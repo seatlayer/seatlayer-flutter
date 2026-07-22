@@ -1,0 +1,158 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/widgets.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+
+import 'bridge/bridge_client.dart';
+import 'bridge/envelope.dart';
+import 'payloads.dart';
+import 'seat_layer_configuration.dart';
+import 'seat_layer_controller.dart';
+import 'seat_layer_error.dart';
+
+/// The JavaScript channel name the web bundle probes for
+/// (`window.SeatLayer.postMessage`). MUST be exactly this string.
+const String _channelName = 'SeatLayer';
+
+/// A seat map.
+///
+/// Hosts a [WebViewWidget] running the vendored SeatLayer bundle, performs the
+/// bridge handshake, and drives the chart through the supplied
+/// [SeatLayerController].
+///
+/// ## Known constraint (v0.1)
+///
+/// The map must be a FIXED-HEIGHT or full-screen box. Do NOT place it inside a
+/// scrolling container ([ListView], [SingleChildScrollView], …). The canvas
+/// consumes pan and pinch to drive its own zoom, so an enclosing scroll view and
+/// the map fight over every gesture and neither behaves. Give it a definite
+/// size and let the map own the space it occupies. An [EagerGestureRecognizer]
+/// is installed so the map — not Flutter — wins those gestures.
+class SeatLayerView extends StatefulWidget {
+  const SeatLayerView({
+    super.key,
+    required this.controller,
+    required this.configuration,
+    this.onReady,
+    this.onLoadError,
+    this.backgroundColor,
+  });
+
+  /// The controller that exposes the chart's commands and event streams. Create
+  /// it in your `State`, keep it, and `dispose()` it.
+  final SeatLayerController controller;
+
+  /// What chart to load and how.
+  final SeatLayerConfiguration configuration;
+
+  /// Called once `sys.ready` arrives. The same value is delivered on
+  /// [SeatLayerController.onReady].
+  final void Function(ReadyInfo info)? onReady;
+
+  /// Called if the handshake fails (incompatible bundle, timeout, page load).
+  final void Function(SeatLayerError error)? onLoadError;
+
+  /// Fill color behind the (transparent) web content.
+  final Color? backgroundColor;
+
+  @override
+  State<SeatLayerView> createState() => _SeatLayerViewState();
+}
+
+class _SeatLayerViewState extends State<SeatLayerView> {
+  late final WebViewController _web;
+
+  @override
+  void initState() {
+    super.initState();
+    _web = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      // The map is a canvas, not a scrolling document — the bundle owns zoom.
+      ..enableZoom(false)
+      ..addJavaScriptChannel(
+        _channelName,
+        onMessageReceived: (message) {
+          // web→native is always a STRING for the Flutter shim.
+          widget.controller.ingestRaw(message.message);
+        },
+      )
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onWebResourceError: (error) {
+            // Only a hard failure of the main document should fail the load;
+            // sub-resource noise must not abort a working chart.
+            if (error.isForMainFrame ?? true) {
+              widget.controller.failWithTransport(
+                'page load failed: ${error.description}',
+              );
+            }
+          },
+        ),
+      );
+
+    _boot();
+  }
+
+  Future<void> _boot() async {
+    final channel = _RunJavaScriptChannel(_web);
+
+    // Arm the handshake BEFORE loading the page, so the `hello` the bundle emits
+    // on startup is already routed and the `init` reply can go straight back.
+    final ready = widget.controller.beginHandshake(channel, widget.configuration);
+    unawaited(ready.then(
+      (info) => widget.onReady?.call(info),
+      onError: (Object error, StackTrace _) {
+        if (error is SeatLayerError) widget.onLoadError?.call(error);
+      },
+    ));
+
+    try {
+      await _web.loadFlutterAsset(widget.configuration.assetPath);
+    } catch (e) {
+      widget.controller.failWithTransport('could not load asset: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final view = WebViewWidget(
+      controller: _web,
+      // Without an eager recognizer webview_flutter never receives the pan/zoom
+      // gestures the canvas needs — it loses every drag to Flutter's arena.
+      gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{
+        Factory<OneSequenceGestureRecognizer>(EagerGestureRecognizer.new),
+      },
+    );
+    final bg = widget.backgroundColor;
+    return bg == null ? view : ColoredBox(color: bg, child: view);
+  }
+}
+
+/// native→web over `WebViewController.runJavaScript`.
+///
+/// The envelope is JSON-encoded, then that JSON string is itself JSON-encoded to
+/// produce a safely-quoted, fully-escaped JS string literal. The payload is
+/// therefore passed to `recv` as DATA — it is never interpolated as code,
+/// whatever it contains.
+class _RunJavaScriptChannel implements BridgeChannel {
+  _RunJavaScriptChannel(this._web);
+  final WebViewController _web;
+
+  @override
+  Future<void> send(Envelope envelope) async {
+    final wire = jsonEncode(envelope.toJson());
+    final literal = jsonEncode(wire); // → a quoted, escaped JS string literal.
+    try {
+      await _web.runJavaScript(
+        'window.__slBridge && window.__slBridge.recv($literal);',
+      );
+    } catch (_) {
+      // A transport hiccup (page torn down mid-send) must never escape; the
+      // command layer's timeout is the backstop.
+    }
+  }
+}
