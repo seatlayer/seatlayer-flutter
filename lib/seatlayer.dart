@@ -4,7 +4,7 @@
 /// driving it through a [SeatLayerController]. The widget hosts the vendored
 /// web bundle in a WebView and speaks the shared, versioned bridge protocol —
 /// the same contract the iOS and web SDKs implement.
-library seatlayer_flutter;
+library seatlayer;
 
 export 'src/bridge/bridge_client.dart'
     show BridgeChannel, BridgeSignal, HelloSignal, EventSignal, UnhandledSignal;
@@ -20,7 +20,8 @@ export 'src/bridge/bridge_protocol.dart'
         BridgeErrorCode,
         BridgeErrorPayload,
         HoldConflict;
-export 'src/bridge/envelope.dart' show Envelope, EnvelopeKind, EnvelopeKindUnknown;
+export 'src/bridge/envelope.dart'
+    show Envelope, EnvelopeKind, EnvelopeKindUnknown;
 export 'src/open_enums.dart';
 export 'src/payloads.dart';
 export 'src/seat_layer_configuration.dart';

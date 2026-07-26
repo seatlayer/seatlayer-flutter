@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:seatlayer_flutter/src/open_enums.dart';
-import 'package:seatlayer_flutter/src/payloads.dart';
+import 'package:seatlayer/src/open_enums.dart';
+import 'package:seatlayer/src/payloads.dart';
 
 void main() {
   group('open enums — unknown values never throw', () {
@@ -9,7 +9,8 @@ void main() {
       expect(SeatStatus.booked.isUnknown, isFalse);
     });
 
-    test('an unfamiliar seat status folds into Unknown, preserving the raw', () {
+    test('an unfamiliar seat status folds into Unknown, preserving the raw',
+        () {
       final s = SeatStatus.fromRaw('quantum_superposition');
       expect(s, isA<SeatStatusUnknown>());
       expect(s.isUnknown, isTrue);
@@ -35,15 +36,18 @@ void main() {
     });
   });
 
-  group('numeric tolerance — double-vs-int (the bug a real run once caught)', () {
+  group('numeric tolerance — double-vs-int (the bug a real run once caught)',
+      () {
     test('HoldResult.expiresAt decodes from an integer JSON number', () {
-      final hold = HoldResult.fromJson({'holdId': 'h1', 'expiresAt': 1712000000000});
+      final hold =
+          HoldResult.fromJson({'holdId': 'h1', 'expiresAt': 1712000000000});
       expect(hold, isNotNull);
       expect(hold!.expiresAt, 1712000000000.0);
     });
 
     test('HoldResult.expiresAt decodes from a double JSON number', () {
-      final hold = HoldResult.fromJson({'holdId': 'h1', 'expiresAt': 1712000000000.0});
+      final hold =
+          HoldResult.fromJson({'holdId': 'h1', 'expiresAt': 1712000000000.0});
       expect(hold!.expiresAt, 1712000000000.0);
     });
 
@@ -69,11 +73,14 @@ void main() {
     test('SelectedSeat.buyerFacingLabel falls back to label', () {
       final plain = SelectedSeat.fromJson({'id': 's1', 'label': 'A-1'})!;
       expect(plain.buyerFacingLabel, 'A-1');
-      final display = SelectedSeat.fromJson({'id': 's1', 'label': 'A-1', 'displayLabel': 'Loge 1'})!;
+      final display = SelectedSeat.fromJson(
+          {'id': 's1', 'label': 'A-1', 'displayLabel': 'Loge 1'})!;
       expect(display.buyerFacingLabel, 'Loge 1');
     });
 
-    test('a seat missing its required id/label decodes to null (dropped by lists)', () {
+    test(
+        'a seat missing its required id/label decodes to null (dropped by lists)',
+        () {
       expect(SelectedSeat.fromJson({'label': 'A-1'}), isNull);
       expect(SelectedSeat.fromJson({'id': 's1'}), isNull);
       expect(SelectedSeat.fromJson('not an object'), isNull);
@@ -108,7 +115,8 @@ void main() {
     });
 
     test('an unknown mode/transport does not throw', () {
-      final info = ReadyInfo.fromJson({'protocol': 9, 'mode': 'dress_rehearsal', 'transport': 'quantum'});
+      final info = ReadyInfo.fromJson(
+          {'protocol': 9, 'mode': 'dress_rehearsal', 'transport': 'quantum'});
       expect(info.mode.isUnknown, isTrue);
       expect(info.transport.isUnknown, isTrue);
       expect(info.protocolRevision, 9);

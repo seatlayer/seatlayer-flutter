@@ -122,7 +122,8 @@ class HoldConflict {
 
   static HoldConflict? fromJson(Object? v) {
     if (jObj(v) == null) return null;
-    return HoldConflict(label: jStr(jGet(v, 'label')), status: jStr(jGet(v, 'status')));
+    return HoldConflict(
+        label: jStr(jGet(v, 'label')), status: jStr(jGet(v, 'status')));
   }
 
   @override

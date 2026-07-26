@@ -1,17 +1,32 @@
-# seatlayer_flutter_example
+# SeatLayer Flutter example
 
-A new Flutter project.
+A runnable example for the official [`seatlayer`](https://pub.dev/packages/seatlayer)
+Flutter package.
 
-## Getting Started
+The default screen uses the package's offline fixture. It exercises the real
+SeatLayer bridge, renderer, selection, hold, and best-available commands without
+requiring a live event key.
 
-This project is a starting point for a Flutter application.
+## Run
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+flutter run
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Choose an iOS or Android simulator or physical device. The seat map must remain
+inside its fixed-height or full-screen container so it can own pan and pinch
+gestures.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Connect a SeatLayer test event
+
+In `lib/main.dart`:
+
+1. replace `flutter-demo-show` with your test event key;
+2. remove the custom `assetPath` so the package loads its normal integration
+   page; and
+3. keep booking and secret-key calls in your backend.
+
+Read the [mobile SDK guide](https://docs.seatlayer.io/buyer-sdk/mobile/) and
+[holds and checkout guide](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
+before connecting production checkout.

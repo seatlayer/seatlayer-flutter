@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:seatlayer_flutter/seatlayer_flutter.dart';
+import 'package:seatlayer/seatlayer.dart';
 
 void main() => runApp(const DemoApp());
 
@@ -36,7 +36,7 @@ class _DemoPageState extends State<DemoPage> {
     apiBase: 'https://api.seatlayer.io',
     currency: 'USD',
     hostInfo: const {'app': 'SeatLayerFlutterDemo/1.0'},
-    assetPath: 'packages/seatlayer_flutter/assets/demo.html',
+    assetPath: 'packages/seatlayer/assets/demo.html',
   );
 
   ReadyInfo? _ready;
@@ -111,15 +111,19 @@ class _DemoPageState extends State<DemoPage> {
                     backgroundColor: const Color(0xFF0F1116),
                     onReady: (info) {
                       setState(() => _ready = info);
-                      _log('ready · protocol ${info.protocolRevision} · '
-                          'transport ${info.transport.raw}');
+                      _log(
+                        'ready · protocol ${info.protocolRevision} · '
+                        'transport ${info.transport.raw}',
+                      );
                       // The single most important line for a real integration:
                       // proof the handshake completed.
-                      debugPrint('[SeatLayerDemo] sys.ready '
-                          'protocol=${info.protocolRevision} '
-                          'mode=${info.mode.raw} '
-                          'transport=${info.transport.raw} '
-                          'event=${info.eventKey ?? "-"}');
+                      debugPrint(
+                        '[SeatLayerDemo] sys.ready '
+                        'protocol=${info.protocolRevision} '
+                        'mode=${info.mode.raw} '
+                        'transport=${info.transport.raw} '
+                        'event=${info.eventKey ?? "-"}',
+                      );
                     },
                     onLoadError: (e) => _log('load failed: ${e.code}'),
                   ),
@@ -128,8 +132,10 @@ class _DemoPageState extends State<DemoPage> {
                       top: 8,
                       left: 12,
                       child: Container(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFD98C1A),
                           borderRadius: BorderRadius.circular(4),
@@ -157,14 +163,17 @@ class _DemoPageState extends State<DemoPage> {
                     _selection.isEmpty
                         ? 'No seats selected'
                         : '${_selection.length} selected · '
-                            '${_selection.map((s) => s.buyerFacingLabel).join(', ')}',
+                              '${_selection.map((s) => s.buyerFacingLabel).join(', ')}',
                     style: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w600),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 6),
-                  Text(_status,
-                      style:
-                          const TextStyle(fontSize: 12, color: Colors.white60)),
+                  Text(
+                    _status,
+                    style: const TextStyle(fontSize: 12, color: Colors.white60),
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [

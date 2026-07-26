@@ -14,7 +14,8 @@ sealed class SeatLayerError implements Exception {
   /// `error`. [BridgeErrorPayload.code] is an OPEN set: bridge codes
   /// (`bad_payload`, `not_ready`, …) and API codes (`sold_out`, …) both arrive
   /// here unchanged.
-  const factory SeatLayerError.bridge(BridgeErrorPayload payload) = BridgeFailure;
+  const factory SeatLayerError.bridge(BridgeErrorPayload payload) =
+      BridgeFailure;
 
   /// No `res`/`err` arrived for a command within the timeout.
   const factory SeatLayerError.timeout(String command, Duration duration) =
@@ -68,7 +69,8 @@ final class BridgeFailure extends SeatLayerError {
   @override
   String get code => payload.code;
   @override
-  String get message => 'SeatLayer bridge error [${payload.code}]: ${payload.message}';
+  String get message =>
+      'SeatLayer bridge error [${payload.code}]: ${payload.message}';
 }
 
 final class TimeoutFailure extends SeatLayerError {

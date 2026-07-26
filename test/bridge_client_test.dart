@@ -1,8 +1,8 @@
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:seatlayer_flutter/src/bridge/bridge_client.dart';
-import 'package:seatlayer_flutter/src/bridge/envelope.dart';
-import 'package:seatlayer_flutter/src/seat_layer_error.dart';
+import 'package:seatlayer/src/bridge/bridge_client.dart';
+import 'package:seatlayer/src/bridge/envelope.dart';
+import 'package:seatlayer/src/seat_layer_error.dart';
 
 class _FakeChannel implements BridgeChannel {
   final List<Envelope> sent = [];
@@ -30,7 +30,9 @@ void main() {
       expect(sent.type, 'hold');
       expect(sent.id, 'n1');
 
-      client.ingest(_res('n1', 'hold', {'hold': {'holdId': 'h1'}}));
+      client.ingest(_res('n1', 'hold', {
+        'hold': {'holdId': 'h1'}
+      }));
       final result = await future;
       expect((result! as Map)['hold'], {'holdId': 'h1'});
       expect(client.openCommandCount, 0);
@@ -52,10 +54,19 @@ void main() {
       expect(await slow, {'seats': <Object?>[]});
     });
 
-    test('an err reply throws a typed BridgeFailure with the API code intact', () async {
+    test('an err reply throws a typed BridgeFailure with the API code intact',
+        () async {
       final client = BridgeClient(channel: _FakeChannel());
       final future = client.command('hold');
-      client.ingest(_err('n1', 'hold', {'code': 'sold_out', 'message': 'gone', 'details': {'conflicts': [{'label': 'A-1', 'status': 'booked'}]}}));
+      client.ingest(_err('n1', 'hold', {
+        'code': 'sold_out',
+        'message': 'gone',
+        'details': {
+          'conflicts': [
+            {'label': 'A-1', 'status': 'booked'}
+          ]
+        }
+      }));
 
       await expectLater(
         future,
@@ -109,9 +120,9 @@ void main() {
         final client = BridgeClient(channel: _FakeChannel());
         var completions = 0;
         client.command('hold').then(
-          (_) => completions++,
-          onError: (_) => completions++,
-        );
+              (_) => completions++,
+              onError: (_) => completions++,
+            );
         async.elapse(const Duration(seconds: 16));
         async.flushMicrotasks();
         expect(completions, 1); // the timeout
@@ -125,7 +136,8 @@ void main() {
   });
 
   group('BridgeClient — event sequencing', () {
-    test('drops a stale event whose n is not greater than the last applied', () {
+    test('drops a stale event whose n is not greater than the last applied',
+        () {
       final client = BridgeClient(channel: _FakeChannel());
       final received = <int>[];
       client.onSignal((s) {
@@ -160,38 +172,48 @@ void main() {
       final client = BridgeClient(channel: _FakeChannel());
       BridgeSignal? got;
       client.onSignal((s) => got = s);
-      client.ingest(const Envelope(kind: EnvelopeKind.hello, type: 'hello', payload: {'bundle': '0.26.0'}));
+      client.ingest(const Envelope(
+          kind: EnvelopeKind.hello,
+          type: 'hello',
+          payload: {'bundle': '0.26.0'}));
       expect(got, isA<HelloSignal>());
       expect(((got! as HelloSignal).payload! as Map)['bundle'], '0.26.0');
     });
 
-    test('an unknown-kind frame is surfaced as UnhandledSignal, not dropped', () {
+    test('an unknown-kind frame is surfaced as UnhandledSignal, not dropped',
+        () {
       final client = BridgeClient(channel: _FakeChannel());
       BridgeSignal? got;
       client.onSignal((s) => got = s);
-      client.ingest(Envelope(kind: EnvelopeKind.fromRaw('brandnew'), type: 'x'));
+      client
+          .ingest(Envelope(kind: EnvelopeKind.fromRaw('brandnew'), type: 'x'));
       expect(got, isA<UnhandledSignal>());
     });
   });
 
   group('BridgeClient — out-of-band command error (the iOS fix)', () {
-    test('an `error` event in flight fails the most recent failable command', () async {
+    test('an `error` event in flight fails the most recent failable command',
+        () async {
       final client = BridgeClient(channel: _FakeChannel());
       final future = client.command('bestAvailable', payload: {'qty': 4});
 
       // The bundle reports the failure out of band as an `error` event…
-      client.ingest(_evt('error', 1, {'code': 'not_enough_together', 'message': 'nope'}));
+      client.ingest(
+          _evt('error', 1, {'code': 'not_enough_together', 'message': 'nope'}));
       // …immediately followed by the trailing res { hold: null }.
       client.ingest(_res('n1', 'bestAvailable', {'hold': null}));
 
       await expectLater(
         future,
-        throwsA(isA<BridgeFailure>().having((e) => e.code, 'code', 'not_enough_together')),
+        throwsA(isA<BridgeFailure>()
+            .having((e) => e.code, 'code', 'not_enough_together')),
       );
       expect(client.openCommandCount, 0); // trailing res was dropped
     });
 
-    test('an `error` event with no failable command in flight is a normal event', () {
+    test(
+        'an `error` event with no failable command in flight is a normal event',
+        () {
       final client = BridgeClient(channel: _FakeChannel());
       final events = <String>[];
       client.onSignal((s) {
@@ -199,18 +221,21 @@ void main() {
       });
       // getSelection is NOT in the failable set — an error is genuinely OOB.
       client.command('getSelection');
-      client.ingest(_evt('error', 1, {'code': 'socket_error', 'message': 'ws down'}));
+      client.ingest(
+          _evt('error', 1, {'code': 'socket_error', 'message': 'ws down'}));
       expect(events, ['error']);
     });
   });
 
   group('BridgeClient — teardown', () {
-    test('close fails every open command and rejects further commands', () async {
+    test('close fails every open command and rejects further commands',
+        () async {
       final client = BridgeClient(channel: _FakeChannel());
       final future = client.command('hold');
       client.close();
       await expectLater(future, throwsA(isA<DestroyedFailure>()));
-      await expectLater(client.command('zoomIn'), throwsA(isA<DestroyedFailure>()));
+      await expectLater(
+          client.command('zoomIn'), throwsA(isA<DestroyedFailure>()));
       expect(client.isClosed, isTrue);
     });
 
@@ -220,9 +245,11 @@ void main() {
       expect(client.close, returnsNormally);
     });
 
-    test('a command with no channel attached fails with a transport error', () async {
+    test('a command with no channel attached fails with a transport error',
+        () async {
       final client = BridgeClient();
-      await expectLater(client.command('hold'), throwsA(isA<TransportFailure>()));
+      await expectLater(
+          client.command('hold'), throwsA(isA<TransportFailure>()));
     });
   });
 }
