@@ -13,6 +13,8 @@ admission, floors, accessibility controls, and a typed event bridge.
 [Developer docs](https://docs.seatlayer.io/buyer-sdk/mobile/) ·
 [Live demo](https://app.seatlayer.io/demo/play) ·
 [Website](https://seatlayer.io/developers/) ·
+[Native Android](https://github.com/seatlayer/seatlayer-android) ·
+[React Native](https://github.com/seatlayer/seatlayer-react-native) ·
 [AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
 
 > **Public preview:** `0.1.x` is the first public Flutter line. Validate it with
