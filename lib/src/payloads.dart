@@ -11,7 +11,8 @@ import 'open_enums.dart';
 
 /// A ticket tier a category offers (Adult / Child / …).
 class CategoryTier {
-  const CategoryTier({required this.id, required this.name, required this.price});
+  const CategoryTier(
+      {required this.id, required this.name, required this.price});
   final String id;
   final String name;
   final double price;
@@ -356,7 +357,8 @@ class ReadyInfo {
   final String? eventKey;
 
   factory ReadyInfo.fromJson(Object? payload) => ReadyInfo(
-        protocolRevision: jInt(jGet(payload, 'protocol')) ?? seatLayerProtocolMin,
+        protocolRevision:
+            jInt(jGet(payload, 'protocol')) ?? seatLayerProtocolMin,
         mode: eventModeOrNull(jGet(payload, 'mode')) ?? EventMode.live,
         transport: transportNameOrNull(jGet(payload, 'transport')) ??
             const TransportNameUnknown(''),
@@ -382,8 +384,8 @@ class BundleInfo {
 
   factory BundleInfo.fromJson(Object? payload) => BundleInfo(
         bundle: jStr(jGet(payload, 'bundle')) ?? 'unknown',
-        protocolRange:
-            ProtocolRange.from(jGet(payload, 'protocol')) ?? ProtocolRange.native,
+        protocolRange: ProtocolRange.from(jGet(payload, 'protocol')) ??
+            ProtocolRange.native,
         capabilities: jListOf(jGet(payload, 'capabilities'), (e) => jStr(e)),
         events: jListOf(jGet(payload, 'events'), (e) => jStr(e)),
         commands: jListOf(jGet(payload, 'commands'), (e) => jStr(e)),

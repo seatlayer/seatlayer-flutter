@@ -68,7 +68,8 @@ class SeatLayerController {
   Stream<ReadyInfo> get onReady => _onReady.stream;
 
   /// The buyer's selection changed. Carries the FULL current selection.
-  Stream<List<SelectedSeat>> get onSelectionChanged => _onSelectionChanged.stream;
+  Stream<List<SelectedSeat>> get onSelectionChanged =>
+      _onSelectionChanged.stream;
 
   /// A hold was created or updated.
   Stream<HoldResult> get onHold => _onHold.stream;
@@ -167,7 +168,8 @@ class SeatLayerController {
       case EventSignal(:final name, :final payload):
         _handleEvent(name, payload);
       case UnhandledSignal(:final envelope):
-        _onUnknownEvent.add(UnknownEvent(name: envelope.type, payload: envelope.payload));
+        _onUnknownEvent
+            .add(UnknownEvent(name: envelope.type, payload: envelope.payload));
     }
   }
 
@@ -199,7 +201,8 @@ class SeatLayerController {
       case 'sys.ready':
         _finishHandshake(ReadyInfo.fromJson(payload));
       case 'sys.incompatible':
-        final web = ProtocolRange.from(jGetLocal(payload, 'web')) ?? ProtocolRange.native;
+        final web = ProtocolRange.from(jGetLocal(payload, 'web')) ??
+            ProtocolRange.native;
         final reason = jStrLocal(jGetLocal(payload, 'message')) ??
             jStrLocal(jGetLocal(payload, 'code')) ??
             "the seat map bundle rejected this app's protocol range";
@@ -209,7 +212,8 @@ class SeatLayerController {
           reason: reason,
         ));
       case 'sys.error':
-        _finishHandshake(SeatLayerError.bridge(BridgeErrorPayload.fromJson(payload)));
+        _finishHandshake(
+            SeatLayerError.bridge(BridgeErrorPayload.fromJson(payload)));
       case 'selection.changed':
         _onSelectionChanged.add(
           _decodeList(jGetLocal(payload, 'seats'), SelectedSeat.fromJson),
@@ -228,7 +232,8 @@ class SeatLayerController {
       case 'hint':
         _onHint.add(jStrLocal(jGetLocal(payload, 'message')));
       case 'error':
-        _onError.add(SeatLayerError.bridge(BridgeErrorPayload.fromJson(payload)));
+        _onError
+            .add(SeatLayerError.bridge(BridgeErrorPayload.fromJson(payload)));
       case 'seat.hover':
         final raw = jGetLocal(payload, 'details');
         _onSeatHover.add(raw == null ? null : SeatHoverDetails.fromJson(raw));
@@ -306,7 +311,8 @@ class SeatLayerController {
 
   /// Ask the server for the best `qty` seats and hold them. A conflict throws
   /// `sold_out` / `not_enough_together` from this call.
-  Future<BestAvailableResult?> bestAvailable(int qty, {String? categoryKey}) async {
+  Future<BestAvailableResult?> bestAvailable(int qty,
+      {String? categoryKey}) async {
     final result = await _run(
       'bestAvailable',
       _compact({'qty': qty, 'categoryKey': categoryKey}),
@@ -361,9 +367,11 @@ class SeatLayerController {
     return _decodeList(jGetLocal(result, 'floors'), FloorInfo.fromJson);
   }
 
-  Future<void> setFloor(String floorId) => _run('setFloor', {'floorId': floorId});
+  Future<void> setFloor(String floorId) =>
+      _run('setFloor', {'floorId': floorId});
 
-  Future<void> setColorblindSafe(bool on) => _run('setColorblindSafe', {'on': on});
+  Future<void> setColorblindSafe(bool on) =>
+      _run('setColorblindSafe', {'on': on});
 
   Future<void> zoomIn() => _run('zoomIn');
   Future<void> zoomOut() => _run('zoomOut');

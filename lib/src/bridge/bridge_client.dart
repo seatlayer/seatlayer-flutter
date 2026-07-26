@@ -92,8 +92,13 @@ class BridgeClient {
   /// commands are deliberately absent: an error during one of those is genuinely
   /// out of band and belongs on the stream.
   static const Set<String> defaultFailableCommands = {
-    'hold', 'holdGA', 'bestAvailable', 'resumeHold', 'extendHold',
-    'release', 'releaseLabels',
+    'hold',
+    'holdGA',
+    'bestAvailable',
+    'resumeHold',
+    'extendHold',
+    'release',
+    'releaseLabels',
   };
 
   /// Event types the bundle uses to report a command failure out of band.
@@ -114,7 +119,8 @@ class BridgeClient {
 
   void attach(BridgeChannel channel) => _channel = channel;
 
-  void onSignal(void Function(BridgeSignal) handler) => _signalHandler = handler;
+  void onSignal(void Function(BridgeSignal) handler) =>
+      _signalHandler = handler;
 
   // MARK: - Outbound
 
@@ -123,7 +129,8 @@ class BridgeClient {
     if (_closed) return Future.error(const SeatLayerError.destroyed());
     final channel = _channel;
     if (channel == null) {
-      return Future.error(const SeatLayerError.transport('no channel attached'));
+      return Future.error(
+          const SeatLayerError.transport('no channel attached'));
     }
 
     _nextId += 1;
@@ -143,7 +150,8 @@ class BridgeClient {
     // Fire-and-forget; a throw inside send must not escape here.
     unawaited(
       channel
-          .send(Envelope(kind: EnvelopeKind.cmd, type: name, id: id, payload: payload))
+          .send(Envelope(
+              kind: EnvelopeKind.cmd, type: name, id: id, payload: payload))
           .catchError((_) {}),
     );
     return completer.future;
@@ -164,7 +172,8 @@ class BridgeClient {
     final entry = _pending.remove(id);
     if (entry == null) return;
     entry.timer.cancel();
-    entry.completer.completeError(SeatLayerError.timeout(entry.command, timeout));
+    entry.completer
+        .completeError(SeatLayerError.timeout(entry.command, timeout));
   }
 
   // MARK: - Inbound

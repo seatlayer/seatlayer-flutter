@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:seatlayer_flutter/src/bridge/envelope.dart';
+import 'package:seatlayer/src/bridge/envelope.dart';
 
 void main() {
   group('Envelope.decode — well-formed frames', () {
     test('decodes a JSON string frame', () {
-      final env = Envelope.decode('{"sl":1,"k":"evt","t":"sys.ready","n":3,"p":{"mode":"live"}}');
+      final env = Envelope.decode(
+          '{"sl":1,"k":"evt","t":"sys.ready","n":3,"p":{"mode":"live"}}');
       expect(env, isNotNull);
       expect(env!.kind, EnvelopeKind.evt);
       expect(env.type, 'sys.ready');
@@ -15,12 +16,14 @@ void main() {
     });
 
     test('decodes an already-structured object frame', () {
-      final env = Envelope.decode({'sl': 1, 'k': 'res', 't': 'hold', 'id': 'n1', 'p': {}});
+      final env = Envelope.decode(
+          {'sl': 1, 'k': 'res', 't': 'hold', 'id': 'n1', 'p': {}});
       expect(env!.kind, EnvelopeKind.res);
       expect(env.id, 'n1');
     });
 
-    test('accepts an integral double as the sequence (JS has one number type)', () {
+    test('accepts an integral double as the sequence (JS has one number type)',
+        () {
       final env = Envelope.decode('{"sl":1,"k":"evt","t":"hint","n":7.0}');
       expect(env!.sequence, 7);
     });
@@ -34,14 +37,18 @@ void main() {
       expect((env.kind as EnvelopeKindUnknown).raw, 'telepathy');
     });
 
-    test('an unknown event type `t` is accepted (any non-empty string is valid)', () {
-      final env = Envelope.decode('{"sl":1,"k":"evt","t":"future.event","n":1}');
+    test(
+        'an unknown event type `t` is accepted (any non-empty string is valid)',
+        () {
+      final env =
+          Envelope.decode('{"sl":1,"k":"evt","t":"future.event","n":1}');
       expect(env, isNotNull);
       expect(env!.type, 'future.event');
     });
 
     test('unknown payload fields are carried through untouched', () {
-      final env = Envelope.decode('{"sl":1,"k":"evt","t":"hint","n":1,"p":{"message":"hi","brandNew":42}}');
+      final env = Envelope.decode(
+          '{"sl":1,"k":"evt","t":"hint","n":1,"p":{"message":"hi","brandNew":42}}');
       final p = env!.payload! as Map;
       expect(p['message'], 'hi');
       expect(p['brandNew'], 42);
@@ -85,14 +92,17 @@ void main() {
     });
 
     test('an init envelope encodes k=init', () {
-      const env = Envelope(kind: EnvelopeKind.init, type: 'init', payload: {'protocol': {'min': 1, 'max': 1}});
+      const env = Envelope(kind: EnvelopeKind.init, type: 'init', payload: {
+        'protocol': {'min': 1, 'max': 1}
+      });
       final json = jsonDecode(env.encode()) as Map<String, Object?>;
       expect(json['k'], 'init');
       expect(json['t'], 'init');
     });
 
     test('an evt envelope carries its sequence as `n`', () {
-      const env = Envelope(kind: EnvelopeKind.evt, type: 'hint', sequence: 5, payload: {});
+      const env = Envelope(
+          kind: EnvelopeKind.evt, type: 'hint', sequence: 5, payload: {});
       final json = jsonDecode(env.encode()) as Map<String, Object?>;
       expect(json['n'], 5);
     });

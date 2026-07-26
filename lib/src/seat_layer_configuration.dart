@@ -32,8 +32,7 @@ class SeatLayerConfiguration {
   /// never the network — a seat map opens with zero network dependency at
   /// startup. Override to load a self-contained fixture page (the example app
   /// points this at its offline demo fixture).
-  static const String defaultAssetPath =
-      'packages/seatlayer_flutter/assets/index.html';
+  static const String defaultAssetPath = 'packages/seatlayer/assets/index.html';
 
   /// Event key, e.g. `ev_xxx`. Required.
   final String event;
@@ -80,7 +79,8 @@ class SeatLayerConfiguration {
   final String assetPath;
 
   /// The `init` payload: `{ protocol, host, chrome, config }`.
-  Map<String, Object?> initPayload({ProtocolRange protocolRange = ProtocolRange.native}) {
+  Map<String, Object?> initPayload(
+      {ProtocolRange protocolRange = ProtocolRange.native}) {
     final host = <String, Object?>{
       'platform': 'flutter',
       'sdk': seatLayerSdkVersion,

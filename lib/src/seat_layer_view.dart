@@ -102,7 +102,8 @@ class _SeatLayerViewState extends State<SeatLayerView> {
 
     // Arm the handshake BEFORE loading the page, so the `hello` the bundle emits
     // on startup is already routed and the `init` reply can go straight back.
-    final ready = widget.controller.beginHandshake(channel, widget.configuration);
+    final ready =
+        widget.controller.beginHandshake(channel, widget.configuration);
     unawaited(ready.then(
       (info) => widget.onReady?.call(info),
       onError: (Object error, StackTrace _) {

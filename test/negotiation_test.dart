@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:seatlayer_flutter/src/bridge/bridge_protocol.dart';
+import 'package:seatlayer/src/bridge/bridge_protocol.dart';
 
 void main() {
   group('negotiate — range intersection, both directions', () {
@@ -36,7 +36,8 @@ void main() {
         web: const ProtocolRange(min: 2, max: 4),
       );
       expect(result, isA<NegotiationIncompatible>());
-      expect((result as NegotiationIncompatible).reason, contains('no shared protocol'));
+      expect((result as NegotiationIncompatible).reason,
+          contains('no shared protocol'));
     });
 
     test('default native range is this SDK 1..1', () {
@@ -50,7 +51,8 @@ void main() {
       expect(ProtocolRange.from(2), const ProtocolRange(min: 2, max: 2));
     });
     test('a {min,max} object normalises directly', () {
-      expect(ProtocolRange.from({'min': 1, 'max': 4}), const ProtocolRange(min: 1, max: 4));
+      expect(ProtocolRange.from({'min': 1, 'max': 4}),
+          const ProtocolRange(min: 1, max: 4));
     });
     test('min > max is rejected', () {
       expect(ProtocolRange.from({'min': 4, 'max': 1}), isNull);
