@@ -1,0 +1,32 @@
+name: Publish to pub.dev
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - name: Verify release tag matches package version
+        run: |
+          package_version="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml)"
+          test "${GITHUB_REF_NAME#v}" = "$package_version"
+      - run: dart pub publish --dry-run
+
+  publish:
+    needs: validate
+    permissions:
+      id-token: write
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
