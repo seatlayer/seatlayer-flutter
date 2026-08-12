@@ -2,7 +2,7 @@ import 'bridge/bridge_client.dart';
 import 'bridge/bridge_protocol.dart';
 
 /// This SDK's version.
-const String seatLayerSdkVersion = '0.1.0';
+const String seatLayerSdkVersion = '0.1.2';
 
 /// The web bundle version vendored into this package (`assets/seatlayer.js`).
 const String seatLayerBundledWebVersion = '0.26.0';

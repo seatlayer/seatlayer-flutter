@@ -30,7 +30,7 @@ Or add it to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  seatlayer: ^0.1.0
+  seatlayer: ^0.1.2
 ```
 
 Then import the public library:
@@ -113,7 +113,7 @@ before connecting checkout.
 
 ## How it works
 
-The SDK hosts a vendored `seatlayer-js@0.35.0` buyer bundle (sha256 `814657ba…`) inside
+The SDK hosts a vendored `seatlayer-js@0.48.1` buyer bundle (sha256 `b459b0b6…`) inside
 `webview_flutter` and communicates over SeatLayer's versioned bridge protocol.
 The UI can start without downloading SDK JavaScript; live chart and inventory
 data still come from the configured SeatLayer API.
@@ -165,6 +165,17 @@ event and keep the default API origin.
 - [JavaScript and React SDKs](https://github.com/seatlayer/seatlayer-sdk)
 - [SeatLayer iOS SDK](https://github.com/seatlayer/seatlayer-ios)
 - [Agent-readable documentation](https://docs.seatlayer.io/llms.txt)
+
+## SeatLayer SDK ecosystem
+
+| Surface | Package or source |
+| --- | --- |
+| JavaScript | [`@seatlayer/js`](https://www.npmjs.com/package/@seatlayer/js) |
+| React | [`@seatlayer/react`](https://www.npmjs.com/package/@seatlayer/react) |
+| React Native | [`@seatlayer/react-native`](https://www.npmjs.com/package/@seatlayer/react-native) |
+| iOS | [`seatlayer-ios`](https://github.com/seatlayer/seatlayer-ios) |
+| Android | [`seatlayer-android`](https://github.com/seatlayer/seatlayer-android) |
+| Server SDKs | [Node.js, Python, PHP, Ruby, .NET, Java, and Go](https://docs.seatlayer.io/server-sdk/install/) |
 
 ## Development
 
