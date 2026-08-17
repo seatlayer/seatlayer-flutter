@@ -114,7 +114,7 @@ before connecting checkout.
 
 ## How it works
 
-The SDK hosts a vendored `seatlayer-js@0.48.1` buyer bundle (sha256 `b459b0b6…`) inside
+The SDK hosts a vendored `seatlayer-js@0.59.0` buyer bundle (sha256 `89bc29fb…`) inside
 `webview_flutter` and communicates over SeatLayer's versioned bridge protocol.
 The UI can start without downloading SDK JavaScript; live chart and inventory
 data still come from the configured SeatLayer API.
