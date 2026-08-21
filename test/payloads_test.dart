@@ -1,8 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/open_enums.dart';
 import 'package:seatlayer/src/payloads.dart';
+import 'package:seatlayer/src/seat_layer_configuration.dart';
 
 void main() {
+  test('hosted and fixture versions remain distinct and pinned', () {
+    expect(seatLayerHostedWebVersion, '0.66.0');
+    expect(seatLayerLegacyFixtureWebVersion, '0.59.0');
+    expect(
+      seatLayerMobilePageUrl,
+      'https://cdn.seatlayer.io/seatlayer-js@$seatLayerHostedWebVersion/mobile.html',
+    );
+  });
+
   group('open enums — unknown values never throw', () {
     test('a known seat status maps to its case', () {
       expect(SeatStatus.fromRaw('booked'), same(SeatStatus.booked));
@@ -145,5 +155,61 @@ void main() {
       expect(info.supportsCommand('teleport'), isFalse);
       expect(info.supportsCapability('ga'), isTrue);
     });
+  });
+
+  test('private selection configuration matches the mobile bridge contract',
+      () {
+    final configuration = SeatLayerConfiguration(
+      event: 'ev_private',
+      buyerAccessToken:
+          const BuyerAccessToken(token: 'bse_seed', expiresAt: 123),
+      buyerAccessTokenProvider: (context) =>
+          BuyerAccessToken(token: 'bse_${context.reason.raw}'),
+      selectedObjects: const ['A-1'],
+      selectableObjects: const ['A-1', 'A-2'],
+      numberOfPlacesToSelect: 2,
+      selectionValidators: const [
+        MinimumSelectedPlaces(2),
+        ConsecutiveSeats(),
+      ],
+      initialView: SeatLayerViewMode.perspective,
+    );
+    final config =
+        configuration.initPayload()['config']! as Map<String, Object?>;
+    expect(config['buyerAccessToken'], {
+      'token': 'bse_seed',
+      'expiresAt': 123.0,
+    });
+    expect(config['nativeAccessProvider'], isTrue);
+    expect(config['selectedObjects'], ['A-1']);
+    expect(config['numberOfPlacesToSelect'], 2);
+    expect(config['selectionValidators'], [
+      {'type': 'minimumSelectedPlaces', 'minimum': 2},
+      {'type': 'consecutiveSeats'},
+    ]);
+    expect(config['initialView'], 'perspective');
+    expect(configuration.usesPrivateAccess, isTrue);
+    expect(configuration.usesSelectionPolicy, isTrue);
+  });
+
+  test('selection and access event decoders preserve unknown values', () {
+    final validity = SelectionValidity.fromJson({
+      'isValid': false,
+      'count': 1,
+      'required': 2,
+      'remaining': 1,
+      'seats': [
+        {'id': 's1', 'label': 'A-1'},
+      ],
+      'violations': ['futureRule'],
+    })!;
+    expect(validity.seats.single.label, 'A-1');
+    expect(validity.violations.single.raw, 'futureRule');
+
+    final access = BuyerAccessUnavailableEvent.fromJson({
+      'reason': 'future_access_state',
+      'retryable': false,
+    })!;
+    expect(access.reason.raw, 'future_access_state');
   });
 }

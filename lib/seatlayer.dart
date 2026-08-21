@@ -1,8 +1,8 @@
 /// SeatLayer Flutter SDK.
 ///
 /// Embed an interactive SeatLayer seat map by placing a [SeatLayerView] and
-/// driving it through a [SeatLayerController]. The widget hosts the vendored
-/// web bundle in a WebView and speaks the shared, versioned bridge protocol —
+/// driving it through a [SeatLayerController]. The widget hosts the immutable,
+/// version-pinned mobile runtime in a WebView and speaks the shared bridge —
 /// the same contract the iOS and web SDKs implement.
 library seatlayer;
 
