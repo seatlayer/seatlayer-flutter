@@ -19,7 +19,8 @@ const String _channelName = 'SeatLayer';
 
 /// A seat map.
 ///
-/// Hosts a [WebViewWidget] running the vendored SeatLayer bundle, performs the
+/// Hosts a [WebViewWidget] running the immutable, version-pinned SeatLayer
+/// mobile page, performs the
 /// bridge handshake, and drives the chart through the supplied
 /// [SeatLayerController].
 ///
@@ -82,6 +83,10 @@ class _SeatLayerViewState extends State<SeatLayerView> {
       )
       ..setNavigationDelegate(
         NavigationDelegate(
+          onNavigationRequest: (request) =>
+              _allowsNavigation(widget.configuration.assetPath, request.url)
+                  ? NavigationDecision.navigate
+                  : NavigationDecision.prevent,
           onWebResourceError: (error) {
             // Only a hard failure of the main document should fail the load;
             // sub-resource noise must not abort a working chart.
@@ -112,10 +117,30 @@ class _SeatLayerViewState extends State<SeatLayerView> {
     ));
 
     try {
-      await _web.loadFlutterAsset(widget.configuration.assetPath);
+      final location = widget.configuration.assetPath;
+      final uri = Uri.tryParse(location);
+      if (uri != null && (uri.scheme == 'https' || uri.scheme == 'http')) {
+        await _web.loadRequest(uri);
+      } else {
+        await _web.loadFlutterAsset(location);
+      }
     } catch (e) {
       widget.controller.failWithTransport('could not load asset: $e');
     }
+  }
+
+  bool _allowsNavigation(String configuredLocation, String requestedLocation) {
+    final configured = Uri.tryParse(configuredLocation);
+    if (configured != null &&
+        (configured.scheme == 'https' || configured.scheme == 'http')) {
+      return requestedLocation == configuredLocation;
+    }
+
+    // `loadFlutterAsset` resolves a package key to a platform-specific file URL.
+    // Only that explicit fixture document is allowed to become the main page.
+    final requested = Uri.tryParse(requestedLocation);
+    return requested?.scheme == 'file' &&
+        Uri.decodeComponent(requested!.path).endsWith(configuredLocation);
   }
 
   @override

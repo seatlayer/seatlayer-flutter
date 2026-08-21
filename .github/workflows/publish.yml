@@ -30,6 +30,14 @@ jobs:
         run: |
           package_version="$(sed -n 's/^version:[[:space:]]*//p' pubspec.yaml)"
           test "${GITHUB_REF_NAME#v}" = "$package_version"
+      - name: Verify deployed hosted runtime
+        run: |
+          runtime="$(sed -n "s/.*seatLayerHostedWebVersion = '\(.*\)';/\1/p" lib/src/seat_layer_configuration.dart)"
+          metadata="$(curl --fail --silent --show-error "https://cdn.seatlayer.io/seatlayer-js@$runtime/release.json")"
+          test "$(printf '%s' "$metadata" | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])')" = "$runtime"
+          test "$(printf '%s' "$metadata" | python3 -c 'import json,sys; print(str(json.load(sys.stdin)["promotable"]).lower())')" = true
+          curl --fail --silent --show-error --output /dev/null \
+            "https://cdn.seatlayer.io/seatlayer-js@$runtime/mobile.html"
       - run: dart pub publish --dry-run
 
   publish:

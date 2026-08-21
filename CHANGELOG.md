@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0
+
+- Loads the pinned `seatlayer-js@0.66.0/mobile.html` document at
+  `https://cdn.seatlayer.io`; buyer-access sessions require that exact origin.
+- Separates the hosted runtime version (`0.66.0`) from the explicit offline
+  demo/test fixture version (`0.59.0`).
+- Adds renewable private buyer access, programmatic selection/category
+  controls, exact-count validators, typed validity/access streams, view-mode
+  parity, and fail-closed capability negotiation.
+- Retains explicit Flutter asset loading for self-contained demos and tests.
+
 ## 0.1.3
 
 - Updated the vendored buyer runtime to `seatlayer-js@0.59.0` (sha256
