@@ -18,7 +18,7 @@ admission, floors, accessibility controls, and a typed event bridge.
 [React Native](https://github.com/seatlayer/seatlayer-react-native) ·
 [AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
 
-> **Public preview:** `0.1.x` is the first public Flutter line. Validate it with
+> **Public preview:** `0.2.x` is the current public Flutter line. Validate it with
 > a test event and physical iOS/Android devices before production rollout.
 
 ## Install
@@ -31,7 +31,7 @@ Or add it to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  seatlayer: ^0.1.2
+  seatlayer: ^0.2.0
 ```
 
 Then import the public library:
@@ -99,6 +99,17 @@ controller.onHoldExpired.listen(returnBuyerToMap);
 controller.onError.listen(reportSeatLayerError);
 ```
 
+For private channel inventory, mint short-lived sessions on your backend for
+the exact allowed origin `https://cdn.seatlayer.io`:
+
+```dart
+final configuration = SeatLayerConfiguration(
+  event: 'ev_private',
+  buyerAccessTokenProvider: (context) =>
+      buyerBackend.mintSeatLayerAccess(context.reason),
+);
+```
+
 ## Security boundary
 
 The Flutter app **selects and holds** inventory. Your trusted backend **inspects
@@ -114,10 +125,12 @@ before connecting checkout.
 
 ## How it works
 
-The SDK hosts a vendored `seatlayer-js@0.59.0` buyer bundle (sha256 `89bc29fb…`) inside
-`webview_flutter` and communicates over SeatLayer's versioned bridge protocol.
-The UI can start without downloading SDK JavaScript; live chart and inventory
-data still come from the configured SeatLayer API.
+Production views load the immutable
+`seatlayer-js@0.66.0/mobile.html` document and its lazy assets from
+`https://cdn.seatlayer.io` inside `webview_flutter`. This gives iOS and Android
+one canonical HTTPS origin for origin-bound buyer sessions. Tokens stay in
+memory and are never put in page URLs or events. Explicit bundled fixture pages
+remain supported for demos and tests and are pinned separately to `0.59.0`.
 
 The public contract matches the Web and iOS SDKs:
 
@@ -130,14 +143,20 @@ The public contract matches the Web and iOS SDKs:
 
 `hold` · `resumeHold` · `extendHold` · `release` · `releaseLabels` ·
 `bestAvailable` · `holdGA` · `setSeatTier` · `getSelection` ·
-`getCurrentHold` · `getGAAreas` · `getFloors` · `setFloor` ·
-`setColorblindSafe` · `zoomIn` · `zoomOut` · `zoomToFit` · `destroy`
+`selectObjects` · `deselectObjects` · `clearSelection` · `selectCategories` ·
+`deselectCategories` · `setSelectableObjects` · `setMaxSelection` ·
+`getSelectionValidity` · `refreshAccess` · `getCurrentHold` · `getGAAreas` ·
+`getFloors` · `setFloor` · `setColorblindSafe` · `setViewMode` ·
+`getViewMode` · `zoomIn` · `zoomOut` · `zoomToFit` · `destroy`
 
 ## Event streams
 
-`onReady` · `onSelectionChanged` · `onHold` · `onHoldRestored` ·
-`onHoldExpired` · `onError` · `onHint` · `onGAClick` · `onSeatHover` ·
-`onDeckTap` · `onUnknownEvent`
+`onReady` · `onSelectionChanged` · `onSelectionValidityChanged` ·
+`onSelectionValid` · `onSelectionInvalid` · `onSelectionLimit` ·
+`onBuyerAccessExpired` · `onBuyerAccessUnavailable` ·
+`onSelectedObjectsUnavailable` · `onHold` · `onHoldRestored` · `onHoldExpired` ·
+`onError` · `onHint` · `onGAClick` · `onSeatHover` · `onDeckTap` ·
+`onUnknownEvent`
 
 ## Layout requirement
 

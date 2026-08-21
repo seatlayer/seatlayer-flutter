@@ -5,6 +5,7 @@ import 'package:meta/meta.dart';
 import 'bridge/bridge_client.dart';
 import 'bridge/bridge_protocol.dart';
 import 'bridge/envelope.dart';
+import 'open_enums.dart';
 import 'payloads.dart';
 import 'seat_layer_configuration.dart';
 import 'seat_layer_error.dart';
@@ -37,6 +38,17 @@ class SeatLayerController {
 
   final _onReady = StreamController<ReadyInfo>.broadcast();
   final _onSelectionChanged = StreamController<List<SelectedSeat>>.broadcast();
+  final _onSelectionValidityChanged =
+      StreamController<SelectionValidity>.broadcast();
+  final _onSelectionValid = StreamController<List<SelectedSeat>>.broadcast();
+  final _onSelectionInvalid = StreamController<SelectionValidity>.broadcast();
+  final _onSelectionLimit = StreamController<int>.broadcast();
+  final _onBuyerAccessExpired =
+      StreamController<BuyerAccessExpiredEvent>.broadcast();
+  final _onBuyerAccessUnavailable =
+      StreamController<BuyerAccessUnavailableEvent>.broadcast();
+  final _onSelectedObjectsUnavailable =
+      StreamController<SelectedObjectUnavailableEvent>.broadcast();
   final _onHold = StreamController<HoldResult>.broadcast();
   final _onHoldRestored = StreamController<HoldResult>.broadcast();
   final _onHoldExpired = StreamController<void>.broadcast();
@@ -71,6 +83,19 @@ class SeatLayerController {
   Stream<List<SelectedSeat>> get onSelectionChanged =>
       _onSelectionChanged.stream;
 
+  Stream<SelectionValidity> get onSelectionValidityChanged =>
+      _onSelectionValidityChanged.stream;
+  Stream<List<SelectedSeat>> get onSelectionValid => _onSelectionValid.stream;
+  Stream<SelectionValidity> get onSelectionInvalid =>
+      _onSelectionInvalid.stream;
+  Stream<int> get onSelectionLimit => _onSelectionLimit.stream;
+  Stream<BuyerAccessExpiredEvent> get onBuyerAccessExpired =>
+      _onBuyerAccessExpired.stream;
+  Stream<BuyerAccessUnavailableEvent> get onBuyerAccessUnavailable =>
+      _onBuyerAccessUnavailable.stream;
+  Stream<SelectedObjectUnavailableEvent> get onSelectedObjectsUnavailable =>
+      _onSelectedObjectsUnavailable.stream;
+
   /// A hold was created or updated.
   Stream<HoldResult> get onHold => _onHold.stream;
 
@@ -80,10 +105,8 @@ class SeatLayerController {
   /// The open hold expired server-side. The seats are gone; return to selection.
   Stream<void> get onHoldExpired => _onHoldExpired.stream;
 
-  /// A checkout signal from the bundle. NOTE: the v1 bridge protocol defines no
-  /// `checkout` event, so this never fires with the vendored 0.26.0 bundle; it
-  /// is wired through the forward-compatible event path for a future bundle that
-  /// emits one. Drive checkout from your own UI after a successful hold today.
+  /// A checkout signal from a future bundle. The current v1 mobile bridge does
+  /// not advertise this event; drive checkout from your own UI after a hold.
   Stream<Object?> get onCheckout => _onCheckout.stream;
 
   /// Something failed out of band. A failed COMMAND does not appear here — it
@@ -191,6 +214,26 @@ class SeatLayerController {
       case NegotiationAgreed():
         final config = _configuration;
         if (config != null) {
+          if (config.usesPrivateAccess &&
+              !info.supportsCapability('native-access-provider')) {
+            _finishHandshake(SeatLayerError.incompatible(
+              native: ProtocolRange.native,
+              web: info.protocolRange,
+              reason: 'the bundle does not support private buyer access',
+            ));
+            return;
+          }
+          if (config.usesSelectionPolicy &&
+              (!info.supportsCapability('selection-controls') ||
+                  !info.supportsCapability('selection-validity'))) {
+            _finishHandshake(SeatLayerError.incompatible(
+              native: ProtocolRange.native,
+              web: info.protocolRange,
+              reason:
+                  'the bundle does not support the configured selection policy',
+            ));
+            return;
+          }
           unawaited(_client?.sendInit(config.initPayload()) ?? Future.value());
         }
     }
@@ -218,6 +261,32 @@ class SeatLayerController {
         _onSelectionChanged.add(
           _decodeList(jGetLocal(payload, 'seats'), SelectedSeat.fromJson),
         );
+      case 'selection.validity.changed':
+        final validity =
+            SelectionValidity.fromJson(jGetLocal(payload, 'validity'));
+        if (validity != null) _onSelectionValidityChanged.add(validity);
+      case 'selection.valid':
+        _onSelectionValid.add(
+          _decodeList(jGetLocal(payload, 'seats'), SelectedSeat.fromJson),
+        );
+      case 'selection.invalid':
+        final validity =
+            SelectionValidity.fromJson(jGetLocal(payload, 'validity'));
+        if (validity != null) _onSelectionInvalid.add(validity);
+      case 'selection.limit':
+        final maximum = jIntLocal(jGetLocal(payload, 'maxSelection'));
+        if (maximum != null) _onSelectionLimit.add(maximum);
+      case 'access.token.request':
+        unawaited(_provideBuyerAccessToken(payload));
+      case 'access.expired':
+        final event = BuyerAccessExpiredEvent.fromJson(payload);
+        if (event != null) _onBuyerAccessExpired.add(event);
+      case 'access.unavailable':
+        final event = BuyerAccessUnavailableEvent.fromJson(payload);
+        if (event != null) _onBuyerAccessUnavailable.add(event);
+      case 'selection.unavailable':
+        final event = SelectedObjectUnavailableEvent.fromJson(payload);
+        if (event != null) _onSelectedObjectsUnavailable.add(event);
       case 'hold.changed':
         final hold = HoldResult.fromJson(jGetLocal(payload, 'hold'));
         if (hold != null) _onHold.add(hold);
@@ -244,6 +313,57 @@ class SeatLayerController {
         _onCheckout.add(payload);
       default:
         _onUnknownEvent.add(UnknownEvent(name: name, payload: payload));
+    }
+  }
+
+  Future<void> _provideBuyerAccessToken(Object? payload) async {
+    final requestId = jStrLocal(jGetLocal(payload, 'requestId'));
+    if (requestId == null) return;
+    final client = _client;
+    if (client == null) return;
+    final rawReason = jStrLocal(jGetLocal(payload, 'reason')) ?? 'initial';
+    final provider = _configuration?.buyerAccessTokenProvider;
+
+    if (provider == null) {
+      try {
+        await client.command(
+          'access.token.unavailable',
+          payload: {'requestId': requestId},
+        );
+      } catch (_) {}
+      return;
+    }
+
+    BuyerAccessToken token;
+    try {
+      token = await provider(BuyerAccessRequestContext(
+        reason: BuyerAccessRefreshReason.fromRaw(rawReason),
+      ));
+      if (token.token.trim().isEmpty || token.expiresAt?.isFinite == false) {
+        throw StateError('invalid buyer access token');
+      }
+    } catch (_) {
+      // Provider failures are sanitized; errors and bearers never become events.
+      try {
+        await client.command(
+          'access.token.unavailable',
+          payload: {'requestId': requestId},
+        );
+      } catch (_) {}
+      return;
+    }
+
+    try {
+      await client.command(
+        'access.token.provide',
+        payload: {
+          'requestId': requestId,
+          'token': token.token,
+          if (token.expiresAt != null) 'expiresAt': token.expiresAt,
+        },
+      );
+    } catch (_) {
+      // The request may have timed out or the view may have reloaded.
     }
   }
 
@@ -349,6 +469,43 @@ class SeatLayerController {
     return _decodeList(jGetLocal(result, 'seats'), SelectedSeat.fromJson);
   }
 
+  Future<List<SelectedSeat>> selectObjects(List<String> objects) async {
+    final result = await _run('selectObjects', {'objects': objects});
+    return _decodeList(jGetLocal(result, 'seats'), SelectedSeat.fromJson);
+  }
+
+  Future<void> deselectObjects(List<String> objects) =>
+      _run('deselectObjects', {'objects': objects});
+
+  Future<void> clearSelection() => _run('clearSelection');
+
+  Future<List<SelectedSeat>> selectCategories(List<String> categoryKeys) async {
+    final result =
+        await _run('selectCategories', {'categoryKeys': categoryKeys});
+    return _decodeList(jGetLocal(result, 'seats'), SelectedSeat.fromJson);
+  }
+
+  Future<void> deselectCategories(List<String> categoryKeys) =>
+      _run('deselectCategories', {'categoryKeys': categoryKeys});
+
+  Future<void> setSelectableObjects(List<String>? objects) =>
+      _run('setSelectableObjects', {'objects': objects});
+
+  Future<void> setMaxSelection(int maximum) {
+    if (maximum < 1) return Future.error(ArgumentError.value(maximum));
+    return _run('setMaxSelection', {'maxSelection': maximum});
+  }
+
+  Future<SelectionValidity?> getSelectionValidity() async {
+    final result = await _run('getSelectionValidity');
+    return SelectionValidity.fromJson(jGetLocal(result, 'validity'));
+  }
+
+  Future<bool> refreshAccess() async {
+    final result = await _run('refreshAccess');
+    return jBoolLocal(jGetLocal(result, 'refreshed')) ?? false;
+  }
+
   /// The open hold, if any.
   Future<HoldResult?> getCurrentHold() async {
     final result = await _run('getCurrentHold');
@@ -373,6 +530,16 @@ class SeatLayerController {
   Future<void> setColorblindSafe(bool on) =>
       _run('setColorblindSafe', {'on': on});
 
+  Future<void> setViewMode(SeatLayerViewMode mode) =>
+      _run('setViewMode', {'mode': mode.raw});
+
+  Future<SeatLayerViewMode> getViewMode() async {
+    final result = await _run('getViewMode');
+    return SeatLayerViewMode.fromRaw(
+      jStrLocal(jGetLocal(result, 'mode')) ?? 'flat',
+    );
+  }
+
   Future<void> zoomIn() => _run('zoomIn');
   Future<void> zoomOut() => _run('zoomOut');
   Future<void> zoomToFit() => _run('zoomToFit');
@@ -396,6 +563,13 @@ class SeatLayerController {
     _client?.close();
     _onReady.close();
     _onSelectionChanged.close();
+    _onSelectionValidityChanged.close();
+    _onSelectionValid.close();
+    _onSelectionInvalid.close();
+    _onSelectionLimit.close();
+    _onBuyerAccessExpired.close();
+    _onBuyerAccessUnavailable.close();
+    _onSelectedObjectsUnavailable.close();
     _onHold.close();
     _onHoldRestored.close();
     _onHoldExpired.close();
@@ -435,3 +609,4 @@ Object? jGetLocal(Object? v, String key) =>
     v is Map ? (v.cast<String, Object?>())[key] : null;
 String? jStrLocal(Object? v) => v is String ? v : null;
 bool? jBoolLocal(Object? v) => v is bool ? v : null;
+int? jIntLocal(Object? v) => v is int ? v : (v is num ? v.toInt() : null);

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'bridge/bridge_protocol.dart';
 import 'json.dart';
 import 'open_enums.dart';
@@ -8,6 +10,120 @@ import 'open_enums.dart';
 // so an app compiled today must keep working when a bundle a year from now adds
 // a field or ships a new enum value. Open enums fold unknown values into their
 // `Unknown` variant (see open_enums.dart).
+
+/// Why private buyer access needs a fresh bearer.
+class BuyerAccessRefreshReason {
+  const BuyerAccessRefreshReason(this.raw);
+  final String raw;
+
+  static const initial = BuyerAccessRefreshReason('initial');
+  static const expiring = BuyerAccessRefreshReason('expiring');
+  static const expired = BuyerAccessRefreshReason('expired');
+  static const unauthorized = BuyerAccessRefreshReason('unauthorized');
+  static const reconnect = BuyerAccessRefreshReason('reconnect');
+  static const manual = BuyerAccessRefreshReason('manual');
+
+  factory BuyerAccessRefreshReason.fromRaw(String raw) => switch (raw) {
+        'initial' => initial,
+        'expiring' => expiring,
+        'expired' => expired,
+        'unauthorized' => unauthorized,
+        'reconnect' => reconnect,
+        'manual' => manual,
+        _ => BuyerAccessRefreshReason(raw),
+      };
+
+  @override
+  bool operator ==(Object other) =>
+      other is BuyerAccessRefreshReason && other.raw == raw;
+  @override
+  int get hashCode => raw.hashCode;
+}
+
+class BuyerAccessUnavailableReason {
+  const BuyerAccessUnavailableReason(this.raw);
+  final String raw;
+
+  static const revoked = BuyerAccessUnavailableReason('revoked');
+  static const paused = BuyerAccessUnavailableReason('paused');
+  static const invalid = BuyerAccessUnavailableReason('invalid');
+  static const originMismatch = BuyerAccessUnavailableReason('origin_mismatch');
+  static const eventMismatch = BuyerAccessUnavailableReason('event_mismatch');
+  static const groupMismatch = BuyerAccessUnavailableReason('group_mismatch');
+  static const modeMismatch = BuyerAccessUnavailableReason('mode_mismatch');
+  static const channelDenied = BuyerAccessUnavailableReason('channel_denied');
+  static const invalidScope = BuyerAccessUnavailableReason('invalid_scope');
+  static const providerFailed = BuyerAccessUnavailableReason('provider_failed');
+  static const noToken = BuyerAccessUnavailableReason('no_token');
+
+  factory BuyerAccessUnavailableReason.fromRaw(String raw) =>
+      BuyerAccessUnavailableReason(raw);
+}
+
+class SelectionViolation {
+  const SelectionViolation(this.raw);
+  final String raw;
+
+  @override
+  bool operator ==(Object other) =>
+      other is SelectionViolation && other.raw == raw;
+  @override
+  int get hashCode => raw.hashCode;
+}
+
+class SelectedObjectUnavailableReason {
+  const SelectedObjectUnavailableReason(this.raw);
+  final String raw;
+}
+
+class BuyerAccessToken {
+  const BuyerAccessToken({required this.token, this.expiresAt});
+  final String token;
+
+  /// Epoch milliseconds; omit to refresh reactively.
+  final double? expiresAt;
+
+  Map<String, Object?> toJson() => {
+        'token': token,
+        if (expiresAt != null) 'expiresAt': expiresAt,
+      };
+}
+
+class BuyerAccessRequestContext {
+  const BuyerAccessRequestContext({required this.reason});
+  final BuyerAccessRefreshReason reason;
+}
+
+typedef BuyerAccessTokenProvider = FutureOr<BuyerAccessToken> Function(
+  BuyerAccessRequestContext context,
+);
+
+sealed class SelectionValidator {
+  const SelectionValidator();
+  Map<String, Object?> toJson();
+}
+
+final class MinimumSelectedPlaces extends SelectionValidator {
+  const MinimumSelectedPlaces(this.minimum);
+  final int minimum;
+  @override
+  Map<String, Object?> toJson() => {
+        'type': 'minimumSelectedPlaces',
+        'minimum': minimum,
+      };
+}
+
+final class ConsecutiveSeats extends SelectionValidator {
+  const ConsecutiveSeats();
+  @override
+  Map<String, Object?> toJson() => const {'type': 'consecutiveSeats'};
+}
+
+final class NoOrphanSeats extends SelectionValidator {
+  const NoOrphanSeats();
+  @override
+  Map<String, Object?> toJson() => const {'type': 'noOrphanSeats'};
+}
 
 /// A ticket tier a category offers (Adult / Child / …).
 class CategoryTier {
@@ -96,6 +212,116 @@ class SelectedSeat {
       tiers: tiers == null ? null : jListOf(tiers, CategoryTier.fromJson),
       tierId: jStr(jGet(v, 'tierId')),
       commercial: SeatCommercialAttributes.fromJson(jGet(v, 'commercial')),
+    );
+  }
+}
+
+class SelectionValidity {
+  const SelectionValidity({
+    required this.isValid,
+    required this.count,
+    required this.required,
+    required this.remaining,
+    required this.seats,
+    required this.violations,
+  });
+
+  final bool isValid;
+  final int count;
+  final int required;
+  final int remaining;
+  final List<SelectedSeat> seats;
+  final List<SelectionViolation> violations;
+
+  static SelectionValidity? fromJson(Object? value) {
+    final isValid = jBool(jGet(value, 'isValid'));
+    final count = jInt(jGet(value, 'count'));
+    final required = jInt(jGet(value, 'required'));
+    final remaining = jInt(jGet(value, 'remaining'));
+    if (isValid == null ||
+        count == null ||
+        required == null ||
+        remaining == null) {
+      return null;
+    }
+    return SelectionValidity(
+      isValid: isValid,
+      count: count,
+      required: required,
+      remaining: remaining,
+      seats: jListOf(jGet(value, 'seats'), SelectedSeat.fromJson),
+      violations: jListOf(
+        jGet(value, 'violations'),
+        (item) => item is String ? SelectionViolation(item) : null,
+      ),
+    );
+  }
+}
+
+class BuyerAccessExpiredEvent {
+  const BuyerAccessExpiredEvent({
+    required this.reason,
+    required this.refreshed,
+    this.code,
+  });
+  final BuyerAccessRefreshReason reason;
+  final String? code;
+  final bool refreshed;
+
+  static BuyerAccessExpiredEvent? fromJson(Object? value) {
+    final reason = jStr(jGet(value, 'reason'));
+    final refreshed = jBool(jGet(value, 'refreshed'));
+    if (reason == null || refreshed == null) return null;
+    return BuyerAccessExpiredEvent(
+      reason: BuyerAccessRefreshReason.fromRaw(reason),
+      code: jStr(jGet(value, 'code')),
+      refreshed: refreshed,
+    );
+  }
+}
+
+class BuyerAccessUnavailableEvent {
+  const BuyerAccessUnavailableEvent({
+    required this.reason,
+    required this.retryable,
+    this.code,
+    this.status,
+  });
+  final BuyerAccessUnavailableReason reason;
+  final String? code;
+  final int? status;
+  final bool retryable;
+
+  static BuyerAccessUnavailableEvent? fromJson(Object? value) {
+    final reason = jStr(jGet(value, 'reason'));
+    final retryable = jBool(jGet(value, 'retryable'));
+    if (reason == null || retryable == null) return null;
+    return BuyerAccessUnavailableEvent(
+      reason: BuyerAccessUnavailableReason.fromRaw(reason),
+      code: jStr(jGet(value, 'code')),
+      status: jInt(jGet(value, 'status')),
+      retryable: retryable,
+    );
+  }
+}
+
+class SelectedObjectUnavailableEvent {
+  const SelectedObjectUnavailableEvent({
+    required this.labels,
+    required this.reason,
+    this.code,
+  });
+  final List<String> labels;
+  final SelectedObjectUnavailableReason reason;
+  final String? code;
+
+  static SelectedObjectUnavailableEvent? fromJson(Object? value) {
+    final reason = jStr(jGet(value, 'reason'));
+    if (reason == null) return null;
+    return SelectedObjectUnavailableEvent(
+      labels: jListOf(jGet(value, 'labels'), (item) => jStr(item)),
+      reason: SelectedObjectUnavailableReason(reason),
+      code: jStr(jGet(value, 'code')),
     );
   }
 }
