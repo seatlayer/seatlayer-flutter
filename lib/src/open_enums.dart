@@ -255,6 +255,29 @@ final class SeatStatusUnknown extends SeatStatus {
   int get hashCode => raw.hashCode;
 }
 
+/// Buyer canvas projection used by the shared picker.
+class SeatLayerViewMode {
+  const SeatLayerViewMode(this.raw);
+  final String raw;
+
+  static const flat = SeatLayerViewMode('flat');
+  static const isometric = SeatLayerViewMode('iso');
+  static const perspective = SeatLayerViewMode('perspective');
+
+  factory SeatLayerViewMode.fromRaw(String raw) => switch (raw) {
+        'flat' => flat,
+        'iso' => isometric,
+        'perspective' => perspective,
+        _ => SeatLayerViewMode(raw),
+      };
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeatLayerViewMode && other.raw == raw;
+  @override
+  int get hashCode => raw.hashCode;
+}
+
 /// Decode an optional open-enum string, tolerating null and non-strings.
 EventMode? eventModeOrNull(Object? v) =>
     v is String ? EventMode.fromRaw(v) : null;
