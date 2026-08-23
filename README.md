@@ -18,8 +18,9 @@ admission, floors, accessibility controls, and a typed event bridge.
 [React Native](https://github.com/seatlayer/seatlayer-react-native) ·
 [AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
 
-> **Public preview:** `0.2.x` is the current public Flutter line. Validate it with
-> a test event and physical iOS/Android devices before production rollout.
+> **Production SDK:** `0.2.x` is the current Flutter line. Pin the documented
+> release and validate your event, checkout handoff, lifecycle, and supported
+> physical devices before rollout.
 
 ## Install
 
