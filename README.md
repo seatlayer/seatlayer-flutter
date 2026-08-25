@@ -132,10 +132,11 @@ and books** the hold after payment or order validation.
 - Calculate the charge from server-inspected hold items, not app input.
 - Reuse your stable order id as `bookingRef` for safe booking retries.
 
-Read [how the integration works](https://docs.seatlayer.io/start/how-it-works/)
-before connecting checkout.
+Continue with
+[seat holds and secure server-side checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
+before connecting payment and booking.
 
-## How it works
+## Flutter runtime and WebView architecture
 
 Production views load the immutable
 `seatlayer-js@0.67.14/mobile.html` document and its lazy assets from
@@ -228,19 +229,16 @@ No. It is clearly labelled browser proof of the wider buyer experience. The
 runnable example and simulator capture above are the proof for this Flutter
 package.
 
-## Related resources
+## Continue your Flutter integration
 
-- [Flutter seat-map integration guide](https://docs.seatlayer.io/buyer-sdk/flutter/)
-- [SeatLayer Flutter package on pub.dev](https://pub.dev/packages/seatlayer)
-- [SeatLayer reserved-seating platform](https://seatlayer.io/)
-- [Buyer seat-map demo (web)](https://app.seatlayer.io/demo/play/grand-theatre)
-- [Mobile SDK chooser](https://docs.seatlayer.io/buyer-sdk/mobile/)
-- [Buyer SDK installation](https://docs.seatlayer.io/buyer-sdk/install/)
-- [Holds and checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
-- [Complete checkout example](https://docs.seatlayer.io/examples/complete-checkout/)
-- [JavaScript and React SDKs](https://github.com/seatlayer/seatlayer-sdk)
-- [SeatLayer iOS SDK](https://github.com/seatlayer/seatlayer-ios)
-- [Agent-readable documentation](https://docs.seatlayer.io/llms.txt)
+- [Follow the Flutter seat-map integration guide](https://docs.seatlayer.io/buyer-sdk/flutter/)
+  for setup, lifecycle, commands, events, and runtime requirements.
+- [Connect seat holds to secure server-side checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
+  without exposing booking credentials in the app.
+- [Run the complete checkout example](https://docs.seatlayer.io/examples/complete-checkout/)
+  to connect the buyer hold id to payment and idempotent booking.
+- [Explore the 3D seating chart for web buyers](https://seatlayer.io/3d-seat-map/)
+  as a separate browser capability when comparing the wider buyer experience.
 
 ## SeatLayer SDK ecosystem
 
