@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2
+
+- Documentation only. Refreshes the README, adds frequently asked questions,
+  and clarifies link text. No Dart API, runtime, or behaviour changes.
+
 ## 0.2.1
 
 - Updates the production hosted mobile runtime and explicit offline fixture to

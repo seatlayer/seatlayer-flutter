@@ -19,7 +19,7 @@ secure booking to your trusted server.
 [SeatLayer React Native SDK](https://github.com/seatlayer/seatlayer-react-native) ·
 [SeatLayer AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
 
-> **Production SDK:** `0.2.1` is the current Flutter release. Pin the documented
+> **Production SDK:** `0.2.2` is the current Flutter release. Pin the documented
 > release and validate your event, checkout handoff, lifecycle, and supported
 > physical devices before rollout.
 
@@ -33,7 +33,7 @@ Or add it to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  seatlayer: ^0.2.1
+  seatlayer: ^0.2.2
 ```
 
 Then import the public library:
