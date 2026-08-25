@@ -15,9 +15,9 @@ secure booking to your trusted server.
 [Flutter seat-map documentation](https://docs.seatlayer.io/buyer-sdk/flutter/) ·
 [SeatLayer reserved-seating platform](https://seatlayer.io/) ·
 [Buyer seat-map demo (web)](https://app.seatlayer.io/demo/play/grand-theatre) ·
-[Native Android](https://github.com/seatlayer/seatlayer-android) ·
-[React Native](https://github.com/seatlayer/seatlayer-react-native) ·
-[AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
+[SeatLayer Android seat map SDK](https://github.com/seatlayer/seatlayer-android) ·
+[SeatLayer React Native SDK](https://github.com/seatlayer/seatlayer-react-native) ·
+[SeatLayer AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
 
 > **Production SDK:** `0.2.1` is the current Flutter release. Pin the documented
 > release and validate your event, checkout handoff, lifecycle, and supported
@@ -192,6 +192,15 @@ event and keep the default API origin.
 
 ## Frequently asked questions
 
+### How do I add a seat map to a Flutter app?
+
+Add the [`seatlayer` package](https://pub.dev/packages/seatlayer), place a
+`SeatLayerView` with your event key in the widget tree, and keep one
+`SeatLayerController` for the lifetime of the view. The quick start above is a
+complete interactive seating chart with live availability; the
+[Flutter seat-map integration guide](https://docs.seatlayer.io/buyer-sdk/flutter/)
+covers lifecycle, commands, and events in depth.
+
 ### Is SeatLayer a Flutter widget or only a WebView snippet?
 
 `SeatLayerView` is a Flutter widget with a typed Dart controller. On iOS and
@@ -204,9 +213,10 @@ and event streams.
 The package declares and supports iOS and Android. It does not currently claim
 Flutter web, macOS, Windows, or Linux support.
 
-### Does the app book seats or process payment?
+### How does seat booking work in a Flutter ticketing app?
 
-No. The app selects inventory and creates a temporary hold. Send the opaque
+The app never books seats or processes payment directly. It selects inventory
+and creates a temporary hold. Send the opaque
 `holdId` to your trusted backend, calculate the charge from server-inspected
 hold items, process the order, and book with a stable `bookingRef`.
 
@@ -237,8 +247,13 @@ package.
   without exposing booking credentials in the app.
 - [Run the complete checkout example](https://docs.seatlayer.io/examples/complete-checkout/)
   to connect the buyer hold id to payment and idempotent booking.
+- [Compare SeatLayer's mobile seat map SDKs](https://docs.seatlayer.io/buyer-sdk/mobile/)
+  when choosing between Flutter, React Native, and the native iOS and Android
+  packages.
 - [Explore the 3D seating chart for web buyers](https://seatlayer.io/3d-seat-map/)
   as a separate browser capability when comparing the wider buyer experience.
+- [Point AI coding agents at the SeatLayer docs index](https://docs.seatlayer.io/llms.txt)
+  (`llms.txt`) for an agent-readable map of the documentation.
 
 ## SeatLayer SDK ecosystem
 
