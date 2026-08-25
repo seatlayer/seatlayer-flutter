@@ -15,9 +15,9 @@ secure booking to your trusted server.
 [Flutter seat-map documentation](https://docs.seatlayer.io/buyer-sdk/flutter/) ·
 [SeatLayer reserved-seating platform](https://seatlayer.io/) ·
 [Buyer seat-map demo (web)](https://app.seatlayer.io/demo/play/grand-theatre) ·
-[Native Android](https://github.com/seatlayer/seatlayer-android) ·
-[React Native](https://github.com/seatlayer/seatlayer-react-native) ·
-[AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
+[SeatLayer Android seat map SDK](https://github.com/seatlayer/seatlayer-android) ·
+[SeatLayer React Native SDK](https://github.com/seatlayer/seatlayer-react-native) ·
+[SeatLayer AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
 
 > **Production SDK:** `0.2.1` is the current Flutter release. Pin the documented
 > release and validate your event, checkout handoff, lifecycle, and supported
@@ -101,16 +101,6 @@ controller.onHoldExpired.listen(returnBuyerToMap);
 controller.onError.listen(reportSeatLayerError);
 ```
 
-## Flutter package proof
-
-![SeatLayer Flutter reserved-seating chart running in the iOS example app](screenshots/flutter-seat-map-ios.png)
-
-This capture comes from the repository's runnable Flutter example using the
-packaged offline fixture. Run `flutter run` from `example/` to exercise the
-real Dart bridge and buyer renderer without a live event key. The separate
-[buyer seat-map demo](https://app.seatlayer.io/demo/play/grand-theatre) is a
-browser preview of the wider SeatLayer buyer experience, not a Flutter app.
-
 For private channel inventory, mint short-lived sessions on your backend for
 the exact allowed origin `https://cdn.seatlayer.io`:
 
@@ -121,6 +111,16 @@ final configuration = SeatLayerConfiguration(
       buyerBackend.mintSeatLayerAccess(context.reason),
 );
 ```
+
+## Flutter seat map in action
+
+![SeatLayer Flutter reserved-seating chart running in the iOS example app](screenshots/flutter-seat-map-ios.png)
+
+This capture comes from the repository's runnable Flutter example using the
+packaged offline fixture. Run `flutter run` from `example/` to exercise the
+real Dart bridge and buyer renderer without a live event key. The separate
+[buyer seat-map demo](https://app.seatlayer.io/demo/play/grand-theatre) is a
+browser preview of the wider SeatLayer buyer experience, not a Flutter app.
 
 ## Security boundary
 
@@ -192,6 +192,15 @@ event and keep the default API origin.
 
 ## Frequently asked questions
 
+### How do I add a seat map to a Flutter app?
+
+Add the [`seatlayer` package](https://pub.dev/packages/seatlayer), place a
+`SeatLayerView` with your event key in the widget tree, and keep one
+`SeatLayerController` for the lifetime of the view. The quick start above is a
+complete interactive seating chart with live availability; the
+[Flutter seat-map integration guide](https://docs.seatlayer.io/buyer-sdk/flutter/)
+covers lifecycle, commands, and events in depth.
+
 ### Is SeatLayer a Flutter widget or only a WebView snippet?
 
 `SeatLayerView` is a Flutter widget with a typed Dart controller. On iOS and
@@ -204,30 +213,37 @@ and event streams.
 The package declares and supports iOS and Android. It does not currently claim
 Flutter web, macOS, Windows, or Linux support.
 
-### Does the app book seats or process payment?
+### How does seat booking work in a Flutter ticketing app?
 
-No. The app selects inventory and creates a temporary hold. Send the opaque
+The app never books seats or processes payment directly. It selects inventory
+and creates a temporary hold. Send the opaque
 `holdId` to your trusted backend, calculate the charge from server-inspected
 hold items, process the order, and book with a stable `bookingRef`.
 
-### Why does the seat map need a definite height?
+### How do temporary seat holds work?
 
-The buyer canvas owns pan and pinch gestures. Give `SeatLayerView` a resolved
-height or a full-screen route, and do not nest it inside another gesture-driven
-scroll or zoom surface.
+When a buyer selects seats, the SDK creates a temporary hold that reserves the
+inventory against concurrent buyers for a limited window. The hold expires
+automatically if checkout does not complete — `onHoldExpired` tells the app to
+return the buyer to the map — and `extendHold` and `resumeHold` cover longer
+checkouts and app restarts. This prevents double-selling without locking seats
+forever.
 
-### Can I evaluate the package without a live event?
+### Can I use my own payment provider?
 
-Yes. The repository example uses the packaged offline fixture to verify the
-Flutter view, bridge, renderer, commands, and event streams. Use a SeatLayer
-test event and your backend when validating live inventory, holds, expiry,
-conflicts, and checkout.
+Yes. SeatLayer never processes payment inside the seat map. The app hands the
+`holdId` to your backend, and your backend charges through any payment
+provider you already use — Stripe, Adyen, Razorpay, or your own — before
+booking the hold through the
+[server-side checkout flow](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/).
 
-### Is the linked buyer demo a Flutter application?
+### Can I try the Flutter seat map without a SeatLayer account or API key?
 
-No. It is clearly labelled browser proof of the wider buyer experience. The
-runnable example and simulator capture above are the proof for this Flutter
-package.
+Yes. The repository example runs on a packaged offline fixture — no account,
+event key, or backend needed — and exercises the real Flutter view, bridge,
+renderer, commands, and event streams. Create a free SeatLayer test event when
+you are ready to validate live inventory, holds, expiry, conflicts, and
+checkout.
 
 ## Continue your Flutter integration
 
@@ -237,13 +253,19 @@ package.
   without exposing booking credentials in the app.
 - [Run the complete checkout example](https://docs.seatlayer.io/examples/complete-checkout/)
   to connect the buyer hold id to payment and idempotent booking.
+- [Compare SeatLayer's mobile seat map SDKs](https://docs.seatlayer.io/buyer-sdk/mobile/)
+  when choosing between Flutter, React Native, and the native iOS and Android
+  packages.
 - [Explore the 3D seating chart for web buyers](https://seatlayer.io/3d-seat-map/)
   as a separate browser capability when comparing the wider buyer experience.
+- [Point AI coding agents at the SeatLayer docs index](https://docs.seatlayer.io/llms.txt)
+  (`llms.txt`) for an agent-readable map of the documentation.
 
 ## SeatLayer SDK ecosystem
 
 | Surface | Package or source |
 | --- | --- |
+| Flutter | [`seatlayer`](https://pub.dev/packages/seatlayer) (this package) |
 | JavaScript | [`@seatlayer/js`](https://www.npmjs.com/package/@seatlayer/js) |
 | React | [`@seatlayer/react`](https://www.npmjs.com/package/@seatlayer/react) |
 | React Native | [`@seatlayer/react-native`](https://www.npmjs.com/package/@seatlayer/react-native) |
