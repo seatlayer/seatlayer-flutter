@@ -9,7 +9,7 @@ class DemoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SeatLayer',
+      title: 'SeatLayer Flutter seat map',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(useMaterial3: true),
       home: const DemoPage(),
@@ -94,7 +94,7 @@ class _DemoPageState extends State<DemoPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF0F1116),
       appBar: AppBar(
-        title: const Text('SeatLayer'),
+        title: const Text('SeatLayer Flutter seat map'),
         backgroundColor: const Color(0xFF0F1116),
       ),
       body: SafeArea(
