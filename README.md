@@ -226,12 +226,13 @@ The buyer canvas owns pan and pinch gestures. Give `SeatLayerView` a resolved
 height or a full-screen route, and do not nest it inside another gesture-driven
 scroll or zoom surface.
 
-### Can I evaluate the package without a live event?
+### Can I try the Flutter seat map without a SeatLayer account or API key?
 
-Yes. The repository example uses the packaged offline fixture to verify the
-Flutter view, bridge, renderer, commands, and event streams. Use a SeatLayer
-test event and your backend when validating live inventory, holds, expiry,
-conflicts, and checkout.
+Yes. The repository example runs on a packaged offline fixture — no account,
+event key, or backend needed — and exercises the real Flutter view, bridge,
+renderer, commands, and event streams. Create a free SeatLayer test event when
+you are ready to validate live inventory, holds, expiry, conflicts, and
+checkout.
 
 ### Is the linked buyer demo a Flutter application?
 
