@@ -101,16 +101,6 @@ controller.onHoldExpired.listen(returnBuyerToMap);
 controller.onError.listen(reportSeatLayerError);
 ```
 
-## Flutter package proof
-
-![SeatLayer Flutter reserved-seating chart running in the iOS example app](screenshots/flutter-seat-map-ios.png)
-
-This capture comes from the repository's runnable Flutter example using the
-packaged offline fixture. Run `flutter run` from `example/` to exercise the
-real Dart bridge and buyer renderer without a live event key. The separate
-[buyer seat-map demo](https://app.seatlayer.io/demo/play/grand-theatre) is a
-browser preview of the wider SeatLayer buyer experience, not a Flutter app.
-
 For private channel inventory, mint short-lived sessions on your backend for
 the exact allowed origin `https://cdn.seatlayer.io`:
 
@@ -121,6 +111,16 @@ final configuration = SeatLayerConfiguration(
       buyerBackend.mintSeatLayerAccess(context.reason),
 );
 ```
+
+## Flutter seat map in action
+
+![SeatLayer Flutter reserved-seating chart running in the iOS example app](screenshots/flutter-seat-map-ios.png)
+
+This capture comes from the repository's runnable Flutter example using the
+packaged offline fixture. Run `flutter run` from `example/` to exercise the
+real Dart bridge and buyer renderer without a live event key. The separate
+[buyer seat-map demo](https://app.seatlayer.io/demo/play/grand-theatre) is a
+browser preview of the wider SeatLayer buyer experience, not a Flutter app.
 
 ## Security boundary
 
@@ -259,6 +259,7 @@ package.
 
 | Surface | Package or source |
 | --- | --- |
+| Flutter | [`seatlayer`](https://pub.dev/packages/seatlayer) (this package) |
 | JavaScript | [`@seatlayer/js`](https://www.npmjs.com/package/@seatlayer/js) |
 | React | [`@seatlayer/react`](https://www.npmjs.com/package/@seatlayer/react) |
 | React Native | [`@seatlayer/react-native`](https://www.npmjs.com/package/@seatlayer/react-native) |
