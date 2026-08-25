@@ -220,11 +220,22 @@ and creates a temporary hold. Send the opaque
 `holdId` to your trusted backend, calculate the charge from server-inspected
 hold items, process the order, and book with a stable `bookingRef`.
 
-### Why does the seat map need a definite height?
+### How do temporary seat holds work?
 
-The buyer canvas owns pan and pinch gestures. Give `SeatLayerView` a resolved
-height or a full-screen route, and do not nest it inside another gesture-driven
-scroll or zoom surface.
+When a buyer selects seats, the SDK creates a temporary hold that reserves the
+inventory against concurrent buyers for a limited window. The hold expires
+automatically if checkout does not complete — `onHoldExpired` tells the app to
+return the buyer to the map — and `extendHold` and `resumeHold` cover longer
+checkouts and app restarts. This prevents double-selling without locking seats
+forever.
+
+### Can I use my own payment provider?
+
+Yes. SeatLayer never processes payment inside the seat map. The app hands the
+`holdId` to your backend, and your backend charges through any payment
+provider you already use — Stripe, Adyen, Razorpay, or your own — before
+booking the hold through the
+[server-side checkout flow](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/).
 
 ### Can I try the Flutter seat map without a SeatLayer account or API key?
 
@@ -233,12 +244,6 @@ event key, or backend needed — and exercises the real Flutter view, bridge,
 renderer, commands, and event streams. Create a free SeatLayer test event when
 you are ready to validate live inventory, holds, expiry, conflicts, and
 checkout.
-
-### Is the linked buyer demo a Flutter application?
-
-No. It is clearly labelled browser proof of the wider buyer experience. The
-runnable example and simulator capture above are the proof for this Flutter
-package.
 
 ## Continue your Flutter integration
 
