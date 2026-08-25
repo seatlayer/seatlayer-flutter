@@ -1,5 +1,5 @@
 name: seatlayer_example
-description: Runnable demo for the SeatLayer Flutter SDK.
+description: Runnable Flutter seat map and reserved seating chart example for the SeatLayer SDK.
 publish_to: 'none'
 version: 1.0.0+1
 

@@ -1,7 +1,8 @@
-# SeatLayer Flutter example
+# SeatLayer Flutter seat map example
 
-A runnable example for the official [`seatlayer`](https://pub.dev/packages/seatlayer)
-Flutter package.
+A runnable reserved-seating chart and seat-picker example for the official
+[`seatlayer`](https://pub.dev/packages/seatlayer) Flutter package on iOS and
+Android.
 
 The default screen uses the package's offline fixture. It exercises the real
 SeatLayer bridge, renderer, selection, hold, and best-available commands without
@@ -27,6 +28,9 @@ In `lib/main.dart`:
    page; and
 3. keep booking and secret-key calls in your backend.
 
-Read the [mobile SDK guide](https://docs.seatlayer.io/buyer-sdk/mobile/) and
-[holds and checkout guide](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
-before connecting production checkout.
+Read the [Flutter seat-map guide](https://docs.seatlayer.io/buyer-sdk/flutter/)
+and [holds and checkout guide](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
+before connecting production checkout. You can also explore the
+[SeatLayer reserved-seating platform](https://seatlayer.io/) and the
+[browser buyer demo](https://app.seatlayer.io/demo/play/grand-theatre); the
+browser demo demonstrates the buyer experience but is not a Flutter app.
