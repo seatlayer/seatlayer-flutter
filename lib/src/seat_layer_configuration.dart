@@ -4,13 +4,13 @@ import 'open_enums.dart';
 import 'payloads.dart';
 
 /// This SDK's version.
-const String seatLayerSdkVersion = '0.2.0';
+const String seatLayerSdkVersion = '0.2.1';
 
 /// The immutable hosted web runtime used by production views.
-const String seatLayerHostedWebVersion = '0.66.0';
+const String seatLayerHostedWebVersion = '0.67.14';
 
 /// Runtime retained only for explicit offline demo/test fixtures.
-const String seatLayerLegacyFixtureWebVersion = '0.59.0';
+const String seatLayerLegacyFixtureWebVersion = '0.67.14';
 
 @Deprecated(
     'Use seatLayerHostedWebVersion; production no longer uses a bundled runtime.')

@@ -4,9 +4,9 @@ import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/seat_layer_configuration.dart';
 
 void main() {
-  test('hosted and fixture versions remain distinct and pinned', () {
-    expect(seatLayerHostedWebVersion, '0.66.0');
-    expect(seatLayerLegacyFixtureWebVersion, '0.59.0');
+  test('hosted and fixture runtime versions remain explicitly pinned', () {
+    expect(seatLayerHostedWebVersion, '0.67.14');
+    expect(seatLayerLegacyFixtureWebVersion, '0.67.14');
     expect(
       seatLayerMobilePageUrl,
       'https://cdn.seatlayer.io/seatlayer-js@$seatLayerHostedWebVersion/mobile.html',

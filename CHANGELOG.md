@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.1
+
+- Updates the production hosted mobile runtime and explicit offline fixture to
+  the verified, promotable `seatlayer-js@0.67.14` release.
+- Improves package discovery around Flutter seat maps, seating charts, seat
+  pickers, and reserved-seating integrations without changing the public Dart
+  API.
+- Adds a real iOS Simulator capture, a focused integration FAQ, and descriptive
+  links to the Flutter documentation, pub.dev package, SeatLayer website, and
+  clearly labelled browser buyer demo.
+
 ## 0.2.0
 
 - Loads the pinned `seatlayer-js@0.66.0/mobile.html` document at
