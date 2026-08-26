@@ -73,6 +73,12 @@ The picker fills the bounded space provided by its parent. Use it as an
 `Expanded` child or on a full page; do not put its map inside a competing
 gesture-driven `ListView` or `SingleChildScrollView`.
 
+On a phone, the turnkey widget deliberately follows the web picker's map-first
+information hierarchy: a compact event header, one concise price rail, the map,
+and a 50-logical-pixel ticket dock. The dock expands for Best Seats, selected
+tickets and checkout, and automatically opens after a new selection. The SDK
+does not add a second section rail above the map.
+
 For public inventory, omit `buyerAccessTokenProvider`. For private channel
 inventory, the provider calls your backend, which mints a short-lived buyer
 session for the exact renderer origin:
@@ -149,7 +155,7 @@ SeatLayerPickerScope(
             Positioned(
               top: 12,
               right: 12,
-              child: SeatLayerPickerMapControls(),
+              child: SeatLayerPickerZoomInButton(),
             ),
           ],
         ),
@@ -193,7 +199,14 @@ The public `0.3.0-dev` component baseline exports:
 - `SeatLayerPickerAccessibilityFilters`
 - `SeatLayerPickerFloorSelector`
 - `SeatLayerPickerMapControls`
+- `SeatLayerPickerOverviewButton`
+- `SeatLayerPickerZoomInButton`
+- `SeatLayerPickerZoomOutButton`
+- `SeatLayerPickerZoomToFitButton`
+- `SeatLayerPickerColorblindButton`
 - `SeatLayerPickerBestAvailable`
+- `SeatLayerPickerBestAvailablePanel`
+- `SeatLayerPickerMobileTicketPanel`
 - `SeatLayerPickerSeatConfirmation`
 - `SeatLayerPickerTablePrompt`
 - `SeatLayerPickerGeneralAdmissionPrompt`

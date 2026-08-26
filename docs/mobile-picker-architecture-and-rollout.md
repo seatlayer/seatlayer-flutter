@@ -29,6 +29,11 @@ components will consume one `SeatLayerPickerController` and one immutable
 but they must not have to reproduce inventory, validation, hold or conflict
 logic.
 
+This boundary is SDK-owned. A consuming application such as DesiPass must not
+carry picker spacing, duplicate-chrome, section-focus, WebView or Best Seats
+workarounds. It should supply configuration, optional theme tokens and the
+checkout callback only.
+
 Popup, embedded and full-screen modes are presentations of the same picker
 session. Changing presentation must not reload the event, clear an unheld
 selection, create a second hold or duplicate buyer chrome.
@@ -272,11 +277,18 @@ The initial public kit consists of:
 - `SeatLayerPickerAttribution`
 - `SeatLayerPickerTestModeIndicator`
 - `SeatLayerPickerMapControls`
+- `SeatLayerPickerOverviewButton`
+- `SeatLayerPickerZoomInButton`
+- `SeatLayerPickerZoomOutButton`
+- `SeatLayerPickerZoomToFitButton`
+- `SeatLayerPickerColorblindButton`
 - `SeatLayerPickerPriceRail`
 - `SeatLayerPickerAccessibilityFilters`
 - `SeatLayerPickerFloorSelector`
 - `SeatLayerPickerSectionNavigator`
 - `SeatLayerPickerBestAvailable`
+- `SeatLayerPickerBestAvailablePanel`
+- `SeatLayerPickerMobileTicketPanel`
 - `SeatLayerPickerSelectionTray`
 - `SeatLayerPickerHoldCountdown`
 - `SeatLayerPickerCheckoutBar`
@@ -775,13 +787,19 @@ model or global window width.
 ### Compact
 
 - Map-first, edge-to-edge composition.
-- Compact event header and one close action.
-- Persistent horizontal price rail.
+- Approximately 40 logical pixels for the event header below the system safe
+  area, with one close action.
+- One concise horizontal price rail (price plus category dot); no second native
+  section/category row is inserted above the map.
 - Pinch as primary zoom gesture.
-- Contextual zoom-out when deeply focused; fit remains available.
-- Selection summary and primary action in a safe-area-aware peek sheet.
+- Contextual back-to-venue after section focus; fit and colorblind-safe controls
+  remain available without a tall five-button zoom column.
+- A 50-logical-pixel safe-area-aware ticket dock is the collapsed state.
 - Expanded sheet for selected tickets, best available, GA/table choices and
-  hold details.
+  hold details. Best Available uses two compact dropdowns and one horizontal
+  quantity/submit row rather than large scrolling chip rails.
+- The ticket panel automatically opens after a new selection and can be closed
+  again without destroying or remounting the map session.
 - Seat confirmation is a bottom card/sheet that does not make the map
   untouchable after dismissal.
 
