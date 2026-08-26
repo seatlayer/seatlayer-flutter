@@ -550,7 +550,7 @@ session id and monotonically increasing revision. Dart ignores stale revisions
 and serializes inventory-changing actions, including repeated checkout taps.
 Private buyer tokens remain memory-only and never enter snapshots.
 
-See [the mobile picker architecture and rollout](docs/mobile-picker-architecture-and-rollout.md)
+See [the mobile picker architecture and rollout](doc/mobile-picker-architecture-and-rollout.md)
 for the exact bridge schema, commands, ownership rules and validation gates.
 
 ## Run the example

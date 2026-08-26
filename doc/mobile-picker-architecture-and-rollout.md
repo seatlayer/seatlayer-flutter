@@ -1,6 +1,6 @@
 # SeatLayer Mobile Buyer Picker — Architecture and Rollout
 
-Status: implementation baseline
+Status: prerelease implementation baseline
 
 Target Flutter release: `0.3.0`
 
