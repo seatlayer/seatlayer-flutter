@@ -408,6 +408,32 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         SeatLayerPickerBusyAction.changingView,
       );
 
+  /// Enable or suppress pointer and keyboard interaction inside the map.
+  ///
+  /// The turnkey adaptive layout calls this automatically whenever native
+  /// confirmation, quantity, loading, or error chrome owns the chart area.
+  /// Custom layouts should do the same around any native overlay that covers a
+  /// [SeatLayerPickerMap]. A visual [IgnorePointer] is not sufficient for an
+  /// iOS platform view: WKWebView can otherwise receive the same physical tap
+  /// beneath the Flutter overlay.
+  ///
+  /// Older compatible runtimes that do not advertise the command are left
+  /// unchanged, preserving source compatibility while the Flutter hit-test
+  /// guard remains in place as a best-effort fallback.
+  Future<void> setMapInteractionEnabled(bool enabled) {
+    final bundle = mapController.bundleInfo;
+    if (bundle != null &&
+        !bundle.supportsCommand('picker.setInteractionEnabled')) {
+      return Future<void>.value();
+    }
+    return _serialize(() async {
+      await mapController.runBridgeCommand(
+        'picker.setInteractionEnabled',
+        <String, Object?>{'enabled': enabled},
+      );
+    });
+  }
+
   /// Choose whether a primary drag rotates or moves the real 3D venue.
   Future<void> set3DNavigationMode(SeatLayer3DNavigationMode mode) => _mutation(
         'picker.setVenue3DNavigationMode',

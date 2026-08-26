@@ -2064,6 +2064,8 @@ class _SeatLayerPickerAdaptiveLayoutState
   bool _mobilePanelExpanded = false;
   bool _mobilePanelInitialized = false;
   int _previousTicketCount = 0;
+  bool _mapInteractionEnabled = true;
+  int _mapInteractionGeneration = 0;
 
   @override
   void didChangeDependencies() {
@@ -2268,6 +2270,13 @@ class _SeatLayerPickerAdaptiveLayoutState
           ignoring: buyerPrompt != null || statusOverlay != null,
           child: map,
         );
+        _syncMapInteraction(
+          controller,
+          enabled: buyerPrompt == null && statusOverlay == null,
+          unlockDelay: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : const Duration(milliseconds: 190),
+        );
 
         if (wide) {
           return Column(
@@ -2417,6 +2426,37 @@ class _SeatLayerPickerAdaptiveLayoutState
     setState(() {
       _confirmedLabels.add(seat.label);
       _mobilePanelExpanded = true;
+    });
+  }
+
+  void _syncMapInteraction(
+    SeatLayerPickerController controller, {
+    required bool enabled,
+    required Duration unlockDelay,
+  }) {
+    if (_mapInteractionEnabled == enabled) return;
+    _mapInteractionEnabled = enabled;
+    final generation = ++_mapInteractionGeneration;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(() async {
+        // Keep the runtime inert while the old card completes its exit. This
+        // prevents a fast second tap from landing on the WebView through the
+        // fading native surface. Locking is immediate; only unlocking waits.
+        if (enabled && unlockDelay > Duration.zero) {
+          await Future<void>.delayed(unlockDelay);
+        }
+        if (!mounted ||
+            generation != _mapInteractionGeneration ||
+            _mapInteractionEnabled != enabled) {
+          return;
+        }
+        try {
+          await controller.setMapInteractionEnabled(enabled);
+        } catch (_) {
+          // The existing Flutter hit-test gate remains the fallback for a
+          // transport that disappears during route teardown.
+        }
+      }());
     });
   }
 

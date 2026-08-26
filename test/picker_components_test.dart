@@ -531,12 +531,23 @@ void main() {
 
     expect(find.text('Select'), findsOneWidget);
     expect(mapGate().ignoring, isTrue);
+    await tester.pump();
+    final locks = map.calls
+        .where((call) => call.$1 == 'picker.setInteractionEnabled')
+        .toList();
+    expect(locks, hasLength(1));
+    expect(locks.single.$2, <String, Object?>{'enabled': false});
 
     await tester.tap(find.text('Select'));
     await tester.pumpAndSettle();
 
     expect(find.text('Select'), findsNothing);
     expect(mapGate().ignoring, isFalse);
+    final interactionCalls = map.calls
+        .where((call) => call.$1 == 'picker.setInteractionEnabled')
+        .toList();
+    expect(interactionCalls, hasLength(2));
+    expect(interactionCalls.last.$2, <String, Object?>{'enabled': true});
   });
 
   testWidgets('mobile ticket dock adapts to each device bottom inset',

@@ -263,6 +263,14 @@ await picker.setBuyerView(SeatLayerBuyerView.venue3D);
 await picker.showSeatIn3D(seat); // enter or retarget without remounting
 await picker.openSeatView(seat); // authored 360° or chart-derived preview
 await picker.set3DNavigationMode(SeatLayer3DNavigationMode.move);
+
+// Required when custom native chrome covers the embedded map.
+await picker.setMapInteractionEnabled(false);
+try {
+  await showMyNativeSeatPrompt();
+} finally {
+  await picker.setMapInteractionEnabled(true);
+}
 ```
 
 The public `0.3.0-dev` component baseline exports:
@@ -317,10 +325,13 @@ the SDK action. The standalone `SeatLayerPickerSeatViewButton` and
 `SeatLayerPickerSeat3DButton` follow the same rule: controller-backed by
 default, callback-replaceable, and absent rather than decorative when the
 capability is unavailable. The confirmation stays above the embedded platform
-view until the immersive command confirms its destination is mounted, and the
-turnkey composition removes the WebView from hit testing for the whole native
-decision state. Both are required to prevent the originating iOS tap from
-selecting a second seat underneath.
+view until the immersive command confirms its destination is mounted. The
+turnkey composition also sends `picker.setInteractionEnabled(false)` so the
+runtime makes its own DOM inert for the whole native decision state, while a
+Flutter `IgnorePointer` remains a visual-tree fallback. Both layers are
+required: UIKit can hit-test WKWebView beneath composited Flutter chrome even
+when the Flutter child itself ignores pointers. The originating tap therefore
+cannot select a second seat underneath.
 
 Targeted parts of the turnkey layout can also be wrapped or replaced through
 `SeatLayerPickerBuilders`. Every builder receives the immutable state, the
