@@ -6,7 +6,7 @@ import '../json.dart';
 const int seatLayerProtocolMin = 1;
 
 /// Newest protocol revision this SDK can speak.
-const int seatLayerProtocolMax = 1;
+const int seatLayerProtocolMax = 2;
 
 /// Protocol range as advertised by either side of the handshake.
 class ProtocolRange {
@@ -16,8 +16,10 @@ class ProtocolRange {
   final int max;
 
   /// This SDK's own range.
-  static const ProtocolRange native =
-      ProtocolRange(min: seatLayerProtocolMin, max: seatLayerProtocolMax);
+  static const ProtocolRange native = ProtocolRange(
+    min: seatLayerProtocolMin,
+    max: seatLayerProtocolMax,
+  );
 
   /// Normalise a `protocol` field that may be a bare number OR a `{min,max}`.
   static ProtocolRange? from(Object? value) {
@@ -123,7 +125,9 @@ class HoldConflict {
   static HoldConflict? fromJson(Object? v) {
     if (jObj(v) == null) return null;
     return HoldConflict(
-        label: jStr(jGet(v, 'label')), status: jStr(jGet(v, 'status')));
+      label: jStr(jGet(v, 'label')),
+      status: jStr(jGet(v, 'status')),
+    );
   }
 
   @override

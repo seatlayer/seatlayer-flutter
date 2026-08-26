@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 import 'bridge/bridge_client.dart';
+import 'bridge/bridge_profile.dart';
 import 'bridge/envelope.dart';
 import 'payloads.dart';
 import 'seat_layer_configuration.dart';
@@ -40,6 +41,7 @@ class SeatLayerView extends StatefulWidget {
     this.onReady,
     this.onLoadError,
     this.backgroundColor,
+    this.bridgeProfile = SeatLayerBridgeProfile.chart,
   });
 
   /// The controller that exposes the chart's commands and event streams. Create
@@ -59,12 +61,18 @@ class SeatLayerView extends StatefulWidget {
   /// Fill color behind the (transparent) web content.
   final Color? backgroundColor;
 
+  /// Internal surface contract. Ordinary integrations should leave this at the
+  /// raw chart default; [SeatLayerPickerMap] supplies the picker-v2 profile.
+  @internal
+  final SeatLayerBridgeProfile bridgeProfile;
+
   @override
   State<SeatLayerView> createState() => _SeatLayerViewState();
 }
 
 class _SeatLayerViewState extends State<SeatLayerView> {
   late final WebViewController _web;
+  int _generation = 0;
 
   @override
   void initState() {
@@ -91,6 +99,7 @@ class _SeatLayerViewState extends State<SeatLayerView> {
             // Only a hard failure of the main document should fail the load;
             // sub-resource noise must not abort a working chart.
             if (error.isForMainFrame ?? true) {
+              if (!mounted) return;
               widget.controller.failWithTransport(
                 'page load failed: ${error.description}',
               );
@@ -103,18 +112,30 @@ class _SeatLayerViewState extends State<SeatLayerView> {
   }
 
   Future<void> _boot() async {
+    final generation = ++_generation;
     final channel = _RunJavaScriptChannel(_web);
 
     // Arm the handshake BEFORE loading the page, so the `hello` the bundle emits
     // on startup is already routed and the `init` reply can go straight back.
-    final ready =
-        widget.controller.beginHandshake(channel, widget.configuration);
-    unawaited(ready.then(
-      (info) => widget.onReady?.call(info),
-      onError: (Object error, StackTrace _) {
-        if (error is SeatLayerError) widget.onLoadError?.call(error);
-      },
-    ));
+    final ready = widget.controller.beginHandshake(
+      channel,
+      widget.configuration,
+      profile: widget.bridgeProfile,
+    );
+    unawaited(
+      ready.then(
+        (info) {
+          if (mounted && generation == _generation) {
+            widget.onReady?.call(info);
+          }
+        },
+        onError: (Object error, StackTrace _) {
+          if (mounted && generation == _generation && error is SeatLayerError) {
+            widget.onLoadError?.call(error);
+          }
+        },
+      ),
+    );
 
     try {
       final location = widget.configuration.assetPath;
@@ -125,8 +146,31 @@ class _SeatLayerViewState extends State<SeatLayerView> {
         await _web.loadFlutterAsset(location);
       }
     } catch (e) {
-      widget.controller.failWithTransport('could not load asset: $e');
+      if (mounted && generation == _generation) {
+        widget.controller.failWithTransport('could not load asset: $e');
+      }
     }
+  }
+
+  @override
+  void didUpdateWidget(covariant SeatLayerView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final runtimeChanged = oldWidget.controller != widget.controller ||
+        !oldWidget.configuration.semanticallyEquals(widget.configuration) ||
+        !oldWidget.bridgeProfile.equivalentTo(widget.bridgeProfile);
+    if (!runtimeChanged) return;
+
+    // Invalidate callbacks from the old page before closing its correlations.
+    _generation += 1;
+    oldWidget.controller.detachTransport();
+    unawaited(_boot());
+  }
+
+  @override
+  void dispose() {
+    _generation += 1;
+    widget.controller.detachTransport();
+    super.dispose();
   }
 
   bool _allowsNavigation(String configuredLocation, String requestedLocation) {

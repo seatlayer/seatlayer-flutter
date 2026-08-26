@@ -24,6 +24,15 @@ export 'src/bridge/envelope.dart'
     show Envelope, EnvelopeKind, EnvelopeKindUnknown;
 export 'src/open_enums.dart';
 export 'src/payloads.dart';
+export 'src/picker/picker_builders.dart';
+export 'src/picker/picker_models.dart';
+export 'src/picker/picker_options.dart';
+export 'src/picker/seat_layer_picker.dart';
+export 'src/picker/seat_layer_picker_components.dart';
+export 'src/picker/seat_layer_picker_controller.dart';
+export 'src/picker/seat_layer_picker_presentation.dart';
+export 'src/picker/seat_layer_picker_scope.dart';
+export 'src/picker/seat_layer_picker_theme.dart';
 export 'src/seat_layer_configuration.dart';
 export 'src/seat_layer_controller.dart';
 export 'src/seat_layer_error.dart';

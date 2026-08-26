@@ -40,9 +40,9 @@ void main() {
           contains('no shared protocol'));
     });
 
-    test('default native range is this SDK 1..1', () {
+    test('default native range covers raw v1 and picker v2', () {
       final result = negotiate(web: const ProtocolRange(min: 1, max: 9));
-      expect((result as NegotiationAgreed).protocol, 1);
+      expect((result as NegotiationAgreed).protocol, 2);
     });
   });
 

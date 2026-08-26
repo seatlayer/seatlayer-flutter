@@ -4,7 +4,7 @@ import 'open_enums.dart';
 import 'payloads.dart';
 
 /// This SDK's version.
-const String seatLayerSdkVersion = '0.2.1';
+const String seatLayerSdkVersion = '0.3.0-dev.1';
 
 /// The immutable hosted web runtime used by production views.
 const String seatLayerHostedWebVersion = '0.67.14';
@@ -13,7 +13,8 @@ const String seatLayerHostedWebVersion = '0.67.14';
 const String seatLayerLegacyFixtureWebVersion = '0.67.14';
 
 @Deprecated(
-    'Use seatLayerHostedWebVersion; production no longer uses a bundled runtime.')
+  'Use seatLayerHostedWebVersion; production no longer uses a bundled runtime.',
+)
 const String seatLayerBundledWebVersion = seatLayerHostedWebVersion;
 const String seatLayerMobileOrigin = 'https://cdn.seatlayer.io';
 const String seatLayerMobilePageUrl =
@@ -131,8 +132,9 @@ class SeatLayerConfiguration {
   final String assetPath;
 
   /// The `init` payload: `{ protocol, host, chrome, config }`.
-  Map<String, Object?> initPayload(
-      {ProtocolRange protocolRange = ProtocolRange.native}) {
+  Map<String, Object?> initPayload({
+    ProtocolRange protocolRange = ProtocolRange.native,
+  }) {
     final host = <String, Object?>{
       'platform': 'flutter',
       'sdk': seatLayerSdkVersion,
@@ -180,4 +182,61 @@ class SeatLayerConfiguration {
       selectableObjects != null ||
       numberOfPlacesToSelect != null ||
       selectionValidators != null;
+
+  /// Whether rebuilding a [SeatLayerConfiguration] produced the same runtime
+  /// semantics. This intentionally does not use object identity: Flutter apps
+  /// commonly construct configuration inline in `build`, and that must not
+  /// reload the WebView or erase a buyer's place in the map.
+  bool semanticallyEquals(SeatLayerConfiguration other) =>
+      event == other.event &&
+      apiBase == other.apiBase &&
+      publicKey == other.publicKey &&
+      maxSelection == other.maxSelection &&
+      locale == other.locale &&
+      _deepEquals(messages, other.messages) &&
+      currency == other.currency &&
+      colorblindSafe == other.colorblindSafe &&
+      initialView == other.initialView &&
+      showsWebSeatTooltip == other.showsWebSeatTooltip &&
+      _deepEquals(
+        buyerAccessToken?.toJson(),
+        other.buyerAccessToken?.toJson(),
+      ) &&
+      identical(buyerAccessTokenProvider, other.buyerAccessTokenProvider) &&
+      _deepEquals(selectedObjects, other.selectedObjects) &&
+      _deepEquals(selectableObjects, other.selectableObjects) &&
+      numberOfPlacesToSelect == other.numberOfPlacesToSelect &&
+      _deepEquals(
+        selectionValidators
+            ?.map((validator) => validator.toJson())
+            .toList(growable: false),
+        other.selectionValidators
+            ?.map((validator) => validator.toJson())
+            .toList(growable: false),
+      ) &&
+      commandTimeout == other.commandTimeout &&
+      handshakeTimeout == other.handshakeTimeout &&
+      _deepEquals(hostInfo, other.hostInfo) &&
+      assetPath == other.assetPath;
+}
+
+bool _deepEquals(Object? left, Object? right) {
+  if (identical(left, right)) return true;
+  if (left is List && right is List) {
+    if (left.length != right.length) return false;
+    for (var i = 0; i < left.length; i++) {
+      if (!_deepEquals(left[i], right[i])) return false;
+    }
+    return true;
+  }
+  if (left is Map && right is Map) {
+    if (left.length != right.length) return false;
+    for (final key in left.keys) {
+      if (!right.containsKey(key) || !_deepEquals(left[key], right[key])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return left == right;
 }

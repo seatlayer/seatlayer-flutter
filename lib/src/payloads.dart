@@ -172,11 +172,21 @@ class SelectedSeat {
     required this.id,
     required this.label,
     this.displayLabel,
+    this.displayType,
+    this.objectId,
+    this.objectType,
     this.categoryKey,
     this.price,
+    this.currency,
     this.tiers,
     this.tierId,
     this.commercial,
+    this.quantity,
+    this.bookingMode,
+    this.capacity,
+    this.minOccupancy,
+    this.maxOccupancy,
+    this.accessibility,
   });
 
   final String id;
@@ -185,15 +195,25 @@ class SelectedSeat {
   /// Buyer-facing label (row `displayLabel` applied). Falls back to [label].
   /// NEVER use for booking — [label] is the inventory identity.
   final String? displayLabel;
+  final String? displayType;
+  final String? objectId;
+  final ObjectType? objectType;
   final String? categoryKey;
 
   /// Price for the chosen tier when the category has tiers, else base price.
   final double? price;
+  final String? currency;
   final List<CategoryTier>? tiers;
 
   /// The chosen tier's id; absent when the category has no tiers.
   final String? tierId;
   final SeatCommercialAttributes? commercial;
+  final int? quantity;
+  final String? bookingMode;
+  final int? capacity;
+  final int? minOccupancy;
+  final int? maxOccupancy;
+  final List<String>? accessibility;
 
   /// What to show the buyer. Booking still uses [label].
   String get buyerFacingLabel => displayLabel ?? label;
@@ -207,11 +227,23 @@ class SelectedSeat {
       id: id,
       label: label,
       displayLabel: jStr(jGet(v, 'displayLabel')),
+      displayType: jStr(jGet(v, 'displayType')),
+      objectId: jStr(jGet(v, 'objectId')),
+      objectType: objectTypeOrNull(jGet(v, 'objectType')),
       categoryKey: jStr(jGet(v, 'categoryKey')),
       price: jDouble(jGet(v, 'price')),
+      currency: jStr(jGet(v, 'currency')),
       tiers: tiers == null ? null : jListOf(tiers, CategoryTier.fromJson),
       tierId: jStr(jGet(v, 'tierId')),
       commercial: SeatCommercialAttributes.fromJson(jGet(v, 'commercial')),
+      quantity: jInt(jGet(v, 'quantity')),
+      bookingMode: jStr(jGet(v, 'bookingMode')),
+      capacity: jInt(jGet(v, 'capacity')),
+      minOccupancy: jInt(jGet(v, 'minOccupancy')),
+      maxOccupancy: jInt(jGet(v, 'maxOccupancy')),
+      accessibility: jGet(v, 'accessibility') == null
+          ? null
+          : jListOf(jGet(v, 'accessibility'), (item) => jStr(item)),
     );
   }
 }

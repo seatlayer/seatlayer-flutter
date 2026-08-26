@@ -148,11 +148,13 @@ sealed class ObjectType {
   static const ObjectType seat = _ObjectSeat();
   static const ObjectType booth = _ObjectBooth();
   static const ObjectType ga = _ObjectGa();
+  static const ObjectType table = _ObjectTable();
 
   factory ObjectType.fromRaw(String raw) => switch (raw) {
         'seat' => seat,
         'booth' => booth,
         'ga' => ga,
+        'table' => table,
         _ => ObjectTypeUnknown(raw),
       };
 
@@ -179,6 +181,12 @@ final class _ObjectGa extends ObjectType {
   const _ObjectGa();
   @override
   String get raw => 'ga';
+}
+
+final class _ObjectTable extends ObjectType {
+  const _ObjectTable();
+  @override
+  String get raw => 'table';
 }
 
 /// An object type a bundle newer than this app introduced.

@@ -195,11 +195,15 @@ larger devices.
 ```dart
 SeatLayerPickerPage(
   configuration: configuration,
+  onCheckout: (handoff) {
+    openCheckout(holdId: handoff.holdId);
+  },
 )
 ```
 
-The page is edge-to-edge, safe-area aware and returns a nullable
-`SeatLayerCheckoutHandoff` when used as a route result.
+The page is edge-to-edge and safe-area aware. `showSeatLayerPicker` sets
+`popOnCheckout` internally and returns the handoff as its route result; an
+application-owned page normally handles the callback itself.
 
 ### 6.4 Custom composition
 
@@ -221,7 +225,7 @@ SeatLayerPickerScope(
         ),
       ),
       SeatLayerPickerSelectionTray(),
-      SeatLayerPickerCheckoutBar(),
+      SeatLayerPickerCheckoutBar(onCheckout: openCheckout),
     ],
   ),
 )
@@ -245,17 +249,19 @@ SeatLayerPickerOptions(
   readOnly: false,
   confirmSelection: true,
   enableBestAvailable: true,
-  enableVenue3D: true,
-  showEventDetails: true,
-  showAttribution: true,
+  enable3D: true,
+  enableSeatView: true,
+  hideEventDetails: false,
+  panelInitiallyCollapsed: false,
+  persistColorblindPreference: true,
+  languages: const [Locale('en'), Locale('de')],
 )
 ```
 
-Hold persistence is explicit through a delegate. The default is in-memory only;
-the SDK does not silently place a hold capability into general application
-preferences. A host-supplied `initialHoldId` defaults to host-owned because the
-host acquired and persisted that capability; the picker releases it only when
-the host explicitly transfers picker ownership.
+The current baseline does not silently persist a hold capability. A host that
+wants restoration persists the handoff itself and supplies `initialHoldId` on
+the next picker session. A host-supplied id defaults to host-owned because the
+host acquired and persisted it.
 
 ## 7. Public Flutter component kit
 
@@ -264,6 +270,8 @@ The initial public kit consists of:
 - `SeatLayerPickerAdaptiveLayout`
 - `SeatLayerPickerMap`
 - `SeatLayerPickerHeader`
+- `SeatLayerPickerAttribution`
+- `SeatLayerPickerTestModeIndicator`
 - `SeatLayerPickerMapControls`
 - `SeatLayerPickerPriceRail`
 - `SeatLayerPickerAccessibilityFilters`
@@ -274,23 +282,23 @@ The initial public kit consists of:
 - `SeatLayerPickerHoldCountdown`
 - `SeatLayerPickerCheckoutBar`
 - `SeatLayerPickerSeatConfirmation`
-- `SeatLayerPickerGAPrompt`
+- `SeatLayerPickerGeneralAdmissionPrompt`
 - `SeatLayerPickerTablePrompt`
+- `SeatLayerPickerActionError`
 - `SeatLayerPickerLoadingView`
 - `SeatLayerPickerErrorView`
-- `SeatLayerPickerAccessUnavailableView`
-- `SeatLayerPickerClosedView`
-- `SeatLayerPickerSoldOutView`
-- `SeatLayerPickerTestModeIndicator`
-- `SeatLayerPickerOverlays`
-- `SeatLayerPickerBuilder`
+- `SeatLayerPickerEmptyView`
 
 Every component reads the nearest `SeatLayerPickerScope`. Components with
 meaningful standalone use may also accept an explicit controller. They remain
 stateless with respect to inventory and holds.
 
 Applications can replace components through normal composition or targeted
-builders. The SDK should not require subclassing private state classes.
+builders. The targeted builder slots cover layout, header, test-mode indicator,
+price rail, section navigator, accessibility filters, map, map controls, Best
+Available, seat/GA/table prompts, selection tray, hold countdown, attribution,
+action errors, checkout bar, loading, error and empty. The SDK does not require
+subclassing private state classes.
 
 ## 8. Picker state and actions
 
@@ -307,35 +315,29 @@ phase and current busy action
 ready info, event mode and capabilities
 event identity, organizer theme and sales state
 currency, categories, prices, tiers and availability
-accessibility types and active filters
-floors, current floor, section focus and map rung
-candidate seat/table/GA prompt
-committed selection and selection validity
-active hold and server-derived remaining time
+active category/accessibility filters and limited-view preference
+floors, current floor, section focus, map rung and projection
+committed selection, table occupancy and selection validity
+general-admission prompt candidate
+token-free active-hold status, owner and server expiry
 recoverable error/access state
 checkout handoff state
 ```
 
-Minimum controller actions:
+Implemented controller actions:
 
 ```text
-retry
-confirmCandidate / cancelCandidate
-setSeatTier
-removeSelection / clearSelection
-findBestAvailable
-confirmGA / cancelGA
-confirmTable / cancelTable
-setCategoryFilter / setAccessibilityFilter
-focusSection / overview
-setFloor
-zoomIn / zoomOut / zoomToFit
-setColorblindSafe
-setBuyerView when supported
-holdAndContinue
-resumeHold / extendHold
-removeHeldTicket / releaseHold
-close / destroy
+retry / synchronize
+setSeatTier / removeObject / clearSelection
+bestAvailable
+setGeneralAdmissionQuantity / dismissGeneralAdmissionCandidate
+setTableQuantity
+setCategoryFilter / setAccessibilityFilter / setLimitedViewHidden
+focusSection / overview / setRung
+setFloor / setViewMode
+zoomIn / zoomOut / zoomToFit / setColorblindSafe
+extendHold / checkout / releasePickerOwnedHold
+setLifecycle / close / dismissError
 ```
 
 Actions are serialized where inventory ownership can change. Repeated checkout
@@ -351,35 +353,32 @@ revision has been applied or a typed timeout is raised.
   capabilities and payloads, not the transport envelope.
 - Flutter advertises protocol support `1..2`.
 - The existing raw surface continues to operate with protocol v1.
-- The complete/native picker requires the `picker-session` capability.
+- The complete/native picker requests protocol `2..2` and requires the exact
+  versioned capability set below.
 - Optional controls are gated by capabilities and commands.
 - Incompatible required payload semantics use protocol v2 rather than changing
   the meaning of an existing v1 field.
 - Unknown fields, events and open-enum values remain forward-compatible.
 
-Required capability names are versioned where their payload contract matters:
+The implemented picker profile requires these exact capability strings:
 
 ```text
-picker-session
+picker-session-v2
 picker-snapshot-v1
 picker-actions-v1
+native-picker-chrome-v1
 checkout-handoff-v1
 hold-ownership-v1
-native-picker-chrome
-native-access-provider
+cart-line-remove-v1
+table-quantity-v1
 ```
 
-Optional capabilities:
-
-```text
-buyer-venue-3d
-seat-panorama
-minimap
-language-switcher
-hosted-checkout
-offer-availability
-picker-analytics
-```
+`native-access-provider` is additionally required when
+`buyerAccessTokenProvider` or `buyerAccessToken` is configured. Existing
+`selection-controls` and `selection-validity` capabilities remain conditional
+requirements when the raw selection-policy fields are configured. Optional
+buyer controls are advertised in the snapshot's `features` object and are
+hidden when their feature is absent.
 
 ### 9.2 Initialisation
 
@@ -396,28 +395,31 @@ and is deliberately absent from the bridge:
   },
   "requirements": {
     "capabilities": [
-      "picker-session",
+      "picker-session-v2",
       "picker-snapshot-v1",
       "picker-actions-v1",
+      "native-picker-chrome-v1",
       "checkout-handoff-v1",
-      "hold-ownership-v1"
+      "hold-ownership-v1",
+      "cart-line-remove-v1",
+      "table-quantity-v1"
     ]
   },
   "chrome": {
+    "owner": "native",
     "seatTooltip": false,
-    "confirmation": false,
     "testModeIndicator": false,
-    "loading": false,
-    "errors": false,
     "attribution": false
   }
 }
 ```
 
-When `chromeOwner` is `native`, `false` delegates those elements to Flutter.
-Exactly one side owns each element. Attribution remains entitlement-driven:
-native ownership moves the required badge; it never bypasses whether the
-server says it must be shown.
+`owner: native` assigns surrounding buyer chrome to Flutter. The renderer hides
+its seat tooltip, test indicator and attribution, while Flutter renders the
+corresponding native component from snapshot state. In particular, a test
+event produces exactly one `SeatLayerPickerTestModeIndicator`, not one badge in
+the WebView and another above it. Attribution remains entitlement-driven by
+`branding.attributionRequired`; moving its owner does not waive it.
 
 ### 9.3 Atomic snapshot
 
@@ -428,90 +430,185 @@ those remain within the rendered map:
 
 ```json
 {
-  "schema": 1,
+  "schema": "seatlayer.picker.snapshot/1",
   "sessionId": "ps_01",
   "revision": 42,
-  "status": {
-    "load": "ready",
-    "sale": "on-sale",
-    "readOnly": false,
-    "busy": null,
-    "checkout": "selecting"
-  },
   "event": {
     "key": "ev_xxx",
-    "mode": "test",
     "name": "Event name",
+    "mode": "test",
+    "currency": "EUR",
     "venue": "Venue",
-    "startsAt": "2026-09-18T18:30:00Z",
+    "startsAt": 1789756200000,
+    "timezone": "Europe/Berlin",
+    "locale": "de",
+    "posterUrl": null,
+    "salesClosed": false
+  },
+  "branding": {
+    "brandName": "Organizer",
+    "logoUrl": null,
+    "attributionRequired": true,
+    "tokens": {}
+  },
+  "features": {
+    "bestAvailable": true,
+    "accessibilityFilter": true,
+    "floors": true
+  },
+  "catalog": {
+    "categories": [],
+    "zones": [],
+    "sections": [],
+    "gaAreas": [],
+    "bestAvailableZones": []
+  },
+  "map": {
+    "rung": "sections",
+    "viewMode": "flat",
+    "activeFloorId": null,
+    "focusedSectionId": null,
+    "focusedSection": null,
+    "colorblindSafe": false,
+    "hideLimitedView": false,
+    "canZoomIn": true,
+    "canZoomOut": true,
+    "categoryFilter": [],
+    "accessibilityFilter": [],
+    "floors": []
+  },
+  "selection": {
+    "seats": [],
+    "validity": null,
+    "maxSelection": 10
+  },
+  "cart": {
+    "items": [],
+    "quantity": 0,
+    "total": 0,
     "currency": "EUR"
   },
-  "categories": [],
-  "features": {},
-  "branding": {},
-  "accessibilityTypes": [],
-  "floors": [],
-  "selection": [],
-  "validity": null,
-  "candidate": null,
-  "hold": null,
-  "focusedSection": null,
-  "rung": "sections",
-  "salesState": "open",
-  "error": null
+  "hold": {
+    "active": false,
+    "expiresAt": null,
+    "ownership": null
+  },
+  "access": {
+    "configured": false,
+    "status": "public",
+    "reason": null
+  }
 }
 ```
 
+Each `cart.items` entry uses the same stable line shape returned later in the
+handoff:
+
+```json
+{
+  "lineKey": "seat:A-1:adult",
+  "label": "A-1",
+  "displayLabel": "Row A, Seat 1",
+  "displayType": "Seat",
+  "objectId": "seat-a-1",
+  "objectType": "seat",
+  "categoryKey": "standard",
+  "tierId": "adult",
+  "unitPrice": 25,
+  "currency": "EUR",
+  "quantity": 1
+}
+```
+
+`selection.seats` carries the corresponding selection identity and display
+metadata, with optional tier/commercial attributes, accessibility values and
+table occupancy fields (`bookingMode`, `quantity`, `capacity`,
+`minOccupancy`, `maxOccupancy`). Unknown extra fields remain forward-compatible.
+
 Dart drops snapshots older than the highest applied revision for the current
 session id and resets the watermark only when `sessionId` changes. A detected
-gap can be repaired with `picker.getSnapshot`. The snapshot may contain only
-non-secret buyer display data. Buyer-access tokens never enter it.
+gap is repaired with `picker.getSnapshot`. `hold` is deliberately token-free:
+it contains only active state, server expiry and `picker`/`host` ownership. The
+opaque `holdId` appears only in `SeatLayerCheckoutHandoff`. Buyer-access tokens
+never enter a snapshot, command error, log or analytics event.
 
 ### 9.4 Commands and events
 
-Minimum new commands:
+The implemented protocol-v2 command table and payload names are:
 
 ```text
-picker.getSnapshot
-picker.retry
-picker.confirmCandidate
-picker.cancelCandidate
-picker.findBestAvailable
-picker.confirmGA
-picker.cancelGA
-picker.confirmTable
-picker.cancelTable
-picker.setCategoryFilter
-picker.setAccessibilityFilter
-picker.focusSection
-picker.overview
-picker.setLocale
-picker.continue
-picker.abort
-picker.setLifecycle
+picker.getSnapshot              no payload
+picker.clearSelection           no payload
+picker.removeCartLine           { label }
+picker.setSeatTier              { seatId, tierId }
+picker.setCategoryFilter        { categoryKeys }
+picker.setLimitedViewFilter     { on }
+picker.setAccessibilityFilter   { types: string[] | null }
+picker.focusSection             { sectionId }
+picker.overview                 no payload
+picker.setRung                  { rung }
+picker.setFloor                 { floorId }
+picker.setColorblindSafe        { on }
+picker.setViewMode              { mode }
+picker.zoomIn                   no payload
+picker.zoomOut                  no payload
+picker.zoomToFit                no payload
+picker.bestAvailable            { qty, categoryKey?, zoneId?, preferPremium, ttlMs? }
+picker.holdGA                   { areaId, qty, tierId?, ttlMs? }
+picker.setTableQuantity         { label, quantity, ttlMs? }
+picker.extendHold               { ttlMs? }
+picker.continue                 { ttlMs? }
+picker.abort                    no payload
+picker.lifecycle                { state: "foreground" | "background" }
 ```
 
-Minimum new events:
+Every mutating command returns the resulting `revision` and may include the
+complete `snapshot`. Dart waits until that revision is applied; after two
+seconds it calls `picker.getSnapshot` and fails with a typed decoding error if
+the runtime still cannot produce the revision. Runtime commands are also
+serialized in arrival order, preventing an asynchronous table replacement from
+racing `picker.continue` even when a native caller issues both rapidly.
+
+Two inventory-sensitive commands have stricter response contracts:
 
 ```text
+picker.removeCartLine { label }
+  -> { removed, source: "selection" | "hold" | "none", holdActive, revision }
+
+picker.setTableQuantity { label, quantity, ttlMs? }
+  -> { updated: true, source: "selection" | "hold", expiresAt, revision }
+```
+
+Removing a held line uses the server partial-release operation; removing the
+last line clears picker ownership. Changing a held table quantity uses an
+atomic server replacement. Neither command may mutate a host-owned hold.
+Relevant typed runtime errors are:
+
+```text
+hold_owned_by_host
+cart_line_release_failed
+table_quantity_rejected
+hold_state_incomplete
+```
+
+The state event surface is deliberately small:
+
+```text
+sys.ready          initial snapshot in payload.snapshot
 picker.snapshot
-picker.notice
-picker.checkout
-picker.close.requested
-picker.analytics
 ```
 
 `picker.continue` validates, creates or reuses a hold, returns the stable
 checkout handoff and atomically transfers ownership to the host.
-`picker.checkout` announces the same transition to observers. `picker.abort`
-is idempotent and acknowledged only after a session-owned hold is released or
-confirmed absent. Every v2 failure is returned as the correlated command error;
-v2 must not repeat the legacy out-of-band error followed by `{hold: null}`
-pattern.
+`picker.abort` is idempotent and acknowledged only after a picker-owned hold is
+released or confirmed absent. Every v2 command failure is returned through its
+correlated error envelope; it must not use the legacy out-of-band error followed
+by an apparently successful null result.
 
 Legacy selection/hold events continue for `surface.kind == chart`. The picker
-surface uses its atomic snapshot stream so independent event ordering cannot
-produce an impossible native UI state.
+controller uses the atomic snapshot stream for state and retains the existing
+typed buyer-access, `ga.click`, hold-expiry and error signals where they carry a
+distinct interaction or lifecycle notification.
 
 ## 10. Checkout handoff
 
@@ -556,11 +653,14 @@ Rules:
 
 1. Manual selection remains unheld until the buyer continues.
 2. Best Available returns an already-created SDK-owned hold.
-3. `holdAndContinue` validates and either reuses an exact active hold or creates
-   one; it never sends concurrent duplicate holds.
-4. Before handoff, close button, system back, route pop, scrim dismissal,
-   widget teardown and configuration replacement release an SDK-owned hold
-   exactly once.
+3. `checkout` (`picker.continue`) validates and either reuses an exact active
+   hold or creates one; concurrent calls share one Future and do not send
+   duplicate hold requests.
+4. Before handoff, the page and modal close button, system back and route pop
+   call the acknowledged `close`/`picker.abort` path exactly once. A host that
+   owns an inline controller must await `controller.close()` before deliberately
+   removing it; synchronous Dart `dispose` cannot guarantee an awaited network
+   release.
 5. If close occurs while a hold request is in flight, close waits for the
    request. A successful late hold is released before close completes.
 6. Delivering `onCheckout` or returning a non-null modal/page result atomically
@@ -568,9 +668,12 @@ Rules:
 7. After transfer, widget disposal never releases the hold.
 8. Hold expiry clears selection/hold state as defined by the server and returns
    the buyer to a recoverable selection experience.
-9. Partial removal from a hold uses the server partial-release operation and
-   updates the same hold id when the server retains it.
-10. App termination cannot guarantee cleanup; the server TTL remains the final
+9. `picker.removeCartLine` uses the server partial-release operation for a held
+   line and updates the same hold when lines remain. The last line clears picker
+   ownership.
+10. `picker.setTableQuantity` atomically replaces held table occupancy rather
+    than exposing a release/re-hold race.
+11. App termination cannot guarantee cleanup; the server TTL remains the final
     safety boundary.
 
 ## 12. Lifecycle
@@ -578,15 +681,18 @@ Rules:
 - The WebView and picker session are mounted once for the controller lifetime.
 - Responsive changes and inline/full-screen expansion do not recreate the
   session.
-- Configuration identity changes trigger an explicit teardown followed by a
-  fresh session; they are not silently ignored.
+- An externally supplied controller is bound to one event and rejects an event
+  change. An internally owned scope creates a fresh controller for a different
+  event; hosts must use the acknowledged close path before replacing a session
+  that may own a hold.
 - Pending ready or command callbacks cannot update a disposed widget.
 - App backgrounding does not pause the server hold clock.
 - Foreground resume refreshes authoritative hold/inventory state.
 - A caller-supplied initial hold is verified with `resumeHold`; it is never
   painted as owned before server verification.
-- The controller exposes `destroy` separately from `dispose`: destroy ends the
-  current runtime session; dispose also closes Dart resources.
+- `close` performs acknowledged picker abandonment. `dispose` closes Dart
+  subscriptions and its internally owned raw controller; it is not a substitute
+  for an awaited close when an inline session may own a hold.
 
 ## 13. Responsive mobile experience
 
@@ -684,13 +790,15 @@ validated separately from surrounding chrome.
 - Existing protocol-v1 hosted runtimes remain usable by the raw surface.
 - New raw-view chrome ownership options are additive and default to current
   behavior.
-- The new full picker uses a separately pinned hosted picker runtime so a picker
-  release does not silently change every raw map integration.
-- Existing test attribution remains visible unless exactly one explicitly
-  designated owner renders it.
-- Correct the existing package/runtime diagnostic mismatch (`pubspec` is
-  `0.2.2`, while the SDK constant currently reports `0.2.1`) and add a release
-  assertion preventing recurrence.
+- The raw and picker surfaces negotiate separate profiles even if a package
+  currently points them at the same immutable runtime document. Raw requests
+  protocol 1; picker requests protocol 2 and fails closed on missing
+  capabilities.
+- Native chrome ownership suppresses the WebView test badge/attribution and
+  renders them from snapshot state, so exactly one owner is visible.
+- The development source reports `0.3.0-dev.1`; publication metadata and the
+  SDK diagnostic constant must be checked together before any tag or package
+  publication.
 
 ## 17. DesiPass API impact
 
