@@ -19,7 +19,7 @@ available for applications that deliberately own every part of the UI.
 [React Native SDK](https://github.com/seatlayer/seatlayer-react-native)
 
 > **Release status:** `0.2.2` remains the published stable package.
-> [`0.3.0-dev.1`](https://pub.dev/packages/seatlayer/versions/0.3.0-dev.1)
+> [`0.3.0-dev.2`](https://pub.dev/packages/seatlayer/versions/0.3.0-dev.2)
 > is the published prerelease containing the `SeatLayerPicker` API described
 > below. Use that exact prerelease while validating; do not point a production
 > app at a moving Git branch.
@@ -29,7 +29,7 @@ available for applications that deliberately own every part of the UI.
 Install the published picker prerelease explicitly:
 
 ```bash
-flutter pub add seatlayer:0.3.0-dev.1
+flutter pub add seatlayer:0.3.0-dev.2
 ```
 
 The stable `0.2.2` package remains available through `flutter pub add
@@ -586,14 +586,14 @@ on an unrelated preview domain.
 
 ## Release path
 
-The `0.3.0-dev.1` prerelease has completed this path:
+The `0.3.0-dev.2` prerelease has completed this path:
 
 1. push reviewed source changes to the Flutter GitHub branch;
 2. pin an exact commit in the Reference app development app;
 3. validate public/private access, section focus, reserved seats, Best
    Available, holds, expiry and close behavior on iOS and Android;
 4. complete one safe hold → payment → server booking journey;
-5. publish and revalidate the `0.3.0-dev.1` prerelease; and
+5. publish and revalidate the `0.3.0-dev.2` prerelease; and
 6. publish stable `0.3.0` only after the documented exit gates pass.
 
 The remaining cross-SDK work is to freeze the JSON fixtures and reproduce the

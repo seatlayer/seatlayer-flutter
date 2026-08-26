@@ -2,7 +2,7 @@ name: seatlayer
 description: >-
   Flutter SDK for interactive seat maps and reserved seating charts on iOS and
   Android, with live availability, seat selection, temporary holds, and secure booking.
-version: 0.3.0-dev.1
+version: 0.3.0-dev.2
 homepage: https://seatlayer.io/developers/
 repository: https://github.com/seatlayer/seatlayer-flutter
 issue_tracker: https://github.com/seatlayer/seatlayer-flutter/issues
