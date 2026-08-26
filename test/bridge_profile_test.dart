@@ -28,6 +28,9 @@ Map<String, Object?> _hello({bool removeTableCapability = false}) =>
         'hold-ownership-v1',
         'cart-line-remove-v1',
         if (!removeTableCapability) 'table-quantity-v1',
+        'venue-3d-v1',
+        'venue-3d-controls-v1',
+        'seat-view-v1',
       ],
       'events': <String>['sys.ready', 'picker.snapshot'],
       'commands': <String>['picker.getSnapshot'],
@@ -82,6 +85,14 @@ void main() {
     expect(
       profile.requiredCapabilities,
       contains('checkout-handoff-reject-v1'),
+    );
+    expect(
+      profile.requiredCapabilities,
+      containsAll(<String>[
+        'venue-3d-v1',
+        'venue-3d-controls-v1',
+        'seat-view-v1',
+      ]),
     );
   });
 

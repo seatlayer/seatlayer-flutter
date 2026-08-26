@@ -1,0 +1,22 @@
+{
+  "runtime": "seatlayer-js@0.68.0",
+  "sourceCommit": "d71db683520bf6c7034208e10806d59ddd7c5c0d",
+  "sourceArtifact": "cdn/dist/seatlayer-js@0.68.0/seatlayer.js",
+  "sha256": "cadcfaea8ebda2dbef175be4462673c64ba6fe79e5e856c9b466941088a5056b",
+  "bytes": 1181605,
+  "publicBootstrapPath": "/bootstrap",
+  "requiredPickerCapabilities": [
+    "picker-session-v2",
+    "picker-snapshot-v1",
+    "picker-actions-v1",
+    "native-picker-chrome-v1",
+    "checkout-handoff-v1",
+    "checkout-handoff-reject-v1",
+    "hold-ownership-v1",
+    "cart-line-remove-v1",
+    "table-quantity-v1",
+    "venue-3d-v1",
+    "venue-3d-controls-v1",
+    "seat-view-v1"
+  ]
+}
