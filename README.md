@@ -260,15 +260,33 @@ The public `0.3.0-dev` component baseline exports:
 - `SeatLayerPickerBestAvailablePanel`
 - `SeatLayerPickerMobileTicketPanel`
 - `SeatLayerPickerSeatConfirmation`
+- `SeatLayerPickerSeatViewButton`
+- `SeatLayerPickerSeat3DButton`
 - `SeatLayerPickerTablePrompt`
 - `SeatLayerPickerGeneralAdmissionPrompt`
 - `SeatLayerPickerSelectionTray`
+- `SeatLayerPickerTicketCard`
 - `SeatLayerPickerHoldCountdown`
 - `SeatLayerPickerCheckoutBar`
 - `SeatLayerPickerActionError`
 - `SeatLayerPickerLoadingView`
 - `SeatLayerPickerErrorView`
 - `SeatLayerPickerEmptyView`
+
+The default phone dock follows the web picker state hierarchy: with no
+selection it shows the minimum price and the optional Best Seats accelerator;
+with an unheld selection it shows ticket count, total and **Review**; with an
+active hold it shows the same summary and **Continue**. Best Seats never crowds
+the primary checkout path after a manual selection. The expanded cart uses
+vertical `SeatLayerPickerTicketCard` rows with buyer labels, category/tier,
+price, commercial warnings and a safe remove action.
+
+`SeatLayerPickerSeatConfirmation` consumes the authored section, row and seat
+identity from the picker snapshot. `SeatLayerPickerSeatViewButton` and
+`SeatLayerPickerSeat3DButton` require real callbacks and are omitted otherwise;
+the SDK does not display a dead action or fabricate a sightline. See the parity
+ledger in the mobile picker architecture document for the bridge work required
+before those actions can be part of the turnkey flow.
 
 Targeted parts of the turnkey layout can also be wrapped or replaced through
 `SeatLayerPickerBuilders`. Every builder receives the immutable state, the

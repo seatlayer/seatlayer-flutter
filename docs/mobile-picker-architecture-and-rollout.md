@@ -303,9 +303,12 @@ The initial public kit consists of:
 - `SeatLayerPickerBestAvailablePanel`
 - `SeatLayerPickerMobileTicketPanel`
 - `SeatLayerPickerSelectionTray`
+- `SeatLayerPickerTicketCard`
 - `SeatLayerPickerHoldCountdown`
 - `SeatLayerPickerCheckoutBar`
 - `SeatLayerPickerSeatConfirmation`
+- `SeatLayerPickerSeatViewButton`
+- `SeatLayerPickerSeat3DButton`
 - `SeatLayerPickerGeneralAdmissionPrompt`
 - `SeatLayerPickerTablePrompt`
 - `SeatLayerPickerActionError`
@@ -316,6 +319,52 @@ The initial public kit consists of:
 Every component reads the nearest `SeatLayerPickerScope`. Components with
 meaningful standalone use may also accept an explicit controller. They remain
 stateless with respect to inventory and holds.
+
+### 7.1 Web-to-mobile feature parity ledger
+
+“Parity” means the same buyer decision, information and outcome; it does not
+require copying browser markup into Flutter. A feature is not complete merely
+because a similarly named button is visible. Its bridge data, action,
+capability gate, default composition, public component and recovery behavior
+must all work.
+
+| Web buyer behavior | Flutter turnkey/default | Public Flutter surface | Bridge/runtime contract | Status |
+| --- | --- | --- | --- | --- |
+| Event identity, close and loading/error states | Header and adaptive overlays | Header, loading, error and empty widgets | Event + access snapshot | Complete |
+| TEST event warning and API-controlled attribution | Exactly one native marker; compact attribution | Test marker + attribution widgets | Event mode + `attributionRequired` | Complete |
+| Category prices and active price filtering | Compact price rail | Price rail | Categories + category filter | Complete |
+| Section/seat navigation, zoom, fit and overview | Map-first controls | Individual map control widgets | Focus/rung/zoom/overview commands | Complete |
+| Focused-section buyer card with availability, entrance and category mix | Navigation works, but the full web summary card is not yet composed | Planned `SeatLayerPickerSectionCard` | Most summary fields already exist; category mix still needs a stable snapshot shape | Planned contract work |
+| Seat candidate identity, category and price | Centered native confirm card with Section / Row / Seat grid | `SeatLayerPickerSeatConfirmation` | `SelectedSeat` spatial fields + category catalog | Complete |
+| Multiple ticket choices and eligibility guidance | Native selectable rows; no congested dropdown | Confirmation component | Tier restriction and buyer message | Complete |
+| Limited-view, premium and wheelchair disclosure | Confirmation notice and cart attributes | Confirmation + ticket card | Commercial/accessibility fields | Complete |
+| Organizer photo/generated sightline and honest distance-to-stage | Omitted when no authoritative action exists | `SeatLayerPickerSeatViewButton` callback hook | Needs capability, protected media transport and stage-distance metadata | Planned contract work |
+| Real venue 3D focused on the candidate seat | Omitted from confirm card until supported; ordinary isometric map control remains separate | `SeatLayerPickerSeat3DButton` callback hook | Needs real venue-3D capability, focus/return actions and fallback | Planned contract work |
+| Manual ticket cart | Vertical buyer-readable rows with category/tier, price and remove/lock state | Selection tray + `SeatLayerPickerTicketCard` | Cart lines + selected-seat context | Complete |
+| Collapsed phone checkout strip | Empty: From + optional Best Seats; selected: total + Review; held: total + Continue | Mobile ticket panel | Cart + hold ownership | Complete |
+| Best Available | Empty-state accelerator and expanded scoped form | Best Available button + panel | Best Available command + picker-owned hold | Complete |
+| General admission and grouped tables | Native quantity/confirmation prompts | GA + table prompt widgets | GA/table commands and cart lines | Complete |
+| Selection rules and buyer hints | Validity gates checkout; action errors render | Action error widget | Validity exists; transient web `hint` is not yet part of picker state | Partial; hint state planned |
+| Hold countdown, restore, expiry, rejection and checkout handoff | Native countdown and safe Continue flow | Countdown + checkout bar | Typed hold ownership/handoff commands | Complete |
+| Localized buyer chrome and RTL | Locale is forwarded to the renderer; native chrome strings are currently English | Components are replaceable | Needs shared native string catalog and locale/RTL conformance fixtures | Planned contract work |
+| Accessibility and device adaptation | Semantics, dynamic safe areas and container breakpoints are implemented | All native components | No extra bridge work | Implemented; physical VoiceOver/TalkBack gate remains |
+
+The next parity work is ordered by buyer impact and cross-SDK reuse:
+
+1. Version the seat-inspection snapshot/command for authoritative seat-view
+   media, distance and capability flags.
+2. Add real venue-3D enter/focus/return commands with an explicit 2D fallback.
+3. Add the full focused-section card and transient buyer-hint state.
+4. Move native strings to the shared locale catalog and add RTL fixtures.
+5. Freeze shared JSON/action fixtures, then implement the same semantics in
+   React Native, iOS and Android using idiomatic platform components.
+
+Until the bridge rows above are complete, callbacks let an application provide
+an existing authoritative view or venue-3D route without forking the picker.
+The turnkey widget deliberately hides unsupported actions. No DesiPass API
+change is required for these presentation improvements; a backend change is
+only justified if end-to-end checkout evidence reveals missing trusted booking
+data.
 
 The default phone dock is container- and inset-responsive. It reads the
 unconsumed `MediaQuery.padding.bottom` rather than identifying device models or

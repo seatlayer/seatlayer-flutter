@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0-dev.1
+
+- Adds the adaptive turnkey picker and public component kit.
+- Matches the web mobile checkout strip across empty, selected and held states.
+- Rebuilds seat confirmation around authored Section / Row / Seat identity,
+  category color, price, ticket choices and accessibility/view disclosures.
+- Replaces the horizontal chip cart with reusable vertical ticket cards.
+- Adds explicit callback-gated seat-view and venue-3D action widgets; unsupported
+  actions remain hidden until the bridge advertises a real capability.
+- Documents the web-to-mobile parity ledger and cross-SDK replication order.
+
 ## 0.2.2
 
 - Documentation only. Refreshes the README, adds frequently asked questions,

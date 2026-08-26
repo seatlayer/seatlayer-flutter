@@ -285,11 +285,23 @@ class SeatLayerPickerSeatConfirmation extends StatefulWidget {
     this.seat,
     this.onConfirm,
     this.onCancel,
+    this.onViewFromSeat,
+    this.onShow3D,
   });
 
   final SelectedSeat? seat;
   final FutureOr<void> Function(SelectedSeat seat)? onConfirm;
   final FutureOr<void> Function(SelectedSeat seat)? onCancel;
+
+  /// Optional host-owned sightline action.
+  ///
+  /// The default native bridge does not invent a view image. Supply this only
+  /// when the host has an authoritative photo or its own seat-view route.
+  final FutureOr<void> Function(SelectedSeat seat)? onViewFromSeat;
+
+  /// Optional host-owned venue-3D action. The control is omitted when null so
+  /// the default card never advertises an unsupported or decorative action.
+  final FutureOr<void> Function(SelectedSeat seat)? onShow3D;
 
   @override
   State<SeatLayerPickerSeatConfirmation> createState() =>
@@ -322,70 +334,238 @@ class _SeatLayerPickerSeatConfirmationState
     }
     _tierId ??= seat.tierId ?? seat.tiers?.firstOrNull?.id;
     final theme = _theme(context, controller.state);
-    return _PromptFrame(
-      title: seat.buyerFacingLabel,
-      subtitle: _seatSubtitle(seat),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (seat.commercial?.restrictedView == true ||
-              seat.commercial?.obstructedView == true)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 10),
-              child: Text(
-                seat.commercial?.note ?? 'This seat may have a limited view.',
-                style: TextStyle(color: theme.warning),
-              ),
-            ),
-          if (seat.tiers?.isNotEmpty == true)
-            InputDecorator(
-              decoration: const InputDecoration(
-                labelText: 'Ticket type',
-                border: OutlineInputBorder(),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  isExpanded: true,
-                  value: _tierId,
-                  items: seat.tiers!
-                      .map(
-                        (tier) => DropdownMenuItem<String>(
-                          value: tier.id,
-                          child: Text(
-                            '${tier.name} · ${_money(tier.price, seat.currency ?? 'USD')}',
+    final category = controller.state.categories
+        .where((item) => item.key == seat.categoryKey)
+        .firstOrNull;
+    final categoryColor = _color(category?.color) ?? theme.accent;
+    final categoryLabel = category?.label ?? seat.categoryKey ?? 'Ticket';
+    final identity = <({String key, String value})>[
+      if (seat.sectionLabel?.trim().isNotEmpty == true)
+        (key: 'Section', value: seat.sectionLabel!.trim()),
+      if (seat.rowLabel?.trim().isNotEmpty == true)
+        (
+          key: seat.displayType?.trim().isNotEmpty == true
+              ? seat.displayType!.trim()
+              : seat.rowType?.trim().isNotEmpty == true
+                  ? seat.rowType!.trim()
+                  : 'Row',
+          value: seat.rowLabel!.trim(),
+        ),
+      (
+        key: seat.objectType == ObjectType.booth ? 'Place' : 'Seat',
+        value: seat.seatNumber?.trim().isNotEmpty == true
+            ? seat.seatNumber!.trim()
+            : seat.buyerFacingLabel,
+      ),
+    ];
+    final limitedView = seat.commercial?.restrictedView == true ||
+        seat.commercial?.obstructedView == true;
+    final wheelchair = seat.wheelchairSpaceType != null ||
+        (seat.accessibility ?? const <String>[])
+            .any((item) => item.toLowerCase().contains('wheelchair'));
+    final tiers = seat.tiers ?? const <CategoryTier>[];
+    final maxHeight = MediaQuery.sizeOf(context).height * .72;
+
+    return Align(
+      alignment: Alignment.center,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 430, maxHeight: maxHeight),
+        child: Material(
+          color: theme.surface,
+          elevation: 24,
+          shadowColor: _alpha(Colors.black, .42),
+          borderRadius: BorderRadius.circular(theme.radius + 4),
+          clipBehavior: Clip.antiAlias,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var index = 0; index < identity.length; index++) ...[
+                        Expanded(
+                          flex: index == 0 && identity.length == 3 ? 5 : 4,
+                          child: _SeatIdentityField(
+                            label: identity[index].key,
+                            value: identity[index].value,
                           ),
                         ),
-                      )
-                      .toList(growable: false),
-                  onChanged: controller.state.isBusy
-                      ? null
-                      : (tierId) => setState(() => _tierId = tierId),
+                        if (index != identity.length - 1)
+                          VerticalDivider(
+                            width: 1,
+                            thickness: 1,
+                            color: theme.divider,
+                          ),
+                      ],
+                    ],
+                  ),
                 ),
-              ),
+                ColoredBox(
+                  color: Color.alphaBlend(
+                    _alpha(categoryColor, .24),
+                    theme.surface,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 13,
+                    ),
+                    child: Row(
+                      children: [
+                        DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: categoryColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: _alpha(theme.text, .28),
+                              width: 1.5,
+                            ),
+                          ),
+                          child: const SizedBox.square(dimension: 14),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            categoryLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: theme.text,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        if (seat.price != null)
+                          Text(
+                            _money(
+                              context,
+                              seat.price!,
+                              seat.currency ?? 'USD',
+                            ),
+                            style: TextStyle(
+                              color: theme.text,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (tiers.length > 1) ...[
+                        Text(
+                          'Ticket type',
+                          style: TextStyle(
+                            color: theme.mutedText,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 7),
+                        for (final tier in tiers)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 7),
+                            child: _SeatTierChoice(
+                              tier: tier,
+                              currency: seat.currency ?? 'USD',
+                              selected: _tierId == tier.id,
+                              enabled: !controller.state.isBusy,
+                              onTap: () => setState(() => _tierId = tier.id),
+                            ),
+                          ),
+                      ] else if (tiers.firstOrNull?.buyerMessage != null) ...[
+                        Text(
+                          tiers.first.buyerMessage!,
+                          style: TextStyle(color: theme.mutedText),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                      if (limitedView)
+                        _SeatNotice(
+                          icon: Icons.visibility_off_outlined,
+                          color: theme.warning,
+                          title: 'View information',
+                          message: seat.commercial?.note ??
+                              'This seat may have a limited or obstructed view.',
+                        ),
+                      if (wheelchair)
+                        _SeatNotice(
+                          icon: Icons.accessible_rounded,
+                          color: theme.accent,
+                          title: 'Accessible place',
+                          message: seat.wheelchairSpaceType == 'no-seat'
+                              ? 'Wheelchair space without a fixed chair.'
+                              : 'Wheelchair-accessible seating.',
+                        ),
+                      if (widget.onViewFromSeat != null) ...[
+                        SeatLayerPickerSeatViewButton(
+                          seat: seat,
+                          onPressed: widget.onViewFromSeat!,
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      if (widget.onShow3D != null) ...[
+                        SeatLayerPickerSeat3DButton(
+                          seat: seat,
+                          onPressed: widget.onShow3D!,
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(52),
+                                side: BorderSide(color: theme.divider),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(theme.radius),
+                                ),
+                              ),
+                              onPressed: controller.state.isBusy
+                                  ? null
+                                  : () => _cancel(controller, seat),
+                              child: const Text('Cancel'),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: FilledButton.icon(
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size.fromHeight(52),
+                                backgroundColor: theme.accent,
+                                foregroundColor: theme.onAccent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(theme.radius),
+                                ),
+                              ),
+                              onPressed: controller.state.isBusy
+                                  ? null
+                                  : () => _confirm(controller, seat),
+                              icon: const Icon(Icons.check_rounded),
+                              label: const Text('Select'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: controller.state.isBusy
-                      ? null
-                      : () => _cancel(controller, seat),
-                  child: const Text('Remove'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton(
-                  onPressed: controller.state.isBusy
-                      ? null
-                      : () => _confirm(controller, seat),
-                  child: const Text('Confirm'),
-                ),
-              ),
-            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -419,6 +599,257 @@ class _SeatLayerPickerSeatConfirmationState
     } catch (_) {
       // The controller keeps the typed failure in picker state for native UI.
     }
+  }
+}
+
+/// A reusable seat-sightline action for hosts with an authoritative view.
+///
+/// It intentionally requires a callback; the SDK never fabricates an image or
+/// enables a button that cannot complete an action.
+class SeatLayerPickerSeatViewButton extends StatelessWidget {
+  const SeatLayerPickerSeatViewButton({
+    super.key,
+    required this.seat,
+    required this.onPressed,
+  });
+
+  final SelectedSeat seat;
+  final FutureOr<void> Function(SelectedSeat seat) onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = SeatLayerPickerScope.stateOf(context);
+    final theme = _theme(context, state);
+    return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+        side: BorderSide(color: theme.divider),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(theme.radius),
+        ),
+      ),
+      onPressed: state.isBusy ? null : () => onPressed(seat),
+      icon: const Icon(Icons.visibility_outlined),
+      label: const Text('View from here'),
+    );
+  }
+}
+
+/// A reusable venue-3D action for hosts whose runtime exposes real venue 3D.
+class SeatLayerPickerSeat3DButton extends StatelessWidget {
+  const SeatLayerPickerSeat3DButton({
+    super.key,
+    required this.seat,
+    required this.onPressed,
+  });
+
+  final SelectedSeat seat;
+  final FutureOr<void> Function(SelectedSeat seat) onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = SeatLayerPickerScope.stateOf(context);
+    final theme = _theme(context, state);
+    return FilledButton.tonalIcon(
+      style: FilledButton.styleFrom(
+        minimumSize: const Size.fromHeight(48),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(theme.radius),
+        ),
+      ),
+      onPressed: state.isBusy ? null : () => onPressed(seat),
+      icon: const Icon(Icons.view_in_ar_outlined),
+      label: const Text('See it in 3D'),
+    );
+  }
+}
+
+class _SeatIdentityField extends StatelessWidget {
+  const _SeatIdentityField({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = _theme(context, SeatLayerPickerScope.stateOf(context));
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 14, 12, 13),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: theme.mutedText,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: theme.text,
+              fontSize: 17,
+              height: 1.05,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SeatTierChoice extends StatelessWidget {
+  const _SeatTierChoice({
+    required this.tier,
+    required this.currency,
+    required this.selected,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final CategoryTier tier;
+  final String currency;
+  final bool selected;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = _theme(context, SeatLayerPickerScope.stateOf(context));
+    final guidance = tier.buyerMessage ??
+        (tier.restriction == 'companion'
+            ? 'Requires the adjacent wheelchair place.'
+            : null);
+    return Material(
+      color: selected ? _alpha(theme.accent, .10) : Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(theme.radius),
+        side: BorderSide(
+          color: selected ? theme.accent : theme.divider,
+          width: selected ? 1.5 : 1,
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(theme.radius),
+        onTap: enabled ? onTap : null,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+          child: Row(
+            children: [
+              Icon(
+                selected
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_unchecked_rounded,
+                color: selected ? theme.accent : theme.mutedText,
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tier.name,
+                      style: TextStyle(
+                        color: theme.text,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    if (guidance != null)
+                      Text(
+                        guidance,
+                        style: TextStyle(
+                          color: theme.mutedText,
+                          fontSize: 11,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                _money(context, tier.price, tier.currency ?? currency),
+                style: TextStyle(
+                  color: theme.text,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SeatNotice extends StatelessWidget {
+  const _SeatNotice({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.message,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = _theme(context, SeatLayerPickerScope.stateOf(context));
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: _alpha(color, .10),
+          borderRadius: BorderRadius.circular(theme.radius),
+          border: Border.all(color: _alpha(color, .35)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(11),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: color, size: 20),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: theme.text,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      message,
+                      style: TextStyle(
+                        color: theme.mutedText,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -578,7 +1009,7 @@ class _SeatLayerPickerGeneralAdmissionPromptState
                       (tier) => DropdownMenuItem<String>(
                         value: tier.id,
                         child: Text(
-                          '${tier.name} · ${_money(tier.price, area.currency ?? 'USD')}',
+                          '${tier.name} · ${_money(context, tier.price, area.currency ?? 'USD')}',
                         ),
                       ),
                     )
@@ -746,19 +1177,36 @@ class _PromptFrame extends StatelessWidget {
   }
 }
 
-String _seatSubtitle(SelectedSeat seat) {
-  final type = seat.displayType ??
-      (seat.objectType == ObjectType.table ? 'Table' : 'Seat');
-  final price = seat.price == null
-      ? ''
-      : ' · ${_money(seat.price!, seat.currency ?? 'USD')}';
-  return '$type$price';
+String _money(BuildContext context, double amount, String currency) {
+  final formatter = SeatLayerPickerScope.optionsOf(context).pricing?.formatter;
+  if (formatter != null) return formatter(amount, currency);
+  const symbols = <String, String>{
+    'EUR': '€',
+    'USD': r'$',
+    'GBP': '£',
+    'INR': '₹',
+    'JPY': '¥',
+    'CNY': '¥',
+    'KRW': '₩',
+  };
+  final decimals = amount == amount.roundToDouble() ? 0 : 2;
+  final value = amount.toStringAsFixed(decimals);
+  final code = currency.toUpperCase();
+  final symbol = symbols[code];
+  return symbol == null ? '$code $value' : '$symbol$value';
 }
 
-String _money(double amount, String currency) {
-  final decimals = amount == amount.roundToDouble() ? 0 : 2;
-  return '$currency ${amount.toStringAsFixed(decimals)}';
+Color? _color(String? raw) {
+  if (raw == null) return null;
+  final value = raw.trim().replaceFirst('#', '');
+  if (value.length != 6 && value.length != 8) return null;
+  final parsed = int.tryParse(value, radix: 16);
+  if (parsed == null) return null;
+  return Color(value.length == 6 ? 0xFF000000 | parsed : parsed);
 }
+
+Color _alpha(Color color, double opacity) =>
+    color.withAlpha((opacity.clamp(0, 1) * 255).round());
 
 SeatLayerResolvedPickerTheme _theme(
   BuildContext context,

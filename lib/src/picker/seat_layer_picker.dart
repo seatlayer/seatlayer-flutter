@@ -1191,6 +1191,10 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
             .reduce((left, right) => left < right ? left : right);
     final currency = state.snapshot?.currency ?? 'USD';
     final hasTickets = state.cartLines.isNotEmpty;
+    final ticketCount = state.snapshot?.ticketCount ?? state.cartLines.length;
+    final cartTotal = state.snapshot?.cartTotal ??
+        state.cartLines.fold<double>(0, (sum, line) => sum + line.total);
+    final hasHold = state.hold != null;
     final maxPanelHeight = maxExpandedHeight ??
         (MediaQuery.sizeOf(context).height * .43).clamp(0.0, 390.0);
     final deviceBottomInset = MediaQuery.paddingOf(context).bottom;
@@ -1242,9 +1246,13 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                minimum == null
-                                    ? 'Choose tickets'
-                                    : 'From ${_compactMoney(minimum, currency)}',
+                                hasTickets
+                                    ? '$ticketCount ticket${ticketCount == 1 ? '' : 's'} · ${_money(context, cartTotal, currency)}'
+                                    : minimum == null
+                                        ? 'Choose tickets'
+                                        : 'From ${_compactMoney(minimum, currency)}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: theme.text,
                                   fontSize: 13,
@@ -1267,6 +1275,31 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
                                 icon: const Icon(Icons.auto_awesome_rounded,
                                     size: 15),
                                 label: const Text('Best seats'),
+                              ),
+                            if (!expanded && hasTickets)
+                              FilledButton(
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size(0, 34),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                  backgroundColor: theme.accent,
+                                  foregroundColor: theme.onAccent,
+                                ),
+                                onPressed: hasHold
+                                    ? controller.canCheckout
+                                        ? () => _ignoreAction(
+                                              _checkoutWithRejection(
+                                                controller,
+                                                onCheckout,
+                                              ),
+                                            )
+                                        : null
+                                    : state.isBusy
+                                        ? null
+                                        : () => onExpandedChanged(true),
+                                child: Text(hasHold ? 'Continue' : 'Review'),
                               ),
                             const SizedBox(width: 6),
                             SizedBox.square(
@@ -1344,61 +1377,309 @@ class SeatLayerPickerSelectionTray extends StatelessWidget {
     final options = SeatLayerPickerScope.optionsOf(context);
     final theme = _theme(context, state);
     final lines = state.cartLines;
+    final ticketCount = state.snapshot?.ticketCount ?? lines.length;
+    final total = state.snapshot?.cartTotal ??
+        lines.fold<double>(0, (sum, line) => sum + line.total);
     return Material(
       color: theme.surface,
       child: Padding(
-        padding: EdgeInsets.fromLTRB(16, compact ? 10 : 16, 16, 10),
+        padding: EdgeInsets.fromLTRB(4, compact ? 8 : 14, 4, 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    lines.isEmpty
-                        ? 'Tap a section, then choose your seats'
-                        : '${state.snapshot?.ticketCount ?? lines.length} ticket${(state.snapshot?.ticketCount ?? lines.length) == 1 ? '' : 's'} selected',
-                    style: TextStyle(
-                      color: theme.text,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 14,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          lines.isEmpty ? 'Choose your seats' : 'Your tickets',
+                          style: TextStyle(
+                            color: theme.text,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          lines.isEmpty
+                              ? 'Tap a section, then choose a seat on the map.'
+                              : '$ticketCount ticket${ticketCount == 1 ? '' : 's'} · ${_money(context, total, state.snapshot?.currency ?? 'USD')}',
+                          style: TextStyle(
+                            color: theme.mutedText,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SeatLayerPickerHoldCountdown(),
-              ],
+                  if (state.hold != null) ...[
+                    const SizedBox(width: 10),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: _alpha(theme.accent, .10),
+                        borderRadius: BorderRadius.circular(99),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.lock_clock_outlined,
+                              size: 14,
+                              color: theme.accent,
+                            ),
+                            const SizedBox(width: 5),
+                            const SeatLayerPickerHoldCountdown(),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
             if (lines.isNotEmpty) ...[
-              const SizedBox(height: 9),
-              SizedBox(
-                height: compact ? 38 : 44,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: lines.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 7),
-                  itemBuilder: (context, index) {
-                    final line = lines[index];
-                    return InputChip(
-                      label: Text(
-                        '${line.buyerFacingLabel} · ${_money(context, line.total, line.currency)}',
-                      ),
-                      onDeleted: options.readOnly ||
-                              state.holdOwner == SeatLayerHoldOwner.host
-                          ? null
-                          : () => _ignoreAction(
-                                controller.removeObject(line.label),
-                              ),
-                    );
-                  },
+              const SizedBox(height: 10),
+              for (var index = 0; index < lines.length; index++) ...[
+                SeatLayerPickerTicketCard(
+                  line: lines[index],
+                  seat: state.selection
+                      .where((seat) => seat.label == lines[index].label)
+                      .firstOrNull,
+                  compact: compact,
+                  onRemove: options.readOnly ||
+                          state.holdOwner == SeatLayerHoldOwner.host
+                      ? null
+                      : () => controller.removeObject(lines[index].label),
                 ),
-              ),
+                if (index != lines.length - 1) const SizedBox(height: 7),
+              ],
             ],
           ],
         ),
       ),
     );
   }
+}
+
+/// One reusable buyer-facing ticket row from [SeatLayerPickerState.cartLines].
+///
+/// Use this in custom cart layouts when the complete
+/// [SeatLayerPickerSelectionTray] is more UI than the host needs.
+class SeatLayerPickerTicketCard extends StatelessWidget {
+  const SeatLayerPickerTicketCard({
+    super.key,
+    required this.line,
+    this.seat,
+    this.compact = false,
+    this.onRemove,
+  });
+
+  final SeatLayerCheckoutLineItem line;
+  final SelectedSeat? seat;
+  final bool compact;
+
+  /// Null makes this row immutable, which is correct for host-owned holds.
+  final Future<void> Function()? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = SeatLayerPickerScope.stateOf(context);
+    final theme = _theme(context, state);
+    final category = state.categories
+        .where((item) => item.key == line.categoryKey)
+        .firstOrNull;
+    final tier =
+        category?.tiers.where((item) => item.id == line.tierId).firstOrNull;
+    final color = category == null
+        ? theme.accent
+        : _parseColor(category.color) ?? theme.accent;
+    final details = <String>[
+      if (category?.label.trim().isNotEmpty == true) category!.label.trim(),
+      if (tier?.name.trim().isNotEmpty == true) tier!.name.trim(),
+      if (line.quantity > 1) '${line.quantity} guests',
+    ];
+    final limitedView = seat?.commercial?.restrictedView == true ||
+        seat?.commercial?.obstructedView == true;
+    final premium = seat?.commercial?.premium == true;
+
+    return Semantics(
+      container: true,
+      label:
+          '${line.buyerFacingLabel}, ${_money(context, line.total, line.currency)}',
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Color.alphaBlend(_alpha(theme.text, .025), theme.surface),
+          borderRadius: BorderRadius.circular(theme.radius),
+          border: Border.all(color: theme.divider),
+        ),
+        child: Padding(
+          padding:
+              EdgeInsets.fromLTRB(12, compact ? 9 : 12, 8, compact ? 9 : 12),
+          child: Row(
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: _alpha(color, .14),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: SizedBox.square(
+                  dimension: compact ? 38 : 42,
+                  child: Icon(
+                    line.objectType == ObjectType.table
+                        ? Icons.table_restaurant_outlined
+                        : line.objectType == ObjectType.ga
+                            ? Icons.groups_2_outlined
+                            : Icons.event_seat_outlined,
+                    color: color,
+                    size: compact ? 20 : 22,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      line.buyerFacingLabel,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: theme.text,
+                        fontSize: compact ? 13 : 14,
+                        height: 1.12,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    if (details.isNotEmpty) ...[
+                      const SizedBox(height: 3),
+                      Text(
+                        details.join(' · '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: theme.mutedText,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                    if (limitedView || premium) ...[
+                      const SizedBox(height: 5),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 4,
+                        children: [
+                          if (limitedView)
+                            _TicketAttribute(
+                              icon: Icons.visibility_off_outlined,
+                              label: 'Limited view',
+                              color: theme.warning,
+                            ),
+                          if (premium)
+                            _TicketAttribute(
+                              icon: Icons.star_outline_rounded,
+                              label: 'Premium',
+                              color: theme.accent,
+                            ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    _money(context, line.total, line.currency),
+                    style: TextStyle(
+                      color: theme.text,
+                      fontSize: compact ? 14 : 15,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  if (onRemove != null)
+                    SizedBox.square(
+                      dimension: 32,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        tooltip: 'Remove ${line.buyerFacingLabel}',
+                        iconSize: 18,
+                        color: theme.mutedText,
+                        onPressed: () => _ignoreAction(onRemove!()),
+                        icon: const Icon(Icons.close_rounded),
+                      ),
+                    )
+                  else if (state.holdOwner == SeatLayerHoldOwner.host)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5),
+                      child: Icon(
+                        Icons.lock_outline_rounded,
+                        size: 15,
+                        color: theme.mutedText,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TicketAttribute extends StatelessWidget {
+  const _TicketAttribute({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: _alpha(color, .10),
+          borderRadius: BorderRadius.circular(99),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 11, color: color),
+              const SizedBox(width: 3),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
 }
 
 class SeatLayerPickerHoldCountdown extends StatefulWidget {
@@ -1716,20 +1997,22 @@ class _SeatLayerPickerAdaptiveLayoutState
         _confirmedLabels.removeWhere(
           (label) => !selectedLabels.contains(label),
         );
-        final ticketCount =
-            state.snapshot?.ticketCount ?? state.cartLines.length;
-        if (ticketCount > _previousTicketCount && !_mobilePanelExpanded) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) setState(() => _mobilePanelExpanded = true);
-          });
-        }
-        _previousTicketCount = ticketCount;
         final pendingSeat =
             !options.readOnly && state.hold == null && options.confirmSelection
                 ? state.selection.reversed
                     .where((seat) => !_confirmedLabels.contains(seat.label))
                     .firstOrNull
                 : null;
+        final ticketCount =
+            state.snapshot?.ticketCount ?? state.cartLines.length;
+        if (ticketCount > _previousTicketCount &&
+            !_mobilePanelExpanded &&
+            pendingSeat == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() => _mobilePanelExpanded = true);
+          });
+        }
+        _previousTicketCount = ticketCount;
         final Widget? buyerPrompt;
         if (!options.readOnly && state.generalAdmissionCandidate != null) {
           buyerPrompt = _part(
@@ -1814,11 +2097,14 @@ class _SeatLayerPickerAdaptiveLayoutState
                             child: accessibility,
                           ),
                           if (buyerPrompt != null)
-                            Positioned(
-                              left: 12,
-                              right: 12,
-                              bottom: 12,
-                              child: buyerPrompt,
+                            Positioned.fill(
+                              child: ColoredBox(
+                                color: _alpha(resolved.background, .64),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12),
+                                  child: buyerPrompt,
+                                ),
+                              ),
                             ),
                           if (statusOverlay != null)
                             Positioned.fill(child: statusOverlay),
@@ -1880,11 +2166,14 @@ class _SeatLayerPickerAdaptiveLayoutState
                   Positioned(right: 10, bottom: 10, child: controls),
                   Positioned(left: 10, bottom: 56, child: accessibility),
                   if (buyerPrompt != null)
-                    Positioned(
-                      left: 8,
-                      right: 8,
-                      bottom: 8,
-                      child: buyerPrompt,
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: _alpha(resolved.background, .64),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: buyerPrompt,
+                        ),
+                      ),
                     ),
                   if (statusOverlay != null)
                     Positioned.fill(child: statusOverlay),
@@ -1932,7 +2221,10 @@ class _SeatLayerPickerAdaptiveLayoutState
 
   Future<void> _confirmSeat(SelectedSeat seat) async {
     if (!mounted) return;
-    setState(() => _confirmedLabels.add(seat.label));
+    setState(() {
+      _confirmedLabels.add(seat.label);
+      _mobilePanelExpanded = true;
+    });
   }
 
   Future<void> _removeSeat(
@@ -1960,8 +2252,7 @@ SeatLayerResolvedPickerTheme _theme(
 String _money(BuildContext context, double amount, String currency) {
   final formatter = SeatLayerPickerScope.optionsOf(context).pricing?.formatter;
   if (formatter != null) return formatter(amount, currency);
-  final decimals = amount == amount.roundToDouble() ? 0 : 2;
-  return '$currency ${amount.toStringAsFixed(decimals)}';
+  return _compactMoney(amount, currency);
 }
 
 String _compactMoney(double amount, String currency) {

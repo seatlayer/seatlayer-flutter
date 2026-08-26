@@ -88,6 +88,40 @@ void main() {
       expect(display.buyerFacingLabel, 'Loge 1');
     });
 
+    test('SelectedSeat keeps buyer-facing spatial and accessibility context',
+        () {
+      final seat = SelectedSeat.fromJson({
+        'id': 's1',
+        'label': 'GALL-A-45',
+        'displayType': 'Row',
+        'sectionLabel': 'Gallery',
+        'rowLabel': 'GALL-A',
+        'seatNumber': '45',
+        'wheelchairSpaceType': 'no-seat',
+        'accessibility': ['wheelchair'],
+        'tiers': [
+          {
+            'id': 'companion',
+            'name': 'Companion',
+            'price': 40,
+            'restriction': 'companion',
+            'buyerMessage': 'Book with the wheelchair place.',
+          },
+        ],
+      })!;
+
+      expect(seat.sectionLabel, 'Gallery');
+      expect(seat.rowLabel, 'GALL-A');
+      expect(seat.seatNumber, '45');
+      expect(seat.wheelchairSpaceType, 'no-seat');
+      expect(seat.accessibility, ['wheelchair']);
+      expect(seat.tiers!.single.restriction, 'companion');
+      expect(
+        seat.tiers!.single.buyerMessage,
+        'Book with the wheelchair place.',
+      );
+    });
+
     test(
         'a seat missing its required id/label decodes to null (dropped by lists)',
         () {
