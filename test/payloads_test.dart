@@ -5,12 +5,40 @@ import 'package:seatlayer/src/seat_layer_configuration.dart';
 
 void main() {
   test('hosted and fixture runtime versions remain explicitly pinned', () {
-    expect(seatLayerHostedWebVersion, '0.67.14');
-    expect(seatLayerLegacyFixtureWebVersion, '0.67.14');
+    expect(seatLayerHostedWebVersion, '0.68.0');
+    expect(seatLayerLegacyFixtureWebVersion, '0.68.0');
     expect(
       seatLayerMobilePageUrl,
       'https://cdn.seatlayer.io/seatlayer-js@$seatLayerHostedWebVersion/mobile.html',
     );
+  });
+
+  test('public Platform configuration forwards the publishable key', () {
+    final configuration = SeatLayerConfiguration(
+      event: 'ev_public',
+      publicKey: 'pk_test_example',
+    );
+
+    final config =
+        configuration.initPayload()['config']! as Map<String, Object?>;
+    expect(config['event'], 'ev_public');
+    expect(config['publicKey'], 'pk_test_example');
+    expect(config.containsKey('nativeAccessProvider'), isFalse);
+  });
+
+  test('private provider signal accompanies any configured public key', () {
+    final configuration = SeatLayerConfiguration(
+      event: 'ev_private',
+      publicKey: 'pk_test_example',
+      buyerAccessTokenProvider: (_) async =>
+          const BuyerAccessToken(token: 'bse_private'),
+    );
+
+    final config =
+        configuration.initPayload()['config']! as Map<String, Object?>;
+    expect(config['publicKey'], 'pk_test_example');
+    expect(config['nativeAccessProvider'], isTrue);
+    expect(configuration.usesPrivateAccess, isTrue);
   });
 
   group('open enums — unknown values never throw', () {

@@ -62,7 +62,7 @@ the checkout CTA.
 SeatLayerPicker(
   configuration: SeatLayerConfiguration(
     event: 'ev_your_event_key',
-    buyerAccessTokenProvider: mintBuyerAccess,
+    publicKey: 'pk_test_your_public_key',
   ),
   onCheckout: (handoff) {
     openCheckout(holdId: handoff.holdId);
@@ -164,9 +164,14 @@ The compact price rail follows the web picker: tapping one price selects that
 single category and frames its seats; tapping the active price again returns to
 all categories.
 
-For public inventory, omit `buyerAccessTokenProvider`. For private channel
-inventory, the provider calls your backend, which mints a short-lived buyer
-session for the exact renderer origin:
+For public Platform inventory, register the exact hosted renderer origin
+`https://cdn.seatlayer.io` on the matching `pk_test_` key. Runtime 0.68
+bootstraps chart, availability, and public buyer access directly and keeps its
+grant in memory; your backend is not on the chart-loading path.
+
+For private, login-gated, presale, partner, or channel inventory, replace
+`publicKey` with a provider that calls your backend and mints a short-lived
+buyer session for that exact renderer origin:
 
 ```dart
 final configuration = SeatLayerConfiguration(
@@ -177,6 +182,14 @@ final configuration = SeatLayerConfiguration(
 ```
 
 Never mint a buyer session with a SeatLayer secret inside the app.
+
+This unreleased wrapper vendors a deterministic runtime fixture built from
+SeatLayer runtime commit
+`d71db683520bf6c7034208e10806d59ddd7c5c0d`. Its `assets/seatlayer.js`
+SHA-256 is
+`cadcfaea8ebda2dbef175be4462673c64ba6fe79e5e856c9b466941088a5056b`;
+`assets/seatlayer.runtime.json` is the machine-readable provenance record. The
+hosted production URL remains a separately deployed immutable artifact.
 
 ## Adaptive modal or full-screen picker
 
@@ -503,7 +516,10 @@ class _RawMapState extends State<RawMap> {
   Widget build(BuildContext context) {
     return SeatLayerView(
       controller: controller,
-      configuration: SeatLayerConfiguration(event: 'ev_your_event_key'),
+      configuration: SeatLayerConfiguration(
+        event: 'ev_your_event_key',
+        publicKey: 'pk_test_your_public_key',
+      ),
     );
   }
 
@@ -566,7 +582,8 @@ flutter run
 Supply a controlled event to exercise the high-level picker:
 
 ```bash
-flutter run --dart-define=SEATLAYER_EVENT=ev_your_test_event
+flutter run --dart-define=SEATLAYER_EVENT=ev_your_test_event \
+  --dart-define=SEATLAYER_PUBLIC_KEY=pk_test_your_public_key
 ```
 
 During hosted-runtime development, override only the picker document being

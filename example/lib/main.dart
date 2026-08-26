@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:seatlayer/seatlayer.dart';
 
 const _eventKey = String.fromEnvironment('SEATLAYER_EVENT');
+const _publicKey = String.fromEnvironment('SEATLAYER_PUBLIC_KEY');
 const _runtimeUrl = String.fromEnvironment('SEATLAYER_RUNTIME_URL');
 
 void main() => runApp(const DemoApp());
@@ -26,7 +27,9 @@ class DemoApp extends StatelessWidget {
 ///
 /// Run with:
 ///
-///   flutter run --dart-define=SEATLAYER_EVENT=ev_your_test_event
+///   flutter run \
+///     --dart-define=SEATLAYER_EVENT=ev_your_test_event \
+///     --dart-define=SEATLAYER_PUBLIC_KEY=pk_test_your_public_key
 ///
 /// During runtime development, also provide the immutable HTTPS test document:
 ///
@@ -41,6 +44,7 @@ class LivePickerDemo extends StatefulWidget {
 class _LivePickerDemoState extends State<LivePickerDemo> {
   late final SeatLayerConfiguration _configuration = SeatLayerConfiguration(
     event: _eventKey,
+    publicKey: _publicKey.isEmpty ? null : _publicKey,
     hostInfo: const {'app': 'SeatLayerFlutterPickerExample/0.3-dev'},
     assetPath: _runtimeUrl.isEmpty
         ? SeatLayerConfiguration.defaultAssetPath
