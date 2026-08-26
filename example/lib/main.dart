@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:seatlayer/seatlayer.dart';
 
+const _eventKey = String.fromEnvironment('SEATLAYER_EVENT');
+const _runtimeUrl = String.fromEnvironment('SEATLAYER_RUNTIME_URL');
+
 void main() => runApp(const DemoApp());
 
 class DemoApp extends StatelessWidget {
@@ -9,33 +12,123 @@ class DemoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SeatLayer Flutter seat map',
+      title: 'SeatLayer Flutter seat picker',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(useMaterial3: true),
-      home: const DemoPage(),
+      home: _eventKey.isEmpty
+          ? const OfflineRawFixtureDemo()
+          : const LivePickerDemo(),
     );
   }
 }
 
-class DemoPage extends StatefulWidget {
-  const DemoPage({super.key});
+/// The complete native picker used for live protocol-v2 validation.
+///
+/// Run with:
+///
+///   flutter run --dart-define=SEATLAYER_EVENT=ev_your_test_event
+///
+/// During runtime development, also provide the immutable HTTPS test document:
+///
+///   --dart-define=SEATLAYER_RUNTIME_URL=https://.../mobile.html
+class LivePickerDemo extends StatefulWidget {
+  const LivePickerDemo({super.key});
 
   @override
-  State<DemoPage> createState() => _DemoPageState();
+  State<LivePickerDemo> createState() => _LivePickerDemoState();
 }
 
-class _DemoPageState extends State<DemoPage> {
+class _LivePickerDemoState extends State<LivePickerDemo> {
+  late final SeatLayerConfiguration _configuration = SeatLayerConfiguration(
+    event: _eventKey,
+    hostInfo: const {'app': 'SeatLayerFlutterPickerExample/0.3-dev'},
+    assetPath: _runtimeUrl.isEmpty
+        ? SeatLayerConfiguration.defaultAssetPath
+        : _runtimeUrl,
+  );
+
+  Future<void> _openCheckout(SeatLayerCheckoutHandoff handoff) async {
+    if (!mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Checkout handoff received',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '${handoff.lineItems.length} line item(s) · '
+                '${handoff.currency} ${handoff.total.toStringAsFixed(2)}',
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'The hold is now host-owned. Send handoff.holdId to your '
+                'trusted backend, inspect the hold there, then take payment '
+                'and book with an idempotent order reference.',
+              ),
+              const SizedBox(height: 20),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Done'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SeatLayerPicker(
+        configuration: _configuration,
+        callbacks: SeatLayerPickerCallbacks(
+          onReady: (info) {
+            debugPrint(
+              '[SeatLayerPickerExample] ready '
+              'protocol=${info.protocolRevision} '
+              'mode=${info.mode.raw} '
+              'event=${info.eventKey ?? "-"}',
+            );
+          },
+          onError: (error) {
+            debugPrint('[SeatLayerPickerExample] error=${error.code}');
+          },
+        ),
+        onCheckout: _openCheckout,
+      ),
+    );
+  }
+}
+
+/// Zero-configuration fallback for bridge development and first-time clones.
+///
+/// The bundled fixture intentionally exercises the stable raw protocol-v1
+/// [SeatLayerView]. It does not pretend to implement the protocol-v2 picker.
+class OfflineRawFixtureDemo extends StatefulWidget {
+  const OfflineRawFixtureDemo({super.key});
+
+  @override
+  State<OfflineRawFixtureDemo> createState() => _OfflineRawFixtureDemoState();
+}
+
+class _OfflineRawFixtureDemoState extends State<OfflineRawFixtureDemo> {
   final SeatLayerController _controller = SeatLayerController();
 
-  // A real integration sets `apiBase` to the SeatLayer API and passes a live
-  // `event` key. This demo instead points `assetPath` at the SDK's offline
-  // fixture page, which drives the REAL bridge against a stub chart — so it
-  // renders and exercises hold/best/fit with no network. See assets/demo.html.
-  late final SeatLayerConfiguration _config = SeatLayerConfiguration(
+  late final SeatLayerConfiguration _configuration = SeatLayerConfiguration(
     event: 'flutter-demo-show',
     apiBase: 'https://api.seatlayer.io',
     currency: 'USD',
-    hostInfo: const {'app': 'SeatLayerFlutterDemo/1.0'},
+    hostInfo: const {'app': 'SeatLayerFlutterRawFixture/1.0'},
     assetPath: 'packages/seatlayer/assets/demo.html',
   );
 
@@ -47,13 +140,13 @@ class _DemoPageState extends State<DemoPage> {
   void initState() {
     super.initState();
     _controller.onSelectionChanged.listen((seats) {
-      setState(() => _selection = seats);
+      if (mounted) setState(() => _selection = seats);
     });
     _controller.onHold.listen((hold) {
-      _log('hold ${hold.holdId} · ${hold.items?.length ?? 0} seats');
+      _log('hold created · ${hold.items?.length ?? 0} item(s)');
     });
     _controller.onHoldExpired.listen((_) => _log('hold expired'));
-    _controller.onError.listen((e) => _log('error: ${e.code}'));
+    _controller.onError.listen((error) => _log('error: ${error.code}'));
   }
 
   @override
@@ -62,14 +155,16 @@ class _DemoPageState extends State<DemoPage> {
     super.dispose();
   }
 
-  void _log(String text) => setState(() => _status = text);
+  void _log(String text) {
+    if (mounted) setState(() => _status = text);
+  }
 
   Future<void> _hold() async {
     try {
       final hold = await _controller.hold();
-      _log(hold == null ? 'no hold' : 'held ${hold.holdId}');
-    } on SeatLayerError catch (e) {
-      _log('hold failed: ${e.code}');
+      _log(hold == null ? 'no hold' : 'hold created');
+    } on SeatLayerError catch (error) {
+      _log('hold failed: ${error.code}');
     }
   }
 
@@ -77,9 +172,8 @@ class _DemoPageState extends State<DemoPage> {
     try {
       final result = await _controller.bestAvailable(4);
       _log('best: ${(result?.labels ?? const []).join(', ')}');
-    } on SeatLayerError catch (e) {
-      // sold_out / not_enough_together arrive here with the API code intact.
-      _log('best available: ${e.code}');
+    } on SeatLayerError catch (error) {
+      _log('best available: ${error.code}');
     }
   }
 
@@ -94,20 +188,19 @@ class _DemoPageState extends State<DemoPage> {
     return Scaffold(
       backgroundColor: const Color(0xFF0F1116),
       appBar: AppBar(
-        title: const Text('SeatLayer Flutter seat map'),
+        title: const Text('Raw protocol-v1 offline fixture'),
         backgroundColor: const Color(0xFF0F1116),
       ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // The map: a fixed-height box, never inside a scroll view (v0.1).
             Expanded(
               child: Stack(
                 children: [
                   SeatLayerView(
                     controller: _controller,
-                    configuration: _config,
+                    configuration: _configuration,
                     backgroundColor: const Color(0xFF0F1116),
                     onReady: (info) {
                       setState(() => _ready = info);
@@ -115,19 +208,14 @@ class _DemoPageState extends State<DemoPage> {
                         'ready · protocol ${info.protocolRevision} · '
                         'transport ${info.transport.raw}',
                       );
-                      // The single most important line for a real integration:
-                      // proof the handshake completed.
-                      debugPrint(
-                        '[SeatLayerDemo] sys.ready '
-                        'protocol=${info.protocolRevision} '
-                        'mode=${info.mode.raw} '
-                        'transport=${info.transport.raw} '
-                        'event=${info.eventKey ?? "-"}',
-                      );
                     },
-                    onLoadError: (e) => _log('load failed: ${e.code}'),
+                    onLoadError: (error) {
+                      _log('load failed: ${error.code}');
+                    },
                   ),
-                  if (ready != null && ready.mode == EventMode.test)
+                  // Raw integrations own their surrounding chrome. The full
+                  // SeatLayerPicker renders this indicator itself exactly once.
+                  if (ready?.mode == EventMode.test)
                     Positioned(
                       top: 8,
                       left: 12,
@@ -163,7 +251,7 @@ class _DemoPageState extends State<DemoPage> {
                     _selection.isEmpty
                         ? 'No seats selected'
                         : '${_selection.length} selected · '
-                              '${_selection.map((s) => s.buyerFacingLabel).join(', ')}',
+                              '${_selection.map((seat) => seat.buyerFacingLabel).join(', ')}',
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -177,11 +265,11 @@ class _DemoPageState extends State<DemoPage> {
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      _Btn('Hold', _hold),
+                      _ActionButton('Hold', _hold),
                       const SizedBox(width: 8),
-                      _Btn('Best 4', _bestAvailable),
+                      _ActionButton('Best 4', _bestAvailable),
                       const SizedBox(width: 8),
-                      _Btn('Fit', _fit),
+                      _ActionButton('Fit', _fit),
                     ],
                   ),
                 ],
@@ -194,8 +282,9 @@ class _DemoPageState extends State<DemoPage> {
   }
 }
 
-class _Btn extends StatelessWidget {
-  const _Btn(this.label, this.onTap);
+class _ActionButton extends StatelessWidget {
+  const _ActionButton(this.label, this.onTap);
+
   final String label;
   final Future<void> Function() onTap;
 
