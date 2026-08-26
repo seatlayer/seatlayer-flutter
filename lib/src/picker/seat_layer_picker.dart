@@ -341,8 +341,8 @@ class SeatLayerPickerPriceRail extends StatelessWidget {
               side: BorderSide(
                 color: selected ? theme.accent : theme.divider,
               ),
-              backgroundColor: theme.background,
-              selectedColor: _alpha(theme.accent, .14),
+              backgroundColor: theme.surface,
+              selectedColor: theme.accent,
               avatar: DecoratedBox(
                 decoration: BoxDecoration(
                   color: _parseColor(category.color) ?? theme.accent,
@@ -358,7 +358,7 @@ class SeatLayerPickerPriceRail extends StatelessWidget {
                       )
                     : '${category.label} · ${_money(context, category.priceMin, state.snapshot?.currency ?? 'USD')}',
                 style: TextStyle(
-                  color: theme.text,
+                  color: selected ? theme.onAccent : theme.text,
                   fontWeight: FontWeight.w700,
                   fontSize: 12,
                 ),
@@ -1652,7 +1652,10 @@ class _SeatLayerPickerAdaptiveLayoutState
                     right: 54,
                     bottom: 2,
                     child: IgnorePointer(
-                      child: SeatLayerPickerAttribution(compact: true),
+                      child: SeatLayerPickerAttribution(
+                        compact: true,
+                        onMap: true,
+                      ),
                     ),
                   ),
                   if (buyerPrompt != null)
