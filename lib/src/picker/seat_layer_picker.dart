@@ -1651,10 +1651,12 @@ class _SeatLayerPickerAdaptiveLayoutState
                     left: 54,
                     right: 54,
                     bottom: 2,
-                    child: IgnorePointer(
-                      child: SeatLayerPickerAttribution(
-                        compact: true,
-                        onMap: true,
+                    child: Center(
+                      child: IgnorePointer(
+                        child: SeatLayerPickerAttribution(
+                          compact: true,
+                          onMap: true,
+                        ),
                       ),
                     ),
                   ),
