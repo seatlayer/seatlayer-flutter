@@ -317,6 +317,16 @@ Every component reads the nearest `SeatLayerPickerScope`. Components with
 meaningful standalone use may also accept an explicit controller. They remain
 stateless with respect to inventory and holds.
 
+The default phone dock is container- and inset-responsive. It reads the
+unconsumed `MediaQuery.padding.bottom` rather than identifying device models or
+using a fixed footer height. A collapsed dock keeps a compact 12-logical-pixel
+clearance for gesture-style insets, an expanded dock reserves the complete
+inset, and larger navigation-bar insets are always preserved in full.
+`SeatLayerPickerPage` owns the top and side page insets but delegates the bottom
+inset to this dock, avoiding a second empty safe-area strip. Custom compositions
+can set `SeatLayerPickerMobileTicketPanel.bottomSafeArea` to `adaptive`, `full`
+or `none`; `none` is only for a host that already consumes the bottom inset.
+
 Applications can replace components through normal composition or targeted
 builders. The targeted builder slots cover header, price rail, section
 navigator, accessibility filters, map, map controls, Best Available,

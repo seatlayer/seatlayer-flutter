@@ -103,7 +103,10 @@ class _SeatLayerPickerPageState extends State<SeatLayerPickerPage> {
         _requestClose(SeatLayerPickerCloseReason.closeButton),
       ),
     );
-    final content = SafeArea(child: picker);
+    // The page reserves its top and side insets; the mobile ticket panel owns
+    // the bottom inset. This lets the dock adapt its gesture clearance instead
+    // of inheriting an unavoidable empty strip in full-screen presentations.
+    final content = SafeArea(bottom: false, child: picker);
     return PopScope(
       canPop: _allowPop,
       // Flutter 3.19 compatibility; newer SDKs prefer onPopInvokedWithResult.
