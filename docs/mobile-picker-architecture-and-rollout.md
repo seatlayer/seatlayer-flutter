@@ -924,8 +924,10 @@ model or global window width.
 - Seat confirmation is a bottom card/sheet that does not make the map
   untouchable after dismissal. Its View from here / See it in 3D action keeps
   the native card mounted until the runtime acknowledges that the destination
-  surface exists; removing it earlier can pass the tail of an iOS platform-view
-  tap into the map and select an unintended seat.
+  surface exists. While any native decision surface is present, the turnkey
+  composition also removes the WebView from platform hit testing; visual
+  stacking alone cannot stop iOS from giving the underlying platform view the
+  same touch sequence.
 - Prompt cards use a short fade/scale/slide transition; ticket summaries,
   cart rows and dock expansion animate only changed state. All SDK-owned motion
   becomes immediate when the platform requests reduced motion.

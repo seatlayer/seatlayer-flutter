@@ -317,8 +317,10 @@ the SDK action. The standalone `SeatLayerPickerSeatViewButton` and
 `SeatLayerPickerSeat3DButton` follow the same rule: controller-backed by
 default, callback-replaceable, and absent rather than decorative when the
 capability is unavailable. The confirmation stays above the embedded platform
-view until the immersive command confirms its destination is mounted; this
-prevents the originating iOS tap from selecting a second seat underneath.
+view until the immersive command confirms its destination is mounted, and the
+turnkey composition removes the WebView from hit testing for the whole native
+decision state. Both are required to prevent the originating iOS tap from
+selecting a second seat underneath.
 
 Targeted parts of the turnkey layout can also be wrapped or replaced through
 `SeatLayerPickerBuilders`. Every builder receives the immutable state, the
