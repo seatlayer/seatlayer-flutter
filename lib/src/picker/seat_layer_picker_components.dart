@@ -28,25 +28,25 @@ class SeatLayerPickerAttribution extends StatelessWidget {
     return Semantics(
       label: 'Powered by SeatLayer',
       child: Opacity(
-        opacity: .72,
+        opacity: compact ? .64 : .72,
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: compact ? 8 : 12,
-            vertical: compact ? 2 : 4,
+            horizontal: compact ? 6 : 12,
+            vertical: compact ? 1 : 4,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const _SeatLayerPoweredMark(),
-              const SizedBox(width: 5),
+              _SeatLayerPoweredMark(compact: compact),
+              SizedBox(width: compact ? 4 : 5),
               Text(
                 'Powered by SeatLayer',
                 style: TextStyle(
                   color: theme.text,
-                  fontSize: compact ? 11 : 12,
+                  fontSize: compact ? 10 : 12,
                   fontWeight: FontWeight.w600,
-                  letterSpacing: .2,
+                  letterSpacing: compact ? .1 : .2,
                 ),
               ),
             ],
@@ -58,29 +58,37 @@ class SeatLayerPickerAttribution extends StatelessWidget {
 }
 
 class _SeatLayerPoweredMark extends StatelessWidget {
-  const _SeatLayerPoweredMark();
+  const _SeatLayerPoweredMark({required this.compact});
+
+  final bool compact;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: const Color(0xFF0C1220),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: const SizedBox.square(
-          dimension: 16,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 3, vertical: 3.5),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                _SeatLayerMarkRow(width: 10),
-                _SeatLayerMarkRow(width: 7),
-                _SeatLayerMarkRow(width: 4),
-              ],
-            ),
+  Widget build(BuildContext context) {
+    final dimension = compact ? 12.0 : 16.0;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF0C1220),
+        borderRadius: BorderRadius.circular(compact ? 3 : 4),
+      ),
+      child: SizedBox.square(
+        dimension: dimension,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 2 : 3,
+            vertical: compact ? 2.5 : 3.5,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _SeatLayerMarkRow(width: compact ? 8 : 10),
+              _SeatLayerMarkRow(width: compact ? 5.5 : 7),
+              _SeatLayerMarkRow(width: compact ? 3 : 4),
+            ],
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class _SeatLayerMarkRow extends StatelessWidget {

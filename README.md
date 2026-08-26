@@ -77,10 +77,11 @@ On a phone, the turnkey widget deliberately follows the web picker's map-first
 information hierarchy: a compact event header, one concise price rail, the map,
 and a 50-logical-pixel ticket-dock control row. Its bottom spacing is calculated
 from the remaining `MediaQuery` inset: gesture-style insets use a compact
-clearance while the dock is collapsed, expanded content gets the complete safe
-area, and larger system-navigation bars are always kept clear. The dock expands
-for Best Seats, selected tickets and checkout, and automatically opens after a
-new selection. The SDK does not add a second section rail above the map. Zoom
+clearance in both collapsed and expanded states, while larger system-navigation
+bars are always kept clear. Required attribution is a small content-sized footer;
+when the API hides it, it reserves no layout height. The dock expands for Best
+Seats, selected tickets and checkout, and automatically opens after a new
+selection. The SDK does not add a second section rail above the map. Zoom
 in/out, fit, 2D/3D and colorblind-safe controls stay available as compact
 floating buttons. Best Seats uses touch-friendly selector rows that open mobile
 choice sheets instead of cramped desktop dropdown menus.
@@ -89,8 +90,9 @@ choice sheets instead of cramped desktop dropdown menus.
 full-screen integration does not append a second empty safe-area strip. For a
 manual composition, `SeatLayerPickerMobileTicketPanel.bottomSafeArea` supports
 `adaptive` (the default), `full`, and `none`; choose `none` only when an ancestor
-already owns the bottom spacing. No fixed device height or app-specific bottom
-spacer is required.
+already owns the bottom spacing. Choose `full` only when the host requires every
+logical pixel of the reported inset to remain empty. No fixed device height or
+app-specific bottom spacer is required.
 
 The usual display controls do not require a custom layout:
 

@@ -369,12 +369,16 @@ data.
 The default phone dock is container- and inset-responsive. It reads the
 unconsumed `MediaQuery.padding.bottom` rather than identifying device models or
 using a fixed footer height. A collapsed dock keeps a compact 12-logical-pixel
-clearance for gesture-style insets, an expanded dock reserves the complete
-inset, and larger navigation-bar insets are always preserved in full.
+clearance for gesture-style insets; the expanded dock uses the same compact
+clearance because its own content padding already protects the final action.
+Larger navigation-bar insets are always preserved in full. Required attribution
+is content-sized and disappears without leaving a reserved row when the API
+marks it unnecessary.
 `SeatLayerPickerPage` owns the top and side page insets but delegates the bottom
 inset to this dock, avoiding a second empty safe-area strip. Custom compositions
 can set `SeatLayerPickerMobileTicketPanel.bottomSafeArea` to `adaptive`, `full`
-or `none`; `none` is only for a host that already consumes the bottom inset.
+or `none`; `full` deliberately preserves the complete reported inset, while
+`none` is only for a host that already consumes it.
 
 Applications can replace components through normal composition or targeted
 builders. The targeted builder slots cover header, price rail, section
