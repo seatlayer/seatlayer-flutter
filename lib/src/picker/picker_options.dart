@@ -34,6 +34,40 @@ class SeatLayerPickerPricing {
   final SeatLayerMoneyFormatter? formatter;
 }
 
+/// Visibility of the turnkey picker's native chrome.
+///
+/// These switches affect only [SeatLayerPicker]'s default composition. Every
+/// corresponding control remains available as a standalone public widget for
+/// hosts that build their own layout.
+@immutable
+class SeatLayerPickerChromeOptions {
+  const SeatLayerPickerChromeOptions({
+    this.showHeader = true,
+    this.showPriceRail = true,
+    this.showFloorSelector = true,
+    this.showMapControls = true,
+    this.showOverviewControl = true,
+    this.showZoomControls = true,
+    this.showZoomToFitControl = true,
+    this.showViewModeControl = true,
+    this.showColorblindControl = true,
+    this.showAccessibilityControl = true,
+    this.showTicketPanel = true,
+  });
+
+  final bool showHeader;
+  final bool showPriceRail;
+  final bool showFloorSelector;
+  final bool showMapControls;
+  final bool showOverviewControl;
+  final bool showZoomControls;
+  final bool showZoomToFitControl;
+  final bool showViewModeControl;
+  final bool showColorblindControl;
+  final bool showAccessibilityControl;
+  final bool showTicketPanel;
+}
+
 @immutable
 class SeatLayerPickerOptions {
   const SeatLayerPickerOptions({
@@ -48,6 +82,7 @@ class SeatLayerPickerOptions {
     this.hideEventDetails = false,
     this.panelInitiallyCollapsed = true,
     this.persistColorblindPreference = true,
+    this.chrome = const SeatLayerPickerChromeOptions(),
     this.languages = const <Locale>[],
     this.pricing,
   });
@@ -74,6 +109,7 @@ class SeatLayerPickerOptions {
   final bool hideEventDetails;
   final bool panelInitiallyCollapsed;
   final bool persistColorblindPreference;
+  final SeatLayerPickerChromeOptions chrome;
   final List<Locale> languages;
   final SeatLayerPickerPricing? pricing;
 

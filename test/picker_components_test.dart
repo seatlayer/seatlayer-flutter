@@ -205,6 +205,52 @@ void main() {
     expect(map.calls.single.$1, 'picker.zoomIn');
   });
 
+  testWidgets('compact map controls keep zoom and view mode available',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    await tester.pumpWidget(
+      _app(map, const SeatLayerPickerMapControls(compact: true)),
+    );
+    map.emit(pickerSnapshot(withSelection: false));
+    await tester.pump();
+
+    expect(find.byTooltip('Zoom in'), findsOneWidget);
+    expect(find.byTooltip('Zoom out'), findsOneWidget);
+    expect(find.byTooltip('Fit venue'), findsOneWidget);
+    expect(find.byTooltip('Switch to 3D map'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Switch to 3D map'));
+    await tester.pump();
+    expect(map.calls.single.$1, 'picker.setViewMode');
+    expect(map.calls.single.$2, <String, Object?>{'mode': 'iso'});
+  });
+
+  testWidgets('chrome options can hide built-in controls without app changes',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    await tester.pumpWidget(
+      _app(
+        map,
+        const SeatLayerPickerMapControls(compact: true),
+        options: const SeatLayerPickerOptions(
+          chrome: SeatLayerPickerChromeOptions(
+            showZoomControls: false,
+            showViewModeControl: false,
+          ),
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot(withSelection: false));
+    await tester.pump();
+
+    expect(find.byTooltip('Zoom in'), findsNothing);
+    expect(find.byTooltip('Zoom out'), findsNothing);
+    expect(find.byTooltip('Switch to 3D map'), findsNothing);
+    expect(find.byTooltip('Fit venue'), findsOneWidget);
+  });
+
   testWidgets('mobile ticket dock stays compact until its controls are opened',
       (tester) async {
     final map = _FakeMapController();
@@ -229,6 +275,7 @@ void main() {
     );
     expect(find.text('From €25'), findsOneWidget);
     expect(find.text('Find the best seats together'), findsNothing);
+    expect(find.text('Powered by SeatLayer'), findsNothing);
 
     await tester.tap(find.text('Best seats'));
     expect(requestedExpansion, isTrue);
@@ -256,6 +303,8 @@ void main() {
     expect(find.text('Ticket type'), findsOneWidget);
     expect(find.text('Venue zone'), findsOneWidget);
     expect(find.text('Find 2 best seats'), findsOneWidget);
+    expect(find.text('Best seats'), findsNothing);
+    expect(find.text('Powered by SeatLayer'), findsOneWidget);
   });
 
   testWidgets('read-only chrome disables inventory controls and prompts',
@@ -316,16 +365,8 @@ void main() {
     await tester.tap(find.text('Best seats'));
     await tester.pumpAndSettle();
 
-    final fields = find.byType(DropdownButtonFormField<String?>);
-    expect(fields, findsNWidgets(2));
-    expect(
-      tester.state<FormFieldState<String?>>(fields.at(0)).value,
-      'standard',
-    );
-    expect(
-      tester.state<FormFieldState<String?>>(fields.at(1)).value,
-      'gallery',
-    );
+    expect(find.text('Standard'), findsOneWidget);
+    expect(find.text('Gallery'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(FilledButton, 'Find 2 best seats'));
     await tester.pumpAndSettle();
@@ -358,19 +399,15 @@ void main() {
     await tester.tap(find.text('Best seats'));
     await tester.pumpAndSettle();
 
-    final fields = find.byType(DropdownButtonFormField<String?>);
-    expect(tester.state<FormFieldState<String?>>(fields.at(0)).value, isNull);
-    expect(
-      tester.state<FormFieldState<String?>>(fields.at(1)).value,
-      'gallery',
-    );
+    expect(find.text('Any ticket type'), findsOneWidget);
+    expect(find.text('Gallery'), findsOneWidget);
     expect(find.text('Internal'), findsNothing);
 
-    await tester.tap(fields.at(0));
+    await tester.tap(find.text('Ticket type'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Premium').last);
     await tester.pumpAndSettle();
-    await tester.tap(fields.at(1));
+    await tester.tap(find.text('Venue zone'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Any venue zone').last);
     await tester.pumpAndSettle();

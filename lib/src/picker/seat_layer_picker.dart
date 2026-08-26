@@ -151,17 +151,17 @@ class SeatLayerPickerHeader extends StatelessWidget {
         bottom: false,
         child: Padding(
           padding: EdgeInsets.fromLTRB(
-            compact ? 10 : 16,
-            compact ? 5 : 10,
+            compact ? 12 : 16,
+            compact ? 6 : 10,
             compact ? 4 : 10,
-            compact ? 5 : 10,
+            compact ? 6 : 10,
           ),
           child: Row(
             children: [
               _PickerBrandMark(
                 theme: theme,
                 state: state,
-                size: compact ? 28 : 36,
+                size: compact ? 22 : 36,
               ),
               SizedBox(width: compact ? 8 : 12),
               Expanded(
@@ -181,7 +181,7 @@ class SeatLayerPickerHeader extends StatelessWidget {
                               fontFamily: theme.fontFamily,
                             ),
                           ),
-                          if (event?.venue != null)
+                          if (!compact && event?.venue != null)
                             Text(
                               event!.venue!,
                               maxLines: 1,
@@ -203,7 +203,11 @@ class SeatLayerPickerHeader extends StatelessWidget {
                   color: theme.text,
                   visualDensity:
                       compact ? VisualDensity.compact : VisualDensity.standard,
-                  icon: const Icon(Icons.close_rounded),
+                  constraints: compact
+                      ? const BoxConstraints.tightFor(width: 26, height: 26)
+                      : null,
+                  padding: EdgeInsets.zero,
+                  icon: Icon(Icons.close_rounded, size: compact ? 19 : 24),
                 ),
             ],
           ),
@@ -229,7 +233,7 @@ class _PickerBrandMark extends StatelessWidget {
     final url = state.branding?.logoUrl;
     if (provider != null || url != null) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(size < 30 ? 6 : 10),
         child: Image(
           image: provider ?? NetworkImage(url!),
           width: size,
@@ -245,7 +249,7 @@ class _PickerBrandMark extends StatelessWidget {
   Widget _fallback() => DecoratedBox(
         decoration: BoxDecoration(
           color: theme.accent,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(size < 30 ? 6 : 10),
         ),
         child: SizedBox(
           width: size,
@@ -432,29 +436,30 @@ class SeatLayerPickerMapControls extends StatelessWidget {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
     final map = state.snapshot?.map;
-    final theme = _theme(context, state);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: _alpha(theme.surface, .94),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: theme.divider),
-        boxShadow: const [
-          BoxShadow(color: Color(0x19000000), blurRadius: 12),
+    final options = SeatLayerPickerScope.optionsOf(context);
+    final chrome = options.chrome;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (chrome.showOverviewControl && map?.focusedSection != null)
+          const SeatLayerPickerOverviewButton(),
+        if (chrome.showZoomControls) ...[
+          const SeatLayerPickerZoomInButton(),
+          const SeatLayerPickerZoomOutButton(),
         ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (map?.focusedSection != null)
-            const SeatLayerPickerOverviewButton(),
-          if (!compact) ...[
-            const SeatLayerPickerZoomInButton(),
-            const SeatLayerPickerZoomOutButton(),
-          ],
-          const SeatLayerPickerZoomToFitButton(),
+        if (chrome.showZoomToFitControl) const SeatLayerPickerZoomToFitButton(),
+        if (chrome.showViewModeControl && options.enable3D)
+          const SeatLayerPickerViewModeButton(),
+        if (chrome.showColorblindControl)
           const SeatLayerPickerColorblindButton(),
-        ],
-      ),
+      ]
+          .map(
+            (control) => Padding(
+              padding: EdgeInsets.only(bottom: compact ? 6 : 7),
+              child: control,
+            ),
+          )
+          .toList(growable: false),
     );
   }
 }
@@ -518,6 +523,25 @@ class SeatLayerPickerZoomToFitButton extends StatelessWidget {
       );
 }
 
+/// A standalone 2D/isometric map toggle for custom picker compositions.
+class SeatLayerPickerViewModeButton extends StatelessWidget {
+  const SeatLayerPickerViewModeButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = SeatLayerPickerScope.controllerOf(context);
+    final is3D = controller.state.snapshot?.map.viewMode != 'flat';
+    return _ControlButton(
+      icon: is3D ? Icons.map_outlined : Icons.view_in_ar_rounded,
+      tooltip: is3D ? 'Switch to 2D map' : 'Switch to 3D map',
+      active: is3D,
+      onPressed: () => controller.setViewMode(
+        is3D ? SeatLayerViewMode.flat : SeatLayerViewMode.isometric,
+      ),
+    );
+  }
+}
+
 /// A standalone colorblind-safe map toggle for custom picker compositions.
 class SeatLayerPickerColorblindButton extends StatelessWidget {
   const SeatLayerPickerColorblindButton({super.key});
@@ -552,12 +576,20 @@ class _ControlButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
     final theme = _theme(context, state);
-    return IconButton(
-      tooltip: tooltip,
-      visualDensity: VisualDensity.compact,
-      color: active ? theme.accent : theme.text,
-      onPressed: onPressed == null ? null : () => _ignoreAction(onPressed!()),
-      icon: Icon(icon, size: 21),
+    return Material(
+      color: _alpha(theme.surface, .94),
+      shape: CircleBorder(side: BorderSide(color: theme.divider)),
+      elevation: 2,
+      shadowColor: const Color(0x33000000),
+      child: IconButton(
+        tooltip: tooltip,
+        visualDensity: VisualDensity.compact,
+        constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+        padding: EdgeInsets.zero,
+        color: active ? theme.accent : theme.text,
+        onPressed: onPressed == null ? null : () => _ignoreAction(onPressed!()),
+        icon: Icon(icon, size: 20),
+      ),
     );
   }
 }
@@ -814,45 +846,26 @@ class _BestAvailableFormState extends State<_BestAvailableForm> {
               ],
             ),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String?>(
-              initialValue: _categoryKey,
-              isExpanded: true,
-              isDense: true,
-              decoration: _bestAvailableDecoration('Ticket type'),
-              items: <DropdownMenuItem<String?>>[
-                const DropdownMenuItem<String?>(
-                  child: Text('Any ticket type'),
-                ),
-                ...widget.categories.map(
-                  (category) => DropdownMenuItem<String?>(
-                    value: category.key,
-                    child: Text(category.label),
-                  ),
-                ),
-              ],
-              onChanged: enabled
-                  ? (value) => setState(() => _categoryKey = value)
-                  : null,
+            _BestAvailableSelector(
+              label: 'Ticket type',
+              value: _categoryKey,
+              fallbackLabel: 'Any ticket type',
+              options: widget.categories
+                  .map((category) => (category.key, category.label))
+                  .toList(growable: false),
+              enabled: enabled,
+              onChanged: (value) => setState(() => _categoryKey = value),
             ),
             const SizedBox(height: 7),
-            DropdownButtonFormField<String?>(
-              initialValue: _zoneId,
-              isExpanded: true,
-              isDense: true,
-              decoration: _bestAvailableDecoration('Venue zone'),
-              items: <DropdownMenuItem<String?>>[
-                const DropdownMenuItem<String?>(
-                  child: Text('Any venue zone'),
-                ),
-                ...widget.zones.map(
-                  (zone) => DropdownMenuItem<String?>(
-                    value: zone.id,
-                    child: Text(zone.label),
-                  ),
-                ),
-              ],
-              onChanged:
-                  enabled ? (value) => setState(() => _zoneId = value) : null,
+            _BestAvailableSelector(
+              label: 'Venue zone',
+              value: _zoneId,
+              fallbackLabel: 'Any venue zone',
+              options: widget.zones
+                  .map((zone) => (zone.id, zone.label))
+                  .toList(growable: false),
+              enabled: enabled,
+              onChanged: (value) => setState(() => _zoneId = value),
             ),
             const SizedBox(height: 7),
             Row(
@@ -936,12 +949,147 @@ class _BestAvailableFormState extends State<_BestAvailableForm> {
   }
 }
 
-InputDecoration _bestAvailableDecoration(String label) => InputDecoration(
-      labelText: label,
-      isDense: true,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(9)),
+class _BestAvailableSelector extends StatelessWidget {
+  const _BestAvailableSelector({
+    required this.label,
+    required this.value,
+    required this.fallbackLabel,
+    required this.options,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String? value;
+  final String fallbackLabel;
+  final List<(String, String)> options;
+  final bool enabled;
+  final ValueChanged<String?> onChanged;
+
+  String get selectedLabel {
+    for (final option in options) {
+      if (option.$1 == value) return option.$2;
+    }
+    return fallbackLabel;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      value: selectedLabel,
+      child: Material(
+        color: scheme.surfaceContainerLowest,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(color: scheme.outlineVariant),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: enabled ? () => _open(context) : null,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: TextStyle(
+                            color: scheme.onSurfaceVariant,
+                            fontSize: 10.5,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          selectedLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.keyboard_arrow_down_rounded,
+                    color: enabled
+                        ? scheme.onSurfaceVariant
+                        : scheme.onSurface.withAlpha(80),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
+  }
+
+  Future<void> _open(BuildContext context) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (sheetContext) => ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(sheetContext).height * .62,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Text(
+                label,
+                style: Theme.of(sheetContext).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+            ),
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                padding: const EdgeInsets.only(bottom: 12),
+                children: [
+                  _selectorTile(sheetContext, null, fallbackLabel),
+                  for (final option in options)
+                    _selectorTile(sheetContext, option.$1, option.$2),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _selectorTile(BuildContext context, String? id, String text) =>
+      ListTile(
+        minTileHeight: 48,
+        title: Text(text),
+        trailing: value == id
+            ? Icon(Icons.check_rounded,
+                color: Theme.of(context).colorScheme.primary)
+            : null,
+        onTap: () {
+          onChanged(id);
+          Navigator.of(context).pop();
+        },
+      );
+}
 
 class _QuantityButton extends StatelessWidget {
   const _QuantityButton({
@@ -1022,46 +1170,71 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
             InkWell(
               onTap: () => onExpandedChanged(!expanded),
               child: SizedBox(
-                height: 50,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          minimum == null
-                              ? 'Choose tickets'
-                              : 'From ${_compactMoney(minimum, currency)}',
-                          style: TextStyle(
-                            color: theme.text,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
+                height: expanded ? 42 : 50,
+                child: Stack(
+                  children: [
+                    Positioned(
+                      top: 4,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: _alpha(theme.mutedText, .5),
+                            borderRadius: BorderRadius.circular(99),
                           ),
+                          child: const SizedBox(width: 32, height: 3),
                         ),
                       ),
-                      if (!hasTickets &&
-                          SeatLayerPickerScope.optionsOf(context)
-                              .enableBestAvailable)
-                        FilledButton.icon(
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size(0, 34),
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                          onPressed: () => onExpandedChanged(true),
-                          icon:
-                              const Icon(Icons.auto_awesome_rounded, size: 15),
-                          label: const Text('Best seats'),
+                    ),
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 5, 6, 0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                minimum == null
+                                    ? 'Choose tickets'
+                                    : 'From ${_compactMoney(minimum, currency)}',
+                                style: TextStyle(
+                                  color: theme.text,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            ),
+                            if (!expanded &&
+                                !hasTickets &&
+                                SeatLayerPickerScope.optionsOf(context)
+                                    .enableBestAvailable)
+                              FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size(0, 34),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                onPressed: () => onExpandedChanged(true),
+                                icon: const Icon(Icons.auto_awesome_rounded,
+                                    size: 15),
+                                label: const Text('Best seats'),
+                              ),
+                            const SizedBox(width: 6),
+                            SizedBox.square(
+                              dimension: 36,
+                              child: Icon(
+                                expanded
+                                    ? Icons.keyboard_arrow_down_rounded
+                                    : Icons.keyboard_arrow_up_rounded,
+                                color: theme.mutedText,
+                              ),
+                            ),
+                          ],
                         ),
-                      const SizedBox(width: 6),
-                      Icon(
-                        expanded
-                            ? Icons.keyboard_arrow_down_rounded
-                            : Icons.keyboard_arrow_up_rounded,
-                        color: theme.mutedText,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -1422,6 +1595,8 @@ class _SeatLayerPickerAdaptiveLayoutState
         final wide = requested == SeatLayerPickerLayoutMode.wide ||
             (requested == SeatLayerPickerLayoutMode.adaptive &&
                 constraints.maxWidth >= 840);
+        final options = SeatLayerPickerScope.optionsOf(context);
+        final chrome = options.chrome;
         final map = _part(
           context,
           widget.builders.map,
@@ -1430,15 +1605,19 @@ class _SeatLayerPickerAdaptiveLayoutState
         final header = _part(
           context,
           widget.builders.header,
-          SeatLayerPickerHeader(
-            onClose: widget.onClose,
-            compact: !wide,
-          ),
+          chrome.showHeader
+              ? SeatLayerPickerHeader(
+                  onClose: widget.onClose,
+                  compact: !wide,
+                )
+              : const SizedBox.shrink(),
         );
         final prices = _part(
           context,
           widget.builders.priceRail,
-          SeatLayerPickerPriceRail(compact: !wide),
+          chrome.showPriceRail
+              ? SeatLayerPickerPriceRail(compact: !wide)
+              : const SizedBox.shrink(),
         );
         final sections = _part(
           context,
@@ -1448,7 +1627,9 @@ class _SeatLayerPickerAdaptiveLayoutState
         final accessibility = _part(
           context,
           widget.builders.accessibilityFilters,
-          SeatLayerPickerAccessibilityFilters(compact: !wide),
+          chrome.showAccessibilityControl
+              ? SeatLayerPickerAccessibilityFilters(compact: !wide)
+              : const SizedBox.shrink(),
         );
         final tray = _part(
           context,
@@ -1464,7 +1645,9 @@ class _SeatLayerPickerAdaptiveLayoutState
         final controls = _part(
           context,
           widget.builders.mapControls,
-          SeatLayerPickerMapControls(compact: !wide),
+          chrome.showMapControls
+              ? SeatLayerPickerMapControls(compact: !wide)
+              : const SizedBox.shrink(),
         );
         final best = _part(
           context,
@@ -1485,7 +1668,6 @@ class _SeatLayerPickerAdaptiveLayoutState
         _confirmedLabels.removeWhere(
           (label) => !selectedLabels.contains(label),
         );
-        final options = SeatLayerPickerScope.optionsOf(context);
         final ticketCount =
             state.snapshot?.ticketCount ?? state.cartLines.length;
         if (ticketCount > _previousTicketCount && !_mobilePanelExpanded) {
@@ -1572,11 +1754,12 @@ class _SeatLayerPickerAdaptiveLayoutState
                             child: testBadge,
                           ),
                           Positioned(top: 12, right: 12, child: controls),
-                          const Positioned(
-                            left: 12,
-                            bottom: 12,
-                            child: SeatLayerPickerFloorSelector(),
-                          ),
+                          if (chrome.showFloorSelector)
+                            const Positioned(
+                              left: 12,
+                              bottom: 12,
+                              child: SeatLayerPickerFloorSelector(),
+                            ),
                           Positioned(
                             left: 12,
                             bottom: 58,
@@ -1640,26 +1823,14 @@ class _SeatLayerPickerAdaptiveLayoutState
                 children: [
                   Positioned.fill(child: map),
                   Positioned(top: 10, left: 10, child: testBadge),
-                  const Positioned(
-                    left: 10,
-                    bottom: 10,
-                    child: SeatLayerPickerFloorSelector(),
-                  ),
+                  if (chrome.showFloorSelector)
+                    const Positioned(
+                      left: 10,
+                      bottom: 10,
+                      child: SeatLayerPickerFloorSelector(),
+                    ),
                   Positioned(right: 10, bottom: 10, child: controls),
                   Positioned(left: 10, bottom: 56, child: accessibility),
-                  const Positioned(
-                    left: 54,
-                    right: 54,
-                    bottom: 2,
-                    child: Center(
-                      child: IgnorePointer(
-                        child: SeatLayerPickerAttribution(
-                          compact: true,
-                          onMap: true,
-                        ),
-                      ),
-                    ),
-                  ),
                   if (buyerPrompt != null)
                     Positioned(
                       left: 8,
@@ -1672,21 +1843,21 @@ class _SeatLayerPickerAdaptiveLayoutState
                 ],
               ),
             ),
-            SeatLayerPickerMobileTicketPanel(
-              expanded: _mobilePanelExpanded,
-              onExpandedChanged: (expanded) {
-                if (_mobilePanelExpanded == expanded) return;
-                setState(() => _mobilePanelExpanded = expanded);
-              },
-              onCheckout: widget.onCheckout,
-              bestAvailable: best,
-              selectionTray: tray,
-              checkoutBar: checkout,
-              actionError: actionError,
-              attribution: const SizedBox.shrink(),
-              maxExpandedHeight:
-                  (constraints.maxHeight * .43).clamp(0.0, 390.0),
-            ),
+            if (chrome.showTicketPanel)
+              SeatLayerPickerMobileTicketPanel(
+                expanded: _mobilePanelExpanded,
+                onExpandedChanged: (expanded) {
+                  if (_mobilePanelExpanded == expanded) return;
+                  setState(() => _mobilePanelExpanded = expanded);
+                },
+                onCheckout: widget.onCheckout,
+                bestAvailable: best,
+                selectionTray: tray,
+                checkoutBar: checkout,
+                actionError: actionError,
+                maxExpandedHeight:
+                    (constraints.maxHeight * .43).clamp(0.0, 390.0),
+              ),
           ],
         );
       },

@@ -14,11 +14,9 @@ class SeatLayerPickerAttribution extends StatelessWidget {
   const SeatLayerPickerAttribution({
     super.key,
     this.compact = true,
-    this.onMap = false,
   });
 
   final bool compact;
-  final bool onMap;
 
   @override
   Widget build(BuildContext context) {
@@ -27,41 +25,80 @@ class SeatLayerPickerAttribution extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final theme = _theme(context, state);
-    final content = Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 10 : 16,
-        vertical: compact ? 4 : 8,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.event_seat_rounded, size: 13, color: theme.mutedText),
-          const SizedBox(width: 5),
-          Text(
-            'Powered by SeatLayer',
-            style: TextStyle(
-              color: theme.mutedText,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
     return Semantics(
       label: 'Powered by SeatLayer',
-      child: onMap
-          ? Material(
-              color: theme.surface.withAlpha(235),
-              shape: StadiumBorder(
-                side: BorderSide(color: theme.divider),
+      child: Opacity(
+        opacity: .72,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: compact ? 8 : 12,
+            vertical: compact ? 2 : 4,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const _SeatLayerPoweredMark(),
+              const SizedBox(width: 5),
+              Text(
+                'Powered by SeatLayer',
+                style: TextStyle(
+                  color: theme.text,
+                  fontSize: compact ? 11 : 12,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: .2,
+                ),
               ),
-              child: content,
-            )
-          : content,
+            ],
+          ),
+        ),
+      ),
     );
   }
+}
+
+class _SeatLayerPoweredMark extends StatelessWidget {
+  const _SeatLayerPoweredMark();
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0C1220),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const SizedBox.square(
+          dimension: 16,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 3, vertical: 3.5),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                _SeatLayerMarkRow(width: 10),
+                _SeatLayerMarkRow(width: 7),
+                _SeatLayerMarkRow(width: 4),
+              ],
+            ),
+          ),
+        ),
+      );
+}
+
+class _SeatLayerMarkRow extends StatelessWidget {
+  const _SeatLayerMarkRow({required this.width});
+
+  final double width;
+
+  @override
+  Widget build(BuildContext context) => Align(
+        alignment: Alignment.centerLeft,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0xFFFCF7EE),
+            borderRadius: BorderRadius.circular(2),
+          ),
+          child: SizedBox(width: width, height: 2),
+        ),
+      );
 }
 
 class SeatLayerPickerSectionNavigator extends StatelessWidget {
