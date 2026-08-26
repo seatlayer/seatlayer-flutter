@@ -501,6 +501,44 @@ void main() {
     expect(find.text('Select'), findsNothing);
   });
 
+  testWidgets('turnkey prompt removes the map platform view from hit testing',
+      (tester) async {
+    final map = _FakeMapController();
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(map.dispose);
+    addTearDown(picker.dispose);
+    const mapKey = ValueKey<String>('map-platform-view-double');
+    await tester.pumpWidget(
+      _app(
+        map,
+        SeatLayerPickerAdaptiveLayout(
+          onCheckout: _noopCheckout,
+          builders: SeatLayerPickerBuilders(
+            map: (context, part) => const SizedBox.expand(key: mapKey),
+          ),
+        ),
+        pickerController: picker,
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+
+    IgnorePointer mapGate() => tester.widget<IgnorePointer>(
+          find.byWidgetPredicate(
+            (widget) => widget is IgnorePointer && widget.child?.key == mapKey,
+          ),
+        );
+
+    expect(find.text('Select'), findsOneWidget);
+    expect(mapGate().ignoring, isTrue);
+
+    await tester.tap(find.text('Select'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select'), findsNothing);
+    expect(mapGate().ignoring, isFalse);
+  });
+
   testWidgets('mobile ticket dock adapts to each device bottom inset',
       (tester) async {
     final map = _FakeMapController();

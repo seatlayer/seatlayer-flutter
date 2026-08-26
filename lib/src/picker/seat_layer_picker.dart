@@ -2260,6 +2260,14 @@ class _SeatLayerPickerAdaptiveLayoutState
             ),
           _ => null,
         };
+        final mapSurface = IgnorePointer(
+          // Platform views participate in iOS gesture recognition before the
+          // Flutter overlay's onPressed callback runs. Explicitly remove the
+          // WebView from hit testing while any native decision surface owns
+          // the map; visual stacking alone does not prevent tap-through.
+          ignoring: buyerPrompt != null || statusOverlay != null,
+          child: map,
+        );
 
         if (wide) {
           return Column(
@@ -2271,7 +2279,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                     Expanded(
                       child: Stack(
                         children: [
-                          Positioned.fill(child: map),
+                          Positioned.fill(child: mapSurface),
                           Positioned(
                             top: 12,
                             left: 12,
@@ -2344,7 +2352,7 @@ class _SeatLayerPickerAdaptiveLayoutState
             Expanded(
               child: Stack(
                 children: [
-                  Positioned.fill(child: map),
+                  Positioned.fill(child: mapSurface),
                   Positioned(top: 10, left: 10, child: testBadge),
                   if (chrome.showFloorSelector)
                     const Positioned(
