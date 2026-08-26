@@ -4,13 +4,25 @@ import 'open_enums.dart';
 import 'payloads.dart';
 
 /// This SDK's version.
-const String seatLayerSdkVersion = '0.3.0-dev.2';
+const String seatLayerSdkVersion = '0.3.0-dev.3';
 
 /// The immutable hosted web runtime used by production views.
 const String seatLayerHostedWebVersion = '0.68.1';
 
 /// Runtime retained only for explicit offline demo/test fixtures.
-const String seatLayerLegacyFixtureWebVersion = '0.67.14';
+const String seatLayerLegacyFixtureWebVersion = '0.68.0';
+
+/// Exact source commit used to build the vendored runtime fixture.
+const String seatLayerBundledRuntimeSourceCommit =
+    'd71db683520bf6c7034208e10806d59ddd7c5c0d';
+
+/// SHA-256 of `assets/seatlayer.js` built from
+/// [seatLayerBundledRuntimeSourceCommit].
+const String seatLayerBundledRuntimeSha256 =
+    'cadcfaea8ebda2dbef175be4462673c64ba6fe79e5e856c9b466941088a5056b';
+
+/// Byte length of the pinned vendored runtime fixture.
+const int seatLayerBundledRuntimeByteLength = 1181605;
 
 @Deprecated(
   'Use seatLayerHostedWebVersion; production no longer uses a bundled runtime.',
@@ -80,7 +92,13 @@ class SeatLayerConfiguration {
   /// API origin. Defaults to `https://api.seatlayer.io` on the web side.
   final String? apiBase;
 
-  /// Reserved for future authenticated rendering.
+  /// Publishable `pk_` key for the public Platform bootstrap.
+  ///
+  /// Register [seatLayerMobileOrigin] on the matching key. For private,
+  /// login-gated, presale, partner, or channel inventory use
+  /// [buyerAccessTokenProvider] instead. An explicit
+  /// [buyerAccessTokenProvider] or [buyerAccessToken] takes precedence inside
+  /// the runtime.
   final String? publicKey;
 
   /// Max seats selectable at once (web default 10).

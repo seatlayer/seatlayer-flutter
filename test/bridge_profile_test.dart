@@ -86,6 +86,14 @@ void main() {
       profile.requiredCapabilities,
       contains('checkout-handoff-reject-v1'),
     );
+    expect(
+      profile.requiredCapabilities,
+      containsAll(<String>[
+        'venue-3d-v1',
+        'venue-3d-controls-v1',
+        'seat-view-v1',
+      ]),
+    );
   });
 
   test('picker handshake sends init only after every required capability',
