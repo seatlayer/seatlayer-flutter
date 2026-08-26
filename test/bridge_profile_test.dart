@@ -16,7 +16,7 @@ final class _Channel implements BridgeChannel {
 
 Map<String, Object?> _hello({bool removeTableCapability = false}) =>
     <String, Object?>{
-      'bundle': '0.68.0-test',
+      'bundle': '0.68.1-test',
       'protocol': <String, Object?>{'min': 1, 'max': 2},
       'capabilities': <String>[
         'picker-session-v2',
@@ -28,6 +28,9 @@ Map<String, Object?> _hello({bool removeTableCapability = false}) =>
         'hold-ownership-v1',
         'cart-line-remove-v1',
         if (!removeTableCapability) 'table-quantity-v1',
+        'venue-3d-v1',
+        'venue-3d-controls-v1',
+        'seat-view-v1',
       ],
       'events': <String>['sys.ready', 'picker.snapshot'],
       'commands': <String>['picker.getSnapshot'],
