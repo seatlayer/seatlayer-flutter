@@ -110,6 +110,14 @@ class _SeatLayerPickerMapState extends State<SeatLayerPickerMap>
       picker.state,
       SeatLayerPickerScope.themeOf(context),
     );
+    final mapTheme = resolveSeatLayerMapTheme(
+      context,
+      SeatLayerPickerScope.themeOf(context),
+    );
+    final bridgeConfig = <String, Object?>{
+      ...options.toBridgeConfig(),
+      if (mapTheme != null) 'mapTheme': mapTheme.toBridgeConfig(),
+    };
     return ColoredBox(
       color: widget.backgroundColor ??
           resolved.mapBackground ??
@@ -119,7 +127,7 @@ class _SeatLayerPickerMapState extends State<SeatLayerPickerMap>
         controller: picker.mapController,
         configuration: configuration,
         bridgeProfile: SeatLayerBridgeProfile.picker(
-          config: options.toBridgeConfig(),
+          config: bridgeConfig,
         ),
         backgroundColor: Colors.transparent,
       ),
@@ -368,13 +376,14 @@ class SeatLayerPickerPriceRail extends StatelessWidget {
                 ),
               ),
               onSelected: (_) {
-                final active = <String>{
-                  ...?state.snapshot?.map.categoryFilter,
-                };
-                selected
-                    ? active.remove(category.key)
-                    : active.add(category.key);
-                _ignoreAction(controller.setCategoryFilter(active));
+                final active =
+                    selected ? const <String>{} : <String>{category.key};
+                _ignoreAction(
+                  controller.setCategoryFilter(
+                    active,
+                    focus: !selected,
+                  ),
+                );
               },
             );
           },

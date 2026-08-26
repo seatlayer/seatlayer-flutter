@@ -314,10 +314,15 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   }
 
   /// Filter the visible categories; an empty set clears the filter.
-  Future<void> setCategoryFilter(Set<String> categoryKeys) => _mutation(
+  Future<void> setCategoryFilter(
+    Set<String> categoryKeys, {
+    bool focus = false,
+  }) =>
+      _mutation(
         'picker.setCategoryFilter',
         <String, Object?>{
           'categoryKeys': categoryKeys.isEmpty ? null : categoryKeys.toList(),
+          if (focus) 'focus': true,
         },
         SeatLayerPickerBusyAction.updatingSelection,
       );

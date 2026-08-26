@@ -867,9 +867,15 @@ safe SDK defaults
 ```
 
 It covers accent/on-accent, background, surface, primary/muted text, borders,
-semantic warning/error colors, radius, logo, typography and map-background
+semantic warning/error colors, radius, logo, typography and map-palette
 overrides. Layout/control visibility belongs to `SeatLayerPickerChromeOptions`;
 map contrast is validated separately from surrounding chrome.
+
+`SeatLayerPickerThemeData.light()` supplies a professional light preset across
+both native chrome and the drawn canvas. `SeatLayerMapThemeData` owns the four
+renderer roles a host can safely contrast together: background, row-label
+color, free-text color and selection color. These values cross picker-v2 as
+data and are validated before the renderer receives them.
 
 ### Localization
 

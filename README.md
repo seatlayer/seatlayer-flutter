@@ -97,11 +97,9 @@ SeatLayerPicker(
       showColorblindControl: true,
     ),
   ),
-  theme: const SeatLayerPickerThemeData(
+  theme: const SeatLayerPickerThemeData.light(
     accent: Color(0xFFE54558),
     onAccent: Colors.white,
-    surface: Colors.white,
-    text: Color(0xFF111827),
     radius: 14,
   ),
   onCheckout: openCheckout,
@@ -112,6 +110,15 @@ SeatLayerPicker(
 composition can place the same public controls anywhere. Attribution is not a
 host visibility switch: the API-provided `branding.attributionRequired` value
 is authoritative.
+
+`SeatLayerPickerThemeData.light()` is a complete light preset, not just white
+Flutter panels. It sends a contrast-paired `SeatLayerMapThemeData` to the
+renderer for the canvas background, row labels, free text and selection ring.
+Use the regular constructor to override any role individually.
+
+The compact price rail follows the web picker: tapping one price selects that
+single category and frames its seats; tapping the active price again returns to
+all categories.
 
 For public inventory, omit `buyerAccessTokenProvider`. For private channel
 inventory, the provider calls your backend, which mints a short-lived buyer

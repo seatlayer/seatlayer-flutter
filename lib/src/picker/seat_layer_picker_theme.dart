@@ -4,8 +4,32 @@ import 'picker_models.dart';
 
 @immutable
 class SeatLayerMapThemeData {
-  const SeatLayerMapThemeData({this.background});
+  const SeatLayerMapThemeData({
+    this.background,
+    this.rowLabelColor,
+    this.textColor,
+    this.selectionColor,
+  });
+
+  const SeatLayerMapThemeData.light({
+    this.background = const Color(0xFFF7F8FA),
+    this.rowLabelColor = const Color(0xFF334155),
+    this.textColor = const Color(0xFF172033),
+    this.selectionColor = const Color(0xFF5B4B8A),
+  });
+
   final Color? background;
+  final Color? rowLabelColor;
+  final Color? textColor;
+  final Color? selectionColor;
+
+  Map<String, Object?> toBridgeConfig() => <String, Object?>{
+        if (background != null) 'background': _colorHex(background!),
+        if (rowLabelColor != null) 'rowLabelColor': _colorHex(rowLabelColor!),
+        if (textColor != null) 'textColor': _colorHex(textColor!),
+        if (selectionColor != null)
+          'selectionColor': _colorHex(selectionColor!),
+      };
 }
 
 @immutable
@@ -26,6 +50,25 @@ class SeatLayerPickerThemeData
     this.logo,
     this.mapTheme,
   });
+
+  /// Professional light preset for native chrome and the drawn seat map.
+  ///
+  /// The accent remains host-configurable, while all neutral roles are paired
+  /// for readable light-surface contrast.
+  const SeatLayerPickerThemeData.light({
+    this.accent = const Color(0xFF5B4B8A),
+    this.onAccent = Colors.white,
+    this.fontFamily,
+    this.radius = 14,
+    this.logo,
+    this.mapTheme = const SeatLayerMapThemeData.light(),
+  })  : background = const Color(0xFFF7F8FA),
+        surface = Colors.white,
+        text = const Color(0xFF172033),
+        mutedText = const Color(0xFF667085),
+        divider = const Color(0xFFD7DCE5),
+        error = const Color(0xFFB42318),
+        warning = const Color(0xFFF4B740);
 
   final Color? accent;
   final Color? onAccent;
@@ -175,6 +218,13 @@ SeatLayerResolvedPickerTheme resolveSeatLayerPickerTheme(
   );
 }
 
+SeatLayerMapThemeData? resolveSeatLayerMapTheme(
+  BuildContext context,
+  SeatLayerPickerThemeData? explicit,
+) =>
+    explicit?.mapTheme ??
+    Theme.of(context).extension<SeatLayerPickerThemeData>()?.mapTheme;
+
 Color? _hex(String? value) {
   if (value == null) return null;
   final raw = value.trim().replaceFirst('#', '');
@@ -187,4 +237,12 @@ Color? _hex(String? value) {
 double? _lerpDouble(double? a, double? b, double t) {
   if (a == null && b == null) return null;
   return (a ?? b)! + ((b ?? a)! - (a ?? b)!) * t;
+}
+
+String _colorHex(Color color) {
+  // `value` keeps this SDK source-compatible with Flutter 3.19. Newer Flutter
+  // exposes toARGB32(), but the package still supports older stable channels.
+  // ignore: deprecated_member_use
+  final rgb = color.value & 0x00FFFFFF;
+  return '#${rgb.toRadixString(16).padLeft(6, '0')}';
 }
