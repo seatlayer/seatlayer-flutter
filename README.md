@@ -324,11 +324,15 @@ to false to hide either action, or pass `onViewFromSeat` / `onShow3D` to replace
 the SDK action. The standalone `SeatLayerPickerSeatViewButton` and
 `SeatLayerPickerSeat3DButton` follow the same rule: controller-backed by
 default, callback-replaceable, and absent rather than decorative when the
-capability is unavailable. The confirmation stays above the embedded platform
-view until the immersive command confirms its destination is mounted. The
-turnkey composition also sends `picker.setInteractionEnabled(false)` so the
-runtime makes its own DOM inert for the whole native decision state, while a
-Flutter `IgnorePointer` remains a visual-tree fallback. Both layers are
+capability is unavailable. Both inspection actions use the same neutral,
+accent-tinted treatment and adapt from one row to a vertical stack in narrow
+containers. The picker reserves its saturated accent for the primary Select
+action; Cancel stays neutral, so host themes cannot accidentally introduce a
+second competing Material color. The confirmation stays above the embedded
+platform view until the immersive command confirms its destination is mounted.
+The turnkey composition also sends `picker.setInteractionEnabled(false)` so
+the runtime makes its own DOM inert for the whole native decision state, while
+a Flutter `IgnorePointer` remains a visual-tree fallback. Both layers are
 required: UIKit can hit-test WKWebView beneath composited Flutter chrome even
 when the Flutter child itself ignores pointers. The originating tap therefore
 cannot select a second seat underneath.
