@@ -939,6 +939,12 @@ model or global window width.
   cannot stop WKWebView from receiving the same physical touch beneath
   composited Flutter chrome. Unlock waits for the short prompt exit animation,
   or is immediate when reduced motion is enabled.
+- Outside that prompt-owned interval, the embedded renderer exclusively owns
+  one-finger pan, two-finger pinch and tap disambiguation. Flutter and host apps
+  must not add a competing drag/scale recognizer or relay per-frame coordinates
+  over the bridge. Touch-capable Apple WebKit uses the runtime's WebKit touch
+  path; a map that taps but will not pan after prompt dismissal is a runtime
+  conformance failure, not an app workaround point.
 - Prompt cards use a short fade/scale/slide transition; ticket summaries,
   cart rows and dock expansion animate only changed state. All SDK-owned motion
   becomes immediate when the platform requests reduced motion.
