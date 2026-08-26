@@ -18,6 +18,14 @@ class SeatLayerMapThemeData {
     this.selectionColor = const Color(0xFF5B4B8A),
   });
 
+  /// High-contrast dark preset for the drawn seating map.
+  const SeatLayerMapThemeData.dark({
+    this.background = const Color(0xFF090D15),
+    this.rowLabelColor = const Color(0xFFD7DEEA),
+    this.textColor = const Color(0xFFF4F7FB),
+    this.selectionColor = const Color(0xFF9B8AFB),
+  });
+
   final Color? background;
   final Color? rowLabelColor;
   final Color? textColor;
@@ -68,6 +76,25 @@ class SeatLayerPickerThemeData
         mutedText = const Color(0xFF667085),
         divider = const Color(0xFFD7DCE5),
         error = const Color(0xFFB42318),
+        warning = const Color(0xFFF4B740);
+
+  /// Professional dark preset for every native picker component and map.
+  ///
+  /// Hosts can still replace the accent, typeface, radius, logo or complete
+  /// map palette without rebuilding the default picker composition.
+  const SeatLayerPickerThemeData.dark({
+    this.accent = const Color(0xFF9B8AFB),
+    this.onAccent = const Color(0xFF110D20),
+    this.fontFamily,
+    this.radius = 14,
+    this.logo,
+    this.mapTheme = const SeatLayerMapThemeData.dark(),
+  })  : background = const Color(0xFF090D15),
+        surface = const Color(0xFF141A24),
+        text = const Color(0xFFF4F7FB),
+        mutedText = const Color(0xFFA9B4C5),
+        divider = const Color(0xFF343E4D),
+        error = const Color(0xFFFF6B6B),
         warning = const Color(0xFFF4B740);
 
   final Color? accent;

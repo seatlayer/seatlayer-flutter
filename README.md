@@ -89,7 +89,10 @@ clearance in both collapsed and expanded states, while larger system-navigation
 bars are always kept clear. Required attribution is a small content-sized footer;
 when the API hides it, it reserves no layout height. The dock expands for Best
 Seats, selected tickets and checkout, and automatically opens after a new
-selection. The SDK does not add a second section rail above the map. Zoom
+selection. Once tickets exist, the expanded sheet keeps a stable responsive
+height: only the ticket rows scroll, while the total, checkout action and
+required attribution remain pinned. Adding more tickets therefore never keeps
+pushing the map upward. The SDK does not add a second section rail above the map. Zoom
 in/out, fit, Map/real-3D, rotate/move and colorblind-safe controls stay
 available as compact floating buttons. Best Seats uses touch-friendly selector
 rows that open mobile choice sheets instead of cramped desktop dropdown menus.
@@ -147,7 +150,15 @@ short motion language and honor the platform reduced-motion preference.
 `SeatLayerPickerThemeData.light()` is a complete light preset, not just white
 Flutter panels. It sends a contrast-paired `SeatLayerMapThemeData` to the
 renderer for the canvas background, row labels, free text and selection ring.
-Use the regular constructor to override any role individually.
+`SeatLayerPickerThemeData.dark()` supplies the matching high-contrast dark
+native chrome and map palette. Use either preset with a brand accent, or use the
+regular constructor to override any role individually:
+
+```dart
+final pickerTheme = Theme.of(context).brightness == Brightness.dark
+    ? const SeatLayerPickerThemeData.dark(accent: Color(0xFFFF5A6F))
+    : const SeatLayerPickerThemeData.light(accent: Color(0xFFE54558));
+```
 
 The compact price rail follows the web picker: tapping one price selects that
 single category and frames its seats; tapping the active price again returns to
@@ -315,7 +326,11 @@ with an unheld selection it shows ticket count, total and **Review**; with an
 active hold it shows the same summary and **Continue**. Best Seats never crowds
 the primary checkout path after a manual selection. The expanded cart uses
 vertical `SeatLayerPickerTicketCard` rows with buyer labels, category/tier,
-price, commercial warnings and a safe remove action.
+price, commercial warnings and a safe remove action. Ticket rows scroll inside
+a stable-height viewport while Total, Continue and required attribution remain
+visible. Manual layouts can set
+`SeatLayerPickerMobileTicketPanel.ticketPanelHeight`; the responsive default is
+still capped by `maxExpandedHeight`.
 
 `SeatLayerPickerSeatConfirmation` consumes the authored section, row and seat
 identity from the picker snapshot and self-wires View from here / See it in 3D

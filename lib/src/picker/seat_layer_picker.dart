@@ -1250,6 +1250,7 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
     this.actionError,
     this.attribution = const SeatLayerPickerAttribution(compact: true),
     this.maxExpandedHeight,
+    this.ticketPanelHeight,
     this.bottomSafeArea = SeatLayerPickerMobilePanelSafeArea.adaptive,
   });
 
@@ -1262,6 +1263,14 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
   final Widget? actionError;
   final Widget attribution;
   final double? maxExpandedHeight;
+
+  /// Stable body height used after tickets have been selected.
+  ///
+  /// The default is responsive and capped by [maxExpandedHeight]. Ticket rows
+  /// scroll inside that viewport, so adding more tickets never keeps pushing
+  /// the map upward. Set this when a custom composition needs a specific sheet
+  /// height; the value is still clamped to the available maximum.
+  final double? ticketPanelHeight;
 
   /// How this panel handles the bottom inset still present in [MediaQuery].
   ///
@@ -1288,6 +1297,9 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
     final hasHold = state.hold != null;
     final maxPanelHeight = maxExpandedHeight ??
         (MediaQuery.sizeOf(context).height * .43).clamp(0.0, 390.0);
+    final stableTicketPanelHeight = (ticketPanelHeight ??
+            (MediaQuery.sizeOf(context).height * .36).clamp(280.0, 340.0))
+        .clamp(0.0, maxPanelHeight);
     final deviceBottomInset = MediaQuery.paddingOf(context).bottom;
     final bottomPadding = switch (bottomSafeArea) {
       SeatLayerPickerMobilePanelSafeArea.adaptive =>
@@ -1448,40 +1460,70 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
               duration: const Duration(milliseconds: 180),
               curve: Curves.easeOutCubic,
               child: expanded
-                  ? ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: maxPanelHeight),
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            if (!hasTickets) ...[
-                              Text(
-                                'Tap a seat on the map, or let us pick the best available for you.',
-                                style: TextStyle(
-                                  color: theme.mutedText,
-                                  fontSize: 12,
+                  ? hasTickets
+                      ? SizedBox(
+                          height: stableTicketPanelHeight,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  key: const ValueKey<String>(
+                                    'mobile-ticket-list-scroll',
+                                  ),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(12, 0, 12, 4),
+                                  child: selectionTray ??
+                                      const SeatLayerPickerSelectionTray(
+                                        compact: true,
+                                      ),
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              bestAvailable ??
-                                  const SeatLayerPickerBestAvailablePanel(),
-                            ] else ...[
-                              selectionTray ??
-                                  const SeatLayerPickerSelectionTray(
-                                    compact: true,
+                              actionError ?? const SeatLayerPickerActionError(),
+                              DecoratedBox(
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    top: BorderSide(color: theme.divider),
                                   ),
-                              checkoutBar ??
-                                  SeatLayerPickerCheckoutBar(
-                                    onCheckout: onCheckout,
-                                  ),
+                                ),
+                                child: MediaQuery.removePadding(
+                                  context: context,
+                                  removeBottom: true,
+                                  child: checkoutBar ??
+                                      SeatLayerPickerCheckoutBar(
+                                        onCheckout: onCheckout,
+                                      ),
+                                ),
+                              ),
+                              Center(child: attribution),
                             ],
-                            actionError ?? const SeatLayerPickerActionError(),
-                            attribution,
-                          ],
-                        ),
-                      ),
-                    )
+                          ),
+                        )
+                      : ConstrainedBox(
+                          constraints:
+                              BoxConstraints(maxHeight: maxPanelHeight),
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  'Tap a seat on the map, or let us pick the best available for you.',
+                                  style: TextStyle(
+                                    color: theme.mutedText,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                bestAvailable ??
+                                    const SeatLayerPickerBestAvailablePanel(),
+                                actionError ??
+                                    const SeatLayerPickerActionError(),
+                                attribution,
+                              ],
+                            ),
+                          ),
+                        )
                   : const SizedBox.shrink(),
             ),
           ],
