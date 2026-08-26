@@ -18,22 +18,23 @@ available for applications that deliberately own every part of the UI.
 [Android SDK](https://github.com/seatlayer/seatlayer-android) ·
 [React Native SDK](https://github.com/seatlayer/seatlayer-react-native)
 
-> **Development status:** `0.2.2` remains the published stable package. The
-> `SeatLayerPicker` API described below is the `0.3.0-dev` source baseline for
-> GitHub and end-to-end validation. It has not been published as a stable or
-> prerelease package yet. Pin an exact reviewed Git commit while validating;
-> do not point a production app at a moving branch.
+> **Release status:** `0.2.2` remains the published stable package.
+> [`0.3.0-dev.2`](https://pub.dev/packages/seatlayer/versions/0.3.0-dev.2)
+> is the published prerelease containing the `SeatLayerPicker` API described
+> below. Use that exact prerelease while validating; do not point a production
+> app at a moving Git branch.
 
 ## Install
 
-The published `0.2.2` package contains the raw `SeatLayerView` API:
+Install the published picker prerelease explicitly:
 
 ```bash
-flutter pub add seatlayer
+flutter pub add seatlayer:0.3.0-dev.2
 ```
 
-To validate the picker after its branch is pushed, pin the exact 40-character
-commit being tested:
+The stable `0.2.2` package remains available through `flutter pub add
+seatlayer`, but does not contain this picker release. A Git commit pin is only
+needed for unpublished development work:
 
 ```yaml
 dependencies:
@@ -585,20 +586,18 @@ on an unrelated preview domain.
 
 ## Release path
 
-The picker is intentionally validated before publication:
+The `0.3.0-dev.2` prerelease has completed this path:
 
 1. push reviewed source changes to the Flutter GitHub branch;
 2. pin an exact commit in the DesiPass development app;
 3. validate public/private access, section focus, reserved seats, Best
    Available, holds, expiry and close behavior on iOS and Android;
 4. complete one safe hold → payment → server booking journey;
-5. publish and revalidate a `0.3.0-dev` prerelease;
-6. publish stable `0.3.0` only after the documented exit gates pass; and
-7. freeze the JSON fixtures and reproduce the proven contract in React Native,
-   iOS and Android SDKs.
+5. publish and revalidate the `0.3.0-dev.2` prerelease; and
+6. publish stable `0.3.0` only after the documented exit gates pass.
 
-No release or package publication is implied by the source version on this
-branch.
+The remaining cross-SDK work is to freeze the JSON fixtures and reproduce the
+proven contract in React Native, iOS and Android SDKs.
 
 ## Platform support
 

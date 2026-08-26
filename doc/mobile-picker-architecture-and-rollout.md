@@ -1085,7 +1085,7 @@ data and are validated before the renderer receives them.
   capabilities.
 - Native chrome ownership suppresses the WebView test badge/attribution and
   renders them from snapshot state, so exactly one owner is visible.
-- The development source reports `0.3.0-dev.1`; publication metadata and the
+- The development source reports `0.3.0-dev.2`; publication metadata and the
   SDK diagnostic constant must be checked together before any tag or package
   publication.
 
@@ -1186,7 +1186,7 @@ runtime version before DesiPass private-event testing.
 
 ### Phase 6 — prerelease and stable Flutter release
 
-- Publish `0.3.0-dev.1` after CI and simulator gates.
+- Publish `0.3.0-dev.2` after CI and simulator gates.
 - Validate in DesiPass against the published prerelease, not only a path
   dependency.
 - Fix findings through additional prereleases.
