@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0-dev.2
+
+- Corrects the published README and install guidance after the successful
+  `0.3.0-dev.1` prerelease release. Runtime and Dart behavior are unchanged.
+
 ## 0.3.0-dev.1
 
 - Pins production views to the verified `seatlayer-js@0.68.1` mobile runtime,
