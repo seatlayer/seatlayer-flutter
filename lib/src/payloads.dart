@@ -127,18 +127,34 @@ final class NoOrphanSeats extends SelectionValidator {
 
 /// A ticket tier a category offers (Adult / Child / …).
 class CategoryTier {
-  const CategoryTier(
-      {required this.id, required this.name, required this.price});
+  const CategoryTier({
+    required this.id,
+    required this.name,
+    required this.price,
+    this.currency,
+    this.restriction,
+    this.buyerMessage,
+  });
   final String id;
   final String name;
   final double price;
+  final String? currency;
+  final String? restriction;
+  final String? buyerMessage;
 
   static CategoryTier? fromJson(Object? v) {
     final id = jStr(jGet(v, 'id'));
     final name = jStr(jGet(v, 'name'));
     final price = jDouble(jGet(v, 'price'));
     if (id == null || name == null || price == null) return null;
-    return CategoryTier(id: id, name: name, price: price);
+    return CategoryTier(
+      id: id,
+      name: name,
+      price: price,
+      currency: jStr(jGet(v, 'currency')),
+      restriction: jStr(jGet(v, 'restriction')),
+      buyerMessage: jStr(jGet(v, 'buyerMessage')),
+    );
   }
 }
 
@@ -173,8 +189,12 @@ class SelectedSeat {
     required this.label,
     this.displayLabel,
     this.displayType,
+    this.rowType,
     this.objectId,
     this.objectType,
+    this.sectionLabel,
+    this.rowLabel,
+    this.seatNumber,
     this.categoryKey,
     this.price,
     this.currency,
@@ -187,6 +207,7 @@ class SelectedSeat {
     this.minOccupancy,
     this.maxOccupancy,
     this.accessibility,
+    this.wheelchairSpaceType,
   });
 
   final String id;
@@ -196,8 +217,18 @@ class SelectedSeat {
   /// NEVER use for booking — [label] is the inventory identity.
   final String? displayLabel;
   final String? displayType;
+
+  /// Deprecated compatibility alias supplied by older chart documents.
+  /// New integrations should use [displayType].
+  final String? rowType;
   final String? objectId;
   final ObjectType? objectType;
+
+  /// Buyer-facing spatial identity used by native confirmation and cart UI.
+  /// These values are display-only; [label] remains the booking identity.
+  final String? sectionLabel;
+  final String? rowLabel;
+  final String? seatNumber;
   final String? categoryKey;
 
   /// Price for the chosen tier when the category has tiers, else base price.
@@ -214,6 +245,7 @@ class SelectedSeat {
   final int? minOccupancy;
   final int? maxOccupancy;
   final List<String>? accessibility;
+  final String? wheelchairSpaceType;
 
   /// What to show the buyer. Booking still uses [label].
   String get buyerFacingLabel => displayLabel ?? label;
@@ -228,8 +260,12 @@ class SelectedSeat {
       label: label,
       displayLabel: jStr(jGet(v, 'displayLabel')),
       displayType: jStr(jGet(v, 'displayType')),
+      rowType: jStr(jGet(v, 'rowType')),
       objectId: jStr(jGet(v, 'objectId')),
       objectType: objectTypeOrNull(jGet(v, 'objectType')),
+      sectionLabel: jStr(jGet(v, 'sectionLabel')),
+      rowLabel: jStr(jGet(v, 'rowLabel')),
+      seatNumber: jStr(jGet(v, 'seatNumber')),
       categoryKey: jStr(jGet(v, 'categoryKey')),
       price: jDouble(jGet(v, 'price')),
       currency: jStr(jGet(v, 'currency')),
@@ -244,6 +280,7 @@ class SelectedSeat {
       accessibility: jGet(v, 'accessibility') == null
           ? null
           : jListOf(jGet(v, 'accessibility'), (item) => jStr(item)),
+      wheelchairSpaceType: jStr(jGet(v, 'wheelchairSpaceType')),
     );
   }
 }

@@ -102,8 +102,22 @@ Map<String, Object?> pickerSnapshot({
                 'id': 'seat-a-1',
                 'label': 'A-1',
                 'displayLabel': 'Row A, Seat 1',
+                'displayType': 'Row',
+                'objectId': 'row-a',
+                'objectType': 'seat',
+                'sectionLabel': 'Gallery',
+                'rowLabel': 'A',
+                'seatNumber': '1',
                 'categoryKey': 'standard',
                 'price': 25.0,
+                'currency': 'EUR',
+                'tiers': <Object?>[
+                  <String, Object?>{
+                    'id': 'adult',
+                    'name': 'Adult',
+                    'price': 25.0,
+                  },
+                ],
                 'tierId': 'adult',
               },
             ]

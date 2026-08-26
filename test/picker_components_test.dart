@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/bridge/bridge_client.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
+import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_components.dart';
@@ -326,6 +327,124 @@ void main() {
     expect(requestedExpansion, isTrue);
   });
 
+  testWidgets(
+      'selected mobile ticket dock replaces minimum price with total and review',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    bool? requestedExpansion;
+    await tester.pumpWidget(
+      _app(
+        map,
+        SeatLayerPickerMobileTicketPanel(
+          expanded: false,
+          onExpandedChanged: (expanded) => requestedExpansion = expanded,
+          onCheckout: _noopCheckout,
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+
+    expect(find.text('1 ticket · €25'), findsOneWidget);
+    expect(find.text('Review'), findsOneWidget);
+    expect(find.text('From €25'), findsNothing);
+    expect(find.text('Best seats'), findsNothing);
+
+    await tester.tap(find.text('Review'));
+    expect(requestedExpansion, isTrue);
+  });
+
+  testWidgets('held mobile ticket dock continues directly to checkout',
+      (tester) async {
+    final map = _FakeMapController(
+      handler: (command, payload) async {
+        if (command != 'picker.continue') fail('unexpected command $command');
+        return <String, Object?>{
+          'revision': 2,
+          'snapshot': pickerSnapshot(revision: 2, holdOwner: 'host'),
+          'handoff': checkoutHandoff(),
+        };
+      },
+    );
+    addTearDown(map.dispose);
+    SeatLayerCheckoutHandoff? checkout;
+    await tester.pumpWidget(
+      _app(
+        map,
+        SeatLayerPickerMobileTicketPanel(
+          expanded: false,
+          onExpandedChanged: _ignoreExpanded,
+          onCheckout: (handoff) => checkout = handoff,
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot(holdOwner: 'picker'));
+    await tester.pump();
+
+    expect(find.text('Continue'), findsOneWidget);
+    expect(find.text('Review'), findsNothing);
+    await tester.tap(find.text('Continue'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(map.calls.single.$1, 'picker.continue');
+    expect(checkout?.holdId, 'hold-1');
+  });
+
+  testWidgets('ticket tray renders a readable vertical buyer cart',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    await tester.pumpWidget(
+      _app(map, const SeatLayerPickerSelectionTray(compact: true)),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+
+    expect(find.text('Your tickets'), findsOneWidget);
+    expect(find.text('1 ticket · €25'), findsOneWidget);
+    expect(find.text('Row A, Seat 1'), findsOneWidget);
+    expect(find.text('Standard · Adult'), findsOneWidget);
+    expect(find.text('€25'), findsOneWidget);
+    expect(find.byType(InputChip), findsNothing);
+    expect(find.byType(SeatLayerPickerTicketCard), findsOneWidget);
+  });
+
+  testWidgets('seat confirmation mirrors the web identity and price hierarchy',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    var confirmed = false;
+    await tester.pumpWidget(
+      _app(
+        map,
+        SeatLayerPickerSeatConfirmation(
+          onConfirm: (_) => confirmed = true,
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+
+    expect(find.text('SECTION'), findsOneWidget);
+    expect(find.text('Gallery'), findsOneWidget);
+    expect(find.text('ROW'), findsOneWidget);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('SEAT'), findsOneWidget);
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Standard'), findsOneWidget);
+    expect(find.text('€25'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('View from here'), findsNothing);
+    expect(find.text('See it in 3D'), findsNothing);
+
+    await tester.tap(find.text('Select'));
+    await tester.pump();
+    expect(confirmed, isTrue);
+  });
+
   testWidgets('mobile ticket dock adapts to each device bottom inset',
       (tester) async {
     final map = _FakeMapController();
@@ -507,8 +626,9 @@ void main() {
           .onPressed,
       isNull,
     );
-    expect(find.text('Confirm'), findsNothing);
-    expect(tester.widget<InputChip>(find.byType(InputChip)).onDeleted, isNull);
+    expect(find.text('Select'), findsNothing);
+    expect(find.byType(SeatLayerPickerTicketCard), findsOneWidget);
+    expect(find.byTooltip('Remove Row A, Seat 1'), findsNothing);
     expect(
       tester
           .widget<FilledButton>(
