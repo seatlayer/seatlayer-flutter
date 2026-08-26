@@ -1505,7 +1505,12 @@ class SeatLayerPickerTicketCard extends StatelessWidget {
     final color = category == null
         ? theme.accent
         : _parseColor(category.color) ?? theme.accent;
+    final buyerLabel = _ticketBuyerLabel(line, seat);
     final details = <String>[
+      if (seat?.sectionLabel?.trim().isNotEmpty == true &&
+          seat!.sectionLabel!.trim().toLowerCase() !=
+              category?.label.trim().toLowerCase())
+        seat!.sectionLabel!.trim(),
       if (category?.label.trim().isNotEmpty == true) category!.label.trim(),
       if (tier?.name.trim().isNotEmpty == true) tier!.name.trim(),
       if (line.quantity > 1) '${line.quantity} guests',
@@ -1516,8 +1521,7 @@ class SeatLayerPickerTicketCard extends StatelessWidget {
 
     return Semantics(
       container: true,
-      label:
-          '${line.buyerFacingLabel}, ${_money(context, line.total, line.currency)}',
+      label: '$buyerLabel, ${_money(context, line.total, line.currency)}',
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: Color.alphaBlend(_alpha(theme.text, .025), theme.surface),
@@ -1553,7 +1557,7 @@ class SeatLayerPickerTicketCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      line.buyerFacingLabel,
+                      buyerLabel,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -1618,7 +1622,7 @@ class SeatLayerPickerTicketCard extends StatelessWidget {
                       dimension: 32,
                       child: IconButton(
                         padding: EdgeInsets.zero,
-                        tooltip: 'Remove ${line.buyerFacingLabel}',
+                        tooltip: 'Remove $buyerLabel',
                         iconSize: 18,
                         color: theme.mutedText,
                         onPressed: () => _ignoreAction(onRemove!()),
@@ -1680,6 +1684,27 @@ class _TicketAttribute extends StatelessWidget {
           ),
         ),
       );
+}
+
+String _ticketBuyerLabel(
+  SeatLayerCheckoutLineItem line,
+  SelectedSeat? seat,
+) {
+  final row = seat?.rowLabel?.trim();
+  final number = seat?.seatNumber?.trim();
+  if (row?.isNotEmpty == true && number?.isNotEmpty == true) {
+    final type = seat?.displayType?.trim().isNotEmpty == true
+        ? seat!.displayType!.trim()
+        : seat?.rowType?.trim().isNotEmpty == true
+            ? seat!.rowType!.trim()
+            : 'Row';
+    return '$type $row · Seat $number';
+  }
+  if (seat?.sectionLabel?.trim().isNotEmpty == true &&
+      number?.isNotEmpty == true) {
+    return '${seat!.sectionLabel!.trim()} · Seat $number';
+  }
+  return line.buyerFacingLabel;
 }
 
 class SeatLayerPickerHoldCountdown extends StatefulWidget {

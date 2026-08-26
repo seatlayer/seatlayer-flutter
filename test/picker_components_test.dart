@@ -404,8 +404,8 @@ void main() {
 
     expect(find.text('Your tickets'), findsOneWidget);
     expect(find.text('1 ticket · €25'), findsOneWidget);
-    expect(find.text('Row A, Seat 1'), findsOneWidget);
-    expect(find.text('Standard · Adult'), findsOneWidget);
+    expect(find.text('Row A · Seat 1'), findsOneWidget);
+    expect(find.text('Gallery · Standard · Adult'), findsOneWidget);
     expect(find.text('€25'), findsOneWidget);
     expect(find.byType(InputChip), findsNothing);
     expect(find.byType(SeatLayerPickerTicketCard), findsOneWidget);
@@ -628,7 +628,7 @@ void main() {
     );
     expect(find.text('Select'), findsNothing);
     expect(find.byType(SeatLayerPickerTicketCard), findsOneWidget);
-    expect(find.byTooltip('Remove Row A, Seat 1'), findsNothing);
+    expect(find.byTooltip('Remove Row A · Seat 1'), findsNothing);
     expect(
       tester
           .widget<FilledButton>(
