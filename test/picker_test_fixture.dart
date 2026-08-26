@@ -53,6 +53,8 @@ Map<String, Object?> pickerSnapshot({
     'features': <String, Object?>{
       'bestAvailable': true,
       'floors': true,
+      'venue3d': true,
+      'seatView': true,
     },
     'catalog': <String, Object?>{
       'categories': <Object?>[
@@ -81,6 +83,8 @@ Map<String, Object?> pickerSnapshot({
     'map': <String, Object?>{
       'rung': 'seats',
       'viewMode': 'flat',
+      'buyerView': 'map',
+      'view3dNavigationMode': 'orbit',
       'activeFloorId': 'ground',
       'floors': <Object?>[
         <String, Object?>{'id': 'ground', 'name': 'Ground floor'},

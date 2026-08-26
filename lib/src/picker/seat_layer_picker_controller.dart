@@ -375,6 +375,46 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         SeatLayerPickerBusyAction.updatingSelection,
       );
 
+  /// Switch between the flat map and SeatLayer's real interactive venue 3D.
+  ///
+  /// [flyToSeatId] enters 3D at a specific seat (or retargets the existing
+  /// scene) without rebuilding it. This is distinct from [setViewMode], which
+  /// controls only the legacy 2D canvas projection.
+  Future<void> setBuyerView(
+    SeatLayerBuyerView view, {
+    String? flyToSeatId,
+    bool resetView = false,
+  }) =>
+      _mutation(
+        'picker.setBuyerView',
+        <String, Object?>{
+          'view': view.raw,
+          if (flyToSeatId != null) 'flyToSeatId': flyToSeatId,
+          if (resetView) 'resetView': true,
+        },
+        SeatLayerPickerBusyAction.changingView,
+      );
+
+  /// Enter the real venue scene and fly to [seat].
+  Future<void> showSeatIn3D(SelectedSeat seat) => setBuyerView(
+        SeatLayerBuyerView.venue3D,
+        flyToSeatId: seat.id,
+      );
+
+  /// Open the authored or chart-derived 360° view-from-seat surface.
+  Future<void> openSeatView(SelectedSeat seat) => _mutation(
+        'picker.openSeatView',
+        <String, Object?>{'seatId': seat.id},
+        SeatLayerPickerBusyAction.changingView,
+      );
+
+  /// Choose whether a primary drag rotates or moves the real 3D venue.
+  Future<void> set3DNavigationMode(SeatLayer3DNavigationMode mode) => _mutation(
+        'picker.setVenue3DNavigationMode',
+        <String, Object?>{'mode': mode.raw},
+        SeatLayerPickerBusyAction.changingView,
+      );
+
   Future<void> zoomIn() => _mutation(
         'picker.zoomIn',
         null,

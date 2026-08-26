@@ -18,6 +18,7 @@ enum SeatLayerPickerBusyAction {
   creatingHold,
   releasingHold,
   refreshingAccess,
+  changingView,
 }
 
 enum SeatLayerPickerCloseReason {
@@ -388,6 +389,8 @@ class SeatLayerPickerMapState {
   const SeatLayerPickerMapState({
     required this.rung,
     required this.viewMode,
+    required this.buyerView,
+    required this.view3DNavigationMode,
     required this.colorblindSafe,
     required this.hideLimitedView,
     required this.canZoomIn,
@@ -398,10 +401,14 @@ class SeatLayerPickerMapState {
     this.activeFloorId,
     this.focusedSectionId,
     this.focusedSection,
+    this.view3DTargetSeatId,
   });
 
   final String rung;
   final String viewMode;
+  final SeatLayerBuyerView buyerView;
+  final SeatLayer3DNavigationMode view3DNavigationMode;
+  final String? view3DTargetSeatId;
   final String? activeFloorId;
   final String? focusedSectionId;
   final SeatLayerPickerSectionSummary? focusedSection;
@@ -415,6 +422,7 @@ class SeatLayerPickerMapState {
 
   String get projection => viewMode;
   String? get floorId => activeFloorId;
+  bool get isVenue3D => buyerView == SeatLayerBuyerView.venue3D;
 
   factory SeatLayerPickerMapState.fromJson(Object? value) =>
       SeatLayerPickerMapState(
@@ -422,6 +430,13 @@ class SeatLayerPickerMapState {
         viewMode: jStr(jGet(value, 'viewMode')) ??
             jStr(jGet(value, 'projection')) ??
             'flat',
+        buyerView: SeatLayerBuyerView.fromRaw(
+          jStr(jGet(value, 'buyerView')) ?? 'map',
+        ),
+        view3DNavigationMode: SeatLayer3DNavigationMode.fromRaw(
+          jStr(jGet(value, 'view3dNavigationMode')) ?? 'orbit',
+        ),
+        view3DTargetSeatId: jStr(jGet(value, 'view3dTargetSeatId')),
         activeFloorId:
             jStr(jGet(value, 'activeFloorId')) ?? jStr(jGet(value, 'floorId')),
         focusedSectionId: jStr(jGet(value, 'focusedSectionId')),

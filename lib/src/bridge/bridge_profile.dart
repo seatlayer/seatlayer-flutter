@@ -29,7 +29,7 @@ class SeatLayerBridgeProfile {
       SeatLayerBridgeProfile._(
         surface: 'picker',
         protocolRange: const ProtocolRange(min: 2, max: 2),
-        requiredCapabilities: const <String>[
+        requiredCapabilities: <String>[
           'picker-session-v2',
           'picker-snapshot-v1',
           'picker-actions-v1',
@@ -39,6 +39,11 @@ class SeatLayerBridgeProfile {
           'hold-ownership-v1',
           'cart-line-remove-v1',
           'table-quantity-v1',
+          if (config['enable3D'] != false) ...<String>[
+            'venue-3d-v1',
+            'venue-3d-controls-v1',
+          ],
+          if (config['enableSeatView'] != false) 'seat-view-v1',
         ],
         config: Map<String, Object?>.unmodifiable(config),
         chrome: const <String, Object?>{

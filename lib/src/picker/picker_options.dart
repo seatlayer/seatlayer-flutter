@@ -79,13 +79,14 @@ class SeatLayerPickerOptions {
     this.enableBestAvailable = true,
     this.enable3D = true,
     this.enableSeatView = true,
+    this.max3DSeats,
     this.hideEventDetails = false,
     this.panelInitiallyCollapsed = true,
     this.persistColorblindPreference = true,
     this.chrome = const SeatLayerPickerChromeOptions(),
     this.languages = const <Locale>[],
     this.pricing,
-  });
+  }) : assert(max3DSeats == null || max3DSeats > 0);
 
   final SeatLayerPickerLayoutMode layout;
   final Duration? holdTtl;
@@ -106,6 +107,9 @@ class SeatLayerPickerOptions {
   final bool enableBestAvailable;
   final bool enable3D;
   final bool enableSeatView;
+
+  /// Optional WebGL seat ceiling. Omit to use SeatLayer's device-aware limit.
+  final int? max3DSeats;
   final bool hideEventDetails;
   final bool panelInitiallyCollapsed;
   final bool persistColorblindPreference;
@@ -121,6 +125,7 @@ class SeatLayerPickerOptions {
         'enableBestAvailable': enableBestAvailable,
         'enable3D': enable3D,
         'enableSeatView': enableSeatView,
+        if (max3DSeats != null) 'max3DSeats': max3DSeats,
         'hideEventDetails': hideEventDetails,
         'panelCollapsed': panelInitiallyCollapsed,
         'languages': languages.map((locale) => locale.toLanguageTag()).toList(),

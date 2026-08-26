@@ -255,6 +255,7 @@ SeatLayerPickerOptions(
   enableBestAvailable: true,
   enable3D: true,
   enableSeatView: true,
+  max3DSeats: 30000, // optional; omit for the device-aware SDK default
   hideEventDetails: false,
   panelInitiallyCollapsed: false,
   persistColorblindPreference: true,
@@ -273,6 +274,13 @@ SeatLayerPickerOptions(
 Required test-mode chrome and API-driven attribution are deliberately not
 hideable here. The runtime snapshot's `branding.attributionRequired` value is
 the sole attribution gate.
+
+`enable3D` and `enableSeatView` gate both turnkey chrome and their versioned
+bridge requirements. `max3DSeats` is an optional host ceiling; when omitted,
+the runtime applies a lower ceiling on coarse-pointer/low-memory devices. The
+real 3D module and generated-panorama code remain lazy chunks, so neither delays
+the first interactive 2D chart. A capability or load failure leaves the same
+map session in place and returns a typed, recoverable picker error.
 
 The current baseline does not silently persist a hold capability. A host that
 wants restoration persists the handoff itself and supplies `initialHoldId` on
@@ -294,6 +302,7 @@ The initial public kit consists of:
 - `SeatLayerPickerZoomOutButton`
 - `SeatLayerPickerZoomToFitButton`
 - `SeatLayerPickerViewModeButton`
+- `SeatLayerPicker3DNavigationModeButton`
 - `SeatLayerPickerColorblindButton`
 - `SeatLayerPickerPriceRail`
 - `SeatLayerPickerAccessibilityFilters`
@@ -320,6 +329,12 @@ Every component reads the nearest `SeatLayerPickerScope`. Components with
 meaningful standalone use may also accept an explicit controller. They remain
 stateless with respect to inventory and holds.
 
+The seat confirmation and both inspection buttons are end-to-end components,
+not visual shells: without callbacks they call `openSeatView` / `showSeatIn3D`
+on the scoped controller and disappear when the matching capability is absent.
+`showSeatView`, `show3D`, `onViewFromSeat` and `onShow3D` let a host hide or
+replace each action independently.
+
 ### 7.1 Web-to-mobile feature parity ledger
 
 “Parity” means the same buyer decision, information and outcome; it does not
@@ -338,8 +353,8 @@ must all work.
 | Seat candidate identity, category and price | Centered native confirm card with Section / Row / Seat grid | `SeatLayerPickerSeatConfirmation` | `SelectedSeat` spatial fields + category catalog | Complete |
 | Multiple ticket choices and eligibility guidance | Native selectable rows; no congested dropdown | Confirmation component | Tier restriction and buyer message | Complete |
 | Limited-view, premium and wheelchair disclosure | Confirmation notice and cart attributes | Confirmation + ticket card | Commercial/accessibility fields | Complete |
-| Organizer photo/generated sightline and honest distance-to-stage | Omitted when no authoritative action exists | `SeatLayerPickerSeatViewButton` callback hook | Needs capability, protected media transport and stage-distance metadata | Planned contract work |
-| Real venue 3D focused on the candidate seat | Omitted from confirm card until supported; ordinary isometric map control remains separate | `SeatLayerPickerSeat3DButton` callback hook | Needs real venue-3D capability, focus/return actions and fallback | Planned contract work |
+| Organizer photo/generated sightline and honest distance-to-stage | Capability-gated View from here action opens the authored 360° or explicitly labeled chart-derived preview | Self-wiring `SeatLayerPickerSeatViewButton`; callback replacement remains available | `seat-view-v1`, protected buyer-asset resolution and `picker.openSeatView` | Complete |
+| Real venue 3D focused on the candidate seat | Map/3D toggle plus candidate action enters the lazy WebGL scene and flies to the seat; unsupported devices retain 2D | `SeatLayerPickerViewModeButton`, `SeatLayerPicker3DNavigationModeButton`, `SeatLayerPickerSeat3DButton` | `venue-3d-v1`, `venue-3d-controls-v1`, enter/focus/return and explicit capability fallback | Complete |
 | Manual ticket cart | Vertical buyer-readable rows with category/tier, price and remove/lock state | Selection tray + `SeatLayerPickerTicketCard` | Cart lines + selected-seat context | Complete |
 | Collapsed phone checkout strip | Empty: From + optional Best Seats; selected: total + Review; held: total + Continue | Mobile ticket panel | Cart + hold ownership | Complete |
 | Best Available | Empty-state accelerator and expanded scoped form | Best Available button + panel | Best Available command + picker-owned hold | Complete |
@@ -351,20 +366,17 @@ must all work.
 
 The next parity work is ordered by buyer impact and cross-SDK reuse:
 
-1. Version the seat-inspection snapshot/command for authoritative seat-view
-   media, distance and capability flags.
-2. Add real venue-3D enter/focus/return commands with an explicit 2D fallback.
-3. Add the full focused-section card and transient buyer-hint state.
-4. Move native strings to the shared locale catalog and add RTL fixtures.
-5. Freeze shared JSON/action fixtures, then implement the same semantics in
+1. Add the full focused-section card and transient buyer-hint state.
+2. Move native strings to the shared locale catalog and add RTL fixtures.
+3. Freeze shared JSON/action fixtures, then implement the same semantics in
    React Native, iOS and Android using idiomatic platform components.
 
-Until the bridge rows above are complete, callbacks let an application provide
-an existing authoritative view or venue-3D route without forking the picker.
-The turnkey widget deliberately hides unsupported actions. No DesiPass API
-change is required for these presentation improvements; a backend change is
-only justified if end-to-end checkout evidence reveals missing trusted booking
-data.
+The seat-inspection widgets call the SDK controller by default and allow a host
+callback to replace either action without forking the picker. Their individual
+visibility flags and capability gates prevent unsupported controls from taking
+space. No DesiPass API change is required for these presentation improvements;
+a backend change is only justified if end-to-end checkout evidence reveals
+missing trusted booking data.
 
 The default phone dock is container- and inset-responsive. It reads the
 unconsumed `MediaQuery.padding.bottom` rather than identifying device models or
@@ -406,7 +418,8 @@ ready info, event mode and capabilities
 event identity, organizer theme and sales state
 currency, categories, prices, tiers and availability
 active category/accessibility filters and limited-view preference
-floors, current floor, section focus, map rung and projection
+floors, current floor, section focus, map rung and legacy canvas projection
+buyer view (`map`/`venue3d`), 3D target seat and rotate/move navigation mode
 committed selection, table occupancy and selection validity
 general-admission prompt candidate
 token-free active-hold status, owner and server expiry
@@ -428,6 +441,7 @@ setTableQuantity
 setCategoryFilter / setAccessibilityFilter / setLimitedViewHidden
 focusSection / overview / setRung
 setFloor / setViewMode
+setBuyerView / showSeatIn3D / openSeatView / set3DNavigationMode
 zoomIn / zoomOut / zoomToFit / setColorblindSafe
 resumeHold / extendHold / checkout / rejectCheckoutHandoff
 releasePickerOwnedHold
@@ -466,6 +480,9 @@ checkout-handoff-reject-v1
 hold-ownership-v1
 cart-line-remove-v1
 table-quantity-v1
+venue-3d-v1                 # required when enable3D is true
+venue-3d-controls-v1        # required when enable3D is true
+seat-view-v1                # required when enableSeatView is true
 ```
 
 `native-access-provider` is additionally required when
@@ -473,7 +490,10 @@ table-quantity-v1
 `selection-controls` and `selection-validity` capabilities remain conditional
 requirements when the raw selection-policy fields are configured. Optional
 buyer controls are advertised in the snapshot's `features` object and are
-hidden when their feature is absent.
+hidden when their event/device feature is absent. The immersive requirements
+are conditional: disabling 3D or seat view removes the corresponding required
+capability, while the default options fail closed against an older runtime that
+cannot honor the requested action.
 
 ### 9.2 Initialisation
 
@@ -498,7 +518,10 @@ and is deliberately absent from the bridge:
       "checkout-handoff-reject-v1",
       "hold-ownership-v1",
       "cart-line-remove-v1",
-      "table-quantity-v1"
+      "table-quantity-v1",
+      "venue-3d-v1",
+      "venue-3d-controls-v1",
+      "seat-view-v1"
     ]
   },
   "chrome": {
@@ -550,7 +573,9 @@ those remain within the rendered map:
   "features": {
     "bestAvailable": true,
     "accessibilityFilter": true,
-    "floors": true
+    "floors": true,
+    "venue3d": true,
+    "seatView": true
   },
   "catalog": {
     "categories": [],
@@ -562,6 +587,9 @@ those remain within the rendered map:
   "map": {
     "rung": "sections",
     "viewMode": "flat",
+    "buyerView": "map",
+    "view3dTargetSeatId": null,
+    "view3dNavigationMode": "orbit",
     "activeFloorId": null,
     "focusedSectionId": null,
     "focusedSection": null,
@@ -651,7 +679,10 @@ picker.overview                 no payload
 picker.setRung                  { rung }
 picker.setFloor                 { floorId }
 picker.setColorblindSafe        { on }
-picker.setViewMode              { mode }
+picker.setViewMode              { mode }  # legacy 2D canvas projection only
+picker.setBuyerView             { view: "map" | "venue3d", flyToSeatId?, resetView? }
+picker.openSeatView             { seatId }
+picker.setVenue3DNavigationMode { mode: "orbit" | "pan" }
 picker.zoomIn                   no payload
 picker.zoomOut                  no payload
 picker.zoomToFit                no payload
@@ -735,9 +766,10 @@ picker.extendHold / picker.continue
 ```
 
 Read-only still permits snapshot sync, category/accessibility/limited-view
-filters, section/rung/floor/view navigation, colorblind mode, zoom, lifecycle,
-abort, exact handoff rejection and destroy. These operations either change only
-presentation or safely release inventory already owned by this picker session.
+filters, section/rung/floor/view navigation, real 3D and seat inspection,
+colorblind mode, zoom, lifecycle, abort, exact handoff rejection and destroy.
+These operations either change only presentation or safely release inventory
+already owned by this picker session.
 
 The state event surface is deliberately small:
 
@@ -869,8 +901,13 @@ model or global window width.
   section/category row is inserted above the map.
 - Pinch remains the primary map gesture, while explicit zoom in/out remains
   visible for discoverability and accessibility.
-- Contextual back-to-venue, zoom in/out, fit, 2D/3D and colorblind-safe actions
-  use separate compact floating buttons rather than one tall control slab.
+- Contextual back-to-venue, zoom in/out, fit, Map/real-3D and colorblind-safe
+  actions use separate compact floating buttons rather than one tall control
+  slab.
+- Entering real 3D crossfades over the still-mounted map. A compact rotate/move
+  control makes the primary one-finger gesture explicit; pinch zoom and smooth
+  pointer-driven camera movement stay inside the renderer without rebuilding
+  Flutter chrome.
 - A 50-logical-pixel safe-area-aware ticket dock is the collapsed state.
 - Expanded sheet for selected tickets, best available, GA/table choices and
   hold details. Best Available uses two touch-friendly selector rows that open
@@ -883,6 +920,9 @@ model or global window width.
   again without destroying or remounting the map session.
 - Seat confirmation is a bottom card/sheet that does not make the map
   untouchable after dismissal.
+- Prompt cards use a short fade/scale/slide transition; ticket summaries,
+  cart rows and dock expansion animate only changed state. All SDK-owned motion
+  becomes immediate when the platform requests reduced motion.
 
 ### Regular and wide
 
@@ -1227,6 +1267,10 @@ inventory flow.
 - Native test payment sheet and successful return to confirmation.
 - Performance and memory after repeated open/close cycles.
 - 2D fallback when optional 3D is unsupported or loses context.
+- Real 3D enter/exit, orbit/pan, pinch zoom, seat fly-to and return-to-map on a
+  WebGL2-capable physical device.
+- Authored and chart-derived View from here surfaces, including drag/pinch and
+  protected media renewal.
 
 ### 20.6 DesiPass end-to-end scenarios
 
@@ -1246,6 +1290,11 @@ inventory flow.
 12. A sandbox/zero-value payment completes.
 13. Booking succeeds idempotently and appears in the resulting order/tickets.
 14. Expired and conflicting inventory return the buyer to a recoverable state.
+15. Map/3D enters the real venue scene, candidate See it in 3D flies to the
+    selected seat, rotate/move and zoom controls work, and returning to Map does
+    not reload the picker session.
+16. View from here opens only when the runtime reports an authored or honest
+    chart-derived view and closes back to the same selection session.
 
 Use two controlled fixtures:
 

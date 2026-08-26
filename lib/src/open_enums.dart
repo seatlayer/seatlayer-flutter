@@ -286,6 +286,51 @@ class SeatLayerViewMode {
   int get hashCode => raw.hashCode;
 }
 
+/// Buyer-facing surface: the flat map or SeatLayer's real WebGL venue view.
+///
+/// This is intentionally separate from [SeatLayerViewMode], whose isometric
+/// value is a legacy 2D canvas projection and is not immersive 3D.
+class SeatLayerBuyerView {
+  const SeatLayerBuyerView(this.raw);
+  final String raw;
+
+  static const map = SeatLayerBuyerView('map');
+  static const venue3D = SeatLayerBuyerView('venue3d');
+
+  factory SeatLayerBuyerView.fromRaw(String raw) => switch (raw) {
+        'map' => map,
+        'venue3d' => venue3D,
+        _ => SeatLayerBuyerView(raw),
+      };
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeatLayerBuyerView && other.raw == raw;
+  @override
+  int get hashCode => raw.hashCode;
+}
+
+/// What a primary drag does inside the real venue-3D surface.
+class SeatLayer3DNavigationMode {
+  const SeatLayer3DNavigationMode(this.raw);
+  final String raw;
+
+  static const rotate = SeatLayer3DNavigationMode('orbit');
+  static const move = SeatLayer3DNavigationMode('pan');
+
+  factory SeatLayer3DNavigationMode.fromRaw(String raw) => switch (raw) {
+        'orbit' => rotate,
+        'pan' => move,
+        _ => SeatLayer3DNavigationMode(raw),
+      };
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeatLayer3DNavigationMode && other.raw == raw;
+  @override
+  int get hashCode => raw.hashCode;
+}
+
 /// Decode an optional open-enum string, tolerating null and non-strings.
 EventMode? eventModeOrNull(Object? v) =>
     v is String ? EventMode.fromRaw(v) : null;
