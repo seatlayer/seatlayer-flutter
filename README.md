@@ -73,6 +73,13 @@ The picker fills the bounded space provided by its parent. Use it as an
 `Expanded` child or on a full page; do not put its map inside a competing
 gesture-driven `ListView` or `SingleChildScrollView`.
 
+Pan and pinch frames are rendered entirely inside the chart. They do not emit
+full picker snapshots or rebuild Flutter chrome on every touch frame; Flutter is
+notified only when a serializable state such as the active zoom rung actually
+changes. The SDK also disables the platform WebView's document zoom,
+overscroll/bounce and edge glow, while isolating the map in its own repaint
+boundary. Hosts do not need gesture workarounds or app-specific scroll code.
+
 On a phone, the turnkey widget deliberately follows the web picker's map-first
 information hierarchy: a compact event header, one concise price rail, the map,
 and a 50-logical-pixel ticket-dock control row. Its bottom spacing is calculated

@@ -898,6 +898,27 @@ A tap on a sufficiently usable seat target selects or opens confirmation. The
 host app must never need to infer map taps and issue repeated generic zoom
 commands.
 
+### Gesture performance invariant
+
+- The embedded chart owns pointer processing and canvas camera movement. Raw
+  pan, pinch and camera-animation frames never cross the Dart bridge.
+- A complete `picker.snapshot` is emitted only for meaningful serializable
+  state. If a gesture crosses the zones/sections/seats threshold, one snapshot
+  updates native chrome for that new rung; ordinary x/y/scale movement emits
+  none.
+- Snapshot creation is deferred and latest-wins at the animation-frame boundary,
+  so several selection, hold or semantic map callbacks cost one state walk and
+  one native message.
+- `SeatLayerView` eagerly assigns its bounded map gesture arena to the WebView,
+  disables document zoom and platform overscroll/bounce, and keeps the platform
+  view behind a repaint boundary. Flutter chrome changes cannot interrupt an
+  active map gesture.
+- Touch-first camera transitions use the shorter mobile timing; reduced-motion
+  settings still snap as before.
+- Hosts must keep the map in a fixed-height or full-screen bounded region, not
+  inside a competing scroll or zoom surface. No DesiPass-specific recognizer,
+  repeated zoom command or scroll workaround is part of the integration.
+
 ### Best Available scope
 
 The turnkey Best Available prompt must make its inventory scope explicit. It

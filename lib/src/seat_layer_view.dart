@@ -82,6 +82,9 @@ class _SeatLayerViewState extends State<SeatLayerView> {
       ..setBackgroundColor(const Color(0x00000000))
       // The map is a canvas, not a scrolling document — the bundle owns zoom.
       ..enableZoom(false)
+      // Suppress WKWebView bounce and Android edge glow. Camera movement must
+      // stay in the canvas instead of waking the platform document scroller.
+      ..setOverScrollMode(WebViewOverScrollMode.never)
       ..addJavaScriptChannel(
         _channelName,
         onMessageReceived: (message) {
@@ -217,13 +220,18 @@ class _SeatLayerViewState extends State<SeatLayerView> {
 
   @override
   Widget build(BuildContext context) {
-    final view = WebViewWidget(
-      controller: _web,
-      // Without an eager recognizer webview_flutter never receives the pan/zoom
-      // gestures the canvas needs — it loses every drag to Flutter's arena.
-      gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{
-        Factory<OneSequenceGestureRecognizer>(EagerGestureRecognizer.new),
-      },
+    final view = RepaintBoundary(
+      // Native picker chrome can rebuild after a semantic state change without
+      // invalidating the platform-view layer that owns the active gesture.
+      child: WebViewWidget(
+        controller: _web,
+        // Without an eager recognizer webview_flutter never receives the
+        // pan/zoom gestures the canvas needs — it loses every drag to Flutter's
+        // arena.
+        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{
+          Factory<OneSequenceGestureRecognizer>(EagerGestureRecognizer.new),
+        },
+      ),
     );
     final bg = widget.backgroundColor;
     return bg == null ? view : ColoredBox(color: bg, child: view);
