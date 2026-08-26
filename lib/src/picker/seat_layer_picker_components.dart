@@ -236,6 +236,9 @@ class _SeatLayerPickerSeatConfirmationState
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
+    if (SeatLayerPickerScope.optionsOf(context).readOnly) {
+      return const SizedBox.shrink();
+    }
     final seat = widget.seat ?? controller.state.selection.lastOrNull;
     if (seat == null || seat.label == _dismissedLabel) {
       return const SizedBox.shrink();
@@ -372,6 +375,9 @@ class _SeatLayerPickerTablePromptState
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
+    if (SeatLayerPickerScope.optionsOf(context).readOnly) {
+      return const SizedBox.shrink();
+    }
     final min = widget.table.minOccupancy ?? 1;
     final max = widget.table.maxOccupancy ?? widget.table.capacity ?? min;
     return _PromptFrame(
@@ -467,6 +473,9 @@ class _SeatLayerPickerGeneralAdmissionPromptState
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
+    if (SeatLayerPickerScope.optionsOf(context).readOnly) {
+      return const SizedBox.shrink();
+    }
     final area = widget.area ?? controller.state.generalAdmissionCandidate;
     if (area == null) return const SizedBox.shrink();
     _tierId ??= area.tiers?.firstOrNull?.id;
@@ -539,7 +548,9 @@ class _SeatLayerPickerGeneralAdmissionPromptState
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
-                  onPressed: max < 1 || controller.state.isBusy
+                  onPressed: max < 1 ||
+                          controller.state.isBusy ||
+                          !controller.state.canMutateInventory
                       ? null
                       : () => _ignoreAction(() async {
                             await controller.setGeneralAdmissionQuantity(

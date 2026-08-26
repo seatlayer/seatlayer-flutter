@@ -634,6 +634,9 @@ class SeatLayerPickerState {
   bool get isTestEvent => event?.mode == EventMode.test;
   bool get hasPickerOwnedHold =>
       hold != null && holdOwner == SeatLayerHoldOwner.picker;
+  bool get hasHostOwnedHold =>
+      hold != null && holdOwner == SeatLayerHoldOwner.host;
+  bool get canMutateInventory => !hasHostOwnedHold;
   bool get canCheckout =>
       isReady &&
       !isBusy &&
@@ -714,6 +717,14 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: handoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+      );
+
+  SeatLayerPickerState withoutHandoff() => SeatLayerPickerState(
+        phase: phase,
+        busyAction: SeatLayerPickerBusyAction.none,
+        snapshot: snapshot,
+        generalAdmissionCandidate: generalAdmissionCandidate,
+        error: error,
       );
 
   SeatLayerPickerState closed() => SeatLayerPickerState(

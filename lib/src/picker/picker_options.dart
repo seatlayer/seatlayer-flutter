@@ -40,7 +40,6 @@ class SeatLayerPickerOptions {
     this.layout = SeatLayerPickerLayoutMode.adaptive,
     this.holdTtl,
     this.initialHoldId,
-    this.initialHoldOwner = SeatLayerHoldOwner.host,
     this.readOnly = false,
     this.confirmSelection = true,
     this.enableBestAvailable = true,
@@ -55,8 +54,18 @@ class SeatLayerPickerOptions {
 
   final SeatLayerPickerLayoutMode layout;
   final Duration? holdTtl;
+
+  /// A hold previously acquired by the host application.
+  ///
+  /// The runtime verifies it with the server before exposing it and always
+  /// treats it as host-owned. Native picker controls never release or mutate
+  /// this hold.
   final String? initialHoldId;
-  final SeatLayerHoldOwner initialHoldOwner;
+
+  /// Prevent every selection, hold and checkout mutation.
+  ///
+  /// The runtime also disables canvas selection. Filters, navigation, view
+  /// controls and safe teardown/rejection actions remain available.
   final bool readOnly;
   final bool confirmSelection;
   final bool enableBestAvailable;
@@ -71,7 +80,6 @@ class SeatLayerPickerOptions {
   Map<String, Object?> toBridgeConfig() => <String, Object?>{
         if (holdTtl != null) 'holdTtlMs': holdTtl!.inMilliseconds,
         if (initialHoldId != null) 'initialHoldId': initialHoldId,
-        if (initialHoldId != null) 'initialHoldOwner': initialHoldOwner.name,
         'readOnly': readOnly,
         'confirmSelection': confirmSelection,
         'enableBestAvailable': enableBestAvailable,

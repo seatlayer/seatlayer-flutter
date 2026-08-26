@@ -43,7 +43,9 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       _callbacks.onHoldExpired?.call();
     });
     _generalAdmissionSubscription = this.mapController.onGAClick.listen((area) {
-      value = value.withGeneralAdmissionCandidate(area);
+      if (!_options.readOnly) {
+        value = value.withGeneralAdmissionCandidate(area);
+      }
     });
     _errorSubscription = this.mapController.onError.listen((error) {
       _callbacks.onError?.call(error);
@@ -99,9 +101,21 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     if (value.phase == SeatLayerPickerPhase.closed) {
       return Future<void>.error(const SeatLayerError.destroyed());
     }
-    _reloadGeneration += 1;
-    value = const SeatLayerPickerState.initializing();
-    return Future<void>.value();
+    return _serialize(() async {
+      // A failed handshake has no live picker to clean up. If the runtime did
+      // reach Ready (for example access later became unavailable), acknowledge
+      // destroy before the ValueKey swap removes its WebView so a picker-owned
+      // hold is not left solely to TTL cleanup.
+      if (mapController.isReady) {
+        try {
+          await mapController.runBridgeCommand('picker.destroy');
+        } catch (_) {
+          // Retry remains recoverable when the old runtime is already gone.
+        }
+      }
+      _reloadGeneration += 1;
+      value = const SeatLayerPickerState.initializing();
+    });
   }
 
   @internal
@@ -140,6 +154,9 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   }) {
     _options = options;
     _callbacks = callbacks;
+    if (options.readOnly && value.generalAdmissionCandidate != null) {
+      value = value.withGeneralAdmissionCandidate(null);
+    }
   }
 
   @internal
@@ -149,9 +166,8 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
 
   void _onBridgeEvent(EventSignal event) {
     if (event.name != 'picker.snapshot' && event.name != 'sys.ready') return;
-    final raw = event.name == 'sys.ready'
-        ? jGet(event.payload, 'snapshot')
-        : event.payload;
+    final raw = jGet(event.payload, 'snapshot') ??
+        (event.name == 'picker.snapshot' ? event.payload : null);
     final snapshot = SeatLayerPickerSnapshot.fromJson(raw);
     if (snapshot != null) _applySnapshot(snapshot);
   }
@@ -207,7 +223,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         }
       });
 
-  Future<void> clearSelection() => _mutation(
+  Future<void> clearSelection() => _inventoryMutation(
         'picker.clearSelection',
         null,
         SeatLayerPickerBusyAction.updatingSelection,
@@ -220,7 +236,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
               candidate.objectId == objectId || candidate.label == objectId,
         )
         .firstOrNull;
-    return _mutation(
+    return _inventoryMutation(
         'picker.removeCartLine',
         <String, Object?>{
           'label': line?.label ?? objectId,
@@ -228,15 +244,81 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         SeatLayerPickerBusyAction.updatingSelection);
   }
 
-  Future<void> setSeatTier(String seatId, String? tierId) => _mutation(
+  Future<void> setSeatTier(String seatId, String? tierId) => _inventoryMutation(
         'picker.setSeatTier',
         <String, Object?>{'seatId': seatId, 'tierId': tierId},
         SeatLayerPickerBusyAction.updatingSelection,
       );
 
+  /// Select objects by their stable labels through the picker-v2 runtime.
+  Future<List<SelectedSeat>> selectObjects(List<String> objects) async {
+    await _inventoryMutation(
+      'picker.selectObjects',
+      <String, Object?>{'objects': List<String>.of(objects)},
+      SeatLayerPickerBusyAction.updatingSelection,
+    );
+    return value.selection;
+  }
+
+  /// Deselect objects by their stable labels.
+  Future<void> deselectObjects(List<String> objects) => _inventoryMutation(
+        'picker.deselectObjects',
+        <String, Object?>{'objects': List<String>.of(objects)},
+        SeatLayerPickerBusyAction.updatingSelection,
+      );
+
+  /// Select every eligible object in the supplied categories.
+  Future<List<SelectedSeat>> selectCategories(
+    List<String> categoryKeys,
+  ) async {
+    await _inventoryMutation(
+      'picker.selectCategories',
+      <String, Object?>{
+        'categoryKeys': List<String>.of(categoryKeys),
+      },
+      SeatLayerPickerBusyAction.updatingSelection,
+    );
+    return value.selection;
+  }
+
+  /// Deselect every selected object in the supplied categories.
+  Future<void> deselectCategories(List<String> categoryKeys) =>
+      _inventoryMutation(
+        'picker.deselectCategories',
+        <String, Object?>{
+          'categoryKeys': List<String>.of(categoryKeys),
+        },
+        SeatLayerPickerBusyAction.updatingSelection,
+      );
+
+  /// Restrict canvas selection to [objects], or pass `null` to remove it.
+  Future<void> setSelectableObjects(List<String>? objects) =>
+      _inventoryMutation(
+        'picker.setSelectableObjects',
+        <String, Object?>{
+          'objects': objects == null ? null : List<String>.of(objects),
+        },
+        SeatLayerPickerBusyAction.updatingSelection,
+      );
+
+  /// Change the maximum number of tickets the buyer may select.
+  Future<void> setMaxSelection(int maximum) {
+    if (maximum < 1) {
+      return Future<void>.error(ArgumentError.value(maximum, 'maximum'));
+    }
+    return _inventoryMutation(
+      'picker.setMaxSelection',
+      <String, Object?>{'maxSelection': maximum},
+      SeatLayerPickerBusyAction.updatingSelection,
+    );
+  }
+
+  /// Filter the visible categories; an empty set clears the filter.
   Future<void> setCategoryFilter(Set<String> categoryKeys) => _mutation(
         'picker.setCategoryFilter',
-        <String, Object?>{'categoryKeys': categoryKeys.toList()},
+        <String, Object?>{
+          'categoryKeys': categoryKeys.isEmpty ? null : categoryKeys.toList(),
+        },
         SeatLayerPickerBusyAction.updatingSelection,
       );
 
@@ -313,7 +395,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     bool preferPremium = false,
   }) {
     if (quantity < 1) return Future<void>.error(ArgumentError.value(quantity));
-    return _mutation(
+    return _inventoryMutation(
         'picker.bestAvailable',
         <String, Object?>{
           'qty': quantity,
@@ -339,6 +421,8 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         ArgumentError.value(quantitiesByTier, 'quantitiesByTier'),
       );
     }
+    final rejected = _rejectReadOnly<void>('picker.holdGA');
+    if (rejected != null) return rejected;
     return _serialize(() async {
       value = value.withBusy(SeatLayerPickerBusyAction.creatingHold);
       try {
@@ -380,7 +464,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     if (quantity < 1) {
       return Future<void>.error(ArgumentError.value(quantity, 'quantity'));
     }
-    return _mutation(
+    return _inventoryMutation(
       'picker.setTableQuantity',
       <String, Object?>{
         'label': label,
@@ -391,14 +475,34 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     );
   }
 
-  Future<void> extendHold() => _mutation(
-      'picker.extendHold',
-      <String, Object?>{
-        if (_options.holdTtl != null) 'ttlMs': _options.holdTtl!.inMilliseconds,
-      },
-      SeatLayerPickerBusyAction.creatingHold);
+  /// Restore a caller-persisted hold as host-owned inventory.
+  ///
+  /// Prefer [SeatLayerPickerOptions.initialHoldId] for restoration during
+  /// startup. This explicit action is available to custom component flows.
+  Future<void> resumeHold(String holdId) {
+    if (holdId.isEmpty) {
+      return Future<void>.error(ArgumentError.value(holdId, 'holdId'));
+    }
+    return _inventoryMutation(
+      'picker.resumeHold',
+      <String, Object?>{'holdId': holdId},
+      SeatLayerPickerBusyAction.creatingHold,
+    );
+  }
+
+  Future<void> extendHold() => _inventoryMutation(
+        'picker.extendHold',
+        <String, Object?>{
+          if (_options.holdTtl != null)
+            'ttlMs': _options.holdTtl!.inMilliseconds,
+        },
+        SeatLayerPickerBusyAction.creatingHold,
+      );
 
   Future<SeatLayerCheckoutHandoff> checkout() {
+    final rejected =
+        _rejectReadOnly<SeatLayerCheckoutHandoff>('picker.continue');
+    if (rejected != null) return rejected;
     final current = _checkoutInFlight;
     if (current != null) return current;
     final future = _serialize(() async {
@@ -440,6 +544,22 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     return future;
   }
 
+  /// Reject a checkout handoff that the host could not accept.
+  ///
+  /// The runtime releases inventory only when [handoff] identifies the exact
+  /// hold handed off by this picker session. This safety action remains
+  /// available in read-only mode.
+  Future<void> rejectCheckoutHandoff(SeatLayerCheckoutHandoff handoff) async {
+    await _mutation(
+      'picker.rejectHandoff',
+      <String, Object?>{'holdId': handoff.holdId},
+      SeatLayerPickerBusyAction.releasingHold,
+    );
+    if (value.checkoutHandoff?.holdId == handoff.holdId) {
+      value = value.withoutHandoff();
+    }
+  }
+
   Future<void> releasePickerOwnedHold() {
     if (!value.hasPickerOwnedHold) return Future<void>.value();
     return _mutation(
@@ -458,6 +578,23 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         },
         SeatLayerPickerBusyAction.synchronizing,
       );
+
+  /// Tear down the picker runtime and await its acknowledgement.
+  ///
+  /// Use [close] for ordinary buyer dismissal. [destroy] exists for custom
+  /// lifecycle owners that are replacing the embedded runtime.
+  Future<void> destroy() => _serialize(() async {
+        if (value.phase == SeatLayerPickerPhase.closed) return;
+        value = value.withBusy(SeatLayerPickerBusyAction.releasingHold);
+        try {
+          await mapController.runBridgeCommand('picker.destroy');
+          value = value.closed();
+          _callbacks.onClosed?.call(SeatLayerPickerCloseReason.programmatic);
+        } catch (error) {
+          value = value.withActionError(error);
+          rethrow;
+        }
+      });
 
   Future<void> close({
     SeatLayerPickerCloseReason reason = SeatLayerPickerCloseReason.programmatic,
@@ -517,6 +654,31 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
           rethrow;
         }
       });
+
+  Future<void> _inventoryMutation(
+    String command,
+    Object? payload,
+    SeatLayerPickerBusyAction busy,
+  ) {
+    final rejected = _rejectReadOnly<void>(command);
+    return rejected ?? _mutation(command, payload, busy);
+  }
+
+  Future<T>? _rejectReadOnly<T>(String command) {
+    if (!_options.readOnly) return null;
+    final error = SeatLayerError.readOnly(command);
+    value = value.withActionError(error);
+    _callbacks.onError?.call(error);
+    return Future<T>.error(error);
+  }
+
+  /// Keep a host callback failure visible after best-effort handoff rejection.
+  @internal
+  void reportActionError(Object error) {
+    if (_disposed) return;
+    value = value.withActionError(error);
+    if (error is SeatLayerError) _callbacks.onError?.call(error);
+  }
 
   void _applySnapshotFromResult(Object? result) {
     final snapshot = SeatLayerPickerSnapshot.fromJson(

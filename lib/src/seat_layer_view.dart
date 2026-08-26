@@ -155,15 +155,43 @@ class _SeatLayerViewState extends State<SeatLayerView> {
   @override
   void didUpdateWidget(covariant SeatLayerView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final runtimeChanged = oldWidget.controller != widget.controller ||
-        !oldWidget.configuration.semanticallyEquals(widget.configuration) ||
+    final controllerChanged = oldWidget.controller != widget.controller;
+    final configurationChanged =
+        !oldWidget.configuration.semanticallyEquals(widget.configuration);
+    final profileChanged =
         !oldWidget.bridgeProfile.equivalentTo(widget.bridgeProfile);
+    final runtimeChanged =
+        controllerChanged || configurationChanged || profileChanged;
     if (!runtimeChanged) return;
 
     // Invalidate callbacks from the old page before closing its correlations.
-    _generation += 1;
+    final generation = ++_generation;
+    if (oldWidget.bridgeProfile.isPicker) {
+      unawaited(
+        _destroyPickerThenBoot(
+          oldWidget.controller,
+          oldWidget.bridgeProfile,
+          generation,
+        ),
+      );
+      return;
+    }
     oldWidget.controller.detachTransport();
     unawaited(_boot());
+  }
+
+  Future<void> _destroyPickerThenBoot(
+    SeatLayerController controller,
+    SeatLayerBridgeProfile profile,
+    int generation,
+  ) async {
+    await prepareSeatLayerRuntimeReload(
+      oldController: controller,
+      oldProfile: profile,
+    );
+    if (!mounted || generation != _generation) return;
+    controller.detachTransport();
+    await _boot();
   }
 
   @override
@@ -199,6 +227,24 @@ class _SeatLayerViewState extends State<SeatLayerView> {
     );
     final bg = widget.backgroundColor;
     return bg == null ? view : ColoredBox(color: bg, child: view);
+  }
+}
+
+/// Best-effort acknowledged teardown shared by configuration and controller
+/// replacement paths. Exposed only so the ordering can be tested without a
+/// platform WebView.
+@visibleForTesting
+Future<void> prepareSeatLayerRuntimeReload({
+  required SeatLayerController oldController,
+  required SeatLayerBridgeProfile oldProfile,
+}) async {
+  if (!oldProfile.isPicker) return;
+  try {
+    // Give the old picker a chance to release only picker-owned inventory and
+    // acknowledge teardown before its command correlations are closed.
+    await oldController.runBridgeCommand('picker.destroy');
+  } catch (_) {
+    // Reload remains recoverable when an old or stalled runtime cannot ack.
   }
 }
 
