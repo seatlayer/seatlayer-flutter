@@ -11,9 +11,14 @@ import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
 class SeatLayerPickerAttribution extends StatelessWidget {
-  const SeatLayerPickerAttribution({super.key, this.compact = true});
+  const SeatLayerPickerAttribution({
+    super.key,
+    this.compact = true,
+    this.onMap = false,
+  });
 
   final bool compact;
+  final bool onMap;
 
   @override
   Widget build(BuildContext context) {
@@ -22,30 +27,39 @@ class SeatLayerPickerAttribution extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final theme = _theme(context, state);
+    final content = Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 10 : 16,
+        vertical: compact ? 4 : 8,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.event_seat_rounded, size: 13, color: theme.mutedText),
+          const SizedBox(width: 5),
+          Text(
+            'Powered by SeatLayer',
+            style: TextStyle(
+              color: theme.mutedText,
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
     return Semantics(
       label: 'Powered by SeatLayer',
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: compact ? 10 : 16,
-          vertical: compact ? 4 : 8,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.event_seat_rounded, size: 13, color: theme.mutedText),
-            const SizedBox(width: 5),
-            Text(
-              'Powered by SeatLayer',
-              style: TextStyle(
-                color: theme.mutedText,
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
+      child: onMap
+          ? Material(
+              color: theme.surface.withAlpha(235),
+              shape: StadiumBorder(
+                side: BorderSide(color: theme.divider),
               ),
-            ),
-          ],
-        ),
-      ),
+              child: content,
+            )
+          : content,
     );
   }
 }
@@ -122,11 +136,17 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     final active = snapshot.map.accessibilityFilter;
     final onPressed = state.isBusy ? null : () => _ignoreAction(_show(context));
     if (compact) {
-      return IconButton.filledTonal(
+      final theme = _theme(context, state);
+      return IconButton(
         tooltip: active.isEmpty
             ? 'Accessibility and view filters'
             : '${active.length} accessibility filters active',
         visualDensity: VisualDensity.compact,
+        style: IconButton.styleFrom(
+          backgroundColor: theme.surface.withAlpha(240),
+          foregroundColor: active.isEmpty ? theme.text : theme.accent,
+          side: BorderSide(color: theme.divider),
+        ),
         onPressed: onPressed,
         icon: Badge(
           isLabelVisible: active.isNotEmpty,

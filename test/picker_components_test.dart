@@ -8,6 +8,7 @@ import 'package:seatlayer/src/picker/seat_layer_picker.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_components.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_scope.dart';
+import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
 import 'package:seatlayer/src/seat_layer_configuration.dart';
 import 'package:seatlayer/src/seat_layer_controller.dart';
 import 'package:seatlayer/src/seat_layer_error.dart';
@@ -51,6 +52,7 @@ Widget _app(
   _FakeMapController map,
   Widget child, {
   SeatLayerPickerOptions options = const SeatLayerPickerOptions(),
+  SeatLayerPickerThemeData? pickerTheme,
 }) {
   final picker = SeatLayerPickerController(mapController: map);
   return MaterialApp(
@@ -59,6 +61,7 @@ Widget _app(
         configuration: SeatLayerConfiguration(event: 'ev_test'),
         controller: picker,
         options: options,
+        theme: pickerTheme,
         child: child,
       ),
     ),
@@ -156,6 +159,34 @@ void main() {
     );
     expect(find.text('€25'), findsOneWidget);
     expect(find.textContaining('Standard ·'), findsNothing);
+  });
+
+  testWidgets('price rail keeps unselected chips readable over a dark map',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    final snapshot = pickerSnapshot(withSelection: false);
+    (snapshot['map']! as Map<String, Object?>)['categoryFilter'] = <Object?>[];
+    await tester.pumpWidget(
+      _app(
+        map,
+        const SeatLayerPickerPriceRail(compact: true),
+        pickerTheme: const SeatLayerPickerThemeData(
+          accent: Color(0xFFE54558),
+          onAccent: Colors.white,
+          background: Colors.black,
+          surface: Colors.white,
+          text: Colors.black,
+        ),
+      ),
+    );
+    map.emit(snapshot);
+    await tester.pump();
+
+    final chip = tester.widget<FilterChip>(find.byType(FilterChip));
+    expect(chip.selected, isFalse);
+    expect(chip.backgroundColor, Colors.white);
+    expect((chip.label as Text).style?.color, Colors.black);
   });
 
   testWidgets('standalone zoom control can be placed in a custom layout',
