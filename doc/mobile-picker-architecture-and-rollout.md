@@ -159,13 +159,19 @@ public prerelease.
 SeatLayerPicker(
   configuration: SeatLayerConfiguration(
     event: eventKey,
-    buyerAccessTokenProvider: mintBuyerAccess,
+    publicKey: 'pk_test_your_public_key',
   ),
   onCheckout: (handoff) {
     openCheckout(holdId: handoff.holdId);
   },
 )
 ```
+
+Register the exact renderer origin on that public key. For private,
+login-gated, presale, partner, or channel inventory, replace `publicKey` with
+the async `buyerAccessTokenProvider`; its authenticated backend mints the
+short-lived buyer session. An explicit provider or token wins over public
+bootstrap.
 
 The picker fills a bounded parent. Like the current map, it must not be placed
 inside a competing gesture-driven scroll/zoom surface.

@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.0-dev.3 (unreleased)
+
+- Retains the hosted `seatlayer-js@0.68.1` runtime and vendors the combined
+  public-bootstrap/mobile-picker fixture built from runtime commit
+  `d71db683520bf6c7034208e10806d59ddd7c5c0d` (sha256
+  `cadcfaea8ebda2dbef175be4462673c64ba6fe79e5e856c9b466941088a5056b`).
+- Adds a machine-readable runtime provenance record and a byte-level test that
+  verifies public `/bootstrap` plus all required picker, 3D, and seat-view
+  capabilities.
+- Documents `publicKey` for public Platform events while retaining the async
+  buyer-access provider for private, presale, partner, and channel inventory.
+
 ## 0.3.0-dev.2
 
 - Corrects the published README and install guidance after the successful
