@@ -1122,6 +1122,25 @@ class _QuantityButton extends StatelessWidget {
       );
 }
 
+/// Controls how the mobile ticket panel handles an unconsumed device bottom
+/// inset.
+enum SeatLayerPickerMobilePanelSafeArea {
+  /// Keep gesture-style insets compact while the dock is collapsed, then
+  /// reserve the complete device inset while the buyer panel is expanded.
+  ///
+  /// Larger system-navigation insets are always reserved in full.
+  adaptive,
+
+  /// Always reserve the complete device bottom inset.
+  full,
+
+  /// Do not reserve a bottom inset because the host layout already owns it.
+  none,
+}
+
+const double _mobilePanelCompactBottomClearance = 12;
+const double _mobilePanelGestureInsetLimit = 36;
+
 /// The compact ticket dock and expandable buyer panel used by the default
 /// phone layout.
 ///
@@ -1140,6 +1159,7 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
     this.actionError,
     this.attribution = const SeatLayerPickerAttribution(compact: true),
     this.maxExpandedHeight,
+    this.bottomSafeArea = SeatLayerPickerMobilePanelSafeArea.adaptive,
   });
 
   final bool expanded;
@@ -1151,6 +1171,12 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
   final Widget? actionError;
   final Widget attribution;
   final double? maxExpandedHeight;
+
+  /// How this panel handles the bottom inset still present in [MediaQuery].
+  ///
+  /// Use [SeatLayerPickerMobilePanelSafeArea.none] when an ancestor already
+  /// owns the spacing. The default prevents duplicated host and SDK insets.
+  final SeatLayerPickerMobilePanelSafeArea bottomSafeArea;
 
   @override
   Widget build(BuildContext context) {
@@ -1167,12 +1193,25 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
     final hasTickets = state.cartLines.isNotEmpty;
     final maxPanelHeight = maxExpandedHeight ??
         (MediaQuery.sizeOf(context).height * .43).clamp(0.0, 390.0);
+    final deviceBottomInset = MediaQuery.paddingOf(context).bottom;
+    final bottomPadding = switch (bottomSafeArea) {
+      SeatLayerPickerMobilePanelSafeArea.adaptive =>
+        expanded || deviceBottomInset > _mobilePanelGestureInsetLimit
+            ? deviceBottomInset
+            : deviceBottomInset > _mobilePanelCompactBottomClearance
+                ? _mobilePanelCompactBottomClearance
+                : deviceBottomInset,
+      SeatLayerPickerMobilePanelSafeArea.full => deviceBottomInset,
+      SeatLayerPickerMobilePanelSafeArea.none => 0.0,
+    };
 
     return Material(
       color: theme.surface,
       elevation: 12,
-      child: SafeArea(
-        top: false,
+      child: AnimatedPadding(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        padding: EdgeInsets.only(bottom: bottomPadding),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

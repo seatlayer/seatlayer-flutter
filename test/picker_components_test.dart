@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/bridge/bridge_client.dart';
+import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_components.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
+import 'package:seatlayer/src/picker/seat_layer_picker_presentation.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_scope.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
 import 'package:seatlayer/src/seat_layer_configuration.dart';
@@ -53,9 +55,18 @@ Widget _app(
   Widget child, {
   SeatLayerPickerOptions options = const SeatLayerPickerOptions(),
   SeatLayerPickerThemeData? pickerTheme,
+  MediaQueryData? mediaQueryData,
+  SeatLayerPickerController? pickerController,
 }) {
-  final picker = SeatLayerPickerController(mapController: map);
+  final picker =
+      pickerController ?? SeatLayerPickerController(mapController: map);
   return MaterialApp(
+    builder: mediaQueryData == null
+        ? null
+        : (context, child) => MediaQuery(
+              data: mediaQueryData,
+              child: child!,
+            ),
     home: Scaffold(
       body: SeatLayerPickerScope(
         configuration: SeatLayerConfiguration(event: 'ev_test'),
@@ -315,6 +326,132 @@ void main() {
     expect(requestedExpansion, isTrue);
   });
 
+  testWidgets('mobile ticket dock adapts to each device bottom inset',
+      (tester) async {
+    final map = _FakeMapController();
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(map.dispose);
+    addTearDown(picker.dispose);
+    const phoneMedia = MediaQueryData(
+      size: Size(390, 844),
+      padding: EdgeInsets.only(bottom: 34),
+      viewPadding: EdgeInsets.only(bottom: 34),
+    );
+
+    Future<double> panelHeight({
+      required bool expanded,
+      required SeatLayerPickerMobilePanelSafeArea safeArea,
+      MediaQueryData media = phoneMedia,
+    }) async {
+      await tester.pumpWidget(
+        _app(
+          map,
+          SeatLayerPickerMobileTicketPanel(
+            expanded: expanded,
+            onExpandedChanged: _ignoreExpanded,
+            onCheckout: _noopCheckout,
+            bottomSafeArea: safeArea,
+          ),
+          mediaQueryData: media,
+          pickerController: picker,
+        ),
+      );
+      map.emit(pickerSnapshot(withSelection: false));
+      await tester.pumpAndSettle();
+      return tester
+          .getSize(find.byType(SeatLayerPickerMobileTicketPanel))
+          .height;
+    }
+
+    expect(
+      await panelHeight(
+        expanded: false,
+        safeArea: SeatLayerPickerMobilePanelSafeArea.adaptive,
+      ),
+      62,
+    );
+    expect(
+      await panelHeight(
+        expanded: false,
+        safeArea: SeatLayerPickerMobilePanelSafeArea.full,
+      ),
+      84,
+    );
+    expect(
+      await panelHeight(
+        expanded: false,
+        safeArea: SeatLayerPickerMobilePanelSafeArea.none,
+      ),
+      50,
+    );
+
+    const navigationBarMedia = MediaQueryData(
+      size: Size(390, 844),
+      padding: EdgeInsets.only(bottom: 48),
+      viewPadding: EdgeInsets.only(bottom: 48),
+    );
+    expect(
+      await panelHeight(
+        expanded: false,
+        safeArea: SeatLayerPickerMobilePanelSafeArea.adaptive,
+        media: navigationBarMedia,
+      ),
+      98,
+    );
+
+    final expandedWithoutInset = await panelHeight(
+      expanded: true,
+      safeArea: SeatLayerPickerMobilePanelSafeArea.none,
+    );
+    final expandedWithInset = await panelHeight(
+      expanded: true,
+      safeArea: SeatLayerPickerMobilePanelSafeArea.adaptive,
+    );
+    expect(expandedWithInset - expandedWithoutInset, 34);
+  });
+
+  testWidgets('full-screen picker delegates its bottom inset to the dock',
+      (tester) async {
+    final map = _FakeMapController();
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(map.dispose);
+    addTearDown(picker.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: const MediaQueryData(
+            size: Size(390, 844),
+            padding: EdgeInsets.only(bottom: 34),
+            viewPadding: EdgeInsets.only(bottom: 34),
+          ),
+          child: child!,
+        ),
+        home: SeatLayerPickerPage(
+          configuration: SeatLayerConfiguration(event: 'ev_test'),
+          controller: picker,
+          builders: const SeatLayerPickerBuilders(
+            map: _emptyPickerPart,
+          ),
+          onCheckout: _noopCheckout,
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot(withSelection: false));
+    await tester.pumpAndSettle();
+
+    final pageSafeArea = find.ancestor(
+      of: find.byType(SeatLayerPicker),
+      matching: find.byType(SafeArea),
+    );
+    expect(pageSafeArea, findsOneWidget);
+    expect(tester.widget<SafeArea>(pageSafeArea).bottom, isFalse);
+    expect(
+      tester.getSize(find.byType(SeatLayerPickerMobileTicketPanel)).height,
+      62,
+    );
+  });
+
   testWidgets(
       'expanded mobile ticket panel exposes the reusable best-seat form',
       (tester) async {
@@ -506,6 +643,12 @@ void main() {
     expect(find.textContaining('rejection unavailable'), findsNothing);
   });
 }
+
+Widget _emptyPickerPart(
+  BuildContext context,
+  SeatLayerPickerPartContext part,
+) =>
+    const SizedBox.shrink();
 
 Future<void> _noopCheckout(_) async {}
 
