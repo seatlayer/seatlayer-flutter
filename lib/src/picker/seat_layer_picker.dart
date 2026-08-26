@@ -447,28 +447,40 @@ class SeatLayerPickerMapControls extends StatelessWidget {
     final map = state.snapshot?.map;
     final options = SeatLayerPickerScope.optionsOf(context);
     final chrome = options.chrome;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (chrome.showOverviewControl && map?.focusedSection != null)
-          const SeatLayerPickerOverviewButton(),
-        if (chrome.showZoomControls) ...[
-          const SeatLayerPickerZoomInButton(),
-          const SeatLayerPickerZoomOutButton(),
-        ],
-        if (chrome.showZoomToFitControl) const SeatLayerPickerZoomToFitButton(),
-        if (chrome.showViewModeControl && options.enable3D)
-          const SeatLayerPickerViewModeButton(),
-        if (chrome.showColorblindControl)
-          const SeatLayerPickerColorblindButton(),
-      ]
-          .map(
-            (control) => Padding(
-              padding: EdgeInsets.only(bottom: compact ? 6 : 7),
-              child: control,
-            ),
-          )
-          .toList(growable: false),
+    return AnimatedSize(
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 190),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (chrome.showOverviewControl && map?.focusedSection != null)
+            const SeatLayerPickerOverviewButton(),
+          if (chrome.showZoomControls) ...[
+            const SeatLayerPickerZoomInButton(),
+            const SeatLayerPickerZoomOutButton(),
+          ],
+          if (chrome.showZoomToFitControl)
+            const SeatLayerPickerZoomToFitButton(),
+          if (chrome.showViewModeControl &&
+              options.enable3D &&
+              state.snapshot?.capabilities.contains('venue3d') == true)
+            const SeatLayerPickerViewModeButton(),
+          if (state.snapshot?.map.isVenue3D == true)
+            const SeatLayerPicker3DNavigationModeButton(),
+          if (chrome.showColorblindControl)
+            const SeatLayerPickerColorblindButton(),
+        ]
+            .map(
+              (control) => Padding(
+                padding: EdgeInsets.only(bottom: compact ? 6 : 7),
+                child: control,
+              ),
+            )
+            .toList(growable: false),
+      ),
     );
   }
 }
@@ -532,21 +544,58 @@ class SeatLayerPickerZoomToFitButton extends StatelessWidget {
       );
 }
 
-/// A standalone 2D/isometric map toggle for custom picker compositions.
+/// A standalone Map / real venue-3D toggle for custom picker compositions.
+///
+/// The old implementation changed only the canvas projection. This control now
+/// drives the same lazy WebGL venue scene and gesture system as the web picker.
 class SeatLayerPickerViewModeButton extends StatelessWidget {
   const SeatLayerPickerViewModeButton({super.key});
 
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
-    final is3D = controller.state.snapshot?.map.viewMode != 'flat';
+    final is3D = controller.state.snapshot?.map.isVenue3D ?? false;
+    final available =
+        controller.state.snapshot?.capabilities.contains('venue3d') == true;
+    if (!available) return const SizedBox.shrink();
     return _ControlButton(
       icon: is3D ? Icons.map_outlined : Icons.view_in_ar_rounded,
-      tooltip: is3D ? 'Switch to 2D map' : 'Switch to 3D map',
+      tooltip: is3D ? 'Back to seat map' : 'Open interactive 3D venue',
       active: is3D,
-      onPressed: () => controller.setViewMode(
-        is3D ? SeatLayerViewMode.flat : SeatLayerViewMode.isometric,
-      ),
+      onPressed: controller.state.isBusy
+          ? null
+          : () => controller.setBuyerView(
+                is3D ? SeatLayerBuyerView.map : SeatLayerBuyerView.venue3D,
+              ),
+    );
+  }
+}
+
+/// Rotate / Move toggle for the active real venue-3D camera.
+///
+/// Pinch-to-zoom and two-finger movement remain available in both modes; this
+/// explicit control makes the primary one-finger gesture discoverable and can
+/// be placed anywhere by a custom composition.
+class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
+  const SeatLayerPicker3DNavigationModeButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = SeatLayerPickerScope.controllerOf(context);
+    final map = controller.state.snapshot?.map;
+    if (map?.isVenue3D != true) return const SizedBox.shrink();
+    final moving = map!.view3DNavigationMode == SeatLayer3DNavigationMode.move;
+    return _ControlButton(
+      icon: moving ? Icons.open_with_rounded : Icons.threesixty_rounded,
+      tooltip: moving ? 'Drag to move venue' : 'Drag to rotate venue',
+      active: true,
+      onPressed: controller.state.isBusy
+          ? null
+          : () => controller.set3DNavigationMode(
+                moving
+                    ? SeatLayer3DNavigationMode.rotate
+                    : SeatLayer3DNavigationMode.move,
+              ),
     );
   }
 }
@@ -585,19 +634,61 @@ class _ControlButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
     final theme = _theme(context, state);
-    return Material(
-      color: _alpha(theme.surface, .94),
-      shape: CircleBorder(side: BorderSide(color: theme.divider)),
-      elevation: 2,
-      shadowColor: const Color(0x33000000),
-      child: IconButton(
-        tooltip: tooltip,
-        visualDensity: VisualDensity.compact,
-        constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-        padding: EdgeInsets.zero,
-        color: active ? theme.accent : theme.text,
-        onPressed: onPressed == null ? null : () => _ignoreAction(onPressed!()),
-        icon: Icon(icon, size: 20),
+    final reducedMotion = MediaQuery.disableAnimationsOf(context);
+    return AnimatedContainer(
+      duration:
+          reducedMotion ? Duration.zero : const Duration(milliseconds: 180),
+      curve: Curves.easeOutCubic,
+      width: 36,
+      height: 36,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: active
+            ? Color.alphaBlend(_alpha(theme.accent, .13), theme.surface)
+            : _alpha(theme.surface, .94),
+        border: Border.all(
+          color: active ? _alpha(theme.accent, .52) : theme.divider,
+        ),
+        boxShadow: const <BoxShadow>[
+          BoxShadow(
+            color: Color(0x26000000),
+            blurRadius: 8,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: IconButton(
+          tooltip: tooltip,
+          visualDensity: VisualDensity.compact,
+          constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+          padding: EdgeInsets.zero,
+          onPressed:
+              onPressed == null ? null : () => _ignoreAction(onPressed!()),
+          icon: AnimatedSwitcher(
+            duration: reducedMotion
+                ? Duration.zero
+                : const Duration(milliseconds: 170),
+            switchInCurve: Curves.easeOutBack,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: .82, end: 1).animate(animation),
+                child: child,
+              ),
+            ),
+            child: Icon(
+              icon,
+              key: ValueKey<String>('${icon.codePoint}:$active'),
+              size: 20,
+              color: active ? theme.accent : theme.text,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -1221,7 +1312,11 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
           children: [
             InkWell(
               onTap: () => onExpandedChanged(!expanded),
-              child: SizedBox(
+              child: AnimatedContainer(
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
                 height: expanded ? 42 : 50,
                 child: Stack(
                   children: [
@@ -1245,70 +1340,100 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Text(
-                                hasTickets
-                                    ? '$ticketCount ticket${ticketCount == 1 ? '' : 's'} · ${_money(context, cartTotal, currency)}'
-                                    : minimum == null
-                                        ? 'Choose tickets'
-                                        : 'From ${_compactMoney(minimum, currency)}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: theme.text,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w800,
+                              child: AnimatedSwitcher(
+                                duration:
+                                    MediaQuery.disableAnimationsOf(context)
+                                        ? Duration.zero
+                                        : const Duration(milliseconds: 190),
+                                child: Text(
+                                  hasTickets
+                                      ? '$ticketCount ticket${ticketCount == 1 ? '' : 's'} · ${_money(context, cartTotal, currency)}'
+                                      : minimum == null
+                                          ? 'Choose tickets'
+                                          : 'From ${_compactMoney(minimum, currency)}',
+                                  key: ValueKey<String>(
+                                    '$hasTickets:$ticketCount:$cartTotal:$minimum',
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: theme.text,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                               ),
                             ),
-                            if (!expanded &&
-                                !hasTickets &&
-                                SeatLayerPickerScope.optionsOf(context)
-                                    .enableBestAvailable)
-                              FilledButton.icon(
-                                style: FilledButton.styleFrom(
-                                  minimumSize: const Size(0, 34),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12),
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                                onPressed: () => onExpandedChanged(true),
-                                icon: const Icon(Icons.auto_awesome_rounded,
-                                    size: 15),
-                                label: const Text('Best seats'),
-                              ),
-                            if (!expanded && hasTickets)
-                              FilledButton(
-                                style: FilledButton.styleFrom(
-                                  minimumSize: const Size(0, 34),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                  ),
-                                  visualDensity: VisualDensity.compact,
-                                  backgroundColor: theme.accent,
-                                  foregroundColor: theme.onAccent,
-                                ),
-                                onPressed: hasHold
-                                    ? controller.canCheckout
-                                        ? () => _ignoreAction(
-                                              _checkoutWithRejection(
-                                                controller,
-                                                onCheckout,
-                                              ),
-                                            )
-                                        : null
-                                    : state.isBusy
-                                        ? null
-                                        : () => onExpandedChanged(true),
-                                child: Text(hasHold ? 'Continue' : 'Review'),
-                              ),
+                            AnimatedSwitcher(
+                              duration: MediaQuery.disableAnimationsOf(context)
+                                  ? Duration.zero
+                                  : const Duration(milliseconds: 210),
+                              child: !expanded &&
+                                      !hasTickets &&
+                                      SeatLayerPickerScope.optionsOf(context)
+                                          .enableBestAvailable
+                                  ? FilledButton.icon(
+                                      key: const ValueKey<String>('best-seats'),
+                                      style: FilledButton.styleFrom(
+                                        minimumSize: const Size(0, 34),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12),
+                                        visualDensity: VisualDensity.compact,
+                                      ),
+                                      onPressed: () => onExpandedChanged(true),
+                                      icon: const Icon(
+                                          Icons.auto_awesome_rounded,
+                                          size: 15),
+                                      label: const Text('Best seats'),
+                                    )
+                                  : !expanded && hasTickets
+                                      ? FilledButton(
+                                          key: const ValueKey<String>('review'),
+                                          style: FilledButton.styleFrom(
+                                            minimumSize: const Size(0, 34),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                            ),
+                                            visualDensity:
+                                                VisualDensity.compact,
+                                            backgroundColor: theme.accent,
+                                            foregroundColor: theme.onAccent,
+                                          ),
+                                          onPressed: hasHold
+                                              ? controller.canCheckout
+                                                  ? () => _ignoreAction(
+                                                        _checkoutWithRejection(
+                                                          controller,
+                                                          onCheckout,
+                                                        ),
+                                                      )
+                                                  : null
+                                              : state.isBusy
+                                                  ? null
+                                                  : () =>
+                                                      onExpandedChanged(true),
+                                          child: Text(
+                                            hasHold ? 'Continue' : 'Review',
+                                          ),
+                                        )
+                                      : const SizedBox(
+                                          key: ValueKey<String>('no-action'),
+                                        ),
+                            ),
                             const SizedBox(width: 6),
                             SizedBox.square(
                               dimension: 36,
-                              child: Icon(
-                                expanded
-                                    ? Icons.keyboard_arrow_down_rounded
-                                    : Icons.keyboard_arrow_up_rounded,
-                                color: theme.mutedText,
+                              child: AnimatedRotation(
+                                duration:
+                                    MediaQuery.disableAnimationsOf(context)
+                                        ? Duration.zero
+                                        : const Duration(milliseconds: 220),
+                                curve: Curves.easeOutCubic,
+                                turns: expanded ? .5 : 0,
+                                child: Icon(
+                                  Icons.keyboard_arrow_up_rounded,
+                                  color: theme.mutedText,
+                                ),
                               ),
                             ),
                           ],
@@ -1451,20 +1576,49 @@ class SeatLayerPickerSelectionTray extends StatelessWidget {
             ),
             if (lines.isNotEmpty) ...[
               const SizedBox(height: 10),
-              for (var index = 0; index < lines.length; index++) ...[
-                SeatLayerPickerTicketCard(
-                  line: lines[index],
-                  seat: state.selection
-                      .where((seat) => seat.label == lines[index].label)
-                      .firstOrNull,
-                  compact: compact,
-                  onRemove: options.readOnly ||
-                          state.holdOwner == SeatLayerHoldOwner.host
-                      ? null
-                      : () => controller.removeObject(lines[index].label),
+              AnimatedSwitcher(
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 240),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) => FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, .025),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
                 ),
-                if (index != lines.length - 1) const SizedBox(height: 7),
-              ],
+                child: Column(
+                  key: ValueKey<String>(
+                    lines
+                        .map((line) =>
+                            '${line.label}:${line.tierId}:${line.quantity}')
+                        .join('|'),
+                  ),
+                  children: [
+                    for (var index = 0; index < lines.length; index++) ...[
+                      SeatLayerPickerTicketCard(
+                        line: lines[index],
+                        seat: state.selection
+                            .where(
+                              (seat) => seat.label == lines[index].label,
+                            )
+                            .firstOrNull,
+                        compact: compact,
+                        onRemove: options.readOnly ||
+                                state.holdOwner == SeatLayerHoldOwner.host
+                            ? null
+                            : () => controller.removeObject(lines[index].label),
+                      ),
+                      if (index != lines.length - 1) const SizedBox(height: 7),
+                    ],
+                  ],
+                ),
+              ),
             ],
           ],
         ),
@@ -2058,6 +2212,7 @@ class _SeatLayerPickerAdaptiveLayoutState
             ),
           );
         } else if (pendingSeat != null) {
+          final capabilities = state.snapshot?.capabilities ?? const <String>{};
           buyerPrompt = _part(
             context,
             widget.builders.seatConfirmation,
@@ -2066,6 +2221,19 @@ class _SeatLayerPickerAdaptiveLayoutState
               seat: pendingSeat,
               onConfirm: _confirmSeat,
               onCancel: (seat) => _removeSeat(controller, seat.label),
+              onViewFromSeat:
+                  options.enableSeatView && capabilities.contains('seatView')
+                      ? (seat) => _inspectSeat(
+                            seat,
+                            () => controller.openSeatView(seat),
+                          )
+                      : null,
+              onShow3D: options.enable3D && capabilities.contains('venue3d')
+                  ? (seat) => _inspectSeat(
+                        seat,
+                        () => controller.showSeatIn3D(seat),
+                      )
+                  : null,
             ),
           );
         } else {
@@ -2121,16 +2289,12 @@ class _SeatLayerPickerAdaptiveLayoutState
                             bottom: 58,
                             child: accessibility,
                           ),
-                          if (buyerPrompt != null)
-                            Positioned.fill(
-                              child: ColoredBox(
-                                color: _alpha(resolved.background, .64),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: buyerPrompt,
-                                ),
-                              ),
+                          Positioned.fill(
+                            child: _PickerPromptTransition(
+                              scrimColor: _alpha(resolved.background, .64),
+                              child: buyerPrompt,
                             ),
+                          ),
                           if (statusOverlay != null)
                             Positioned.fill(child: statusOverlay),
                         ],
@@ -2190,16 +2354,12 @@ class _SeatLayerPickerAdaptiveLayoutState
                     ),
                   Positioned(right: 10, bottom: 10, child: controls),
                   Positioned(left: 10, bottom: 56, child: accessibility),
-                  if (buyerPrompt != null)
-                    Positioned.fill(
-                      child: ColoredBox(
-                        color: _alpha(resolved.background, .64),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: buyerPrompt,
-                        ),
-                      ),
+                  Positioned.fill(
+                    child: _PickerPromptTransition(
+                      scrimColor: _alpha(resolved.background, .64),
+                      child: buyerPrompt,
                     ),
+                  ),
                   if (statusOverlay != null)
                     Positioned.fill(child: statusOverlay),
                 ],
@@ -2252,6 +2412,20 @@ class _SeatLayerPickerAdaptiveLayoutState
     });
   }
 
+  Future<void> _inspectSeat(
+    SelectedSeat seat,
+    Future<void> Function() action,
+  ) async {
+    if (!mounted) return;
+    setState(() => _confirmedLabels.add(seat.label));
+    try {
+      await action();
+    } catch (_) {
+      if (mounted) setState(() => _confirmedLabels.remove(seat.label));
+      rethrow;
+    }
+  }
+
   Future<void> _removeSeat(
     SeatLayerPickerController controller,
     String label,
@@ -2261,6 +2435,69 @@ class _SeatLayerPickerAdaptiveLayoutState
     } finally {
       if (mounted) setState(() => _confirmedLabels.add(label));
     }
+  }
+}
+
+/// One motion language for every native decision surface: scrim, seat card,
+/// GA/table prompts and their exit. The canvas remains mounted underneath, so
+/// opening a card never resets camera state or causes a WebView flash.
+class _PickerPromptTransition extends StatelessWidget {
+  const _PickerPromptTransition({
+    required this.scrimColor,
+    required this.child,
+  });
+
+  final Color scrimColor;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final reducedMotion = MediaQuery.disableAnimationsOf(context);
+    final prompt = child;
+    return IgnorePointer(
+      ignoring: prompt == null,
+      child: AnimatedSwitcher(
+        duration:
+            reducedMotion ? Duration.zero : const Duration(milliseconds: 260),
+        reverseDuration:
+            reducedMotion ? Duration.zero : const Duration(milliseconds: 190),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        transitionBuilder: (current, animation) {
+          if (reducedMotion) return current;
+          final eased = CurvedAnimation(
+            parent: animation,
+            curve: Curves.easeOutCubic,
+            reverseCurve: Curves.easeInCubic,
+          );
+          return FadeTransition(
+            opacity: eased,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, .035),
+                end: Offset.zero,
+              ).animate(eased),
+              child: ScaleTransition(
+                scale: Tween<double>(begin: .965, end: 1).animate(eased),
+                child: current,
+              ),
+            ),
+          );
+        },
+        child: prompt == null
+            ? const SizedBox.expand(key: ValueKey<String>('picker-prompt-none'))
+            : ColoredBox(
+                key: ValueKey<Object>(
+                  (prompt.runtimeType, prompt.key ?? prompt.runtimeType),
+                ),
+                color: scrimColor,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: prompt,
+                ),
+              ),
+      ),
+    );
   }
 }
 

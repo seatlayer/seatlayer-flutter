@@ -55,7 +55,8 @@ This is the default integration. `SeatLayerPicker` supplies the adaptive
 layout, event identity, price and accessibility filters, section/floor/map
 controls, seat-tier confirmation, GA and variable-table prompts, Best
 Available, selection tray, hold countdown, attribution, one test-event badge,
-recoverable action errors and the checkout CTA.
+recoverable action errors, authored/chart-derived seat views, real venue 3D and
+the checkout CTA.
 
 ```dart
 SeatLayerPicker(
@@ -89,9 +90,9 @@ bars are always kept clear. Required attribution is a small content-sized footer
 when the API hides it, it reserves no layout height. The dock expands for Best
 Seats, selected tickets and checkout, and automatically opens after a new
 selection. The SDK does not add a second section rail above the map. Zoom
-in/out, fit, 2D/3D and colorblind-safe controls stay available as compact
-floating buttons. Best Seats uses touch-friendly selector rows that open mobile
-choice sheets instead of cramped desktop dropdown menus.
+in/out, fit, Map/real-3D, rotate/move and colorblind-safe controls stay
+available as compact floating buttons. Best Seats uses touch-friendly selector
+rows that open mobile choice sheets instead of cramped desktop dropdown menus.
 
 `SeatLayerPickerPage` leaves the bottom inset to the ticket dock, so a
 full-screen integration does not append a second empty safe-area strip. For a
@@ -108,6 +109,8 @@ SeatLayerPicker(
   configuration: configuration,
   options: const SeatLayerPickerOptions(
     enable3D: true,
+    enableSeatView: true,
+    max3DSeats: 30000, // optional; omit for the device-aware SDK default
     chrome: SeatLayerPickerChromeOptions(
       showHeader: true,
       showPriceRail: true,
@@ -129,6 +132,14 @@ SeatLayerPicker(
 composition can place the same public controls anywhere. Attribution is not a
 host visibility switch: the API-provided `branding.attributionRequired` value
 is authoritative.
+
+Venue 3D is a real, lazy-loaded WebGL scene, not the legacy isometric canvas
+projection. The base map stays interactive while the scene module loads and
+the SDK crossfades into it; unsupported devices keep the complete 2D flow and
+do not show a dead control. `enable3D`, `enableSeatView` and `max3DSeats` let a
+host disable or constrain immersive rendering without changing its layout.
+Picker cards, ticket-dock changes, cart rows and immersive surfaces use one
+short motion language and honor the platform reduced-motion preference.
 
 `SeatLayerPickerThemeData.light()` is a complete light preset, not just white
 Flutter panels. It sends a contrast-paired `SeatLayerMapThemeData` to the
@@ -245,6 +256,10 @@ await picker.deselectCategories(['restricted-view']);
 await picker.setSelectableObjects(['A-12', 'A-13', 'A-14']);
 await picker.setMaxSelection(4);
 await picker.resumeHold(restoredHoldId); // restored as host-owned
+await picker.setBuyerView(SeatLayerBuyerView.venue3D);
+await picker.showSeatIn3D(seat); // enter or retarget without remounting
+await picker.openSeatView(seat); // authored 360° or chart-derived preview
+await picker.set3DNavigationMode(SeatLayer3DNavigationMode.move);
 ```
 
 The public `0.3.0-dev` component baseline exports:
@@ -264,6 +279,7 @@ The public `0.3.0-dev` component baseline exports:
 - `SeatLayerPickerZoomOutButton`
 - `SeatLayerPickerZoomToFitButton`
 - `SeatLayerPickerViewModeButton`
+- `SeatLayerPicker3DNavigationModeButton`
 - `SeatLayerPickerColorblindButton`
 - `SeatLayerPickerBestAvailable`
 - `SeatLayerPickerBestAvailablePanel`
@@ -291,11 +307,13 @@ vertical `SeatLayerPickerTicketCard` rows with buyer labels, category/tier,
 price, commercial warnings and a safe remove action.
 
 `SeatLayerPickerSeatConfirmation` consumes the authored section, row and seat
-identity from the picker snapshot. `SeatLayerPickerSeatViewButton` and
-`SeatLayerPickerSeat3DButton` require real callbacks and are omitted otherwise;
-the SDK does not display a dead action or fabricate a sightline. See the parity
-ledger in the mobile picker architecture document for the bridge work required
-before those actions can be part of the turnkey flow.
+identity from the picker snapshot and self-wires View from here / See it in 3D
+when the runtime advertises those capabilities. Set `showSeatView` or `show3D`
+to false to hide either action, or pass `onViewFromSeat` / `onShow3D` to replace
+the SDK action. The standalone `SeatLayerPickerSeatViewButton` and
+`SeatLayerPickerSeat3DButton` follow the same rule: controller-backed by
+default, callback-replaceable, and absent rather than decorative when the
+capability is unavailable.
 
 Targeted parts of the turnkey layout can also be wrapped or replaced through
 `SeatLayerPickerBuilders`. Every builder receives the immutable state, the
@@ -475,6 +493,12 @@ hold-ownership-v1
 cart-line-remove-v1
 table-quantity-v1
 ```
+
+With the default `enable3D: true` and `enableSeatView: true`, the picker also
+requires `venue-3d-v1`, `venue-3d-controls-v1` and `seat-view-v1`. Disabling an
+optional feature removes its bridge requirement. This fails closed against an
+old hosted runtime instead of showing a control that silently changes only the
+2D projection or does nothing.
 
 Picker state uses complete `seatlayer.picker.snapshot/1` replacements with a
 session id and monotonically increasing revision. Dart ignores stale revisions

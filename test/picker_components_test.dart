@@ -110,7 +110,6 @@ void main() {
     );
     map.emit(pickerSnapshot());
     await tester.pump();
-
     expect(find.text('TEST MODE · BOOKS NOTHING'), findsOneWidget);
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
   });
@@ -260,16 +259,17 @@ void main() {
     );
     map.emit(pickerSnapshot(withSelection: false));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
 
     expect(find.byTooltip('Zoom in'), findsOneWidget);
     expect(find.byTooltip('Zoom out'), findsOneWidget);
     expect(find.byTooltip('Fit venue'), findsOneWidget);
-    expect(find.byTooltip('Switch to 3D map'), findsOneWidget);
+    expect(find.byTooltip('Open interactive 3D venue'), findsOneWidget);
 
-    await tester.tap(find.byTooltip('Switch to 3D map'));
+    await tester.tap(find.byTooltip('Open interactive 3D venue'));
     await tester.pump();
-    expect(map.calls.single.$1, 'picker.setViewMode');
-    expect(map.calls.single.$2, <String, Object?>{'mode': 'iso'});
+    expect(map.calls.single.$1, 'picker.setBuyerView');
+    expect(map.calls.single.$2, <String, Object?>{'view': 'venue3d'});
   });
 
   testWidgets('chrome options can hide built-in controls without app changes',
@@ -293,7 +293,7 @@ void main() {
 
     expect(find.byTooltip('Zoom in'), findsNothing);
     expect(find.byTooltip('Zoom out'), findsNothing);
-    expect(find.byTooltip('Switch to 3D map'), findsNothing);
+    expect(find.byTooltip('Open interactive 3D venue'), findsNothing);
     expect(find.byTooltip('Fit venue'), findsOneWidget);
   });
 
@@ -344,6 +344,10 @@ void main() {
       ),
     );
     map.emit(pickerSnapshot());
+    await tester.pump();
+    // Let the action crossfade finish: AnimatedSwitcher intentionally keeps
+    // the outgoing Best seats button mounted while Review enters.
+    await tester.pump(const Duration(milliseconds: 220));
     await tester.pump();
 
     expect(find.text('1 ticket · €25'), findsOneWidget);
@@ -437,12 +441,35 @@ void main() {
     expect(find.text('€25'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
     expect(find.text('Select'), findsOneWidget);
-    expect(find.text('View from here'), findsNothing);
-    expect(find.text('See it in 3D'), findsNothing);
+    expect(find.text('View from here'), findsOneWidget);
+    expect(find.text('See it in 3D'), findsOneWidget);
 
     await tester.tap(find.text('Select'));
     await tester.pump();
     expect(confirmed, isTrue);
+  });
+
+  testWidgets(
+      'seat inspection widgets self-wire and remain individually hideable',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    await tester.pumpWidget(
+      _app(
+        map,
+        const SeatLayerPickerSeatConfirmation(show3D: false),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+
+    expect(find.text('View from here'), findsOneWidget);
+    expect(find.text('See it in 3D'), findsNothing);
+    await tester.tap(find.text('View from here'));
+    await tester.pump();
+
+    expect(map.calls.single.$1, 'picker.openSeatView');
+    expect(map.calls.single.$2, <String, Object?>{'seatId': 'seat-a-1'});
   });
 
   testWidgets('mobile ticket dock adapts to each device bottom inset',

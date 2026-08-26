@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/bridge/bridge_client.dart';
+import 'package:seatlayer/src/open_enums.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
@@ -298,6 +299,46 @@ void main() {
     );
     expect(map.calls[7].payload, isNull);
     expect(picker.state.phase, SeatLayerPickerPhase.closed);
+  });
+
+  test('immersive actions use real venue and seat-view commands', () async {
+    var revision = 1;
+    final map = _FakeMapController((_, __) async {
+      revision += 1;
+      return <String, Object?>{
+        'revision': revision,
+        'snapshot': pickerSnapshot(revision: revision),
+      };
+    });
+    final picker = _picker(map);
+    addTearDown(() {
+      picker.dispose();
+      map.dispose();
+    });
+    await _deliver(map, pickerSnapshot());
+    final seat = picker.state.selection.single;
+
+    await picker.showSeatIn3D(seat);
+    await picker.openSeatView(seat);
+    await picker.set3DNavigationMode(SeatLayer3DNavigationMode.move);
+    await picker.setBuyerView(SeatLayerBuyerView.map);
+
+    expect(
+      map.calls.map((call) => call.name),
+      <String>[
+        'picker.setBuyerView',
+        'picker.openSeatView',
+        'picker.setVenue3DNavigationMode',
+        'picker.setBuyerView',
+      ],
+    );
+    expect(map.calls[0].payload, <String, Object?>{
+      'view': 'venue3d',
+      'flyToSeatId': 'seat-a-1',
+    });
+    expect(map.calls[1].payload, <String, Object?>{'seatId': 'seat-a-1'});
+    expect(map.calls[2].payload, <String, Object?>{'mode': 'pan'});
+    expect(map.calls[3].payload, <String, Object?>{'view': 'map'});
   });
 
   test('handoff rejection remains allowed in read-only mode', () async {

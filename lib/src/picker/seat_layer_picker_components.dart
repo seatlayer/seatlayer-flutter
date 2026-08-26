@@ -295,21 +295,31 @@ class SeatLayerPickerSeatConfirmation extends StatefulWidget {
     this.onCancel,
     this.onViewFromSeat,
     this.onShow3D,
+    this.showSeatView = true,
+    this.show3D = true,
   });
 
   final SelectedSeat? seat;
   final FutureOr<void> Function(SelectedSeat seat)? onConfirm;
   final FutureOr<void> Function(SelectedSeat seat)? onCancel;
 
-  /// Optional host-owned sightline action.
+  /// Optional replacement for the SDK seat-view action.
   ///
-  /// The default native bridge does not invent a view image. Supply this only
-  /// when the host has an authoritative photo or its own seat-view route.
+  /// When omitted, the component opens SeatLayer's authored/chart-derived
+  /// seat-view surface whenever the negotiated runtime supports it.
   final FutureOr<void> Function(SelectedSeat seat)? onViewFromSeat;
 
-  /// Optional host-owned venue-3D action. The control is omitted when null so
-  /// the default card never advertises an unsupported or decorative action.
+  /// Optional replacement for the SDK's real venue-3D action.
+  ///
+  /// When omitted, the component enters the negotiated venue scene and flies
+  /// to the candidate seat. Unsupported actions remain absent.
   final FutureOr<void> Function(SelectedSeat seat)? onShow3D;
+
+  /// Whether the capability-gated view-from-seat action may be shown.
+  final bool showSeatView;
+
+  /// Whether the capability-gated real venue-3D action may be shown.
+  final bool show3D;
 
   @override
   State<SeatLayerPickerSeatConfirmation> createState() =>
@@ -373,6 +383,16 @@ class _SeatLayerPickerSeatConfirmationState
             .any((item) => item.toLowerCase().contains('wheelchair'));
     final tiers = seat.tiers ?? const <CategoryTier>[];
     final maxHeight = MediaQuery.sizeOf(context).height * .72;
+    final capabilities =
+        controller.state.snapshot?.capabilities ?? const <String>{};
+    final viewFromSeat = widget.showSeatView
+        ? widget.onViewFromSeat ??
+            (capabilities.contains('seatView') ? controller.openSeatView : null)
+        : null;
+    final show3D = widget.show3D
+        ? widget.onShow3D ??
+            (capabilities.contains('venue3d') ? controller.showSeatIn3D : null)
+        : null;
 
     return Align(
       alignment: Alignment.center,
@@ -514,17 +534,18 @@ class _SeatLayerPickerSeatConfirmationState
                               ? 'Wheelchair space without a fixed chair.'
                               : 'Wheelchair-accessible seating.',
                         ),
-                      if (widget.onViewFromSeat != null) ...[
+                      if (viewFromSeat != null) ...[
                         SeatLayerPickerSeatViewButton(
                           seat: seat,
-                          onPressed: widget.onViewFromSeat!,
+                          onPressed: (candidate) =>
+                              _inspect(candidate, viewFromSeat),
                         ),
                         const SizedBox(height: 8),
                       ],
-                      if (widget.onShow3D != null) ...[
+                      if (show3D != null) ...[
                         SeatLayerPickerSeat3DButton(
                           seat: seat,
-                          onPressed: widget.onShow3D!,
+                          onPressed: (candidate) => _inspect(candidate, show3D),
                         ),
                         const SizedBox(height: 10),
                       ],
@@ -608,26 +629,46 @@ class _SeatLayerPickerSeatConfirmationState
       // The controller keeps the typed failure in picker state for native UI.
     }
   }
+
+  Future<void> _inspect(
+    SelectedSeat seat,
+    FutureOr<void> Function(SelectedSeat seat) action,
+  ) async {
+    setState(() => _dismissedLabel = seat.label);
+    try {
+      await action(seat);
+    } catch (_) {
+      if (mounted) setState(() => _dismissedLabel = null);
+      // Controller-backed actions already publish a typed picker error. A
+      // custom action can render its own failure before this card returns.
+    }
+  }
 }
 
-/// A reusable seat-sightline action for hosts with an authoritative view.
+/// A reusable view-from-seat action.
 ///
-/// It intentionally requires a callback; the SDK never fabricates an image or
-/// enables a button that cannot complete an action.
+/// Without [onPressed], it calls the SDK controller and hides itself unless the
+/// runtime advertises an authored or honest chart-derived seat view.
 class SeatLayerPickerSeatViewButton extends StatelessWidget {
   const SeatLayerPickerSeatViewButton({
     super.key,
     required this.seat,
-    required this.onPressed,
+    this.onPressed,
   });
 
   final SelectedSeat seat;
-  final FutureOr<void> Function(SelectedSeat seat) onPressed;
+  final FutureOr<void> Function(SelectedSeat seat)? onPressed;
 
   @override
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
     final theme = _theme(context, state);
+    final controller = SeatLayerPickerScope.controllerOf(context);
+    final action = onPressed ??
+        (state.snapshot?.capabilities.contains('seatView') == true
+            ? controller.openSeatView
+            : null);
+    if (action == null) return const SizedBox.shrink();
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(48),
@@ -636,28 +677,38 @@ class SeatLayerPickerSeatViewButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(theme.radius),
         ),
       ),
-      onPressed: state.isBusy ? null : () => onPressed(seat),
+      onPressed: state.isBusy ? null : () => action(seat),
       icon: const Icon(Icons.visibility_outlined),
       label: const Text('View from here'),
     );
   }
 }
 
-/// A reusable venue-3D action for hosts whose runtime exposes real venue 3D.
+/// A reusable venue-3D action.
+///
+/// Without [onPressed], it flies to [seat] through the SDK controller and hides
+/// itself when the negotiated runtime cannot render real venue 3D.
 class SeatLayerPickerSeat3DButton extends StatelessWidget {
   const SeatLayerPickerSeat3DButton({
     super.key,
     required this.seat,
-    required this.onPressed,
+    this.onPressed,
   });
 
   final SelectedSeat seat;
-  final FutureOr<void> Function(SelectedSeat seat) onPressed;
+  final FutureOr<void> Function(SelectedSeat seat)? onPressed;
 
   @override
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
     final theme = _theme(context, state);
+    final controller = SeatLayerPickerScope.controllerOf(context);
+    final action = onPressed ??
+        (state.snapshot?.capabilities.contains('venue3d') == true
+            ? controller.showSeatIn3D
+            : null);
+    if (action == null) return const SizedBox.shrink();
+    final alreadyIn3D = state.snapshot?.map.isVenue3D ?? false;
     return FilledButton.tonalIcon(
       style: FilledButton.styleFrom(
         minimumSize: const Size.fromHeight(48),
@@ -665,9 +716,13 @@ class SeatLayerPickerSeat3DButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(theme.radius),
         ),
       ),
-      onPressed: state.isBusy ? null : () => onPressed(seat),
-      icon: const Icon(Icons.view_in_ar_outlined),
-      label: const Text('See it in 3D'),
+      onPressed: state.isBusy ? null : () => action(seat),
+      icon: Icon(
+        alreadyIn3D
+            ? Icons.airline_seat_recline_normal_rounded
+            : Icons.view_in_ar_outlined,
+      ),
+      label: Text(alreadyIn3D ? 'View from this seat' : 'See it in 3D'),
     );
   }
 }
