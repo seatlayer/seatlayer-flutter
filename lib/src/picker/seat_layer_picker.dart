@@ -502,63 +502,187 @@ Future<void> _showBestAvailableSheet(
   SeatLayerPickerController controller,
   int initialQuantity,
 ) async {
+  final snapshot = controller.state.snapshot;
+  final zones = snapshot?.bestAvailableZones ?? const <SeatLayerPickerZone>[];
+  final categories = (snapshot?.categories ?? const <SeatLayerPickerCategory>[])
+      .where((category) => !category.notForSale)
+      .toList(growable: false);
   var quantity =
       initialQuantity.clamp(1, controller.state.snapshot?.maxSelection ?? 10);
-  final chosen = await showModalBottomSheet<int>(
+  var zoneId = _focusedBestAvailableZoneId(snapshot);
+  String? categoryKey;
+  final categoryFilter = snapshot?.map.categoryFilter ?? const <String>{};
+  if (categoryFilter.length == 1 &&
+      categories.any((category) => category.key == categoryFilter.single)) {
+    categoryKey = categoryFilter.single;
+  }
+  final request = await showModalBottomSheet<_BestAvailableRequest>(
     context: context,
     showDragHandle: true,
+    isScrollControlled: true,
     builder: (context) => StatefulBuilder(
       builder: (context, setSheetState) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Find seats together',
-                  style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 8),
-              const Text(
-                  'We will hold the best available seats together for checkout.'),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton.filledTonal(
-                    onPressed: quantity > 1
-                        ? () => setSheetState(() => quantity -= 1)
-                        : null,
-                    icon: const Icon(Icons.remove_rounded),
-                  ),
-                  SizedBox(
-                    width: 84,
-                    child: Text(
-                      '$quantity',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Find seats together',
+                    style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 8),
+                const Text(
+                    'We will hold the best available seats together for checkout.'),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton.filledTonal(
+                      tooltip: 'Fewer tickets',
+                      onPressed: quantity > 1
+                          ? () => setSheetState(() => quantity -= 1)
+                          : null,
+                      icon: const Icon(Icons.remove_rounded),
+                    ),
+                    SizedBox(
+                      width: 84,
+                      child: Semantics(
+                        label:
+                            '$quantity ${quantity == 1 ? 'ticket' : 'tickets'}',
+                        liveRegion: true,
+                        child: Text(
+                          '$quantity',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                      ),
+                    ),
+                    IconButton.filledTonal(
+                      tooltip: 'More tickets',
+                      onPressed: quantity <
+                              (controller.state.snapshot?.maxSelection ?? 10)
+                          ? () => setSheetState(() => quantity += 1)
+                          : null,
+                      icon: const Icon(Icons.add_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'Search area',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: 6),
+                Semantics(
+                  container: true,
+                  label: 'Best available search area choices',
+                  child: SizedBox(
+                    height: 48,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: zones.length + 1,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final zone = index == 0 ? null : zones[index - 1];
+                        final choiceZoneId = zone?.id;
+                        return ChoiceChip(
+                          visualDensity: VisualDensity.compact,
+                          label: Text(zone?.label ?? 'Across venue'),
+                          selected: zoneId == choiceZoneId,
+                          onSelected: (_) => setSheetState(
+                            () => zoneId = choiceZoneId,
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  IconButton.filledTonal(
-                    onPressed: quantity <
-                            (controller.state.snapshot?.maxSelection ?? 10)
-                        ? () => setSheetState(() => quantity += 1)
-                        : null,
-                    icon: const Icon(Icons.add_rounded),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Ticket category',
+                  style: Theme.of(context).textTheme.labelLarge,
+                ),
+                const SizedBox(height: 6),
+                Semantics(
+                  container: true,
+                  label: 'Best available ticket category choices',
+                  child: SizedBox(
+                    height: 48,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: categories.length + 1,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final category =
+                            index == 0 ? null : categories[index - 1];
+                        final choiceCategoryKey = category?.key;
+                        return ChoiceChip(
+                          visualDensity: VisualDensity.compact,
+                          label: Text(category?.label ?? 'Any category'),
+                          selected: categoryKey == choiceCategoryKey,
+                          onSelected: (_) => setSheetState(
+                            () => categoryKey = choiceCategoryKey,
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              FilledButton(
-                onPressed: () => Navigator.of(context).pop(quantity),
-                child: const Text('Find seats'),
-              ),
-            ],
+                ),
+                const SizedBox(height: 20),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(
+                    _BestAvailableRequest(
+                      quantity: quantity,
+                      zoneId: zoneId,
+                      categoryKey: categoryKey,
+                    ),
+                  ),
+                  child: const Text('Find seats'),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     ),
   );
-  if (chosen != null) await controller.bestAvailable(quantity: chosen);
+  if (request != null) {
+    await controller.bestAvailable(
+      quantity: request.quantity,
+      zoneId: request.zoneId,
+      categoryKey: request.categoryKey,
+    );
+  }
+}
+
+String? _focusedBestAvailableZoneId(SeatLayerPickerSnapshot? snapshot) {
+  final focusedSectionId = snapshot?.map.focusedSectionId;
+  if (focusedSectionId == null) return null;
+
+  String? focusedZoneId;
+  for (final section in snapshot!.sections) {
+    if (section.id == focusedSectionId) {
+      focusedZoneId = section.zoneId;
+      break;
+    }
+  }
+  if (focusedZoneId == null) return null;
+  return snapshot.bestAvailableZones.any((zone) => zone.id == focusedZoneId)
+      ? focusedZoneId
+      : null;
+}
+
+class _BestAvailableRequest {
+  const _BestAvailableRequest({
+    required this.quantity,
+    required this.zoneId,
+    required this.categoryKey,
+  });
+
+  final int quantity;
+  final String? zoneId;
+  final String? categoryKey;
 }
 
 class SeatLayerPickerSelectionTray extends StatelessWidget {
