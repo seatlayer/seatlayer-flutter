@@ -2417,11 +2417,13 @@ class _SeatLayerPickerAdaptiveLayoutState
     Future<void> Function() action,
   ) async {
     if (!mounted) return;
-    setState(() => _confirmedLabels.add(seat.label));
     try {
       await action();
+      // Do not uncover the embedded platform view until the runtime confirms
+      // its immersive surface is mounted. This also makes the card-to-view
+      // animation a handoff instead of a flash through the raw map.
+      if (mounted) setState(() => _confirmedLabels.add(seat.label));
     } catch (_) {
-      if (mounted) setState(() => _confirmedLabels.remove(seat.label));
       rethrow;
     }
   }

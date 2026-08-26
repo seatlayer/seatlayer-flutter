@@ -135,9 +135,12 @@ is authoritative.
 
 Venue 3D is a real, lazy-loaded WebGL scene, not the legacy isometric canvas
 projection. The base map stays interactive while the scene module loads and
-the SDK crossfades into it; unsupported devices keep the complete 2D flow and
-do not show a dead control. `enable3D`, `enableSeatView` and `max3DSeats` let a
-host disable or constrain immersive rendering without changing its layout.
+the SDK crossfades into it. After the first build, the scene stays mounted but
+idle while the buyer returns to the map, so repeated Map/3D comparison is
+instant and never churns the mobile WebGL context. Unsupported devices keep the
+complete 2D flow and do not show a dead control. `enable3D`, `enableSeatView`
+and `max3DSeats` let a host disable or constrain immersive rendering without
+changing its layout.
 Picker cards, ticket-dock changes, cart rows and immersive surfaces use one
 short motion language and honor the platform reduced-motion preference.
 
@@ -313,7 +316,9 @@ to false to hide either action, or pass `onViewFromSeat` / `onShow3D` to replace
 the SDK action. The standalone `SeatLayerPickerSeatViewButton` and
 `SeatLayerPickerSeat3DButton` follow the same rule: controller-backed by
 default, callback-replaceable, and absent rather than decorative when the
-capability is unavailable.
+capability is unavailable. The confirmation stays above the embedded platform
+view until the immersive command confirms its destination is mounted; this
+prevents the originating iOS tap from selecting a second seat underneath.
 
 Targeted parts of the turnkey layout can also be wrapped or replaced through
 `SeatLayerPickerBuilders`. Every builder receives the immutable state, the
