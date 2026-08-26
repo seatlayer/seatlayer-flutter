@@ -93,6 +93,18 @@ void main() {
     );
   });
 
+  test('dark theme serializes the complete renderer map palette', () {
+    expect(
+      const SeatLayerMapThemeData.dark().toBridgeConfig(),
+      <String, Object?>{
+        'background': '#090d15',
+        'rowLabelColor': '#d7deea',
+        'textColor': '#f4f7fb',
+        'selectionColor': '#9b8afb',
+      },
+    );
+  });
+
   testWidgets('native chrome shows one test badge and required attribution',
       (tester) async {
     final map = _FakeMapController();
@@ -413,6 +425,86 @@ void main() {
     expect(find.text('€25'), findsOneWidget);
     expect(find.byType(InputChip), findsNothing);
     expect(find.byType(SeatLayerPickerTicketCard), findsOneWidget);
+  });
+
+  testWidgets(
+      'selected mobile panel stays fixed while ticket rows scroll internally',
+      (tester) async {
+    final map = _FakeMapController();
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(map.dispose);
+    addTearDown(picker.dispose);
+    await tester.pumpWidget(
+      _app(
+        map,
+        const SeatLayerPickerMobileTicketPanel(
+          expanded: true,
+          onExpandedChanged: _ignoreExpanded,
+          onCheckout: _noopCheckout,
+          ticketPanelHeight: 300,
+          maxExpandedHeight: 340,
+          bottomSafeArea: SeatLayerPickerMobilePanelSafeArea.none,
+        ),
+        mediaQueryData: const MediaQueryData(size: Size(390, 844)),
+        pickerController: picker,
+      ),
+    );
+
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+    final oneTicketHeight =
+        tester.getSize(find.byType(SeatLayerPickerMobileTicketPanel)).height;
+
+    map.emit(_snapshotWithTicketCount(6));
+    await tester.pumpAndSettle();
+    final sixTicketHeight =
+        tester.getSize(find.byType(SeatLayerPickerMobileTicketPanel)).height;
+
+    expect(sixTicketHeight, oneTicketHeight);
+    expect(sixTicketHeight, 342);
+    expect(
+      find.byKey(const ValueKey<String>('mobile-ticket-list-scroll')),
+      findsOneWidget,
+    );
+    expect(find.byType(SeatLayerPickerTicketCard), findsNWidgets(6));
+    expect(find.text('Total'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
+  });
+
+  testWidgets('dark preset themes reusable cart chrome without light surfaces',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    await tester.pumpWidget(
+      _app(
+        map,
+        const SeatLayerPickerMobileTicketPanel(
+          expanded: true,
+          onExpandedChanged: _ignoreExpanded,
+          onCheckout: _noopCheckout,
+          ticketPanelHeight: 300,
+          bottomSafeArea: SeatLayerPickerMobilePanelSafeArea.none,
+        ),
+        pickerTheme: const SeatLayerPickerThemeData.dark(
+          accent: Color(0xFFE54558),
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.byType(SeatLayerPickerMobileTicketPanel),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Material && widget.color == const Color(0xFF141A24),
+        ),
+      ),
+      findsWidgets,
+    );
+    expect(find.text('Your tickets'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
   });
 
   testWidgets('seat confirmation mirrors the web identity and price hierarchy',
@@ -991,6 +1083,47 @@ Widget _emptyPickerPart(
 Future<void> _noopCheckout(_) async {}
 
 void _ignoreExpanded(bool _) {}
+
+Map<String, Object?> _snapshotWithTicketCount(int count) {
+  final snapshot = pickerSnapshot(revision: 2);
+  final cart = snapshot['cart']! as Map<String, Object?>;
+  final selection = snapshot['selection']! as Map<String, Object?>;
+  final originalLine = Map<String, Object?>.from(
+    (cart['items']! as List<Object?>).single! as Map<String, Object?>,
+  );
+  final originalSeat = Map<String, Object?>.from(
+    (selection['seats']! as List<Object?>).single! as Map<String, Object?>,
+  );
+  cart['items'] = List<Object?>.generate(count, (index) {
+    final number = index + 1;
+    return <String, Object?>{
+      ...originalLine,
+      'lineKey': 'seat:A-$number:adult',
+      'label': 'A-$number',
+      'displayLabel': 'Row A, Seat $number',
+      'objectId': 'seat-a-$number',
+    };
+  });
+  cart['quantity'] = count;
+  cart['total'] = count * 25.0;
+  selection['seats'] = List<Object?>.generate(count, (index) {
+    final number = index + 1;
+    return <String, Object?>{
+      ...originalSeat,
+      'id': 'seat-a-$number',
+      'label': 'A-$number',
+      'displayLabel': 'Row A, Seat $number',
+      'seatNumber': '$number',
+    };
+  });
+  selection['validity'] = <String, Object?>{
+    'isValid': true,
+    'count': count,
+    'required': 0,
+    'remaining': 0,
+  };
+  return snapshot;
+}
 
 Map<String, Object?> _bestAvailableSnapshot({
   List<Object?> categoryFilter = const <Object?>['standard'],

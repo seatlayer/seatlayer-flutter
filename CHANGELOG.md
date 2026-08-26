@@ -2,6 +2,10 @@
 
 ## 0.3.0-dev.1
 
+- Keeps the mobile multi-ticket sheet at a stable responsive height, scrolls
+  ticket rows internally and pins the total, checkout and attribution region.
+- Adds complete light and dark picker/map theme presets for turnkey and custom
+  component compositions.
 - Adds the adaptive turnkey picker and public component kit.
 - Matches the web mobile checkout strip across empty, selected and held states.
 - Rebuilds seat confirmation around authored Section / Row / Seat identity,

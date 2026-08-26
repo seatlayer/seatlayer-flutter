@@ -359,7 +359,7 @@ must all work.
 | Limited-view, premium and wheelchair disclosure | Confirmation notice and cart attributes | Confirmation + ticket card | Commercial/accessibility fields | Complete |
 | Organizer photo/generated sightline and honest distance-to-stage | Capability-gated View from here action opens the authored 360° or explicitly labeled chart-derived preview | Self-wiring `SeatLayerPickerSeatViewButton`; callback replacement remains available | `seat-view-v1`, protected buyer-asset resolution and `picker.openSeatView` | Complete |
 | Real venue 3D focused on the candidate seat | Map/3D toggle plus candidate action enters the lazy WebGL scene and flies to the seat; unsupported devices retain 2D | `SeatLayerPickerViewModeButton`, `SeatLayerPicker3DNavigationModeButton`, `SeatLayerPickerSeat3DButton` | `venue-3d-v1`, `venue-3d-controls-v1`, enter/focus/return and explicit capability fallback | Complete |
-| Manual ticket cart | Vertical buyer-readable rows with category/tier, price and remove/lock state | Selection tray + `SeatLayerPickerTicketCard` | Cart lines + selected-seat context | Complete |
+| Manual ticket cart | Stable-height sheet; buyer-readable rows scroll while total and checkout stay pinned | Mobile ticket panel + selection tray + `SeatLayerPickerTicketCard` | Cart lines + selected-seat context | Complete |
 | Collapsed phone checkout strip | Empty: From + optional Best Seats; selected: total + Review; held: total + Continue | Mobile ticket panel | Cart + hold ownership | Complete |
 | Best Available | Empty-state accelerator and expanded scoped form | Best Available button + panel | Best Available command + picker-owned hold | Complete |
 | General admission and grouped tables | Native quantity/confirmation prompts | GA + table prompt widgets | GA/table commands and cart lines | Complete |
@@ -395,6 +395,15 @@ inset to this dock, avoiding a second empty safe-area strip. Custom compositions
 can set `SeatLayerPickerMobileTicketPanel.bottomSafeArea` to `adaptive`, `full`
 or `none`; `full` deliberately preserves the complete reported inset, while
 `none` is only for a host that already consumes it.
+
+After the first selection, the expanded mobile panel uses one stable responsive
+height instead of growing once per ticket. Only the selection tray scrolls;
+action errors, Total, Continue and required attribution remain pinned. A host
+can set `ticketPanelHeight` for its own composition, while
+`maxExpandedHeight` remains the safety ceiling for small containers. Both the
+turnkey picker and every public component support
+`SeatLayerPickerThemeData.light` and `SeatLayerPickerThemeData.dark`; each
+preset includes the matching map palette and every token remains overridable.
 
 Applications can replace components through normal composition or targeted
 builders. The targeted builder slots cover header, price rail, section
