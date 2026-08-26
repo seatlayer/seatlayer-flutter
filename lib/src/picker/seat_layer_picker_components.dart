@@ -89,7 +89,12 @@ class SeatLayerPickerSectionNavigator extends StatelessWidget {
 }
 
 class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
-  const SeatLayerPickerAccessibilityFilters({super.key});
+  const SeatLayerPickerAccessibilityFilters({
+    super.key,
+    this.compact = false,
+  });
+
+  final bool compact;
 
   static const Map<String, String> _labels = <String, String>{
     'wheelchair': 'Wheelchair',
@@ -115,8 +120,23 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final active = snapshot.map.accessibilityFilter;
+    final onPressed = state.isBusy ? null : () => _ignoreAction(_show(context));
+    if (compact) {
+      return IconButton.filledTonal(
+        tooltip: active.isEmpty
+            ? 'Accessibility and view filters'
+            : '${active.length} accessibility filters active',
+        visualDensity: VisualDensity.compact,
+        onPressed: onPressed,
+        icon: Badge(
+          isLabelVisible: active.isNotEmpty,
+          label: Text('${active.length}'),
+          child: const Icon(Icons.accessible_forward_rounded, size: 18),
+        ),
+      );
+    }
     return OutlinedButton.icon(
-      onPressed: state.isBusy ? null : () => _ignoreAction(_show(context)),
+      onPressed: onPressed,
       icon: const Icon(Icons.accessible_forward_rounded, size: 18),
       label:
           Text(active.isEmpty ? 'Accessibility' : '${active.length} filters'),

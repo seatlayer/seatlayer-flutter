@@ -46,7 +46,7 @@ class SeatLayerPickerOptions {
     this.enable3D = true,
     this.enableSeatView = true,
     this.hideEventDetails = false,
-    this.panelInitiallyCollapsed = false,
+    this.panelInitiallyCollapsed = true,
     this.persistColorblindPreference = true,
     this.languages = const <Locale>[],
     this.pricing,
@@ -85,6 +85,8 @@ class SeatLayerPickerOptions {
         'enableBestAvailable': enableBestAvailable,
         'enable3D': enable3D,
         'enableSeatView': enableSeatView,
+        'hideEventDetails': hideEventDetails,
+        'panelCollapsed': panelInitiallyCollapsed,
         'languages': languages.map((locale) => locale.toLanguageTag()).toList(),
       };
 }
