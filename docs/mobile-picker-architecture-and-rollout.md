@@ -907,7 +907,10 @@ model or global window width.
 - Entering real 3D crossfades over the still-mounted map. A compact rotate/move
   control makes the primary one-finger gesture explicit; pinch zoom and smooth
   pointer-driven camera movement stay inside the renderer without rebuilding
-  Flutter chrome.
+  Flutter chrome. The lazy scene is built only on first entry, then retained as
+  a hidden idle surface for instant comparison toggles. Return-to-map reframes
+  the current semantic section/category before the dissolve and never tears
+  down WebGL mid-transition.
 - A 50-logical-pixel safe-area-aware ticket dock is the collapsed state.
 - Expanded sheet for selected tickets, best available, GA/table choices and
   hold details. Best Available uses two touch-friendly selector rows that open
@@ -919,7 +922,10 @@ model or global window width.
 - The ticket panel automatically opens after a new selection and can be closed
   again without destroying or remounting the map session.
 - Seat confirmation is a bottom card/sheet that does not make the map
-  untouchable after dismissal.
+  untouchable after dismissal. Its View from here / See it in 3D action keeps
+  the native card mounted until the runtime acknowledges that the destination
+  surface exists; removing it earlier can pass the tail of an iOS platform-view
+  tap into the map and select an unintended seat.
 - Prompt cards use a short fade/scale/slide transition; ticket summaries,
   cart rows and dock expansion animate only changed state. All SDK-owned motion
   becomes immediate when the platform requests reduced motion.

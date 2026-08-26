@@ -472,6 +472,35 @@ void main() {
     expect(map.calls.single.$2, <String, Object?>{'seatId': 'seat-a-1'});
   });
 
+  testWidgets('seat confirmation stays mounted until immersive view is ready',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    final ready = Completer<void>();
+    await tester.pumpWidget(
+      _app(
+        map,
+        SeatLayerPickerSeatConfirmation(
+          onViewFromSeat: (_) => ready.future,
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+
+    await tester.tap(find.text('View from here'));
+    await tester.pump();
+
+    // The card continues to absorb the originating iOS gesture while the
+    // WebView mounts its modal; otherwise that tap can select another seat.
+    expect(find.text('Select'), findsOneWidget);
+
+    ready.complete();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select'), findsNothing);
+  });
+
   testWidgets('mobile ticket dock adapts to each device bottom inset',
       (tester) async {
     final map = _FakeMapController();

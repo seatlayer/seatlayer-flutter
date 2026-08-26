@@ -634,13 +634,15 @@ class _SeatLayerPickerSeatConfirmationState
     SelectedSeat seat,
     FutureOr<void> Function(SelectedSeat seat) action,
   ) async {
-    setState(() => _dismissedLabel = seat.label);
     try {
       await action(seat);
+      // Keep the native card above the platform view until the runtime has
+      // actually mounted the seat-view/3D surface. Removing it first lets the
+      // tail of the same iOS tap reach WKWebView and select a seat underneath.
+      if (mounted) setState(() => _dismissedLabel = seat.label);
     } catch (_) {
-      if (mounted) setState(() => _dismissedLabel = null);
       // Controller-backed actions already publish a typed picker error. A
-      // custom action can render its own failure before this card returns.
+      // custom action can render its own failure while this card stays put.
     }
   }
 }
