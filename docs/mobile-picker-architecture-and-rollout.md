@@ -245,7 +245,6 @@ Network, event, buyer-access and raw selection configuration remain in
 SeatLayerPickerOptions(
   holdTtl: const Duration(minutes: 10),
   initialHoldId: restoredHoldId,
-  initialHoldOwner: SeatLayerHoldOwner.host,
   readOnly: false,
   confirmSelection: true,
   enableBestAvailable: true,
@@ -260,8 +259,8 @@ SeatLayerPickerOptions(
 
 The current baseline does not silently persist a hold capability. A host that
 wants restoration persists the handoff itself and supplies `initialHoldId` on
-the next picker session. A host-supplied id defaults to host-owned because the
-host acquired and persisted it.
+the next picker session. A host-supplied id is always host-owned because the
+host acquired and persisted it; ownership is intentionally not a public option.
 
 ## 7. Public Flutter component kit
 
@@ -294,11 +293,14 @@ meaningful standalone use may also accept an explicit controller. They remain
 stateless with respect to inventory and holds.
 
 Applications can replace components through normal composition or targeted
-builders. The targeted builder slots cover layout, header, test-mode indicator,
-price rail, section navigator, accessibility filters, map, map controls, Best
-Available, seat/GA/table prompts, selection tray, hold countdown, attribution,
-action errors, checkout bar, loading, error and empty. The SDK does not require
-subclassing private state classes.
+builders. The targeted builder slots cover header, price rail, section
+navigator, accessibility filters, map, map controls, Best Available,
+seat/GA/table prompts, selection tray, hold countdown, action errors, checkout
+bar, loading, error and empty. The adaptive layout, test-mode marker and
+required attribution have no replacement builder, so returning an empty custom
+widget cannot suppress required native chrome. Theme tokens still customize
+their appearance. A fully manual `SeatLayerPickerScope` composition must place
+the test marker and attribution components itself.
 
 ## 8. Picker state and actions
 
@@ -329,6 +331,9 @@ Implemented controller actions:
 ```text
 retry / synchronize
 setSeatTier / removeObject / clearSelection
+selectObjects / deselectObjects
+selectCategories / deselectCategories
+setSelectableObjects / setMaxSelection
 bestAvailable
 setGeneralAdmissionQuantity / dismissGeneralAdmissionCandidate
 setTableQuantity
@@ -336,8 +341,9 @@ setCategoryFilter / setAccessibilityFilter / setLimitedViewHidden
 focusSection / overview / setRung
 setFloor / setViewMode
 zoomIn / zoomOut / zoomToFit / setColorblindSafe
-extendHold / checkout / releasePickerOwnedHold
-setLifecycle / close / dismissError
+resumeHold / extendHold / checkout / rejectCheckoutHandoff
+releasePickerOwnedHold
+setLifecycle / close / destroy / dismissError
 ```
 
 Actions are serialized where inventory ownership can change. Repeated checkout
@@ -368,6 +374,7 @@ picker-snapshot-v1
 picker-actions-v1
 native-picker-chrome-v1
 checkout-handoff-v1
+checkout-handoff-reject-v1
 hold-ownership-v1
 cart-line-remove-v1
 table-quantity-v1
@@ -400,6 +407,7 @@ and is deliberately absent from the bridge:
       "picker-actions-v1",
       "native-picker-chrome-v1",
       "checkout-handoff-v1",
+      "checkout-handoff-reject-v1",
       "hold-ownership-v1",
       "cart-line-remove-v1",
       "table-quantity-v1"
@@ -538,10 +546,16 @@ The implemented protocol-v2 command table and payload names are:
 
 ```text
 picker.getSnapshot              no payload
+picker.selectObjects            { objects: string[] }
+picker.deselectObjects          { objects: string[] }
 picker.clearSelection           no payload
+picker.selectCategories         { categoryKeys: string[] }
+picker.deselectCategories       { categoryKeys: string[] }
 picker.removeCartLine           { label }
 picker.setSeatTier              { seatId, tierId }
-picker.setCategoryFilter        { categoryKeys }
+picker.setSelectableObjects     { objects: string[] | null }
+picker.setMaxSelection          { maxSelection }
+picker.setCategoryFilter        { categoryKeys: string[] | null }
 picker.setLimitedViewFilter     { on }
 picker.setAccessibilityFilter   { types: string[] | null }
 picker.focusSection             { sectionId }
@@ -556,10 +570,13 @@ picker.zoomToFit                no payload
 picker.bestAvailable            { qty, categoryKey?, zoneId?, preferPremium, ttlMs? }
 picker.holdGA                   { areaId, qty, tierId?, ttlMs? }
 picker.setTableQuantity         { label, quantity, ttlMs? }
+picker.resumeHold               { holdId }
 picker.extendHold               { ttlMs? }
 picker.continue                 { ttlMs? }
+picker.rejectHandoff            { holdId }
 picker.abort                    no payload
 picker.lifecycle                { state: "foreground" | "background" }
+picker.destroy                  no payload
 ```
 
 Every mutating command returns the resulting `revision` and may include the
@@ -569,7 +586,18 @@ the runtime still cannot produce the revision. Runtime commands are also
 serialized in arrival order, preventing an asynchronous table replacement from
 racing `picker.continue` even when a native caller issues both rapidly.
 
-Two inventory-sensitive commands have stricter response contracts:
+`setCategoryFilter(<String>{})` sends `categoryKeys: null`, which means clear
+the filter; an empty array is not used as a second, ambiguous clear encoding.
+The selection wrappers expose typed Dart results/state while preserving these
+wire results:
+
+```text
+picker.selectObjects / picker.selectCategories -> { seats, revision }
+picker.resumeHold -> { restored, expiresAt, revision }
+picker.destroy -> { destroyed: true, released, revision }
+```
+
+Three inventory-sensitive commands have stricter response contracts:
 
 ```text
 picker.removeCartLine { label }
@@ -577,6 +605,9 @@ picker.removeCartLine { label }
 
 picker.setTableQuantity { label, quantity, ttlMs? }
   -> { updated: true, source: "selection" | "hold", expiresAt, revision }
+
+picker.rejectHandoff { holdId }
+  -> { released: true, revision }
 ```
 
 Removing a held line uses the server partial-release operation; removing the
@@ -589,7 +620,36 @@ hold_owned_by_host
 cart_line_release_failed
 table_quantity_rejected
 hold_state_incomplete
+handoff_not_owned
 ```
+
+`picker.rejectHandoff` succeeds only when its id matches the exact active hold
+returned by this runtime session's most recent successful `picker.continue`.
+It cannot release a merely resumed host hold or an arbitrary id. A server
+release failure preserves both the tracked handoff and host ownership so the
+same id can be retried safely.
+
+### 9.5 Read-only enforcement
+
+`readOnly: true` forces the web chart's selectable-object policy to an empty
+set and Dart rejects inventory-changing controller calls locally with a typed
+`SeatLayerError(code: "read_only")`. Native seat/GA/table prompts, cart-line
+deletes, Best Available and checkout are disabled. The runtime independently
+returns `read_only` if a custom or stale host still sends one of these commands:
+
+```text
+picker.selectObjects / picker.deselectObjects / picker.clearSelection
+picker.selectCategories / picker.deselectCategories / picker.setSeatTier
+picker.removeCartLine / picker.setTableQuantity
+picker.setSelectableObjects / picker.setMaxSelection
+picker.holdGA / picker.bestAvailable / picker.resumeHold
+picker.extendHold / picker.continue
+```
+
+Read-only still permits snapshot sync, category/accessibility/limited-view
+filters, section/rung/floor/view navigation, colorblind mode, zoom, lifecycle,
+abort, exact handoff rejection and destroy. These operations either change only
+presentation or safely release inventory already owned by this picker session.
 
 The state event surface is deliberately small:
 
@@ -665,15 +725,20 @@ Rules:
    request. A successful late hold is released before close completes.
 6. Delivering `onCheckout` or returning a non-null modal/page result atomically
    transfers ownership to the host.
-7. After transfer, widget disposal never releases the hold.
-8. Hold expiry clears selection/hold state as defined by the server and returns
+7. If the turnkey `onCheckout` callback fails, Flutter best-effort calls
+   `picker.rejectHandoff` with that exact handoff before preserving and
+   surfacing the original callback error. Custom flows call
+   `rejectCheckoutHandoff(handoff)` explicitly.
+8. After transfer, widget disposal never releases the hold. Only exact handoff
+   rejection or the trusted checkout/booking path may resolve it.
+9. Hold expiry clears selection/hold state as defined by the server and returns
    the buyer to a recoverable selection experience.
-9. `picker.removeCartLine` uses the server partial-release operation for a held
+10. `picker.removeCartLine` uses the server partial-release operation for a held
    line and updates the same hold when lines remain. The last line clears picker
    ownership.
-10. `picker.setTableQuantity` atomically replaces held table occupancy rather
+11. `picker.setTableQuantity` atomically replaces held table occupancy rather
     than exposing a release/re-hold race.
-11. App termination cannot guarantee cleanup; the server TTL remains the final
+12. App termination cannot guarantee cleanup; the server TTL remains the final
     safety boundary.
 
 ## 12. Lifecycle
@@ -685,6 +750,14 @@ Rules:
   change. An internally owned scope creates a fresh controller for a different
   event; hosts must use the acknowledged close path before replacing a session
   that may own a hold.
+- A `SeatLayerView` picker configuration or controller replacement first makes
+  a best-effort acknowledged `picker.destroy` call against the old controller,
+  then detaches its correlations and boots the replacement. Raw protocol-v1
+  views keep their existing direct-detach behavior.
+- A synchronous removal of an internally owned `SeatLayerPickerScope` cannot
+  itself await a network release. Do not use an in-place event/key swap as a
+  close mechanism: present through `SeatLayerPickerPage`/`showSeatLayerPicker`,
+  or supply a controller and await `close()` before removing the old scope.
 - Pending ready or command callbacks cannot update a disposed widget.
 - App backgrounding does not pause the server hold clock.
 - Foreground resume refreshes authoritative hold/inventory state.

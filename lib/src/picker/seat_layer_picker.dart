@@ -481,7 +481,10 @@ class SeatLayerPickerBestAvailable extends StatelessWidget {
     if (!options.enableBestAvailable) return const SizedBox.shrink();
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
-    final enabled = state.isReady && !state.isBusy;
+    final enabled = state.isReady &&
+        !state.isBusy &&
+        !options.readOnly &&
+        state.canMutateInventory;
     return OutlinedButton.icon(
       onPressed: enabled
           ? () => _ignoreAction(
@@ -566,6 +569,7 @@ class SeatLayerPickerSelectionTray extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
+    final options = SeatLayerPickerScope.optionsOf(context);
     final theme = _theme(context, state);
     final lines = state.cartLines;
     return Material(
@@ -607,7 +611,8 @@ class SeatLayerPickerSelectionTray extends StatelessWidget {
                       label: Text(
                         '${line.buyerFacingLabel} · ${_money(context, line.total, line.currency)}',
                       ),
-                      onDeleted: state.holdOwner == SeatLayerHoldOwner.host
+                      onDeleted: options.readOnly ||
+                              state.holdOwner == SeatLayerHoldOwner.host
                           ? null
                           : () => _ignoreAction(
                                 controller.removeObject(line.label),
@@ -723,10 +728,9 @@ class SeatLayerPickerCheckoutBar extends StatelessWidget {
                   ),
                 ),
                 onPressed: controller.canCheckout
-                    ? () => _ignoreAction(() async {
-                          final handoff = await controller.checkout();
-                          await onCheckout(handoff);
-                        }())
+                    ? () => _ignoreAction(
+                          _checkoutWithRejection(controller, onCheckout),
+                        )
                     : null,
                 child:
                     state.busyAction == SeatLayerPickerBusyAction.creatingHold
@@ -890,11 +894,7 @@ class _SeatLayerPickerAdaptiveLayoutState
           widget.builders.checkoutBar,
           SeatLayerPickerCheckoutBar(onCheckout: widget.onCheckout),
         );
-        final testBadge = _part(
-          context,
-          widget.builders.testModeIndicator,
-          const SeatLayerPickerTestModeIndicator(),
-        );
+        const testBadge = SeatLayerPickerTestModeIndicator();
         final controls = _part(
           context,
           widget.builders.mapControls,
@@ -905,11 +905,7 @@ class _SeatLayerPickerAdaptiveLayoutState
           widget.builders.bestAvailable,
           const SeatLayerPickerBestAvailable(),
         );
-        final attribution = _part(
-          context,
-          widget.builders.attribution,
-          const SeatLayerPickerAttribution(),
-        );
+        const attribution = SeatLayerPickerAttribution();
         final actionError = _part(
           context,
           widget.builders.actionError,
@@ -922,13 +918,14 @@ class _SeatLayerPickerAdaptiveLayoutState
           (label) => !selectedLabels.contains(label),
         );
         final options = SeatLayerPickerScope.optionsOf(context);
-        final pendingSeat = state.hold == null && options.confirmSelection
-            ? state.selection.reversed
-                .where((seat) => !_confirmedLabels.contains(seat.label))
-                .firstOrNull
-            : null;
+        final pendingSeat =
+            !options.readOnly && state.hold == null && options.confirmSelection
+                ? state.selection.reversed
+                    .where((seat) => !_confirmedLabels.contains(seat.label))
+                    .firstOrNull
+                : null;
         final Widget? buyerPrompt;
-        if (state.generalAdmissionCandidate != null) {
+        if (!options.readOnly && state.generalAdmissionCandidate != null) {
           buyerPrompt = _part(
             context,
             widget.builders.generalAdmissionPrompt,
@@ -993,7 +990,11 @@ class _SeatLayerPickerAdaptiveLayoutState
                       child: Stack(
                         children: [
                           Positioned.fill(child: map),
-                          Positioned(top: 12, left: 12, child: testBadge),
+                          const Positioned(
+                            top: 12,
+                            left: 12,
+                            child: testBadge,
+                          ),
                           Positioned(top: 12, right: 12, child: controls),
                           const Positioned(
                             left: 12,
@@ -1063,7 +1064,7 @@ class _SeatLayerPickerAdaptiveLayoutState
               child: Stack(
                 children: [
                   Positioned.fill(child: map),
-                  Positioned(top: 10, left: 10, child: testBadge),
+                  const Positioned(top: 10, left: 10, child: testBadge),
                   Positioned(top: 10, right: 10, child: controls),
                   const Positioned(
                     left: 10,
@@ -1109,7 +1110,7 @@ class _SeatLayerPickerAdaptiveLayoutState
       ),
       child: ColoredBox(color: resolved.background, child: body),
     );
-    return _part(context, widget.builders.layout, themed);
+    return themed;
   }
 
   Future<void> _confirmSeat(SelectedSeat seat) async {
@@ -1158,6 +1159,25 @@ Color _alpha(Color color, double opacity) =>
 
 void _ignoreAction(Future<void> action) {
   unawaited(action.catchError((Object _) {}));
+}
+
+Future<void> _checkoutWithRejection(
+  SeatLayerPickerController controller,
+  SeatLayerCheckoutCallback onCheckout,
+) async {
+  final handoff = await controller.checkout();
+  try {
+    await onCheckout(handoff);
+  } catch (error, stack) {
+    try {
+      await controller.rejectCheckoutHandoff(handoff);
+    } catch (_) {
+      // Preserve the host callback failure; rejection is best effort and its
+      // own typed failure remains available to explicit controller callers.
+    }
+    controller.reportActionError(error);
+    Error.throwWithStackTrace(error, stack);
+  }
 }
 
 extension<T> on Iterable<T> {

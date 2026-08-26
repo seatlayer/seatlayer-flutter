@@ -143,6 +143,11 @@ SeatLayerPickerScope(
             SeatLayerPickerMap(),
             Positioned(
               top: 12,
+              left: 12,
+              child: SeatLayerPickerTestModeIndicator(),
+            ),
+            Positioned(
+              top: 12,
               right: 12,
               child: SeatLayerPickerMapControls(),
             ),
@@ -150,6 +155,7 @@ SeatLayerPickerScope(
         ),
       ),
       const SeatLayerPickerSelectionTray(),
+      const SeatLayerPickerAttribution(),
       SeatLayerPickerCheckoutBar(onCheckout: openCheckout),
     ],
   ),
@@ -163,6 +169,16 @@ hold is acknowledged as released:
 ```dart
 await picker.close();
 picker.dispose();
+```
+
+Custom controls use typed picker-v2 methods rather than raw bridge strings:
+
+```dart
+await picker.selectObjects(['A-12', 'A-13']);
+await picker.deselectCategories(['restricted-view']);
+await picker.setSelectableObjects(['A-12', 'A-13', 'A-14']);
+await picker.setMaxSelection(4);
+await picker.resumeHold(restoredHoldId); // restored as host-owned
 ```
 
 The public `0.3.0-dev` component baseline exports:
@@ -191,7 +207,12 @@ The public `0.3.0-dev` component baseline exports:
 
 Targeted parts of the turnkey layout can also be wrapped or replaced through
 `SeatLayerPickerBuilders`. Every builder receives the immutable state, the
-session controller and the default child.
+session controller and the default child. The overall adaptive layout, test
+marker and required `Powered by SeatLayer` attribution deliberately have no
+replacement builder: theme colors and typography remain customizable, but required native
+chrome cannot be hidden by returning an empty widget. A fully manual
+`SeatLayerPickerScope` composition must include both required components as the
+example above does.
 
 ```dart
 SeatLayerPicker(
@@ -224,8 +245,25 @@ chrome owner. Its init contract sends:
 
 The renderer therefore does not draw a second test badge. Flutter reads the
 event mode from the atomic picker snapshot and renders exactly one
-`SeatLayerPickerTestModeIndicator`. A raw `SeatLayerView` remains protocol 1;
-the host continues to own any surrounding test-event chrome there.
+`SeatLayerPickerTestModeIndicator` plus one `Powered by SeatLayer` attribution
+when `branding.attributionRequired` is true. Neither can be replaced through
+`SeatLayerPickerBuilders`; both still inherit the picker theme. A white-label
+entitlement may explicitly set `attributionRequired: false`. A raw
+`SeatLayerView` remains protocol 1; the host continues to own any surrounding
+test-event chrome there.
+
+## Read-only picker
+
+Use `SeatLayerPickerOptions(readOnly: true)` to inspect a map, current
+selection or restored hold without allowing inventory changes. The runtime
+blocks canvas selection, while native seat/GA/table prompts, selection deletes,
+Best Available and checkout are disabled. Category/accessibility filters,
+section and floor navigation, view modes and zoom remain available.
+
+The controller also enforces this boundary before sending a bridge command.
+Direct selection, hold and checkout actions fail with a typed
+`SeatLayerError` whose code is `read_only`, so a custom component cannot bypass
+the UI guard.
 
 ## Checkout and hold security
 
@@ -255,6 +293,32 @@ Calling checkout transfers hold ownership to the host. Closing or disposing
 the picker after that handoff must not release the hold. Before handoff, modal
 close releases a picker-owned hold. Process termination cannot guarantee a
 release, so the server TTL remains the final safety boundary.
+
+The built-in retry path also acknowledges `picker.destroy` before replacing a
+runtime that had reached Ready. A failed handshake has no live picker and
+retries immediately.
+
+If a turnkey `onCheckout` callback throws because host validation or navigation
+failed, the picker automatically attempts
+`picker.rejectHandoff {holdId}` before surfacing the original callback error.
+The runtime releases only the exact hold most recently handed off by that
+picker session; it cannot release an arbitrary resumed or host-owned hold. A
+custom flow that calls `controller.checkout()` directly can perform the same
+safe rollback explicitly:
+
+```dart
+final handoff = await picker.checkout();
+try {
+  await openCheckout(handoff);
+} catch (_) {
+  await picker.rejectCheckoutHandoff(handoff);
+  rethrow;
+}
+```
+
+`SeatLayerPickerOptions(initialHoldId: restoredHoldId)` always restores a
+host-owned hold. Ownership is not caller-configurable, and picker cart controls
+never alter or release that restored hold.
 
 Continue with
 [holds and secure server-side checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
@@ -311,6 +375,7 @@ picker-snapshot-v1
 picker-actions-v1
 native-picker-chrome-v1
 checkout-handoff-v1
+checkout-handoff-reject-v1
 hold-ownership-v1
 cart-line-remove-v1
 table-quantity-v1

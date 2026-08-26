@@ -20,11 +20,14 @@ class SeatLayerPickerPartContext {
   final Widget defaultChild;
 }
 
+/// Optional replacements for non-mandatory parts of the adaptive picker.
+///
+/// The complete layout, test-mode marker and required SeatLayer attribution do
+/// not have builder slots, so a custom builder cannot suppress compliance
+/// chrome. Their appearance remains configurable through the picker theme.
 class SeatLayerPickerBuilders {
   const SeatLayerPickerBuilders({
-    this.layout,
     this.header,
-    this.testModeIndicator,
     this.priceRail,
     this.sectionNavigator,
     this.accessibilityFilters,
@@ -36,7 +39,6 @@ class SeatLayerPickerBuilders {
     this.tablePrompt,
     this.selectionTray,
     this.holdCountdown,
-    this.attribution,
     this.actionError,
     this.checkoutBar,
     this.loading,
@@ -44,9 +46,7 @@ class SeatLayerPickerBuilders {
     this.empty,
   });
 
-  final SeatLayerPickerPartBuilder? layout;
   final SeatLayerPickerPartBuilder? header;
-  final SeatLayerPickerPartBuilder? testModeIndicator;
   final SeatLayerPickerPartBuilder? priceRail;
   final SeatLayerPickerPartBuilder? sectionNavigator;
   final SeatLayerPickerPartBuilder? accessibilityFilters;
@@ -58,7 +58,6 @@ class SeatLayerPickerBuilders {
   final SeatLayerPickerPartBuilder? tablePrompt;
   final SeatLayerPickerPartBuilder? selectionTray;
   final SeatLayerPickerPartBuilder? holdCountdown;
-  final SeatLayerPickerPartBuilder? attribution;
   final SeatLayerPickerPartBuilder? actionError;
   final SeatLayerPickerPartBuilder? checkoutBar;
   final SeatLayerPickerPartBuilder? loading;

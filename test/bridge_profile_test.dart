@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/bridge/bridge_client.dart';
 import 'package:seatlayer/src/bridge/bridge_profile.dart';
 import 'package:seatlayer/src/bridge/envelope.dart';
+import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/seat_layer_configuration.dart';
 import 'package:seatlayer/src/seat_layer_controller.dart';
 import 'package:seatlayer/src/seat_layer_error.dart';
@@ -23,6 +24,7 @@ Map<String, Object?> _hello({bool removeTableCapability = false}) =>
         'picker-actions-v1',
         'native-picker-chrome-v1',
         'checkout-handoff-v1',
+        'checkout-handoff-reject-v1',
         'hold-ownership-v1',
         'cart-line-remove-v1',
         if (!removeTableCapability) 'table-quantity-v1',
@@ -32,6 +34,15 @@ Map<String, Object?> _hello({bool removeTableCapability = false}) =>
     };
 
 void main() {
+  test('restored holds are configured without caller-controlled ownership', () {
+    final config = const SeatLayerPickerOptions(
+      initialHoldId: 'hold-restored',
+    ).toBridgeConfig();
+
+    expect(config, containsPair('initialHoldId', 'hold-restored'));
+    expect(config, isNot(contains('initialHoldOwner')));
+  });
+
   test('raw chart remains a protocol-v1 integration', () {
     final payload = SeatLayerBridgeProfile.chart.initPayload(
       SeatLayerConfiguration(event: 'ev_raw'),
@@ -67,6 +78,10 @@ void main() {
     expect(
       payload['config'],
       containsPair('holdTtlMs', 300000),
+    );
+    expect(
+      profile.requiredCapabilities,
+      contains('checkout-handoff-reject-v1'),
     );
   });
 

@@ -43,6 +43,10 @@ sealed class SeatLayerError implements Exception {
   /// A reply arrived but did not match the expected shape.
   const factory SeatLayerError.decoding(String detail) = DecodingFailure;
 
+  /// The host configured a read-only picker and attempted to change selection
+  /// or inventory through the native controller.
+  const factory SeatLayerError.readOnly(String command) = ReadOnlyFailure;
+
   /// The wire code, for callers that branch on the open code set.
   String get code;
 
@@ -140,4 +144,17 @@ final class DecodingFailure extends SeatLayerError {
   String get code => 'sl_decoding';
   @override
   String get message => 'SeatLayer could not decode a bridge reply: $detail';
+}
+
+final class ReadOnlyFailure extends SeatLayerError {
+  const ReadOnlyFailure(this.command);
+
+  final String command;
+
+  @override
+  String get code => 'read_only';
+
+  @override
+  String get message =>
+      'SeatLayer picker is read-only; `$command` cannot change inventory';
 }

@@ -35,6 +35,7 @@ class SeatLayerBridgeProfile {
           'picker-actions-v1',
           'native-picker-chrome-v1',
           'checkout-handoff-v1',
+          'checkout-handoff-reject-v1',
           'hold-ownership-v1',
           'cart-line-remove-v1',
           'table-quantity-v1',
