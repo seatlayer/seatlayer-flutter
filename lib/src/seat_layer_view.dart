@@ -82,9 +82,6 @@ class _SeatLayerViewState extends State<SeatLayerView> {
       ..setBackgroundColor(const Color(0x00000000))
       // The map is a canvas, not a scrolling document — the bundle owns zoom.
       ..enableZoom(false)
-      // Suppress WKWebView bounce and Android edge glow. Camera movement must
-      // stay in the canvas instead of waking the platform document scroller.
-      ..setOverScrollMode(WebViewOverScrollMode.never)
       ..addJavaScriptChannel(
         _channelName,
         onMessageReceived: (message) {
@@ -111,7 +108,20 @@ class _SeatLayerViewState extends State<SeatLayerView> {
         ),
       );
 
+    // Suppress WKWebView bounce and Android edge glow when the installed
+    // platform adapter supports it. Some host apps override a newer
+    // webview_flutter facade with an older adapter; the pinned document's CSS
+    // remains the fallback and that host mismatch must not fail picker boot.
+    unawaited(_disablePlatformOverScroll());
     _boot();
+  }
+
+  Future<void> _disablePlatformOverScroll() async {
+    try {
+      await _web.setOverScrollMode(WebViewOverScrollMode.never);
+    } catch (_) {
+      // Capability fallback for host-overridden legacy platform adapters.
+    }
   }
 
   Future<void> _boot() async {
