@@ -799,6 +799,22 @@ A tap on a sufficiently usable seat target selects or opens confirmation. The
 host app must never need to infer map taps and issue repeated generic zoom
 commands.
 
+### Best Available scope
+
+The turnkey Best Available prompt must make its inventory scope explicit. It
+offers `Across venue` plus the authored Best Available zones, and `Any category`
+plus the saleable categories. When the focused section maps to an authored Best
+Available zone, that zone is the initial scope; one active category filter may
+similarly seed the category choice. Both choices remain visible and editable
+before inventory is held.
+
+Section focus is camera/navigation state, so the runtime does not silently
+reinterpret it as an inventory constraint. Current Best Available APIs constrain
+by `zoneId` and `categoryKey`; the native picker resolves a focused section's
+`zoneId` from `catalog.sections`. Exact section-only Best Available would require
+an additive server, bridge and cross-SDK `sectionId` contract and is not implied
+when multiple sections share one zone.
+
 ## 14. Theme, localization and accessibility
 
 ### Theme
@@ -1054,6 +1070,8 @@ inventory flow.
 - Section tap focuses the intended section.
 - Overview/section/seat navigation.
 - Category and accessibility filtering.
+- Best Available exposes its zone/category scope and forwards the explicit
+  choices.
 - Candidate confirmation and tier change.
 - GA and grouped-table prompts.
 - Hold, restore, extension, expiry and conflict recovery.
@@ -1092,6 +1110,8 @@ inventory flow.
 4. Section tap focuses automatically without the app zoom workaround.
 5. Reserved seat selection, tier selection and removal work.
 6. Best Available creates and displays one hold.
+   When a focused section maps to a Best Available zone, the prompt names that
+   zone and lets the buyer switch back to `Across venue` before holding seats.
 7. GA and table inventory work on representative fixtures.
 8. Close before checkout releases the hold.
 9. Continue hands the same hold id to DesiPass checkout.

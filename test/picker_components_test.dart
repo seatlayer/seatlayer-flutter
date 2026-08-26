@@ -182,6 +182,97 @@ void main() {
     expect(map.calls, isEmpty);
   });
 
+  testWidgets(
+      'best available defaults to the focused section zone and active category',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    final snapshot = _bestAvailableSnapshot();
+
+    await tester.pumpWidget(
+      _app(map, const SeatLayerPickerBestAvailable()),
+    );
+    map.emit(snapshot);
+    await tester.pump();
+
+    await tester.tap(find.text('Find best seats'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Across venue'), findsOneWidget);
+    expect(find.text('Any category'), findsOneWidget);
+    expect(
+      tester
+          .widget<ChoiceChip>(
+            find.widgetWithText(ChoiceChip, 'Gallery'),
+          )
+          .selected,
+      isTrue,
+    );
+    expect(
+      tester
+          .widget<ChoiceChip>(
+            find.widgetWithText(ChoiceChip, 'Standard'),
+          )
+          .selected,
+      isTrue,
+    );
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Find seats'));
+    await tester.pumpAndSettle();
+
+    expect(map.calls, hasLength(1));
+    expect(map.calls.single.$1, 'picker.bestAvailable');
+    expect(map.calls.single.$2, <String, Object?>{
+      'qty': 2,
+      'categoryKey': 'standard',
+      'zoneId': 'gallery',
+      'preferPremium': false,
+    });
+  });
+
+  testWidgets(
+      'best available can search across venue with an explicitly chosen category',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    final snapshot = _bestAvailableSnapshot(
+      categoryFilter: <Object?>['standard', 'premium'],
+    );
+
+    await tester.pumpWidget(
+      _app(map, const SeatLayerPickerBestAvailable()),
+    );
+    map.emit(snapshot);
+    await tester.pump();
+
+    await tester.tap(find.text('Find best seats'));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<ChoiceChip>(
+            find.widgetWithText(ChoiceChip, 'Any category'),
+          )
+          .selected,
+      isTrue,
+    );
+    expect(find.text('Internal'), findsNothing);
+
+    await tester.tap(find.text('Across venue'));
+    await tester.tap(find.text('Premium'));
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, 'Find seats'));
+    await tester.pumpAndSettle();
+
+    expect(map.calls, hasLength(1));
+    expect(map.calls.single.$1, 'picker.bestAvailable');
+    expect(map.calls.single.$2, <String, Object?>{
+      'qty': 2,
+      'categoryKey': 'premium',
+      'preferPremium': false,
+    });
+  });
+
   testWidgets('turnkey checkout rejects a failed host handoff', (tester) async {
     final map = _FakeMapController(
       handler: (command, payload) async {
@@ -233,3 +324,48 @@ void main() {
 }
 
 Future<void> _noopCheckout(_) async {}
+
+Map<String, Object?> _bestAvailableSnapshot({
+  List<Object?> categoryFilter = const <Object?>['standard'],
+}) {
+  final snapshot = pickerSnapshot(withSelection: false);
+  final catalog = snapshot['catalog']! as Map<String, Object?>;
+  catalog['sections'] = <Object?>[
+    <String, Object?>{
+      'id': 'gallery-a',
+      'label': 'Gallery A',
+      'zoneId': 'gallery',
+    },
+  ];
+  catalog['bestAvailableZones'] = <Object?>[
+    <String, Object?>{'id': 'gallery', 'label': 'Gallery'},
+    <String, Object?>{'id': 'orchestra', 'label': 'Orchestra'},
+  ];
+  catalog['categories'] = <Object?>[
+    ...catalog['categories']! as List<Object?>,
+    <String, Object?>{
+      'key': 'premium',
+      'label': 'Premium',
+      'color': '#D97706',
+      'priceMin': 50.0,
+      'priceMax': 50.0,
+      'available': 12,
+      'notForSale': false,
+      'tiers': <Object?>[],
+    },
+    <String, Object?>{
+      'key': 'internal',
+      'label': 'Internal',
+      'color': '#64748B',
+      'priceMin': 0.0,
+      'priceMax': 0.0,
+      'available': 5,
+      'notForSale': true,
+      'tiers': <Object?>[],
+    },
+  ];
+  final map = snapshot['map']! as Map<String, Object?>;
+  map['focusedSectionId'] = 'gallery-a';
+  map['categoryFilter'] = categoryFilter;
+  return snapshot;
+}
