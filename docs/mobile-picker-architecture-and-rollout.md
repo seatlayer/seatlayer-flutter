@@ -442,6 +442,7 @@ setCategoryFilter / setAccessibilityFilter / setLimitedViewHidden
 focusSection / overview / setRung
 setFloor / setViewMode
 setBuyerView / showSeatIn3D / openSeatView / set3DNavigationMode
+setMapInteractionEnabled
 zoomIn / zoomOut / zoomToFit / setColorblindSafe
 resumeHold / extendHold / checkout / rejectCheckoutHandoff
 releasePickerOwnedHold
@@ -925,9 +926,12 @@ model or global window width.
   untouchable after dismissal. Its View from here / See it in 3D action keeps
   the native card mounted until the runtime acknowledges that the destination
   surface exists. While any native decision surface is present, the turnkey
-  composition also removes the WebView from platform hit testing; visual
-  stacking alone cannot stop iOS from giving the underlying platform view the
-  same touch sequence.
+  composition both gates the Flutter map child and calls
+  `picker.setInteractionEnabled(false)`. The latter makes the runtime DOM inert
+  and is the authoritative iOS guard: visual stacking or `IgnorePointer` alone
+  cannot stop WKWebView from receiving the same physical touch beneath
+  composited Flutter chrome. Unlock waits for the short prompt exit animation,
+  or is immediate when reduced motion is enabled.
 - Prompt cards use a short fade/scale/slide transition; ticket summaries,
   cart rows and dock expansion animate only changed state. All SDK-owned motion
   becomes immediate when the platform requests reduced motion.

@@ -341,6 +341,31 @@ void main() {
     expect(map.calls[3].payload, <String, Object?>{'view': 'map'});
   });
 
+  test('native overlays can suppress WebView interaction independently',
+      () async {
+    final map = _FakeMapController(
+      (command, payload) async => <String, Object?>{},
+    );
+    final picker = _picker(map);
+    addTearDown(() {
+      picker.dispose();
+      map.dispose();
+    });
+
+    await picker.setMapInteractionEnabled(false);
+    await picker.setMapInteractionEnabled(true);
+
+    expect(
+      map.calls.map((call) => call.name),
+      <String>[
+        'picker.setInteractionEnabled',
+        'picker.setInteractionEnabled',
+      ],
+    );
+    expect(map.calls[0].payload, <String, Object?>{'enabled': false});
+    expect(map.calls[1].payload, <String, Object?>{'enabled': true});
+  });
+
   test('handoff rejection remains allowed in read-only mode', () async {
     final map = _FakeMapController((command, payload) async {
       expect(command, 'picker.rejectHandoff');
