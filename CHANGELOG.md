@@ -2,6 +2,9 @@
 
 ## 0.3.0-dev.1
 
+- Pins production views to the verified `seatlayer-js@0.68.1` mobile runtime,
+  including native interaction blocking, responsive section drill-down,
+  smoother WebKit pan/pinch gestures and the negotiated 3D control bridge.
 - Keeps the mobile multi-ticket sheet at a stable responsive height, scrolls
   ticket rows internally and pins the total, checkout and attribution region.
 - Adds complete light and dark picker/map theme presets for turnkey and custom
