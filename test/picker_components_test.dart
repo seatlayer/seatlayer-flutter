@@ -526,7 +526,48 @@ void main() {
       expanded: true,
       safeArea: SeatLayerPickerMobilePanelSafeArea.adaptive,
     );
-    expect(expandedWithInset - expandedWithoutInset, 34);
+    expect(expandedWithInset - expandedWithoutInset, 12);
+  });
+
+  testWidgets(
+      'expanded mobile footer releases attribution space when branding hides it',
+      (tester) async {
+    Future<double> expandedHeight({required bool attributionRequired}) async {
+      final map = _FakeMapController();
+      final picker = SeatLayerPickerController(mapController: map);
+      addTearDown(map.dispose);
+      addTearDown(picker.dispose);
+      await tester.pumpWidget(
+        _app(
+          map,
+          const SeatLayerPickerMobileTicketPanel(
+            expanded: true,
+            onExpandedChanged: _ignoreExpanded,
+            onCheckout: _noopCheckout,
+          ),
+          mediaQueryData: const MediaQueryData(
+            size: Size(390, 844),
+            padding: EdgeInsets.only(bottom: 34),
+            viewPadding: EdgeInsets.only(bottom: 34),
+          ),
+          pickerController: picker,
+        ),
+      );
+      final snapshot = pickerSnapshot(withSelection: false);
+      (snapshot['branding']! as Map<String, Object?>)['attributionRequired'] =
+          attributionRequired;
+      map.emit(snapshot);
+      await tester.pumpAndSettle();
+      return tester
+          .getSize(find.byType(SeatLayerPickerMobileTicketPanel))
+          .height;
+    }
+
+    final brandedHeight = await expandedHeight(attributionRequired: true);
+    expect(find.text('Powered by SeatLayer'), findsOneWidget);
+    final whiteLabelHeight = await expandedHeight(attributionRequired: false);
+    expect(find.text('Powered by SeatLayer'), findsNothing);
+    expect(whiteLabelHeight, lessThan(brandedHeight));
   });
 
   testWidgets('full-screen picker delegates its bottom inset to the dock',

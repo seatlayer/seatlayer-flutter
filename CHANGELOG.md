@@ -7,6 +7,8 @@
 - Rebuilds seat confirmation around authored Section / Row / Seat identity,
   category color, price, ticket choices and accessibility/view disclosures.
 - Replaces the horizontal chip cart with reusable vertical ticket cards.
+- Keeps the compact attribution at the visual bottom without stacking the full
+  gesture inset beneath it, and releases its height when branding hides it.
 - Adds explicit callback-gated seat-view and venue-3D action widgets; unsupported
   actions remain hidden until the bridge advertises a real capability.
 - Documents the web-to-mobile parity ledger and cross-SDK replication order.

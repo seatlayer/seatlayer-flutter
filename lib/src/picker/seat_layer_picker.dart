@@ -1125,10 +1125,10 @@ class _QuantityButton extends StatelessWidget {
 /// Controls how the mobile ticket panel handles an unconsumed device bottom
 /// inset.
 enum SeatLayerPickerMobilePanelSafeArea {
-  /// Keep gesture-style insets compact while the dock is collapsed, then
-  /// reserve the complete device inset while the buyer panel is expanded.
+  /// Keep gesture-style insets compact in both collapsed and expanded states.
   ///
-  /// Larger system-navigation insets are always reserved in full.
+  /// The panel's own content padding keeps actions clear of the home gesture;
+  /// larger system-navigation insets are always reserved in full.
   adaptive,
 
   /// Always reserve the complete device bottom inset.
@@ -1200,7 +1200,7 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
     final deviceBottomInset = MediaQuery.paddingOf(context).bottom;
     final bottomPadding = switch (bottomSafeArea) {
       SeatLayerPickerMobilePanelSafeArea.adaptive =>
-        expanded || deviceBottomInset > _mobilePanelGestureInsetLimit
+        deviceBottomInset > _mobilePanelGestureInsetLimit
             ? deviceBottomInset
             : deviceBottomInset > _mobilePanelCompactBottomClearance
                 ? _mobilePanelCompactBottomClearance
