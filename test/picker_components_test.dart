@@ -69,6 +69,18 @@ Widget _app(
 }
 
 void main() {
+  test('light theme serializes the complete renderer map palette', () {
+    expect(
+      const SeatLayerMapThemeData.light().toBridgeConfig(),
+      <String, Object?>{
+        'background': '#f7f8fa',
+        'rowLabelColor': '#334155',
+        'textColor': '#172033',
+        'selectionColor': '#5b4b8a',
+      },
+    );
+  });
+
   testWidgets('native chrome shows one test badge and required attribution',
       (tester) async {
     final map = _FakeMapController();
@@ -187,6 +199,28 @@ void main() {
     expect(chip.selected, isFalse);
     expect(chip.backgroundColor, Colors.white);
     expect((chip.label as Text).style?.color, Colors.black);
+  });
+
+  testWidgets('price chip filters and frames one category like the web picker',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    final snapshot = pickerSnapshot(withSelection: false);
+    (snapshot['map']! as Map<String, Object?>)['categoryFilter'] = <Object?>[];
+    await tester.pumpWidget(
+      _app(map, const SeatLayerPickerPriceRail(compact: true)),
+    );
+    map.emit(snapshot);
+    await tester.pump();
+
+    await tester.tap(find.text('€25'));
+    await tester.pump();
+
+    expect(map.calls.single.$1, 'picker.setCategoryFilter');
+    expect(map.calls.single.$2, <String, Object?>{
+      'categoryKeys': <String>['standard'],
+      'focus': true,
+    });
   });
 
   testWidgets('standalone zoom control can be placed in a custom layout',
