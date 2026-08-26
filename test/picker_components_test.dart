@@ -426,6 +426,9 @@ void main() {
         SeatLayerPickerSeatConfirmation(
           onConfirm: (_) => confirmed = true,
         ),
+        pickerTheme: const SeatLayerPickerThemeData.light(
+          accent: Color(0xFFE54558),
+        ),
       ),
     );
     map.emit(pickerSnapshot());
@@ -444,9 +447,78 @@ void main() {
     expect(find.text('View from here'), findsOneWidget);
     expect(find.text('See it in 3D'), findsOneWidget);
 
+    final seatViewButton = tester.widget<OutlinedButton>(
+      find.descendant(
+        of: find.byType(SeatLayerPickerSeatViewButton),
+        matching: find.byType(OutlinedButton),
+      ),
+    );
+    final seat3DButton = tester.widget<OutlinedButton>(
+      find.descendant(
+        of: find.byType(SeatLayerPickerSeat3DButton),
+        matching: find.byType(OutlinedButton),
+      ),
+    );
+    expect(
+      find.descendant(
+        of: find.byType(SeatLayerPickerSeat3DButton),
+        matching: find.byType(FilledButton),
+      ),
+      findsNothing,
+    );
+    expect(
+      seat3DButton.style?.backgroundColor?.resolve(<WidgetState>{}),
+      seatViewButton.style?.backgroundColor?.resolve(<WidgetState>{}),
+    );
+    expect(
+      seat3DButton.style?.foregroundColor?.resolve(<WidgetState>{}),
+      const Color(0xFF172033),
+    );
+    expect(
+      tester.getCenter(find.text('View from here')).dy,
+      tester.getCenter(find.text('See it in 3D')).dy,
+    );
+
+    final cancelButton = tester.widget<OutlinedButton>(
+      find.widgetWithText(OutlinedButton, 'Cancel'),
+    );
+    final selectButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Select'),
+    );
+    expect(
+      cancelButton.style?.foregroundColor?.resolve(<WidgetState>{}),
+      const Color(0xFF172033),
+    );
+    expect(
+      selectButton.style?.backgroundColor?.resolve(<WidgetState>{}),
+      const Color(0xFFE54558),
+    );
+
     await tester.tap(find.text('Select'));
     await tester.pump();
     expect(confirmed, isTrue);
+  });
+
+  testWidgets('seat inspection actions stack on a narrow confirmation card',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    await tester.binding.setSurfaceSize(const Size(320, 700));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    await tester.pumpWidget(
+      _app(
+        map,
+        const SeatLayerPickerSeatConfirmation(),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+
+    expect(
+      tester.getCenter(find.text('View from here')).dy,
+      isNot(tester.getCenter(find.text('See it in 3D')).dy),
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets(

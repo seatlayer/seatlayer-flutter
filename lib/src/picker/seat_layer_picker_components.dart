@@ -393,6 +393,18 @@ class _SeatLayerPickerSeatConfirmationState
         ? widget.onShow3D ??
             (capabilities.contains('venue3d') ? controller.showSeatIn3D : null)
         : null;
+    final inspectionActions = <Widget>[
+      if (viewFromSeat != null)
+        SeatLayerPickerSeatViewButton(
+          seat: seat,
+          onPressed: (candidate) => _inspect(candidate, viewFromSeat),
+        ),
+      if (show3D != null)
+        SeatLayerPickerSeat3DButton(
+          seat: seat,
+          onPressed: (candidate) => _inspect(candidate, show3D),
+        ),
+    ];
 
     return Align(
       alignment: Alignment.center,
@@ -400,9 +412,12 @@ class _SeatLayerPickerSeatConfirmationState
         constraints: BoxConstraints(maxWidth: 430, maxHeight: maxHeight),
         child: Material(
           color: theme.surface,
-          elevation: 24,
-          shadowColor: _alpha(Colors.black, .42),
-          borderRadius: BorderRadius.circular(theme.radius + 4),
+          elevation: 18,
+          shadowColor: _alpha(Colors.black, .26),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(theme.radius + 6),
+            side: BorderSide(color: _alpha(theme.divider, .9)),
+          ),
           clipBehavior: Clip.antiAlias,
           child: SingleChildScrollView(
             child: Column(
@@ -431,10 +446,17 @@ class _SeatLayerPickerSeatConfirmationState
                     ],
                   ),
                 ),
-                ColoredBox(
-                  color: Color.alphaBlend(
-                    _alpha(categoryColor, .24),
-                    theme.surface,
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Color.alphaBlend(
+                      _alpha(categoryColor, .10),
+                      theme.surface,
+                    ),
+                    border: Border.symmetric(
+                      horizontal: BorderSide(
+                        color: _alpha(categoryColor, .16),
+                      ),
+                    ),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -476,7 +498,7 @@ class _SeatLayerPickerSeatConfirmationState
                             ),
                             style: TextStyle(
                               color: theme.text,
-                              fontSize: 20,
+                              fontSize: 19,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -534,20 +556,9 @@ class _SeatLayerPickerSeatConfirmationState
                               ? 'Wheelchair space without a fixed chair.'
                               : 'Wheelchair-accessible seating.',
                         ),
-                      if (viewFromSeat != null) ...[
-                        SeatLayerPickerSeatViewButton(
-                          seat: seat,
-                          onPressed: (candidate) =>
-                              _inspect(candidate, viewFromSeat),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                      if (show3D != null) ...[
-                        SeatLayerPickerSeat3DButton(
-                          seat: seat,
-                          onPressed: (candidate) => _inspect(candidate, show3D),
-                        ),
-                        const SizedBox(height: 10),
+                      if (inspectionActions.isNotEmpty) ...[
+                        _SeatInspectionActions(children: inspectionActions),
+                        const SizedBox(height: 14),
                       ],
                       Row(
                         children: [
@@ -555,7 +566,19 @@ class _SeatLayerPickerSeatConfirmationState
                             child: OutlinedButton(
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(52),
+                                foregroundColor: theme.text,
+                                disabledForegroundColor:
+                                    _alpha(theme.mutedText, .5),
+                                backgroundColor: Color.alphaBlend(
+                                  _alpha(theme.text, .035),
+                                  theme.surface,
+                                ),
+                                overlayColor: _alpha(theme.text, .055),
                                 side: BorderSide(color: theme.divider),
+                                textStyle: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.circular(theme.radius),
@@ -574,6 +597,18 @@ class _SeatLayerPickerSeatConfirmationState
                                 minimumSize: const Size.fromHeight(52),
                                 backgroundColor: theme.accent,
                                 foregroundColor: theme.onAccent,
+                                disabledBackgroundColor: Color.alphaBlend(
+                                  _alpha(theme.mutedText, .16),
+                                  theme.surface,
+                                ),
+                                disabledForegroundColor:
+                                    _alpha(theme.mutedText, .58),
+                                elevation: 0,
+                                overlayColor: _alpha(theme.onAccent, .12),
+                                textStyle: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius:
                                       BorderRadius.circular(theme.radius),
@@ -647,6 +682,38 @@ class _SeatLayerPickerSeatConfirmationState
   }
 }
 
+class _SeatInspectionActions extends StatelessWidget {
+  const _SeatInspectionActions({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          if (children.length == 1) return children.single;
+          if (constraints.maxWidth < 330) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var index = 0; index < children.length; index++) ...[
+                  children[index],
+                  if (index != children.length - 1) const SizedBox(height: 8),
+                ],
+              ],
+            );
+          }
+          return Row(
+            children: [
+              for (var index = 0; index < children.length; index++) ...[
+                Expanded(child: children[index]),
+                if (index != children.length - 1) const SizedBox(width: 10),
+              ],
+            ],
+          );
+        },
+      );
+}
+
 /// A reusable view-from-seat action.
 ///
 /// Without [onPressed], it calls the SDK controller and hides itself unless the
@@ -672,13 +739,7 @@ class SeatLayerPickerSeatViewButton extends StatelessWidget {
             : null);
     if (action == null) return const SizedBox.shrink();
     return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(
-        minimumSize: const Size.fromHeight(48),
-        side: BorderSide(color: theme.divider),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(theme.radius),
-        ),
-      ),
+      style: _seatInspectionButtonStyle(theme),
       onPressed: state.isBusy ? null : () => action(seat),
       icon: const Icon(Icons.visibility_outlined),
       label: const Text('View from here'),
@@ -711,13 +772,8 @@ class SeatLayerPickerSeat3DButton extends StatelessWidget {
             : null);
     if (action == null) return const SizedBox.shrink();
     final alreadyIn3D = state.snapshot?.map.isVenue3D ?? false;
-    return FilledButton.tonalIcon(
-      style: FilledButton.styleFrom(
-        minimumSize: const Size.fromHeight(48),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(theme.radius),
-        ),
-      ),
+    return OutlinedButton.icon(
+      style: _seatInspectionButtonStyle(theme),
       onPressed: state.isBusy ? null : () => action(seat),
       icon: Icon(
         alreadyIn3D
@@ -728,6 +784,29 @@ class SeatLayerPickerSeat3DButton extends StatelessWidget {
     );
   }
 }
+
+ButtonStyle _seatInspectionButtonStyle(
+  SeatLayerResolvedPickerTheme theme,
+) =>
+    OutlinedButton.styleFrom(
+      minimumSize: const Size.fromHeight(50),
+      foregroundColor: theme.text,
+      disabledForegroundColor: _alpha(theme.mutedText, .5),
+      backgroundColor: Color.alphaBlend(
+        _alpha(theme.accent, .055),
+        theme.surface,
+      ),
+      overlayColor: _alpha(theme.accent, .08),
+      side: BorderSide(color: _alpha(theme.accent, .18)),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      textStyle: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w800,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(theme.radius),
+      ),
+    );
 
 class _SeatIdentityField extends StatelessWidget {
   const _SeatIdentityField({required this.label, required this.value});

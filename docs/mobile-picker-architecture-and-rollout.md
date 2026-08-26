@@ -333,7 +333,11 @@ The seat confirmation and both inspection buttons are end-to-end components,
 not visual shells: without callbacks they call `openSeatView` / `showSeatIn3D`
 on the scoped controller and disappear when the matching capability is absent.
 `showSeatView`, `show3D`, `onViewFromSeat` and `onShow3D` let a host hide or
-replace each action independently.
+replace each action independently. The default confirmation has one deliberate
+action hierarchy: View from here and See it in 3D share a neutral accent-tinted
+style, Cancel is neutral, and Select alone uses the saturated host accent. The
+inspection pair shares a row when its container permits and stacks on narrow
+containers; it never inherits an unrelated Material tertiary color.
 
 ### 7.1 Web-to-mobile feature parity ledger
 
@@ -925,8 +929,11 @@ model or global window width.
 - Seat confirmation is a bottom card/sheet that does not make the map
   untouchable after dismissal. Its View from here / See it in 3D action keeps
   the native card mounted until the runtime acknowledges that the destination
-  surface exists. While any native decision surface is present, the turnkey
-  composition both gates the Flutter map child and calls
+  surface exists. Both inspection actions share one secondary visual treatment,
+  while Cancel is neutral and Select is the only saturated primary action. The
+  pair becomes a vertical stack below its container breakpoint rather than
+  shrinking labels or overflowing. While any native decision surface is
+  present, the turnkey composition both gates the Flutter map child and calls
   `picker.setInteractionEnabled(false)`. The latter makes the runtime DOM inert
   and is the authoritative iOS guard: visual stacking or `IgnorePointer` alone
   cannot stop WKWebView from receiving the same physical touch beneath
