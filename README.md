@@ -337,6 +337,14 @@ required: UIKit can hit-test WKWebView beneath composited Flutter chrome even
 when the Flutter child itself ignores pointers. The originating tap therefore
 cannot select a second seat underneath.
 
+The lock applies only while native decision chrome is visible. As soon as the
+prompt closes, the renderer again owns one-finger pan and two-finger pinch
+inside the WebView. Do not wrap `SeatLayerPickerMap` in an app-level drag or
+scale recognizer and do not stream touch coordinates over the bridge: doing so
+competes with the renderer and breaks tap-versus-pan suppression. If a map can
+tap but cannot pan after a prompt closes, update/fix the SeatLayer runtime; it
+is not a Reference app page-level gesture concern.
+
 Targeted parts of the turnkey layout can also be wrapped or replaced through
 `SeatLayerPickerBuilders`. Every builder receives the immutable state, the
 session controller and the default child. The overall adaptive layout, test
