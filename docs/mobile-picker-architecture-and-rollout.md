@@ -258,9 +258,21 @@ SeatLayerPickerOptions(
   hideEventDetails: false,
   panelInitiallyCollapsed: false,
   persistColorblindPreference: true,
+  chrome: const SeatLayerPickerChromeOptions(
+    showHeader: true,
+    showPriceRail: true,
+    showZoomControls: true,
+    showViewModeControl: true,
+    showColorblindControl: true,
+  ),
   languages: const [Locale('en'), Locale('de')],
 )
 ```
+
+`SeatLayerPickerChromeOptions` changes only the SDK's turnkey composition.
+Required test-mode chrome and API-driven attribution are deliberately not
+hideable here. The runtime snapshot's `branding.attributionRequired` value is
+the sole attribution gate.
 
 The current baseline does not silently persist a hold capability. A host that
 wants restoration persists the handoff itself and supplies `initialHoldId` on
@@ -281,6 +293,7 @@ The initial public kit consists of:
 - `SeatLayerPickerZoomInButton`
 - `SeatLayerPickerZoomOutButton`
 - `SeatLayerPickerZoomToFitButton`
+- `SeatLayerPickerViewModeButton`
 - `SeatLayerPickerColorblindButton`
 - `SeatLayerPickerPriceRail`
 - `SeatLayerPickerAccessibilityFilters`
@@ -791,13 +804,18 @@ model or global window width.
   area, with one close action.
 - One concise horizontal price rail (price plus category dot); no second native
   section/category row is inserted above the map.
-- Pinch as primary zoom gesture.
-- Contextual back-to-venue after section focus; fit and colorblind-safe controls
-  remain available without a tall five-button zoom column.
+- Pinch remains the primary map gesture, while explicit zoom in/out remains
+  visible for discoverability and accessibility.
+- Contextual back-to-venue, zoom in/out, fit, 2D/3D and colorblind-safe actions
+  use separate compact floating buttons rather than one tall control slab.
 - A 50-logical-pixel safe-area-aware ticket dock is the collapsed state.
 - Expanded sheet for selected tickets, best available, GA/table choices and
-  hold details. Best Available uses two compact dropdowns and one horizontal
-  quantity/submit row rather than large scrolling chip rails.
+  hold details. Best Available uses two touch-friendly selector rows that open
+  mobile choice sheets plus one horizontal quantity/submit row, rather than
+  cramped desktop dropdowns or large scrolling chip rails.
+- Required attribution, when enabled by the API, is a compact mark and wordmark
+  in the expanded ticket-panel footer. It never consumes map space and does not
+  appear in the collapsed 50-pixel dock.
 - The ticket panel automatically opens after a new selection and can be closed
   again without destroying or remounting the map session.
 - Seat confirmation is a bottom card/sheet that does not make the map
@@ -849,9 +867,9 @@ safe SDK defaults
 ```
 
 It covers accent/on-accent, background, surface, primary/muted text, borders,
-semantic success/warning/error colors, selected/held/sold treatments, radius,
-spacing, control sizing, typography and map-theme overrides. Map contrast is
-validated separately from surrounding chrome.
+semantic warning/error colors, radius, logo, typography and map-background
+overrides. Layout/control visibility belongs to `SeatLayerPickerChromeOptions`;
+map contrast is validated separately from surrounding chrome.
 
 ### Localization
 

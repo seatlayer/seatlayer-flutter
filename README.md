@@ -77,7 +77,41 @@ On a phone, the turnkey widget deliberately follows the web picker's map-first
 information hierarchy: a compact event header, one concise price rail, the map,
 and a 50-logical-pixel ticket dock. The dock expands for Best Seats, selected
 tickets and checkout, and automatically opens after a new selection. The SDK
-does not add a second section rail above the map.
+does not add a second section rail above the map. Zoom in/out, fit, 2D/3D and
+colorblind-safe controls stay available as compact floating buttons. Best Seats
+uses touch-friendly selector rows that open mobile choice sheets instead of
+cramped desktop dropdown menus.
+
+The usual display controls do not require a custom layout:
+
+```dart
+SeatLayerPicker(
+  configuration: configuration,
+  options: const SeatLayerPickerOptions(
+    enable3D: true,
+    chrome: SeatLayerPickerChromeOptions(
+      showHeader: true,
+      showPriceRail: true,
+      showZoomControls: true,
+      showViewModeControl: true,
+      showColorblindControl: true,
+    ),
+  ),
+  theme: const SeatLayerPickerThemeData(
+    accent: Color(0xFFE54558),
+    onAccent: Colors.white,
+    surface: Colors.white,
+    text: Color(0xFF111827),
+    radius: 14,
+  ),
+  onCheckout: openCheckout,
+)
+```
+
+`SeatLayerPickerChromeOptions` controls only the turnkey composition. A custom
+composition can place the same public controls anywhere. Attribution is not a
+host visibility switch: the API-provided `branding.attributionRequired` value
+is authoritative.
 
 For public inventory, omit `buyerAccessTokenProvider`. For private channel
 inventory, the provider calls your backend, which mints a short-lived buyer
@@ -203,6 +237,7 @@ The public `0.3.0-dev` component baseline exports:
 - `SeatLayerPickerZoomInButton`
 - `SeatLayerPickerZoomOutButton`
 - `SeatLayerPickerZoomToFitButton`
+- `SeatLayerPickerViewModeButton`
 - `SeatLayerPickerColorblindButton`
 - `SeatLayerPickerBestAvailable`
 - `SeatLayerPickerBestAvailablePanel`
@@ -259,9 +294,12 @@ chrome owner. Its init contract sends:
 The renderer therefore does not draw a second test badge. Flutter reads the
 event mode from the atomic picker snapshot and renders exactly one
 `SeatLayerPickerTestModeIndicator` plus one `Powered by SeatLayer` attribution
-when `branding.attributionRequired` is true. Neither can be replaced through
-`SeatLayerPickerBuilders`; both still inherit the picker theme. A white-label
-entitlement may explicitly set `attributionRequired: false`. A raw
+when `branding.attributionRequired` is true. On phones the small attribution is
+in the expanded ticket-panel footer, matching the web picker; it never floats
+over the map and is absent while the 50-pixel dock is collapsed. Neither item
+can be replaced through `SeatLayerPickerBuilders`; both still inherit the
+picker theme. A white-label entitlement may explicitly set
+`attributionRequired: false`. A raw
 `SeatLayerView` remains protocol 1; the host continues to own any surrounding
 test-event chrome there.
 
