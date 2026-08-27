@@ -124,7 +124,7 @@ SeatLayerPickerScope(
 | `SeatLayerChart` | The drawn map (alias of `SeatLayerPickerMap`) | yes |
 | `SeatLayerPickerHeader` | Event identity, hold pill, dismiss | yes |
 | `SeatLayerPriceLegend` | Price chips that filter the map | yes |
-| `SeatLayerDockBar` | Focused section, seats left, prev/next, Overview | yes |
+| `SeatLayerDockBar` | Focused section, seats left, prev/next, Venue | yes |
 | `SeatLayerPickerMapControls` | Accessibility, fit, Map/3D in the corners | yes |
 | `SeatLayerConfirmCard` | The phone's one-seat decision card | yes |
 | `SeatLayerCartSheet` | Peek bar and content-height cart | yes |

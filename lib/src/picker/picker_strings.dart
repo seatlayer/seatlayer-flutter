@@ -13,7 +13,7 @@ class SeatLayerPickerStrings {
   const SeatLayerPickerStrings({
     this.close = 'Close seat selection',
     this.chooseSeats = 'Choose your seats',
-    this.overview = 'Overview',
+    this.overview = 'Venue',
     this.previousSection = 'Previous section',
     this.nextSection = 'Next section',
     this.backToVenue = 'Back to venue',

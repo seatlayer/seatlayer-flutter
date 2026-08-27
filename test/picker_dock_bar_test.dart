@@ -18,7 +18,7 @@ void main() {
 
     expect(find.text('Gallery'), findsOneWidget);
     expect(find.text('74 left'), findsOneWidget);
-    expect(find.text('Overview'), findsOneWidget);
+    expect(find.text('Venue'), findsOneWidget);
   });
 
   testWidgets('a section with no known count shows no count at all',
@@ -79,7 +79,7 @@ void main() {
     expect(_stepEnabled(tester, 'Next section'), isFalse);
   });
 
-  testWidgets('Overview returns the map to the venue', (tester) async {
+  testWidgets('Venue returns the map to the overview', (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
 
@@ -87,7 +87,7 @@ void main() {
     map.emit(pickerSnapshot(sections: pickerSections()));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Overview'));
+    await tester.tap(find.text('Venue'));
     await tester.pump();
 
     expect(map.callsTo('picker.overview'), hasLength(1));
