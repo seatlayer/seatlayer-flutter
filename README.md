@@ -782,10 +782,27 @@ flutter run \
   --dart-define=SEATLAYER_RUNTIME_URL=https://cdn.example/mobile.html
 ```
 
+A runtime that is not published yet can be served from the host machine and
+named the same way, which is how a bridge change is proved against a real app
+before it ships:
+
+```bash
+# in the runtime checkout, after its CDN build
+python3 -m http.server 8181 --directory cdn/dist/seatlayer-js@<version>
+
+flutter run \
+  --dart-define=SEATLAYER_EVENT=ev_your_test_event \
+  --dart-define=SEATLAYER_RUNTIME_URL=http://localhost:8181/mobile.html
+```
+
+An iOS simulator and an Android emulator both reach the host machine's server.
+The API answers according to the publishable key's registered origins, so the
+local origin has to be registered on the key as well.
+
 Omitting `SEATLAYER_RUNTIME_URL` uses the package's immutable runtime pin. A
-development runtime must use an allowed HTTPS origin for private buyer access;
-an origin-bound token minted for `https://cdn.seatlayer.io` cannot be replayed
-on an unrelated preview domain.
+development runtime must use an allowed origin for private buyer access; an
+origin-bound token minted for `https://cdn.seatlayer.io` cannot be replayed on
+an unrelated preview domain.
 
 ## Release path
 

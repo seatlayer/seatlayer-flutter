@@ -146,6 +146,24 @@ class SeatLayerConfiguration {
   final Map<String, String> hostInfo;
 
   /// Hosted production URL, or a Flutter asset key for an explicit fixture.
+  ///
+  /// Leave it alone in production: the default is the immutable, version-pinned
+  /// hosted page, and that pinning is what makes a shipped app's behaviour
+  /// reproducible.
+  ///
+  /// Two other values are supported, both for development:
+  ///
+  /// - **An `http://localhost` page**, for testing against a runtime build that
+  ///   is not on the CDN yet — a release candidate, or a bridge change being
+  ///   proved against a real app before it ships. Serve the built runtime
+  ///   directory and point this at its `mobile.html`; an iOS simulator and an
+  ///   Android emulator both reach the host machine's server. The publishable
+  ///   key's registered origins govern what the API will answer, so the local
+  ///   origin has to be registered too.
+  /// - **A Flutter asset key**, for a self-contained offline fixture.
+  ///
+  /// Only the exact document named here may become the main frame; the view
+  /// refuses every other navigation.
   final String assetPath;
 
   /// The `init` payload: `{ protocol, host, chrome, config }`.

@@ -23,7 +23,7 @@ Optional defines:
 | --- | --- |
 | `SEATLAYER_API_BASE` | Points the session at another API origin. |
 | `SEATLAYER_THEME_MODE` | `auto` (default), `light` or `dark`. |
-| `SEATLAYER_RUNTIME_URL` | An immutable HTTPS runtime document, for runtime development. Omit it to use the package's own pin. |
+| `SEATLAYER_RUNTIME_URL` | A runtime document to load instead of the package's pin: an immutable HTTPS page, or an `http://localhost` one served from a local runtime build. Omit it to use the pin. |
 
 Choose an iOS or Android simulator or physical device. The seat map must remain
 inside its fixed-height or full-screen container so it can own pan and pinch
