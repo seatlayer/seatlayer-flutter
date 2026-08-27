@@ -9,8 +9,10 @@ import '../seat_layer_configuration.dart';
 import '../seat_layer_error.dart';
 import '../seat_layer_view.dart';
 import 'picker_builders.dart';
+import 'picker_confirm_card.dart';
 import 'picker_dock_bar.dart';
 import 'picker_models.dart';
+import 'picker_motion.dart';
 import 'picker_options.dart';
 import 'picker_theme_sync.dart';
 import 'seat_layer_picker_controller.dart';
@@ -2306,31 +2308,50 @@ class _SeatLayerPickerAdaptiveLayoutState
               onCancel: (seat) => _removeSeat(controller, seat.label),
             ),
           );
-        } else if (pendingSeat != null) {
+        } else if (pendingSeat != null && chrome.showConfirmCard) {
           final capabilities = state.snapshot?.capabilities ?? const <String>{};
-          buyerPrompt = _part(
-            context,
-            widget.builders.seatConfirmation,
-            SeatLayerPickerSeatConfirmation(
-              key: ValueKey<String>(pendingSeat.label),
-              seat: pendingSeat,
-              onConfirm: _confirmSeat,
-              onCancel: (seat) => _removeSeat(controller, seat.label),
-              onViewFromSeat:
-                  options.enableSeatView && capabilities.contains('seatView')
-                      ? (seat) => _inspectSeat(
-                            seat,
-                            () => controller.openSeatView(seat),
-                          )
-                      : null,
-              onShow3D: options.enable3D && capabilities.contains('venue3d')
-                  ? (seat) => _inspectSeat(
+          final onViewFromSeat =
+              options.enableSeatView && capabilities.contains('seatView')
+                  ? (SelectedSeat seat) => _inspectSeat(
+                        seat,
+                        () => controller.openSeatView(seat),
+                      )
+                  : null;
+          final onShow3D =
+              options.enable3D && capabilities.contains('venue3d')
+                  ? (SelectedSeat seat) => _inspectSeat(
                         seat,
                         () => controller.showSeatIn3D(seat),
                       )
-                  : null,
-            ),
-          );
+                  : null;
+          // The phone gets the one-line card; the wide layout keeps the
+          // identity grid, which has the room for it.
+          buyerPrompt = wide
+              ? _part(
+                  context,
+                  widget.builders.seatConfirmation,
+                  SeatLayerPickerSeatConfirmation(
+                    key: ValueKey<String>(pendingSeat.label),
+                    seat: pendingSeat,
+                    onConfirm: _confirmSeat,
+                    onCancel: (seat) => _removeSeat(controller, seat.label),
+                    onViewFromSeat: onViewFromSeat,
+                    onShow3D: onShow3D,
+                  ),
+                )
+              : _part(
+                  context,
+                  widget.builders.confirmCard ??
+                      widget.builders.seatConfirmation,
+                  SeatLayerConfirmCard(
+                    key: ValueKey<String>(pendingSeat.label),
+                    seat: pendingSeat,
+                    onConfirm: _confirmSeat,
+                    onCancel: (seat) => _removeSeat(controller, seat.label),
+                    onViewFromSeat: onViewFromSeat,
+                    onShow3D: onShow3D,
+                  ),
+                );
         } else {
           buyerPrompt = null;
         }
@@ -2691,18 +2712,17 @@ class _PickerPromptTransition extends StatelessWidget {
     return IgnorePointer(
       ignoring: prompt == null,
       child: AnimatedSwitcher(
-        duration:
-            reducedMotion ? Duration.zero : const Duration(milliseconds: 260),
+        duration: SeatLayerPickerMotion.of(context, SeatLayerPickerMotion.enter),
         reverseDuration:
-            reducedMotion ? Duration.zero : const Duration(milliseconds: 190),
-        switchInCurve: Curves.easeOutCubic,
-        switchOutCurve: Curves.easeInCubic,
+            SeatLayerPickerMotion.of(context, SeatLayerPickerMotion.exit),
+        switchInCurve: SeatLayerPickerMotion.easeEnter,
+        switchOutCurve: SeatLayerPickerMotion.easeExit,
         transitionBuilder: (current, animation) {
           if (reducedMotion) return current;
           final eased = CurvedAnimation(
             parent: animation,
-            curve: Curves.easeOutCubic,
-            reverseCurve: Curves.easeInCubic,
+            curve: SeatLayerPickerMotion.easeEnter,
+            reverseCurve: SeatLayerPickerMotion.easeExit,
           );
           return FadeTransition(
             opacity: eased,
@@ -2725,10 +2745,10 @@ class _PickerPromptTransition extends StatelessWidget {
                   (prompt.runtimeType, prompt.key ?? prompt.runtimeType),
                 ),
                 color: scrimColor,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: prompt,
-                ),
+                // Each prompt owns its own insets: the phone confirm card is
+                // specified as the screen less one 16pt gutter, and a shared
+                // outer padding would quietly narrow it.
+                child: Center(child: prompt),
               ),
       ),
     );

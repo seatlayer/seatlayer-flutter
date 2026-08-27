@@ -27,6 +27,7 @@ export 'src/payloads.dart';
 export 'src/picker/picker_builders.dart';
 export 'src/picker/picker_haptics.dart' show PickerHapticCue;
 export 'src/picker/picker_models.dart';
+export 'src/picker/picker_confirm_card.dart';
 export 'src/picker/picker_dock_bar.dart';
 export 'src/picker/picker_layout.dart';
 export 'src/picker/picker_motion.dart';

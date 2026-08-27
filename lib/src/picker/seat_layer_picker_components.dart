@@ -415,225 +415,230 @@ class _SeatLayerPickerSeatConfirmationState
 
     return Align(
       alignment: Alignment.center,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 430, maxHeight: maxHeight),
-        child: Material(
-          color: theme.surface,
-          elevation: 18,
-          shadowColor: _alpha(Colors.black, .26),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(theme.radius + 6),
-            side: BorderSide(color: _alpha(theme.divider, .9)),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (var index = 0; index < identity.length; index++) ...[
-                        Expanded(
-                          flex: index == 0 && identity.length == 3 ? 5 : 4,
-                          child: _SeatIdentityField(
-                            label: identity[index].key,
-                            value: identity[index].value,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 430, maxHeight: maxHeight),
+          child: Material(
+            color: theme.surface,
+            elevation: 18,
+            shadowColor: _alpha(Colors.black, .26),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(theme.radius + 6),
+              side: BorderSide(color: _alpha(theme.divider, .9)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var index = 0;
+                            index < identity.length;
+                            index++) ...[
+                          Expanded(
+                            flex: index == 0 && identity.length == 3 ? 5 : 4,
+                            child: _SeatIdentityField(
+                              label: identity[index].key,
+                              value: identity[index].value,
+                            ),
                           ),
-                        ),
-                        if (index != identity.length - 1)
-                          VerticalDivider(
-                            width: 1,
-                            thickness: 1,
-                            color: theme.divider,
-                          ),
+                          if (index != identity.length - 1)
+                            VerticalDivider(
+                              width: 1,
+                              thickness: 1,
+                              color: theme.divider,
+                            ),
+                        ],
                       ],
-                    ],
-                  ),
-                ),
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: Color.alphaBlend(
-                      _alpha(categoryColor, .10),
-                      theme.surface,
                     ),
-                    border: Border.symmetric(
-                      horizontal: BorderSide(
-                        color: _alpha(categoryColor, .16),
+                  ),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: Color.alphaBlend(
+                        _alpha(categoryColor, .10),
+                        theme.surface,
+                      ),
+                      border: Border.symmetric(
+                        horizontal: BorderSide(
+                          color: _alpha(categoryColor, .16),
+                        ),
                       ),
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 13,
-                    ),
-                    child: Row(
-                      children: [
-                        DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: categoryColor,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: _alpha(theme.text, .28),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: const SizedBox.square(dimension: 14),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            categoryLabel,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: theme.text,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                        ),
-                        if (seat.price != null)
-                          Text(
-                            _money(
-                              context,
-                              seat.price!,
-                              seat.currency ?? 'USD',
-                            ),
-                            style: TextStyle(
-                              color: theme.text,
-                              fontSize: 19,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (tiers.length > 1) ...[
-                        Text(
-                          'Ticket type',
-                          style: TextStyle(
-                            color: theme.mutedText,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 7),
-                        for (final tier in tiers)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 7),
-                            child: _SeatTierChoice(
-                              tier: tier,
-                              currency: seat.currency ?? 'USD',
-                              selected: _tierId == tier.id,
-                              enabled: !controller.state.isBusy,
-                              onTap: () => setState(() => _tierId = tier.id),
-                            ),
-                          ),
-                      ] else if (tiers.firstOrNull?.buyerMessage != null) ...[
-                        Text(
-                          tiers.first.buyerMessage!,
-                          style: TextStyle(color: theme.mutedText),
-                        ),
-                        const SizedBox(height: 10),
-                      ],
-                      if (limitedView)
-                        _SeatNotice(
-                          icon: Icons.visibility_off_outlined,
-                          color: theme.warning,
-                          title: 'View information',
-                          message: seat.commercial?.note ??
-                              'This seat may have a limited or obstructed view.',
-                        ),
-                      if (wheelchair)
-                        _SeatNotice(
-                          icon: Icons.accessible_rounded,
-                          color: theme.accent,
-                          title: 'Accessible place',
-                          message: seat.wheelchairSpaceType == 'no-seat'
-                              ? 'Wheelchair space without a fixed chair.'
-                              : 'Wheelchair-accessible seating.',
-                        ),
-                      if (inspectionActions.isNotEmpty) ...[
-                        _SeatInspectionActions(children: inspectionActions),
-                        const SizedBox(height: 14),
-                      ],
-                      Row(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 13,
+                      ),
+                      child: Row(
                         children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(52),
-                                foregroundColor: theme.text,
-                                disabledForegroundColor:
-                                    _alpha(theme.mutedText, .5),
-                                backgroundColor: Color.alphaBlend(
-                                  _alpha(theme.text, .035),
-                                  theme.surface,
-                                ),
-                                overlayColor: _alpha(theme.text, .055),
-                                side: BorderSide(color: theme.divider),
-                                textStyle: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(theme.radius),
-                                ),
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: categoryColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: _alpha(theme.text, .28),
+                                width: 1.5,
                               ),
-                              onPressed: controller.state.isBusy
-                                  ? null
-                                  : () => _cancel(controller, seat),
-                              child: const Text('Cancel'),
                             ),
+                            child: const SizedBox.square(dimension: 14),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
-                            child: FilledButton.icon(
-                              style: FilledButton.styleFrom(
-                                minimumSize: const Size.fromHeight(52),
-                                backgroundColor: theme.accent,
-                                foregroundColor: theme.onAccent,
-                                disabledBackgroundColor: Color.alphaBlend(
-                                  _alpha(theme.mutedText, .16),
-                                  theme.surface,
-                                ),
-                                disabledForegroundColor:
-                                    _alpha(theme.mutedText, .58),
-                                elevation: 0,
-                                overlayColor: _alpha(theme.onAccent, .12),
-                                textStyle: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(theme.radius),
-                                ),
+                            child: Text(
+                              categoryLabel,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: theme.text,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
                               ),
-                              onPressed: controller.state.isBusy
-                                  ? null
-                                  : () => _confirm(controller, seat),
-                              icon: const Icon(Icons.check_rounded),
-                              label: const Text('Select'),
                             ),
                           ),
+                          if (seat.price != null)
+                            Text(
+                              _money(
+                                context,
+                                seat.price!,
+                                seat.currency ?? 'USD',
+                              ),
+                              style: TextStyle(
+                                color: theme.text,
+                                fontSize: 19,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (tiers.length > 1) ...[
+                          Text(
+                            'Ticket type',
+                            style: TextStyle(
+                              color: theme.mutedText,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 7),
+                          for (final tier in tiers)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 7),
+                              child: _SeatTierChoice(
+                                tier: tier,
+                                currency: seat.currency ?? 'USD',
+                                selected: _tierId == tier.id,
+                                enabled: !controller.state.isBusy,
+                                onTap: () => setState(() => _tierId = tier.id),
+                              ),
+                            ),
+                        ] else if (tiers.firstOrNull?.buyerMessage != null) ...[
+                          Text(
+                            tiers.first.buyerMessage!,
+                            style: TextStyle(color: theme.mutedText),
+                          ),
+                          const SizedBox(height: 10),
+                        ],
+                        if (limitedView)
+                          _SeatNotice(
+                            icon: Icons.visibility_off_outlined,
+                            color: theme.warning,
+                            title: 'View information',
+                            message: seat.commercial?.note ??
+                                'This seat may have a limited or obstructed view.',
+                          ),
+                        if (wheelchair)
+                          _SeatNotice(
+                            icon: Icons.accessible_rounded,
+                            color: theme.accent,
+                            title: 'Accessible place',
+                            message: seat.wheelchairSpaceType == 'no-seat'
+                                ? 'Wheelchair space without a fixed chair.'
+                                : 'Wheelchair-accessible seating.',
+                          ),
+                        if (inspectionActions.isNotEmpty) ...[
+                          _SeatInspectionActions(children: inspectionActions),
+                          const SizedBox(height: 14),
+                        ],
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(52),
+                                  foregroundColor: theme.text,
+                                  disabledForegroundColor:
+                                      _alpha(theme.mutedText, .5),
+                                  backgroundColor: Color.alphaBlend(
+                                    _alpha(theme.text, .035),
+                                    theme.surface,
+                                  ),
+                                  overlayColor: _alpha(theme.text, .055),
+                                  side: BorderSide(color: theme.divider),
+                                  textStyle: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(theme.radius),
+                                  ),
+                                ),
+                                onPressed: controller.state.isBusy
+                                    ? null
+                                    : () => _cancel(controller, seat),
+                                child: const Text('Cancel'),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: FilledButton.icon(
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(52),
+                                  backgroundColor: theme.accent,
+                                  foregroundColor: theme.onAccent,
+                                  disabledBackgroundColor: Color.alphaBlend(
+                                    _alpha(theme.mutedText, .16),
+                                    theme.surface,
+                                  ),
+                                  disabledForegroundColor:
+                                      _alpha(theme.mutedText, .58),
+                                  elevation: 0,
+                                  overlayColor: _alpha(theme.onAccent, .12),
+                                  textStyle: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(theme.radius),
+                                  ),
+                                ),
+                                onPressed: controller.state.isBusy
+                                    ? null
+                                    : () => _confirm(controller, seat),
+                                icon: const Icon(Icons.check_rounded),
+                                label: const Text('Select'),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1293,32 +1298,35 @@ class _PromptFrame extends StatelessWidget {
     final theme = seatLayerPickerThemeOf(context);
     return Align(
       alignment: Alignment.bottomCenter,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
-        child: Material(
-          color: theme.surface,
-          elevation: 14,
-          borderRadius: BorderRadius.circular(theme.radius),
-          clipBehavior: Clip.antiAlias,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: theme.text,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w900,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520),
+          child: Material(
+            color: theme.surface,
+            elevation: 14,
+            borderRadius: BorderRadius.circular(theme.radius),
+            clipBehavior: Clip.antiAlias,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: theme.text,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 3),
-                Text(subtitle, style: TextStyle(color: theme.mutedText)),
-                const SizedBox(height: 14),
-                child,
-              ],
+                  const SizedBox(height: 3),
+                  Text(subtitle, style: TextStyle(color: theme.mutedText)),
+                  const SizedBox(height: 14),
+                  child,
+                ],
+              ),
             ),
           ),
         ),
