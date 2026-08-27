@@ -109,6 +109,19 @@ void usePhoneSurface(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
-/// Compare the widget under test against `test/goldens/<name>.png`.
-Future<void> expectGolden(WidgetTester tester, Finder finder, String name) =>
-    expectLater(finder, matchesGoldenFile('goldens/$name.png'));
+/// Identifies the subtree a golden is taken of.
+const Key goldenSubjectKey = ValueKey<String>('seatlayer-golden-subject');
+
+/// Give [child] its own layer so a golden captures it and nothing else.
+///
+/// Without this the nearest repaint boundary is the whole test surface, and
+/// every golden would be a picture of one widget floating on an empty screen.
+Widget goldenSubject(Widget child) =>
+    RepaintBoundary(key: goldenSubjectKey, child: child);
+
+/// Compare the [goldenSubject] on screen against `test/goldens/<name>.png`.
+Future<void> expectGolden(WidgetTester tester, String name) =>
+    expectLater(
+      find.byKey(goldenSubjectKey),
+      matchesGoldenFile('goldens/$name.png'),
+    );

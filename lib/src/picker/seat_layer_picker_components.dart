@@ -109,7 +109,14 @@ class _SeatLayerMarkRow extends StatelessWidget {
       );
 }
 
+/// A chip per section, for the wide layout's side panel.
+///
+/// The phone uses [SeatLayerDockBar] instead: a chip list of every section is
+/// a directory, and what a buyer standing inside one section needs is where
+/// they are, how much room is left, and the way out. This navigator hides
+/// itself once seats are revealed, which is exactly where the dock belongs.
 class SeatLayerPickerSectionNavigator extends StatelessWidget {
+  /// Creates the wide layout's section chip list.
   const SeatLayerPickerSectionNavigator({super.key});
 
   @override

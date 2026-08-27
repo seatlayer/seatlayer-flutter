@@ -100,6 +100,14 @@ class SeatLayerPickerScope extends StatefulWidget {
     return scope!.brightness;
   }
 
+  /// Lifecycle callbacks registered on the picker above [context].
+  static SeatLayerPickerCallbacks callbacksOf(BuildContext context) {
+    final scope =
+        context.dependOnInheritedWidgetOfExactType<_SeatLayerPickerInherited>();
+    assert(scope != null, 'No SeatLayerPickerScope found above this context');
+    return scope!.callbacks;
+  }
+
   /// Buyer-facing strings for the picker above [context].
   static SeatLayerPickerStrings stringsOf(BuildContext context) =>
       optionsOf(context).strings;
@@ -174,6 +182,7 @@ class _SeatLayerPickerScopeState extends State<SeatLayerPickerScope> {
       theme: widget.theme,
       themeMode: widget.themeMode,
       brightness: brightness,
+      callbacks: widget.callbacks,
       child: widget.child,
     );
   }
@@ -200,6 +209,7 @@ class _SeatLayerPickerInherited
     required this.theme,
     required this.themeMode,
     required this.brightness,
+    required this.callbacks,
     required super.child,
   }) : super(notifier: controller);
 
@@ -209,6 +219,7 @@ class _SeatLayerPickerInherited
   final SeatLayerPickerThemeData? theme;
   final SeatLayerThemeMode themeMode;
   final Brightness brightness;
+  final SeatLayerPickerCallbacks callbacks;
 
   @override
   bool updateShouldNotify(covariant _SeatLayerPickerInherited oldWidget) =>

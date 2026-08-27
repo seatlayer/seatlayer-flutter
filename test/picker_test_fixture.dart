@@ -1,8 +1,36 @@
+/// Three sections in snapshot order, for dock-bar stepping.
+List<Object?> pickerSections() => <Object?>[
+      <String, Object?>{
+        'id': 'section-a',
+        'label': 'Gallery',
+        'color': '#635BFF',
+        'seatsLeft': 74,
+      },
+      <String, Object?>{
+        'id': 'section-b',
+        'label': 'Terrace',
+        'color': '#22A06B',
+        'seatsLeft': 12,
+      },
+      <String, Object?>{
+        'id': 'section-c',
+        'label': 'Orchestra',
+        'color': '#E5A100',
+        'seatsLeft': null,
+      },
+    ];
+
 Map<String, Object?> pickerSnapshot({
   int revision = 1,
   String sessionId = 'session-1',
   String? holdOwner,
   bool withSelection = true,
+  String rung = 'seats',
+  String focusedSectionId = 'section-a',
+  List<Object?>? sections,
+  List<Object?>? cartItems,
+  int? ticketCount,
+  double? cartTotal,
 }) {
   final lines = withSelection
       ? <Object?>[
@@ -77,11 +105,11 @@ Map<String, Object?> pickerSnapshot({
       ],
       'gaAreas': <Object?>[],
       'zones': <Object?>[],
-      'sections': <Object?>[],
+      'sections': sections ?? <Object?>[],
       'bestAvailableZones': <Object?>[],
     },
     'map': <String, Object?>{
-      'rung': 'seats',
+      'rung': rung,
       'viewMode': 'flat',
       'buyerView': 'map',
       'view3dNavigationMode': 'orbit',
@@ -94,10 +122,17 @@ Map<String, Object?> pickerSnapshot({
       'canZoomIn': true,
       'canZoomOut': true,
       'categoryFilter': <Object?>['standard'],
-      'focusedSection': <String, Object?>{
-        'id': 'section-a',
-        'label': 'Section A',
-      },
+      'focusedSectionId': rung == 'overview' ? null : focusedSectionId,
+      'focusedSection': rung == 'overview'
+          ? null
+          : (sections ?? <Object?>[])
+                  .cast<Map<String, Object?>>()
+                  .where((item) => item['id'] == focusedSectionId)
+                  .firstOrNull ??
+              <String, Object?>{
+                'id': focusedSectionId,
+                'label': 'Section A',
+              },
     },
     'selection': <String, Object?>{
       'seats': withSelection
@@ -135,9 +170,9 @@ Map<String, Object?> pickerSnapshot({
       'maxSelection': 10,
     },
     'cart': <String, Object?>{
-      'items': lines,
-      'quantity': withSelection ? 1 : 0,
-      'total': withSelection ? 25.0 : 0.0,
+      'items': cartItems ?? lines,
+      'quantity': ticketCount ?? (withSelection ? 1 : 0),
+      'total': cartTotal ?? (withSelection ? 25.0 : 0.0),
       'currency': 'EUR',
     },
     'hold': hold,
@@ -146,6 +181,13 @@ Map<String, Object?> pickerSnapshot({
       'status': 'public',
     },
   };
+}
+
+extension<T> on Iterable<T> {
+  T? get firstOrNull {
+    final iterator = this.iterator;
+    return iterator.moveNext() ? iterator.current : null;
+  }
 }
 
 Map<String, Object?> checkoutHandoff() => <String, Object?>{

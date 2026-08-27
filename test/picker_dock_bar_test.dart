@@ -1,0 +1,147 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/picker/picker_dock_bar.dart';
+import 'package:seatlayer/src/picker/picker_layout.dart';
+
+import 'picker_test_fixture.dart';
+import 'picker_widget_harness.dart';
+
+void main() {
+  testWidgets('the dock names the focused section and its remaining seats',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    map.emit(pickerSnapshot(sections: pickerSections()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gallery'), findsOneWidget);
+    expect(find.text('74 left'), findsOneWidget);
+    expect(find.text('Overview'), findsOneWidget);
+  });
+
+  testWidgets('a section with no known count shows no count at all',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    map.emit(
+      pickerSnapshot(sections: pickerSections(), focusedSectionId: 'section-c'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Orchestra'), findsOneWidget);
+    expect(find.textContaining('left'), findsNothing);
+  });
+
+  testWidgets('the dock slides away at the venue overview', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    map.emit(pickerSnapshot(sections: pickerSections(), rung: 'overview'));
+    await tester.pumpAndSettle();
+
+    final opacity = tester.widget<AnimatedOpacity>(
+      find.byType(AnimatedOpacity),
+    );
+    expect(opacity.opacity, 0);
+  });
+
+  testWidgets('stepping moves by snapshot order and never wraps around',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    map.emit(pickerSnapshot(sections: pickerSections()));
+    await tester.pumpAndSettle();
+
+    expect(_stepEnabled(tester, 'Previous section'), isFalse);
+
+    await tester.tap(find.byTooltip('Next section'));
+    await tester.pump();
+    expect(
+      map.callsTo('picker.focusSection').single.$2,
+      <String, Object?>{'sectionId': 'section-b'},
+    );
+
+    map.emit(
+      pickerSnapshot(
+        revision: 5,
+        sections: pickerSections(),
+        focusedSectionId: 'section-c',
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(_stepEnabled(tester, 'Next section'), isFalse);
+  });
+
+  testWidgets('Overview returns the map to the venue', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    map.emit(pickerSnapshot(sections: pickerSections()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Overview'));
+    await tester.pump();
+
+    expect(map.callsTo('picker.overview'), hasLength(1));
+  });
+
+  testWidgets('the dock is 52 points tall plus the device inset',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    map.emit(pickerSnapshot(sections: pickerSections()));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSize(find.byType(SeatLayerDockBar)).height,
+      const SeatLayerPickerLayout().dockBarHeight,
+    );
+  });
+
+  for (final brightness in Brightness.values) {
+    testWidgets('dock bar golden — ${brightness.name}', (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: goldenSubject(
+              const SeatLayerDockBar(reserveBottomInset: false),
+            ),
+          ),
+          platformBrightness: brightness,
+        ),
+      );
+      map.emit(pickerSnapshot(sections: pickerSections()));
+      await tester.pumpAndSettle();
+
+      await expectGolden(tester, 'dock_bar_${brightness.name}');
+    });
+  }
+}
+
+bool _stepEnabled(WidgetTester tester, String tooltip) =>
+    tester
+        .widget<IconButton>(
+          find.ancestor(
+            of: find.byTooltip(tooltip),
+            matching: find.byType(IconButton),
+          ),
+        )
+        .onPressed !=
+    null;

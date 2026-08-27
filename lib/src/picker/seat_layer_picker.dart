@@ -9,6 +9,7 @@ import '../seat_layer_configuration.dart';
 import '../seat_layer_error.dart';
 import '../seat_layer_view.dart';
 import 'picker_builders.dart';
+import 'picker_dock_bar.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
 import 'picker_theme_sync.dart';
@@ -2147,6 +2148,7 @@ class _SeatLayerPickerAdaptiveLayoutState
   int _previousTicketCount = 0;
   bool _mapInteractionEnabled = true;
   int _mapInteractionGeneration = 0;
+  String? _previousRung;
 
   @override
   void didChangeDependencies() {
@@ -2204,7 +2206,7 @@ class _SeatLayerPickerAdaptiveLayoutState
         );
         final prices = _part(
           context,
-          widget.builders.priceRail,
+          widget.builders.legend ?? widget.builders.priceRail,
           chrome.showPriceRail
               ? SeatLayerPickerPriceRail(compact: !wide)
               : const SizedBox.shrink(),
@@ -2213,6 +2215,16 @@ class _SeatLayerPickerAdaptiveLayoutState
           context,
           widget.builders.sectionNavigator,
           const SeatLayerPickerSectionNavigator(),
+        );
+        final dock = _part(
+          context,
+          widget.builders.dockBar,
+          SeatLayerDockBar(
+            onSectionChanged: SeatLayerPickerScope.callbacksOf(context)
+                .onSectionFocused,
+            // The cart sheet below already reserves the device inset.
+            reserveBottomInset: !chrome.showTicketPanel,
+          ),
         );
         final accessibility = _part(
           context,
@@ -2274,6 +2286,7 @@ class _SeatLayerPickerAdaptiveLayoutState
           });
         }
         _previousTicketCount = ticketCount;
+        _followRungToPeek(state);
         final Widget? buyerPrompt;
         if (!options.readOnly && state.generalAdmissionCandidate != null) {
           buyerPrompt = _part(
@@ -2434,6 +2447,11 @@ class _SeatLayerPickerAdaptiveLayoutState
           );
         }
 
+        // The corner controls ride above the dock so neither covers the
+        // other; the dock itself is edge-to-edge at the map's own bottom.
+        final dockLift = _dockVisible(state)
+            ? resolved.layout.dockBarHeight
+            : 0.0;
         return Column(
           children: [
             header,
@@ -2444,13 +2462,24 @@ class _SeatLayerPickerAdaptiveLayoutState
                   Positioned.fill(child: mapSurface),
                   Positioned(top: 10, left: 10, child: testBadge),
                   if (chrome.showFloorSelector)
-                    const Positioned(
+                    Positioned(
                       left: 10,
-                      bottom: 10,
-                      child: SeatLayerPickerFloorSelector(),
+                      bottom: 10 + dockLift,
+                      child: const SeatLayerPickerFloorSelector(),
                     ),
-                  Positioned(right: 10, bottom: 10, child: controls),
-                  Positioned(left: 10, bottom: 56, child: accessibility),
+                  Positioned(right: 10, bottom: 10 + dockLift, child: controls),
+                  Positioned(
+                    left: 10,
+                    bottom: 56 + dockLift,
+                    child: accessibility,
+                  ),
+                  if (chrome.showDockBar)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: dock,
+                    ),
                   Positioned.fill(
                     child: _PickerPromptTransition(
                       scrimColor: _alpha(resolved.background, .64),
@@ -2482,6 +2511,7 @@ class _SeatLayerPickerAdaptiveLayoutState
       },
     );
 
+    final canPop = !_ownsBackGesture(state);
     final themed = Theme(
       data: Theme.of(context).copyWith(
         colorScheme: Theme.of(context).colorScheme.copyWith(
@@ -2498,7 +2528,81 @@ class _SeatLayerPickerAdaptiveLayoutState
       ),
       child: ColoredBox(color: resolved.background, child: body),
     );
-    return themed;
+    // The rung ladder. Android predictive back and the iOS edge swipe both
+    // arrive here, so one gesture walks seat card → section → overview →
+    // dismiss instead of leaving the picker on the buyer's first try out.
+    return PopScope(
+      canPop: canPop,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _climbDown(controller, state);
+      },
+      child: themed,
+    );
+  }
+
+  /// Whether the picker still has a rung of its own to descend.
+  bool _ownsBackGesture(SeatLayerPickerState state) =>
+      _mobilePanelExpanded ||
+      _hasOpenPrompt(state) ||
+      state.snapshot?.map.rung == 'seats';
+
+  bool _hasOpenPrompt(SeatLayerPickerState state) {
+    if (SeatLayerPickerScope.optionsOf(context).readOnly) return false;
+    if (state.generalAdmissionCandidate != null) return true;
+    if (!SeatLayerPickerScope.optionsOf(context).confirmSelection) return false;
+    if (state.hold != null) return false;
+    return state.selection
+        .any((seat) => !_confirmedLabels.contains(seat.label));
+  }
+
+  /// One rung down, in the order the buyer built them up.
+  void _climbDown(
+    SeatLayerPickerController controller,
+    SeatLayerPickerState state,
+  ) {
+    if (_mobilePanelExpanded) {
+      setState(() => _mobilePanelExpanded = false);
+      return;
+    }
+    if (_hasOpenPrompt(state)) {
+      final pending = state.selection.reversed
+          .where((seat) => !_confirmedLabels.contains(seat.label))
+          .firstOrNull;
+      if (state.generalAdmissionCandidate != null) {
+        controller.dismissGeneralAdmissionCandidate();
+        return;
+      }
+      if (pending != null) {
+        _ignoreAction(_removeSeat(controller, pending.label));
+        return;
+      }
+    }
+    if (state.snapshot?.map.rung == 'seats') {
+      _ignoreAction(controller.overview());
+    }
+  }
+
+  bool _dockVisible(SeatLayerPickerState state) =>
+      state.snapshot?.map.rung == 'seats' &&
+      state.snapshot?.map.focusedSectionId != null;
+
+  /// A return to the overview collapses the sheet with it.
+  ///
+  /// The runtime owns the backdrop tap — tapping the dimmed map outside the
+  /// focused section is what produces the rung change — so watching the rung
+  /// is how the native chrome hears about it without a new snapshot field.
+  void _followRungToPeek(SeatLayerPickerState state) {
+    final rung = state.snapshot?.map.rung;
+    if (rung == null || rung == _previousRung) return;
+    final descended = _previousRung == 'seats' && rung != 'seats';
+    _previousRung = rung;
+    if (!descended || !_mobilePanelExpanded) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _mobilePanelExpanded) {
+        setState(() => _mobilePanelExpanded = false);
+      }
+    });
   }
 
   Future<void> _confirmSeat(SelectedSeat seat) async {
