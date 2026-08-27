@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import 'picker_tokens.g.dart';
+
 /// The picker's timing vocabulary, mirroring the web widget's `pickerMotion`.
 ///
 /// One table, spent by every animated moment in the native chrome. Surfaces
@@ -13,42 +15,53 @@ import 'package:flutter/widgets.dart';
 /// asked for less movement.
 abstract final class SeatLayerPickerMotion {
   /// Anything arriving: cards, sheets, toasts, overlays.
-  static const Duration enter = Duration(milliseconds: 260);
+  static const Duration enter =
+      Duration(milliseconds: SeatLayerMotionTokens.enter);
 
   /// Anything leaving. Faster than the entrance — a departure should not be
   /// something the buyer waits through.
-  static const Duration exit = Duration(milliseconds: 180);
+  static const Duration exit =
+      Duration(milliseconds: SeatLayerMotionTokens.exit);
 
   /// The dock bar riding in from under the map.
-  static const Duration dock = Duration(milliseconds: 240);
+  static const Duration dock =
+      Duration(milliseconds: SeatLayerMotionTokens.dock);
 
   /// The cart sheet changing height or state.
-  static const Duration sheet = Duration(milliseconds: 300);
+  static const Duration sheet =
+      Duration(milliseconds: SeatLayerMotionTokens.sheet);
 
   /// A selected seat flying from the confirm card to the peek bar.
-  static const Duration fly = Duration(milliseconds: 420);
+  static const Duration fly =
+      Duration(milliseconds: SeatLayerMotionTokens.fly);
 
   /// One seat of a best-available result popping in.
-  static const Duration pop = Duration(milliseconds: 180);
+  static const Duration pop =
+      Duration(milliseconds: SeatLayerMotionTokens.pop);
 
   /// Between consecutive members of a set.
-  static const Duration stagger = Duration(milliseconds: 60);
+  static const Duration stagger =
+      Duration(milliseconds: SeatLayerMotionTokens.stagger);
 
   /// Swapping text in place — the dock name as the map pans under it.
-  static const Duration crossfade = Duration(milliseconds: 120);
+  static const Duration crossfade =
+      Duration(milliseconds: SeatLayerMotionTokens.crossfade);
 
   /// A toast or undo bar rising.
-  static const Duration toast = Duration(milliseconds: 200);
+  static const Duration toast =
+      Duration(milliseconds: SeatLayerMotionTokens.toast);
 
   /// The immersive 3D chrome settling onto the scene.
-  static const Duration immersive = Duration(milliseconds: 300);
+  static const Duration immersive =
+      Duration(milliseconds: SeatLayerMotionTokens.immersive);
 
   /// How long an undo stays offered after a ticket is removed.
   ///
   /// Not an animation and deliberately outside [catalog]'s budget: this is how
   /// long a buyer has to change their mind, and four seconds is the shortest
   /// span that survives a glance away from the screen.
-  static const Duration undoWindow = Duration(seconds: 4);
+  static const Duration undoWindow =
+      Duration(milliseconds: SeatLayerMotionTokens.undoWindow);
 
   /// Every token, for the catalogue test that keeps them inside the budget.
   static const Map<String, Duration> catalog = <String, Duration>{

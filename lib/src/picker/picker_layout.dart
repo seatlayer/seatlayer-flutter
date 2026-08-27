@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import 'picker_tokens.g.dart';
+
 /// The measured sizes the phone picker is built from.
 ///
 /// Every number the phone layout depends on lives here rather than inside a
@@ -10,26 +12,26 @@ import 'package:flutter/foundation.dart';
 class SeatLayerPickerLayout {
   /// Creates a layout token set; every field defaults to the phone spec.
   const SeatLayerPickerLayout({
-    this.phoneBreakpoint = 640,
-    this.wideBreakpoint = 840,
-    this.headerHeight = 56,
-    this.headerLogoSize = 28,
-    this.dockBarHeight = 52,
-    this.peekHeight = 50,
-    this.sheetMaxHeightFraction = .6,
-    this.emptyTrayMaxHeight = 150,
-    this.denseLineHeight = 40,
-    this.denseVisibleLines = 5,
-    this.confirmCardGutter = 16,
-    this.confirmCardMaxWidth = 360,
-    this.confirmIdentityHeight = 44,
-    this.confirmPhotoHeight = 64,
-    this.confirmActionHeight = 40,
-    this.selectorHeight = 40,
-    this.accessibilityControlSize = 44,
-    this.mapControlSize = 36,
-    this.attributionHeight = 18,
-    this.legendChipFontSize = 11,
+    this.phoneBreakpoint = SeatLayerSizeTokens.phoneBreakpoint,
+    this.wideBreakpoint = SeatLayerSizeTokens.wideBreakpoint,
+    this.headerHeight = SeatLayerSizeTokens.headerHeight,
+    this.headerLogoSize = SeatLayerSizeTokens.headerLogoSize,
+    this.dockBarHeight = SeatLayerSizeTokens.dockBarHeight,
+    this.peekHeight = SeatLayerSizeTokens.peekHeight,
+    this.sheetMaxHeightFraction = SeatLayerSizeTokens.sheetMaxHeightFraction,
+    this.emptyTrayMaxHeight = SeatLayerSizeTokens.emptyTrayMaxHeight,
+    this.denseLineHeight = SeatLayerSizeTokens.denseLineHeight,
+    this.denseVisibleLines = SeatLayerSizeTokens.denseVisibleLines,
+    this.confirmCardGutter = SeatLayerSizeTokens.confirmCardGutter,
+    this.confirmCardMaxWidth = SeatLayerSizeTokens.confirmCardMaxWidth,
+    this.confirmIdentityHeight = SeatLayerSizeTokens.confirmIdentityHeight,
+    this.confirmPhotoHeight = SeatLayerSizeTokens.confirmPhotoHeight,
+    this.confirmActionHeight = SeatLayerSizeTokens.confirmActionHeight,
+    this.selectorHeight = SeatLayerSizeTokens.selectorHeight,
+    this.accessibilityControlSize = SeatLayerSizeTokens.accessibilityControlSize,
+    this.mapControlSize = SeatLayerSizeTokens.mapControlSize,
+    this.attributionHeight = SeatLayerSizeTokens.attributionHeight,
+    this.legendChipFontSize = SeatLayerSizeTokens.legendChipFontSize,
   });
 
   /// Widths below this use the phone composition.

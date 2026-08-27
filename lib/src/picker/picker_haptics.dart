@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 import 'picker_models.dart';
+import 'picker_tokens.g.dart';
 
 /// One thing worth feeling.
 enum PickerHapticCue {
@@ -117,11 +118,22 @@ class PickerHapticsPolicy {
 /// on. Nothing that depends on the buyer's seats may ever fail because a phone
 /// declined to buzz.
 void playPickerHaptic(PickerHapticCue cue) {
-  final Future<void> played = switch (cue) {
-    PickerHapticCue.selectionAdded => HapticFeedback.selectionClick(),
-    PickerHapticCue.sectionFocused => HapticFeedback.lightImpact(),
-    PickerHapticCue.holdCreated => HapticFeedback.mediumImpact(),
-    PickerHapticCue.holdExpired => HapticFeedback.heavyImpact(),
-  };
-  unawaited(played.catchError((Object _) {}));
+  unawaited(_fire(pickerHapticStrength(cue)).catchError((Object _) {}));
 }
+
+/// Which platform strength [cue] fires, named the way `design/tokens.json`
+/// names it so every SDK feels the same.
+String pickerHapticStrength(PickerHapticCue cue) => switch (cue) {
+      PickerHapticCue.selectionAdded => SeatLayerHapticTokens.selectionAdded,
+      PickerHapticCue.sectionFocused => SeatLayerHapticTokens.sectionFocused,
+      PickerHapticCue.holdCreated => SeatLayerHapticTokens.holdCreated,
+      PickerHapticCue.holdExpired => SeatLayerHapticTokens.holdExpired,
+    };
+
+Future<void> _fire(String strength) => switch (strength) {
+      'selection' => HapticFeedback.selectionClick(),
+      'light' => HapticFeedback.lightImpact(),
+      'medium' => HapticFeedback.mediumImpact(),
+      'heavy' => HapticFeedback.heavyImpact(),
+      _ => HapticFeedback.selectionClick(),
+    };

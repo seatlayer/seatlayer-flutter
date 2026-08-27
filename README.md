@@ -136,6 +136,29 @@ SeatLayerPickerScope(
 | `SeatLayerPickerTablePrompt` / `…GeneralAdmissionPrompt` | Quantity prompts | yes |
 | `SeatLayerPickerScope` | The state every widget above reads | n/a |
 
+## Design system
+
+The picker's colours, sizes, radii, elevations, type scale, motion table,
+haptic cues and default strings live in one platform-neutral file,
+[`design/tokens.json`](design/tokens.json), and the component catalogue that
+describes every widget in terms of those tokens lives in
+[`design/components.md`](design/components.md). The catalogue is written for a
+Swift, Kotlin or React Native engineer reproducing this design, and it uses the
+Dart API's names throughout.
+
+`lib/src/picker/picker_tokens.g.dart` is **generated** from the JSON and must
+not be hand-edited:
+
+```bash
+dart run tool/gen_tokens.dart          # sync:tokens — regenerate
+dart run tool/gen_tokens.dart --check  # fail if the generated file is stale
+```
+
+The theme presets, `SeatLayerPickerLayout`, `SeatLayerPickerMotion`, the haptic
+map and `SeatLayerPickerStrings` all read that file, and
+`test/design_tokens_test.dart` asserts them against the JSON as well as running
+the staleness check, so the two cannot drift.
+
 ## Customisation
 
 The zero-configuration path is the approved phone experience. Everything about
@@ -790,6 +813,7 @@ Flutter web, macOS, Windows or Linux support.
 flutter pub get
 flutter analyze
 flutter test
+dart run tool/gen_tokens.dart   # sync:tokens, after editing design/tokens.json
 dart pub publish --dry-run
 ```
 

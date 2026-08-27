@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'picker_layout.dart';
+import 'picker_tokens.g.dart';
 import 'picker_styles.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_scope.dart';
@@ -41,18 +42,18 @@ class SeatLayerMapThemeData {
   /// The ground is recessed below the white chrome that docks on top of it, so
   /// the venue reads as a hole cut in the interface rather than as more of it.
   const SeatLayerMapThemeData.light({
-    this.background = const Color(0xFFE9EDF4),
-    this.rowLabelColor = const Color(0xFF334155),
-    this.textColor = const Color(0xFF172033),
-    this.selectionColor = const Color(0xFF5B4B8A),
+    this.background = SeatLayerLightTokens.mapBackground,
+    this.rowLabelColor = SeatLayerLightTokens.mapRowLabel,
+    this.textColor = SeatLayerLightTokens.mapText,
+    this.selectionColor = SeatLayerLightTokens.mapSelection,
   });
 
   /// High-contrast dark preset for the drawn seating map.
   const SeatLayerMapThemeData.dark({
-    this.background = const Color(0xFF0F1522),
-    this.rowLabelColor = const Color(0xFFD7DEEA),
-    this.textColor = const Color(0xFFF4F7FB),
-    this.selectionColor = const Color(0xFF9B8AFB),
+    this.background = SeatLayerDarkTokens.mapBackground,
+    this.rowLabelColor = SeatLayerDarkTokens.mapRowLabel,
+    this.textColor = SeatLayerDarkTokens.mapText,
+    this.selectionColor = SeatLayerDarkTokens.mapSelection,
   });
 
   /// Ground the venue is drawn on.
@@ -119,41 +120,41 @@ class SeatLayerPickerThemeData
   /// the map ground is recessed beneath it. The accent stays host-configurable
   /// because a mode owns the ground, never the brand.
   const SeatLayerPickerThemeData.light({
-    this.accent = const Color(0xFF5B4B8A),
-    this.onAccent = Colors.white,
+    this.accent = SeatLayerLightTokens.accent,
+    this.onAccent = SeatLayerLightTokens.onAccent,
     this.fontFamily,
-    this.radius = 14,
+    this.radius = SeatLayerRadiusTokens.base,
     this.logo,
     this.mapTheme = const SeatLayerMapThemeData.light(),
     this.layout,
     this.styles,
-  })  : background = const Color(0xFFF6F7FB),
-        surface = Colors.white,
-        text = const Color(0xFF172033),
-        mutedText = const Color(0xFF667085),
-        divider = const Color(0x29172033),
-        error = const Color(0xFFB42318),
-        warning = const Color(0xFFF4B740);
+  })  : background = SeatLayerLightTokens.background,
+        surface = SeatLayerLightTokens.surface,
+        text = SeatLayerLightTokens.text,
+        mutedText = SeatLayerLightTokens.mutedText,
+        divider = SeatLayerLightTokens.divider,
+        error = SeatLayerLightTokens.error,
+        warning = SeatLayerLightTokens.warning;
 
   /// Dark preset for native chrome and the drawn seat map.
   ///
   /// The ground roles mirror the web picker's dark mode token for token.
   const SeatLayerPickerThemeData.dark({
-    this.accent = const Color(0xFF9B8AFB),
-    this.onAccent = const Color(0xFF110D20),
+    this.accent = SeatLayerDarkTokens.accent,
+    this.onAccent = SeatLayerDarkTokens.onAccent,
     this.fontFamily,
-    this.radius = 14,
+    this.radius = SeatLayerRadiusTokens.base,
     this.logo,
     this.mapTheme = const SeatLayerMapThemeData.dark(),
     this.layout,
     this.styles,
-  })  : background = const Color(0xFF0F1522),
-        surface = const Color(0xFF1A2234),
-        text = const Color(0xFFEEF1F8),
-        mutedText = const Color(0xFFA5AEC2),
-        divider = const Color(0x3DA5AEC2),
-        error = const Color(0xFFFF6B6B),
-        warning = const Color(0xFFF4B740);
+  })  : background = SeatLayerDarkTokens.background,
+        surface = SeatLayerDarkTokens.surface,
+        text = SeatLayerDarkTokens.text,
+        mutedText = SeatLayerDarkTokens.mutedText,
+        divider = SeatLayerDarkTokens.divider,
+        error = SeatLayerDarkTokens.error,
+        warning = SeatLayerDarkTokens.warning;
 
   /// The preset for [brightness].
   factory SeatLayerPickerThemeData.forBrightness(Brightness brightness) =>
@@ -349,12 +350,12 @@ class SeatLayerResolvedPickerTheme {
           brightness: Brightness.dark,
           accent: accent,
           onAccent: onAccent,
-          background: const Color(0xFF0F1522),
-          surface: const Color(0xFF1A2234),
-          text: const Color(0xFFEEF1F8),
-          mutedText: const Color(0xFFA5AEC2),
-          divider: const Color(0x3DA5AEC2),
-          error: const Color(0xFFFF6B6B),
+          background: SeatLayerDarkTokens.background,
+          surface: SeatLayerDarkTokens.surface,
+          text: SeatLayerDarkTokens.text,
+          mutedText: SeatLayerDarkTokens.mutedText,
+          divider: SeatLayerDarkTokens.divider,
+          error: SeatLayerDarkTokens.error,
           warning: warning,
           radius: radius,
           layout: layout,
@@ -432,8 +433,10 @@ SeatLayerResolvedPickerTheme resolveSeatLayerPickerTheme(
         _hex(organizer?.line) ??
         scheme.outlineVariant,
     error: ground((theme) => theme.error) ?? scheme.error,
-    warning: ground((theme) => theme.warning) ?? const Color(0xFFF4B740),
-    radius: host((theme) => theme.radius) ?? organizer?.radius ?? 14,
+    warning: ground((theme) => theme.warning) ?? SeatLayerLightTokens.warning,
+    radius: host((theme) => theme.radius) ??
+        organizer?.radius ??
+        SeatLayerRadiusTokens.base,
     layout: host((theme) => theme.layout) ?? const SeatLayerPickerLayout(),
     // Slots stack: a theme extension on the app, then the picker's own theme.
     styles: (app?.styles ?? const SeatLayerPickerStyles())

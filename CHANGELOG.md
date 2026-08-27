@@ -5,6 +5,29 @@
 Phone parity round. The native chrome is rebuilt against the web picker's
 measured phone layout, and the package is prepared for a stable 0.3.0.
 
+**Design system**
+
+- `design/tokens.json` is the single, platform-neutral source for the picker's
+  palettes, sizes, radii, elevations, type scale, motion table, haptic cues and
+  default strings. `dart run tool/gen_tokens.dart` generates
+  `lib/src/picker/picker_tokens.g.dart` from it, the theme presets, layout,
+  motion, haptics and strings read that generated file, and
+  `test/design_tokens_test.dart` fails if the two ever disagree or if the
+  generated file is stale. The file is written to move to the runtime
+  repository and feed Swift, Kotlin and TypeScript generators next.
+- `design/components.md` documents every picker widget — inputs, states,
+  anatomy in tokens, style slots, callbacks and bridge commands — for the iOS,
+  Android and React Native ports.
+
+**Styling**
+
+- `SeatLayerPickerStyles` adds per-element style slots to
+  `SeatLayerPickerThemeData` (`primaryButtonStyle`, `secondaryButtonStyle`,
+  `continueButtonStyle`, `iconButtonStyle`, `chipShape`, `legendChipStyle`,
+  `dockBarStyle`, `confirmCardStyle`, `sheetStyle`, `headerStyle`,
+  `pillStyle`), so one control can be restyled without replacing the widget
+  that draws it. Every widget owning a slot also takes a `style:` override.
+
 **Theme**
 
 - `SeatLayerPicker(themeMode:)` with `SeatLayerThemeMode.auto | light | dark`.
