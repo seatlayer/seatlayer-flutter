@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0-dev.4 (unreleased)
+
+- Pins the hosted runtime to `seatlayer-js@0.70.0`. Views load
+  `https://cdn.seatlayer.io/seatlayer-js@0.70.0/mobile.html`, which advertises
+  protocol `1..2` and every capability `SeatLayerBridgeProfile.picker()`
+  requires, so the picker handshake still agrees on protocol 2.
+- The offline demo/test fixture stays on `seatlayer-js@0.68.0`. It is a
+  byte-verified vendored artifact, not a version string, and re-vendoring it is
+  a separate change from moving production onto a new hosted runtime.
+
 ## 0.3.0-dev.3 (unreleased)
 
 - Retains the hosted `seatlayer-js@0.68.1` runtime and vendors the combined

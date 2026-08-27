@@ -166,7 +166,7 @@ single category and frames its seats; tapping the active price again returns to
 all categories.
 
 For public Platform inventory, register the exact hosted renderer origin
-`https://cdn.seatlayer.io` on the matching `pk_test_` key. Runtime 0.68
+`https://cdn.seatlayer.io` on the matching `pk_test_` key. Runtime 0.70
 bootstraps chart, availability, and public buyer access directly and keeps its
 grant in memory; your backend is not on the chart-loading path.
 
