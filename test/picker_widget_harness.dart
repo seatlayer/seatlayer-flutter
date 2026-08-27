@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/bridge/bridge_client.dart';
+import 'package:seatlayer/src/bridge/bridge_protocol.dart';
+import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_scope.dart';
@@ -15,13 +17,43 @@ import 'picker_test_fixture.dart';
 /// The phone the goldens are taken on: iPhone 14/15/16 logical size.
 const Size phoneSize = Size(390, 844);
 
+/// What a runtime speaking the whole native-chrome contract advertises.
+///
+/// Only the parts the SDK gates on; the real `hello` carries more.
+BundleInfo nativeChromeBundle({
+  List<String> capabilities = const <String>[
+    'native-chrome-contract-v1',
+    'viewport-insets-v1',
+  ],
+  List<String> commands = const <String>[
+    'picker.setThemeMode',
+    'picker.setViewportInsets',
+  ],
+}) =>
+    BundleInfo(
+      bundle: 'seatlayer-js@0.71.2',
+      protocolRange: const ProtocolRange(min: 1, max: 2),
+      capabilities: capabilities,
+      events: const <String>['picker.snapshot'],
+      commands: commands,
+    );
+
 /// A map controller that answers every bridge command from a local snapshot.
 final class FakePickerMap extends SeatLayerController {
   /// Creates a fake runtime, optionally with a custom command [handler].
-  FakePickerMap({this.handler});
+  FakePickerMap({this.handler, this.bundle});
 
   /// Replaces the default "echo a bumped snapshot" reply.
   final Future<Object?> Function(String command, Object? payload)? handler;
+
+  /// What this fake runtime advertised in `hello`.
+  ///
+  /// Null is a runtime that never handshook, which is what most component
+  /// tests want: capability-gated commands are withheld from it.
+  final BundleInfo? bundle;
+
+  @override
+  BundleInfo? get bundleInfo => bundle;
 
   /// Every command the picker sent, in order.
   final List<(String, Object?)> calls = <(String, Object?)>[];

@@ -384,6 +384,88 @@ class SeatLayerPickerHold {
   }
 }
 
+/// How much of the map surface the host's own chrome is covering.
+///
+/// The runtime frames the venue — `zoomToFit`, a focused section, the glide
+/// that follows a tap, a best-available result — against the whole WebView
+/// rectangle. Native chrome drawn over that rectangle therefore covers a
+/// perfectly framed venue. These insets shrink the rectangle the camera aims
+/// at without clipping anything: the map still draws and pans underneath the
+/// chrome, so nothing is hidden that the buyer cannot reach.
+///
+/// Every side is in the same logical points Flutter lays out in, which is what
+/// the WebView reads as a CSS pixel.
+@immutable
+class SeatLayerViewportInsets {
+  /// Creates a set of insets; every omitted side is zero.
+  const SeatLayerViewportInsets({
+    this.top = 0,
+    this.right = 0,
+    this.bottom = 0,
+    this.left = 0,
+  });
+
+  /// No chrome over the map.
+  static const SeatLayerViewportInsets zero = SeatLayerViewportInsets();
+
+  /// Height of the chrome covering the top of the map.
+  final double top;
+
+  /// Width of the chrome covering the right of the map.
+  final double right;
+
+  /// Height of the chrome covering the bottom of the map.
+  final double bottom;
+
+  /// Width of the chrome covering the left of the map.
+  final double left;
+
+  /// Whether every side is zero.
+  bool get isEmpty => top == 0 && right == 0 && bottom == 0 && left == 0;
+
+  /// The payload `picker.setViewportInsets` accepts.
+  ///
+  /// Negative and non-finite sides are floored to zero rather than sent: the
+  /// runtime answers `bad_payload` for them, and a mis-measured piece of
+  /// chrome must not fail an action the buyer started.
+  Map<String, Object?> toBridgePayload() => <String, Object?>{
+        'top': _wire(top),
+        'right': _wire(right),
+        'bottom': _wire(bottom),
+        'left': _wire(left),
+      };
+
+  static double _wire(double value) =>
+      value.isFinite && value > 0 ? value : 0.0;
+
+  static SeatLayerViewportInsets? fromJson(Object? value) {
+    if (jObj(value) == null) return null;
+    double side(String key) => _wire(jDouble(jGet(value, key)) ?? 0);
+    return SeatLayerViewportInsets(
+      top: side('top'),
+      right: side('right'),
+      bottom: side('bottom'),
+      left: side('left'),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeatLayerViewportInsets &&
+      other.top == top &&
+      other.right == right &&
+      other.bottom == bottom &&
+      other.left == left;
+
+  @override
+  int get hashCode => Object.hash(top, right, bottom, left);
+
+  @override
+  String toString() =>
+      'SeatLayerViewportInsets(top: $top, right: $right, bottom: $bottom, '
+      'left: $left)';
+}
+
 @immutable
 class SeatLayerPickerMapState {
   const SeatLayerPickerMapState({
@@ -402,6 +484,7 @@ class SeatLayerPickerMapState {
     this.focusedSectionId,
     this.focusedSection,
     this.view3DTargetSeatId,
+    this.viewportInsets,
   });
 
   final String rung;
@@ -419,6 +502,13 @@ class SeatLayerPickerMapState {
   final Set<String> categoryFilter;
   final Set<String> accessibilityFilter;
   final List<FloorInfo> floors;
+
+  /// What the runtime is currently framing against, echoed back.
+  ///
+  /// Null on a runtime that predates the command, which frames against the
+  /// whole surface. A host can compare this with what it last sent to tell a
+  /// dropped command from an applied one without a round trip.
+  final SeatLayerViewportInsets? viewportInsets;
 
   String get projection => viewMode;
   String? get floorId => activeFloorId;
@@ -455,6 +545,9 @@ class SeatLayerPickerMapState {
         ),
         floors: List<FloorInfo>.unmodifiable(
           jListOf(jGet(value, 'floors'), FloorInfo.fromJson),
+        ),
+        viewportInsets: SeatLayerViewportInsets.fromJson(
+          jGet(value, 'viewportInsets'),
         ),
       );
 }

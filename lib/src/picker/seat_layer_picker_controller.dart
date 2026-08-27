@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import '../bridge/bridge_client.dart';
 import '../json.dart';
@@ -13,6 +14,9 @@ import 'picker_haptics.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
 import 'seat_layer_picker_theme.dart';
+
+/// Advertised by a runtime that frames against host-reported viewport insets.
+const String _viewportInsetsCapability = 'viewport-insets-v1';
 
 /// State and actions for one high-level picker session.
 ///
@@ -91,6 +95,11 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   Future<SeatLayerCheckoutHandoff>? _checkoutInFlight;
   Future<void>? _closeInFlight;
   int _reloadGeneration = 0;
+  SeatLayerViewportInsets? _pendingViewportInsets;
+  bool _hasPendingViewportInsets = false;
+  SeatLayerViewportInsets? _sentViewportInsets;
+  bool _hasSentViewportInsets = false;
+  bool _viewportInsetsFlushScheduled = false;
   final Map<int, List<Completer<void>>> _revisionWaiters =
       <int, List<Completer<void>>>{};
 
@@ -135,6 +144,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       }
       _reloadGeneration += 1;
       _haptics.reset();
+      _forgetViewportInsets();
       value = const SeatLayerPickerState.initializing();
     });
   }
@@ -428,6 +438,78 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       <String, Object?>{'mode': mode?.raw},
       SeatLayerPickerBusyAction.changingView,
     );
+  }
+
+  /// Tell the runtime how much of the map surface native chrome is covering.
+  ///
+  /// Persistent: the last value applies to every later fit and glide, so send
+  /// a new one whenever the chrome moves — the dock arriving with a focused
+  /// section, a sheet peeking, the rail hiding. Pass null to clear it and
+  /// frame against the whole surface again.
+  ///
+  /// Nothing is sent to a runtime that does not advertise `viewport-insets-v1`
+  /// and the command, which frames against the whole surface as it always has.
+  /// Repeated identical values are dropped, and several calls inside one frame
+  /// coalesce into the last, so a host may call this from every layout pass.
+  ///
+  /// This reports where furniture is; it changes no inventory and produces no
+  /// busy state, because a buyer resizing a sheet must not see the picker go
+  /// busy underneath them.
+  Future<void> setViewportInsets(SeatLayerViewportInsets? insets) {
+    if (!supportsViewportInsets) return Future<void>.value();
+    final wanted = insets;
+    _pendingViewportInsets = wanted;
+    _hasPendingViewportInsets = true;
+    if (_viewportInsetsFlushScheduled) return Future<void>.value();
+    _viewportInsetsFlushScheduled = true;
+    final completer = Completer<void>();
+    // One send per frame. Native chrome settles over several layout passes —
+    // the dock animating in while the sheet re-measures — and each pass would
+    // otherwise mint its own command and its own map revision.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewportInsetsFlushScheduled = false;
+      if (!completer.isCompleted) {
+        completer.complete(_flushViewportInsets());
+      }
+    });
+    return completer.future;
+  }
+
+  /// Forget what was reported to a runtime that is going away.
+  ///
+  /// A fresh runtime frames against its whole surface until it is told
+  /// otherwise, so the next report has to be sent even when the numbers have
+  /// not moved.
+  void _forgetViewportInsets() {
+    _sentViewportInsets = null;
+    _hasSentViewportInsets = false;
+  }
+
+  /// Whether the mounted runtime accepts [setViewportInsets].
+  bool get supportsViewportInsets {
+    final bundle = mapController.bundleInfo;
+    return bundle != null &&
+        bundle.supportsCapability(_viewportInsetsCapability) &&
+        bundle.supportsCommand('picker.setViewportInsets');
+  }
+
+  Future<void> _flushViewportInsets() {
+    if (_disposed || !_hasPendingViewportInsets) return Future<void>.value();
+    final wanted = _pendingViewportInsets;
+    _hasPendingViewportInsets = false;
+    if (_hasSentViewportInsets && _sentViewportInsets == wanted) {
+      return Future<void>.value();
+    }
+    _sentViewportInsets = wanted;
+    _hasSentViewportInsets = true;
+    return _serialize(() async {
+      await mapController.runBridgeCommand(
+        'picker.setViewportInsets',
+        wanted == null
+            ? <String, Object?>{'insets': null}
+            : wanted.toBridgePayload(),
+      );
+    });
   }
 
   Future<void> setViewMode(SeatLayerViewMode mode) => _mutation(

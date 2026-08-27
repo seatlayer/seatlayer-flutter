@@ -71,10 +71,15 @@ class _SeatLayerPickerAdaptiveLayoutState
   int _mapInteractionGeneration = 0;
   Timer? _mapUnlockTimer;
   String? _previousRung;
+  SeatLayerViewportInsets? _reportedInsets;
+  SeatLayerPickerController? _picker;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Kept so `dispose` can clear the insets: the tree is already gone by then
+    // and the scope can no longer be looked up.
+    _picker = SeatLayerPickerScope.controllerOf(context);
     if (_mobilePanelInitialized) return;
     _mobilePanelExpanded =
         !SeatLayerPickerScope.optionsOf(context).panelInitiallyCollapsed;
@@ -347,6 +352,9 @@ class _SeatLayerPickerAdaptiveLayoutState
         );
 
         if (wide) {
+          // The wide composition puts its chrome beside the map rather than
+          // on it, so the runtime frames against the whole surface again.
+          _reportViewportInsets(SeatLayerViewportInsets.zero);
           return Column(
             children: [
               header,
@@ -430,6 +438,20 @@ class _SeatLayerPickerAdaptiveLayoutState
         // dock itself is edge-to-edge at the map's own bottom.
         final dockLift =
             _dockVisible(state) ? resolved.layout.dockBarHeight : 0.0;
+        // What of the map this composition is standing on. Only chrome drawn
+        // OVER the map counts: the header and the cart sheet are rows of the
+        // same Column, so the map surface begins and ends where they do and
+        // the runtime already frames inside them. The rail and the dock are
+        // not — they are stacked on the map — so a section framed to the whole
+        // surface lands partly underneath them unless the runtime is told.
+        _reportViewportInsets(
+          SeatLayerViewportInsets(
+            top: chrome.showPriceRail || chrome.showMapControls
+                ? _mapChromeTop
+                : 0,
+            bottom: chrome.showDockBar ? dockLift : 0,
+          ),
+        );
         return Column(
           children: [
             header,
@@ -649,9 +671,29 @@ class _SeatLayerPickerAdaptiveLayoutState
     ignorePickerAction(controller.setMapInteractionEnabled(enabled));
   }
 
+  /// Hand the runtime the current chrome bands.
+  ///
+  /// Called from `build`, which is where the numbers are known, and deferred
+  /// to after the frame so reporting furniture never runs inside layout. The
+  /// controller drops repeats and coalesces a frame's calls into one command.
+  void _reportViewportInsets(SeatLayerViewportInsets insets) {
+    if (_reportedInsets == insets) return;
+    _reportedInsets = insets;
+    final controller = SeatLayerPickerScope.controllerOf(context);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _reportedInsets != insets) return;
+      ignorePickerAction(controller.setViewportInsets(insets));
+    });
+  }
+
   @override
   void dispose() {
     _mapUnlockTimer?.cancel();
+    // The runtime outlives this layout during a route swap, and chrome that is
+    // gone must not keep cropping the venue.
+    if (_reportedInsets != null && _reportedInsets != SeatLayerViewportInsets.zero) {
+      ignorePickerAction(_picker?.setViewportInsets(null) ?? Future<void>.value());
+    }
     super.dispose();
   }
 

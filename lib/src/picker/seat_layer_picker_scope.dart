@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import '../seat_layer_configuration.dart';
@@ -111,6 +113,32 @@ class SeatLayerPickerScope extends StatefulWidget {
   /// Buyer-facing strings for the picker above [context].
   static SeatLayerPickerStrings stringsOf(BuildContext context) =>
       optionsOf(context).strings;
+
+  /// Tell the map above [context] how much of it your chrome is covering.
+  ///
+  /// The runtime frames the venue against the whole map surface, so a rail, a
+  /// dock or a sheet drawn over that surface covers part of what it just
+  /// framed. Report those bands and the camera aims at the visible part
+  /// instead; the map still draws and pans underneath, so nothing becomes
+  /// unreachable.
+  ///
+  /// The drop-in layout does this for its own chrome. Call it from a composed
+  /// layout whenever a piece of your chrome appears, disappears or changes
+  /// height, and pass null on dispose to hand the whole surface back. Calls
+  /// are coalesced per frame and repeats are dropped, so reporting from every
+  /// layout pass is cheap. Runtimes that do not advertise the capability
+  /// receive nothing and keep framing against the whole surface.
+  static void setViewportInsets(
+    BuildContext context,
+    SeatLayerViewportInsets? insets,
+  ) {
+    final scope =
+        context.getInheritedWidgetOfExactType<_SeatLayerPickerInherited>();
+    assert(scope != null, 'No SeatLayerPickerScope found above this context');
+    unawaited(
+      scope!.controller.setViewportInsets(insets).catchError((Object _) {}),
+    );
+  }
 
   @override
   State<SeatLayerPickerScope> createState() => _SeatLayerPickerScopeState();
