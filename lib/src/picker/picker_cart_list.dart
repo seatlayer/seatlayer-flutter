@@ -184,7 +184,7 @@ SeatLayerTicketLine _resolveLine(
     section: seat?.sectionLabel?.trim().isNotEmpty ?? false
         ? seat!.sectionLabel!.trim()
         : category?.label ?? item.buyerFacingLabel,
-    rowLabel: seat?.rowLabel?.trim() ?? '',
+    rowLabel: pickerRowLabel(seat?.rowLabel, seat?.sectionLabel),
     seatLabel: seat?.seatNumber?.trim().isNotEmpty ?? false
         ? seat!.seatNumber!.trim()
         : item.buyerFacingLabel,

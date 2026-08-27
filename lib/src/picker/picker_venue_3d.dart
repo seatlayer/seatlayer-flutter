@@ -188,8 +188,8 @@ class _SeatDeck extends StatelessWidget {
   static List<String>? _identityParts(SelectedSeat seat) => <String>[
         if (seat.sectionLabel?.trim().isNotEmpty ?? false)
           seat.sectionLabel!.trim(),
-        if (seat.rowLabel?.trim().isNotEmpty ?? false)
-          'Row ${seat.rowLabel!.trim()}',
+        if (pickerRowLabel(seat.rowLabel, seat.sectionLabel).isNotEmpty)
+          'Row ${pickerRowLabel(seat.rowLabel, seat.sectionLabel)}',
         if (seat.seatNumber?.trim().isNotEmpty ?? false)
           'Seat ${seat.seatNumber!.trim()}',
       ];

@@ -53,3 +53,21 @@ String pickerCompactMoney(double amount, String currency) {
 void ignorePickerAction(Future<void> action) {
   unawaited(action.catchError((Object _) {}));
 }
+
+/// The row's own name, with the section's name taken back off the front.
+///
+/// Charts are commonly authored with fully qualified row names — a row in
+/// `Stalls D` is stored as `Stalls D C` — and the snapshot repeats that name
+/// verbatim. Printing it beside the section it already contains gives
+/// `Stalls D · Row Stalls D C`, so the shared prefix comes off before the row
+/// is shown. A row whose name does not start with its section is left alone,
+/// and a row that is nothing but its section keeps its full name rather than
+/// becoming empty.
+String pickerRowLabel(String? rowLabel, String? sectionLabel) {
+  final row = rowLabel?.trim() ?? '';
+  final section = sectionLabel?.trim() ?? '';
+  if (row.isEmpty || section.isEmpty) return row;
+  if (!row.toLowerCase().startsWith(section.toLowerCase())) return row;
+  final rest = row.substring(section.length).trim();
+  return rest.isEmpty ? row : rest;
+}

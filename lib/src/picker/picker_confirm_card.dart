@@ -266,8 +266,8 @@ class _IdentityRow extends StatelessWidget {
     final parts = <String>[
       if (seat.sectionLabel?.trim().isNotEmpty ?? false)
         seat.sectionLabel!.trim(),
-      if (seat.rowLabel?.trim().isNotEmpty ?? false)
-        '${_rowWord(seat)} ${seat.rowLabel!.trim()}',
+      if (pickerRowLabel(seat.rowLabel, seat.sectionLabel).isNotEmpty)
+        '${_rowWord(seat)} ${pickerRowLabel(seat.rowLabel, seat.sectionLabel)}',
       '${_seatWord(seat)} ${seat.seatNumber?.trim().isNotEmpty ?? false ? seat.seatNumber!.trim() : seat.buyerFacingLabel}',
     ];
     return Padding(
