@@ -225,6 +225,21 @@ options: SeatLayerPickerOptions(
 ),
 ```
 
+**Or take the translations SeatLayer already ships.** The drawn map speaks
+thirty-seven languages; `SeatLayerPickerStrings.forLocale` gives the native
+chrome around it the same words, from the same reviewed dictionaries:
+
+```dart
+options: SeatLayerPickerOptions(
+  strings: SeatLayerPickerStrings.forLocale(Localizations.localeOf(context)),
+),
+```
+
+It resolves by language, and by script for Chinese. An untranslated locale —
+and any single entry the runtime has no wording for — keeps its English
+default, and the result is an ordinary `SeatLayerPickerStrings`, so you can
+still override any entry on top of it.
+
 **Hear about every action.** All callbacks are optional:
 
 ```dart

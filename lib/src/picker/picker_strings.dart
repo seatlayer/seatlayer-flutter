@@ -1,5 +1,8 @@
+import 'dart:ui' show Locale;
+
 import 'package:flutter/foundation.dart';
 
+import 'picker_strings_locales.g.dart';
 import 'picker_tokens.g.dart';
 
 /// Every buyer-facing string the native picker chrome renders.
@@ -64,6 +67,46 @@ class SeatLayerPickerStrings {
     this.heldFor = _defaultHeldFor,
     this.seatIdentity = _defaultSeatIdentity,
   });
+
+  /// The defaults for [locale], falling back to English.
+  ///
+  /// The wording comes from the SeatLayer runtime's own dictionaries, so the
+  /// drawn map and the native chrome around it say the same things in the same
+  /// words. Thirty-seven locales are translated; anything else, and any single
+  /// string the runtime has no equivalent for, keeps the English default.
+  ///
+  /// This is a starting point, never a ceiling: the result is an ordinary
+  /// [SeatLayerPickerStrings], so a host overrides any entry the usual way.
+  ///
+  /// ```dart
+  /// options: SeatLayerPickerOptions(
+  ///   strings: SeatLayerPickerStrings.forLocale(Localizations.localeOf(context)),
+  /// )
+  /// ```
+  static SeatLayerPickerStrings forLocale(Locale locale) {
+    for (final tag in _candidates(locale)) {
+      final match = seatLayerPickerStringsByLocale[tag];
+      if (match != null) return match;
+    }
+    return const SeatLayerPickerStrings();
+  }
+
+  /// The dictionary names [locale] could be, most specific first.
+  static Iterable<String> _candidates(Locale locale) sync* {
+    final language = locale.languageCode;
+    final script = locale.scriptCode;
+    if (script != null) yield '$language-$script';
+    final country = locale.countryCode;
+    if (country != null) yield '$language-$country';
+    // Chinese is the one language the runtime splits by script rather than by
+    // region, and a bare `zh` is Simplified far more often than not.
+    if (script == null && language == 'zh') {
+      yield country == 'TW' || country == 'HK' || country == 'MO'
+          ? 'zh-Hant'
+          : 'zh-Hans';
+    }
+    yield language;
+  }
 
   /// Tooltip on the header's dismiss control.
   final String close;
