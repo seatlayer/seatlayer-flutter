@@ -83,6 +83,7 @@ Map<String, Object?> pickerSnapshot({
       'floors': true,
       'venue3d': true,
       'seatView': true,
+      'accessibilityFilter': true,
     },
     'catalog': <String, Object?>{
       'categories': <Object?>[
