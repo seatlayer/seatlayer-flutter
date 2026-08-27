@@ -40,6 +40,7 @@ export 'src/picker/picker_motion.dart';
 export 'src/picker/picker_options.dart';
 export 'src/picker/picker_strings.dart';
 export 'src/picker/picker_tray_dense.dart';
+export 'src/picker/picker_venue_3d.dart';
 export 'src/picker/seat_layer_picker.dart';
 export 'src/picker/seat_layer_picker_components.dart';
 export 'src/picker/seat_layer_picker_controller.dart';

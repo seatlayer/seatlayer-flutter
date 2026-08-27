@@ -16,6 +16,7 @@ import 'picker_confirm_card.dart';
 import 'picker_header.dart';
 import 'picker_legend.dart';
 import 'picker_map_controls.dart';
+import 'picker_venue_3d.dart';
 import 'picker_dock_bar.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
@@ -552,6 +553,15 @@ class _SeatLayerPickerAdaptiveLayoutState
             actionError: null,
           ),
         );
+        final venue3D = _part(
+          context,
+          widget.builders.venue3D,
+          SeatLayerVenue3D(
+            topInset: 10,
+            bottomInset: 10 +
+                (_dockVisible(state) ? resolved.layout.dockBarHeight : 0.0),
+          ),
+        );
         final testBadge = SeatLayerPickerTestModeIndicator(compact: !wide);
         final controls = _part(
           context,
@@ -805,6 +815,8 @@ class _SeatLayerPickerAdaptiveLayoutState
                       child: const SeatLayerPickerFloorSelector(),
                     ),
                   Positioned.fill(child: controls),
+                  if (chrome.showVenue3DChrome)
+                    Positioned.fill(child: venue3D),
                   if (chrome.showDockBar)
                     Positioned(left: 0, right: 0, bottom: 0, child: dock),
                   Positioned.fill(
