@@ -20,4 +20,42 @@ void main() {
     expect(pickerRowLabel(null, 'Stalls D'), '');
     expect(pickerRowLabel('  C ', null), 'C');
   });
+
+  test('an ALL-CAPS abbreviation of the section comes off too', () {
+    // The shape the pilot showed: `GALL-H` printed under a section already
+    // named `Gallery`, and `ORCH-A` under `Orchestra`.
+    expect(pickerRowLabel('GALL-H', 'Gallery'), 'H');
+    expect(pickerRowLabel('ORCH-A', 'Orchestra'), 'A');
+    expect(pickerRowLabel('ORCH A', 'Orchestra'), 'A');
+    expect(pickerRowLabel('GALL\u00b7H', 'Gallery'), 'H');
+    expect(pickerRowLabel('GALL/H', 'Gallery'), 'H');
+  });
+
+  test('a bare row name is never mistaken for a section code', () {
+    // No separator, so there is no token to take off — however much of the
+    // section name it happens to look like.
+    expect(pickerRowLabel('A', 'Anfiteatro'), 'A');
+    expect(pickerRowLabel('A', 'Orchestra'), 'A');
+  });
+
+  test('the section code the snapshot supplies is taken off exactly', () {
+    expect(pickerRowLabel('BLK9-H', 'Upper Tier', sectionCode: 'BLK9'), 'H');
+    // A code that is not this section's is not a licence to strip.
+    expect(
+      pickerRowLabel('BLK9-H', 'Upper Tier', sectionCode: 'BLK8'),
+      'BLK9-H',
+    );
+  });
+
+  test('a token that names something else survives', () {
+    expect(pickerRowLabel('VIP-3', 'Gallery'), 'VIP-3');
+    expect(pickerRowLabel('Balcony-C', 'Stalls D'), 'Balcony-C');
+    // A single letter is a row group far more often than a section code.
+    expect(pickerRowLabel('G-4', 'Gallery'), 'G-4');
+  });
+
+  test('a separator the section left behind is cleaned up', () {
+    expect(pickerRowLabel('Gallery-H', 'Gallery'), 'H');
+    expect(pickerRowLabel('Stalls D \u00b7 C', 'Stalls D'), 'C');
+  });
 }

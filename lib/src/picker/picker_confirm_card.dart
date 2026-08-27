@@ -274,11 +274,18 @@ class _IdentityRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
+    final row = pickerRowLabel(
+      seat.rowLabel,
+      seat.sectionLabel,
+      sectionCode: pickerSectionCode(
+        SeatLayerPickerScope.stateOf(context),
+        seat.sectionLabel,
+      ),
+    );
     final parts = <String>[
       if (seat.sectionLabel?.trim().isNotEmpty ?? false)
         seat.sectionLabel!.trim(),
-      if (pickerRowLabel(seat.rowLabel, seat.sectionLabel).isNotEmpty)
-        '${_rowWord(seat)} ${pickerRowLabel(seat.rowLabel, seat.sectionLabel)}',
+      if (row.isNotEmpty) '${_rowWord(seat)} $row',
       '${_seatWord(seat)} ${seat.seatNumber?.trim().isNotEmpty ?? false ? seat.seatNumber!.trim() : seat.buyerFacingLabel}',
     ];
     return Padding(

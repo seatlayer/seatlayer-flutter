@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../open_enums.dart';
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -120,7 +121,7 @@ class _SeatDeck extends StatelessWidget {
           _CaptionChip(
             theme: theme,
             text: strings.seatIdentity(<String>[
-              ...?_identityParts(seats[index]),
+              ...?_identityParts(state, seats[index]),
               strings.viewFromYourSeat,
             ]),
           ),
@@ -192,14 +193,23 @@ class _SeatDeck extends StatelessWidget {
     );
   }
 
-  static List<String>? _identityParts(SelectedSeat seat) => <String>[
-        if (seat.sectionLabel?.trim().isNotEmpty ?? false)
-          seat.sectionLabel!.trim(),
-        if (pickerRowLabel(seat.rowLabel, seat.sectionLabel).isNotEmpty)
-          'Row ${pickerRowLabel(seat.rowLabel, seat.sectionLabel)}',
-        if (seat.seatNumber?.trim().isNotEmpty ?? false)
-          'Seat ${seat.seatNumber!.trim()}',
-      ];
+  static List<String>? _identityParts(
+    SeatLayerPickerState state,
+    SelectedSeat seat,
+  ) {
+    final row = pickerRowLabel(
+      seat.rowLabel,
+      seat.sectionLabel,
+      sectionCode: pickerSectionCode(state, seat.sectionLabel),
+    );
+    return <String>[
+      if (seat.sectionLabel?.trim().isNotEmpty ?? false)
+        seat.sectionLabel!.trim(),
+      if (row.isNotEmpty) 'Row $row',
+      if (seat.seatNumber?.trim().isNotEmpty ?? false)
+        'Seat ${seat.seatNumber!.trim()}',
+    ];
+  }
 }
 
 class _CaptionChip extends StatelessWidget {

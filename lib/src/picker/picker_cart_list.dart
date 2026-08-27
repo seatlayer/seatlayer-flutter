@@ -192,7 +192,11 @@ SeatLayerTicketLine _resolveLine(
     item: item,
     seat: seat,
     section: section ?? category?.label ?? item.buyerFacingLabel,
-    rowLabel: pickerRowLabel(row, section),
+    rowLabel: pickerRowLabel(
+      row,
+      section,
+      sectionCode: pickerSectionCode(state, section),
+    ),
     seatLabel: number ?? item.buyerFacingLabel,
     categoryLabel: category?.label ?? item.categoryKey,
     categoryColor: pickerColor(category?.color) ?? theme.accent,
