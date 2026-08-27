@@ -173,13 +173,7 @@ SeatLayerTicketLine _resolveLine(
   SeatLayerCheckoutLineItem item,
   SeatLayerResolvedPickerTheme theme,
 ) {
-  SelectedSeat? seat;
-  for (final candidate in state.selection) {
-    if (candidate.label == item.label) {
-      seat = candidate;
-      break;
-    }
-  }
+  final seat = _seatBehind(state.selection, item);
   SeatLayerPickerCategory? category;
   for (final candidate in state.categories) {
     if (candidate.key == item.categoryKey) {
@@ -425,4 +419,30 @@ class _ArrivalPop extends StatelessWidget {
       child: child,
     );
   }
+}
+
+/// The selected seat a cart line stands for.
+///
+/// The inventory label is the primary key, but it is not the only identifier
+/// the contract carries and it is not always the one a line arrives with — a
+/// Best Available result, for instance, is a line the buyer never tapped. The
+/// object id and the seat's own id are checked next, so an identity the
+/// runtime did send is used rather than falling back to the category name and
+/// a raw inventory label.
+SelectedSeat? _seatBehind(
+  List<SelectedSeat> selection,
+  SeatLayerCheckoutLineItem item,
+) {
+  for (final candidate in selection) {
+    if (candidate.label == item.label) return candidate;
+  }
+  for (final candidate in selection) {
+    if (candidate.objectId != null && candidate.objectId == item.objectId) {
+      return candidate;
+    }
+  }
+  for (final candidate in selection) {
+    if (candidate.id == item.objectId) return candidate;
+  }
+  return null;
 }

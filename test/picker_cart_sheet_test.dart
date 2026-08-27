@@ -21,6 +21,8 @@ double _sheetHeight(WidgetTester tester) =>
     tester.getSize(find.byType(SeatLayerCartSheet)).height;
 
 void main() {
+  _identityJoinTests();
+
   testWidgets('the peek states the cart and the way on, and nothing else',
       (tester) async {
     final map = FakePickerMap();
@@ -308,4 +310,35 @@ Map<String, Object?> _tenDistinctRows({int revision = 10}) {
       },
   ];
   return snapshot;
+}
+
+void _identityJoinTests() {
+  testWidgets('a line whose label differs still finds its seat',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
+    );
+    final snapshot = pickerSnapshot();
+    // A Best Available result arrives as a line the buyer never tapped: the
+    // cart's inventory label and the seat's own label need not agree, but the
+    // object id does.
+    final cart = snapshot['cart']! as Map<String, Object?>;
+    final items = (cart['items']! as List<Object?>)
+        .cast<Map<String, Object?>>()
+        .map((item) => <String, Object?>{...item, 'label': 'West Gallery A-1'})
+        .toList();
+    cart['items'] = items;
+    map.emit(snapshot);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Gallery'), findsWidgets);
+    expect(find.textContaining('West Gallery A-1'), findsNothing);
+  });
 }
