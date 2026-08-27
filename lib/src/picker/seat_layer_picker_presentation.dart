@@ -151,9 +151,36 @@ class _SeatLayerPickerPageState extends State<SeatLayerPickerPage> {
           unawaited(_requestClose(SeatLayerPickerCloseReason.systemBack));
         }
       },
-      child: widget.useScaffold ? Scaffold(body: content) : content,
+      child: widget.useScaffold ? _scaffold(content) : content,
     );
   }
+
+  /// The picker on a scaffold whose ground is the picker's own.
+  ///
+  /// A bare `Scaffold` paints the HOST application's
+  /// `scaffoldBackgroundColor`, and the page hands its top inset to a SafeArea
+  /// rather than to the header — so a dark picker inside a light-themed host
+  /// wore a white band above its own header. The ground is the surface the
+  /// header docks on, so the strip reads as part of the header.
+  ///
+  /// The colour is resolved through a listener rather than once, because the
+  /// organizer's branding only arrives with the first snapshot. [content] is
+  /// passed through untouched, so a new ground never rebuilds the picker.
+  Widget _scaffold(Widget content) =>
+      ValueListenableBuilder<SeatLayerPickerState>(
+        valueListenable: _controller,
+        child: content,
+        builder: (context, state, child) => Scaffold(
+          backgroundColor: resolveSeatLayerPickerTheme(
+            context,
+            state,
+            widget.theme,
+            brightness:
+                resolveSeatLayerThemeBrightness(context, widget.themeMode),
+          ).surface,
+          body: child,
+        ),
+      );
 }
 
 /// Present [SeatLayerPickerPage] and complete with the buyer's hold.
