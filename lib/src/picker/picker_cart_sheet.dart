@@ -75,13 +75,12 @@ class SeatLayerCartSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
-    final state = controller.state;
     final theme = seatLayerPickerThemeOf(context);
     final layout = theme.layout;
     final options = SeatLayerPickerScope.optionsOf(context);
     final bottomInset =
         reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0;
-    final hasTickets = state.cartLines.isNotEmpty;
+    final hasTickets = controller.confirmedCartLines.isNotEmpty;
     final maxSheet =
         MediaQuery.sizeOf(context).height * layout.sheetMaxHeightFraction;
     final maxBody =
@@ -168,9 +167,13 @@ class _PeekRow extends StatelessWidget {
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final currency = state.snapshot?.currency ?? 'USD';
-    final ticketCount = state.snapshot?.ticketCount ?? state.cartLines.length;
-    final total = state.snapshot?.cartTotal ??
-        state.cartLines.fold<double>(0, (sum, line) => sum + line.total);
+    // What the buyer has AGREED to. A tapped seat is in the runtime's
+    // selection — and so in the cart, the count and the total — from the
+    // moment it is tapped, but a confirm card standing over the map is still
+    // asking whether they want it. Counting it here showed `1 ticket · €40`
+    // under a card the buyer had not answered.
+    final ticketCount = controller.confirmedTicketCount;
+    final total = controller.confirmedCartTotal;
     final cheapest = _cheapest(state);
 
     final label = hasTickets

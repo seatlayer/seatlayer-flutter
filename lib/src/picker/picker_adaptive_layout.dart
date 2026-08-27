@@ -64,7 +64,6 @@ class SeatLayerPickerAdaptiveLayout extends StatefulWidget {
 class _SeatLayerPickerAdaptiveLayoutState
     extends State<SeatLayerPickerAdaptiveLayout> {
   final GlobalKey _mapKey = GlobalKey(debugLabel: 'seatlayer-picker-map');
-  final Set<String> _confirmedLabels = <String>{};
   bool _mapInteractionEnabled = true;
   int _mapInteractionGeneration = 0;
   Timer? _mapUnlockTimer;
@@ -228,17 +227,10 @@ class _SeatLayerPickerAdaptiveLayoutState
           const SeatLayerPickerActionError(),
         );
 
-        final selectedLabels =
-            state.selection.map((seat) => seat.label).toSet();
-        _confirmedLabels.removeWhere(
-          (label) => !selectedLabels.contains(label),
-        );
-        final pendingSeat =
-            !options.readOnly && state.hold == null && options.confirmSelection
-                ? state.selection.reversed
-                    .where((seat) => !_confirmedLabels.contains(seat.label))
-                    .firstOrNull
-                : null;
+        // The controller owns which seat is still being asked about, so the
+        // cart sheet and the checkout gate answer the same question this
+        // layout does.
+        final pendingSeat = controller.unansweredSeat;
         // The sheet never opens itself: a sheet that springs up on every pick
         // covers the map the buyer is still choosing from. It does collapse
         // itself when a seat card opens over the map, which is the tap the
@@ -314,6 +306,18 @@ class _SeatLayerPickerAdaptiveLayoutState
         } else {
           buyerPrompt = null;
         }
+        // Only a card that is actually on screen suppresses its seat. A seat
+        // nobody is asking about belongs in the cart, however the options are
+        // set: the GA and table prompts speak for their own units and are not
+        // a seat waiting on an answer.
+        controller.setConfirmCardSeat(
+          buyerPrompt != null &&
+                  pendingSeat != null &&
+                  state.generalAdmissionCandidate == null &&
+                  pendingSeat.bookingMode != 'variable'
+              ? pendingSeat
+              : null,
+        );
         final Widget? statusOverlay = switch (state.phase) {
           SeatLayerPickerPhase.initializing => ColoredBox(
               color: pickerAlpha(resolved.background, .84),
@@ -553,10 +557,7 @@ class _SeatLayerPickerAdaptiveLayoutState
   bool _hasOpenPrompt(SeatLayerPickerState state) {
     if (SeatLayerPickerScope.optionsOf(context).readOnly) return false;
     if (state.generalAdmissionCandidate != null) return true;
-    if (!SeatLayerPickerScope.optionsOf(context).confirmSelection) return false;
-    if (state.hold != null) return false;
-    return state.selection
-        .any((seat) => !_confirmedLabels.contains(seat.label));
+    return _picker?.seatAwaitingConfirmation != null;
   }
 
   /// One rung down, in the order the buyer built them up.
@@ -569,9 +570,7 @@ class _SeatLayerPickerAdaptiveLayoutState
       return;
     }
     if (_hasOpenPrompt(state)) {
-      final pending = state.selection.reversed
-          .where((seat) => !_confirmedLabels.contains(seat.label))
-          .firstOrNull;
+      final pending = controller.seatAwaitingConfirmation;
       if (state.generalAdmissionCandidate != null) {
         controller.dismissGeneralAdmissionCandidate();
         return;
@@ -608,7 +607,7 @@ class _SeatLayerPickerAdaptiveLayoutState
 
   Future<void> _confirmSeat(SelectedSeat seat) async {
     if (!mounted) return;
-    setState(() => _confirmedLabels.add(seat.label));
+    _picker?.markSeatAnswered(seat.label);
   }
 
   Future<void> _checkoutAndAnnounce(SeatLayerCheckoutHandoff handoff) async {
@@ -696,7 +695,7 @@ class _SeatLayerPickerAdaptiveLayoutState
       // Do not uncover the embedded platform view until the runtime confirms
       // its immersive surface is mounted. This also makes the card-to-view
       // animation a handoff instead of a flash through the raw map.
-      if (mounted) setState(() => _confirmedLabels.add(seat.label));
+      if (mounted) _picker?.markSeatAnswered(seat.label);
     } catch (_) {
       rethrow;
     }
@@ -709,7 +708,7 @@ class _SeatLayerPickerAdaptiveLayoutState
     try {
       await controller.removeObject(label);
     } finally {
-      if (mounted) setState(() => _confirmedLabels.add(label));
+      if (mounted) controller.markSeatAnswered(label);
     }
   }
 }
@@ -774,12 +773,5 @@ class _PickerPromptTransition extends StatelessWidget {
               ),
       ),
     );
-  }
-}
-
-extension<T> on Iterable<T> {
-  T? get firstOrNull {
-    final iterator = this.iterator;
-    return iterator.moveNext() ? iterator.current : null;
   }
 }
