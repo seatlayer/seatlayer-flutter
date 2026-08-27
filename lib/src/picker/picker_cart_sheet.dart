@@ -75,7 +75,10 @@ class SeatLayerCartSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
-    final theme = seatLayerPickerThemeOf(context);
+    // The sheet caps the same surface the header and the legend do, so it
+    // takes the same palette: white chrome docked under a dark venue scene
+    // reads as a mistake, and the three were disagreeing in 3D.
+    final theme = seatLayerMapChromeThemeOf(context);
     final layout = theme.layout;
     final options = SeatLayerPickerScope.optionsOf(context);
     final bottomInset =
@@ -164,7 +167,7 @@ class _PeekRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
-    final theme = seatLayerPickerThemeOf(context);
+    final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final currency = state.snapshot?.currency ?? 'USD';
     // What the buyer has AGREED to. A tapped seat is in the runtime's
@@ -415,7 +418,7 @@ class SeatLayerBookButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
-    final theme = seatLayerPickerThemeOf(context);
+    final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final busy =
         controller.state.busyAction == SeatLayerPickerBusyAction.creatingHold;

@@ -30,13 +30,20 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
     if (!state.isTestEvent) return const SizedBox.shrink();
-    final theme = seatLayerPickerThemeOf(context);
+    // The badge is drawn ON the map, so it follows the map's palette — which
+    // the immersive scene keeps dark whatever side the picker is on. A solid
+    // amber lozenge over a dark venue reads as a highlighter stripe left on
+    // the screen; on the dark side it becomes a dark pill with amber ink and
+    // an amber hairline, which reads as the same badge in the same voice.
+    final theme = seatLayerMapChromeThemeOf(context);
+    final dark = theme.brightness == Brightness.dark;
     return Semantics(
       label: 'Test event. No real inventory will be booked.',
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: theme.warning,
+          color: dark ? pickerAlpha(theme.surface, .92) : theme.warning,
           borderRadius: BorderRadius.circular(999),
+          border: dark ? Border.all(color: theme.warning) : null,
           boxShadow: const [
             BoxShadow(color: Color(0x33000000), blurRadius: 8),
           ],
@@ -48,11 +55,12 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
           ),
           child: Text(
             compact ? 'TEST MODE' : 'TEST MODE · BOOKS NOTHING',
-            style: const TextStyle(
-              color: Color(0xFF1A1200),
+            style: TextStyle(
+              color: dark ? theme.warning : const Color(0xFF1A1200),
               fontSize: 10,
               fontWeight: FontWeight.w900,
               letterSpacing: .6,
+              fontFamily: theme.fontFamily,
             ),
           ),
         ),
