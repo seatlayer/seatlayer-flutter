@@ -4,6 +4,21 @@ import 'package:seatlayer/seatlayer.dart';
 const _eventKey = String.fromEnvironment('SEATLAYER_EVENT');
 const _publicKey = String.fromEnvironment('SEATLAYER_PUBLIC_KEY');
 const _runtimeUrl = String.fromEnvironment('SEATLAYER_RUNTIME_URL');
+const _apiBase = String.fromEnvironment('SEATLAYER_API_BASE');
+const _themeModeName = String.fromEnvironment(
+  'SEATLAYER_THEME_MODE',
+  defaultValue: 'auto',
+);
+
+/// The theme mode named by `--dart-define=SEATLAYER_THEME_MODE=…`.
+///
+/// Unknown names fall back to [SeatLayerThemeMode.auto] so a typo opens the
+/// picker rather than failing the run.
+SeatLayerThemeMode get _themeMode => switch (_themeModeName) {
+  'light' => SeatLayerThemeMode.light,
+  'dark' => SeatLayerThemeMode.dark,
+  _ => SeatLayerThemeMode.auto,
+};
 
 void main() => runApp(const DemoApp());
 
@@ -22,6 +37,11 @@ class DemoApp extends StatelessWidget {
     debugShowCheckedModeBanner: false,
     theme: ThemeData(useMaterial3: true),
     darkTheme: ThemeData.dark(useMaterial3: true),
+    themeMode: switch (_themeMode) {
+      SeatLayerThemeMode.light => ThemeMode.light,
+      SeatLayerThemeMode.dark => ThemeMode.dark,
+      SeatLayerThemeMode.auto => ThemeMode.system,
+    },
     home: _eventKey.isEmpty ? const _MissingEventKey() : const LivePickerDemo(),
   );
 }
@@ -54,6 +74,9 @@ class _MissingEventKey extends StatelessWidget {
 ///     --dart-define=SEATLAYER_EVENT=ev_your_test_event \
 ///     --dart-define=SEATLAYER_PUBLIC_KEY=pk_test_your_public_key
 ///
+/// Optional: `SEATLAYER_API_BASE` points the session at another API origin, and
+/// `SEATLAYER_THEME_MODE=auto|light|dark` pins the picker's appearance.
+///
 /// During runtime development, also provide the immutable HTTPS test document:
 ///
 ///   --dart-define=SEATLAYER_RUNTIME_URL=https://.../mobile.html
@@ -68,6 +91,7 @@ class _LivePickerDemoState extends State<LivePickerDemo> {
   late final SeatLayerConfiguration _configuration = SeatLayerConfiguration(
     event: _eventKey,
     publicKey: _publicKey.isEmpty ? null : _publicKey,
+    apiBase: _apiBase.isEmpty ? null : _apiBase,
     hostInfo: const {'app': 'SeatLayerFlutterPickerExample/0.3-dev'},
     assetPath: _runtimeUrl.isEmpty
         ? SeatLayerConfiguration.defaultAssetPath
@@ -118,6 +142,7 @@ class _LivePickerDemoState extends State<LivePickerDemo> {
     return Scaffold(
       body: SeatLayerPicker(
         configuration: _configuration,
+        themeMode: _themeMode,
         callbacks: SeatLayerPickerCallbacks(
           onReady: (info) {
             debugPrint(
