@@ -334,18 +334,40 @@ changing its layout.
 Picker cards, ticket-dock changes, cart rows and immersive surfaces use one
 short motion language and honor the platform reduced-motion preference.
 
-`SeatLayerPickerThemeData.light()` is a complete light preset, not just white
-Flutter panels. It sends a contrast-paired `SeatLayerMapThemeData` to the
-renderer for the canvas background, row labels, free text and selection ring.
-`SeatLayerPickerThemeData.dark()` supplies the matching high-contrast dark
-native chrome and map palette. Use either preset with a brand accent, or use the
-regular constructor to override any role individually:
+### Branding, and which constructor follows the device
+
+**Brand with the default constructor.** It sets only the roles you name, so
+every ground role still comes from `themeMode` — and `SeatLayerThemeMode.auto`
+follows the device live, chrome and drawn map together:
+
+```dart
+SeatLayerPicker(
+  configuration: configuration,
+  themeMode: SeatLayerThemeMode.auto,
+  theme: const SeatLayerPickerThemeData(accent: Color(0xFFE54558)),
+  onCheckout: openCheckout,
+)
+```
+
+`SeatLayerPickerThemeData.light()` and `.dark()` are complete presets, not just
+white or black Flutter panels: each also sends a contrast-paired
+`SeatLayerMapThemeData` to the renderer for the canvas background, row labels,
+free text and the selection ring.
+
+**A preset pins the mode.** Because it supplies a whole explicit ground
+palette, and explicit roles win over the resolved mode, `themeMode: auto` with
+`.light()` never goes dark — the device flip changes nothing on screen. Reach
+for a preset when you *want* one fixed side, and drive it yourself if you want
+both:
 
 ```dart
 final pickerTheme = Theme.of(context).brightness == Brightness.dark
     ? const SeatLayerPickerThemeData.dark(accent: Color(0xFFFF5A6F))
     : const SeatLayerPickerThemeData.light(accent: Color(0xFFE54558));
 ```
+
+`themeMode` is available on `SeatLayerPicker`, `SeatLayerPickerScope`,
+`SeatLayerPickerPage` and `showSeatLayerPicker` alike.
 
 The compact price rail follows the web picker: tapping one price selects that
 single category and frames its seats; tapping the active price again returns to

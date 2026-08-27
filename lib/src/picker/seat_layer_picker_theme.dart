@@ -96,6 +96,12 @@ class SeatLayerPickerThemeData
     extends ThemeExtension<SeatLayerPickerThemeData> {
   /// Creates a partial theme; omitted roles fall back to the resolved mode,
   /// then to the organizer's branding, then to the ambient [ColorScheme].
+  ///
+  /// This is the constructor to brand with. `SeatLayerPickerThemeData(accent:
+  /// myBrand)` leaves every ground role unset, so the picker still follows
+  /// [SeatLayerThemeMode] — including [SeatLayerThemeMode.auto], which tracks
+  /// the device live. The `.light()` and `.dark()` presets each supply a whole
+  /// ground palette and therefore pin the picker to one side.
   const SeatLayerPickerThemeData({
     this.accent,
     this.onAccent,
@@ -119,6 +125,13 @@ class SeatLayerPickerThemeData
   /// The ground roles mirror the web picker's light mode: chrome is white and
   /// the map ground is recessed beneath it. The accent stays host-configurable
   /// because a mode owns the ground, never the brand.
+  ///
+  /// **This preset pins the picker to light.** It supplies a complete explicit
+  /// ground palette, and explicit roles win over the resolved
+  /// [SeatLayerThemeMode] — so `themeMode: auto` with `.light()` never follows
+  /// the device. That is the point of a preset. A host that wants its brand
+  /// accent AND a picker that follows the device uses the default constructor
+  /// instead: `SeatLayerPickerThemeData(accent: myBrand)`.
   const SeatLayerPickerThemeData.light({
     this.accent = SeatLayerLightTokens.accent,
     this.onAccent = SeatLayerLightTokens.onAccent,
@@ -139,6 +152,9 @@ class SeatLayerPickerThemeData
   /// Dark preset for native chrome and the drawn seat map.
   ///
   /// The ground roles mirror the web picker's dark mode token for token.
+  ///
+  /// **This preset pins the picker to dark**, for the same reason
+  /// [SeatLayerPickerThemeData.light] pins it to light.
   const SeatLayerPickerThemeData.dark({
     this.accent = SeatLayerDarkTokens.accent,
     this.onAccent = SeatLayerDarkTokens.onAccent,
