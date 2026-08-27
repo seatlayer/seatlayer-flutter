@@ -65,8 +65,6 @@ class _SeatLayerPickerAdaptiveLayoutState
     extends State<SeatLayerPickerAdaptiveLayout> {
   final GlobalKey _mapKey = GlobalKey(debugLabel: 'seatlayer-picker-map');
   final Set<String> _confirmedLabels = <String>{};
-  bool _mobilePanelExpanded = false;
-  bool _mobilePanelInitialized = false;
   bool _mapInteractionEnabled = true;
   int _mapInteractionGeneration = 0;
   Timer? _mapUnlockTimer;
@@ -80,11 +78,17 @@ class _SeatLayerPickerAdaptiveLayoutState
     // Kept so `dispose` can clear the insets: the tree is already gone by then
     // and the scope can no longer be looked up.
     _picker = SeatLayerPickerScope.controllerOf(context);
-    if (_mobilePanelInitialized) return;
-    _mobilePanelExpanded =
-        !SeatLayerPickerScope.optionsOf(context).panelInitiallyCollapsed;
-    _mobilePanelInitialized = true;
   }
+
+  /// Whether the buyer has the cart sheet open.
+  ///
+  /// Read from the controller, never from this State: a theme flip or a host
+  /// rebuilding its route can hand the layout a fresh State, and a sheet that
+  /// snaps shut takes the buyer's place in their own cart with it.
+  bool get _sheetExpanded => _picker?.cartSheetExpanded ?? false;
+
+  void _setSheetExpanded(bool expanded) =>
+      _picker?.setCartSheetExpanded(expanded);
 
   Widget _part(
     BuildContext context,
@@ -177,11 +181,8 @@ class _SeatLayerPickerAdaptiveLayoutState
           context,
           widget.builders.cartSheet,
           SeatLayerCartSheet(
-            expanded: _mobilePanelExpanded,
-            onExpandedChanged: (expanded) {
-              if (_mobilePanelExpanded == expanded) return;
-              setState(() => _mobilePanelExpanded = expanded);
-            },
+            expanded: _sheetExpanded,
+            onExpandedChanged: _setSheetExpanded,
             onCheckout: _checkoutAndAnnounce,
             bestSeats: null,
             cartList: null,
@@ -242,11 +243,9 @@ class _SeatLayerPickerAdaptiveLayoutState
         // covers the map the buyer is still choosing from. It does collapse
         // itself when a seat card opens over the map, which is the tap the
         // runtime does report to native chrome.
-        if (pendingSeat != null && _mobilePanelExpanded) {
+        if (pendingSeat != null && _sheetExpanded) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted && _mobilePanelExpanded) {
-              setState(() => _mobilePanelExpanded = false);
-            }
+            if (mounted && _sheetExpanded) _setSheetExpanded(false);
           });
         }
         _followRungToPeek(state);
@@ -547,7 +546,7 @@ class _SeatLayerPickerAdaptiveLayoutState
 
   /// Whether the picker still has a rung of its own to descend.
   bool _ownsBackGesture(SeatLayerPickerState state) =>
-      _mobilePanelExpanded ||
+      _sheetExpanded ||
       _hasOpenPrompt(state) ||
       state.snapshot?.map.rung == 'seats';
 
@@ -565,8 +564,8 @@ class _SeatLayerPickerAdaptiveLayoutState
     SeatLayerPickerController controller,
     SeatLayerPickerState state,
   ) {
-    if (_mobilePanelExpanded) {
-      setState(() => _mobilePanelExpanded = false);
+    if (_sheetExpanded) {
+      _setSheetExpanded(false);
       return;
     }
     if (_hasOpenPrompt(state)) {
@@ -601,11 +600,9 @@ class _SeatLayerPickerAdaptiveLayoutState
     if (rung == null || rung == _previousRung) return;
     final descended = _previousRung == 'seats' && rung != 'seats';
     _previousRung = rung;
-    if (!descended || !_mobilePanelExpanded) return;
+    if (!descended || !_sheetExpanded) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _mobilePanelExpanded) {
-        setState(() => _mobilePanelExpanded = false);
-      }
+      if (mounted && _sheetExpanded) _setSheetExpanded(false);
     });
   }
 
@@ -681,8 +678,10 @@ class _SeatLayerPickerAdaptiveLayoutState
     _mapUnlockTimer?.cancel();
     // The runtime outlives this layout during a route swap, and chrome that is
     // gone must not keep cropping the venue.
-    if (_reportedInsets != null && _reportedInsets != SeatLayerViewportInsets.zero) {
-      ignorePickerAction(_picker?.setViewportInsets(null) ?? Future<void>.value());
+    if (_reportedInsets != null &&
+        _reportedInsets != SeatLayerViewportInsets.zero) {
+      ignorePickerAction(
+          _picker?.setViewportInsets(null) ?? Future<void>.value());
     }
     super.dispose();
   }

@@ -110,6 +110,15 @@ class SeatLayerPickerScope extends StatefulWidget {
     return scope!.callbacks;
   }
 
+  /// Whether the cart sheet of the picker above [context] is open.
+  ///
+  /// Kept on the controller rather than in the chrome's widget state, so a
+  /// theme flip or a host rebuilding its route cannot snap the sheet shut
+  /// under the buyer. Set it with
+  /// `SeatLayerPickerScope.controllerOf(context).setCartSheetExpanded(...)`.
+  static bool cartSheetExpandedOf(BuildContext context) =>
+      controllerOf(context).cartSheetExpanded;
+
   /// Buyer-facing strings for the picker above [context].
   static SeatLayerPickerStrings stringsOf(BuildContext context) =>
       optionsOf(context).strings;

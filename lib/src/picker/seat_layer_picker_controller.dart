@@ -100,6 +100,8 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   Future<void>? _closeInFlight;
   int _reloadGeneration = 0;
   SeatLayerViewportInsets? _pendingViewportInsets;
+  bool _cartSheetExpanded = false;
+  bool _cartSheetInitialized = false;
   bool _hasPendingViewportInsets = false;
   SeatLayerViewportInsets? _sentViewportInsets;
   bool _hasSentViewportInsets = false;
@@ -110,6 +112,26 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   SeatLayerPickerState get state => value;
   SeatLayerPickerOptions get options => _options;
   bool get canCheckout => value.canCheckout && !_options.readOnly;
+
+  /// Whether the buyer has the cart sheet open.
+  ///
+  /// Deliberately here and not in the chrome's own widget state. A theme flip,
+  /// a host rebuilding its route, a snapshot arriving — any of them can give
+  /// the layout a fresh [State], and an expanded sheet that snaps shut takes
+  /// the buyer's place in their own cart with it. The controller outlives all
+  /// of that, and a composed layout reads the same value the drop-in does.
+  bool get cartSheetExpanded => _cartSheetExpanded;
+
+  /// Open or collapse the cart sheet.
+  ///
+  /// Notifies listeners without touching [value]: the sheet is chrome, not
+  /// picker state, and nothing about it belongs in a snapshot.
+  void setCartSheetExpanded(bool expanded) {
+    if (_disposed || _cartSheetExpanded == expanded) return;
+    _cartSheetExpanded = expanded;
+    _cartSheetInitialized = true;
+    notifyListeners();
+  }
 
   @internal
   int get reloadGeneration => _reloadGeneration;
@@ -175,6 +197,10 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     _options = options;
     _callbacks = callbacks;
     _runtimeAttached = true;
+    if (!_cartSheetInitialized) {
+      _cartSheetInitialized = true;
+      _cartSheetExpanded = !options.panelInitiallyCollapsed;
+    }
     _closing = false;
     if (value.phase == SeatLayerPickerPhase.closed ||
         value.phase == SeatLayerPickerPhase.failed) {
@@ -453,14 +479,23 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     final carriesGround = mapTheme != null &&
         bundle != null &&
         bundle.supportsCapability(_nativeChromeContractCapability);
-    return _mutation(
-      'picker.setThemeMode',
-      <String, Object?>{
-        'mode': mode?.raw,
-        if (carriesGround) 'mapTheme': mapTheme.toBridgeConfig(),
-      },
-      SeatLayerPickerBusyAction.changingView,
-    );
+    // Deliberately NOT a _mutation. Repainting changes no inventory and moves
+    // no geometry, so parking the picker on `changingView` only greys the
+    // chrome the buyer is looking at — and folding the reply's snapshot in
+    // mid-flip is how a colours-only command came to move the rung, which
+    // hides the dock, changes the insets the layout reports and re-frames the
+    // camera off the buyer's seat. Whatever the repaint really changed still
+    // arrives on the snapshot event stream, exactly as it does for
+    // `picker.setViewportInsets`.
+    return _serialize(() async {
+      await mapController.runBridgeCommand(
+        'picker.setThemeMode',
+        <String, Object?>{
+          'mode': mode?.raw,
+          if (carriesGround) 'mapTheme': mapTheme.toBridgeConfig(),
+        },
+      );
+    });
   }
 
   /// Tell the runtime how much of the map surface native chrome is covering.
