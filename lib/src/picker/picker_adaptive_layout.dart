@@ -39,6 +39,9 @@ const double _mapChromeTop = 44;
 /// The breathing room between two stacked pieces of map chrome.
 const double _badgeGap = 8;
 
+/// Where the top rail itself begins.
+const double _railTop = 8;
+
 /// The complete buyer seat picker, ready to place on a route.
 ///
 /// Everything below it is composable: each part is a public widget that works
@@ -447,12 +450,21 @@ class _SeatLayerPickerAdaptiveLayoutState
         // the runtime already frames inside them. The rail and the dock are
         // not — they are stacked on the map — so a section framed to the whole
         // surface lands partly underneath them unless the runtime is told.
+        final venue3DUp = state.snapshot?.map.isVenue3D ?? false;
         _reportViewportInsets(
           SeatLayerViewportInsets(
-            top: chrome.showPriceRail || chrome.showMapControls
-                ? _mapChromeTop
-                : 0,
-            bottom: chrome.showDockBar ? dockLift : 0,
+            top: _topBand(
+              chrome: chrome,
+              testBadge: state.isTestEvent,
+              venue3D: venue3DUp,
+              venue3DTopInset: venue3DTopInset,
+            ),
+            bottom: _bottomBand(
+              chrome: chrome,
+              state: state,
+              dockLift: dockLift,
+              venue3D: venue3DUp,
+            ),
           ),
         );
         return Column(
@@ -493,11 +505,11 @@ class _SeatLayerPickerAdaptiveLayoutState
                   // corner; the badge steps below that pill rather than under
                   // it, measured from the same inset the pill is given.
                   Positioned(
-                    top: (state.snapshot?.map.isVenue3D ?? false)
-                        ? venue3DTopInset +
-                            SeatLayerVenue3D.backPillHeight +
-                            _badgeGap
-                        : _mapChromeTop,
+                    top: _testBadgeTop(
+                      chrome: chrome,
+                      venue3D: venue3DUp,
+                      venue3DTopInset: venue3DTopInset,
+                    ),
                     left: 10,
                     child: testBadge,
                   ),
@@ -546,6 +558,82 @@ class _SeatLayerPickerAdaptiveLayoutState
       },
       child: themed,
     );
+  }
+
+  /// How much of the map's top the phone's chrome is standing on.
+  ///
+  /// The rail is one band the runtime must frame inside; the test badge is a
+  /// second, stacked under it, and a test event is not a rare case — it is
+  /// what every integration sees first. In the immersive scene the rail is
+  /// gone and `‹ Back to venue` takes its place, at its own inset.
+  static double _topBand({
+    required SeatLayerPickerChromeOptions chrome,
+    required bool testBadge,
+    required bool venue3D,
+    required double venue3DTopInset,
+  }) {
+    final rail = _topRailBand(
+      chrome: chrome,
+      venue3D: venue3D,
+      venue3DTopInset: venue3DTopInset,
+    );
+    if (!testBadge) return rail;
+    return _testBadgeTop(
+          chrome: chrome,
+          venue3D: venue3D,
+          venue3DTopInset: venue3DTopInset,
+        ) +
+        SeatLayerPickerTestModeIndicator.compactHeight;
+  }
+
+  /// The band the rail, or the scene's way back, occupies on its own.
+  static double _topRailBand({
+    required SeatLayerPickerChromeOptions chrome,
+    required bool venue3D,
+    required double venue3DTopInset,
+  }) {
+    if (venue3D) {
+      return chrome.showVenue3DChrome
+          ? venue3DTopInset + SeatLayerVenue3D.backPillHeight
+          : 0;
+    }
+    return chrome.showPriceRail || chrome.showMapControls ? _mapChromeTop : 0;
+  }
+
+  /// Where the test-mode badge sits, which is one line under whatever is
+  /// above it — or at the rail's own start when nothing is.
+  static double _testBadgeTop({
+    required SeatLayerPickerChromeOptions chrome,
+    required bool venue3D,
+    required double venue3DTopInset,
+  }) {
+    final rail = _topRailBand(
+      chrome: chrome,
+      venue3D: venue3D,
+      venue3DTopInset: venue3DTopInset,
+    );
+    return rail == 0 ? _railTop : rail + _badgeGap;
+  }
+
+  /// How much of the map's bottom the phone's chrome is standing on.
+  ///
+  /// The dock on the map, and in the scene the seat deck above it — which is
+  /// taller once the buyer is sitting somewhere, because it grows a caption.
+  /// The header and the cart sheet are rows of the same Column as the map, so
+  /// the map surface already ends where they begin and they are correctly not
+  /// reported.
+  static double _bottomBand({
+    required SeatLayerPickerChromeOptions chrome,
+    required SeatLayerPickerState state,
+    required double dockLift,
+    required bool venue3D,
+  }) {
+    final dock = chrome.showDockBar ? dockLift : 0.0;
+    if (!venue3D || !chrome.showVenue3DChrome) return dock;
+    final seated = state.snapshot?.map.view3DTargetSeatId != null;
+    final deck =
+        10 + dockLift + SeatLayerVenue3D.seatDeckHeight(seated: seated);
+    return deck > dock ? deck : dock;
   }
 
   /// Whether the picker still has a rung of its own to descend.

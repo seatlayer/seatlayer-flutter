@@ -21,6 +21,16 @@ Iterable<Object?> _insetPayloads(FakePickerMap map) =>
 
 Widget _layout() => SeatLayerPickerAdaptiveLayout(onCheckout: (_) async {});
 
+/// The picker with the immersive scene up, optionally sitting in a seat.
+Map<String, Object?> _inVenue3D({int revision = 3, String? seatedOn}) {
+  final snapshot =
+      pickerSnapshot(revision: revision, sections: pickerSections());
+  final map = snapshot['map']! as Map<String, Object?>;
+  map['buyerView'] = 'venue3d';
+  map['view3dTargetSeatId'] = seatedOn;
+  return snapshot;
+}
+
 void main() {
   testWidgets('the dock arriving changes what the runtime frames against',
       (tester) async {
@@ -34,7 +44,11 @@ void main() {
     await tester.pumpAndSettle();
 
     final atOverview = _insetPayloads(map).last! as Map<String, Object?>;
-    expect(atOverview['top'], 44.0, reason: 'the price rail caps the map');
+    expect(
+      atOverview['top'],
+      72.0,
+      reason: 'the price rail caps the map, and the test badge sits under it',
+    );
     expect(
       atOverview['bottom'],
       0.0,
@@ -52,7 +66,7 @@ void main() {
       greaterThan(0),
       reason: 'the dock now stands on the bottom of the map',
     );
-    expect(focused['top'], 44.0);
+    expect(focused['top'], 72.0);
   });
 
   testWidgets('a settled layout stops reporting', (tester) async {
@@ -127,7 +141,9 @@ void main() {
         ),
       ),
     );
-    map.emit(pickerSnapshot(sections: pickerSections()));
+    // A live event, so nothing at all is drawn over the map: the test badge
+    // is not one of the chrome switches and would still stand on it.
+    map.emit(pickerSnapshot(sections: pickerSections(), testEvent: false));
     await tester.pumpAndSettle();
 
     expect(
@@ -186,6 +202,60 @@ void main() {
     expect(
       SeatLayerPickerSnapshot.fromJson(pickerSnapshot())!.map.viewportInsets,
       isNull,
+    );
+  });
+
+  testWidgets('the immersive scene reports its own chrome, not the map rail',
+      (tester) async {
+    // In 3D the rail is gone and the scene's own furniture takes its place:
+    // `‹ Back to venue` at the top, the seat deck at the bottom. Reporting the
+    // map's bands there would crop the venue against chrome that is not drawn.
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout()));
+    map.emit(pickerSnapshot(sections: pickerSections()));
+    await tester.pumpAndSettle();
+    final onMap = _insetPayloads(map).last! as Map<String, Object?>;
+
+    map.emit(_inVenue3D(revision: 4));
+    await tester.pumpAndSettle();
+    final inScene = _insetPayloads(map).last! as Map<String, Object?>;
+
+    expect(inScene, isNot(onMap));
+    // 46 clear of the legend + a 36pt pill + 8 + the 20pt badge under it.
+    expect(inScene['top'], 110.0);
+    // 10 + the dock + the seat deck, which has a caption once the buyer is
+    // sitting somewhere.
+    expect(
+      inScene['bottom'],
+      greaterThan(onMap['bottom']! as double),
+      reason: 'the seat deck stands on more of the map than the dock alone',
+    );
+  });
+
+  testWidgets('the seat deck grows a caption and reports the taller band',
+      (tester) async {
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout()));
+    map.emit(_inVenue3D());
+    await tester.pumpAndSettle();
+    final looking = _insetPayloads(map).last! as Map<String, Object?>;
+
+    map.emit(_inVenue3D(revision: 4, seatedOn: 'seat-a-1'));
+    await tester.pumpAndSettle();
+    final seated = _insetPayloads(map).last! as Map<String, Object?>;
+
+    expect(
+      seated['bottom']! as double,
+      (looking['bottom']! as double) + 36,
+      reason: 'the caption chip plus its gap',
     );
   });
 }

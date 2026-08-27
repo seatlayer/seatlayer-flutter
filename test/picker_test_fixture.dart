@@ -31,6 +31,7 @@ Map<String, Object?> pickerSnapshot({
   List<Object?>? cartItems,
   int? ticketCount,
   double? cartTotal,
+  bool testEvent = true,
 }) {
   final lines = withSelection
       ? <Object?>[
@@ -68,7 +69,7 @@ Map<String, Object?> pickerSnapshot({
     'event': <String, Object?>{
       'key': 'ev_test',
       'name': 'Mobile Test Event',
-      'mode': 'test',
+      'mode': testEvent ? 'test' : 'live',
       'currency': 'EUR',
       'venue': 'Riverside Auditorium',
       'salesClosed': false,

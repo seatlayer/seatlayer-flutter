@@ -14,9 +14,17 @@ import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
 class SeatLayerPickerTestModeIndicator extends StatelessWidget {
+  /// Creates the test-event badge.
   const SeatLayerPickerTestModeIndicator({super.key, this.compact = false});
 
+  /// Whether to render the phone's short badge.
   final bool compact;
+
+  /// How tall the phone's badge is.
+  ///
+  /// Published because the badge is drawn ON the map, so the layout has to
+  /// include it in the band it reports to the runtime.
+  static const double compactHeight = 20;
 
   @override
   Widget build(BuildContext context) {

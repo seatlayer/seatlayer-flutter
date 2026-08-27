@@ -44,6 +44,22 @@ class SeatLayerVenue3D extends StatelessWidget {
   /// pill this widget draws instead of repeating a number.
   static const double backPillHeight = 36;
 
+  /// How tall the caption chip naming the buyer's seat is.
+  static const double captionChipHeight = 28;
+
+  /// The gap between the caption chip and the control row below it.
+  static const double captionGap = 8;
+
+  /// How tall the seat deck at the bottom of the scene is.
+  ///
+  /// The controls are always there; the caption chip only once the buyer is
+  /// sitting in a seat. Published so the layout can report the band this
+  /// chrome stands on without repeating either number.
+  static double seatDeckHeight({required bool seated}) =>
+      (seated ? captionChipHeight + captionGap : 0) +
+      captionGap +
+      backPillHeight;
+
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
