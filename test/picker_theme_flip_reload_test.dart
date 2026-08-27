@@ -80,9 +80,78 @@ void main() {
     await tester.pump();
 
     // Re-deriving it here would only reach the map by rebooting the picker.
-    // The runtime has no command to change a map ground after boot, so the
-    // ask is recorded rather than paid for with the buyer's selection.
+    // The ground moves as an argument of `picker.setThemeMode` instead, which
+    // repaints in place; see the test below.
     expect(_profile(tester).config['mapTheme'], booted);
+  });
+
+  testWidgets('the flip carries the new ground so the venue follows the chrome',
+      (tester) async {
+    useFakeWebViewPlatform();
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    Widget build(Brightness platform) => pickerHarness(
+          map,
+          const SeatLayerPickerMap(),
+          platformBrightness: platform,
+        );
+
+    await tester.pumpWidget(build(Brightness.light));
+    await tester.pump();
+    final booted = _profile(tester).config['mapTheme'];
+
+    await tester.pumpWidget(build(Brightness.dark));
+    await tester.pump();
+
+    // A host `mapTheme` outranks a mode inside the runtime, so the frozen boot
+    // ground would pin the canvas light for the widget's life if the mode
+    // travelled alone. One command answers both halves.
+    final flip =
+        map.callsTo('picker.setThemeMode').single.$2! as Map<String, Object?>;
+    expect(flip['mode'], 'dark');
+    expect(
+      flip['mapTheme'],
+      const SeatLayerMapThemeData.dark().toBridgeConfig(),
+    );
+    expect(
+      _profile(tester).config['mapTheme'],
+      booted,
+      reason: 'the init config is the bridge profile; changing it reboots',
+    );
+    expect(map.callsTo('picker.destroy'), isEmpty);
+  });
+
+  testWidgets('a runtime without the contract still gets the bare mode',
+      (tester) async {
+    useFakeWebViewPlatform();
+    final map = FakePickerMap(
+      bundle: nativeChromeBundle(
+        capabilities: const <String>[],
+        commands: const <String>['picker.setThemeMode'],
+      ),
+    );
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    Widget build(Brightness platform) => pickerHarness(
+          map,
+          const SeatLayerPickerMap(),
+          platformBrightness: platform,
+        );
+
+    await tester.pumpWidget(build(Brightness.light));
+    await tester.pump();
+    await tester.pumpWidget(build(Brightness.dark));
+    await tester.pump();
+
+    // Today's behaviour, unchanged: the chrome flips and the drawn ground
+    // keeps the side it booted on, which is honest and visible.
+    expect(
+      map.callsTo('picker.setThemeMode').single.$2,
+      <String, Object?>{'mode': 'dark'},
+    );
   });
 
   testWidgets('a map ground the host authored is still handed over',

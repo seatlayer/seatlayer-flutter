@@ -87,7 +87,16 @@ class _PickerThemeModeSyncState extends State<PickerThemeModeSync> {
     _liveMode = mode;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || _liveMode != mode) return;
-      unawaited(picker.setThemeMode(mode).catchError((Object _) {}));
+      // The ground travels with the mode. The init config still carries the
+      // frozen boot colours — changing it is what reboots the runtime — so
+      // this command is the only way the drawn venue can follow the device
+      // onto the new side, and it repaints in place with the selection, the
+      // focused section and the camera intact.
+      unawaited(
+        picker
+            .setThemeMode(mode, mapTheme: mapTheme)
+            .catchError((Object _) {}),
+      );
     });
   }
 }

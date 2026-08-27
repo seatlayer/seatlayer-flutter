@@ -15,6 +15,10 @@ import 'picker_models.dart';
 import 'picker_options.dart';
 import 'seat_layer_picker_theme.dart';
 
+/// Advertised by a runtime that speaks the native-chrome contract, including
+/// `picker.setThemeMode`'s optional map ground.
+const String _nativeChromeContractCapability = 'native-chrome-contract-v1';
+
 /// Advertised by a runtime that frames against host-reported viewport insets.
 const String _viewportInsetsCapability = 'viewport-insets-v1';
 
@@ -428,14 +432,33 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   /// Pass null to hand the colours back to the chart. Runtimes that predate the
   /// command are left unchanged rather than failing the action, so a theme flip
   /// can never break an otherwise working session.
-  Future<void> setThemeMode(SeatLayerThemeMode? mode) {
+  ///
+  /// [mapTheme] moves the map's own ground with the mode. It is needed because
+  /// an explicit ground outranks a mode inside the runtime: a host that named
+  /// map colours at boot — which this SDK does, frozen, so the venue matches
+  /// the chrome it booted under — has pinned the canvas, and no number of mode
+  /// changes can flip it afterwards. Sending the newly resolved colours with
+  /// the mode re-inks the venue in place, keeping the selection, the focused
+  /// section and the camera. It travels only to a runtime that advertises the
+  /// contract; older ones receive the mode alone, which is what they have
+  /// always received.
+  Future<void> setThemeMode(
+    SeatLayerThemeMode? mode, {
+    SeatLayerMapThemeData? mapTheme,
+  }) {
     final bundle = mapController.bundleInfo;
     if (bundle != null && !bundle.supportsCommand('picker.setThemeMode')) {
       return Future<void>.value();
     }
+    final carriesGround = mapTheme != null &&
+        bundle != null &&
+        bundle.supportsCapability(_nativeChromeContractCapability);
     return _mutation(
       'picker.setThemeMode',
-      <String, Object?>{'mode': mode?.raw},
+      <String, Object?>{
+        'mode': mode?.raw,
+        if (carriesGround) 'mapTheme': mapTheme.toBridgeConfig(),
+      },
       SeatLayerPickerBusyAction.changingView,
     );
   }
