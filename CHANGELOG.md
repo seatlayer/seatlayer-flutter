@@ -5,6 +5,30 @@
 Phone parity round. The native chrome is rebuilt against the web picker's
 measured phone layout, and the package is prepared for a stable 0.3.0.
 
+**Native chrome contract** (needs a runtime advertising it; consumed
+capability-gated, so the hosted 0.70.0 build behaves exactly as before)
+
+- `SeatLayerViewportInsets` and
+  `SeatLayerPickerController.setViewportInsets` report how much of the map
+  surface native chrome is covering, so the runtime frames a section, the venue
+  overview and a best-available result into the part the buyer can see. It is a
+  framing inset, not a clip: the venue still draws and pans under the chrome.
+  The drop-in reports its own rail and dock;
+  `SeatLayerPickerScope.setViewportInsets` does the same for a composed layout.
+  What the runtime is honouring comes back as
+  `SeatLayerPickerMapState.viewportInsets`.
+- `setThemeMode` takes the map's new ground alongside the mode, so a device
+  appearance flip re-inks the drawn venue in place — keeping the selection, the
+  focused section and the camera. Without it the boot ground pinned the canvas
+  for the widget's life.
+- `SeatLayerCheckoutLineItem` carries `seatId`, `sectionLabel`, `rowLabel` and
+  `seatNumber`. Best Available clears the renderer selection before it holds
+  and a resumed hold was never in one, so those lines had no address to render;
+  they now read `Choir · A · 9–10` instead of a category and a raw label.
+- `SeatLayerPickerSectionSummary.dominantCategoryKey` binds the dock's section
+  dot to the category rather than to a copied hex, so it agrees with the price
+  legend through a recolour or a colourblind-safe repaint.
+
 **Design system**
 
 - `design/tokens.json` is the single, platform-neutral source for the picker's
