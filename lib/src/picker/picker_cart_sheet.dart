@@ -6,7 +6,8 @@ import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_options.dart';
-import 'seat_layer_picker_components.dart';
+import 'picker_attribution.dart';
+import 'picker_errors.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -91,12 +92,13 @@ class SeatLayerCartSheet extends StatelessWidget {
               hasTickets: hasTickets,
               onExpandedChanged: onExpandedChanged,
               onCheckout: onCheckout,
-              showBestSeatsShortcut:
-                  hasTickets && options.enableBestAvailable && !options.readOnly,
+              showBestSeatsShortcut: hasTickets &&
+                  options.enableBestAvailable &&
+                  !options.readOnly,
             ),
             AnimatedSize(
-              duration:
-                  SeatLayerPickerMotion.of(context, SeatLayerPickerMotion.sheet),
+              duration: SeatLayerPickerMotion.of(
+                  context, SeatLayerPickerMotion.sheet),
               curve: SeatLayerPickerMotion.easeEnter,
               alignment: Alignment.topCenter,
               child: !expanded
@@ -371,8 +373,8 @@ class SeatLayerBookButton extends StatelessWidget {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
-    final busy = controller.state.busyAction ==
-        SeatLayerPickerBusyAction.creatingHold;
+    final busy =
+        controller.state.busyAction == SeatLayerPickerBusyAction.creatingHold;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),
       child: FilledButton(

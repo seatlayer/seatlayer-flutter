@@ -278,9 +278,8 @@ class _Stepper extends StatelessWidget {
           _StepIcon(
             icon: Icons.remove_rounded,
             tooltip: strings.fewerTickets,
-            onPressed: enabled && quantity > 1
-                ? () => onChanged(quantity - 1)
-                : null,
+            onPressed:
+                enabled && quantity > 1 ? () => onChanged(quantity - 1) : null,
           ),
           Semantics(
             liveRegion: true,

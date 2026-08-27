@@ -43,7 +43,10 @@ final class FakePickerMap extends SeatLayerController {
       ...current,
       'revision': (current['revision']! as int) + 1,
     };
-    return <String, Object?>{'revision': current['revision'], 'snapshot': current};
+    return <String, Object?>{
+      'revision': current['revision'],
+      'snapshot': current
+    };
   }
 
   /// Push [snapshot] as if the runtime had emitted it.
@@ -120,8 +123,7 @@ Widget goldenSubject(Widget child) =>
     RepaintBoundary(key: goldenSubjectKey, child: child);
 
 /// Compare the [goldenSubject] on screen against `test/goldens/<name>.png`.
-Future<void> expectGolden(WidgetTester tester, String name) =>
-    expectLater(
+Future<void> expectGolden(WidgetTester tester, String name) => expectLater(
       find.byKey(goldenSubjectKey),
       matchesGoldenFile('goldens/$name.png'),
     );

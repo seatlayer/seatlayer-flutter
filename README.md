@@ -50,6 +50,144 @@ Then import the public library:
 import 'package:seatlayer/seatlayer.dart';
 ```
 
+## Two ways in
+
+```mermaid
+flowchart TD
+  A["SeatLayerConfiguration<br/>event + publishable key"] --> B{"How much layout<br/>do you want to own?"}
+  B -->|"None"| C["SeatLayerPicker<br/>drop-in"]
+  B -->|"All of it"| D["SeatLayerPickerScope"]
+  D --> E["SeatLayerChart"]
+  D --> F["SeatLayerPickerHeader<br/>SeatLayerPriceLegend<br/>SeatLayerDockBar"]
+  D --> G["SeatLayerConfirmCard<br/>SeatLayerCartSheet<br/>SeatLayerVenue3D"]
+  C --> H["onCheckout(handoff)"]
+  E --> H
+  F --> H
+  G --> H
+  H --> I["Your backend books the hold"]
+```
+
+### Recipe 1 — drop-in
+
+One widget. The complete buyer flow, on the approved phone UX by default.
+
+```dart
+SeatLayerPicker(
+  configuration: SeatLayerConfiguration(
+    event: 'ev_your_event',
+    publicKey: 'pk_test_your_key',
+  ),
+  themeMode: SeatLayerThemeMode.auto,
+  onCheckout: (handoff) => bookOnYourBackend(handoff.holdId),
+  onClose: () => Navigator.of(context).pop(),
+)
+```
+
+### Recipe 2 — composable
+
+Place a scope, then arrange the parts yourself. Every widget below reads its
+state from the scope; none of them needs the drop-in layout.
+
+```dart
+SeatLayerPickerScope(
+  configuration: configuration,
+  themeMode: SeatLayerThemeMode.auto,
+  child: Column(
+    children: [
+      SeatLayerPickerHeader(compact: true, onClose: close),
+      Expanded(
+        child: Stack(
+          children: [
+            const Positioned.fill(child: SeatLayerChart()),
+            const Positioned(top: 8, left: 0, child: SeatLayerPriceLegend(compact: true)),
+            const Positioned.fill(child: SeatLayerPickerMapControls(compact: true)),
+            const Positioned(left: 0, right: 0, bottom: 0, child: SeatLayerDockBar()),
+            const Positioned.fill(child: SeatLayerVenue3D()),
+          ],
+        ),
+      ),
+      SeatLayerCartSheet(
+        expanded: expanded,
+        onExpandedChanged: (value) => setState(() => expanded = value),
+        onCheckout: (handoff) => bookOnYourBackend(handoff.holdId),
+      ),
+    ],
+  ),
+)
+```
+
+## Widget catalogue
+
+| Widget | What it is | Standalone in a scope |
+| --- | --- | --- |
+| `SeatLayerPicker` | The drop-in buyer flow | n/a |
+| `SeatLayerChart` | The drawn map (alias of `SeatLayerPickerMap`) | yes |
+| `SeatLayerPickerHeader` | Event identity, hold pill, dismiss | yes |
+| `SeatLayerPriceLegend` | Price chips that filter the map | yes |
+| `SeatLayerDockBar` | Focused section, seats left, prev/next, Overview | yes |
+| `SeatLayerPickerMapControls` | Accessibility, fit, Map/3D in the corners | yes |
+| `SeatLayerConfirmCard` | The phone's one-seat decision card | yes |
+| `SeatLayerCartSheet` | Peek bar and content-height cart | yes |
+| `SeatLayerCartList` | The dense ticket list with run folding | yes |
+| `SeatLayerBestSeatsForm` | Two selects, a stepper, one action | yes |
+| `SeatLayerBookButton` | The full-width checkout call to action | yes |
+| `SeatLayerVenue3D` | Caption, seat stepper and exits over the 3D scene | yes |
+| `SeatLayerPickerAccessibilityFilters` | Access needs and the colourblind palette | yes |
+| `SeatLayerPickerTablePrompt` / `…GeneralAdmissionPrompt` | Quantity prompts | yes |
+| `SeatLayerPickerScope` | The state every widget above reads | n/a |
+
+## Customisation
+
+The zero-configuration path is the approved phone experience. Everything about
+it is still yours to change.
+
+**Hide a part.** Every piece of chrome has a switch:
+
+```dart
+options: const SeatLayerPickerOptions(
+  chrome: SeatLayerPickerChromeOptions(showDockBar: false),
+),
+```
+
+**Replace one part, keep the rest.** A builder receives the live state and the
+widget the drop-in would have rendered:
+
+```dart
+builders: SeatLayerPickerBuilders(
+  cartSheet: (context, part) => MyOwnSheet(state: part.state, fallback: part.defaultChild),
+),
+```
+
+**Retune the sizes.** The spec's numbers are defaults, not constants:
+
+```dart
+theme: const SeatLayerPickerThemeData.light(
+  layout: SeatLayerPickerLayout(dockBarHeight: 60, sheetMaxHeightFraction: .5),
+),
+```
+
+**Translate or reword anything.** Every buyer-facing string is an override:
+
+```dart
+options: SeatLayerPickerOptions(
+  strings: SeatLayerPickerStrings(
+    holdAndCheckout: 'Réserver et payer',
+    seatsLeft: (count) => '$count restants',
+  ),
+),
+```
+
+**Hear about every action.** All callbacks are optional:
+
+```dart
+callbacks: SeatLayerPickerCallbacks(
+  onSectionFocused: (id) => analytics.log('section', id),
+  onSeatSelected: (seat) => analytics.log('seat', seat.label),
+  onThemeResolved: (brightness) => debugPrint('picker is $brightness'),
+  onContinue: (handoff) => analytics.log('checkout', handoff.holdId),
+),
+```
+
 ## Turnkey picker quick start
 
 This is the default integration. `SeatLayerPicker` supplies the adaptive

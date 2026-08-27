@@ -37,10 +37,9 @@ class _PickerThemeModeSyncState extends State<PickerThemeModeSync> {
   @override
   Widget build(BuildContext context) {
     final picker = SeatLayerPickerScope.controllerOf(context);
-    final mode =
-        SeatLayerPickerScope.brightnessOf(context) == Brightness.dark
-            ? SeatLayerThemeMode.dark
-            : SeatLayerThemeMode.light;
+    final mode = SeatLayerPickerScope.brightnessOf(context) == Brightness.dark
+        ? SeatLayerThemeMode.dark
+        : SeatLayerThemeMode.light;
     _sync(picker, mode);
     return widget.builder(context, _bootMode!);
   }

@@ -395,8 +395,9 @@ SeatLayerResolvedPickerTheme resolveSeatLayerPickerTheme(
 
   return SeatLayerResolvedPickerTheme(
     brightness: side,
-    accent:
-        host((theme) => theme.accent) ?? _hex(organizer?.accent) ?? preset.accent!,
+    accent: host((theme) => theme.accent) ??
+        _hex(organizer?.accent) ??
+        preset.accent!,
     onAccent: host((theme) => theme.onAccent) ??
         _hex(organizer?.accentInk) ??
         preset.onAccent!,
@@ -421,9 +422,8 @@ SeatLayerResolvedPickerTheme resolveSeatLayerPickerTheme(
     layout: host((theme) => theme.layout) ?? const SeatLayerPickerLayout(),
     fontFamily: host((theme) => theme.fontFamily) ?? organizer?.fontFamily,
     logo: host((theme) => theme.logo),
-    mapBackground:
-        resolveSeatLayerMapTheme(context, explicit, brightness: side)
-            ?.background,
+    mapBackground: resolveSeatLayerMapTheme(context, explicit, brightness: side)
+        ?.background,
   );
 }
 

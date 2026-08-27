@@ -192,8 +192,7 @@ class SeatLayerPickerStrings {
 
   static String _defaultFromPrice(String money) => 'From $money';
 
-  static String _defaultContinueWithTotal(String money) =>
-      'Continue · $money';
+  static String _defaultContinueWithTotal(String money) => 'Continue · $money';
 
   static String _defaultFindBestSeats(int count) => 'Find $count best seats';
 

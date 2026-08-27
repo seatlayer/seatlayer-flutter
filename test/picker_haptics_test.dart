@@ -193,7 +193,8 @@ void main() {
 
       map.emit(pickerSnapshot(withSelection: false));
       await pumpEventQueue();
-      expect(fired, isEmpty, reason: 'the first snapshot seeds, it never fires');
+      expect(fired, isEmpty,
+          reason: 'the first snapshot seeds, it never fires');
 
       map.emit(pickerSnapshot(revision: 2, holdOwner: 'picker'), sequence: 2);
       await pumpEventQueue();

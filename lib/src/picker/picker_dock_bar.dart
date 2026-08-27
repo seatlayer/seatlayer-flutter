@@ -190,8 +190,7 @@ class _DockContents extends StatelessWidget {
           ),
           onPressed: busy
               ? null
-              : onOverview ??
-                  () => ignorePickerAction(controller.overview()),
+              : onOverview ?? () => ignorePickerAction(controller.overview()),
           icon: const Icon(Icons.chevron_left_rounded, size: 18),
           label: Text(strings.overview),
         ),

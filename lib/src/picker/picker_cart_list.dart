@@ -79,7 +79,8 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
             run: shown[index],
             open: _openRuns.contains(index),
             removable: removable,
-            arrivalIndex: arrivals.indexOf(shown[index].members.first.item.lineKey),
+            arrivalIndex:
+                arrivals.indexOf(shown[index].members.first.item.lineKey),
             onToggle: () => setState(
               () => _openRuns.contains(index)
                   ? _openRuns.remove(index)
@@ -395,9 +396,8 @@ class _ArrivalPop extends StatelessWidget {
     return TweenAnimationBuilder<double>(
       key: ValueKey<int>(index),
       tween: Tween<double>(begin: 0, end: 1),
-      duration: total > SeatLayerPickerMotion.fly
-          ? SeatLayerPickerMotion.fly
-          : total,
+      duration:
+          total > SeatLayerPickerMotion.fly ? SeatLayerPickerMotion.fly : total,
       curve: Interval(
         total.inMilliseconds == 0
             ? 0

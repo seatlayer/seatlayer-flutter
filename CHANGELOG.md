@@ -1,6 +1,89 @@
 # Changelog
 
-## 0.3.0-dev.4 (unreleased)
+## 0.3.0-dev.5 (unreleased)
+
+Phone parity round. The native chrome is rebuilt against the web picker's
+measured phone layout, and the package is prepared for a stable 0.3.0.
+
+**Theme**
+
+- `SeatLayerPicker(themeMode:)` with `SeatLayerThemeMode.auto | light | dark`.
+  `auto` follows `MediaQuery.platformBrightness` live. The resolved side is
+  folded into the init config as `theme: { mode }` and every later change
+  travels as `picker.setThemeMode`, so a light/dark flip repaints the chrome
+  and the drawn map without reloading the runtime or losing the selection.
+- The light and dark presets now match the web picker's ground tokens: white
+  chrome over a recessed `#e9edf4` map in light, `#0f1522`/`#1a2234` in dark.
+- `SeatLayerPickerCallbacks.onThemeResolved` reports the resolved side.
+
+**Phone chrome**
+
+- New `SeatLayerDockBar`: the focused section, its remaining seats, prev/next
+  and an explicit way back to the overview, docked under the map at rung 2.
+- A native rung ladder. `PopScope` walks seat card → section → overview →
+  dismiss, so Android predictive back and the iOS edge swipe both behave.
+- New `SeatLayerConfirmCard`: one identity line, a photo strip carrying the
+  view-from-seat and 3D pills, and a 40-point action row. 89 points without the
+  strip, 158 with it.
+- New `SeatLayerCartSheet`: a 50-point peek and an expanded height that follows
+  its own content, capped at three fifths of the screen. The sheet never opens
+  itself.
+- New `SeatLayerCartList`: one 40-point line per ticket, with consecutive seats
+  in the same row and price folding into a run (`Gallery · A · 1–6  6 × €25`).
+  Removal is immediate with a four-second undo.
+- New `SeatLayerBestSeatsForm`: two selects on one row, a stepper and one
+  action. No card, no title, no helper paragraph.
+- `SeatLayerPickerHeader` is one 56-point line and owns the hold countdown.
+- `SeatLayerPriceLegend` replaces the price rail: dot-and-price chips that
+  scroll sideways over the map's top-left corner.
+- `SeatLayerPickerMapControls` puts accessibility, fit-to-screen and a
+  segmented Map/3D control in the corners on a phone. The zoom pair and the
+  colourblind toggle are off by default there — pinch already zooms, and the
+  colourblind palette moved inside the accessibility sheet.
+- New `SeatLayerVenue3D`: caption chip, seat stepper, `Open venue 360°`,
+  recentre and `‹ Back to venue` over the immersive scene, in dark tokens
+  whatever the picker's own mode is.
+
+**Motion and haptics**
+
+- `SeatLayerPickerMotion`: one duration table every animation spends, and every
+  one of them collapses under `MediaQuery.disableAnimations`.
+- `PickerHapticCue.holdExpired` fires `heavyImpact` from the runtime's own
+  expiry signal.
+
+**Customisation**
+
+- `SeatLayerPickerStrings` makes every buyer-facing string an override.
+- `SeatLayerPickerLayout` makes every size in the spec a default rather than a
+  constant.
+- New builder slots: `dockBar`, `confirmCard`, `cartSheet`, `venue3D`,
+  `legend`. New chrome switches for the dock bar, confirm card, 3D chrome and
+  hold pill.
+- New callbacks: `onSectionFocused`, `onSeatSelected`, `onSeatRemoved`,
+  `onSeatViewOpened`, `onContinue`, `onThemeResolved`.
+
+**Package**
+
+- `lib/seatlayer.dart` exports explicit `show` lists. Anything not listed is an
+  implementation detail.
+- The 1.18 MB offline fixture (`seatlayer.js`, `demo.html`, `index.html`) moved
+  to `example/assets/` and out of the published archive. Production has always
+  loaded the immutable hosted page.
+- The example app opens on the live picker; the raw protocol-1 fixture is now
+  `example/lib/offline_fixture_demo.dart`.
+- Files split by concern, with a 1,500-line guard (`tool/check_file_sizes.dart`)
+  and a test that runs it.
+- Goldens in light and dark at 390×844 for every rebuilt widget.
+
+**Breaking, within the 0.3 prerelease line**
+
+- `SeatLayerPickerMobileTicketPanel`, `SeatLayerPickerTicketCard`,
+  `SeatLayerPickerBestAvailable`, `SeatLayerPickerMobilePanelSafeArea` and the
+  deprecated `seatLayerBundledWebVersion` are removed.
+- `SeatLayerPickerSelectionTray`, `SeatLayerPickerBestAvailablePanel` and
+  `SeatLayerPickerPriceRail` remain as deprecated typedefs until 0.4.
+
+## 0.3.0-dev.4
 
 - Pins the hosted runtime to `seatlayer-js@0.70.0`. Views load
   `https://cdn.seatlayer.io/seatlayer-js@0.70.0/mobile.html`, which advertises

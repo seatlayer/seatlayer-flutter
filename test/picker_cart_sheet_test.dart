@@ -29,7 +29,8 @@ void main() {
     await tester.pumpWidget(
       pickerHarness(
         map,
-        Align(alignment: Alignment.bottomCenter, child: _sheet(expanded: false)),
+        Align(
+            alignment: Alignment.bottomCenter, child: _sheet(expanded: false)),
       ),
     );
     map.emit(pickerSnapshot());
@@ -51,7 +52,8 @@ void main() {
     await tester.pumpWidget(
       pickerHarness(
         map,
-        Align(alignment: Alignment.bottomCenter, child: _sheet(expanded: false)),
+        Align(
+            alignment: Alignment.bottomCenter, child: _sheet(expanded: false)),
       ),
     );
     map.emit(pickerSnapshot(withSelection: false));
@@ -67,7 +69,8 @@ void main() {
     usePhoneSurface(tester);
 
     await tester.pumpWidget(
-      pickerHarness(map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+      pickerHarness(
+          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
     );
     map.emit(snapshotWithTicketCount(6));
     await tester.pumpAndSettle();
@@ -84,7 +87,8 @@ void main() {
     usePhoneSurface(tester);
 
     await tester.pumpWidget(
-      pickerHarness(map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+      pickerHarness(
+          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
     );
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
@@ -110,7 +114,8 @@ void main() {
     usePhoneSurface(tester);
 
     await tester.pumpWidget(
-      pickerHarness(map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+      pickerHarness(
+          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
     );
     map.emit(bestAvailableSnapshot());
     await tester.pumpAndSettle();
@@ -133,7 +138,8 @@ void main() {
     usePhoneSurface(tester);
 
     await tester.pumpWidget(
-      pickerHarness(map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+      pickerHarness(
+          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
     );
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
@@ -153,7 +159,8 @@ void main() {
     usePhoneSurface(tester);
 
     await tester.pumpWidget(
-      pickerHarness(map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+      pickerHarness(
+          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
     );
     map.emit(snapshotWithTicketCount(6));
     await tester.pumpAndSettle();
@@ -169,7 +176,8 @@ void main() {
     usePhoneSurface(tester);
 
     await tester.pumpWidget(
-      pickerHarness(map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+      pickerHarness(
+          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
     );
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();

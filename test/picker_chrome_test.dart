@@ -5,7 +5,7 @@ import 'package:seatlayer/src/picker/picker_layout.dart';
 import 'package:seatlayer/src/picker/picker_legend.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
-import 'package:seatlayer/src/picker/seat_layer_picker_components.dart';
+import 'package:seatlayer/src/picker/picker_accessibility.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
@@ -120,7 +120,8 @@ void main() {
       await tester.tap(find.text('€25'));
       await tester.pump();
 
-      expect(map.callsTo('picker.setCategoryFilter').single.$2, <String, Object?>{
+      expect(
+          map.callsTo('picker.setCategoryFilter').single.$2, <String, Object?>{
         'categoryKeys': <String>['standard'],
         'focus': true,
       });
@@ -140,7 +141,8 @@ void main() {
       await tester.tap(find.text('€25'));
       await tester.pump();
 
-      expect(map.callsTo('picker.setCategoryFilter').single.$2, <String, Object?>{
+      expect(
+          map.callsTo('picker.setCategoryFilter').single.$2, <String, Object?>{
         'categoryKeys': null,
       });
     });
@@ -206,9 +208,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        tester
-            .getSize(find.byType(SeatLayerPickerAccessibilityFilters))
-            .height,
+        tester.getSize(find.byType(SeatLayerPickerAccessibilityFilters)).height,
         _layout.accessibilityControlSize,
       );
     });

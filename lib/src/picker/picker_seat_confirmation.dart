@@ -1,328 +1,16 @@
+/// The wide layout's seat confirmation, and the two ways to look at a seat.
+library;
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 
 import '../open_enums.dart';
 import '../payloads.dart';
-import '../seat_layer_error.dart';
-import 'picker_models.dart';
+import 'picker_internal.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
-
-class SeatLayerPickerAttribution extends StatelessWidget {
-  const SeatLayerPickerAttribution({
-    super.key,
-    this.compact = true,
-  });
-
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = SeatLayerPickerScope.stateOf(context);
-    if (state.branding?.attributionRequired != true) {
-      return const SizedBox.shrink();
-    }
-    final theme = seatLayerPickerThemeOf(context);
-    return Semantics(
-      label: 'Powered by SeatLayer',
-      child: Opacity(
-        opacity: compact ? .64 : .72,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 6 : 12,
-            vertical: compact ? 1 : 4,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _SeatLayerPoweredMark(compact: compact),
-              SizedBox(width: compact ? 4 : 5),
-              Text(
-                'Powered by SeatLayer',
-                style: TextStyle(
-                  color: theme.text,
-                  fontSize: compact ? 10 : 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: compact ? .1 : .2,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SeatLayerPoweredMark extends StatelessWidget {
-  const _SeatLayerPoweredMark({required this.compact});
-
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final dimension = compact ? 12.0 : 16.0;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: const Color(0xFF0C1220),
-        borderRadius: BorderRadius.circular(compact ? 3 : 4),
-      ),
-      child: SizedBox.square(
-        dimension: dimension,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 2 : 3,
-            vertical: compact ? 2.5 : 3.5,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _SeatLayerMarkRow(width: compact ? 8 : 10),
-              _SeatLayerMarkRow(width: compact ? 5.5 : 7),
-              _SeatLayerMarkRow(width: compact ? 3 : 4),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SeatLayerMarkRow extends StatelessWidget {
-  const _SeatLayerMarkRow({required this.width});
-
-  final double width;
-
-  @override
-  Widget build(BuildContext context) => Align(
-        alignment: Alignment.centerLeft,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: const Color(0xFFFCF7EE),
-            borderRadius: BorderRadius.circular(2),
-          ),
-          child: SizedBox(width: width, height: 2),
-        ),
-      );
-}
-
-/// A chip per section, for the wide layout's side panel.
-///
-/// The phone uses [SeatLayerDockBar] instead: a chip list of every section is
-/// a directory, and what a buyer standing inside one section needs is where
-/// they are, how much room is left, and the way out. This navigator hides
-/// itself once seats are revealed, which is exactly where the dock belongs.
-class SeatLayerPickerSectionNavigator extends StatelessWidget {
-  /// Creates the wide layout's section chip list.
-  const SeatLayerPickerSectionNavigator({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = SeatLayerPickerScope.controllerOf(context);
-    final state = controller.state;
-    final sections = state.snapshot?.sections ?? const [];
-    if (sections.isEmpty || state.snapshot?.map.rung == 'seats') {
-      return const SizedBox.shrink();
-    }
-    final theme = seatLayerPickerThemeOf(context);
-    final active = state.snapshot?.map.focusedSectionId;
-    return Material(
-      color: theme.surface,
-      child: SizedBox(
-        height: 48,
-        child: ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          scrollDirection: Axis.horizontal,
-          itemCount: sections.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 7),
-          itemBuilder: (context, index) {
-            final section = sections[index];
-            return ChoiceChip(
-              selected: active == section.id,
-              label: Text(section.displayLabel ?? section.label),
-              onSelected: state.isBusy
-                  ? null
-                  : (_) => _ignoreAction(controller.focusSection(section.id)),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-/// The filters a buyer with an access need reaches for.
-///
-/// On the phone this is one 44-point control at the map's bottom-left corner,
-/// and the colourblind-safe palette lives inside it rather than as its own
-/// button on the map — which is where someone who needs it goes looking.
-class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
-  /// Creates the accessibility filter control.
-  const SeatLayerPickerAccessibilityFilters({
-    super.key,
-    this.compact = false,
-  });
-
-  /// Whether to render the phone's single round control.
-  final bool compact;
-
-  static const Map<String, String> _labels = <String, String>{
-    'wheelchair': 'Wheelchair',
-    'companion': 'Companion',
-    'semi-ambulatory': 'Semi-ambulatory',
-    'designated-aisle': 'Aisle seat',
-    'step-free': 'Step-free',
-    'hearing': 'Hearing support',
-    'cart': 'Mobility cart',
-    'sign-language': 'Sign language view',
-    'low-vision': 'Low vision',
-    'sensory-friendly': 'Sensory-friendly',
-    'plus-size': 'Plus-size seat',
-    'lift-armrest': 'Lift armrest',
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final state = SeatLayerPickerScope.stateOf(context);
-    final snapshot = state.snapshot;
-    if (snapshot == null ||
-        !snapshot.capabilities.contains('accessibilityFilter')) {
-      return const SizedBox.shrink();
-    }
-    final active = snapshot.map.accessibilityFilter;
-    final onPressed = state.isBusy ? null : () => _ignoreAction(_show(context));
-    if (compact) {
-      final theme = seatLayerPickerThemeOf(context);
-      final size = theme.layout.accessibilityControlSize;
-      return SizedBox.square(
-        dimension: size,
-        child: IconButton(
-          tooltip: active.isEmpty
-              ? SeatLayerPickerScope.stringsOf(context).accessibility
-              : '${active.length} accessibility filters active',
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.zero,
-          constraints: BoxConstraints.tightFor(width: size, height: size),
-          style: IconButton.styleFrom(
-            backgroundColor: theme.surface.withAlpha(240),
-            foregroundColor: active.isEmpty ? theme.text : theme.accent,
-            side: BorderSide(color: theme.divider),
-          ),
-          onPressed: onPressed,
-          icon: Badge(
-            isLabelVisible: active.isNotEmpty,
-            label: Text('${active.length}'),
-            child: const Icon(Icons.accessible_forward_rounded, size: 20),
-          ),
-        ),
-      );
-    }
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: const Icon(Icons.accessible_forward_rounded, size: 18),
-      label:
-          Text(active.isEmpty ? 'Accessibility' : '${active.length} filters'),
-    );
-  }
-
-  Future<void> _show(BuildContext context) async {
-    final controller = SeatLayerPickerScope.controllerOf(context);
-    final initial = <String>{
-      ...?controller.state.snapshot?.map.accessibilityFilter,
-    };
-    final initialHideLimited =
-        controller.state.snapshot?.map.hideLimitedView ?? false;
-    final initialColorblind =
-        controller.state.snapshot?.map.colorblindSafe ?? false;
-    var selected = initial;
-    var hideLimited = initialHideLimited;
-    var colorblind = initialColorblind;
-    final result = await showModalBottomSheet<
-        ({
-          Set<String> types,
-          bool hideLimited,
-          bool colorblind,
-        })>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setSheetState) => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  'Accessibility and view',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 12),
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: Wrap(
-                      spacing: 7,
-                      runSpacing: 7,
-                      children: _labels.entries.map((entry) {
-                        final on = selected.contains(entry.key);
-                        return FilterChip(
-                          selected: on,
-                          label: Text(entry.value),
-                          onSelected: (_) => setSheetState(() {
-                            selected = <String>{...selected};
-                            on
-                                ? selected.remove(entry.key)
-                                : selected.add(entry.key);
-                          }),
-                        );
-                      }).toList(growable: false),
-                    ),
-                  ),
-                ),
-                SwitchListTile.adaptive(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Hide limited-view seats'),
-                  value: hideLimited,
-                  onChanged: (value) =>
-                      setSheetState(() => hideLimited = value),
-                ),
-                SwitchListTile.adaptive(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text('Colorblind-safe colors'),
-                  value: colorblind,
-                  onChanged: (value) => setSheetState(() => colorblind = value),
-                ),
-                const SizedBox(height: 8),
-                FilledButton(
-                  onPressed: () => Navigator.of(context).pop(
-                    (
-                      types: selected,
-                      hideLimited: hideLimited,
-                      colorblind: colorblind,
-                    ),
-                  ),
-                  child: const Text('Apply filters'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-    if (result == null) return;
-    await controller.setAccessibilityFilter(result.types);
-    if (result.hideLimited != initialHideLimited) {
-      await controller.setLimitedViewHidden(result.hideLimited);
-    }
-    if (result.colorblind != initialColorblind) {
-      await controller.setColorblindSafe(result.colorblind);
-    }
-  }
-}
 
 class SeatLayerPickerSeatConfirmation extends StatefulWidget {
   const SeatLayerPickerSeatConfirmation({
@@ -392,7 +80,7 @@ class _SeatLayerPickerSeatConfirmationState
     final category = controller.state.categories
         .where((item) => item.key == seat.categoryKey)
         .firstOrNull;
-    final categoryColor = _color(category?.color) ?? theme.accent;
+    final categoryColor = pickerColor(category?.color) ?? theme.accent;
     final categoryLabel = category?.label ?? seat.categoryKey ?? 'Ticket';
     final identity = <({String key, String value})>[
       if (seat.sectionLabel?.trim().isNotEmpty == true)
@@ -452,10 +140,10 @@ class _SeatLayerPickerSeatConfirmationState
           child: Material(
             color: theme.surface,
             elevation: 18,
-            shadowColor: _alpha(Colors.black, .26),
+            shadowColor: pickerAlpha(Colors.black, .26),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(theme.radius + 6),
-              side: BorderSide(color: _alpha(theme.divider, .9)),
+              side: BorderSide(color: pickerAlpha(theme.divider, .9)),
             ),
             clipBehavior: Clip.antiAlias,
             child: SingleChildScrollView(
@@ -490,12 +178,12 @@ class _SeatLayerPickerSeatConfirmationState
                   DecoratedBox(
                     decoration: BoxDecoration(
                       color: Color.alphaBlend(
-                        _alpha(categoryColor, .10),
+                        pickerAlpha(categoryColor, .10),
                         theme.surface,
                       ),
                       border: Border.symmetric(
                         horizontal: BorderSide(
-                          color: _alpha(categoryColor, .16),
+                          color: pickerAlpha(categoryColor, .16),
                         ),
                       ),
                     ),
@@ -511,7 +199,7 @@ class _SeatLayerPickerSeatConfirmationState
                               color: categoryColor,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: _alpha(theme.text, .28),
+                                color: pickerAlpha(theme.text, .28),
                                 width: 1.5,
                               ),
                             ),
@@ -532,7 +220,7 @@ class _SeatLayerPickerSeatConfirmationState
                           ),
                           if (seat.price != null)
                             Text(
-                              _money(
+                              pickerMoney(
                                 context,
                                 seat.price!,
                                 seat.currency ?? 'USD',
@@ -609,12 +297,12 @@ class _SeatLayerPickerSeatConfirmationState
                                   minimumSize: const Size.fromHeight(52),
                                   foregroundColor: theme.text,
                                   disabledForegroundColor:
-                                      _alpha(theme.mutedText, .5),
+                                      pickerAlpha(theme.mutedText, .5),
                                   backgroundColor: Color.alphaBlend(
-                                    _alpha(theme.text, .035),
+                                    pickerAlpha(theme.text, .035),
                                     theme.surface,
                                   ),
-                                  overlayColor: _alpha(theme.text, .055),
+                                  overlayColor: pickerAlpha(theme.text, .055),
                                   side: BorderSide(color: theme.divider),
                                   textStyle: const TextStyle(
                                     fontSize: 14,
@@ -639,13 +327,14 @@ class _SeatLayerPickerSeatConfirmationState
                                   backgroundColor: theme.accent,
                                   foregroundColor: theme.onAccent,
                                   disabledBackgroundColor: Color.alphaBlend(
-                                    _alpha(theme.mutedText, .16),
+                                    pickerAlpha(theme.mutedText, .16),
                                     theme.surface,
                                   ),
                                   disabledForegroundColor:
-                                      _alpha(theme.mutedText, .58),
+                                      pickerAlpha(theme.mutedText, .58),
                                   elevation: 0,
-                                  overlayColor: _alpha(theme.onAccent, .12),
+                                  overlayColor:
+                                      pickerAlpha(theme.onAccent, .12),
                                   textStyle: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w800,
@@ -833,13 +522,13 @@ ButtonStyle _seatInspectionButtonStyle(
     OutlinedButton.styleFrom(
       minimumSize: const Size.fromHeight(50),
       foregroundColor: theme.text,
-      disabledForegroundColor: _alpha(theme.mutedText, .5),
+      disabledForegroundColor: pickerAlpha(theme.mutedText, .5),
       backgroundColor: Color.alphaBlend(
-        _alpha(theme.accent, .055),
+        pickerAlpha(theme.accent, .055),
         theme.surface,
       ),
-      overlayColor: _alpha(theme.accent, .08),
-      side: BorderSide(color: _alpha(theme.accent, .18)),
+      overlayColor: pickerAlpha(theme.accent, .08),
+      side: BorderSide(color: pickerAlpha(theme.accent, .18)),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       textStyle: const TextStyle(
         fontSize: 13,
@@ -917,7 +606,7 @@ class _SeatTierChoice extends StatelessWidget {
             ? 'Requires the adjacent wheelchair place.'
             : null);
     return Material(
-      color: selected ? _alpha(theme.accent, .10) : Colors.transparent,
+      color: selected ? pickerAlpha(theme.accent, .10) : Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(theme.radius),
         side: BorderSide(
@@ -964,7 +653,7 @@ class _SeatTierChoice extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                _money(context, tier.price, tier.currency ?? currency),
+                pickerMoney(context, tier.price, tier.currency ?? currency),
                 style: TextStyle(
                   color: theme.text,
                   fontWeight: FontWeight.w900,
@@ -998,9 +687,9 @@ class _SeatNotice extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: _alpha(color, .10),
+          color: pickerAlpha(color, .10),
           borderRadius: BorderRadius.circular(theme.radius),
-          border: Border.all(color: _alpha(color, .35)),
+          border: Border.all(color: pickerAlpha(color, .35)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(11),
@@ -1039,368 +728,9 @@ class _SeatNotice extends StatelessWidget {
   }
 }
 
-class SeatLayerPickerTablePrompt extends StatefulWidget {
-  const SeatLayerPickerTablePrompt({
-    super.key,
-    required this.table,
-    this.onConfirm,
-    this.onCancel,
-  });
-
-  final SelectedSeat table;
-  final FutureOr<void> Function(SelectedSeat table)? onConfirm;
-  final FutureOr<void> Function(SelectedSeat table)? onCancel;
-
-  @override
-  State<SeatLayerPickerTablePrompt> createState() =>
-      _SeatLayerPickerTablePromptState();
-}
-
-class _SeatLayerPickerTablePromptState
-    extends State<SeatLayerPickerTablePrompt> {
-  late int _quantity;
-
-  @override
-  void initState() {
-    super.initState();
-    _quantity = widget.table.quantity ?? widget.table.minOccupancy ?? 1;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = SeatLayerPickerScope.controllerOf(context);
-    if (SeatLayerPickerScope.optionsOf(context).readOnly) {
-      return const SizedBox.shrink();
-    }
-    final min = widget.table.minOccupancy ?? 1;
-    final max = widget.table.maxOccupancy ?? widget.table.capacity ?? min;
-    return _PromptFrame(
-      title: widget.table.buyerFacingLabel,
-      subtitle: 'Choose the number of guests for this table',
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton.filledTonal(
-                onPressed: _quantity > min
-                    ? () => setState(() => _quantity -= 1)
-                    : null,
-                icon: const Icon(Icons.remove_rounded),
-              ),
-              SizedBox(
-                width: 80,
-                child: Text(
-                  '$_quantity',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ),
-              IconButton.filledTonal(
-                onPressed: _quantity < max
-                    ? () => setState(() => _quantity += 1)
-                    : null,
-                icon: const Icon(Icons.add_rounded),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () => _ignoreAction(() async {
-                    if (widget.onCancel != null) {
-                      await widget.onCancel!(widget.table);
-                    } else {
-                      await controller.removeObject(widget.table.label);
-                    }
-                  }()),
-                  child: const Text('Remove'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton(
-                  onPressed: controller.state.isBusy
-                      ? null
-                      : () => _ignoreAction(() async {
-                            await controller.setTableQuantity(
-                              label: widget.table.label,
-                              quantity: _quantity,
-                            );
-                            await widget.onConfirm?.call(widget.table);
-                          }()),
-                  child: const Text('Confirm table'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class SeatLayerPickerGeneralAdmissionPrompt extends StatefulWidget {
-  const SeatLayerPickerGeneralAdmissionPrompt({
-    super.key,
-    this.area,
-    this.onConfirmed,
-    this.onCancel,
-  });
-
-  final GAArea? area;
-  final FutureOr<void> Function(GAArea area)? onConfirmed;
-  final VoidCallback? onCancel;
-
-  @override
-  State<SeatLayerPickerGeneralAdmissionPrompt> createState() =>
-      _SeatLayerPickerGeneralAdmissionPromptState();
-}
-
-class _SeatLayerPickerGeneralAdmissionPromptState
-    extends State<SeatLayerPickerGeneralAdmissionPrompt> {
-  int _quantity = 1;
-  String? _tierId;
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = SeatLayerPickerScope.controllerOf(context);
-    if (SeatLayerPickerScope.optionsOf(context).readOnly) {
-      return const SizedBox.shrink();
-    }
-    final area = widget.area ?? controller.state.generalAdmissionCandidate;
-    if (area == null) return const SizedBox.shrink();
-    _tierId ??= area.tiers?.firstOrNull?.id;
-    final selectedCount = controller.state.snapshot?.ticketCount ?? 0;
-    final remainingCap =
-        (controller.state.snapshot?.maxSelection ?? 10) - selectedCount;
-    final max = [area.available ?? remainingCap, remainingCap]
-        .where((value) => value > 0)
-        .fold<int>(remainingCap, (a, b) => a < b ? a : b);
-    return _PromptFrame(
-      title: area.label ?? 'General admission',
-      subtitle: '${area.available ?? 0} places currently available',
-      child: Column(
-        children: [
-          if (area.tiers?.isNotEmpty == true)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: _tierId,
-                items: area.tiers!
-                    .map(
-                      (tier) => DropdownMenuItem<String>(
-                        value: tier.id,
-                        child: Text(
-                          '${tier.name} · ${_money(context, tier.price, area.currency ?? 'USD')}',
-                        ),
-                      ),
-                    )
-                    .toList(growable: false),
-                onChanged: (tierId) => setState(() => _tierId = tierId),
-              ),
-            ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton.filledTonal(
-                onPressed:
-                    _quantity > 1 ? () => setState(() => _quantity -= 1) : null,
-                icon: const Icon(Icons.remove_rounded),
-              ),
-              SizedBox(
-                width: 80,
-                child: Text(
-                  '$_quantity',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ),
-              IconButton.filledTonal(
-                onPressed: _quantity < max
-                    ? () => setState(() => _quantity += 1)
-                    : null,
-                icon: const Icon(Icons.add_rounded),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    controller.dismissGeneralAdmissionCandidate();
-                    widget.onCancel?.call();
-                  },
-                  child: const Text('Cancel'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton(
-                  onPressed: max < 1 ||
-                          controller.state.isBusy ||
-                          !controller.state.canMutateInventory
-                      ? null
-                      : () => _ignoreAction(() async {
-                            await controller.setGeneralAdmissionQuantity(
-                              areaId: area.id,
-                              quantitiesByTier: <String?, int>{
-                                _tierId: _quantity,
-                              },
-                            );
-                            await widget.onConfirmed?.call(area);
-                          }()),
-                  child: const Text('Add tickets'),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class SeatLayerPickerActionError extends StatelessWidget {
-  const SeatLayerPickerActionError({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final controller = SeatLayerPickerScope.controllerOf(context);
-    final error = controller.state.error;
-    if (error == null || controller.state.phase != SeatLayerPickerPhase.ready) {
-      return const SizedBox.shrink();
-    }
-    final theme = seatLayerPickerThemeOf(context);
-    final message = error is SeatLayerError ? error.message : '$error';
-    return Material(
-      color: theme.error,
-      child: SafeArea(
-        top: false,
-        bottom: false,
-        child: Row(
-          children: [
-            const SizedBox(width: 12),
-            const Icon(Icons.error_outline_rounded, color: Colors.white),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text(
-                  message,
-                  style: const TextStyle(color: Colors.white),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-            IconButton(
-              tooltip: 'Dismiss error',
-              onPressed: controller.dismissError,
-              color: Colors.white,
-              icon: const Icon(Icons.close_rounded),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PromptFrame extends StatelessWidget {
-  const _PromptFrame({
-    required this.title,
-    required this.subtitle,
-    required this.child,
-  });
-
-  final String title;
-  final String subtitle;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = seatLayerPickerThemeOf(context);
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
-          child: Material(
-            color: theme.surface,
-            elevation: 14,
-            borderRadius: BorderRadius.circular(theme.radius),
-            clipBehavior: Clip.antiAlias,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: theme.text,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(subtitle, style: TextStyle(color: theme.mutedText)),
-                  const SizedBox(height: 14),
-                  child,
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-String _money(BuildContext context, double amount, String currency) {
-  final formatter = SeatLayerPickerScope.optionsOf(context).pricing?.formatter;
-  if (formatter != null) return formatter(amount, currency);
-  const symbols = <String, String>{
-    'EUR': '€',
-    'USD': r'$',
-    'GBP': '£',
-    'INR': '₹',
-    'JPY': '¥',
-    'CNY': '¥',
-    'KRW': '₩',
-  };
-  final decimals = amount == amount.roundToDouble() ? 0 : 2;
-  final value = amount.toStringAsFixed(decimals);
-  final code = currency.toUpperCase();
-  final symbol = symbols[code];
-  return symbol == null ? '$code $value' : '$symbol$value';
-}
-
-Color? _color(String? raw) {
-  if (raw == null) return null;
-  final value = raw.trim().replaceFirst('#', '');
-  if (value.length != 6 && value.length != 8) return null;
-  final parsed = int.tryParse(value, radix: 16);
-  if (parsed == null) return null;
-  return Color(value.length == 6 ? 0xFF000000 | parsed : parsed);
-}
-
-Color _alpha(Color color, double opacity) =>
-    color.withAlpha((opacity.clamp(0, 1) * 255).round());
-
 extension<T> on List<T> {
   T? get firstOrNull => isEmpty ? null : first;
   T? get lastOrNull => isEmpty ? null : last;
 }
 
-void _ignoreAction(Future<void> action) {
-  unawaited(action.catchError((Object _) {}));
-}
+// ignore: unused_element

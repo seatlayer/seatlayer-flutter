@@ -4,12 +4,15 @@ import 'open_enums.dart';
 import 'payloads.dart';
 
 /// This SDK's version.
-const String seatLayerSdkVersion = '0.3.0-dev.4';
+const String seatLayerSdkVersion = '0.3.0-dev.5';
 
 /// The immutable hosted web runtime used by production views.
 const String seatLayerHostedWebVersion = '0.70.0';
 
-/// Runtime retained only for explicit offline demo/test fixtures.
+/// Runtime retained only for the example app's explicit offline fixture.
+///
+/// The fixture itself lives in `example/assets/`, outside the published
+/// package: production always loads the immutable hosted page.
 const String seatLayerLegacyFixtureWebVersion = '0.68.0';
 
 /// Exact source commit used to build the vendored runtime fixture.
@@ -24,10 +27,6 @@ const String seatLayerBundledRuntimeSha256 =
 /// Byte length of the pinned vendored runtime fixture.
 const int seatLayerBundledRuntimeByteLength = 1181605;
 
-@Deprecated(
-  'Use seatLayerHostedWebVersion; production no longer uses a bundled runtime.',
-)
-const String seatLayerBundledWebVersion = seatLayerHostedWebVersion;
 const String seatLayerMobileOrigin = 'https://cdn.seatlayer.io';
 const String seatLayerMobilePageUrl =
     '$seatLayerMobileOrigin/seatlayer-js@$seatLayerHostedWebVersion/mobile.html';

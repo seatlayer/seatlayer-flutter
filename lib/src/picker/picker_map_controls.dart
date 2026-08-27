@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../open_enums.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
-import 'seat_layer_picker_components.dart';
+import 'picker_accessibility.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 

@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_dock_bar.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
-import 'package:seatlayer/src/picker/seat_layer_picker.dart';
+import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';

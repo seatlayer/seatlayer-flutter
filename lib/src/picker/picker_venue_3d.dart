@@ -99,13 +99,11 @@ class _SeatDeck extends StatelessWidget {
     final strings = SeatLayerPickerScope.stringsOf(context);
     final seats = state.selection;
     final targetId = state.snapshot?.map.view3DTargetSeatId;
-    final index = targetId == null
-        ? -1
-        : seats.indexWhere((seat) => seat.id == targetId);
+    final index =
+        targetId == null ? -1 : seats.indexWhere((seat) => seat.id == targetId);
     final seated = index >= 0;
     final previous = seated && index > 0 ? seats[index - 1] : null;
-    final next =
-        seated && index < seats.length - 1 ? seats[index + 1] : null;
+    final next = seated && index < seats.length - 1 ? seats[index + 1] : null;
     final busy = state.isBusy;
 
     return Column(

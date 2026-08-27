@@ -75,8 +75,7 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       return const SizedBox.shrink();
     }
     final selection = controller.state.selection;
-    final seat =
-        widget.seat ?? (selection.isEmpty ? null : selection.last);
+    final seat = widget.seat ?? (selection.isEmpty ? null : selection.last);
     if (seat == null || seat.label == _dismissedLabel) {
       return const SizedBox.shrink();
     }
@@ -96,11 +95,10 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
             capabilities.contains('seatView')
         ? widget.onViewFromSeat ?? controller.openSeatView
         : null;
-    final venue3D = widget.show3D &&
-            options.enable3D &&
-            capabilities.contains('venue3d')
-        ? widget.onShow3D ?? controller.showSeatIn3D
-        : null;
+    final venue3D =
+        widget.show3D && options.enable3D && capabilities.contains('venue3d')
+            ? widget.onShow3D ?? controller.showSeatIn3D
+            : null;
     final hasStrip = seatView != null || venue3D != null;
 
     // The card sizes itself to its content and to the screen less one gutter

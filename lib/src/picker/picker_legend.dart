@@ -116,9 +116,7 @@ class _LegendChip extends StatelessWidget {
                     label,
                     style: TextStyle(
                       color: selected ? theme.onAccent : theme.text,
-                      fontSize: compact
-                          ? theme.layout.legendChipFontSize
-                          : 12,
+                      fontSize: compact ? theme.layout.legendChipFontSize : 12,
                       fontWeight: FontWeight.w800,
                       fontFamily: theme.fontFamily,
                     ),
