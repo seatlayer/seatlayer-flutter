@@ -25,6 +25,7 @@ export 'src/bridge/envelope.dart'
 export 'src/open_enums.dart';
 export 'src/payloads.dart';
 export 'src/picker/picker_builders.dart';
+export 'src/picker/picker_haptics.dart' show PickerHapticCue;
 export 'src/picker/picker_models.dart';
 export 'src/picker/picker_options.dart';
 export 'src/picker/seat_layer_picker.dart';

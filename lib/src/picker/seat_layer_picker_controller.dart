@@ -9,6 +9,7 @@ import '../payloads.dart';
 import '../seat_layer_configuration.dart';
 import '../seat_layer_controller.dart';
 import '../seat_layer_error.dart';
+import 'picker_haptics.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
 
@@ -96,6 +97,17 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   ///
   /// Selection and hold recovery remain runtime/server-authoritative; the SDK
   /// does not pretend stale local state survived a failed transport.
+  /// Decides which haptic each snapshot has earned. Pure and stateful — the
+  /// judgement is the interesting part, and it is only testable apart from the
+  /// platform channel.
+  final PickerHapticsPolicy _haptics = PickerHapticsPolicy();
+
+  /// The seam the haptics tests replace. A platform channel cannot be asserted
+  /// against in a widget test, and a policy that fired through one directly
+  /// would be testable only by not testing it.
+  @visibleForTesting
+  void Function(PickerHapticCue cue) playHaptic = playPickerHaptic;
+
   Future<void> retry() {
     if (_disposed) return Future<void>.error(const SeatLayerError.destroyed());
     if (value.phase == SeatLayerPickerPhase.closed) {
@@ -114,6 +126,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         }
       }
       _reloadGeneration += 1;
+      _haptics.reset();
       value = const SeatLayerPickerState.initializing();
     });
   }
@@ -143,6 +156,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     _closing = false;
     if (value.phase == SeatLayerPickerPhase.closed ||
         value.phase == SeatLayerPickerPhase.failed) {
+      _haptics.reset();
       value = const SeatLayerPickerState.initializing();
     }
   }
@@ -197,6 +211,28 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         previousHold?.owner != nextHold?.owner ||
         previousHold?.expiresAt != nextHold?.expiresAt) {
       _callbacks.onHoldChanged?.call(nextHold, value.checkoutHandoff);
+    }
+
+    // Every cue comes from here, and only from here: the snapshot is the one
+    // place selection, focus and hold are known to agree. Firing from the
+    // per-event signals as well would buzz twice for one seat.
+    if (_options.haptics) {
+      for (final cue in _haptics.onSnapshot(snapshot)) {
+        // A cue is a nicety; adopting the snapshot is not. Haptics reach a
+        // platform channel, and a channel is not always there — a headless
+        // test binding, a platform with no motor, an embedder that has torn
+        // its messenger down. None of that is a reason to drop a snapshot the
+        // buyer's seats depend on.
+        try {
+          playHaptic(cue);
+        } catch (_) {
+          // Silent by design: there is nothing a host could do about it.
+        }
+      }
+    } else {
+      // Keep the policy's memory current so turning haptics back on mid-session
+      // does not replay everything that happened while it was off.
+      _haptics.onSnapshot(snapshot);
     }
 
     final completed = _revisionWaiters.keys
