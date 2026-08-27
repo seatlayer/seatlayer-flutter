@@ -58,7 +58,12 @@ void main() {
       final control = find.byType(SeatLayerPickerViewModeControl);
       expect(control, findsOneWidget);
       final prices = tester.getRect(find.byType(SeatLayerPriceLegend));
-      expect(tester.getRect(control).left, greaterThanOrEqualTo(prices.right));
+      // Not merely "not overlapping": the rail's soft edge has to finish in
+      // clear space, or a half-shown chip still reads as a cut.
+      expect(
+        tester.getRect(control).left - prices.right,
+        greaterThanOrEqualTo(8),
+      );
     });
   }
 

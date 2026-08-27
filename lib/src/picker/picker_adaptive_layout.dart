@@ -447,11 +447,17 @@ class _SeatLayerPickerAdaptiveLayoutState
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        Expanded(child: prices),
+                        // The rail stops short of the control: its soft edge
+                        // then finishes in clear space rather than against the
+                        // control's own edge, which reads as a cut.
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.only(end: 8),
+                            child: prices,
+                          ),
+                        ),
                         if (chrome.showMapControls)
                           const Padding(
-                            // The legend already keeps its fade width clear,
-                            // so the control needs no second gap on its left.
                             padding: EdgeInsets.only(right: 10),
                             child: SeatLayerPickerViewModeControl(),
                           ),
