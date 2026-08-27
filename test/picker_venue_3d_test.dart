@@ -18,6 +18,22 @@ Map<String, Object?> _seated({String at = 'seat-a-2', int revision = 3}) {
   return snapshot;
 }
 
+/// The same scene, in a venue whose row names repeat their section.
+///
+/// A real chart writes `Stalls D` as the section and `Stalls D C` as the row.
+Map<String, Object?> _seatedInQualifiedRow() {
+  final snapshot = _seated(at: 'seat-a-1');
+  final selection = snapshot['selection']! as Map<String, Object?>;
+  selection['seats'] = (selection['seats']! as List<Object?>)
+      .map((seat) => <String, Object?>{
+            ...seat! as Map<String, Object?>,
+            'sectionLabel': 'Stalls D',
+            'rowLabel': 'Stalls D C',
+          })
+      .toList(growable: false);
+  return snapshot;
+}
+
 void main() {
   testWidgets('the chrome stays away until the scene is up', (tester) async {
     final map = FakePickerMap();
@@ -47,6 +63,23 @@ void main() {
     );
     expect(find.text('Back to venue'), findsOneWidget);
     expect(find.text('Open venue 360°'), findsOneWidget);
+  });
+
+  testWidgets('the caption drops the section the row name repeats',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerVenue3D()));
+    map.emit(_seatedInQualifiedRow());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Stalls D · Row C · Seat 1 · view from your seat'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Row Stalls D C'), findsNothing);
   });
 
   testWidgets('stepping retargets the scene rather than rebuilding it',
