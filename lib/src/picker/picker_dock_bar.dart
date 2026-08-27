@@ -139,7 +139,11 @@ class _DockContents extends StatelessWidget {
         const SizedBox(width: 12),
         DecoratedBox(
           decoration: BoxDecoration(
-            color: pickerColor(section.color) ?? theme.accent,
+            color: pickerSectionColor(
+              section,
+              controller.state.categories,
+              fallback: theme.accent,
+            ),
             shape: BoxShape.circle,
           ),
           child: const SizedBox.square(dimension: 10),

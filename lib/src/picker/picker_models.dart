@@ -190,6 +190,7 @@ class SeatLayerPickerSectionSummary {
     this.zoneLabel,
     this.entrance,
     this.color,
+    this.dominantCategoryKey,
     this.seatsLeft,
     this.priceMin,
     this.priceMax,
@@ -202,6 +203,15 @@ class SeatLayerPickerSectionSummary {
   final String? zoneLabel;
   final String? entrance;
   final String? color;
+
+  /// The category most of this section's free seats belong to.
+  ///
+  /// Prefer it over [color] when the host paints its own dot: the key survives
+  /// a colourblind-safe palette, a category recolour and a legend that has
+  /// already resolved the same colour, where a copied hex does not. Absent on
+  /// a section with nothing free to be dominant.
+  final String? dominantCategoryKey;
+
   final int? seatsLeft;
   final double? priceMin;
   final double? priceMax;
@@ -217,6 +227,7 @@ class SeatLayerPickerSectionSummary {
       zoneLabel: jStr(jGet(value, 'zoneLabel')),
       entrance: jStr(jGet(value, 'entrance')),
       color: jStr(jGet(value, 'color')),
+      dominantCategoryKey: jStr(jGet(value, 'dominantCategoryKey')),
       seatsLeft: jInt(jGet(value, 'seatsLeft')),
       priceMin: jDouble(jGet(value, 'priceMin')),
       priceMax: jDouble(jGet(value, 'priceMax')),

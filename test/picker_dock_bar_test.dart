@@ -21,6 +21,69 @@ void main() {
     expect(find.text('Venue'), findsOneWidget);
   });
 
+  testWidgets('the dot follows the section\'s dominant category, not its paint',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    // The section is authored green while every free seat in it is Standard.
+    // A drawing decision is not a ticket one: the dot has to agree with the
+    // price legend, which paints from the category list.
+    map.emit(
+      pickerSnapshot(
+        sections: <Object?>[
+          <String, Object?>{
+            'id': 'section-a',
+            'label': 'Gallery',
+            'color': '#22A06B',
+            'dominantCategoryKey': 'standard',
+            'seatsLeft': 74,
+          },
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(_dotColor(tester), const Color(0xFF635BFF));
+  });
+
+  testWidgets('a section that names no dominant category keeps its own colour',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    map.emit(pickerSnapshot(sections: pickerSections()));
+    await tester.pumpAndSettle();
+
+    expect(_dotColor(tester), const Color(0xFF635BFF));
+  });
+
+  testWidgets('a dominant category the catalog does not carry falls back',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    map.emit(
+      pickerSnapshot(
+        sections: <Object?>[
+          <String, Object?>{
+            'id': 'section-a',
+            'label': 'Gallery',
+            'color': '#22A06B',
+            'dominantCategoryKey': 'filtered-out',
+            'seatsLeft': 74,
+          },
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(_dotColor(tester), const Color(0xFF22A06B));
+  });
+
   testWidgets('a section with no known count shows no count at all',
       (tester) async {
     final map = FakePickerMap();
@@ -145,3 +208,14 @@ bool _stepEnabled(WidgetTester tester, String tooltip) =>
         )
         .onPressed !=
     null;
+
+/// The colour of the dock's section dot.
+Color? _dotColor(WidgetTester tester) {
+  final decorated = tester.widget<DecoratedBox>(
+    find.descendant(
+      of: find.byType(SeatLayerDockBar),
+      matching: find.byType(DecoratedBox),
+    ).first,
+  );
+  return (decorated.decoration as BoxDecoration).color;
+}

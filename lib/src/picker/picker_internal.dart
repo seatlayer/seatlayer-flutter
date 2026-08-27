@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import 'picker_models.dart';
 import 'seat_layer_picker_scope.dart';
 
 /// [color] at [opacity], without the deprecated `withOpacity`.
@@ -70,4 +71,32 @@ String pickerRowLabel(String? rowLabel, String? sectionLabel) {
   if (!row.toLowerCase().startsWith(section.toLowerCase())) return row;
   final rest = row.substring(section.length).trim();
   return rest.isEmpty ? row : rest;
+}
+
+/// The colour that stands for a section in native chrome.
+///
+/// The section reports both a resolved colour and the key of the category most
+/// of its free seats belong to. The key is preferred: it resolves against the
+/// same category list the legend paints from, so the dot beside a section name
+/// and the chip beside its price are one colour rather than two that agree
+/// only until a palette changes underneath them. A colourblind-safe repaint is
+/// exactly that case.
+///
+/// Falls back to the section's own colour, then to [fallback], for a section
+/// with nothing free to be dominant and for runtimes that report no key.
+Color pickerSectionColor(
+  SeatLayerPickerSectionSummary section,
+  List<SeatLayerPickerCategory> categories, {
+  required Color fallback,
+}) {
+  final key = section.dominantCategoryKey;
+  if (key != null) {
+    for (final category in categories) {
+      if (category.key == key) {
+        final resolved = pickerColor(category.color);
+        if (resolved != null) return resolved;
+      }
+    }
+  }
+  return pickerColor(section.color) ?? fallback;
 }
