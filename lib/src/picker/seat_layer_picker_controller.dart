@@ -12,6 +12,7 @@ import '../seat_layer_error.dart';
 import 'picker_haptics.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
+import 'seat_layer_picker_theme.dart';
 
 /// State and actions for one high-level picker session.
 ///
@@ -404,6 +405,23 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         <String, Object?>{'on': enabled},
         SeatLayerPickerBusyAction.updatingSelection,
       );
+
+  /// Repaint the drawn map for [mode] without reloading the runtime.
+  ///
+  /// Pass null to hand the colours back to the chart. Runtimes that predate the
+  /// command are left unchanged rather than failing the action, so a theme flip
+  /// can never break an otherwise working session.
+  Future<void> setThemeMode(SeatLayerThemeMode? mode) {
+    final bundle = mapController.bundleInfo;
+    if (bundle != null && !bundle.supportsCommand('picker.setThemeMode')) {
+      return Future<void>.value();
+    }
+    return _mutation(
+      'picker.setThemeMode',
+      <String, Object?>{'mode': mode?.raw},
+      SeatLayerPickerBusyAction.changingView,
+    );
+  }
 
   Future<void> setViewMode(SeatLayerViewMode mode) => _mutation(
         'picker.setViewMode',

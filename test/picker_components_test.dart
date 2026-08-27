@@ -85,7 +85,7 @@ void main() {
     expect(
       const SeatLayerMapThemeData.light().toBridgeConfig(),
       <String, Object?>{
-        'background': '#f7f8fa',
+        'background': '#e9edf4',
         'rowLabelColor': '#334155',
         'textColor': '#172033',
         'selectionColor': '#5b4b8a',
@@ -97,7 +97,7 @@ void main() {
     expect(
       const SeatLayerMapThemeData.dark().toBridgeConfig(),
       <String, Object?>{
-        'background': '#090d15',
+        'background': '#0f1522',
         'rowLabelColor': '#d7deea',
         'textColor': '#f4f7fb',
         'selectionColor': '#9b8afb',
@@ -262,7 +262,7 @@ void main() {
     expect(map.calls.single.$1, 'picker.zoomIn');
   });
 
-  testWidgets('compact map controls keep zoom and view mode available',
+  testWidgets('compact map controls drop the zoom pair and keep Map/3D',
       (tester) async {
     final map = _FakeMapController();
     addTearDown(map.dispose);
@@ -273,8 +273,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
 
-    expect(find.byTooltip('Zoom in'), findsOneWidget);
-    expect(find.byTooltip('Zoom out'), findsOneWidget);
+    // Pinch already zooms on a touch screen, so the phone rail spends its
+    // space on the controls a finger cannot replace.
+    expect(find.byTooltip('Zoom in'), findsNothing);
+    expect(find.byTooltip('Zoom out'), findsNothing);
     expect(find.byTooltip('Fit venue'), findsOneWidget);
     expect(find.byTooltip('Open interactive 3D venue'), findsOneWidget);
 
@@ -498,7 +500,7 @@ void main() {
         of: find.byType(SeatLayerPickerMobileTicketPanel),
         matching: find.byWidgetPredicate(
           (widget) =>
-              widget is Material && widget.color == const Color(0xFF141A24),
+              widget is Material && widget.color == const Color(0xFF1A2234),
         ),
       ),
       findsWidgets,

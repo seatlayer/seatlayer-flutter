@@ -11,12 +11,20 @@ import '../seat_layer_view.dart';
 import 'picker_builders.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
+import 'picker_theme_sync.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_components.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
+/// The complete buyer seat picker, ready to place on a route.
+///
+/// Everything below it is composable: each part is a public widget that works
+/// standalone inside a [SeatLayerPickerScope], [options] hides any part, and
+/// [builders] replaces one part while keeping the rest.
 class SeatLayerPicker extends StatelessWidget {
+  /// Creates a picker for [configuration], handing finished holds to
+  /// [onCheckout].
   const SeatLayerPicker({
     super.key,
     required this.configuration,
@@ -24,18 +32,41 @@ class SeatLayerPicker extends StatelessWidget {
     this.controller,
     this.options = const SeatLayerPickerOptions(),
     this.theme,
+    this.themeMode = SeatLayerThemeMode.auto,
     this.builders = const SeatLayerPickerBuilders(),
     this.callbacks = const SeatLayerPickerCallbacks(),
     this.onClose,
   });
 
+  /// What event to load and how.
   final SeatLayerConfiguration configuration;
+
+  /// Receives the hold when the buyer continues to checkout.
   final SeatLayerCheckoutCallback onCheckout;
+
+  /// The session driver, or null to let the picker own one.
   final SeatLayerPickerController? controller;
+
+  /// Behaviour switches for the session and its chrome.
   final SeatLayerPickerOptions options;
+
+  /// Explicit colours; these win over the resolved [themeMode].
   final SeatLayerPickerThemeData? theme;
+
+  /// Which side of the theme to paint.
+  ///
+  /// [SeatLayerThemeMode.auto] follows the device live: a system light/dark
+  /// flip repaints the chrome and the drawn map with no reload and no lost
+  /// selection. The resolved side is also what crosses the bridge.
+  final SeatLayerThemeMode themeMode;
+
+  /// Replacements for individual parts of the default composition.
   final SeatLayerPickerBuilders builders;
+
+  /// Session lifecycle callbacks.
   final SeatLayerPickerCallbacks callbacks;
+
+  /// Called when the buyer dismisses the picker; omit to hide the control.
   final VoidCallback? onClose;
 
   @override
@@ -44,6 +75,7 @@ class SeatLayerPicker extends StatelessWidget {
         controller: controller,
         options: options,
         theme: theme,
+        themeMode: themeMode,
         callbacks: callbacks,
         child: SeatLayerPickerAdaptiveLayout(
           onCheckout: onCheckout,
@@ -53,8 +85,15 @@ class SeatLayerPicker extends StatelessWidget {
       );
 }
 
+/// The drawn seat map: geometry, seats, labels, hit testing and the 3D scene.
+///
+/// This is the only part of the picker that is not native chrome. Place it
+/// inside a [SeatLayerPickerScope] to compose a layout of your own.
 class SeatLayerPickerMap extends StatefulWidget {
+  /// Creates the map surface.
   const SeatLayerPickerMap({super.key, this.backgroundColor});
+
+  /// Fill behind the transparent canvas; defaults to the resolved map ground.
   final Color? backgroundColor;
 
   @override
@@ -105,31 +144,31 @@ class _SeatLayerPickerMapState extends State<SeatLayerPickerMap>
     final picker = SeatLayerPickerScope.controllerOf(context);
     final configuration = SeatLayerPickerScope.configurationOf(context);
     final options = SeatLayerPickerScope.optionsOf(context);
-    final resolved = resolveSeatLayerPickerTheme(
-      context,
-      picker.state,
-      SeatLayerPickerScope.themeOf(context),
-    );
+    final brightness = SeatLayerPickerScope.brightnessOf(context);
+    final resolved = seatLayerPickerThemeOf(context);
     final mapTheme = resolveSeatLayerMapTheme(
       context,
       SeatLayerPickerScope.themeOf(context),
+      brightness: brightness,
     );
-    final bridgeConfig = <String, Object?>{
-      ...options.toBridgeConfig(),
-      if (mapTheme != null) 'mapTheme': mapTheme.toBridgeConfig(),
-    };
     return ColoredBox(
       color: widget.backgroundColor ??
           resolved.mapBackground ??
           resolved.background,
-      child: SeatLayerView(
-        key: ValueKey<int>(picker.reloadGeneration),
-        controller: picker.mapController,
-        configuration: configuration,
-        bridgeProfile: SeatLayerBridgeProfile.picker(
-          config: bridgeConfig,
+      child: PickerThemeModeSync(
+        builder: (context, bootMode) => SeatLayerView(
+          key: ValueKey<int>(picker.reloadGeneration),
+          controller: picker.mapController,
+          configuration: configuration,
+          bridgeProfile: SeatLayerBridgeProfile.picker(
+            config: <String, Object?>{
+              ...options.toBridgeConfig(),
+              'theme': <String, Object?>{'mode': bootMode.raw},
+              if (mapTheme != null) 'mapTheme': mapTheme.toBridgeConfig(),
+            },
+          ),
+          backgroundColor: Colors.transparent,
         ),
-        backgroundColor: Colors.transparent,
       ),
     );
   }
@@ -150,7 +189,7 @@ class SeatLayerPickerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     final event = state.event;
     final options = SeatLayerPickerScope.optionsOf(context);
     return Material(
@@ -280,7 +319,7 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
     if (!state.isTestEvent) return const SizedBox.shrink();
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     return Semantics(
       label: 'Test event. No real inventory will be booked.',
       child: DecoratedBox(
@@ -320,7 +359,7 @@ class SeatLayerPickerPriceRail extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     final categories = state.categories
         .where((category) => !category.notForSale)
         .toList(growable: false);
@@ -402,7 +441,7 @@ class SeatLayerPickerFloorSelector extends StatelessWidget {
     final state = controller.state;
     final floors = state.snapshot?.floors ?? const [];
     if (floors.length < 2) return const SizedBox.shrink();
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: _alpha(theme.surface, .94),
@@ -456,9 +495,10 @@ class SeatLayerPickerMapControls extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (chrome.showOverviewControl && map?.focusedSection != null)
+          if (chrome.overviewControlFor(phone: compact) &&
+              map?.focusedSection != null)
             const SeatLayerPickerOverviewButton(),
-          if (chrome.showZoomControls) ...[
+          if (chrome.zoomControlsFor(phone: compact)) ...[
             const SeatLayerPickerZoomInButton(),
             const SeatLayerPickerZoomOutButton(),
           ],
@@ -470,7 +510,7 @@ class SeatLayerPickerMapControls extends StatelessWidget {
             const SeatLayerPickerViewModeButton(),
           if (state.snapshot?.map.isVenue3D == true)
             const SeatLayerPicker3DNavigationModeButton(),
-          if (chrome.showColorblindControl)
+          if (chrome.colorblindControlFor(phone: compact))
             const SeatLayerPickerColorblindButton(),
         ]
             .map(
@@ -632,8 +672,7 @@ class _ControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = SeatLayerPickerScope.stateOf(context);
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     final reducedMotion = MediaQuery.disableAnimationsOf(context);
     return AnimatedContainer(
       duration:
@@ -1282,7 +1321,7 @@ class SeatLayerPickerMobileTicketPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     final categories = state.categories.where((item) => !item.notForSale);
     final minimum = categories.isEmpty
         ? null
@@ -1542,7 +1581,7 @@ class SeatLayerPickerSelectionTray extends StatelessWidget {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
     final options = SeatLayerPickerScope.optionsOf(context);
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     final lines = state.cartLines;
     final ticketCount = state.snapshot?.ticketCount ?? lines.length;
     final total = state.snapshot?.cartTotal ??
@@ -1692,7 +1731,7 @@ class SeatLayerPickerTicketCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     final category = state.categories
         .where((item) => item.key == line.categoryKey)
         .firstOrNull;
@@ -1959,7 +1998,7 @@ class SeatLayerPickerCheckoutBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     return Material(
       color: theme.surface,
       child: SafeArea(
@@ -2139,8 +2178,7 @@ class _SeatLayerPickerAdaptiveLayoutState
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
-    final explicitTheme = SeatLayerPickerScope.themeOf(context);
-    final resolved = resolveSeatLayerPickerTheme(context, state, explicitTheme);
+    final resolved = seatLayerPickerThemeOf(context);
     final body = LayoutBuilder(
       builder: (context, constraints) {
         final requested = SeatLayerPickerScope.optionsOf(context).layout;
@@ -2592,16 +2630,6 @@ class _PickerPromptTransition extends StatelessWidget {
     );
   }
 }
-
-SeatLayerResolvedPickerTheme _theme(
-  BuildContext context,
-  SeatLayerPickerState state,
-) =>
-    resolveSeatLayerPickerTheme(
-      context,
-      state,
-      SeatLayerPickerScope.themeOf(context),
-    );
 
 String _money(BuildContext context, double amount, String currency) {
   final formatter = SeatLayerPickerScope.optionsOf(context).pricing?.formatter;

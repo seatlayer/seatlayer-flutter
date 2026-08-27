@@ -24,7 +24,7 @@ class SeatLayerPickerAttribution extends StatelessWidget {
     if (state.branding?.attributionRequired != true) {
       return const SizedBox.shrink();
     }
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     return Semantics(
       label: 'Powered by SeatLayer',
       child: Opacity(
@@ -120,7 +120,7 @@ class SeatLayerPickerSectionNavigator extends StatelessWidget {
     if (sections.isEmpty || state.snapshot?.map.rung == 'seats') {
       return const SizedBox.shrink();
     }
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     final active = state.snapshot?.map.focusedSectionId;
     return Material(
       color: theme.surface,
@@ -181,7 +181,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     final active = snapshot.map.accessibilityFilter;
     final onPressed = state.isBusy ? null : () => _ignoreAction(_show(context));
     if (compact) {
-      final theme = _theme(context, state);
+      final theme = seatLayerPickerThemeOf(context);
       return IconButton(
         tooltip: active.isEmpty
             ? 'Accessibility and view filters'
@@ -351,7 +351,7 @@ class _SeatLayerPickerSeatConfirmationState
       return const SizedBox.shrink();
     }
     _tierId ??= seat.tierId ?? seat.tiers?.firstOrNull?.id;
-    final theme = _theme(context, controller.state);
+    final theme = seatLayerPickerThemeOf(context);
     final category = controller.state.categories
         .where((item) => item.key == seat.categoryKey)
         .firstOrNull;
@@ -731,7 +731,7 @@ class SeatLayerPickerSeatViewButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     final controller = SeatLayerPickerScope.controllerOf(context);
     final action = onPressed ??
         (state.snapshot?.capabilities.contains('seatView') == true
@@ -764,7 +764,7 @@ class SeatLayerPickerSeat3DButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     final controller = SeatLayerPickerScope.controllerOf(context);
     final action = onPressed ??
         (state.snapshot?.capabilities.contains('venue3d') == true
@@ -816,7 +816,7 @@ class _SeatIdentityField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = _theme(context, SeatLayerPickerScope.stateOf(context));
+    final theme = seatLayerPickerThemeOf(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(14, 14, 12, 13),
       child: Column(
@@ -869,7 +869,7 @@ class _SeatTierChoice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = _theme(context, SeatLayerPickerScope.stateOf(context));
+    final theme = seatLayerPickerThemeOf(context);
     final guidance = tier.buyerMessage ??
         (tier.restriction == 'companion'
             ? 'Requires the adjacent wheelchair place.'
@@ -951,7 +951,7 @@ class _SeatNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = _theme(context, SeatLayerPickerScope.stateOf(context));
+    final theme = seatLayerPickerThemeOf(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: DecoratedBox(
@@ -1234,7 +1234,7 @@ class SeatLayerPickerActionError extends StatelessWidget {
     if (error == null || controller.state.phase != SeatLayerPickerPhase.ready) {
       return const SizedBox.shrink();
     }
-    final theme = _theme(context, controller.state);
+    final theme = seatLayerPickerThemeOf(context);
     final message = error is SeatLayerError ? error.message : '$error';
     return Material(
       color: theme.error,
@@ -1283,8 +1283,7 @@ class _PromptFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = SeatLayerPickerScope.stateOf(context);
-    final theme = _theme(context, state);
+    final theme = seatLayerPickerThemeOf(context);
     return Align(
       alignment: Alignment.bottomCenter,
       child: ConstrainedBox(
@@ -1351,16 +1350,6 @@ Color? _color(String? raw) {
 
 Color _alpha(Color color, double opacity) =>
     color.withAlpha((opacity.clamp(0, 1) * 255).round());
-
-SeatLayerResolvedPickerTheme _theme(
-  BuildContext context,
-  SeatLayerPickerState state,
-) =>
-    resolveSeatLayerPickerTheme(
-      context,
-      state,
-      SeatLayerPickerScope.themeOf(context),
-    );
 
 extension<T> on List<T> {
   T? get firstOrNull => isEmpty ? null : first;

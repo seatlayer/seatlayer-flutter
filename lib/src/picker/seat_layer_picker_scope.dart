@@ -3,10 +3,18 @@ import 'package:flutter/widgets.dart';
 import '../seat_layer_configuration.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
+import 'picker_strings.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_theme.dart';
 
+/// Shared picker state for a composed layout.
+///
+/// Every SeatLayer chrome widget reads its controller, configuration, options,
+/// theme and resolved brightness from the nearest scope, so a host can place
+/// one component by hand and keep the rest of the drop-in.
 class SeatLayerPickerScope extends StatefulWidget {
+  /// Creates a scope. Supply a [controller] to keep the session across route
+  /// changes; otherwise the scope owns one for its own lifetime.
   const SeatLayerPickerScope({
     super.key,
     required this.configuration,
@@ -14,16 +22,32 @@ class SeatLayerPickerScope extends StatefulWidget {
     this.controller,
     this.options = const SeatLayerPickerOptions(),
     this.theme,
+    this.themeMode = SeatLayerThemeMode.auto,
     this.callbacks = const SeatLayerPickerCallbacks(),
   });
 
+  /// What event to load and how.
   final SeatLayerConfiguration configuration;
+
+  /// The session driver, or null to let the scope own one.
   final SeatLayerPickerController? controller;
+
+  /// Behaviour switches for the session and its chrome.
   final SeatLayerPickerOptions options;
+
+  /// Explicit colours; these win over the resolved mode.
   final SeatLayerPickerThemeData? theme;
+
+  /// Which side of the theme to paint, and what to tell the runtime.
+  final SeatLayerThemeMode themeMode;
+
+  /// Session lifecycle callbacks.
   final SeatLayerPickerCallbacks callbacks;
+
+  /// The composition below this scope.
   final Widget child;
 
+  /// The controller driving the picker above [context].
   static SeatLayerPickerController controllerOf(BuildContext context) {
     final scope =
         context.dependOnInheritedWidgetOfExactType<_SeatLayerPickerInherited>();
@@ -31,9 +55,11 @@ class SeatLayerPickerScope extends StatefulWidget {
     return scope!.controller;
   }
 
+  /// The most recent state of the picker above [context].
   static SeatLayerPickerState stateOf(BuildContext context) =>
       controllerOf(context).value;
 
+  /// What event the picker above [context] loaded.
   static SeatLayerConfiguration configurationOf(BuildContext context) {
     final scope =
         context.dependOnInheritedWidgetOfExactType<_SeatLayerPickerInherited>();
@@ -41,6 +67,7 @@ class SeatLayerPickerScope extends StatefulWidget {
     return scope!.configuration;
   }
 
+  /// Behaviour switches for the picker above [context].
   static SeatLayerPickerOptions optionsOf(BuildContext context) {
     final scope =
         context.dependOnInheritedWidgetOfExactType<_SeatLayerPickerInherited>();
@@ -48,12 +75,34 @@ class SeatLayerPickerScope extends StatefulWidget {
     return scope!.options;
   }
 
+  /// The host's explicit theme, if it supplied one.
   static SeatLayerPickerThemeData? themeOf(BuildContext context) {
     final scope =
         context.dependOnInheritedWidgetOfExactType<_SeatLayerPickerInherited>();
     assert(scope != null, 'No SeatLayerPickerScope found above this context');
     return scope!.theme;
   }
+
+  /// The requested theme mode of the picker above [context].
+  static SeatLayerThemeMode themeModeOf(BuildContext context) {
+    final scope =
+        context.dependOnInheritedWidgetOfExactType<_SeatLayerPickerInherited>();
+    assert(scope != null, 'No SeatLayerPickerScope found above this context');
+    return scope!.themeMode;
+  }
+
+  /// The side [themeModeOf] resolved to, following the device under
+  /// [SeatLayerThemeMode.auto].
+  static Brightness brightnessOf(BuildContext context) {
+    final scope =
+        context.dependOnInheritedWidgetOfExactType<_SeatLayerPickerInherited>();
+    assert(scope != null, 'No SeatLayerPickerScope found above this context');
+    return scope!.brightness;
+  }
+
+  /// Buyer-facing strings for the picker above [context].
+  static SeatLayerPickerStrings stringsOf(BuildContext context) =>
+      optionsOf(context).strings;
 
   @override
   State<SeatLayerPickerScope> createState() => _SeatLayerPickerScopeState();
@@ -62,6 +111,7 @@ class SeatLayerPickerScope extends StatefulWidget {
 class _SeatLayerPickerScopeState extends State<SeatLayerPickerScope> {
   late SeatLayerPickerController _controller;
   late bool _ownsController;
+  Brightness? _announcedBrightness;
 
   @override
   void initState() {
@@ -113,13 +163,32 @@ class _SeatLayerPickerScopeState extends State<SeatLayerPickerScope> {
   }
 
   @override
-  Widget build(BuildContext context) => _SeatLayerPickerInherited(
-        controller: _controller,
-        configuration: widget.configuration,
-        options: widget.options,
-        theme: widget.theme,
-        child: widget.child,
-      );
+  Widget build(BuildContext context) {
+    final brightness =
+        resolveSeatLayerThemeBrightness(context, widget.themeMode);
+    _announceBrightness(brightness);
+    return _SeatLayerPickerInherited(
+      controller: _controller,
+      configuration: widget.configuration,
+      options: widget.options,
+      theme: widget.theme,
+      themeMode: widget.themeMode,
+      brightness: brightness,
+      child: widget.child,
+    );
+  }
+
+  void _announceBrightness(Brightness brightness) {
+    if (_announcedBrightness == brightness) return;
+    _announcedBrightness = brightness;
+    final callback = widget.callbacks.onThemeResolved;
+    if (callback == null) return;
+    // The host is told after the frame that carries the change, so a listener
+    // that calls setState does not rebuild the tree it is being told about.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) callback(brightness);
+    });
+  }
 }
 
 class _SeatLayerPickerInherited
@@ -129,6 +198,8 @@ class _SeatLayerPickerInherited
     required this.configuration,
     required this.options,
     required this.theme,
+    required this.themeMode,
+    required this.brightness,
     required super.child,
   }) : super(notifier: controller);
 
@@ -136,6 +207,8 @@ class _SeatLayerPickerInherited
   final SeatLayerConfiguration configuration;
   final SeatLayerPickerOptions options;
   final SeatLayerPickerThemeData? theme;
+  final SeatLayerThemeMode themeMode;
+  final Brightness brightness;
 
   @override
   bool updateShouldNotify(covariant _SeatLayerPickerInherited oldWidget) =>
@@ -143,5 +216,7 @@ class _SeatLayerPickerInherited
       !configuration.semanticallyEquals(oldWidget.configuration) ||
       options != oldWidget.options ||
       theme != oldWidget.theme ||
+      themeMode != oldWidget.themeMode ||
+      brightness != oldWidget.brightness ||
       super.updateShouldNotify(oldWidget);
 }
