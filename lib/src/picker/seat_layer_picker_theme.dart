@@ -382,6 +382,25 @@ class SeatLayerResolvedPickerTheme {
         );
 }
 
+/// Black or white, whichever is legible on [accent].
+///
+/// A host brands the picker by handing it one colour. Pairing that colour with
+/// a FIXED ink is how a pale brand accent ends up carrying white text: the
+/// button renders, nobody's code fails, and the label is simply unreadable.
+///
+/// The choice is WCAG relative luminance, the same measure the contrast ratio
+/// is defined on, so the winner is the higher of the two ratios. That is never
+/// below 4.58:1 — the two curves cross above the 4.5:1 floor — so an accent of
+/// any colour gets ink that passes AA for normal text.
+Color seatLayerOnAccentFor(Color accent) {
+  final luminance = accent.computeLuminance();
+  final onWhite = 1.05 / (luminance + 0.05);
+  final onBlack = (luminance + 0.05) / 0.05;
+  return onWhite >= onBlack
+      ? const Color(0xFFFFFFFF)
+      : const Color(0xFF000000);
+}
+
 /// Turn [mode] into a real side, reading the device for
 /// [SeatLayerThemeMode.auto].
 ///
@@ -425,14 +444,19 @@ SeatLayerResolvedPickerTheme resolveSeatLayerPickerTheme(
   T? ground<T>(T? Function(SeatLayerPickerThemeData theme) read) =>
       host(read) ?? read(preset);
 
+  // Told apart because their ink is: a preset's accent ships with the ink it
+  // was designed against, while a colour the host or the organizer chose has
+  // no ink of its own and must be given one that can be read on it.
+  final brandAccent = host((theme) => theme.accent) ?? _hex(organizer?.accent);
+
   return SeatLayerResolvedPickerTheme(
     brightness: side,
-    accent: host((theme) => theme.accent) ??
-        _hex(organizer?.accent) ??
-        preset.accent!,
+    accent: brandAccent ?? preset.accent!,
     onAccent: host((theme) => theme.onAccent) ??
         _hex(organizer?.accentInk) ??
-        preset.onAccent!,
+        (brandAccent == null
+            ? preset.onAccent!
+            : seatLayerOnAccentFor(brandAccent)),
     background: ground((theme) => theme.background) ??
         _hex(organizer?.background) ??
         scheme.surface,
