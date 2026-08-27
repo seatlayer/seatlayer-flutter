@@ -123,6 +123,10 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
   ) async {
     final messenger = ScaffoldMessenger.maybeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
+    // The undo bar is the picker's own chrome, so it takes the picker's
+    // palette. Left to Material it inherits the app's, which paints a white
+    // bar across a dark picker.
+    final theme = seatLayerPickerThemeOf(context);
     final callbacks = SeatLayerPickerScope.callbacksOf(context);
     final label = line.item.label;
     try {
@@ -134,10 +138,15 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
     messenger?.hideCurrentSnackBar();
     messenger?.showSnackBar(
       SnackBar(
-        content: Text(strings.seatRemoved),
+        backgroundColor: theme.surface,
+        content: Text(
+          strings.seatRemoved,
+          style: TextStyle(color: theme.text, fontFamily: theme.fontFamily),
+        ),
         duration: SeatLayerPickerMotion.undoWindow,
         action: SnackBarAction(
           label: strings.undo,
+          textColor: theme.accent,
           onPressed: () =>
               ignorePickerAction(controller.selectObjects(<String>[label])),
         ),

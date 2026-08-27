@@ -4,6 +4,7 @@ import 'package:seatlayer/src/picker/picker_best_seats.dart';
 import 'package:seatlayer/src/picker/picker_cart_list.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
@@ -188,6 +189,13 @@ void main() {
 
     expect(map.callsTo('picker.removeCartLine'), hasLength(1));
     expect(find.text('Undo'), findsOneWidget);
+
+    // The undo bar is the picker's chrome, not the app's, so it paints the
+    // picker's surface rather than Material's own inverse.
+    expect(
+      tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor,
+      const SeatLayerPickerThemeData.light().surface,
+    );
 
     // Let the bar finish rising; it is off-screen until it has.
     await tester.pumpAndSettle();
