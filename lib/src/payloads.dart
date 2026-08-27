@@ -636,6 +636,7 @@ class ReadyInfo {
     required this.mode,
     required this.transport,
     this.eventKey,
+    this.timeToReadyMs,
   });
 
   /// The negotiated protocol revision.
@@ -651,13 +652,30 @@ class ReadyInfo {
   /// The event key the chart was built for.
   final String? eventKey;
 
-  factory ReadyInfo.fromJson(Object? payload) => ReadyInfo(
+  /// Milliseconds from the view arming the handshake to `sys.ready`.
+  ///
+  /// The whole cold path: WebView creation, the page fetch over the network,
+  /// bundle parse, handshake, and the chart's first render. It is the number
+  /// that decides whether a buyer thinks the app is broken, and it is not
+  /// visible from either side alone — the web side cannot see the WebView being
+  /// created, and the app cannot see the chart finish rendering.
+  ///
+  /// Nothing is logged with it. Report it to your own analytics if you want it;
+  /// an SDK that prints timings into a host's console is a nuisance, and one
+  /// that ships them somewhere is worse.
+  ///
+  /// `null` for a [ReadyInfo] not produced by a live handshake.
+  final int? timeToReadyMs;
+
+  factory ReadyInfo.fromJson(Object? payload, {int? timeToReadyMs}) =>
+      ReadyInfo(
         protocolRevision:
             jInt(jGet(payload, 'protocol')) ?? seatLayerProtocolMin,
         mode: eventModeOrNull(jGet(payload, 'mode')) ?? EventMode.live,
         transport: transportNameOrNull(jGet(payload, 'transport')) ??
             const TransportNameUnknown(''),
         eventKey: jStr(jGet(jGet(payload, 'chart'), 'event')),
+        timeToReadyMs: timeToReadyMs,
       );
 }
 
