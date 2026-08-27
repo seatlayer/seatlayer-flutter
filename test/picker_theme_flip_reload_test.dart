@@ -58,19 +58,31 @@ void main() {
     );
   });
 
-  testWidgets('a mode-derived map ground is left to the runtime',
+  testWidgets('the map ground is frozen on the side the picker booted on',
       (tester) async {
     useFakeWebViewPlatform();
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
-    await tester.pumpWidget(
-      pickerHarness(map, const SeatLayerPickerMap()),
-    );
+    Widget build(Brightness platform) => pickerHarness(
+          map,
+          const SeatLayerPickerMap(),
+          platformBrightness: platform,
+        );
+
+    await tester.pumpWidget(build(Brightness.light));
+    await tester.pump();
+    final booted = _profile(tester).config['mapTheme'];
+    expect(booted, containsPair('background', '#e9edf4'));
+
+    await tester.pumpWidget(build(Brightness.dark));
     await tester.pump();
 
-    expect(_profile(tester).config, isNot(contains('mapTheme')));
+    // Re-deriving it here would only reach the map by rebooting the picker.
+    // The runtime has no command to change a map ground after boot, so the
+    // ask is recorded rather than paid for with the buyer's selection.
+    expect(_profile(tester).config['mapTheme'], booted);
   });
 
   testWidgets('a map ground the host authored is still handed over',

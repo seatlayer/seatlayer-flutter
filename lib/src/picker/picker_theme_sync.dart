@@ -20,8 +20,12 @@ class PickerBootTheme {
   /// The resolved side the runtime booted on.
   final SeatLayerThemeMode mode;
 
-  /// The map colours the host authored, or null to let the runtime derive them
-  /// from its own mode — which is what keeps a later flip a repaint.
+  /// The map colours handed to the runtime at boot.
+  ///
+  /// Frozen on the side the picker booted on. The runtime pins its map ground
+  /// to whatever the init config supplied, and there is no bridge command to
+  /// change it afterwards — so re-deriving this on a flip would only reach the
+  /// map by rebooting the picker, which is the bug this freeze exists to stop.
   final SeatLayerMapThemeData? mapTheme;
 }
 
@@ -58,24 +62,24 @@ class _PickerThemeModeSyncState extends State<PickerThemeModeSync> {
     final mode = SeatLayerPickerScope.brightnessOf(context) == Brightness.dark
         ? SeatLayerThemeMode.dark
         : SeatLayerThemeMode.light;
-    // Read once per build so the frozen value below is never a stale closure,
-    // and never the mode-derived default — see [seatLayerAuthoredMapTheme].
-    final authoredMap = seatLayerAuthoredMapTheme(
+    // Read once per build so the frozen value below is never a stale closure.
+    final mapTheme = resolveSeatLayerMapTheme(
       context,
       SeatLayerPickerScope.themeOf(context),
+      brightness: SeatLayerPickerScope.brightnessOf(context),
     );
-    _sync(picker, mode, authoredMap);
+    _sync(picker, mode, mapTheme);
     return widget.builder(context, _boot!);
   }
 
   void _sync(
     SeatLayerPickerController picker,
     SeatLayerThemeMode mode,
-    SeatLayerMapThemeData? authoredMap,
+    SeatLayerMapThemeData? mapTheme,
   ) {
     if (_bootGeneration != picker.reloadGeneration) {
       _bootGeneration = picker.reloadGeneration;
-      _boot = PickerBootTheme(mode: mode, mapTheme: authoredMap);
+      _boot = PickerBootTheme(mode: mode, mapTheme: mapTheme);
       _liveMode = mode;
       return;
     }
