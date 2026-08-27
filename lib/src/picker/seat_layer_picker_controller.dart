@@ -42,6 +42,13 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         .onSelectedObjectsUnavailable
         .listen((event) => _callbacks.onSelectedObjectUnavailable?.call(event));
     _holdExpiredSubscription = this.mapController.onHoldExpired.listen((_) {
+      if (_options.haptics) {
+        try {
+          playHaptic(PickerHapticCue.holdExpired);
+        } catch (_) {
+          // A cue is a nicety; there is nothing a host could do about it.
+        }
+      }
       _callbacks.onHoldExpired?.call();
     });
     _generalAdmissionSubscription = this.mapController.onGAClick.listen((area) {

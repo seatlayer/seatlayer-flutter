@@ -67,9 +67,13 @@ SeatLayerPickerSnapshot _snapshot({
 
 final class _FakeMapController extends SeatLayerController {
   final events = StreamController<EventSignal>.broadcast();
+  final expiries = StreamController<void>.broadcast();
 
   @override
   Stream<EventSignal> get onBridgeEvent => events.stream;
+
+  @override
+  Stream<void> get onHoldExpired => expiries.stream;
 
   @override
   Future<Object?> runBridgeCommand(String command, [Object? payload]) async =>
@@ -88,6 +92,7 @@ final class _FakeMapController extends SeatLayerController {
   @override
   void dispose() {
     unawaited(events.close());
+    unawaited(expiries.close());
     super.dispose();
   }
 }
@@ -193,6 +198,28 @@ void main() {
       map.emit(pickerSnapshot(revision: 2, holdOwner: 'picker'), sequence: 2);
       await pumpEventQueue();
       expect(fired, contains(PickerHapticCue.holdCreated));
+    });
+
+    test('a lapsed hold is the heaviest cue, and the only uninvited one',
+        () async {
+      final map = _FakeMapController();
+      final picker = SeatLayerPickerController(mapController: map);
+      final fired = <PickerHapticCue>[];
+      picker.playHaptic = fired.add;
+      picker.attach(
+        configuration: SeatLayerConfiguration(event: 'ev_test'),
+        options: const SeatLayerPickerOptions(),
+      );
+      addTearDown(() {
+        picker.dispose();
+        map.dispose();
+      });
+
+      // Deliberately not derived from the snapshot: a hold going inactive
+      // looks identical whether it lapsed or the buyer let it go on purpose.
+      map.expiries.add(null);
+      await pumpEventQueue();
+      expect(fired, <PickerHapticCue>[PickerHapticCue.holdExpired]);
     });
 
     test('haptics: false stays silent', () async {

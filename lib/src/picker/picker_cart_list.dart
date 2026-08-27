@@ -134,7 +134,7 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
     messenger?.showSnackBar(
       SnackBar(
         content: Text(strings.seatRemoved),
-        duration: const Duration(seconds: 4),
+        duration: SeatLayerPickerMotion.undoWindow,
         action: SnackBarAction(
           label: strings.undo,
           onPressed: () =>

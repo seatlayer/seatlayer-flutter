@@ -708,9 +708,8 @@ class _SeatLayerPickerAdaptiveLayoutState
         _syncMapInteraction(
           controller,
           enabled: buyerPrompt == null && statusOverlay == null,
-          unlockDelay: MediaQuery.disableAnimationsOf(context)
-              ? Duration.zero
-              : const Duration(milliseconds: 190),
+          unlockDelay:
+              SeatLayerPickerMotion.of(context, SeatLayerPickerMotion.exit),
         );
 
         if (wide) {

@@ -43,6 +43,13 @@ abstract final class SeatLayerPickerMotion {
   /// The immersive 3D chrome settling onto the scene.
   static const Duration immersive = Duration(milliseconds: 300);
 
+  /// How long an undo stays offered after a ticket is removed.
+  ///
+  /// Not an animation and deliberately outside [catalog]'s budget: this is how
+  /// long a buyer has to change their mind, and four seconds is the shortest
+  /// span that survives a glance away from the screen.
+  static const Duration undoWindow = Duration(seconds: 4);
+
   /// Every token, for the catalogue test that keeps them inside the budget.
   static const Map<String, Duration> catalog = <String, Duration>{
     'enter': enter,

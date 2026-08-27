@@ -15,8 +15,18 @@ enum PickerHapticCue {
   sectionFocused,
 
   /// Seats are now actually held. The one moment in the flow where something
-  /// irreversible-feeling happened, so it gets the heaviest cue.
+  /// irreversible-feeling happened, so it gets a firm cue.
   holdCreated,
+
+  /// The hold ran out and the seats went back. The heaviest cue in the set,
+  /// and the only one for something the buyer did not do — it has to reach
+  /// them when they are not looking at the screen, which is exactly when a
+  /// hold lapses.
+  ///
+  /// Fired from the runtime's own expiry signal rather than from the snapshot:
+  /// a snapshot only shows a hold going inactive, and a buyer releasing their
+  /// seats deliberately must not feel like a loss.
+  holdExpired,
 }
 
 /// Decides WHICH haptic to fire, without knowing how to fire one.
@@ -111,6 +121,7 @@ void playPickerHaptic(PickerHapticCue cue) {
     PickerHapticCue.selectionAdded => HapticFeedback.selectionClick(),
     PickerHapticCue.sectionFocused => HapticFeedback.lightImpact(),
     PickerHapticCue.holdCreated => HapticFeedback.mediumImpact(),
+    PickerHapticCue.holdExpired => HapticFeedback.heavyImpact(),
   };
   unawaited(played.catchError((Object _) {}));
 }
