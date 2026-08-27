@@ -35,6 +35,11 @@ class SeatLayerController {
 
   Completer<ReadyInfo>? _readyCompleter;
   Timer? _handshakeTimer;
+
+  /// Runs from the view arming the handshake to `sys.ready`, which is the only
+  /// place the WHOLE cold start is visible: the web side cannot see the WebView
+  /// being created and the app cannot see the chart finish rendering.
+  Stopwatch? _handshakeClock;
   bool _hasFinished = false;
   bool _disposed = false;
 
@@ -155,6 +160,7 @@ class SeatLayerController {
     }
     _configuration = configuration;
     _profile = profile;
+    _handshakeClock = Stopwatch()..start();
     _hasFinished = false;
     _readyInfo = null;
     _bundleInfo = null;
@@ -285,7 +291,12 @@ class SeatLayerController {
   void _handleEvent(String name, Object? payload) {
     switch (name) {
       case 'sys.ready':
-        _finishHandshake(ReadyInfo.fromJson(payload));
+        _finishHandshake(
+          ReadyInfo.fromJson(
+            payload,
+            timeToReadyMs: _handshakeClock?.elapsedMilliseconds,
+          ),
+        );
       case 'sys.incompatible':
         final web = ProtocolRange.from(jGetLocal(payload, 'web')) ??
             ProtocolRange.native;
@@ -429,6 +440,7 @@ class SeatLayerController {
     _hasFinished = true;
     _handshakeTimer?.cancel();
     _handshakeTimer = null;
+    _handshakeClock?.stop();
 
     final completer = _readyCompleter;
     _readyCompleter = null;
