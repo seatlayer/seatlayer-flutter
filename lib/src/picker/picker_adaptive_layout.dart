@@ -527,19 +527,9 @@ class _SeatLayerPickerAdaptiveLayoutState
 
     final canPop = !_ownsBackGesture(state);
     final themed = Theme(
-      data: Theme.of(context).copyWith(
-        colorScheme: Theme.of(context).colorScheme.copyWith(
-              primary: resolved.accent,
-              onPrimary: resolved.onAccent,
-              surface: resolved.surface,
-              onSurface: resolved.text,
-            ),
-        textTheme: Theme.of(context).textTheme.apply(
-              fontFamily: resolved.fontFamily,
-              bodyColor: resolved.text,
-              displayColor: resolved.text,
-            ),
-      ),
+      // One function themes every native surface, this composition and any
+      // route it pushes alike; see seatLayerPickerMaterialTheme.
+      data: seatLayerPickerMaterialTheme(context, resolved),
       child: ColoredBox(color: resolved.background, child: body),
     );
     // The rung ladder. Android predictive back and the iOS edge swipe both

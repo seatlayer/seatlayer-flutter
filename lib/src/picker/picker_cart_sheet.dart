@@ -289,10 +289,17 @@ class _PeekRow extends StatelessWidget {
     return prices.reduce((a, b) => a < b ? a : b);
   }
 
-  Future<void> _openBestSeats(BuildContext context) => showModalBottomSheet(
-        context: context,
-        showDragHandle: true,
-        isScrollControlled: true,
+  /// Open the best-available form as a modal, still inside the picker.
+  ///
+  /// The builder of a pushed route runs under the Navigator overlay, which is
+  /// an ancestor of the scope rather than a descendant, so the form's own
+  /// scope lookups would assert. The scope is re-provided into the route, and
+  /// the picker's surface and palette travel with it rather than the host's.
+  Future<void> _openBestSeats(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    final body = SeatLayerPickerScope.inherit(
+      context,
+      Builder(
         builder: (sheetContext) => SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 16),
@@ -301,7 +308,16 @@ class _PeekRow extends StatelessWidget {
             ),
           ),
         ),
-      );
+      ),
+    );
+    return showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      backgroundColor: theme.surface,
+      builder: (_) => body,
+    );
+  }
 }
 
 class _EmptyBody extends StatelessWidget {

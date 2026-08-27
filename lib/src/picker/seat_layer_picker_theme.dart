@@ -460,6 +460,41 @@ SeatLayerResolvedPickerTheme seatLayerPickerThemeOf(BuildContext context) =>
       brightness: SeatLayerPickerScope.brightnessOf(context),
     );
 
+/// The Material theme the picker's own palette implies.
+///
+/// Every native surface the picker pushes — the drop-in composition, and any
+/// modal route opened from it — is themed through this one function, so a
+/// `FilterChip` inside a pushed sheet and a `FilledButton` on the map read as
+/// one interface. Without it a pushed route resolves `Theme.of` against the
+/// HOST application, which is how a dark picker ended up with light Material
+/// chrome inside its own bottom sheets.
+ThemeData seatLayerPickerMaterialTheme(
+  BuildContext context,
+  SeatLayerResolvedPickerTheme resolved,
+) {
+  final ambient = Theme.of(context);
+  return ambient.copyWith(
+    brightness: resolved.brightness,
+    colorScheme: ambient.colorScheme.copyWith(
+      brightness: resolved.brightness,
+      primary: resolved.accent,
+      onPrimary: resolved.onAccent,
+      surface: resolved.surface,
+      onSurface: resolved.text,
+      surfaceContainerLow: resolved.surface,
+      surfaceContainerHigh: resolved.surface,
+      outlineVariant: resolved.divider,
+    ),
+    canvasColor: resolved.surface,
+    dividerColor: resolved.divider,
+    textTheme: ambient.textTheme.apply(
+      fontFamily: resolved.fontFamily,
+      bodyColor: resolved.text,
+      displayColor: resolved.text,
+    ),
+  );
+}
+
 /// The palette for chrome that sits ON the map surface.
 ///
 /// Identical to [seatLayerPickerThemeOf] except while the immersive scene is

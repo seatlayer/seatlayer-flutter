@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 import '../seat_layer_configuration.dart';
 import 'picker_models.dart';
@@ -113,6 +113,41 @@ class SeatLayerPickerScope extends StatefulWidget {
   /// Buyer-facing strings for the picker above [context].
   static SeatLayerPickerStrings stringsOf(BuildContext context) =>
       optionsOf(context).strings;
+
+  /// Re-provide the picker scope, and its theme, below a pushed route.
+  ///
+  /// A `showModalBottomSheet`, `showDialog` or `Navigator.push` builder runs
+  /// under the Navigator's overlay, which is an ANCESTOR of the scope rather
+  /// than a descendant. Anything the picker pushes therefore cannot see the
+  /// controller, options, strings or theme it was opened from — the lookup
+  /// asserts, and `Theme.of` resolves against the host application instead.
+  ///
+  /// Call this with a context that is still inside the scope, and place the
+  /// result in the route's builder:
+  ///
+  /// ```dart
+  /// final body = SeatLayerPickerScope.inherit(context, const MySheet());
+  /// showModalBottomSheet(context: context, builder: (_) => body);
+  /// ```
+  ///
+  /// The controller is re-provided by reference, so the pushed surface stays
+  /// live: a snapshot arriving while the sheet is open rebuilds it. The
+  /// resolved brightness is recomputed rather than captured, so a device
+  /// appearance flip repaints the pushed route with everything else.
+  static Widget inherit(BuildContext context, Widget child) {
+    final scope =
+        context.getInheritedWidgetOfExactType<_SeatLayerPickerInherited>();
+    assert(scope != null, 'No SeatLayerPickerScope found above this context');
+    return _SeatLayerPickerReprovider(
+      controller: scope!.controller,
+      configuration: scope.configuration,
+      options: scope.options,
+      theme: scope.theme,
+      themeMode: scope.themeMode,
+      callbacks: scope.callbacks,
+      child: child,
+    );
+  }
 
   /// Tell the map above [context] how much of it your chrome is covering.
   ///
@@ -258,4 +293,50 @@ class _SeatLayerPickerInherited
       themeMode != oldWidget.themeMode ||
       brightness != oldWidget.brightness ||
       super.updateShouldNotify(oldWidget);
+}
+
+/// The scope, re-provided below a pushed route by [SeatLayerPickerScope.inherit].
+///
+/// Deliberately not a [SeatLayerPickerScope]: that owns a controller lifecycle
+/// and would attach and detach the session every time a sheet opened.
+class _SeatLayerPickerReprovider extends StatelessWidget {
+  const _SeatLayerPickerReprovider({
+    required this.controller,
+    required this.configuration,
+    required this.options,
+    required this.theme,
+    required this.themeMode,
+    required this.callbacks,
+    required this.child,
+  });
+
+  final SeatLayerPickerController controller;
+  final SeatLayerConfiguration configuration;
+  final SeatLayerPickerOptions options;
+  final SeatLayerPickerThemeData? theme;
+  final SeatLayerThemeMode themeMode;
+  final SeatLayerPickerCallbacks callbacks;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => _SeatLayerPickerInherited(
+        controller: controller,
+        configuration: configuration,
+        options: options,
+        theme: theme,
+        themeMode: themeMode,
+        brightness: resolveSeatLayerThemeBrightness(context, themeMode),
+        callbacks: callbacks,
+        // The theme is resolved BELOW the inherited widget, so it reads the
+        // same scope the child does rather than whatever was above the route.
+        child: Builder(
+          builder: (inner) => Theme(
+            data: seatLayerPickerMaterialTheme(
+              inner,
+              seatLayerPickerThemeOf(inner),
+            ),
+            child: child,
+          ),
+        ),
+      );
 }

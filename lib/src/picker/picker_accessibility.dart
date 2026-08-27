@@ -95,16 +95,13 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     var selected = initial;
     var hideLimited = initialHideLimited;
     var colorblind = initialColorblind;
-    final result = await showModalBottomSheet<
-        ({
-          Set<String> types,
-          bool hideLimited,
-          bool colorblind,
-        })>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (context) => StatefulBuilder(
+    final theme = seatLayerPickerThemeOf(context);
+    // The sheet body is built INSIDE the scope and handed to the route, so the
+    // route's builder — which runs under the Navigator overlay, above the
+    // scope — still gets the picker's controller, strings and palette.
+    final body = SeatLayerPickerScope.inherit(
+      context,
+      StatefulBuilder(
         builder: (context, setSheetState) => SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -167,6 +164,18 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
           ),
         ),
       ),
+    );
+    final result = await showModalBottomSheet<
+        ({
+          Set<String> types,
+          bool hideLimited,
+          bool colorblind,
+        })>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: theme.surface,
+      builder: (_) => body,
     );
     if (result == null) return;
     await controller.setAccessibilityFilter(result.types);
