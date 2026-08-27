@@ -6,6 +6,25 @@ import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
+/// Everything about the theme that the runtime's init config is allowed to
+/// carry.
+///
+/// Frozen per reload generation as one value, because the rule is the same for
+/// every field: what goes into the init config is part of the bridge profile,
+/// and a profile that changes is a reload.
+@immutable
+class PickerBootTheme {
+  /// Creates the frozen boot-time theme.
+  const PickerBootTheme({required this.mode, required this.mapTheme});
+
+  /// The resolved side the runtime booted on.
+  final SeatLayerThemeMode mode;
+
+  /// The map colours the host authored, or null to let the runtime derive them
+  /// from its own mode — which is what keeps a later flip a repaint.
+  final SeatLayerMapThemeData? mapTheme;
+}
+
 /// Keeps the runtime's theme mode in step with the side the scope resolved.
 ///
 /// The mode is handed to [builder] frozen per reload generation on purpose: the
@@ -21,16 +40,15 @@ class PickerThemeModeSync extends StatefulWidget {
   /// Creates a synchronizer that builds its child with the boot-time mode.
   const PickerThemeModeSync({super.key, required this.builder});
 
-  /// Builds the subtree with the mode currently folded into the init config.
-  final Widget Function(BuildContext context, SeatLayerThemeMode bootMode)
-      builder;
+  /// Builds the subtree with the theme currently folded into the init config.
+  final Widget Function(BuildContext context, PickerBootTheme boot) builder;
 
   @override
   State<PickerThemeModeSync> createState() => _PickerThemeModeSyncState();
 }
 
 class _PickerThemeModeSyncState extends State<PickerThemeModeSync> {
-  SeatLayerThemeMode? _bootMode;
+  PickerBootTheme? _boot;
   SeatLayerThemeMode? _liveMode;
   int? _bootGeneration;
 
@@ -40,14 +58,24 @@ class _PickerThemeModeSyncState extends State<PickerThemeModeSync> {
     final mode = SeatLayerPickerScope.brightnessOf(context) == Brightness.dark
         ? SeatLayerThemeMode.dark
         : SeatLayerThemeMode.light;
-    _sync(picker, mode);
-    return widget.builder(context, _bootMode!);
+    // Read once per build so the frozen value below is never a stale closure,
+    // and never the mode-derived default — see [seatLayerAuthoredMapTheme].
+    final authoredMap = seatLayerAuthoredMapTheme(
+      context,
+      SeatLayerPickerScope.themeOf(context),
+    );
+    _sync(picker, mode, authoredMap);
+    return widget.builder(context, _boot!);
   }
 
-  void _sync(SeatLayerPickerController picker, SeatLayerThemeMode mode) {
+  void _sync(
+    SeatLayerPickerController picker,
+    SeatLayerThemeMode mode,
+    SeatLayerMapThemeData? authoredMap,
+  ) {
     if (_bootGeneration != picker.reloadGeneration) {
       _bootGeneration = picker.reloadGeneration;
-      _bootMode = mode;
+      _boot = PickerBootTheme(mode: mode, mapTheme: authoredMap);
       _liveMode = mode;
       return;
     }

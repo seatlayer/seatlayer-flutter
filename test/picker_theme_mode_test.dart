@@ -63,8 +63,8 @@ void main() {
     Widget build(Brightness platform) => pickerHarness(
           map,
           PickerThemeModeSync(
-            builder: (context, bootMode) {
-              bootModes.add(bootMode);
+            builder: (context, boot) {
+              bootModes.add(boot.mode);
               return const SizedBox.shrink();
             },
           ),

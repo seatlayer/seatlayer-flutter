@@ -483,12 +483,31 @@ SeatLayerMapThemeData? resolveSeatLayerMapTheme(
   SeatLayerPickerThemeData? explicit, {
   Brightness? brightness,
 }) {
-  final authored = explicit?.mapTheme ??
-      Theme.of(context).extension<SeatLayerPickerThemeData>()?.mapTheme;
+  final authored = seatLayerAuthoredMapTheme(context, explicit);
   if (authored != null) return authored;
   if (brightness == null) return null;
   return SeatLayerPickerThemeData.forBrightness(brightness).mapTheme;
 }
+
+/// The map colours the HOST authored, with no mode-derived fallback.
+///
+/// The difference from [resolveSeatLayerMapTheme] is load-bearing, not
+/// cosmetic. A mode-derived ground follows the device's appearance, and
+/// anything that follows the appearance must never reach the runtime's init
+/// config: the config is part of the bridge profile, and a changed profile is
+/// what a SeatLayerView treats as a reload — which destroys the picker and
+/// takes the buyer's section, selection and 3D scene with it.
+///
+/// Sending nothing when the host authored nothing is also what makes the live
+/// repaint work: the runtime derives the ground from its own theme mode, and
+/// `picker.setThemeMode` re-inks it in place. An authored `map` would override
+/// that and pin the ground to one side forever.
+SeatLayerMapThemeData? seatLayerAuthoredMapTheme(
+  BuildContext context,
+  SeatLayerPickerThemeData? explicit,
+) =>
+    explicit?.mapTheme ??
+    Theme.of(context).extension<SeatLayerPickerThemeData>()?.mapTheme;
 
 Color? _hex(String? value) {
   if (value == null) return null;

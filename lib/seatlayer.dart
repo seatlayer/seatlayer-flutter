@@ -112,6 +112,7 @@ export 'src/picker/seat_layer_picker_theme.dart'
         SeatLayerResolvedPickerTheme,
         SeatLayerThemeMode,
         resolveSeatLayerMapTheme,
+        seatLayerAuthoredMapTheme,
         resolveSeatLayerPickerTheme,
         resolveSeatLayerThemeBrightness,
         seatLayerPickerThemeOf;

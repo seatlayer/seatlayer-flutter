@@ -145,27 +145,26 @@ class _SeatLayerPickerMapState extends State<SeatLayerPickerMap>
     final picker = SeatLayerPickerScope.controllerOf(context);
     final configuration = SeatLayerPickerScope.configurationOf(context);
     final options = SeatLayerPickerScope.optionsOf(context);
-    final brightness = SeatLayerPickerScope.brightnessOf(context);
     final resolved = seatLayerPickerThemeOf(context);
-    final mapTheme = resolveSeatLayerMapTheme(
-      context,
-      SeatLayerPickerScope.themeOf(context),
-      brightness: brightness,
-    );
     return ColoredBox(
       color: widget.backgroundColor ??
           resolved.mapBackground ??
           resolved.background,
       child: PickerThemeModeSync(
-        builder: (context, bootMode) => SeatLayerView(
+        // Everything in this config is part of the bridge profile, and a
+        // changed profile reboots the runtime. Nothing here may follow the
+        // device's appearance: the boot theme is frozen per reload generation
+        // and a flip travels as `picker.setThemeMode`.
+        builder: (context, boot) => SeatLayerView(
           key: ValueKey<int>(picker.reloadGeneration),
           controller: picker.mapController,
           configuration: configuration,
           bridgeProfile: SeatLayerBridgeProfile.picker(
             config: <String, Object?>{
               ...options.toBridgeConfig(),
-              'theme': <String, Object?>{'mode': bootMode.raw},
-              if (mapTheme != null) 'mapTheme': mapTheme.toBridgeConfig(),
+              'theme': <String, Object?>{'mode': boot.mode.raw},
+              if (boot.mapTheme != null)
+                'mapTheme': boot.mapTheme!.toBridgeConfig(),
             },
           ),
           backgroundColor: Colors.transparent,
