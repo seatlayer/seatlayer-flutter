@@ -101,6 +101,9 @@ class _CornerControls extends StatelessWidget {
     final has3D = chrome.showViewModeControl &&
         options.enable3D &&
         state.snapshot?.capabilities.contains('venue3d') == true;
+    // While the immersive scene is up there is no flat map to fit, filter or
+    // pan, and SeatLayerVenue3D owns that corner. Only the way back stays.
+    final onMap = !(state.snapshot?.map.isVenue3D ?? false);
     return Stack(
       children: <Widget>[
         if (has3D)
@@ -109,19 +112,19 @@ class _CornerControls extends StatelessWidget {
             right: inset,
             child: const SeatLayerPickerViewModeControl(),
           ),
-        if (chrome.showAccessibilityControl)
+        if (onMap && chrome.showAccessibilityControl)
           Positioned(
             left: inset,
             bottom: bottom,
             child: const SeatLayerPickerAccessibilityFilters(compact: true),
           ),
-        if (chrome.showZoomToFitControl)
+        if (onMap && chrome.showZoomToFitControl)
           Positioned(
             right: inset,
             bottom: bottom,
             child: const SeatLayerPickerZoomToFitButton(),
           ),
-        if (chrome.zoomControlsFor(phone: true))
+        if (onMap && chrome.zoomControlsFor(phone: true))
           Positioned(
             right: inset,
             bottom: bottom + 42,
@@ -134,14 +137,15 @@ class _CornerControls extends StatelessWidget {
               ],
             ),
           ),
-        if (chrome.overviewControlFor(phone: true) &&
+        if (onMap &&
+            chrome.overviewControlFor(phone: true) &&
             state.snapshot?.map.focusedSection != null)
           Positioned(
             left: inset,
             top: inset,
             child: const SeatLayerPickerOverviewButton(),
           ),
-        if (chrome.colorblindControlFor(phone: true))
+        if (onMap && chrome.colorblindControlFor(phone: true))
           Positioned(
             left: inset,
             bottom: bottom + 52,
@@ -167,7 +171,7 @@ class SeatLayerPickerViewModeControl extends StatelessWidget {
     if (state.snapshot?.capabilities.contains('venue3d') != true) {
       return const SizedBox.shrink();
     }
-    final theme = seatLayerPickerThemeOf(context);
+    final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final is3D = state.snapshot?.map.isVenue3D ?? false;
     return Material(
@@ -215,7 +219,7 @@ class _Segment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = seatLayerPickerThemeOf(context);
+    final theme = seatLayerMapChromeThemeOf(context);
     return Semantics(
       button: true,
       selected: selected,

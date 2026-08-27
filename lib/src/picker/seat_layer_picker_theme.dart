@@ -439,6 +439,19 @@ SeatLayerResolvedPickerTheme seatLayerPickerThemeOf(BuildContext context) =>
       brightness: SeatLayerPickerScope.brightnessOf(context),
     );
 
+/// The palette for chrome that sits ON the map surface.
+///
+/// Identical to [seatLayerPickerThemeOf] except while the immersive scene is
+/// up, when it returns the dark scene palette: white chrome over a dark venue
+/// reads as a mistake, and the header, legend and 3D controls all cap the same
+/// surface.
+SeatLayerResolvedPickerTheme seatLayerMapChromeThemeOf(BuildContext context) {
+  final base = seatLayerPickerThemeOf(context);
+  final venue3D =
+      SeatLayerPickerScope.stateOf(context).snapshot?.map.isVenue3D ?? false;
+  return venue3D ? base.immersive : base;
+}
+
 /// Resolve the colours the drawn map is repainted with.
 ///
 /// A host that set [SeatLayerPickerThemeData.mapTheme] always wins. Otherwise

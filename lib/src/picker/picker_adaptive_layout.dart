@@ -182,7 +182,8 @@ class _SeatLayerPickerAdaptiveLayoutState
           context,
           widget.builders.venue3D,
           SeatLayerVenue3D(
-            topInset: 10,
+            // Clear the legend, which stays on screen in the scene's palette.
+            topInset: chrome.showPriceRail ? 46 : 10,
             bottomInset: 10 +
                 (_dockVisible(state) ? resolved.layout.dockBarHeight : 0.0),
           ),

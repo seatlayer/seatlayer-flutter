@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/picker/picker_accessibility.dart';
+import 'package:seatlayer/src/picker/picker_legend.dart';
+import 'package:seatlayer/src/picker/picker_map_controls.dart';
 import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 
 import 'picker_test_fixture.dart';
@@ -11,6 +14,7 @@ Map<String, Object?> _seated({String at = 'seat-a-2', int revision = 3}) {
   final map = snapshot['map']! as Map<String, Object?>;
   map['buyerView'] = 'venue3d';
   map['view3dTargetSeatId'] = at;
+  map['categoryFilter'] = <Object?>[];
   return snapshot;
 }
 
@@ -140,6 +144,48 @@ void main() {
       find.text('Gallery · Row A · Seat 2 · view from your seat'),
     );
     expect(caption.style!.color, const Color(0xFFEEF1F8));
+  });
+
+  testWidgets('the map-only controls stand down while the scene is up',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerPickerMapControls(compact: true)),
+    );
+    map.emit(_seated());
+    await tester.pumpAndSettle();
+
+    // There is no flat map to fit or filter, and the 3D chrome owns that
+    // corner.
+    expect(find.byType(SeatLayerPickerZoomToFitButton), findsNothing);
+    expect(find.byType(SeatLayerPickerAccessibilityFilters), findsNothing);
+    // The way back out stays.
+    expect(find.byType(SeatLayerPickerViewModeControl), findsOneWidget);
+  });
+
+  testWidgets('the legend over the scene takes the scene palette',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SeatLayerPriceLegend(compact: true),
+        platformBrightness: Brightness.light,
+      ),
+    );
+    map.emit(_seated());
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<Text>(find.text('€25')).style!.color,
+      const Color(0xFFEEF1F8),
+    );
   });
 
   for (final brightness in Brightness.values) {

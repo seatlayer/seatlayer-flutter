@@ -37,7 +37,8 @@ class SeatLayerPickerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
-    final theme = seatLayerPickerThemeOf(context);
+    // The header caps the immersive scene, so it takes its palette too.
+    final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final options = SeatLayerPickerScope.optionsOf(context);
     final logoSize = compact ? theme.layout.headerLogoSize : 36.0;
@@ -93,7 +94,7 @@ class _EventTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
-    final theme = seatLayerPickerThemeOf(context);
+    final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final event = state.event;
     final name = event?.name ?? strings.chooseSeats;
@@ -224,7 +225,7 @@ class _SeatLayerPickerHoldCountdownState
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
     if (state.hold == null) return const SizedBox.shrink();
-    final theme = seatLayerPickerThemeOf(context);
+    final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final remaining = state.holdRemaining(DateTime.now());
     final minutes =

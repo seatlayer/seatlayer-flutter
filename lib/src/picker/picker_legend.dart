@@ -21,7 +21,9 @@ class SeatLayerPriceLegend extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
-    final theme = seatLayerPickerThemeOf(context);
+    // Over the immersive scene this rail is white chrome on a dark venue, so
+    // it takes the scene's palette the way the 3D chrome does.
+    final theme = seatLayerMapChromeThemeOf(context);
     final categories = state.categories
         .where((category) => !category.notForSale)
         .toList(growable: false);
@@ -47,6 +49,7 @@ class SeatLayerPriceLegend extends StatelessWidget {
             color: pickerColor(category.color) ?? theme.accent,
             selected: selected,
             compact: compact,
+            theme: theme,
             semanticsLabel: '${category.label}, '
                 '${pickerMoney(context, category.priceMin, currency)}',
             onPressed: () => ignorePickerAction(
@@ -73,6 +76,7 @@ class _LegendChip extends StatelessWidget {
     required this.selected,
     required this.compact,
     required this.semanticsLabel,
+    required this.theme,
     required this.onPressed,
   });
 
@@ -81,11 +85,11 @@ class _LegendChip extends StatelessWidget {
   final bool selected;
   final bool compact;
   final String semanticsLabel;
+  final SeatLayerResolvedPickerTheme theme;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final theme = seatLayerPickerThemeOf(context);
     return Semantics(
       button: true,
       selected: selected,
