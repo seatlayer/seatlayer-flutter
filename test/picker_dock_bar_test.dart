@@ -6,6 +6,26 @@ import 'package:seatlayer/src/picker/picker_layout.dart';
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
 
+/// The fixture venue with [count] seats picked in `Gallery`.
+Map<String, Object?> _galleryPicks(int count, {int revision = 2}) {
+  final snapshot =
+      pickerSnapshot(sections: pickerSections(), revision: revision);
+  final selection = snapshot['selection']! as Map<String, Object?>;
+  final seat = Map<String, Object?>.from(
+    (selection['seats']! as List<Object?>).single! as Map<String, Object?>,
+  );
+  selection['seats'] = List<Object?>.generate(
+    count,
+    (index) => <String, Object?>{
+      ...seat,
+      'id': 'seat-a-${index + 1}',
+      'label': 'A-${index + 1}',
+      'seatNumber': '${index + 1}',
+    },
+  );
+  return snapshot;
+}
+
 void main() {
   testWidgets('the dock names the focused section and its remaining seats',
       (tester) async {
@@ -17,7 +37,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Gallery'), findsOneWidget);
-    expect(find.text('74 left'), findsOneWidget);
+    // 74 free, less the one seat the fixture's buyer has already picked there.
+    expect(find.text('73 left'), findsOneWidget);
     expect(find.text('Venue'), findsOneWidget);
   });
 
@@ -196,6 +217,62 @@ void main() {
       await expectGolden(tester, 'dock_bar_${brightness.name}');
     });
   }
+
+  testWidgets("the count comes down by the buyer's own picks", (tester) async {
+    // The runtime counts a seat as available until it is held, so a section
+    // the buyer has just taken two seats out of still reports its whole free
+    // count. The dock said `74 left` with two of the seventy-four already in
+    // the buyer's cart.
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    map.emit(pickerSnapshot(sections: pickerSections()));
+    await tester.pumpAndSettle();
+
+    // One seat, in `Gallery`, which is section-a's label in the fixture.
+    expect(find.text('73 left'), findsOneWidget);
+    expect(find.text('74 left'), findsNothing);
+
+    map.emit(_galleryPicks(3, revision: 4));
+    await tester.pumpAndSettle();
+    expect(find.text('71 left'), findsOneWidget);
+  });
+
+  testWidgets('a seat in another section leaves this one alone',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    final snapshot = pickerSnapshot(sections: pickerSections());
+    for (final seat in (snapshot['selection']!
+        as Map<String, Object?>)['seats']! as List<Object?>) {
+      (seat! as Map<String, Object?>)['sectionLabel'] = 'Terrace';
+    }
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    map.emit(snapshot);
+    await tester.pumpAndSettle();
+
+    expect(find.text('74 left'), findsOneWidget);
+  });
+
+  testWidgets('a section that reports no count still reports none',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+    map.emit(
+      pickerSnapshot(sections: pickerSections(), focusedSectionId: 'section-c'),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('left'), findsNothing);
+    expect(find.text('Orchestra'), findsOneWidget);
+  });
 }
 
 bool _stepEnabled(WidgetTester tester, String tooltip) =>
@@ -212,10 +289,12 @@ bool _stepEnabled(WidgetTester tester, String tooltip) =>
 /// The colour of the dock's section dot.
 Color? _dotColor(WidgetTester tester) {
   final decorated = tester.widget<DecoratedBox>(
-    find.descendant(
-      of: find.byType(SeatLayerDockBar),
-      matching: find.byType(DecoratedBox),
-    ).first,
+    find
+        .descendant(
+          of: find.byType(SeatLayerDockBar),
+          matching: find.byType(DecoratedBox),
+        )
+        .first,
   );
   return (decorated.decoration as BoxDecoration).color;
 }

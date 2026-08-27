@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../payloads.dart';
 import 'picker_internal.dart';
 import 'picker_styles.dart';
 import 'picker_models.dart';
@@ -132,7 +133,7 @@ class _DockContents extends StatelessWidget {
         index >= 0 && index < sections.length - 1 ? sections[index + 1] : null;
     final busy = controller.state.isBusy;
     final name = section.displayLabel ?? section.label;
-    final count = section.seatsLeft;
+    final count = _seatsLeftForBuyer(section, controller.state.selection);
 
     return Row(
       children: [
@@ -219,6 +220,36 @@ class _DockContents extends StatelessWidget {
     ignorePickerAction(controller.focusSection(target.id));
     onSectionChanged?.call(target.id);
   }
+}
+
+/// How many seats are left in [section] for the buyer looking at it.
+///
+/// The runtime counts a seat as available until it is held, so a section the
+/// buyer has just taken two seats out of still reported its whole free count —
+/// the dock said `74 left` while two of those seventy-four were in the buyer's
+/// own cart. Their own picks come off, so the number moves as they choose.
+///
+/// Only seats that name this section can be attributed to it; a selection with
+/// no section on it leaves the count alone rather than guessing.
+int? _seatsLeftForBuyer(
+  SeatLayerPickerSectionSummary section,
+  List<SelectedSeat> selection,
+) {
+  final left = section.seatsLeft;
+  if (left == null || selection.isEmpty) return left;
+  final names = <String>{
+    section.label.trim().toLowerCase(),
+    if (section.displayLabel != null)
+      section.displayLabel!.trim().toLowerCase(),
+  }..removeWhere((name) => name.isEmpty);
+  if (names.isEmpty) return left;
+  var mine = 0;
+  for (final seat in selection) {
+    final where = seat.sectionLabel?.trim().toLowerCase();
+    if (where != null && names.contains(where)) mine += 1;
+  }
+  final remaining = left - mine;
+  return remaining < 0 ? 0 : remaining;
 }
 
 class _DockSeparator extends StatelessWidget {
