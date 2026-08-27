@@ -198,3 +198,91 @@ Map<String, Object?> checkoutHandoff() => <String, Object?>{
           as Map<String, Object?>)['items'],
       'total': 25.0,
     };
+
+/// A cart holding [count] consecutive seats in one row.
+Map<String, Object?> snapshotWithTicketCount(int count, {int revision = 2}) {
+  final snapshot = pickerSnapshot(revision: revision);
+  final cart = snapshot['cart']! as Map<String, Object?>;
+  final selection = snapshot['selection']! as Map<String, Object?>;
+  final originalLine = Map<String, Object?>.from(
+    (cart['items']! as List<Object?>).single! as Map<String, Object?>,
+  );
+  final originalSeat = Map<String, Object?>.from(
+    (selection['seats']! as List<Object?>).single! as Map<String, Object?>,
+  );
+  cart['items'] = List<Object?>.generate(count, (index) {
+    final number = index + 1;
+    return <String, Object?>{
+      ...originalLine,
+      'lineKey': 'seat:A-$number:adult',
+      'label': 'A-$number',
+      'displayLabel': 'Row A, Seat $number',
+      'objectId': 'seat-a-$number',
+    };
+  });
+  cart['quantity'] = count;
+  cart['total'] = count * 25.0;
+  selection['seats'] = List<Object?>.generate(count, (index) {
+    final number = index + 1;
+    return <String, Object?>{
+      ...originalSeat,
+      'id': 'seat-a-$number',
+      'label': 'A-$number',
+      'displayLabel': 'Row A, Seat $number',
+      'seatNumber': '$number',
+    };
+  });
+  selection['validity'] = <String, Object?>{
+    'isValid': true,
+    'count': count,
+    'required': 0,
+    'remaining': 0,
+  };
+  return snapshot;
+}
+
+/// A venue with zones and several categories, focused on one section.
+Map<String, Object?> bestAvailableSnapshot({
+  List<Object?> categoryFilter = const <Object?>['standard'],
+}) {
+  final snapshot = pickerSnapshot(withSelection: false);
+  final catalog = snapshot['catalog']! as Map<String, Object?>;
+  catalog['sections'] = <Object?>[
+    <String, Object?>{
+      'id': 'gallery-a',
+      'label': 'Gallery A',
+      'zoneId': 'gallery',
+    },
+  ];
+  catalog['bestAvailableZones'] = <Object?>[
+    <String, Object?>{'id': 'gallery', 'label': 'Gallery'},
+    <String, Object?>{'id': 'orchestra', 'label': 'Orchestra'},
+  ];
+  catalog['categories'] = <Object?>[
+    ...catalog['categories']! as List<Object?>,
+    <String, Object?>{
+      'key': 'premium',
+      'label': 'Premium',
+      'color': '#D97706',
+      'priceMin': 50.0,
+      'priceMax': 50.0,
+      'available': 12,
+      'notForSale': false,
+      'tiers': <Object?>[],
+    },
+    <String, Object?>{
+      'key': 'internal',
+      'label': 'Internal',
+      'color': '#64748B',
+      'priceMin': 0.0,
+      'priceMax': 0.0,
+      'available': 5,
+      'notForSale': true,
+      'tiers': <Object?>[],
+    },
+  ];
+  final map = snapshot['map']! as Map<String, Object?>;
+  map['focusedSectionId'] = 'gallery-a';
+  map['categoryFilter'] = categoryFilter;
+  return snapshot;
+}
