@@ -86,6 +86,7 @@ class SeatLayerPickerOptions {
     this.chrome = const SeatLayerPickerChromeOptions(),
     this.languages = const <Locale>[],
     this.pricing,
+    this.haptics = true,
   }) : assert(max3DSeats == null || max3DSeats > 0);
 
   final SeatLayerPickerLayoutMode layout;
@@ -116,6 +117,18 @@ class SeatLayerPickerOptions {
   final SeatLayerPickerChromeOptions chrome;
   final List<Locale> languages;
   final SeatLayerPickerPricing? pricing;
+
+  /// Fire haptic feedback on the moments worth feeling: a seat joining the
+  /// selection, the map moving into a section, and seats actually being held.
+  ///
+  /// Native only, and only on a device with a motor — it is silent on desktop,
+  /// on web, and wherever the platform has haptics turned off. Turn it off if
+  /// your app has its own feedback vocabulary and two would collide.
+  ///
+  /// Deliberately absent from [toBridgeConfig]: the runtime does not vibrate
+  /// anything, and telling it about a purely native preference would only
+  /// invite a second implementation of the same feeling.
+  final bool haptics;
 
   Map<String, Object?> toBridgeConfig() => <String, Object?>{
         if (holdTtl != null) 'holdTtlMs': holdTtl!.inMilliseconds,
