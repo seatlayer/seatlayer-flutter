@@ -22,6 +22,7 @@ class SeatLayerPickerMapControls extends StatelessWidget {
     this.compact = false,
     this.edgeInset = 10,
     this.bottomInset = 0,
+    this.includeViewModeControl = true,
   });
 
   /// Whether to render the phone's corner placement.
@@ -32,6 +33,14 @@ class SeatLayerPickerMapControls extends StatelessWidget {
 
   /// Extra space to leave at the bottom, so controls ride above the dock bar.
   final double bottomInset;
+
+  /// Whether the Map/3D control belongs to this stack.
+  ///
+  /// The turnkey phone layout draws the price legend and the Map/3D control as
+  /// one top rail, so the two cannot land on top of each other whatever the
+  /// translated labels measure. It therefore takes the control out of here and
+  /// places it itself. A host composing its own layout keeps the default.
+  final bool includeViewModeControl;
 
   @override
   Widget build(BuildContext context) =>
@@ -98,7 +107,8 @@ class _CornerControls extends StatelessWidget {
     final chrome = options.chrome;
     final inset = owner.edgeInset;
     final bottom = inset + owner.bottomInset;
-    final has3D = chrome.showViewModeControl &&
+    final has3D = owner.includeViewModeControl &&
+        chrome.showViewModeControl &&
         options.enable3D &&
         state.snapshot?.capabilities.contains('venue3d') == true;
     // While the immersive scene is up there is no flat map to fit, filter or

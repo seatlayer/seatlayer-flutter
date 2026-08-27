@@ -198,6 +198,8 @@ class _SeatLayerPickerAdaptiveLayoutState
                   bottomInset: !wide && _dockVisible(state)
                       ? resolved.layout.dockBarHeight
                       : 0,
+                  // On a phone the top rail below owns the Map/3D control.
+                  includeViewModeControl: wide,
                 )
               : const SizedBox.shrink(),
         );
@@ -428,10 +430,32 @@ class _SeatLayerPickerAdaptiveLayoutState
               child: Stack(
                 children: [
                   Positioned.fill(child: mapSurface),
-                  // The legend is pushed off the venue, in the corner the
-                  // map's own controls leave free.
-                  Positioned(top: 8, left: 0, right: 56, child: prices),
-                  Positioned(top: 44, left: 10, child: testBadge),
+                  // One top rail: the prices scroll, the Map/3D control keeps
+                  // the width its own labels need, and neither is drawn over
+                  // the other in any language.
+                  Positioned(
+                    top: 8,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(child: prices),
+                        if (chrome.showMapControls)
+                          const Padding(
+                            padding: EdgeInsets.only(left: 8, right: 10),
+                            child: SeatLayerPickerViewModeControl(),
+                          ),
+                      ],
+                    ),
+                  ),
+                  // The immersive scene puts its own way back in this
+                  // corner; the badge steps down rather than under it.
+                  Positioned(
+                    top: (state.snapshot?.map.isVenue3D ?? false) ? 84 : 44,
+                    left: 10,
+                    child: testBadge,
+                  ),
                   if (chrome.showFloorSelector)
                     Positioned(
                       left: 10,
