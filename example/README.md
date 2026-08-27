@@ -1,35 +1,52 @@
 # SeatLayer Flutter seat map example
 
-A runnable reserved-seating chart and seat-picker example for the official
+A runnable reserved-seating seat picker for the official
 [`seatlayer`](https://pub.dev/packages/seatlayer) Flutter package on iOS and
 Android.
 
-The default screen uses the package's offline fixture. It exercises the real
-SeatLayer bridge, renderer, selection, hold, and best-available commands without
-requiring a live event key.
+## Run the picker
 
-## Run
+The default screen is the live picker, which is the product. It needs a test
+event key; pass no key and the app says so rather than quietly showing
+something else.
 
 ```bash
 flutter pub get
-flutter run
+flutter run \
+  --dart-define=SEATLAYER_EVENT=ev_your_test_event \
+  --dart-define=SEATLAYER_PUBLIC_KEY=pk_test_your_public_key
 ```
+
+Optional defines:
+
+| Define | Effect |
+| --- | --- |
+| `SEATLAYER_API_BASE` | Points the session at another API origin. |
+| `SEATLAYER_THEME_MODE` | `auto` (default), `light` or `dark`. |
+| `SEATLAYER_RUNTIME_URL` | An immutable HTTPS runtime document, for runtime development. Omit it to use the package's own pin. |
 
 Choose an iOS or Android simulator or physical device. The seat map must remain
 inside its fixed-height or full-screen container so it can own pan and pinch
 gestures.
 
-## Connect a SeatLayer test event
+## The other two entry points
 
-In `lib/main.dart`:
+Neither is the default; both are chosen explicitly with `-t`.
 
-1. replace `flutter-demo-show` with your test event key;
-2. remove the custom `assetPath` so the package loads its normal integration
-   page; and
-3. keep booking and secret-key calls in your backend.
+```bash
+# The bridge, against the packaged offline fixture — no event key needed.
+flutter run -t lib/offline_fixture_demo.dart
 
-Read the [Flutter seat-map guide](https://docs.seatlayer.io/buyer-sdk/flutter/)
-and [holds and checkout guide](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
+# The native chrome over a canned snapshot, for design review. The map is a
+# placeholder: this is not a working picker.
+flutter run -t lib/chrome_preview.dart
+```
+
+## Connect your own event
+
+Keep booking and secret-key calls in your backend. Read the
+[Flutter seat-map guide](https://docs.seatlayer.io/buyer-sdk/flutter/) and the
+[holds and checkout guide](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
 before connecting production checkout. You can also explore the
 [SeatLayer reserved-seating platform](https://seatlayer.io/) and the
 [browser buyer demo](https://app.seatlayer.io/demo/play/grand-theatre); the
