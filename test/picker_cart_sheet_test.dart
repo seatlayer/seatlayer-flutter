@@ -166,7 +166,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('1–6'), findsOneWidget);
-    expect(find.text('6 ×'), findsOneWidget);
+    expect(find.text('6 × €25'), findsOneWidget);
     expect(find.text('€150'), findsOneWidget);
   });
 

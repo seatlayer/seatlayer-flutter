@@ -36,6 +36,8 @@ SeatLayerTicketLine _line({
     );
 
 void main() {
+  _seatOrderTests();
+
   group('runSeatsLabel', () {
     test('one seat reads as itself', () {
       expect(runSeatsLabel(<String>['3']), '3');
@@ -145,5 +147,35 @@ void main() {
     test('general admission does not', () {
       expect(ticketIsGroupable(item(type: ObjectType.ga), null), isFalse);
     });
+  });
+}
+
+void _seatOrderTests() {
+  test('an opened run answers in the order its label reads', () {
+    final runs = groupTicketLines(<SeatLayerTicketLine>[
+      _line(seatLabel: '6'),
+      _line(seatLabel: '5'),
+      _line(seatLabel: '7'),
+    ]);
+    expect(runs.single.seatsLabel, '5–7');
+    expect(
+      runs.single.membersInSeatOrder
+          .map((member) => member.seatLabel)
+          .toList(),
+      <String>['5', '6', '7'],
+    );
+  });
+
+  test('unnumbered seats keep the order the buyer picked them in', () {
+    final runs = groupTicketLines(<SeatLayerTicketLine>[
+      _line(seatLabel: 'B'),
+      _line(seatLabel: 'A'),
+    ]);
+    expect(
+      runs.single.membersInSeatOrder
+          .map((member) => member.seatLabel)
+          .toList(),
+      <String>['B', 'A'],
+    );
   });
 }

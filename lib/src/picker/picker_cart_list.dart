@@ -222,7 +222,7 @@ class _RunBlock extends StatelessWidget {
             index: arrivalIndex,
             child: _DenseLine(
               line: run.members.first,
-              run: run,
+              run: run.isGroup ? run : null,
               open: open,
               removable: removable,
               onToggle: run.isGroup ? onToggle : null,
@@ -230,7 +230,7 @@ class _RunBlock extends StatelessWidget {
             ),
           ),
           if (run.isGroup && open)
-            for (final member in run.members)
+            for (final member in run.membersInSeatOrder)
               _DenseLine(
                 line: member,
                 run: null,
@@ -334,7 +334,7 @@ class _DenseLine extends StatelessWidget {
                 ),
                 if (size > 1) ...[
                   Text(
-                    '$size ×',
+                    '$size × ${line.amountText}',
                     style: TextStyle(
                       color: theme.mutedText,
                       fontSize: 12,
