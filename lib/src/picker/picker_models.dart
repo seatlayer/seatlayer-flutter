@@ -261,6 +261,10 @@ class SeatLayerCheckoutLineItem {
     this.displayLabel,
     this.displayType,
     this.tierId,
+    this.seatId,
+    this.sectionLabel,
+    this.rowLabel,
+    this.seatNumber,
   });
 
   final String lineKey;
@@ -274,6 +278,35 @@ class SeatLayerCheckoutLineItem {
   final double unitPrice;
   final String currency;
   final int quantity;
+
+  /// The renderer's own id for the seat this line stands for.
+  ///
+  /// Present whenever the runtime knew which seat the line is, which is the
+  /// reliable way to join a line back to the selection: an inventory label is
+  /// the primary key but it is not always what the line arrived under.
+  final String? seatId;
+
+  /// Where the seat is — `Stalls D`. Absent for a general-admission unit,
+  /// which has no seat.
+  final String? sectionLabel;
+
+  /// The seat's row — `C`. May be authored fully qualified (`Stalls D C`);
+  /// print it through `pickerRowLabel` rather than raw.
+  final String? rowLabel;
+
+  /// The seat's number in its row — `6`.
+  final String? seatNumber;
+
+  /// Whether the runtime named this line's seat on the line itself.
+  ///
+  /// Best Available clears the renderer selection before it holds, and a
+  /// resumed hold was never in one, so joining back to `selection` finds
+  /// nothing for exactly the two paths where the buyer did not tap the seat.
+  /// The address travels on the line for those.
+  bool get hasSeatIdentity =>
+      (sectionLabel?.trim().isNotEmpty ?? false) ||
+      (rowLabel?.trim().isNotEmpty ?? false) ||
+      (seatNumber?.trim().isNotEmpty ?? false);
 
   String get buyerFacingLabel => displayLabel ?? label;
   double get total => unitPrice * quantity;
@@ -296,6 +329,10 @@ class SeatLayerCheckoutLineItem {
       unitPrice: jDouble(jGet(value, 'unitPrice')) ?? 0,
       currency: jStr(jGet(value, 'currency')) ?? 'USD',
       quantity: jInt(jGet(value, 'quantity')) ?? 1,
+      seatId: jStr(jGet(value, 'seatId')),
+      sectionLabel: jStr(jGet(value, 'sectionLabel')),
+      rowLabel: jStr(jGet(value, 'rowLabel')),
+      seatNumber: jStr(jGet(value, 'seatNumber')),
     );
   }
 

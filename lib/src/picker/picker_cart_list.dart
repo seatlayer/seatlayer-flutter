@@ -181,16 +181,19 @@ SeatLayerTicketLine _resolveLine(
       break;
     }
   }
+  // The line's own address first, the selected seat's second. A line the buyer
+  // never tapped — a Best Available result, a resumed hold — is in no renderer
+  // selection at all, so the join finds nothing and only the line knows where
+  // the seat is.
+  final section = _first(item.sectionLabel, seat?.sectionLabel);
+  final row = _first(item.rowLabel, seat?.rowLabel);
+  final number = _first(item.seatNumber, seat?.seatNumber);
   return SeatLayerTicketLine(
     item: item,
     seat: seat,
-    section: seat?.sectionLabel?.trim().isNotEmpty ?? false
-        ? seat!.sectionLabel!.trim()
-        : category?.label ?? item.buyerFacingLabel,
-    rowLabel: pickerRowLabel(seat?.rowLabel, seat?.sectionLabel),
-    seatLabel: seat?.seatNumber?.trim().isNotEmpty ?? false
-        ? seat!.seatNumber!.trim()
-        : item.buyerFacingLabel,
+    section: section ?? category?.label ?? item.buyerFacingLabel,
+    rowLabel: pickerRowLabel(row, section),
+    seatLabel: number ?? item.buyerFacingLabel,
     categoryLabel: category?.label ?? item.categoryKey,
     categoryColor: pickerColor(category?.color) ?? theme.accent,
     amountText: pickerMoney(context, item.total, item.currency),
@@ -433,6 +436,12 @@ SelectedSeat? _seatBehind(
   List<SelectedSeat> selection,
   SeatLayerCheckoutLineItem item,
 ) {
+  final seatId = item.seatId;
+  if (seatId != null) {
+    for (final candidate in selection) {
+      if (candidate.id == seatId) return candidate;
+    }
+  }
   for (final candidate in selection) {
     if (candidate.label == item.label) return candidate;
   }
@@ -445,4 +454,12 @@ SelectedSeat? _seatBehind(
     if (candidate.id == item.objectId) return candidate;
   }
   return null;
+}
+
+/// [primary] if it carries something to print, else [fallback].
+String? _first(String? primary, String? fallback) {
+  final first = primary?.trim() ?? '';
+  if (first.isNotEmpty) return first;
+  final second = fallback?.trim() ?? '';
+  return second.isEmpty ? null : second;
 }

@@ -287,3 +287,45 @@ Map<String, Object?> bestAvailableSnapshot({
   map['categoryFilter'] = categoryFilter;
   return snapshot;
 }
+
+/// A Best Available result: seats held, and NO renderer selection behind them.
+///
+/// This is the shape that made the address disappear. Best Available clears
+/// the selection before it holds and a resumed hold was never in one, so a
+/// host joining cart lines back to `selection` finds nothing for exactly the
+/// two paths where the buyer did not tap the seat. Each line carries its own
+/// section, row and seat number instead.
+Map<String, Object?> bestAvailableHeldSnapshot({
+  int count = 2,
+  int firstSeat = 9,
+  String sectionLabel = 'Choir',
+  String rowLabel = 'A',
+  bool identityOnLines = true,
+}) {
+  final snapshot = pickerSnapshot(holdOwner: 'picker', withSelection: false);
+  final cart = snapshot['cart']! as Map<String, Object?>;
+  cart['items'] = List<Object?>.generate(count, (index) {
+    final number = firstSeat + index;
+    return <String, Object?>{
+      'lineKey': 'seat:$rowLabel-$number:adult',
+      'label': '$rowLabel-$number',
+      'objectId': 'seat-$rowLabel-$number',
+      'objectType': 'seat',
+      'categoryKey': 'standard',
+      'tierId': 'adult',
+      'unitPrice': 25.0,
+      'currency': 'EUR',
+      'quantity': 1,
+      if (identityOnLines) ...<String, Object?>{
+        'seatId': 'seat-$rowLabel-$number',
+        'sectionLabel': sectionLabel,
+        // Charts are commonly authored with fully qualified row names.
+        'rowLabel': '$sectionLabel $rowLabel',
+        'seatNumber': '$number',
+      },
+    };
+  });
+  cart['quantity'] = count;
+  cart['total'] = count * 25.0;
+  return snapshot;
+}
