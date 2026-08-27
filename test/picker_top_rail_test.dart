@@ -4,6 +4,8 @@ import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_legend.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
+import 'package:seatlayer/src/picker/picker_status_views.dart';
+import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
@@ -94,6 +96,29 @@ void main() {
         matching: find.byType(ShaderMask),
       ),
       findsNothing,
+    );
+  });
+
+  testWidgets('the test badge stacks below the way back out of 3D',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout()));
+    final snapshot = _snapshotWithCategories(8);
+    (snapshot['map']! as Map<String, Object?>)['buyerView'] = 'venue3d';
+    map.emit(snapshot);
+    await tester.pumpAndSettle();
+
+    final badge = tester.getRect(
+      find.byType(SeatLayerPickerTestModeIndicator),
+    );
+    final back = tester.getRect(find.text('Back to venue'));
+    expect(badge.top, greaterThanOrEqualTo(back.bottom));
+    expect(
+      badge.top,
+      lessThan(back.bottom + SeatLayerVenue3D.backPillHeight),
     );
   });
 

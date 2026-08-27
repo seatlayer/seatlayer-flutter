@@ -33,6 +33,12 @@ import 'picker_section_navigator.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
+/// Where the phone's map chrome starts, below the top rail of prices.
+const double _mapChromeTop = 44;
+
+/// The breathing room between two stacked pieces of map chrome.
+const double _badgeGap = 8;
+
 /// The complete buyer seat picker, ready to place on a route.
 ///
 /// Everything below it is composable: each part is a public widget that works
@@ -178,12 +184,13 @@ class _SeatLayerPickerAdaptiveLayoutState
             actionError: null,
           ),
         );
+        final venue3DTopInset = chrome.showPriceRail ? 46.0 : 10.0;
         final venue3D = _part(
           context,
           widget.builders.venue3D,
           SeatLayerVenue3D(
             // Clear the legend, which stays on screen in the scene's palette.
-            topInset: chrome.showPriceRail ? 46 : 10,
+            topInset: venue3DTopInset,
             bottomInset: 10 +
                 (_dockVisible(state) ? resolved.layout.dockBarHeight : 0.0),
           ),
@@ -451,10 +458,15 @@ class _SeatLayerPickerAdaptiveLayoutState
                       ],
                     ),
                   ),
-                  // The immersive scene puts its own way back in this
-                  // corner; the badge steps down rather than under it.
+                  // The immersive scene puts `‹ Back to venue` in this
+                  // corner; the badge steps below that pill rather than under
+                  // it, measured from the same inset the pill is given.
                   Positioned(
-                    top: (state.snapshot?.map.isVenue3D ?? false) ? 84 : 44,
+                    top: (state.snapshot?.map.isVenue3D ?? false)
+                        ? venue3DTopInset +
+                            SeatLayerVenue3D.backPillHeight +
+                            _badgeGap
+                        : _mapChromeTop,
                     left: 10,
                     child: testBadge,
                   ),

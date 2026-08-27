@@ -36,6 +36,13 @@ class SeatLayerVenue3D extends StatelessWidget {
   /// Space to leave at the bottom, clear of the cart sheet.
   final double bottomInset;
 
+  /// How tall `‹ Back to venue` is.
+  ///
+  /// Published so a host stacking its own chrome under the scene's way back —
+  /// the turnkey layout stacks the test-mode badge there — measures the same
+  /// pill this widget draws instead of repeating a number.
+  static const double backPillHeight = 36;
+
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
@@ -247,7 +254,9 @@ class _ImmersivePill extends StatelessWidget {
         child: InkWell(
           onTap: onPressed,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 36),
+            constraints: const BoxConstraints(
+              minHeight: SeatLayerVenue3D.backPillHeight,
+            ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
