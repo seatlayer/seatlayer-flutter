@@ -17,21 +17,84 @@ Widget _layout() => SeatLayerPickerAdaptiveLayout(
       ),
     );
 
+/// A snapshot whose catalogue carries [count] sellable categories.
+///
+/// Prices climb so no two chips are the same width, which is how a real
+/// venue's legend runs off the end of the rail.
+Map<String, Object?> _snapshotWithCategories(int count) {
+  final snapshot = pickerSnapshot();
+  final catalog = snapshot['catalog']! as Map<String, Object?>;
+  catalog['categories'] = List<Object?>.generate(count, (index) {
+    final price = 45.0 + index * 35;
+    return <String, Object?>{
+      'key': 'tier-$index',
+      'label': 'Tier $index',
+      'color': '#635BFF',
+      'priceMin': price,
+      'priceMax': price,
+      'available': 10,
+      'notForSale': false,
+      'tiers': <Object?>[],
+    };
+  });
+  (snapshot['map']! as Map<String, Object?>)['categoryFilter'] = <Object?>[];
+  return snapshot;
+}
+
 void main() {
-  testWidgets('the phone top rail never draws Map/3D over the prices',
+  for (final count in <int>[5, 8]) {
+    testWidgets('the phone top rail never draws Map/3D over $count prices',
+        (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(pickerHarness(map, _layout()));
+      map.emit(_snapshotWithCategories(count));
+      await tester.pumpAndSettle();
+
+      final control = find.byType(SeatLayerPickerViewModeControl);
+      expect(control, findsOneWidget);
+      final prices = tester.getRect(find.byType(SeatLayerPriceLegend));
+      expect(tester.getRect(control).left, greaterThanOrEqualTo(prices.right));
+    });
+  }
+
+  testWidgets('a legend that runs off the rail fades rather than cuts',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
-    map.emit(pickerSnapshot());
+    map.emit(_snapshotWithCategories(8));
     await tester.pumpAndSettle();
 
-    final control = find.byType(SeatLayerPickerViewModeControl);
-    expect(control, findsOneWidget);
-    final prices = tester.getRect(find.byType(SeatLayerPriceLegend));
-    expect(tester.getRect(control).left, greaterThanOrEqualTo(prices.right));
+    expect(
+      find.descendant(
+        of: find.byType(SeatLayerPriceLegend),
+        matching: find.byType(ShaderMask),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a legend that fits the rail draws no soft edge', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout()));
+    map.emit(_snapshotWithCategories(1));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.descendant(
+        of: find.byType(SeatLayerPriceLegend),
+        matching: find.byType(ShaderMask),
+      ),
+      findsNothing,
+    );
   });
 
   testWidgets('a composed host still gets Map/3D from the map controls',

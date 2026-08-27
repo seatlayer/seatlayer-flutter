@@ -443,7 +443,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                         Expanded(child: prices),
                         if (chrome.showMapControls)
                           const Padding(
-                            padding: EdgeInsets.only(left: 8, right: 10),
+                            // The legend already keeps its fade width clear,
+                            // so the control needs no second gap on its left.
+                            padding: EdgeInsets.only(right: 10),
                             child: SeatLayerPickerViewModeControl(),
                           ),
                       ],
