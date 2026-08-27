@@ -6,6 +6,7 @@ import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_options.dart';
+import 'picker_styles.dart';
 import 'picker_attribution.dart';
 import 'picker_errors.dart';
 import 'seat_layer_picker_controller.dart';
@@ -34,6 +35,8 @@ class SeatLayerCartSheet extends StatelessWidget {
     this.actionError,
     this.attribution = const SeatLayerPickerAttribution(compact: true),
     this.reserveBottomInset = true,
+    this.style,
+    this.continueButtonStyle,
   });
 
   /// Whether the sheet is open.
@@ -57,6 +60,12 @@ class SeatLayerCartSheet extends StatelessWidget {
   /// Replaces the inline action error.
   final Widget? actionError;
 
+  /// Overrides [SeatLayerPickerStyles.sheetStyle] for this sheet.
+  final SeatLayerSurfaceStyle? style;
+
+  /// Overrides [SeatLayerPickerStyles.continueButtonStyle] for this peek bar.
+  final ButtonStyle? continueButtonStyle;
+
   /// The required SeatLayer attribution.
   final Widget attribution;
 
@@ -78,9 +87,12 @@ class SeatLayerCartSheet extends StatelessWidget {
     final maxBody =
         (maxSheet - layout.peekHeight - bottomInset).clamp(0.0, maxSheet);
 
+    final surface = (theme.styles.sheetStyle ?? const SeatLayerSurfaceStyle())
+        .merge(style);
     return Material(
-      color: theme.surface,
-      elevation: 12,
+      color: surface.color ?? theme.surface,
+      elevation: surface.elevation ?? 12,
+      shape: surface.shape,
       child: Padding(
         padding: EdgeInsets.only(bottom: bottomInset),
         child: Column(
@@ -95,6 +107,7 @@ class SeatLayerCartSheet extends StatelessWidget {
               showBestSeatsShortcut: hasTickets &&
                   options.enableBestAvailable &&
                   !options.readOnly,
+              continueStyle: continueButtonStyle,
             ),
             AnimatedSize(
               duration: SeatLayerPickerMotion.of(
@@ -138,6 +151,7 @@ class _PeekRow extends StatelessWidget {
     required this.onExpandedChanged,
     required this.onCheckout,
     required this.showBestSeatsShortcut,
+    required this.continueStyle,
   });
 
   final bool expanded;
@@ -145,6 +159,7 @@ class _PeekRow extends StatelessWidget {
   final ValueChanged<bool> onExpandedChanged;
   final SeatLayerCheckoutCallback onCheckout;
   final bool showBestSeatsShortcut;
+  final ButtonStyle? continueStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -227,6 +242,9 @@ class _PeekRow extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                             fontFamily: theme.fontFamily,
                           ),
+                        ).merge(
+                          continueStyle ??
+                              theme.styles.resolvedContinueButtonStyle,
                         ),
                         onPressed: controller.canCheckout
                             ? () => ignorePickerAction(
@@ -363,10 +381,17 @@ class _FilledBody extends StatelessWidget {
 /// footer ended up being read as a second, different price.
 class SeatLayerBookButton extends StatelessWidget {
   /// Creates the checkout call to action.
-  const SeatLayerBookButton({super.key, required this.onCheckout});
+  const SeatLayerBookButton({
+    super.key,
+    required this.onCheckout,
+    this.style,
+  });
 
   /// Receives the hold once the runtime has created it.
   final SeatLayerCheckoutCallback onCheckout;
+
+  /// Overrides [SeatLayerPickerStyles.primaryButtonStyle] for this button.
+  final ButtonStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -390,7 +415,7 @@ class SeatLayerBookButton extends StatelessWidget {
             fontWeight: FontWeight.w800,
             fontFamily: theme.fontFamily,
           ),
-        ),
+        ).merge(style ?? theme.styles.primaryButtonStyle),
         onPressed: controller.canCheckout
             ? () => ignorePickerAction(
                   checkoutThroughHost(controller, onCheckout),

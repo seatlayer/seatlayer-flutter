@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
+import 'picker_styles.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -20,6 +21,7 @@ class SeatLayerPickerHeader extends StatelessWidget {
     this.showEventDetails = true,
     this.compact = false,
     this.showHoldPill = true,
+    this.style,
   });
 
   /// Called when the buyer dismisses the picker; omit to hide the control.
@@ -34,6 +36,9 @@ class SeatLayerPickerHeader extends StatelessWidget {
   /// Whether to show the hold countdown while seats are held.
   final bool showHoldPill;
 
+  /// Overrides [SeatLayerPickerStyles.headerStyle] for this header.
+  final SeatLayerSurfaceStyle? style;
+
   @override
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
@@ -43,8 +48,13 @@ class SeatLayerPickerHeader extends StatelessWidget {
     final options = SeatLayerPickerScope.optionsOf(context);
     final logoSize = compact ? theme.layout.headerLogoSize : 36.0;
 
+    final headerStyle =
+        (theme.styles.headerStyle ?? const SeatLayerSurfaceStyle())
+            .merge(style);
     return Material(
-      color: theme.surface,
+      color: headerStyle.color ?? theme.surface,
+      elevation: headerStyle.elevation ?? 0,
+      shape: headerStyle.shape,
       child: SafeArea(
         bottom: false,
         child: SizedBox(

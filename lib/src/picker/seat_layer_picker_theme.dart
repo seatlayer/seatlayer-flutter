@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'picker_layout.dart';
+import 'picker_styles.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_scope.dart';
 
@@ -109,6 +110,7 @@ class SeatLayerPickerThemeData
     this.logo,
     this.mapTheme,
     this.layout,
+    this.styles,
   });
 
   /// Light preset for native chrome and the drawn seat map.
@@ -124,6 +126,7 @@ class SeatLayerPickerThemeData
     this.logo,
     this.mapTheme = const SeatLayerMapThemeData.light(),
     this.layout,
+    this.styles,
   })  : background = const Color(0xFFF6F7FB),
         surface = Colors.white,
         text = const Color(0xFF172033),
@@ -143,6 +146,7 @@ class SeatLayerPickerThemeData
     this.logo,
     this.mapTheme = const SeatLayerMapThemeData.dark(),
     this.layout,
+    this.styles,
   })  : background = const Color(0xFF0F1522),
         surface = const Color(0xFF1A2234),
         text = const Color(0xFFEEF1F8),
@@ -199,6 +203,9 @@ class SeatLayerPickerThemeData
   /// Sizes the phone chrome is built from.
   final SeatLayerPickerLayout? layout;
 
+  /// Per-element style slots, for restyling one control in place.
+  final SeatLayerPickerStyles? styles;
+
   @override
   SeatLayerPickerThemeData copyWith({
     Color? accent,
@@ -215,6 +222,7 @@ class SeatLayerPickerThemeData
     ImageProvider? logo,
     SeatLayerMapThemeData? mapTheme,
     SeatLayerPickerLayout? layout,
+    SeatLayerPickerStyles? styles,
   }) =>
       SeatLayerPickerThemeData(
         accent: accent ?? this.accent,
@@ -231,6 +239,7 @@ class SeatLayerPickerThemeData
         logo: logo ?? this.logo,
         mapTheme: mapTheme ?? this.mapTheme,
         layout: layout ?? this.layout,
+        styles: styles ?? this.styles,
       );
 
   @override
@@ -254,6 +263,7 @@ class SeatLayerPickerThemeData
       logo: t < .5 ? logo : other.logo,
       mapTheme: t < .5 ? mapTheme : other.mapTheme,
       layout: t < .5 ? layout : other.layout,
+      styles: t < .5 ? styles : other.styles,
     );
   }
 }
@@ -275,6 +285,7 @@ class SeatLayerResolvedPickerTheme {
     required this.warning,
     required this.radius,
     required this.layout,
+    this.styles = const SeatLayerPickerStyles(),
     this.fontFamily,
     this.logo,
     this.mapBackground,
@@ -316,6 +327,9 @@ class SeatLayerResolvedPickerTheme {
   /// Sizes the phone chrome is built from.
   final SeatLayerPickerLayout layout;
 
+  /// Per-element style slots, already merged from every layer.
+  final SeatLayerPickerStyles styles;
+
   /// Typeface for every native picker surface.
   final String? fontFamily;
 
@@ -344,6 +358,7 @@ class SeatLayerResolvedPickerTheme {
           warning: warning,
           radius: radius,
           layout: layout,
+          styles: styles,
           fontFamily: fontFamily,
           logo: logo,
           mapBackground: mapBackground,
@@ -420,6 +435,9 @@ SeatLayerResolvedPickerTheme resolveSeatLayerPickerTheme(
     warning: ground((theme) => theme.warning) ?? const Color(0xFFF4B740),
     radius: host((theme) => theme.radius) ?? organizer?.radius ?? 14,
     layout: host((theme) => theme.layout) ?? const SeatLayerPickerLayout(),
+    // Slots stack: a theme extension on the app, then the picker's own theme.
+    styles: (app?.styles ?? const SeatLayerPickerStyles())
+        .merge(explicit?.styles),
     fontFamily: host((theme) => theme.fontFamily) ?? organizer?.fontFamily,
     logo: host((theme) => theme.logo),
     mapBackground: resolveSeatLayerMapTheme(context, explicit, brightness: side)

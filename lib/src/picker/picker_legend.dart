@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
+import 'picker_styles.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
@@ -12,10 +13,13 @@ import 'seat_layer_picker_theme.dart';
 /// tapping it again clears the filter.
 class SeatLayerPriceLegend extends StatelessWidget {
   /// Creates the price legend.
-  const SeatLayerPriceLegend({super.key, this.compact = false});
+  const SeatLayerPriceLegend({super.key, this.compact = false, this.style});
 
   /// Whether to render the phone's chip size and spacing.
   final bool compact;
+
+  /// Overrides [SeatLayerPickerStyles.legendChipStyle] for these chips.
+  final SeatLayerSurfaceStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +46,9 @@ class SeatLayerPriceLegend extends StatelessWidget {
           final category = categories[index];
           final selected = active.contains(category.key);
           return _LegendChip(
+            style: (theme.styles.legendChipStyle ??
+                    const SeatLayerSurfaceStyle())
+                .merge(style),
             label: compact
                 ? pickerCompactMoney(category.priceMin, currency)
                 : '${category.label} · '
@@ -71,6 +78,7 @@ typedef SeatLayerPickerPriceRail = SeatLayerPriceLegend;
 
 class _LegendChip extends StatelessWidget {
   const _LegendChip({
+    required this.style,
     required this.label,
     required this.color,
     required this.selected,
@@ -80,6 +88,7 @@ class _LegendChip extends StatelessWidget {
     required this.onPressed,
   });
 
+  final SeatLayerSurfaceStyle style;
   final String label;
   final Color color;
   final bool selected;
@@ -90,6 +99,7 @@ class _LegendChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final chipStyle = style;
     return Semantics(
       button: true,
       selected: selected,
@@ -97,10 +107,17 @@ class _LegendChip extends StatelessWidget {
       child: Material(
         color: selected
             ? theme.accent
-            : Color.alphaBlend(pickerAlpha(theme.text, .04), theme.surface),
-        shape: StadiumBorder(
-          side: BorderSide(color: selected ? theme.accent : theme.divider),
-        ),
+            : chipStyle.color ??
+                Color.alphaBlend(pickerAlpha(theme.text, .04), theme.surface),
+        elevation: chipStyle.elevation ?? 0,
+        shape: chipStyle.shape ??
+            theme.styles.chipShape?.copyWith(
+              side: BorderSide(color: selected ? theme.accent : theme.divider),
+            ) ??
+            StadiumBorder(
+              side:
+                  BorderSide(color: selected ? theme.accent : theme.divider),
+            ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onPressed,

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../open_enums.dart';
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_styles.dart';
 import 'picker_motion.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -32,6 +33,7 @@ class SeatLayerConfirmCard extends StatefulWidget {
     this.onShow3D,
     this.showSeatView = true,
     this.show3D = true,
+    this.style,
   });
 
   /// The seat being decided on; defaults to the most recent selection.
@@ -54,6 +56,9 @@ class SeatLayerConfirmCard extends StatefulWidget {
 
   /// Whether the capability-gated 3D pill may be shown.
   final bool show3D;
+
+  /// Overrides [SeatLayerPickerStyles.confirmCardStyle] for this card.
+  final SeatLayerSurfaceStyle? style;
 
   @override
   State<SeatLayerConfirmCard> createState() => _SeatLayerConfirmCardState();
@@ -100,6 +105,9 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
             ? widget.onShow3D ?? controller.showSeatIn3D
             : null;
     final hasStrip = seatView != null || venue3D != null;
+    final cardStyle =
+        (theme.styles.confirmCardStyle ?? const SeatLayerSurfaceStyle())
+            .merge(widget.style);
 
     // The card sizes itself to its content and to the screen less one gutter
     // on each side; whoever places it decides where on the map it sits.
@@ -115,13 +123,14 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
           ),
           child: Material(
             key: const ValueKey<String>('seatlayer.confirm-card.surface'),
-            color: theme.surface,
-            elevation: 18,
+            color: cardStyle.color ?? theme.surface,
+            elevation: cardStyle.elevation ?? 18,
             shadowColor: pickerAlpha(const Color(0xFF000000), .26),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(theme.radius + 4),
-              side: BorderSide(color: pickerAlpha(theme.divider, .9)),
-            ),
+            shape: cardStyle.shape ??
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(theme.radius + 4),
+                  side: BorderSide(color: pickerAlpha(theme.divider, .9)),
+                ),
             clipBehavior: Clip.antiAlias,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -155,6 +164,7 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                         child: _CardButton(
                           label: strings.cancel,
                           filled: false,
+                          style: theme.styles.secondaryButtonStyle,
                           onPressed: controller.state.isBusy
                               ? null
                               : () => _cancel(controller, seat),
@@ -166,6 +176,7 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                           label: strings.select,
                           icon: Icons.check_rounded,
                           filled: true,
+                          style: theme.styles.primaryButtonStyle,
                           onPressed: controller.state.isBusy
                               ? null
                               : () => _confirm(controller, seat),
@@ -415,9 +426,11 @@ class _StripPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
+    final pill = theme.styles.pillStyle ?? const SeatLayerSurfaceStyle();
     return Material(
-      color: pickerAlpha(theme.surface, .92),
-      shape: const StadiumBorder(),
+      color: pill.color ?? pickerAlpha(theme.surface, .92),
+      elevation: pill.elevation ?? 0,
+      shape: pill.shape ?? theme.styles.chipShape ?? const StadiumBorder(),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
@@ -451,24 +464,39 @@ class _CardButton extends StatelessWidget {
     required this.filled,
     required this.onPressed,
     this.icon,
+    this.style,
   });
 
   final String label;
   final bool filled;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final ButtonStyle? style;
 
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
+    final disabled = onPressed == null;
     final background = filled
         ? theme.accent
         : Color.alphaBlend(pickerAlpha(theme.text, .04), theme.surface);
     final ink = filled ? theme.onAccent : theme.text;
+    final styledGround = seatLayerStyleRole(
+      style?.backgroundColor,
+      disabled: disabled,
+    );
+    final styledInk =
+        seatLayerStyleRole(style?.foregroundColor, disabled: disabled);
     return Material(
-      color: onPressed == null
-          ? Color.alphaBlend(pickerAlpha(theme.mutedText, .16), theme.surface)
-          : background,
+      color: styledGround ??
+          (disabled
+              ? Color.alphaBlend(
+                  pickerAlpha(theme.mutedText, .16),
+                  theme.surface,
+                )
+              : background),
+      shape: seatLayerStyleRole(style?.shape),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
         child: Center(
@@ -476,19 +504,18 @@ class _CardButton extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (icon != null) ...[
-                Icon(icon, size: 16, color: ink),
+                Icon(icon, size: 16, color: styledInk ?? ink),
                 const SizedBox(width: 6),
               ],
               Text(
                 label,
                 style: TextStyle(
-                  color: onPressed == null
-                      ? pickerAlpha(theme.mutedText, .58)
-                      : ink,
+                  color: styledInk ??
+                      (disabled ? pickerAlpha(theme.mutedText, .58) : ink),
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                   fontFamily: theme.fontFamily,
-                ),
+                ).merge(seatLayerStyleRole(style?.textStyle)),
               ),
             ],
           ),

@@ -158,6 +158,31 @@ builders: SeatLayerPickerBuilders(
 ),
 ```
 
+**Restyle one element, keep the widget.** Every control the picker draws has a
+style slot on the theme, so a single button can change shape without replacing
+the widget around it. Turning the peek bar's `Continue` into a square filled
+button is three lines:
+
+```dart
+theme: SeatLayerPickerThemeData.light(
+  styles: SeatLayerPickerStyles(
+    continueButtonStyle: FilledButton.styleFrom(shape: const RoundedRectangleBorder()),
+  ),
+),
+```
+
+The slots are `primaryButtonStyle`, `secondaryButtonStyle`,
+`continueButtonStyle`, `iconButtonStyle`, `chipShape`, `legendChipStyle`,
+`dockBarStyle`, `confirmCardStyle`, `sheetStyle`, `headerStyle` and
+`pillStyle`. Button slots take a Material `ButtonStyle`; surface slots take a
+`SeatLayerSurfaceStyle` (colour, shape, elevation, padding, type). Every widget
+that owns a slot also accepts a `style:` parameter, which wins over the theme
+for that one instance:
+
+```dart
+SeatLayerDockBar(style: SeatLayerSurfaceStyle(shape: const RoundedRectangleBorder()))
+```
+
 **Retune the sizes.** The spec's numbers are defaults, not constants:
 
 ```dart

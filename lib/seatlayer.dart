@@ -83,6 +83,8 @@ export 'src/picker/picker_status_views.dart'
         SeatLayerPickerLoadingView,
         SeatLayerPickerTestModeIndicator;
 export 'src/picker/picker_strings.dart' show SeatLayerPickerStrings;
+export 'src/picker/picker_styles.dart'
+    show SeatLayerPickerStyles, SeatLayerSurfaceStyle, seatLayerStyleRole;
 export 'src/picker/picker_tray_dense.dart'
     show
         SeatLayerTicketLine,

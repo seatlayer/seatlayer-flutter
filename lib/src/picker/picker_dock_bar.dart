@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
+import 'picker_styles.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'seat_layer_picker_controller.dart';
@@ -23,6 +24,7 @@ class SeatLayerDockBar extends StatelessWidget {
     this.onOverview,
     this.onSectionChanged,
     this.reserveBottomInset = true,
+    this.style,
   });
 
   /// Replaces the built-in return to the venue overview.
@@ -41,6 +43,9 @@ class SeatLayerDockBar extends StatelessWidget {
   /// owns that space and two reservations would stack.
   final bool reserveBottomInset;
 
+  /// Overrides [SeatLayerPickerStyles.dockBarStyle] for this bar.
+  final SeatLayerSurfaceStyle? style;
+
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
@@ -50,6 +55,9 @@ class SeatLayerDockBar extends StatelessWidget {
     final bottomInset =
         reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0;
     final height = theme.layout.dockBarHeight;
+    final barStyle =
+        (theme.styles.dockBarStyle ?? const SeatLayerSurfaceStyle())
+            .merge(style);
 
     final visible = section != null && snapshot!.map.rung == 'seats';
     return AnimatedSlide(
@@ -62,8 +70,9 @@ class SeatLayerDockBar extends StatelessWidget {
         child: IgnorePointer(
           ignoring: !visible,
           child: Material(
-            color: theme.surface,
-            elevation: 8,
+            color: barStyle.color ?? theme.surface,
+            elevation: barStyle.elevation ?? 8,
+            shape: barStyle.shape,
             child: SizedBox(
               height: height + bottomInset,
               child: Padding(
