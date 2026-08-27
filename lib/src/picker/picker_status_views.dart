@@ -9,6 +9,7 @@ import '../seat_layer_error.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
+import 'picker_strings.dart';
 import 'picker_cart_sheet.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -188,47 +189,121 @@ class SeatLayerPickerCheckoutBar extends StatelessWidget {
   }
 }
 
+/// What the picker shows while the seat map is still coming up.
+///
+/// Placed inside a [SeatLayerPickerScope] it reads the picker's own palette
+/// and strings. A host also has to render the failures that happen BEFORE a
+/// scope exists — minting a buyer token, loading its own catalogue — so
+/// [SeatLayerPickerLoadingView.standalone] takes the same two values directly
+/// and needs no scope at all.
 class SeatLayerPickerLoadingView extends StatelessWidget {
-  const SeatLayerPickerLoadingView({super.key});
+  /// Creates the loading view, reading the scope above it.
+  const SeatLayerPickerLoadingView({super.key})
+      : theme = null,
+        strings = null;
 
-  @override
-  Widget build(BuildContext context) => const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Loading seat map…'),
-          ],
-        ),
-      );
-}
+  /// Creates the loading view outside any scope.
+  ///
+  /// Use it for the wait before the picker is mounted, so the buyer sees one
+  /// interface rather than the host's spinner and then SeatLayer's.
+  const SeatLayerPickerLoadingView.standalone({
+    super.key,
+    required SeatLayerResolvedPickerTheme this.theme,
+    this.strings = const SeatLayerPickerStrings(),
+  });
 
-class SeatLayerPickerErrorView extends StatelessWidget {
-  const SeatLayerPickerErrorView({super.key, this.onRetry});
-  final VoidCallback? onRetry;
+  /// The palette to paint with, or null to read it from the scope.
+  final SeatLayerResolvedPickerTheme? theme;
+
+  /// The words to use, or null to read them from the scope.
+  final SeatLayerPickerStrings? strings;
 
   @override
   Widget build(BuildContext context) {
-    final controller = SeatLayerPickerScope.controllerOf(context);
-    final error = controller.state.error;
-    final message = error is SeatLayerError
-        ? error.message
-        : 'The seat map could not be loaded.';
+    final palette = theme ?? seatLayerPickerThemeOf(context);
+    final words = strings ?? SeatLayerPickerScope.stringsOf(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          CircularProgressIndicator(color: palette.accent),
+          const SizedBox(height: 16),
+          Text(
+            words.loading,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: palette.text,
+              fontFamily: palette.fontFamily,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// What the picker shows when the seat map could not be loaded.
+///
+/// [SeatLayerPickerErrorView.standalone] is the same view outside any scope,
+/// for the failures a host has to render before the picker is mounted.
+class SeatLayerPickerErrorView extends StatelessWidget {
+  /// Creates the failure view, reading the scope above it.
+  const SeatLayerPickerErrorView({super.key, this.onRetry})
+      : theme = null,
+        strings = null,
+        message = null;
+
+  /// Creates the failure view outside any scope.
+  const SeatLayerPickerErrorView.standalone({
+    super.key,
+    required SeatLayerResolvedPickerTheme this.theme,
+    required VoidCallback this.onRetry,
+    this.strings = const SeatLayerPickerStrings(),
+    this.message,
+  });
+
+  /// Replaces the controller's own retry.
+  final VoidCallback? onRetry;
+
+  /// The palette to paint with, or null to read it from the scope.
+  final SeatLayerResolvedPickerTheme? theme;
+
+  /// The words to use, or null to read them from the scope.
+  final SeatLayerPickerStrings? strings;
+
+  /// What went wrong, or null for the generic wording.
+  final String? message;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = theme ?? seatLayerPickerThemeOf(context);
+    final words = strings ?? SeatLayerPickerScope.stringsOf(context);
+    final controller =
+        theme == null ? SeatLayerPickerScope.controllerOf(context) : null;
+    final error = controller?.state.error;
+    final text = message ??
+        (error is SeatLayerError ? error.message : words.errorMessage);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(28),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.cloud_off_rounded, size: 40),
+          children: <Widget>[
+            Icon(Icons.cloud_off_rounded, size: 40, color: palette.mutedText),
             const SizedBox(height: 14),
-            Text(message, textAlign: TextAlign.center),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: palette.text,
+                fontFamily: palette.fontFamily,
+              ),
+            ),
             const SizedBox(height: 16),
             FilledButton.tonal(
               onPressed:
-                  onRetry ?? () => ignorePickerAction(controller.retry()),
-              child: const Text('Try again'),
+                  onRetry ?? () => ignorePickerAction(controller!.retry()),
+              child: Text(words.retry),
             ),
           ],
         ),

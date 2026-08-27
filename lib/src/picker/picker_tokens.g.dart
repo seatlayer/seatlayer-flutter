@@ -348,4 +348,61 @@ abstract final class SeatLayerStringTokens {
 
   /// Ticket removed
   static const String seatRemoved = 'Ticket removed';
+
+  /// Loading seat map…
+  static const String loading = 'Loading seat map…';
+
+  /// The seat map could not be loaded.
+  static const String errorMessage = 'The seat map could not be loaded.';
+
+  /// Try again
+  static const String retry = 'Try again';
+
+  /// Accessibility and view
+  static const String accessibilityTitle = 'Accessibility and view';
+
+  /// Hide limited-view seats
+  static const String hideLimitedView = 'Hide limited-view seats';
+
+  /// Colourblind-friendly colours
+  static const String colorblindSafe = 'Colourblind-friendly colours';
+
+  /// Apply filters
+  static const String applyFilters = 'Apply filters';
+
+  /// Wheelchair
+  static const String accessWheelchair = 'Wheelchair';
+
+  /// Companion
+  static const String accessCompanion = 'Companion';
+
+  /// Semi-ambulatory
+  static const String accessSemiAmbulatory = 'Semi-ambulatory';
+
+  /// Aisle seat
+  static const String accessDesignatedAisle = 'Aisle seat';
+
+  /// Step-free
+  static const String accessStepFree = 'Step-free';
+
+  /// Hearing support
+  static const String accessHearing = 'Hearing support';
+
+  /// Mobility cart
+  static const String accessCart = 'Mobility cart';
+
+  /// Sign language view
+  static const String accessSignLanguage = 'Sign language view';
+
+  /// Low vision
+  static const String accessLowVision = 'Low vision';
+
+  /// Sensory-friendly
+  static const String accessSensoryFriendly = 'Sensory-friendly';
+
+  /// Plus-size seat
+  static const String accessPlusSize = 'Plus-size seat';
+
+  /// Lift armrest
+  static const String accessLiftArmrest = 'Lift armrest';
 }

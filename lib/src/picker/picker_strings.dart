@@ -46,6 +46,14 @@ class SeatLayerPickerStrings {
     this.fitVenue = SeatLayerStringTokens.fitVenue,
     this.mapView = SeatLayerStringTokens.mapView,
     this.seatRemoved = SeatLayerStringTokens.seatRemoved,
+    this.loading = SeatLayerStringTokens.loading,
+    this.errorMessage = SeatLayerStringTokens.errorMessage,
+    this.retry = SeatLayerStringTokens.retry,
+    this.accessibilityTitle = SeatLayerStringTokens.accessibilityTitle,
+    this.hideLimitedView = SeatLayerStringTokens.hideLimitedView,
+    this.colorblindSafe = SeatLayerStringTokens.colorblindSafe,
+    this.applyFilters = SeatLayerStringTokens.applyFilters,
+    this.accessNeeds = defaultAccessNeeds,
     this.ticketCount = _defaultTicketCount,
     this.seatsLeft = _defaultSeatsLeft,
     this.seatsFree = _defaultSeatsFree,
@@ -155,6 +163,50 @@ class SeatLayerPickerStrings {
 
   /// Message announced after a ticket is removed.
   final String seatRemoved;
+
+  /// Shown while the seat map is still loading.
+  final String loading;
+
+  /// Shown when the seat map could not be loaded.
+  final String errorMessage;
+
+  /// The action that tries a failed load again.
+  final String retry;
+
+  /// Title of the accessibility and view sheet.
+  final String accessibilityTitle;
+
+  /// The sheet's switch hiding seats with a limited view.
+  final String hideLimitedView;
+
+  /// The sheet's switch for a colourblind-safe palette.
+  final String colorblindSafe;
+
+  /// The sheet's action applying the chosen filters.
+  final String applyFilters;
+
+  /// Names for the access needs the runtime can filter by, by wire key.
+  ///
+  /// A key the runtime reports and this map does not name is drawn under its
+  /// own wire key rather than hidden, so a need added on the runtime side is
+  /// still reachable before this table catches up.
+  final Map<String, String> accessNeeds;
+
+  /// The English name of every access need the runtime filters by.
+  static const Map<String, String> defaultAccessNeeds = <String, String>{
+    'wheelchair': SeatLayerStringTokens.accessWheelchair,
+    'companion': SeatLayerStringTokens.accessCompanion,
+    'semi-ambulatory': SeatLayerStringTokens.accessSemiAmbulatory,
+    'designated-aisle': SeatLayerStringTokens.accessDesignatedAisle,
+    'step-free': SeatLayerStringTokens.accessStepFree,
+    'hearing': SeatLayerStringTokens.accessHearing,
+    'cart': SeatLayerStringTokens.accessCart,
+    'sign-language': SeatLayerStringTokens.accessSignLanguage,
+    'low-vision': SeatLayerStringTokens.accessLowVision,
+    'sensory-friendly': SeatLayerStringTokens.accessSensoryFriendly,
+    'plus-size': SeatLayerStringTokens.accessPlusSize,
+    'lift-armrest': SeatLayerStringTokens.accessLiftArmrest,
+  };
 
   /// "1 ticket" / "6 tickets".
   final String Function(int count) ticketCount;

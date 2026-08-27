@@ -86,6 +86,13 @@ void main() {
     expect(strings.emptyTrayHint, table['emptyTrayHint']);
     expect(strings.backToVenue, table['backToVenue']);
     expect(strings.testMode, table['testMode']);
+    expect(strings.loading, table['loading']);
+    expect(strings.errorMessage, table['errorMessage']);
+    expect(strings.retry, table['retry']);
+    expect(strings.accessibilityTitle, table['accessibilityTitle']);
+    expect(strings.applyFilters, table['applyFilters']);
+    expect(strings.accessNeeds['wheelchair'], table['accessWheelchair']);
+    expect(strings.accessNeeds['lift-armrest'], table['accessLiftArmrest']);
   });
 
   test('picker_tokens.g.dart is not stale', () {

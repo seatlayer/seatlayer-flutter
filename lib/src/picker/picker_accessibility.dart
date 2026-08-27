@@ -23,21 +23,6 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
   /// Whether to render the phone's single round control.
   final bool compact;
 
-  static const Map<String, String> _labels = <String, String>{
-    'wheelchair': 'Wheelchair',
-    'companion': 'Companion',
-    'semi-ambulatory': 'Semi-ambulatory',
-    'designated-aisle': 'Aisle seat',
-    'step-free': 'Step-free',
-    'hearing': 'Hearing support',
-    'cart': 'Mobility cart',
-    'sign-language': 'Sign language view',
-    'low-vision': 'Low vision',
-    'sensory-friendly': 'Sensory-friendly',
-    'plus-size': 'Plus-size seat',
-    'lift-armrest': 'Lift armrest',
-  };
-
   @override
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
@@ -78,8 +63,11 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     return OutlinedButton.icon(
       onPressed: onPressed,
       icon: const Icon(Icons.accessible_forward_rounded, size: 18),
-      label:
-          Text(active.isEmpty ? 'Accessibility' : '${active.length} filters'),
+      label: Text(
+        active.isEmpty
+            ? SeatLayerPickerScope.stringsOf(context).accessibility
+            : '${active.length} filters',
+      ),
     );
   }
 
@@ -96,6 +84,15 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     var hideLimited = initialHideLimited;
     var colorblind = initialColorblind;
     final theme = seatLayerPickerThemeOf(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    // The needs the RUNTIME can filter by, in its own order, named from the
+    // string table. One the table has no name for is drawn under its wire key
+    // rather than dropped, so a need added on the runtime side is reachable
+    // before this side catches up.
+    final needs = <String, String>{
+      for (final key in strings.accessNeeds.keys)
+        key: strings.accessNeeds[key]!,
+    };
     // The sheet body is built INSIDE the scope and handed to the route, so the
     // route's builder — which runs under the Navigator overlay, above the
     // scope — still gets the picker's controller, strings and palette.
@@ -110,7 +107,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Accessibility and view',
+                  strings.accessibilityTitle,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
@@ -119,7 +116,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                     child: Wrap(
                       spacing: 7,
                       runSpacing: 7,
-                      children: _labels.entries.map((entry) {
+                      children: needs.entries.map((entry) {
                         final on = selected.contains(entry.key);
                         return FilterChip(
                           selected: on,
@@ -137,14 +134,14 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                 ),
                 SwitchListTile.adaptive(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Hide limited-view seats'),
+                  title: Text(strings.hideLimitedView),
                   value: hideLimited,
                   onChanged: (value) =>
                       setSheetState(() => hideLimited = value),
                 ),
                 SwitchListTile.adaptive(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Colorblind-safe colors'),
+                  title: Text(strings.colorblindSafe),
                   value: colorblind,
                   onChanged: (value) => setSheetState(() => colorblind = value),
                 ),
@@ -157,7 +154,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                       colorblind: colorblind,
                     ),
                   ),
-                  child: const Text('Apply filters'),
+                  child: Text(strings.applyFilters),
                 ),
               ],
             ),

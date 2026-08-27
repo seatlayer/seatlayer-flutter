@@ -318,7 +318,7 @@ void main() {
       await tester.tap(find.byType(IconButton));
       await tester.pumpAndSettle();
 
-      expect(find.text('Colorblind-safe colors'), findsOneWidget);
+      expect(find.text('Colourblind-friendly colours'), findsOneWidget);
     });
   });
 
