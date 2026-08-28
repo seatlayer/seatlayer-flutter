@@ -58,6 +58,18 @@ class SeatLayerSurfaceStyle {
   int get hashCode => Object.hash(color, shape, elevation, padding, textStyle);
 }
 
+/// The shape every action in the picker carries.
+///
+/// Material 3 rounds buttons to a stadium. The picker's actions are not pills:
+/// they round to `radius.button`, which is what the web picker's own buttons
+/// measure. A button that draws no shape of its own asks for this one, and any
+/// `style:` a host passes still wins over it.
+ButtonStyle seatLayerButtonShape(double radius) => ButtonStyle(
+      shape: WidgetStatePropertyAll<OutlinedBorder>(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+      ),
+    );
+
 /// Read one resolvable role out of a [ButtonStyle].
 ///
 /// The confirm card's two halves are one seam-free 1:1 split rather than two

@@ -12,6 +12,8 @@ import 'picker_options.dart';
 import 'picker_strings.dart';
 import 'picker_cart_sheet.dart';
 import 'seat_layer_picker_scope.dart';
+import 'picker_tokens.g.dart';
+import 'picker_styles.dart';
 import 'seat_layer_picker_theme.dart';
 
 class SeatLayerPickerTestModeIndicator extends StatelessWidget {
@@ -43,7 +45,7 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: dark ? pickerAlpha(theme.surface, .92) : theme.warning,
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
           border: dark ? Border.all(color: theme.warning) : null,
           boxShadow: const [
             BoxShadow(color: Color(0x33000000), blurRadius: 8),
@@ -165,7 +167,7 @@ class SeatLayerPickerCheckoutBar extends StatelessWidget {
                   foregroundColor: theme.onAccent,
                   minimumSize: const Size(156, 48),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(theme.radius),
+                    borderRadius: BorderRadius.circular(theme.buttonRadius),
                   ),
                 ),
                 onPressed: controller.canCheckout
@@ -301,6 +303,7 @@ class SeatLayerPickerErrorView extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             FilledButton.tonal(
+              style: seatLayerButtonShape(palette.buttonRadius),
               onPressed:
                   onRetry ?? () => ignorePickerAction(controller!.retry()),
               child: Text(words.retry),

@@ -309,8 +309,9 @@ class _SeatLayerPickerSeatConfirmationState
                                     fontWeight: FontWeight.w800,
                                   ),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(theme.radius),
+                                    borderRadius: BorderRadius.circular(
+                                      theme.buttonRadius,
+                                    ),
                                   ),
                                 ),
                                 onPressed: controller.state.isBusy
@@ -340,8 +341,9 @@ class _SeatLayerPickerSeatConfirmationState
                                     fontWeight: FontWeight.w800,
                                   ),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                        BorderRadius.circular(theme.radius),
+                                    borderRadius: BorderRadius.circular(
+                                      theme.buttonRadius,
+                                    ),
                                   ),
                                 ),
                                 onPressed: controller.state.isBusy
@@ -535,7 +537,7 @@ ButtonStyle _seatInspectionButtonStyle(
         fontWeight: FontWeight.w800,
       ),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(theme.radius),
+        borderRadius: BorderRadius.circular(theme.buttonRadius),
       ),
     );
 

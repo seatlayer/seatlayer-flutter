@@ -114,6 +114,7 @@ class SeatLayerPickerThemeData
     this.warning,
     this.fontFamily,
     this.radius,
+    this.buttonRadius,
     this.logo,
     this.mapTheme,
     this.layout,
@@ -137,6 +138,7 @@ class SeatLayerPickerThemeData
     this.onAccent = SeatLayerLightTokens.onAccent,
     this.fontFamily,
     this.radius = SeatLayerRadiusTokens.base,
+    this.buttonRadius = SeatLayerRadiusTokens.button,
     this.logo,
     this.mapTheme = const SeatLayerMapThemeData.light(),
     this.layout,
@@ -160,6 +162,7 @@ class SeatLayerPickerThemeData
     this.onAccent = SeatLayerDarkTokens.onAccent,
     this.fontFamily,
     this.radius = SeatLayerRadiusTokens.base,
+    this.buttonRadius = SeatLayerRadiusTokens.button,
     this.logo,
     this.mapTheme = const SeatLayerMapThemeData.dark(),
     this.layout,
@@ -208,8 +211,15 @@ class SeatLayerPickerThemeData
   /// Typeface for every native picker surface.
   final String? fontFamily;
 
-  /// Corner radius for cards, sheets and buttons.
+  /// Corner radius for cards, sheets and other containers.
   final double? radius;
+
+  /// Corner radius for the picker's buttons.
+  ///
+  /// Buttons are deliberately squarer than the surfaces they sit on — the web
+  /// picker's own actions round to ~8 pt — so this is its own role rather than
+  /// a fraction of [radius]. Set it to a large number for pills.
+  final double? buttonRadius;
 
   /// Brand mark shown in the header, replacing the organizer's logo URL.
   final ImageProvider? logo;
@@ -236,6 +246,7 @@ class SeatLayerPickerThemeData
     Color? warning,
     String? fontFamily,
     double? radius,
+    double? buttonRadius,
     ImageProvider? logo,
     SeatLayerMapThemeData? mapTheme,
     SeatLayerPickerLayout? layout,
@@ -253,6 +264,7 @@ class SeatLayerPickerThemeData
         warning: warning ?? this.warning,
         fontFamily: fontFamily ?? this.fontFamily,
         radius: radius ?? this.radius,
+        buttonRadius: buttonRadius ?? this.buttonRadius,
         logo: logo ?? this.logo,
         mapTheme: mapTheme ?? this.mapTheme,
         layout: layout ?? this.layout,
@@ -277,6 +289,7 @@ class SeatLayerPickerThemeData
       warning: Color.lerp(warning, other.warning, t),
       fontFamily: t < .5 ? fontFamily : other.fontFamily,
       radius: _lerpDouble(radius, other.radius, t),
+      buttonRadius: _lerpDouble(buttonRadius, other.buttonRadius, t),
       logo: t < .5 ? logo : other.logo,
       mapTheme: t < .5 ? mapTheme : other.mapTheme,
       layout: t < .5 ? layout : other.layout,
@@ -301,6 +314,7 @@ class SeatLayerResolvedPickerTheme {
     required this.error,
     required this.warning,
     required this.radius,
+    required this.buttonRadius,
     required this.layout,
     this.styles = const SeatLayerPickerStyles(),
     this.fontFamily,
@@ -338,8 +352,11 @@ class SeatLayerResolvedPickerTheme {
   /// Ink for advisories.
   final Color warning;
 
-  /// Corner radius for cards, sheets and buttons.
+  /// Corner radius for cards, sheets and other containers.
   final double radius;
+
+  /// Corner radius for the picker's buttons.
+  final double buttonRadius;
 
   /// Sizes the phone chrome is built from.
   final SeatLayerPickerLayout layout;
@@ -374,6 +391,7 @@ class SeatLayerResolvedPickerTheme {
           error: SeatLayerDarkTokens.error,
           warning: warning,
           radius: radius,
+          buttonRadius: buttonRadius,
           layout: layout,
           styles: styles,
           fontFamily: fontFamily,
@@ -396,9 +414,7 @@ Color seatLayerOnAccentFor(Color accent) {
   final luminance = accent.computeLuminance();
   final onWhite = 1.05 / (luminance + 0.05);
   final onBlack = (luminance + 0.05) / 0.05;
-  return onWhite >= onBlack
-      ? const Color(0xFFFFFFFF)
-      : const Color(0xFF000000);
+  return onWhite >= onBlack ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
 }
 
 /// Turn [mode] into a real side, reading the device for
@@ -477,10 +493,14 @@ SeatLayerResolvedPickerTheme resolveSeatLayerPickerTheme(
     radius: host((theme) => theme.radius) ??
         organizer?.radius ??
         SeatLayerRadiusTokens.base,
+    // Not derived from `radius`: the organizer's branding radius describes its
+    // cards, and inheriting it would make a rounded brand grow pill buttons.
+    buttonRadius:
+        host((theme) => theme.buttonRadius) ?? SeatLayerRadiusTokens.button,
     layout: host((theme) => theme.layout) ?? const SeatLayerPickerLayout(),
     // Slots stack: a theme extension on the app, then the picker's own theme.
-    styles: (app?.styles ?? const SeatLayerPickerStyles())
-        .merge(explicit?.styles),
+    styles:
+        (app?.styles ?? const SeatLayerPickerStyles()).merge(explicit?.styles),
     fontFamily: host((theme) => theme.fontFamily) ?? organizer?.fontFamily,
     logo: host((theme) => theme.logo),
     mapBackground: resolveSeatLayerMapTheme(context, explicit, brightness: side)
@@ -513,6 +533,7 @@ ThemeData seatLayerPickerMaterialTheme(
   SeatLayerResolvedPickerTheme resolved,
 ) {
   final ambient = Theme.of(context);
+  final shape = seatLayerButtonShape(resolved.buttonRadius);
   return ambient.copyWith(
     brightness: resolved.brightness,
     colorScheme: ambient.colorScheme.copyWith(
@@ -532,6 +553,15 @@ ThemeData seatLayerPickerMaterialTheme(
       bodyColor: resolved.text,
       displayColor: resolved.text,
     ),
+    // Material 3 rounds every button to a stadium. The picker's actions are
+    // not pills: `Continue`, `Apply filters` and the rest carry the web
+    // picker's own `radius.button`. A button that sets its own shape — or a
+    // host that sets one through a style slot — still wins, because a widget's
+    // `style:` resolves ahead of the theme.
+    filledButtonTheme: FilledButtonThemeData(style: shape),
+    outlinedButtonTheme: OutlinedButtonThemeData(style: shape),
+    textButtonTheme: TextButtonThemeData(style: shape),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: shape),
   );
 }
 

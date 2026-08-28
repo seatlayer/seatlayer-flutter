@@ -31,6 +31,7 @@ const SeatLayerResolvedPickerTheme _standaloneTheme =
   error: SeatLayerDarkTokens.error,
   warning: SeatLayerDarkTokens.warning,
   radius: SeatLayerRadiusTokens.base,
+  buttonRadius: SeatLayerRadiusTokens.button,
   layout: SeatLayerPickerLayout(),
 );
 

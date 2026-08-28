@@ -7,6 +7,7 @@ import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
+import 'picker_tokens.g.dart';
 import 'seat_layer_picker_theme.dart';
 
 /// The chrome drawn over the immersive venue scene.
@@ -85,7 +86,7 @@ class SeatLayerVenue3D extends StatelessWidget {
                   Positioned(
                     top: topInset,
                     left: 10,
-                    child: _ImmersivePill(
+                    child: _ImmersiveAction(
                       theme: theme,
                       icon: Icons.chevron_left_rounded,
                       label: strings.backToVenue,
@@ -154,7 +155,7 @@ class _SeatDeck extends StatelessWidget {
                   : () => _sit(controller, previous),
             ),
             const SizedBox(width: 8),
-            _ImmersivePill(
+            _ImmersiveAction(
               theme: theme,
               icon: Icons.threesixty_rounded,
               label: strings.openVenue360,
@@ -239,7 +240,7 @@ class _CaptionChip extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: pickerAlpha(theme.surface, .88),
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.chip),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
@@ -259,8 +260,8 @@ class _CaptionChip extends StatelessWidget {
       );
 }
 
-class _ImmersivePill extends StatelessWidget {
-  const _ImmersivePill({
+class _ImmersiveAction extends StatelessWidget {
+  const _ImmersiveAction({
     required this.theme,
     required this.icon,
     required this.label,
@@ -275,7 +276,10 @@ class _ImmersivePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
         color: pickerAlpha(theme.surface, .9),
-        shape: StadiumBorder(side: BorderSide(color: theme.divider)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(theme.buttonRadius),
+          side: BorderSide(color: theme.divider),
+        ),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onPressed,

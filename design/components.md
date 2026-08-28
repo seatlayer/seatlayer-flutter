@@ -7,6 +7,31 @@ names, deliberately: the four SDKs should agree on what things are called.
 Every token reference (`size.dockBarHeight`, `color.dark.surface`,
 `motion.duration.sheet`) resolves in [`tokens.json`](./tokens.json).
 
+## Corner radius: buttons are not pills
+
+**Decision, 2026-08-28 (owner).** Actions carry `radius.button` — 8 pt, which is
+what the web picker's own buttons measure: its primary call to action rounds to
+`calc(var(--sl-radius) * .55)` = 7.7 pt at the default 14 pt host radius, its
+confirm-card actions to 9 pt and its view/3D buttons to 8 pt. Material's default
+stadium button is therefore **wrong** for this design, and every native action
+overrides it: `Continue`, `Hold seats & checkout`, `Cancel`, `Select`, `Find N
+best seats`, `View from here`, `See it in 3D`, `Open venue 360°`, `Back to
+venue`, `Apply filters`, `Try again` and the prompts' pairs.
+
+`radius.button` is its own role, not a fraction of `radius.base`: a brand that
+rounds its cards to 20 pt must not thereby grow pill buttons, and the organizer's
+branding radius is never inherited by it.
+
+Exactly three things stay true pills, at `radius.pill` / `radius.chip` (999):
+the hold countdown pill, the price-legend chips, and the Map/3D segmented
+control. Round icon controls (map buttons, the 3D seat stepper) are circles and
+are unaffected.
+
+Dart: `SeatLayerPickerThemeData(buttonRadius:)` moves every action at once, and
+the per-element slots — `primaryButtonStyle`, `secondaryButtonStyle`,
+`continueButtonStyle`, `iconButtonStyle` — and each widget's `style:` parameter
+still win over it.
+
 ## Shared model
 
 Every component reads one **picker snapshot** published by the runtime over the
@@ -144,7 +169,8 @@ override** `style:`
   2. Photo strip, `size.confirmPhotoHeight`, only when a photo or 3D exists,
      with the `View from here` and `3D` pills overlaid.
   3. Actions, `size.confirmActionHeight`: `Cancel` and `✓ Select`, split 1:1,
-     Select filled.
+     Select filled. The strip's `View from here` and `3D` controls are actions,
+     not chips: they carry `radius.button`.
 - **Motion** opens anchored to the tapped seat with `motion.curve.spring` over
   `motion.duration.enter`; leaves over `motion.duration.exit`. Select fires the
   `selectionAdded` haptic and a fly-to-peek indicator over
@@ -201,7 +227,7 @@ override** `style:`
 **Instance override** `style:`
 
 - **Inputs** `cart`, `hold`, busy state.
-- **Anatomy** full width, 46 pt, radius `radius.base − 2`, `type.bookButton`.
+- **Anatomy** full width, 46 pt, radius `radius.button`, `type.bookButton`.
   Carries its own label only — the total is already on the peek bar.
 - **States** idle, busy (spinner), disabled when checkout is not possible.
 - **Commands** `picker.checkout`, then `picker.rejectHandoff` if the host
@@ -213,7 +239,9 @@ override** `style:`
 
 - **Inputs** the focused `SelectedSeat`, `map.isVenue3D`, `capabilities`.
 - **States** live seat view / venue 360°; stepper disabled in venue mode.
-- **Anatomy** the dark scene palette whatever the resolved mode is. Top-left
+- **Anatomy** the dark scene palette whatever the resolved mode is. `‹ Back to
+  venue` and `Open venue 360°` are actions at `radius.button`; the caption chip
+  naming the seat is a chip at `radius.chip`. Top-left
   `‹ Back to venue`. Bottom: a caption chip naming the seat, then
   `‹` previous seat, `Open venue 360°`, `›` next seat, and recentre.
 - **Motion** `motion.duration.immersive`.
@@ -228,7 +256,8 @@ override** `style:`
 - **Inputs** `hold.expiresAt`.
 - **States** counting down; absent when there is no picker-owned hold — a hold
   handed to the host is the host's to display.
-- **Anatomy** a pill with a timer glyph and `mm:ss`, `type.pill`.
+- **Anatomy** a true pill (`radius.pill`) with a timer glyph and `mm:ss`,
+  `type.pill`.
 - **Haptics** `holdCreated` on creation, `holdExpired` on expiry.
 
 ## TestModeBadge

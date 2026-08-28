@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
 import 'seat_layer_picker_scope.dart';
+import 'picker_styles.dart';
 import 'seat_layer_picker_theme.dart';
 
 /// The filters a buyer with an access need reaches for.
@@ -61,6 +62,9 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
       );
     }
     return OutlinedButton.icon(
+      style: seatLayerButtonShape(
+        seatLayerPickerThemeOf(context).buttonRadius,
+      ),
       onPressed: onPressed,
       icon: const Icon(Icons.accessible_forward_rounded, size: 18),
       label: Text(
@@ -147,6 +151,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 FilledButton(
+                  style: seatLayerButtonShape(theme.buttonRadius),
                   onPressed: () => Navigator.of(context).pop(
                     (
                       types: selected,

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../payloads.dart';
 import 'picker_internal.dart';
 import 'seat_layer_picker_scope.dart';
+import 'picker_styles.dart';
 import 'seat_layer_picker_theme.dart';
 
 class SeatLayerPickerTablePrompt extends StatefulWidget {
@@ -43,6 +44,7 @@ class _SeatLayerPickerTablePromptState
     if (SeatLayerPickerScope.optionsOf(context).readOnly) {
       return const SizedBox.shrink();
     }
+    final radius = seatLayerPickerThemeOf(context).buttonRadius;
     final min = widget.table.minOccupancy ?? 1;
     final max = widget.table.maxOccupancy ?? widget.table.capacity ?? min;
     return _PromptFrame(
@@ -80,6 +82,7 @@ class _SeatLayerPickerTablePromptState
             children: [
               Expanded(
                 child: OutlinedButton(
+                  style: seatLayerButtonShape(radius),
                   onPressed: () => ignorePickerAction(() async {
                     if (widget.onCancel != null) {
                       await widget.onCancel!(widget.table);
@@ -93,6 +96,7 @@ class _SeatLayerPickerTablePromptState
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
+                  style: seatLayerButtonShape(radius),
                   onPressed: controller.state.isBusy
                       ? null
                       : () => ignorePickerAction(() async {
@@ -141,6 +145,7 @@ class _SeatLayerPickerGeneralAdmissionPromptState
     if (SeatLayerPickerScope.optionsOf(context).readOnly) {
       return const SizedBox.shrink();
     }
+    final radius = seatLayerPickerThemeOf(context).buttonRadius;
     final area = widget.area ?? controller.state.generalAdmissionCandidate;
     if (area == null) return const SizedBox.shrink();
     _tierId ??= area.tiers?.firstOrNull?.id;
@@ -203,6 +208,7 @@ class _SeatLayerPickerGeneralAdmissionPromptState
             children: [
               Expanded(
                 child: OutlinedButton(
+                  style: seatLayerButtonShape(radius),
                   onPressed: () {
                     controller.dismissGeneralAdmissionCandidate();
                     widget.onCancel?.call();
@@ -213,6 +219,7 @@ class _SeatLayerPickerGeneralAdmissionPromptState
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
+                  style: seatLayerButtonShape(radius),
                   onPressed: max < 1 ||
                           controller.state.isBusy ||
                           !controller.state.canMutateInventory

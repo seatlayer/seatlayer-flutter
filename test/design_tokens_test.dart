@@ -57,6 +57,21 @@ void main() {
     expect(layout.accessibilityControlSize, size['minimumHitTarget']);
   });
 
+  test('the radii are design/tokens.json, and buttons are not pills', () {
+    final radius = _section('radius');
+    const light = SeatLayerPickerThemeData.light();
+    const dark = SeatLayerPickerThemeData.dark();
+    expect(light.radius, radius['base']);
+    expect(light.buttonRadius, radius['button']);
+    expect(dark.buttonRadius, radius['button']);
+    // The owner's decision, pinned: the picker's actions round like the web
+    // picker's (~8 pt), and only the hold pill, the legend chips and the
+    // Map/3D control are true pills.
+    expect(radius['button'], lessThan(radius['base']! as num));
+    expect(radius['pill'], 999);
+    expect(radius['chip'], 999);
+  });
+
   test('the motion table is design/tokens.json and inside its budget', () {
     final motion = _section('motion');
     final durations = motion['duration']! as Map<String, Object?>;
@@ -66,7 +81,8 @@ void main() {
         durations[entry.key],
         reason: 'motion token ${entry.key}',
       );
-      expect(entry.value.inMilliseconds, lessThanOrEqualTo(motion['budgetMs']! as int));
+      expect(entry.value.inMilliseconds,
+          lessThanOrEqualTo(motion['budgetMs']! as int));
     }
     expect(durations.keys.toSet(), SeatLayerPickerMotion.catalog.keys.toSet());
   });

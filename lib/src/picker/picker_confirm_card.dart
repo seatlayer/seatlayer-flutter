@@ -382,7 +382,7 @@ class _InspectionStrip extends StatelessWidget {
         child: Row(
           children: [
             if (onViewFromSeat != null)
-              _StripPill(
+              _StripAction(
                 icon: Icons.visibility_outlined,
                 label: strings.viewFromHere,
                 onPressed:
@@ -390,7 +390,7 @@ class _InspectionStrip extends StatelessWidget {
               ),
             const Spacer(),
             if (onShow3D != null)
-              _StripPill(
+              _StripAction(
                 icon: Icons.view_in_ar_rounded,
                 label: strings.venue3D,
                 onPressed: busy ? null : () => _inspect(context, onShow3D!),
@@ -419,8 +419,8 @@ class _InspectionStrip extends StatelessWidget {
   }
 }
 
-class _StripPill extends StatelessWidget {
-  const _StripPill({
+class _StripAction extends StatelessWidget {
+  const _StripAction({
     required this.icon,
     required this.label,
     required this.onPressed,
@@ -437,7 +437,12 @@ class _StripPill extends StatelessWidget {
     return Material(
       color: pill.color ?? pickerAlpha(theme.surface, .92),
       elevation: pill.elevation ?? 0,
-      shape: pill.shape ?? theme.styles.chipShape ?? const StadiumBorder(),
+      // `View from here` and `3D` are actions, not chips, so they carry the
+      // button radius rather than the chip's stadium.
+      shape: pill.shape ??
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(theme.buttonRadius),
+          ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,

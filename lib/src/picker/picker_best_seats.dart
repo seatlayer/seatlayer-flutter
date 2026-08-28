@@ -111,7 +111,7 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
                   foregroundColor: theme.onAccent,
                   minimumSize: Size(0, theme.layout.selectorHeight),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(theme.radius - 4),
+                    borderRadius: BorderRadius.circular(theme.buttonRadius),
                   ),
                   textStyle: TextStyle(
                     fontSize: 13,

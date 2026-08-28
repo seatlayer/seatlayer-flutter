@@ -171,6 +171,12 @@ abstract final class SeatLayerRadiusTokens {
   /// `14`
   static const double sheet = 14;
 
+  /// `8`
+  static const double button = 8;
+
+  /// `999`
+  static const double chip = 999;
+
   /// `999`
   static const double pill = 999;
 }

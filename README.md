@@ -183,16 +183,21 @@ builders: SeatLayerPickerBuilders(
 
 **Restyle one element, keep the widget.** Every control the picker draws has a
 style slot on the theme, so a single button can change shape without replacing
-the widget around it. Turning the peek bar's `Continue` into a square filled
-button is three lines:
+the widget around it. The picker's buttons round to `radius.button` (8 pt, the
+web picker's own), so turning the peek bar's `Continue` into a pill is three
+lines:
 
 ```dart
 theme: SeatLayerPickerThemeData.light(
   styles: SeatLayerPickerStyles(
-    continueButtonStyle: FilledButton.styleFrom(shape: const RoundedRectangleBorder()),
+    continueButtonStyle: FilledButton.styleFrom(shape: const StadiumBorder()),
   ),
 ),
 ```
+
+Every button moves together through `buttonRadius`, which is its own role
+rather than a fraction of `radius`: `SeatLayerPickerThemeData.light(radius: 20)`
+rounds the cards and sheets without growing pill actions.
 
 The slots are `primaryButtonStyle`, `secondaryButtonStyle`,
 `continueButtonStyle`, `iconButtonStyle`, `chipShape`, `legendChipStyle`,

@@ -6,6 +6,7 @@ import 'picker_internal.dart';
 import 'picker_styles.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_scope.dart';
+import 'picker_tokens.g.dart';
 import 'seat_layer_picker_theme.dart';
 
 /// Whose event this is, how long the seats are held, and the way out.
@@ -245,7 +246,7 @@ class _SeatLayerPickerHoldCountdownState
     return DecoratedBox(
       decoration: BoxDecoration(
         color: pickerAlpha(theme.accent, .12),
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),

@@ -45,6 +45,15 @@ capability-gated, so the hosted 0.70.0 build behaves exactly as before)
 
 **Styling**
 
+- Buttons are no longer pills. Every action — `Continue`, `Hold seats &
+  checkout`, `Cancel`, `Select`, `Find N best seats`, `View from here`, `See it
+  in 3D`, `Open venue 360°`, `Back to venue`, `Apply filters`, `Try again` —
+  rounds to the new `radius.button` (8), which is what the web picker's own
+  buttons measure, instead of Material's default stadium.
+  `SeatLayerPickerThemeData(buttonRadius:)` moves them all at once and is its
+  own role, so `radius:` still rounds cards and sheets without growing pill
+  actions. The hold pill, the price-legend chips and the Map/3D segmented
+  control stay true pills (`radius.pill` / `radius.chip`).
 - `SeatLayerPickerStyles` adds per-element style slots to
   `SeatLayerPickerThemeData` (`primaryButtonStyle`, `secondaryButtonStyle`,
   `continueButtonStyle`, `iconButtonStyle`, `chipShape`, `legendChipStyle`,

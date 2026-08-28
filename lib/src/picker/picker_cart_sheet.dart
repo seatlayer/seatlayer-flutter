@@ -89,8 +89,8 @@ class SeatLayerCartSheet extends StatelessWidget {
     final maxBody =
         (maxSheet - layout.peekHeight - bottomInset).clamp(0.0, maxSheet);
 
-    final surface = (theme.styles.sheetStyle ?? const SeatLayerSurfaceStyle())
-        .merge(style);
+    final surface =
+        (theme.styles.sheetStyle ?? const SeatLayerSurfaceStyle()).merge(style);
     return Material(
       color: surface.color ?? theme.surface,
       elevation: surface.elevation ?? 12,
@@ -237,6 +237,9 @@ class _PeekRow extends StatelessWidget {
                       ),
                     if (!expanded && hasTickets) ...[
                       FilledButton(
+                        // The shape merges LAST: `merge` fills this style's
+                        // null fields, so a slot or an instance style that
+                        // sets its own shape still wins.
                         style: FilledButton.styleFrom(
                           backgroundColor: theme.accent,
                           foregroundColor: theme.onAccent,
@@ -248,10 +251,12 @@ class _PeekRow extends StatelessWidget {
                             fontWeight: FontWeight.w800,
                             fontFamily: theme.fontFamily,
                           ),
-                        ).merge(
-                          continueStyle ??
-                              theme.styles.resolvedContinueButtonStyle,
-                        ),
+                        )
+                            .merge(
+                              continueStyle ??
+                                  theme.styles.resolvedContinueButtonStyle,
+                            )
+                            .merge(seatLayerButtonShape(theme.buttonRadius)),
                         onPressed: controller.canCheckout
                             ? () => ignorePickerAction(
                                   checkoutThroughHost(controller, onCheckout),
@@ -425,19 +430,20 @@ class SeatLayerBookButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),
       child: FilledButton(
+        // The shape merges LAST so `primaryButtonStyle` — or this instance's
+        // own `style:` — can still reshape the button.
         style: FilledButton.styleFrom(
           backgroundColor: theme.accent,
           foregroundColor: theme.onAccent,
           minimumSize: const Size.fromHeight(46),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(theme.radius - 2),
-          ),
           textStyle: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w800,
             fontFamily: theme.fontFamily,
           ),
-        ).merge(style ?? theme.styles.primaryButtonStyle),
+        )
+            .merge(style ?? theme.styles.primaryButtonStyle)
+            .merge(seatLayerButtonShape(theme.buttonRadius)),
         onPressed: controller.canCheckout
             ? () => ignorePickerAction(
                   checkoutThroughHost(controller, onCheckout),
