@@ -2,8 +2,10 @@
 
 ## 0.3.1
 
-Defects the owner found on a phone, and the three things the perf round said
-the SDK owned.
+Defects the owner found on a phone, the three things the perf round said the
+SDK owned, and the additive native-chrome contract that came out of it: the
+chart-load beacon, the seat-view panorama's words, and the floor strip's
+confirmed shape.
 
 **The system bars are the picker's** — the reported defect
 
@@ -34,6 +36,68 @@ the SDK owned.
   name take a second line at 12 sp, and only then can it ellipsize. The step
   controls never give way: they are how the buyer moves. Goldens at 390 and
   320.
+
+**One load time covering the whole open**
+
+- The runtime's chart-load beacon now reaches the host (`evt
+  telemetry.chartLoad`, capability `chart-load-trace-v1`) and is decoded whole
+  into `SeatLayerChartLoadTrace` — the API, availability, normalise, renderer
+  and paint spans, the seat and floor counts, the chart's cache result, and the
+  three document-relative spans `documentMs` / `handshakeMs` / `bootMs`. Fields
+  this release does not model are kept verbatim on `raw`, so a runtime that adds
+  one is readable without an SDK release.
+- It is merged with the SDK's own measurement rather than surfaced alone. The
+  runtime's clock starts at its own document; the SDK's `ReadyInfo` starts when
+  the view armed its handshake; neither is what the buyer felt.
+  `SeatLayerChartLoad.tapToReadyMs` starts at the picker's **mount** — the frame
+  after the tap — so it is the same T0 whether or not the page was prewarmed,
+  and `hostMs` is that span less the page's own `bootMs`. On the pilot's
+  3,513 ms cold open that outside-the-page share was 2,495 ms.
+- Reached as `SeatLayerPickerController.onChartLoad` (a broadcast stream) or
+  `SeatLayerPickerCallbacks(onChartLoad:)`. Fires once per render attempt,
+  success or failure. **Nothing is logged and nothing is sent anywhere** — it is
+  a hook for the host's own analytics.
+
+**The seat-view panorama's words are native**
+
+- The 3D scene went native-clean a round ago; the 2D `View from here` fallback
+  did not. It kept drawing its own header line, disclosure caption and `PREVIEW`
+  badge over the picture, and on a phone all three landed under the native price
+  rail — two owners drawing chrome in the same band.
+- Against a runtime advertising `native-seat-view-chrome-v1` the picker adds
+  `seatViewTitle`, `seatViewCaption` and `seatViewBadge` to its init suppression
+  and draws `SeatLayerSeatViewChrome` instead: a caption strip and disclosure
+  badge in the picker's palette, clear of the rail and the dock. The words
+  arrive already localized on `evt seatView.changed` and arrive again after a
+  live language switch, so nothing is re-derived here; `SeatLayerSeatView.real`
+  is what separates an authored capture of the seat from one the engine drew out
+  of the venue's geometry, so the badge never has to be recognised by its
+  translated word.
+- Composable like every other part: `SeatLayerPickerBuilders(seatViewChrome:)`,
+  `SeatLayerPickerChromeOptions(showSeatViewChrome:)` and
+  `SeatLayerPickerStyles(seatViewChromeStyle:)`. It takes no touch — every
+  gesture over the panorama is the panorama's.
+- The CLOSE button is deliberately not suppressed. It is the buyer's only way
+  out of a full-screen picture, and native chrome does not reach inside the
+  panorama to offer one. An older runtime is asked to suppress nothing and keeps
+  drawing its own, so the disclosure is on screen exactly once either way.
+
+**Floors read in the order the venue has them**
+
+- The runtime confirmed the floor contract and one negative with it: there is no
+  `level` field. The strip had been sorting floors top-down by it whenever every
+  floor carried one, which no floor does — dead by construction, and a sort that
+  would reorder half a venue the day a chart carried a partial level. Removed;
+  the snapshot's order is the venue's order, stage upward.
+- The "All floors" chip now needs both halves of the runtime's word: the
+  `floor-stack-v1` capability and a reported `floorMode`. A chip drawn on one
+  half alone would send `'all'` to a runtime with no such floor.
+- `SeatLayerPickerMapState.floorLabelStyle` is read alongside, for a host
+  drawing a strip of its own that wants to match the stacked view's badges.
+- `SeatLayerPickerStrings.allFloors` remains the one native chrome string with
+  no runtime dictionary key to take its translation from, and is now recorded as
+  an ask rather than as folklore. It keeps its English wording in every locale
+  until the key exists; override it for a multi-floor venue outside English.
 
 **Prewarm**
 
