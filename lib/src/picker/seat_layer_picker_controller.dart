@@ -10,6 +10,7 @@ import '../payloads.dart';
 import '../seat_layer_configuration.dart';
 import '../seat_layer_controller.dart';
 import '../seat_layer_error.dart';
+import 'picker_availability.dart';
 import 'picker_chart_load.dart';
 import 'picker_haptics.dart';
 import 'picker_models.dart';
@@ -29,7 +30,6 @@ const String _floorStackCapability = 'floor-stack-v1';
 
 /// Advertised by a runtime that hands its own chart-load beacon to the host.
 const String _chartLoadTraceCapability = 'chart-load-trace-v1';
-
 
 /// State and actions for one high-level picker session.
 ///
@@ -64,16 +64,8 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         .mapController
         .onSelectedObjectsUnavailable
         .listen((event) => _callbacks.onSelectedObjectUnavailable?.call(event));
-    _holdExpiredSubscription = this.mapController.onHoldExpired.listen((_) {
-      if (_options.haptics) {
-        try {
-          playHaptic(PickerHapticCue.holdExpired);
-        } catch (_) {
-          // A cue is a nicety; there is nothing a host could do about it.
-        }
-      }
-      _callbacks.onHoldExpired?.call();
-    });
+    _holdExpiredSubscription =
+        this.mapController.onHoldExpired.listen((_) => _reportHoldExpired());
     _generalAdmissionSubscription = this.mapController.onGAClick.listen((area) {
       if (!_options.readOnly) {
         value = value.withGeneralAdmissionCandidate(area);
@@ -134,16 +126,22 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   bool _viewportInsetsFlushScheduled = false;
   final Map<int, List<Completer<void>>> _revisionWaiters =
       <int, List<Completer<void>>>{};
+  Future<SeatLayerAvailabilityRefresh>? _refreshInFlight;
+  SeatLayerHoldLapse? _holdLapse;
+  bool _holdExpiryReported = false;
 
   SeatLayerPickerState get state => value;
   SeatLayerPickerOptions get options => _options;
+
   /// Whether the buyer may hand this cart to checkout.
   ///
   /// False while a confirm card is open: the seat under it is already in the
   /// runtime's selection, so without this the buyer could check out a seat
   /// they were still being asked about, by pressing a button behind the scrim.
   bool get canCheckout =>
-      value.canCheckout && !_options.readOnly && seatAwaitingConfirmation == null;
+      value.canCheckout &&
+      !_options.readOnly &&
+      seatAwaitingConfirmation == null;
 
   /// The seat a confirm card is standing over, unanswered.
   ///
@@ -447,6 +445,13 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         previousHold?.expiresAt != nextHold?.expiresAt) {
       _callbacks.onHoldChanged?.call(nextHold, value.checkoutHandoff);
     }
+    if (nextHold != null) {
+      // A live hold ends the previous one's story: the expiry may be announced
+      // again when THIS hold ends, and a lapse notice left standing over a
+      // fresh countdown would be telling the buyer about seats they now have.
+      _holdExpiryReported = false;
+      _holdLapse = null;
+    }
 
     // Every cue comes from here, and only from here: the snapshot is the one
     // place selection, focus and hold are known to agree. Firing from the
@@ -493,6 +498,170 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
           rethrow;
         }
       });
+
+  /// Whether the mounted runtime can re-read live availability.
+  ///
+  /// Both halves are checked: a runtime may carry the command name in an old
+  /// `hello` without the semantics this SDK relies on, and the capability is
+  /// the half that promises a buyer's own held seats are excluded from `lost`.
+  bool get supportsAvailabilityRefresh {
+    final bundle = mapController.bundleInfo;
+    return bundle != null &&
+        bundle.supportsCapability(seatLayerAvailabilityRefreshCapability);
+  }
+
+  /// Whether the mounted runtime reports the access needs this chart offers.
+  bool get supportsAccessNeeds {
+    final bundle = mapController.bundleInfo;
+    return bundle != null &&
+        bundle.supportsCapability(seatLayerAccessNeedsCapability);
+  }
+
+  /// A hold that ended on its own and has not been shown to the buyer yet.
+  ///
+  /// Set by [refreshAvailability] from the server's answer, never from the
+  /// local countdown. Cleared by [dismissHoldLapse], by
+  /// [reselectLapsedSeats], and by any snapshot carrying a live hold.
+  SeatLayerHoldLapse? get holdLapse => _holdLapse;
+
+  /// Re-read live availability, without disturbing anything the buyer owns.
+  ///
+  /// Call it whenever the picker comes back to the front — the app resuming, a
+  /// pushed checkout screen popping — because a suspended app learns nothing
+  /// while it is away. [SeatLayerPickerOptions.refreshOnResume] wires both of
+  /// those for the drop-in; this is the same action for a composed layout.
+  ///
+  /// Safe everywhere it can be called from. On a runtime that does not
+  /// advertise `availability-refresh-v1` it answers
+  /// [SeatLayerAvailabilityRefresh.unsupported] rather than throwing, so a host
+  /// can wire the hook once and not care which runtime a device fetched. Two
+  /// overlapping calls share one Future — the runtime coalesces a refresh with
+  /// any availability read already in flight, and issuing a second would only
+  /// mint a second revision for the same answer.
+  ///
+  /// Deliberately NOT a `_mutation`, and deliberately without a busy action.
+  /// [SeatLayerPickerBusyAction.synchronizing] is what
+  /// [SeatLayerPickerState.isBusy] reads, and every control in the chrome
+  /// disables itself on that. A refresh nobody asked for — fired the instant a
+  /// buyer returns to the app — would grey the map controls, the confirm card
+  /// and the checkout button for a round trip each time, which reads as the
+  /// picker breaking rather than as it catching up. Whatever the refresh
+  /// really changed still arrives as a snapshot, exactly as
+  /// `picker.setViewportInsets` does.
+  Future<SeatLayerAvailabilityRefresh> refreshAvailability() {
+    if (_disposed || !value.isReady || !supportsAvailabilityRefresh) {
+      return Future<SeatLayerAvailabilityRefresh>.value(
+        const SeatLayerAvailabilityRefresh.unsupported(),
+      );
+    }
+    final current = _refreshInFlight;
+    if (current != null) return current;
+    final future = _serialize(_runRefresh);
+    _refreshInFlight = future;
+    unawaited(
+      future.then<void>(
+        (_) => _clearRefreshFlight(future),
+        onError: (Object _, StackTrace __) => _clearRefreshFlight(future),
+      ),
+    );
+    return future;
+  }
+
+  Future<SeatLayerAvailabilityRefresh> _runRefresh() async {
+    final SeatLayerAvailabilityRefresh refresh;
+    try {
+      final result = await mapController.runBridgeCommand(
+        'picker.refreshAvailability',
+        const <String, Object?>{},
+      );
+      _applySnapshotFromResult(result);
+      refresh = SeatLayerAvailabilityRefresh.fromJson(
+        jGet(result, 'result') ?? result,
+      );
+      final revision = refresh.revision;
+      if (revision != null) await _awaitRevision(revision);
+    } catch (error) {
+      // A refresh is housekeeping. Parking the whole picker on an error the
+      // buyer never asked for would replace a working map with a red panel
+      // because a background poll missed, so the failure is handed to the
+      // host's error callback and the session carries on.
+      if (error is SeatLayerError) _callbacks.onError?.call(error);
+      return const SeatLayerAvailabilityRefresh.unsupported();
+    }
+    if (refresh.lostLabels.isNotEmpty) {
+      // The same path a seat lost in the foreground already takes, so a host
+      // that handles one handles both and no second surface exists.
+      _callbacks.onSelectedObjectUnavailable?.call(
+        SelectedObjectUnavailableEvent(
+          labels: refresh.lostLabels,
+          reason: const SelectedObjectUnavailableReason('taken'),
+        ),
+      );
+    }
+    if (refresh.holdLapsed) {
+      _holdLapse = SeatLayerHoldLapse(
+        lapsedLabels: refresh.lapsedLabels,
+        recoverableLabels: refresh.recoverableLabels,
+        heldFor: _options.holdTtl,
+      );
+      // The server is the authority here, not the local countdown: a timer in
+      // a suspended isolate may never have fired, so this is often the first
+      // and only notice that the hold is gone.
+      _reportHoldExpired();
+      notifyListeners();
+    }
+    return refresh;
+  }
+
+  /// Fire the hold-expiry cue and callback at most once per hold.
+  ///
+  /// Both the runtime's `hold.expired` event and a refresh that finds the hold
+  /// gone lead here, and on a resume they commonly both arrive. Reset when a
+  /// snapshot carries a live hold again.
+  void _reportHoldExpired() {
+    if (_disposed || _holdExpiryReported) return;
+    _holdExpiryReported = true;
+    if (_options.haptics) {
+      try {
+        playHaptic(PickerHapticCue.holdExpired);
+      } catch (_) {
+        // A cue is a nicety; there is nothing a host could do about it.
+      }
+    }
+    _callbacks.onHoldExpired?.call();
+  }
+
+  /// Take the lapse message down without acting on it.
+  void dismissHoldLapse() {
+    if (_disposed || _holdLapse == null) return;
+    _holdLapse = null;
+    notifyListeners();
+  }
+
+  /// Select the lapsed seats that are still free, so the buyer can hold again.
+  ///
+  /// Works from the labels the last refresh reported free, never from local
+  /// state: between the lapse and the buyer's tap the seats can go, and
+  /// re-selecting from memory would put somebody else's seat in the cart.
+  ///
+  /// This re-selects; it does not create the hold. `picker.continue` is the
+  /// only command that holds, and it also mints a checkout handoff the host
+  /// consumes — so calling it here would carry the buyer off to checkout when
+  /// all they said was that they wanted their seats back. The new hold comes
+  /// from the same call to action as every other one, which is on screen.
+  Future<List<SelectedSeat>> reselectLapsedSeats() async {
+    final lapse = _holdLapse;
+    if (lapse == null || lapse.recoverableLabels.isEmpty) {
+      return value.selection;
+    }
+    _holdLapse = null;
+    notifyListeners();
+    return selectObjects(lapse.recoverableLabels);
+  }
+
+  void _clearRefreshFlight(Future<SeatLayerAvailabilityRefresh> future) {
+    if (identical(_refreshInFlight, future)) _refreshInFlight = null;
+  }
 
   Future<void> clearSelection() => _inventoryMutation(
         'picker.clearSelection',

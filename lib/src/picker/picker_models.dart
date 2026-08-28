@@ -520,6 +520,50 @@ class SeatLayerViewportInsets {
       'left: $left)';
 }
 
+/// One access need this event's chart actually offers, and how many free seats
+/// currently match it.
+///
+/// Reported only by a runtime advertising `access-needs-v1`. A need whose seats
+/// are all taken is still listed, with a [count] of zero — "this venue has no
+/// step-free seats" and "its step-free seats are gone" are different facts, and
+/// a filter chip that simply vanished would tell the buyer the first when the
+/// truth was the second.
+@immutable
+class SeatLayerAccessNeed {
+  /// Creates one offered access need.
+  const SeatLayerAccessNeed({required this.key, required this.count});
+
+  /// The runtime's wire key, for example `wheelchair` or `step-free`.
+  ///
+  /// Named through [SeatLayerPickerStrings.accessNeeds]; a key that table has
+  /// no name for is drawn under this key rather than dropped.
+  final String key;
+
+  /// How many free seats match this need right now.
+  final int count;
+
+  /// Whether any seat is still available under this need.
+  bool get isAvailable => count > 0;
+
+  /// Decode one `{ key, count }` entry, or null if it names nothing.
+  static SeatLayerAccessNeed? fromJson(Object? value) {
+    final key = jStr(jGet(value, 'key'));
+    if (key == null || key.isEmpty) return null;
+    final count = jInt(jGet(value, 'count')) ?? 0;
+    return SeatLayerAccessNeed(key: key, count: count < 0 ? 0 : count);
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeatLayerAccessNeed && other.key == key && other.count == count;
+
+  @override
+  int get hashCode => Object.hash(key, count);
+
+  @override
+  String toString() => 'SeatLayerAccessNeed($key: $count)';
+}
+
 @immutable
 class SeatLayerPickerMapState {
   const SeatLayerPickerMapState({
@@ -534,6 +578,7 @@ class SeatLayerPickerMapState {
     required this.categoryFilter,
     required this.accessibilityFilter,
     required this.floors,
+    this.accessNeeds = const <SeatLayerAccessNeed>[],
     this.activeFloorId,
     this.floorMode,
     this.floorLabelStyle,
@@ -558,6 +603,13 @@ class SeatLayerPickerMapState {
   final Set<String> categoryFilter;
   final Set<String> accessibilityFilter;
   final List<FloorInfo> floors;
+
+  /// The access needs this event's chart offers, in the runtime's own order.
+  ///
+  /// Empty on a runtime that does not advertise `access-needs-v1`, which is
+  /// why the accessibility sheet falls back to the full static list there: an
+  /// empty list means "not reported", never "this venue offers none".
+  final List<SeatLayerAccessNeed> accessNeeds;
 
   /// Whether the runtime is drawing every floor or just [activeFloorId].
   ///
@@ -625,6 +677,9 @@ class SeatLayerPickerMapState {
         ),
         floors: List<FloorInfo>.unmodifiable(
           jListOf(jGet(value, 'floors'), FloorInfo.fromJson),
+        ),
+        accessNeeds: List<SeatLayerAccessNeed>.unmodifiable(
+          jListOf(jGet(value, 'accessNeeds'), SeatLayerAccessNeed.fromJson),
         ),
         floorMode: jStr(jGet(value, 'floorMode')),
         floorLabelStyle: jStr(jGet(value, 'floorLabelStyle')),

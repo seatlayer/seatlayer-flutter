@@ -183,6 +183,8 @@ class SeatLayerPickerOptions {
     this.hideEventDetails = false,
     this.panelInitiallyCollapsed = true,
     this.persistColorblindPreference = true,
+    this.refreshOnResume = true,
+    this.announceHoldLapse = true,
     this.chrome = const SeatLayerPickerChromeOptions(),
     this.languages = const <Locale>[],
     this.pricing,
@@ -232,6 +234,32 @@ class SeatLayerPickerOptions {
 
   /// Whether a colourblind-safe choice survives the session.
   final bool persistColorblindPreference;
+
+  /// Re-read live availability whenever the picker comes back to the front.
+  ///
+  /// Covers both ways it can: the application resuming from the background,
+  /// and a pushed route — a checkout screen, a sign-in — popping back to the
+  /// picker. A suspended app learns nothing while it is away, so without this
+  /// the buyer returns to a map that was last true minutes ago and can tap a
+  /// seat somebody else already bought.
+  ///
+  /// The route half needs [SeatLayerPicker.routeObserver] in the host's
+  /// `MaterialApp.navigatorObservers`; without it the lifecycle half still
+  /// works and nothing complains. Turning this off turns off BOTH triggers,
+  /// for a host that refreshes on its own schedule.
+  ///
+  /// Deliberately absent from [toBridgeConfig]: when to ask is a host-side
+  /// decision about the host's own navigation, and the runtime has no view of
+  /// either event.
+  final bool refreshOnResume;
+
+  /// Tell the buyer, once, when their hold has lapsed while they were away.
+  ///
+  /// A line in the cart sheet and a toast — never a dialog, and never anything
+  /// that blocks the map. [SeatLayerPickerCallbacks.onHoldExpired] fires
+  /// either way, so a host that would rather own the moment turns this off and
+  /// keeps the notification.
+  final bool announceHoldLapse;
 
   /// Which parts of the native chrome render.
   final SeatLayerPickerChromeOptions chrome;
