@@ -30,6 +30,13 @@ New: `SeatLayerPickerController.refreshAvailability()`,
 `SeatLayerAvailabilityRefresh`, `SeatLayerHoldLapse`, `SeatLayerRecovery`,
 `SeatLayerHoldLapseNotice`.
 
+The hold countdown stops the moment a read finds the hold gone, even when the
+snapshot in hand still describes a live one — it was read before the
+reconciliation that ended it, and a clock still running over released seats is
+the one thing that can leave a buyer reassured right up to a failed checkout.
+`SeatLayerPickerState.hold` answers null from that moment, so any layout hung
+off it goes quiet with the built-in pill.
+
 The accessibility sheet now offers what the event actually has. On a runtime
 that reports them, only the access needs this chart carries are drawn, in the
 runtime's order, each with the number of matching free seats; a need whose seats

@@ -844,6 +844,7 @@ class SeatLayerPickerState {
     this.checkoutHandoff,
     this.generalAdmissionCandidate,
     this.error,
+    this.holdLapsed = false,
   });
 
   const SeatLayerPickerState.initializing()
@@ -852,7 +853,8 @@ class SeatLayerPickerState {
         snapshot = null,
         checkoutHandoff = null,
         generalAdmissionCandidate = null,
-        error = null;
+        error = null,
+        holdLapsed = false;
 
   final SeatLayerPickerPhase phase;
   final SeatLayerPickerBusyAction busyAction;
@@ -860,6 +862,15 @@ class SeatLayerPickerState {
   final SeatLayerCheckoutHandoff? checkoutHandoff;
   final GAArea? generalAdmissionCandidate;
   final Object? error;
+
+  /// Whether the last availability read found the buyer's own hold gone.
+  ///
+  /// The snapshot in hand may still describe a live hold — it was read before
+  /// the reconciliation that condemned it, or the runtime has not pushed the
+  /// cleared one yet — and a countdown running off THAT is the whole defect
+  /// this flag closes: a dead hold with a live clock, discovered at checkout.
+  /// While it is set [hold] answers null, so nothing downstream can tick.
+  final bool holdLapsed;
 
   int get revision => snapshot?.revision ?? 0;
   String? get sessionId => snapshot?.sessionId;
@@ -871,8 +882,9 @@ class SeatLayerPickerState {
       snapshot?.selection ?? const <SelectedSeat>[];
   List<SeatLayerCheckoutLineItem> get cartLines =>
       snapshot?.cartLines ?? const <SeatLayerCheckoutLineItem>[];
-  SeatLayerPickerHold? get hold =>
-      snapshot?.hold.active == true ? snapshot!.hold : null;
+  SeatLayerPickerHold? get hold => !holdLapsed && snapshot?.hold.active == true
+      ? snapshot!.hold
+      : null;
   SeatLayerHoldOwner? get holdOwner => snapshot?.holdOwner;
   bool get isReady => phase == SeatLayerPickerPhase.ready;
   bool get isBusy => busyAction != SeatLayerPickerBusyAction.none;
@@ -917,6 +929,7 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        holdLapsed: holdLapsed,
       );
 
   SeatLayerPickerState withError(Object next) => SeatLayerPickerState(
@@ -926,6 +939,7 @@ class SeatLayerPickerState {
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
         error: next,
+        holdLapsed: holdLapsed,
       );
 
   SeatLayerPickerState withActionError(Object next) => SeatLayerPickerState(
@@ -935,6 +949,7 @@ class SeatLayerPickerState {
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
         error: next,
+        holdLapsed: holdLapsed,
       );
 
   SeatLayerPickerState withGeneralAdmissionCandidate(GAArea? area) =>
@@ -945,6 +960,7 @@ class SeatLayerPickerState {
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: area,
         error: error,
+        holdLapsed: holdLapsed,
       );
 
   SeatLayerPickerState withoutError() => SeatLayerPickerState(
@@ -953,6 +969,7 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        holdLapsed: holdLapsed,
       );
 
   SeatLayerPickerState withHandoff(SeatLayerCheckoutHandoff handoff) =>
@@ -962,6 +979,7 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: handoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        holdLapsed: holdLapsed,
       );
 
   SeatLayerPickerState withoutHandoff() => SeatLayerPickerState(
@@ -970,6 +988,22 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         generalAdmissionCandidate: generalAdmissionCandidate,
         error: error,
+        holdLapsed: holdLapsed,
+      );
+
+  /// The same state with the buyer's hold condemned.
+  ///
+  /// Applied the moment a refresh reports `holdLapsed`, so the countdown pill
+  /// stops on the same frame the buyer is told — rather than on whenever the
+  /// runtime's next snapshot happens to arrive.
+  SeatLayerPickerState withLapsedHold() => SeatLayerPickerState(
+        phase: phase,
+        busyAction: busyAction,
+        snapshot: snapshot,
+        checkoutHandoff: checkoutHandoff,
+        generalAdmissionCandidate: generalAdmissionCandidate,
+        error: error,
+        holdLapsed: true,
       );
 
   SeatLayerPickerState closed() => SeatLayerPickerState(
@@ -978,6 +1012,7 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        holdLapsed: holdLapsed,
       );
 }
 

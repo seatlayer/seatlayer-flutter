@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/bridge/bridge_protocol.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_availability.dart';
+import 'package:seatlayer/src/picker/picker_header.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/seat_layer_configuration.dart';
@@ -321,6 +322,128 @@ void main() {
 
       expect(holdExpired, 1);
       expect(controller.holdLapse, isNotNull);
+    });
+  });
+
+  // THE COUNTDOWN MAY NOT OUTLIVE THE HOLD.
+  //
+  // The runtime decides a hold has lapsed from the hold's own expiry, so a
+  // reply can carry `holdLapsed: true` beside a snapshot that STILL describes
+  // a live hold — the snapshot was read before the reconciliation that
+  // condemned it. The pill counts down off that snapshot, so believing it
+  // leaves a live clock over dead seats: the buyer is reassured by a timer
+  // while his seats belong to somebody else, and finds out at checkout.
+  group('a hold the runtime has condemned', () {
+    FakePickerMap condemning(List<String> recoverable) => FakePickerMap(
+          bundle: refreshingBundle(),
+          handler: (command, payload) async => availabilityRefresh(
+            // Deliberately STALE: still an active hold, expiry far away.
+            snapshot: heldRowSnapshot(revision: 4),
+            holdLapsed: true,
+            lapsedLabels: const <String>['A-1', 'A-2', 'A-3'],
+            recoverable: recoverable,
+            revision: 4,
+          ),
+        );
+
+    test('stops the countdown even when the snapshot still shows a hold',
+        () async {
+      var holdExpired = 0;
+      final map = condemning(const <String>[]);
+      addTearDown(map.dispose);
+      final controller = await _ready(
+        map,
+        snapshot: heldRowSnapshot(),
+        options: const SeatLayerPickerOptions(holdTtl: Duration(minutes: 15)),
+        callbacks:
+            SeatLayerPickerCallbacks(onHoldExpired: () => holdExpired += 1),
+      );
+      expect(controller.state.hold, isNotNull);
+
+      final result = await controller.refreshAvailability();
+
+      expect(result.holdLapsed, isTrue);
+      expect(controller.state.holdLapsed, isTrue);
+      expect(
+        controller.state.hold,
+        isNull,
+        reason: 'the pill reads state.hold; anything else keeps ticking',
+      );
+      expect(controller.state.holdRemaining(DateTime.now()), Duration.zero);
+      expect(holdExpired, 1);
+    });
+
+    test('recovers nothing when another buyer holds every seat', () async {
+      final map = condemning(const <String>[]);
+      addTearDown(map.dispose);
+      final controller = await _ready(map, snapshot: heldRowSnapshot());
+
+      await controller.refreshAvailability();
+
+      expect(controller.holdLapse!.recovery, SeatLayerRecovery.none);
+      expect(controller.holdLapse!.recoverableLabels, isEmpty);
+      // What the copy reports as could-not-be-recovered: all three of them.
+      expect(controller.holdLapse!.unrecoveredCount, 3);
+    });
+
+    test('offers back only the seats that came free', () async {
+      final map = condemning(const <String>['A-2']);
+      addTearDown(map.dispose);
+      final controller = await _ready(map, snapshot: heldRowSnapshot());
+
+      await controller.refreshAvailability();
+
+      expect(controller.holdLapse!.recovery, SeatLayerRecovery.partial);
+      expect(controller.holdLapse!.recoverableLabels, <String>['A-2']);
+      expect(controller.holdLapse!.unrecoveredCount, 2);
+      expect(controller.state.hold, isNull);
+    });
+
+    test('leaves a hold that has NOT been condemned running', () async {
+      // The conservatism that must survive: the runtime found the hold fine,
+      // and this side may not second-guess it off a seat status.
+      final map = FakePickerMap(
+        bundle: refreshingBundle(),
+        handler: (command, payload) async => availabilityRefresh(
+            snapshot: heldRowSnapshot(revision: 4), revision: 4),
+      );
+      addTearDown(map.dispose);
+      final controller = await _ready(map, snapshot: heldRowSnapshot());
+      final expiry = controller.state.hold!.expiresAt;
+
+      await controller.refreshAvailability();
+
+      expect(controller.state.holdLapsed, isFalse);
+      expect(controller.state.hold, isNotNull);
+      expect(controller.state.hold!.expiresAt, expiry);
+      expect(controller.holdLapse, isNull);
+    });
+
+    testWidgets('the header pill goes the moment the hold is condemned',
+        (tester) async {
+      final map = condemning(const <String>[]);
+      addTearDown(map.dispose);
+      useFakeWebViewPlatform();
+      usePhoneSurface(tester);
+
+      final controller = SeatLayerPickerController(mapController: map);
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const SeatLayerPickerHeader(compact: true),
+          controller: controller,
+        ),
+      );
+      map.emit(heldRowSnapshot());
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.timer_outlined), findsOneWidget);
+
+      await controller.refreshAvailability();
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.timer_outlined), findsNothing);
+      expect(find.byType(SeatLayerPickerHoldCountdown), findsNothing,
+          reason: 'the header hangs the pill off state.hold, which is now gone');
     });
   });
 

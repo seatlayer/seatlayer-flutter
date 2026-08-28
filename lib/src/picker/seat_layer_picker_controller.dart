@@ -649,6 +649,11 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       heldFor: _options.holdTtl,
     );
     if (next.supersedes(_holdLapse)) _holdLapse = next;
+    // Condemn the hold in the state on THIS frame. The snapshot in hand can
+    // still describe a live one — it was read before the reconciliation that
+    // ended it — and a countdown ticking off that is a live clock over a dead
+    // hold, which the buyer only discovers when checkout fails.
+    if (!value.holdLapsed) value = value.withLapsedHold();
     // The server is the authority here, not the local countdown: a timer in a
     // suspended isolate may never have fired, so this is often the first and
     // only notice that the hold is gone.
