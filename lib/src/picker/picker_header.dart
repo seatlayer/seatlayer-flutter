@@ -209,6 +209,15 @@ class SeatLayerPickerHoldCountdown extends StatefulWidget {
   /// Creates the hold countdown pill.
   const SeatLayerPickerHoldCountdown({super.key});
 
+  /// The wall clock this pill counts down against.
+  ///
+  /// A golden of the header is a picture of a running countdown, so the real
+  /// clock would make it a different picture every second. `flutter_test_config`
+  /// pins this to a fixed instant for the whole test run; nothing in the
+  /// shipped SDK ever reassigns it.
+  @visibleForTesting
+  static DateTime Function() debugClock = DateTime.now;
+
   @override
   State<SeatLayerPickerHoldCountdown> createState() =>
       _SeatLayerPickerHoldCountdownState();
@@ -238,7 +247,8 @@ class _SeatLayerPickerHoldCountdownState
     if (state.hold == null) return const SizedBox.shrink();
     final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
-    final remaining = state.holdRemaining(DateTime.now());
+    final remaining =
+        state.holdRemaining(SeatLayerPickerHoldCountdown.debugClock());
     final minutes =
         remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds =
