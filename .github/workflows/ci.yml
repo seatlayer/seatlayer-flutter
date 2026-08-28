@@ -28,3 +28,26 @@ jobs:
       - run: flutter analyze
       - run: flutter test
       - run: dart pub publish --dry-run
+
+  # Goldens are recorded on macOS and can only be compared there.
+  #
+  # Fonts are pinned for every host in test/flutter_test_config.dart, so the
+  # glyphs and their positions are now identical everywhere. What is not
+  # identical is how Skia rasterises them: CoreText on macOS and FreeType on
+  # Linux disagree on the anti-aliased edge of every letter, which left 2-5% of
+  # each image differing one pixel deep around glyph outlines. A comparator
+  # loose enough to accept that would also accept a real regression, so the
+  # images are enforced on the platform that records them. The Linux job above
+  # still runs every other test; the golden group skips itself there with a
+  # reason.
+  goldens:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.0
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter test --tags golden

@@ -221,31 +221,33 @@ void main() {
     );
   });
 
-  for (final brightness in Brightness.values) {
-    testWidgets('venue 3D golden — ${brightness.name}', (tester) async {
-      final map = FakePickerMap();
-      addTearDown(map.dispose);
-      usePhoneSurface(tester);
+  group('goldens', () {
+    for (final brightness in Brightness.values) {
+      testWidgets('venue 3D golden — ${brightness.name}', (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
 
-      await tester.pumpWidget(
-        pickerHarness(
-          map,
-          goldenSubject(
-            // The scene is the WebView; the golden is the chrome over a stand-in.
-            const ColoredBox(
-              color: Color(0xFF10151F),
-              child: SizedBox.expand(child: SeatLayerVenue3D()),
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            goldenSubject(
+              // The scene is the WebView; the golden is the chrome over a stand-in.
+              const ColoredBox(
+                color: Color(0xFF10151F),
+                child: SizedBox.expand(child: SeatLayerVenue3D()),
+              ),
             ),
+            platformBrightness: brightness,
           ),
-          platformBrightness: brightness,
-        ),
-      );
-      map.emit(_seated());
-      await tester.pumpAndSettle();
+        );
+        map.emit(_seated());
+        await tester.pumpAndSettle();
 
-      await expectGolden(tester, 'venue_3d_${brightness.name}');
-    });
-  }
+        await expectGolden(tester, 'venue_3d_${brightness.name}');
+      }, tags: goldenTag);
+    }
+  }, skip: goldenSkip);
 }
 
 bool _iconEnabled(WidgetTester tester, String tooltip) =>

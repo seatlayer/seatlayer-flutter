@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -153,6 +154,27 @@ const Key goldenSubjectKey = ValueKey<String>('seatlayer-golden-subject');
 /// every golden would be a picture of one widget floating on an empty screen.
 Widget goldenSubject(Widget child) =>
     RepaintBoundary(key: goldenSubjectKey, child: child);
+
+/// The tag every golden test carries, so one CI job can select exactly them.
+const String goldenTag = 'golden';
+
+/// Why this host does not compare goldens — `null` on macOS, which does.
+///
+/// Fonts were the first half of the cross-host problem and are fixed for good
+/// in `test/flutter_test_config.dart`: Roboto and Material Icons are now loaded
+/// from pinned bytes, so every host lays out the same glyphs in the same
+/// places. The second half cannot be fixed the same way. Skia rasterises those
+/// glyphs through the host's own text backend — CoreText on macOS, FreeType on
+/// Linux — and the two disagree on the anti-aliased edge of every letter. The
+/// residue is 2-5% of pixels per image, all of it one pixel deep around glyph
+/// outlines, with nothing structural left. Loosening the comparator far enough
+/// to swallow that would also swallow a real regression, so instead the goldens
+/// are recorded on macOS and enforced on macOS, by the `goldens` job in
+/// `.github/workflows/ci.yml`. Every other check still runs everywhere.
+final Object? goldenSkip = Platform.isMacOS
+    ? null
+    : 'Goldens are recorded and enforced on macOS (the `goldens` CI job); '
+        'this host rasterises glyph edges differently.';
 
 /// Compare the [goldenSubject] on screen against `test/goldens/<name>.png`.
 Future<void> expectGolden(WidgetTester tester, String name) => expectLater(

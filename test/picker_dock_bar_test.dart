@@ -193,30 +193,32 @@ void main() {
     );
   });
 
-  for (final brightness in Brightness.values) {
-    testWidgets('dock bar golden — ${brightness.name}', (tester) async {
-      final map = FakePickerMap();
-      addTearDown(map.dispose);
-      usePhoneSurface(tester);
+  group('goldens', () {
+    for (final brightness in Brightness.values) {
+      testWidgets('dock bar golden — ${brightness.name}', (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
 
-      await tester.pumpWidget(
-        pickerHarness(
-          map,
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: goldenSubject(
-              const SeatLayerDockBar(reserveBottomInset: false),
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: goldenSubject(
+                const SeatLayerDockBar(reserveBottomInset: false),
+              ),
             ),
+            platformBrightness: brightness,
           ),
-          platformBrightness: brightness,
-        ),
-      );
-      map.emit(pickerSnapshot(sections: pickerSections()));
-      await tester.pumpAndSettle();
+        );
+        map.emit(pickerSnapshot(sections: pickerSections()));
+        await tester.pumpAndSettle();
 
-      await expectGolden(tester, 'dock_bar_${brightness.name}');
-    });
-  }
+        await expectGolden(tester, 'dock_bar_${brightness.name}');
+      }, tags: goldenTag);
+    }
+  }, skip: goldenSkip);
 
   testWidgets("the count comes down by the buyer's own picks", (tester) async {
     // The runtime counts a seat as available until it is held, so a section

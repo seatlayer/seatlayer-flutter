@@ -144,43 +144,45 @@ void main() {
     expect(find.text('Select'), findsNothing);
   });
 
-  for (final brightness in Brightness.values) {
-    testWidgets('confirm card golden with strip — ${brightness.name}',
-        (tester) async {
-      final map = FakePickerMap();
-      addTearDown(map.dispose);
-      usePhoneSurface(tester);
+  group('goldens', () {
+    for (final brightness in Brightness.values) {
+      testWidgets('confirm card golden with strip — ${brightness.name}',
+          (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
 
-      await tester.pumpWidget(
-        pickerHarness(
-          map,
-          goldenSubject(const SeatLayerConfirmCard()),
-          platformBrightness: brightness,
-        ),
-      );
-      map.emit(pickerSnapshot());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            goldenSubject(const SeatLayerConfirmCard()),
+            platformBrightness: brightness,
+          ),
+        );
+        map.emit(pickerSnapshot());
+        await tester.pumpAndSettle();
 
-      await expectGolden(tester, 'confirm_card_strip_${brightness.name}');
-    });
+        await expectGolden(tester, 'confirm_card_strip_${brightness.name}');
+      }, tags: goldenTag);
 
-    testWidgets('confirm card golden without strip — ${brightness.name}',
-        (tester) async {
-      final map = FakePickerMap();
-      addTearDown(map.dispose);
-      usePhoneSurface(tester);
+      testWidgets('confirm card golden without strip — ${brightness.name}',
+          (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
 
-      await tester.pumpWidget(
-        pickerHarness(
-          map,
-          goldenSubject(const SeatLayerConfirmCard()),
-          platformBrightness: brightness,
-        ),
-      );
-      map.emit(_withoutImmersiveFeatures());
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            goldenSubject(const SeatLayerConfirmCard()),
+            platformBrightness: brightness,
+          ),
+        );
+        map.emit(_withoutImmersiveFeatures());
+        await tester.pumpAndSettle();
 
-      await expectGolden(tester, 'confirm_card_plain_${brightness.name}');
-    });
-  }
+        await expectGolden(tester, 'confirm_card_plain_${brightness.name}');
+      }, tags: goldenTag);
+    }
+  }, skip: goldenSkip);
 }

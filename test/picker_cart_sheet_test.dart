@@ -254,40 +254,42 @@ void main() {
     expect(find.text('Show less'), findsOneWidget);
   });
 
-  for (final brightness in Brightness.values) {
-    for (final entry in <(String, Map<String, Object?>, bool)>[
-      ('empty', bestAvailableSnapshot(), true),
-      ('one', pickerSnapshot(), true),
-      ('six', snapshotWithTicketCount(6), true),
-      ('many', _tenDistinctRows(), true),
-      ('peek', pickerSnapshot(), false),
-    ]) {
-      testWidgets('cart sheet golden ${entry.$1} — ${brightness.name}',
-          (tester) async {
-        final map = FakePickerMap();
-        addTearDown(map.dispose);
-        usePhoneSurface(tester);
+  group('goldens', () {
+    for (final brightness in Brightness.values) {
+      for (final entry in <(String, Map<String, Object?>, bool)>[
+        ('empty', bestAvailableSnapshot(), true),
+        ('one', pickerSnapshot(), true),
+        ('six', snapshotWithTicketCount(6), true),
+        ('many', _tenDistinctRows(), true),
+        ('peek', pickerSnapshot(), false),
+      ]) {
+        testWidgets('cart sheet golden ${entry.$1} — ${brightness.name}',
+            (tester) async {
+          final map = FakePickerMap();
+          addTearDown(map.dispose);
+          usePhoneSurface(tester);
 
-        await tester.pumpWidget(
-          pickerHarness(
-            map,
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: goldenSubject(_sheet(expanded: entry.$3)),
+          await tester.pumpWidget(
+            pickerHarness(
+              map,
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: goldenSubject(_sheet(expanded: entry.$3)),
+              ),
+              platformBrightness: brightness,
             ),
-            platformBrightness: brightness,
-          ),
-        );
-        map.emit(entry.$2);
-        await tester.pumpAndSettle();
+          );
+          map.emit(entry.$2);
+          await tester.pumpAndSettle();
 
-        await expectGolden(
-          tester,
-          'cart_sheet_${entry.$1}_${brightness.name}',
-        );
-      });
+          await expectGolden(
+            tester,
+            'cart_sheet_${entry.$1}_${brightness.name}',
+          );
+        }, tags: goldenTag);
+      }
     }
-  }
+  }, skip: goldenSkip);
 }
 
 /// Ten tickets that share nothing, so each is its own run.

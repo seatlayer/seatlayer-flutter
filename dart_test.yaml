@@ -1,0 +1,5 @@
+# Declared so `--tags golden` / `--exclude-tags golden` are recognised rather
+# than reported as an unknown tag. The goldens are recorded and enforced on
+# macOS only; see test/picker_widget_harness.dart for why.
+tags:
+  golden:

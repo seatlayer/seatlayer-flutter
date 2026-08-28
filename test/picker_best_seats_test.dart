@@ -178,26 +178,28 @@ void main() {
     expect(find.text('Find 2 best seats'), findsNothing);
   });
 
-  for (final brightness in Brightness.values) {
-    testWidgets('best seats golden — ${brightness.name}', (tester) async {
-      final map = FakePickerMap();
-      addTearDown(map.dispose);
-      usePhoneSurface(tester);
+  group('goldens', () {
+    for (final brightness in Brightness.values) {
+      testWidgets('best seats golden — ${brightness.name}', (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
 
-      await tester.pumpWidget(
-        pickerHarness(
-          map,
-          Padding(
-            padding: const EdgeInsets.all(14),
-            child: goldenSubject(const SeatLayerBestSeatsForm()),
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: goldenSubject(const SeatLayerBestSeatsForm()),
+            ),
+            platformBrightness: brightness,
           ),
-          platformBrightness: brightness,
-        ),
-      );
-      map.emit(bestAvailableSnapshot());
-      await tester.pumpAndSettle();
+        );
+        map.emit(bestAvailableSnapshot());
+        await tester.pumpAndSettle();
 
-      await expectGolden(tester, 'best_seats_${brightness.name}');
-    });
-  }
+        await expectGolden(tester, 'best_seats_${brightness.name}');
+      }, tags: goldenTag);
+    }
+  }, skip: goldenSkip);
 }

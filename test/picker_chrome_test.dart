@@ -322,67 +322,69 @@ void main() {
     });
   });
 
-  for (final brightness in Brightness.values) {
-    testWidgets('header golden — ${brightness.name}', (tester) async {
-      final map = FakePickerMap();
-      addTearDown(map.dispose);
-      usePhoneSurface(tester);
+  group('goldens', () {
+    for (final brightness in Brightness.values) {
+      testWidgets('header golden — ${brightness.name}', (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
 
-      await tester.pumpWidget(
-        pickerHarness(
-          map,
-          Align(
-            alignment: Alignment.topCenter,
-            child: goldenSubject(
-              SeatLayerPickerHeader(compact: true, onClose: () {}),
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            Align(
+              alignment: Alignment.topCenter,
+              child: goldenSubject(
+                SeatLayerPickerHeader(compact: true, onClose: () {}),
+              ),
             ),
+            platformBrightness: brightness,
           ),
-          platformBrightness: brightness,
-        ),
-      );
-      map.emit(pickerSnapshot(holdOwner: 'picker'));
-      await tester.pumpAndSettle();
+        );
+        map.emit(pickerSnapshot(holdOwner: 'picker'));
+        await tester.pumpAndSettle();
 
-      await expectGolden(tester, 'header_${brightness.name}');
-    });
+        await expectGolden(tester, 'header_${brightness.name}');
+      }, tags: goldenTag);
 
-    testWidgets('price legend golden — ${brightness.name}', (tester) async {
-      final map = FakePickerMap();
-      addTearDown(map.dispose);
-      usePhoneSurface(tester);
+      testWidgets('price legend golden — ${brightness.name}', (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
 
-      await tester.pumpWidget(
-        pickerHarness(
-          map,
-          Align(
-            alignment: Alignment.topCenter,
-            child: goldenSubject(const SeatLayerPriceLegend(compact: true)),
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            Align(
+              alignment: Alignment.topCenter,
+              child: goldenSubject(const SeatLayerPriceLegend(compact: true)),
+            ),
+            platformBrightness: brightness,
           ),
-          platformBrightness: brightness,
-        ),
-      );
-      map.emit(bestAvailableSnapshot());
-      await tester.pumpAndSettle();
+        );
+        map.emit(bestAvailableSnapshot());
+        await tester.pumpAndSettle();
 
-      await expectGolden(tester, 'price_legend_${brightness.name}');
-    });
+        await expectGolden(tester, 'price_legend_${brightness.name}');
+      }, tags: goldenTag);
 
-    testWidgets('map controls golden — ${brightness.name}', (tester) async {
-      final map = FakePickerMap();
-      addTearDown(map.dispose);
-      usePhoneSurface(tester);
+      testWidgets('map controls golden — ${brightness.name}', (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
 
-      await tester.pumpWidget(
-        pickerHarness(
-          map,
-          goldenSubject(const SeatLayerPickerMapControls(compact: true)),
-          platformBrightness: brightness,
-        ),
-      );
-      map.emit(pickerSnapshot(withSelection: false));
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            goldenSubject(const SeatLayerPickerMapControls(compact: true)),
+            platformBrightness: brightness,
+          ),
+        );
+        map.emit(pickerSnapshot(withSelection: false));
+        await tester.pumpAndSettle();
 
-      await expectGolden(tester, 'map_controls_${brightness.name}');
-    });
-  }
+        await expectGolden(tester, 'map_controls_${brightness.name}');
+      }, tags: goldenTag);
+    }
+  }, skip: goldenSkip);
 }
