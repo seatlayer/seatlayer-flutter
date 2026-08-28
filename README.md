@@ -125,6 +125,32 @@ void initState() {
 }
 ```
 
+**Stay current when the buyer comes back.** A picker that has been in the
+background learns nothing while it is there, so a buyer returning from a
+payment sheet or a phone call can otherwise tap a seat somebody else already
+bought. The picker re-reads live availability whenever it comes back to the
+front, and reconciles the buyer's hold against the server rather than against
+the in-app countdown, which may never have fired at all. Seats the buyer had
+selected and lost reach `onSelectedObjectUnavailable`; a hold that lapsed is
+stated once in the cart sheet, with the still-free seats offered back.
+
+Add `SeatLayerPicker.routeObserver` so the same thing happens when your own
+checkout screen pops back — that path never backgrounds the application, so
+nothing else can notice it:
+
+```dart
+MaterialApp(
+  navigatorObservers: <NavigatorObserver>[SeatLayerPicker.routeObserver],
+  home: const MyHome(),
+)
+```
+
+It is optional: without it the lifecycle trigger still works and nothing
+complains. `SeatLayerPickerOptions(refreshOnResume: false)` turns both triggers
+off, and `announceHoldLapse: false` keeps the refresh but leaves the lapse
+message to you — `onHoldExpired` fires either way. Call
+`controller.refreshAvailability()` yourself from a composed layout.
+
 ## Customise the picker
 
 Four levels, cheapest first. None of them rebuilds the layout or the flow.
@@ -446,6 +472,11 @@ automatically if checkout does not complete — `onHoldExpired` tells the app to
 return the buyer to the map — and `extendHold` and `resumeHold` cover longer
 checkouts and app restarts. This prevents double-selling without locking seats
 forever.
+
+A hold that runs out while the app is in the background is caught on the way
+back in: the picker asks the server whether the hold still stands rather than
+trusting a timer that may never have fired, tells the buyer once, and offers
+back whichever of their seats are still free.
 
 ### Can I use my own payment provider?
 

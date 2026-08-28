@@ -2,6 +2,33 @@
 
 ## 0.3.3
 
+A picker that comes back to the front now finds out what changed while it was
+away. Returning from the background, or from a route pushed over it, re-reads
+live availability: seats the buyer had selected and somebody else has since
+bought are deselected and reported through `onSelectedObjectUnavailable`, and
+the buyer's own hold is reconciled against the server rather than against an
+in-app countdown that may never have fired. Nothing the buyer owns is touched —
+selection, hold, cart total, camera and rung all stay exactly where they were.
+
+A hold that lapsed while the buyer was away is now said out loud, once: a line
+in the cart sheet and a toast, never a dialog, with the seats that are still
+free offered back under `Select them again`. `onHoldExpired` still fires, and
+`SeatLayerPickerOptions(announceHoldLapse: false)` leaves the moment entirely to
+the host. `SeatLayerPickerOptions(refreshOnResume: false)` turns the refresh
+itself off. The route half needs `SeatLayerPicker.routeObserver` in
+`MaterialApp.navigatorObservers`; without it the lifecycle half still works.
+New: `SeatLayerPickerController.refreshAvailability()`,
+`SeatLayerAvailabilityRefresh`, `SeatLayerHoldLapse`, `SeatLayerRecovery`,
+`SeatLayerHoldLapseNotice`.
+
+The accessibility sheet now offers what the event actually has. On a runtime
+that reports them, only the access needs this chart carries are drawn, in the
+runtime's order, each with the number of matching free seats; a need whose seats
+are all gone stays on the sheet and goes dark, so "this venue has none" and
+"these are taken" remain different answers. Older runtimes keep the full static
+list. Every name is still overridable through
+`SeatLayerPickerStrings.accessNeeds`.
+
 A brand accent now carries white ink. When you hand the picker an accent
 without naming an ink for it, the picker was choosing whichever of black and
 white scored higher against it, and a brand red scores higher on black — so
