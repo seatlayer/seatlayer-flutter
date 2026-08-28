@@ -62,6 +62,15 @@ final class FakePickerMap extends SeatLayerController {
   final StreamController<EventSignal> _events =
       StreamController<EventSignal>.broadcast();
 
+  final StreamController<ReadyInfo> _ready =
+      StreamController<ReadyInfo>.broadcast();
+
+  @override
+  Stream<ReadyInfo> get onReady => _ready.stream;
+
+  /// Report a finished handshake, as [SeatLayerView] would.
+  void emitReady(ReadyInfo info) => _ready.add(info);
+
   /// The snapshot this fake currently reports.
   Map<String, Object?> current = pickerSnapshot();
 
@@ -90,6 +99,10 @@ final class FakePickerMap extends SeatLayerController {
     );
   }
 
+  /// Push one arbitrary bridge event, for the surfaces that are not snapshots.
+  void emitEvent(String name, Object? payload, {int sequence = 1}) => _events
+      .add(EventSignal(name: name, payload: payload, sequence: sequence));
+
   /// Commands whose name is [command].
   Iterable<(String, Object?)> callsTo(String command) =>
       calls.where((call) => call.$1 == command);
@@ -97,6 +110,7 @@ final class FakePickerMap extends SeatLayerController {
   @override
   void dispose() {
     unawaited(_events.close());
+    unawaited(_ready.close());
     super.dispose();
   }
 }

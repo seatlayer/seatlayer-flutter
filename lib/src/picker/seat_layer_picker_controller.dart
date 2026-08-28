@@ -10,6 +10,7 @@ import '../payloads.dart';
 import '../seat_layer_configuration.dart';
 import '../seat_layer_controller.dart';
 import '../seat_layer_error.dart';
+import 'picker_chart_load.dart';
 import 'picker_haptics.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
@@ -21,6 +22,9 @@ const String _nativeChromeContractCapability = 'native-chrome-contract-v1';
 
 /// Advertised by a runtime that frames against host-reported viewport insets.
 const String _viewportInsetsCapability = 'viewport-insets-v1';
+
+/// Advertised by a runtime that hands its own chart-load beacon to the host.
+const String _chartLoadTraceCapability = 'chart-load-trace-v1';
 
 /// State and actions for one high-level picker session.
 ///
@@ -35,9 +39,15 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     _bridgeSubscription = this.mapController.onBridgeEvent.listen(
           _onBridgeEvent,
         );
-    _readySubscription = this.mapController.onReady.listen(
-          (info) => _callbacks.onReady?.call(info),
-        );
+    _readySubscription = this.mapController.onReady.listen((info) {
+      // T0 is the mount, not the handshake: the buyer's wait started when the
+      // picker appeared. Frozen here rather than read when the trace arrives,
+      // because the trace can land a frame or two later and that frame is not
+      // part of what the buyer waited for.
+      _readyInfo = info;
+      _tapToReadyMs = _mountClock.elapsedMilliseconds;
+      _callbacks.onReady?.call(info);
+    });
     _accessExpiredSubscription = this.mapController.onBuyerAccessExpired.listen(
           (event) => _callbacks.onAccessExpired?.call(event),
         );
@@ -88,6 +98,14 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   late final StreamSubscription<void> _holdExpiredSubscription;
   late final StreamSubscription<GAArea> _generalAdmissionSubscription;
   late final StreamSubscription<SeatLayerError> _errorSubscription;
+
+  final StreamController<SeatLayerChartLoad> _chartLoads =
+      StreamController<SeatLayerChartLoad>.broadcast();
+
+  /// Started when the picker mounts; the clock `tapToReadyMs` is read off.
+  final Stopwatch _mountClock = Stopwatch();
+  int? _tapToReadyMs;
+  ReadyInfo? _readyInfo;
 
   SeatLayerPickerOptions _options = const SeatLayerPickerOptions();
   SeatLayerPickerCallbacks _callbacks = const SeatLayerPickerCallbacks();
@@ -252,6 +270,12 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       _reloadGeneration += 1;
       _haptics.reset();
       _forgetViewportInsets();
+      // A retry is a second open, and its own wait starts here.
+      _tapToReadyMs = null;
+      _readyInfo = null;
+      _mountClock
+        ..reset()
+        ..start();
       value = const SeatLayerPickerState.initializing();
     });
   }
@@ -278,6 +302,10 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     _options = options;
     _callbacks = callbacks;
     _runtimeAttached = true;
+    // T0 for `tapToReadyMs`. Only the first mount starts it: a controller
+    // handed to a second scope is a re-parent, not a second open, and
+    // restarting here would report the re-parent as the buyer's wait.
+    if (!_mountClock.isRunning && _tapToReadyMs == null) _mountClock.start();
     if (!_cartSheetInitialized) {
       _cartSheetInitialized = true;
       _cartSheetExpanded = !options.panelInitiallyCollapsed;
@@ -308,11 +336,47 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   }
 
   void _onBridgeEvent(EventSignal event) {
+    if (event.name == 'telemetry.chartLoad') {
+      _onChartLoadTrace(event.payload);
+      return;
+    }
     if (event.name != 'picker.snapshot' && event.name != 'sys.ready') return;
     final raw = jGet(event.payload, 'snapshot') ??
         (event.name == 'picker.snapshot' ? event.payload : null);
     final snapshot = SeatLayerPickerSnapshot.fromJson(raw);
     if (snapshot != null) _applySnapshot(snapshot);
+  }
+
+  /// One chart load, as the runtime measured it and as this SDK did.
+  ///
+  /// Broadcast, so several listeners can watch it, and it emits nothing at all
+  /// on a runtime that does not advertise `chart-load-trace-v1` — the SDK never
+  /// synthesises a trace it was not given. Fires once per render attempt,
+  /// success or failure.
+  ///
+  /// A late listener misses the load it was late for; the drop-in's
+  /// [SeatLayerPickerCallbacks.onChartLoad] is bound before the runtime mounts
+  /// and is the surface most hosts want.
+  Stream<SeatLayerChartLoad> get onChartLoad => _chartLoads.stream;
+
+  void _onChartLoadTrace(Object? payload) {
+    if (_disposed) return;
+    final bundle = mapController.bundleInfo;
+    // Capability-gated consumption: a runtime that has not said it speaks this
+    // is not read for it, whatever happens to be on the wire.
+    if (bundle == null ||
+        !bundle.supportsCapability(_chartLoadTraceCapability)) {
+      return;
+    }
+    final trace = SeatLayerChartLoadTrace.fromJson(jGet(payload, 'trace'));
+    if (trace == null) return;
+    final load = SeatLayerChartLoad(
+      trace: trace,
+      tapToReadyMs: _tapToReadyMs,
+      ready: _readyInfo,
+    );
+    _callbacks.onChartLoad?.call(load);
+    if (_chartLoads.hasListener) _chartLoads.add(load);
   }
 
   void _applySnapshot(SeatLayerPickerSnapshot snapshot) {
@@ -1115,6 +1179,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     unawaited(_holdExpiredSubscription.cancel());
     unawaited(_generalAdmissionSubscription.cancel());
     unawaited(_errorSubscription.cancel());
+    unawaited(_chartLoads.close());
     if (_ownsMapController) mapController.dispose();
     super.dispose();
   }

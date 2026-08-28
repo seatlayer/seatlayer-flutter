@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import '../payloads.dart';
 import '../seat_layer_error.dart';
+import 'picker_chart_load.dart';
 import 'picker_models.dart';
 import 'picker_strings.dart';
 
@@ -273,6 +274,7 @@ class SeatLayerPickerCallbacks {
   /// Creates a callback set.
   const SeatLayerPickerCallbacks({
     this.onReady,
+    this.onChartLoad,
     this.onSelectionChanged,
     this.onSelectionValidityChanged,
     this.onHoldChanged,
@@ -292,6 +294,13 @@ class SeatLayerPickerCallbacks {
 
   /// The runtime finished its handshake.
   final ValueChanged<ReadyInfo>? onReady;
+
+  /// One chart load finished, measured from the buyer's tap.
+  ///
+  /// Fires once per render attempt, success or failure, and only on a runtime
+  /// advertising `chart-load-trace-v1`. Nothing is logged or sent by the SDK:
+  /// this is the hook for a host's own analytics. See [SeatLayerChartLoad].
+  final ValueChanged<SeatLayerChartLoad>? onChartLoad;
 
   /// The selected seats changed.
   final ValueChanged<List<SelectedSeat>>? onSelectionChanged;

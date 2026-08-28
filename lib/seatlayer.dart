@@ -42,6 +42,8 @@ export 'src/picker/picker_builders.dart'
 export 'src/picker/picker_cart_list.dart' show SeatLayerCartList;
 export 'src/picker/picker_cart_sheet.dart'
     show SeatLayerBookButton, SeatLayerCartSheet;
+export 'src/picker/picker_chart_load.dart'
+    show SeatLayerChartLoad, SeatLayerChartLoadTrace;
 export 'src/picker/picker_confirm_card.dart' show SeatLayerConfirmCard;
 export 'src/picker/picker_dock_bar.dart' show SeatLayerDockBar;
 export 'src/picker/picker_errors.dart' show SeatLayerPickerActionError;

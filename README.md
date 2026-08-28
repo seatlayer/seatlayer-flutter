@@ -338,6 +338,55 @@ An unclaimed page is thrown away after five minutes (`ttl:`), and immediately
 if the platform reports memory pressure — a head start must never be what gets
 your app killed. `SeatLayerPicker.cancelPrewarm()` gives it back early.
 
+### Performance telemetry
+
+The runtime measures its own load and hands the same beacon to you. The SDK
+measures the half the page cannot see — WebView construction, process spin-up
+and whatever your app did between mounting the picker and the page existing —
+and gives you both in one object:
+
+```dart
+SeatLayerPicker(
+  configuration: configuration,
+  onCheckout: _checkout,
+  callbacks: SeatLayerPickerCallbacks(
+    onChartLoad: (load) {
+      analytics.track('seatmap_open', <String, Object?>{
+        'tapToReadyMs': load.tapToReadyMs, // the whole wait, from the tap
+        'hostMs': load.hostMs,             // the part outside the page
+        'bootMs': load.trace.bootMs,       // the page's whole life
+        'documentMs': load.trace.documentMs,
+        'renderMs': load.trace.ms,
+        'outcome': load.trace.outcome,
+        'bundle': load.trace.bundle,
+      });
+    },
+  ),
+)
+```
+
+`SeatLayerPickerController.onChartLoad` is the same record as a broadcast
+stream, for a composed layout that drives its own controller.
+
+`tapToReadyMs` starts when the picker was **mounted** — the frame after the
+buyer's tap — and ends when the runtime reported the chart ready. It is the
+same T0 whether or not the page was prewarmed, so a prewarm shows up as a
+smaller number rather than as a hidden one. `hostMs` is that span less the
+page's own `bootMs`: on the pilot's 3,513 ms cold open it was 2,495 ms, more
+than two thirds of the wait and entirely outside the runtime.
+
+Everything else on `load.trace` is the runtime's own beacon — the API,
+availability, normalise, renderer and paint spans, seat and floor counts, the
+chart's cache result and the negotiated protocol. Fields this SDK release does
+not model are kept verbatim on `load.trace.raw`, so a runtime that adds one
+does not need an SDK release to be readable.
+
+It fires once per render attempt, success **or** failure, and it fires even
+where the runtime's own beacon deliberately never reaches the network. It
+requires a runtime advertising `chart-load-trace-v1`; an older one simply never
+calls back. **The SDK logs nothing and sends nothing anywhere** — this is a
+hook for your analytics, and nothing more.
+
 Pan and pinch frames are rendered entirely inside the chart. They do not emit
 full picker snapshots or rebuild Flutter chrome on every touch frame; Flutter is
 notified only when a serializable state such as the active zoom rung actually
