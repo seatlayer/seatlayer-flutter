@@ -181,6 +181,122 @@ class SeatLayerPickerThemeData
         error = SeatLayerDarkTokens.error,
         warning = SeatLayerDarkTokens.warning;
 
+  /// The picker painted in an application's own Material palette.
+  ///
+  /// One call applies a whole brand: the accent every action, active state and
+  /// selected control uses comes from [ColorScheme.primary], the ink on it
+  /// from `onPrimary`, and the grounds, ink and hairlines from the surface
+  /// roles — so a red-primary app gets a red `Continue`, a red `Select`, a red
+  /// `Find N best seats`, a red hold pill and a red Map/3D control, with no
+  /// per-widget styling and nothing left on the SDK's own indigo.
+  ///
+  /// Category colours are deliberately NOT touched. The price legend, the
+  /// section dots and the seats themselves carry the organizer's ticket
+  /// categories, which mean something; recolouring them to the brand would
+  /// make the dock's dot disagree with the price it stands for.
+  ///
+  /// | picker role | `ColorScheme` |
+  /// | --- | --- |
+  /// | `accent` / `onAccent` | `primary` / `onPrimary` |
+  /// | `surface` — header, dock, sheet, cards | `surface` |
+  /// | `background` — the page under them | `surface`, stepped toward black |
+  /// | `text` / `mutedText` | `onSurface` / `onSurfaceVariant` |
+  /// | `divider` | `outlineVariant` |
+  /// | `error` | `error` |
+  ///
+  /// A `ColorScheme` has no recessed-page role that works in both modes, so
+  /// [background] is derived: the picker's chrome docks on a page one small
+  /// tonal step darker than itself, which reads as depth on a light palette
+  /// and on a dark one alike. Pass `background:` to say it yourself.
+  ///
+  /// **This pins the picker to the scheme's side**, exactly as
+  /// [SeatLayerPickerThemeData.light] and `.dark()` do, because it supplies a
+  /// complete explicit ground palette. That is what you want here: the scheme
+  /// came from the host's own theme, which is already on the side the host
+  /// chose. Use [SeatLayerPickerThemeData.of] to take that theme's scheme —
+  /// and its typeface — straight from the context.
+  ///
+  /// Every named argument overrides the mapping for one role.
+  factory SeatLayerPickerThemeData.fromColorScheme(
+    ColorScheme scheme, {
+    Color? accent,
+    Color? onAccent,
+    Color? background,
+    Color? surface,
+    Color? text,
+    Color? mutedText,
+    Color? divider,
+    Color? error,
+    Color? warning,
+    String? fontFamily,
+    double? radius,
+    double? buttonRadius,
+    ImageProvider? logo,
+    SeatLayerMapThemeData? mapTheme,
+    SeatLayerPickerLayout? layout,
+    SeatLayerPickerStyles? styles,
+  }) {
+    final ground = surface ?? scheme.surface;
+    return SeatLayerPickerThemeData(
+      accent: accent ?? scheme.primary,
+      onAccent: onAccent ?? scheme.onPrimary,
+      background: background ?? _recessed(ground),
+      surface: ground,
+      text: text ?? scheme.onSurface,
+      mutedText: mutedText ?? scheme.onSurfaceVariant,
+      divider: divider ?? scheme.outlineVariant,
+      error: error ?? scheme.error,
+      warning: warning,
+      fontFamily: fontFamily,
+      radius: radius,
+      buttonRadius: buttonRadius,
+      logo: logo,
+      mapTheme: mapTheme,
+      layout: layout,
+      styles: styles,
+    );
+  }
+
+  /// The picker painted in the palette and typeface of the ambient [Theme].
+  ///
+  /// The one-liner for an app that already has a brand:
+  ///
+  /// ```dart
+  /// SeatLayerPicker(
+  ///   configuration: configuration,
+  ///   theme: SeatLayerPickerThemeData.of(context),
+  ///   onCheckout: openCheckout,
+  /// )
+  /// ```
+  ///
+  /// Takes the host theme's [ColorScheme] through
+  /// [SeatLayerPickerThemeData.fromColorScheme] and its body typeface with it,
+  /// so the picker reads as a screen of the same application. Because the
+  /// scheme already carries the side the host is on, this follows an in-app
+  /// dark-mode switch as long as the widget calling it rebuilds — which it
+  /// does, since [Theme.of] registers the dependency.
+  factory SeatLayerPickerThemeData.of(
+    BuildContext context, {
+    Color? accent,
+    Color? onAccent,
+    double? radius,
+    double? buttonRadius,
+    ImageProvider? logo,
+    SeatLayerPickerStyles? styles,
+  }) {
+    final theme = Theme.of(context);
+    return SeatLayerPickerThemeData.fromColorScheme(
+      theme.colorScheme,
+      accent: accent,
+      onAccent: onAccent,
+      fontFamily: theme.textTheme.bodyMedium?.fontFamily,
+      radius: radius,
+      buttonRadius: buttonRadius,
+      logo: logo,
+      styles: styles,
+    );
+  }
+
   /// The preset for [brightness].
   factory SeatLayerPickerThemeData.forBrightness(Brightness brightness) =>
       brightness == Brightness.dark
@@ -405,6 +521,16 @@ class SeatLayerResolvedPickerTheme {
           mapBackground: mapBackground,
         );
 }
+
+/// The page a picker's chrome docks on, one tonal step under [surface].
+///
+/// A `ColorScheme` names no recessed ground that works on both sides: the
+/// container roles step lighter in dark mode and darker in light, so neither
+/// reads as "under" in both. A small step toward black does, and it keeps the
+/// picker's own spatial model — chrome raised above a page, with the drawn map
+/// cut into it — on any palette a host hands over.
+Color _recessed(Color surface) =>
+    Color.lerp(surface, const Color(0xFF000000), .05)!;
 
 /// Black or white, whichever is legible on [accent].
 ///

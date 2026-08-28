@@ -384,6 +384,33 @@ changing its layout.
 Picker cards, ticket-dock changes, cart rows and immersive surfaces use one
 short motion language and honor the platform reduced-motion preference.
 
+### One call for an app that already has a palette
+
+If your app has a `ColorScheme`, hand it over and the whole picker is branded:
+
+```dart
+SeatLayerPicker(
+  configuration: configuration,
+  theme: SeatLayerPickerThemeData.of(context), // or .fromColorScheme(scheme)
+  onCheckout: openCheckout,
+)
+```
+
+`primary`/`onPrimary` become the accent and its ink, so `Continue`, `Select`,
+`Find N best seats`, the hold pill and the Map/3D control all carry your brand;
+`surface`, `onSurface`, `onSurfaceVariant`, `outlineVariant` and `error` become
+the picker's grounds, ink, hairlines and failures. `.of(context)` takes your
+theme's body typeface with the scheme. Every role has a named override.
+
+**Ticket categories are deliberately left alone.** The price chips, the dock's
+section dot and the seats themselves carry the organizer's categories, which
+mean a price — recolouring them to your brand would make the dot disagree with
+the chip it matches.
+
+Because a scheme is a complete ground palette, this pins the picker to the side
+that scheme is on — which is what you want, since it came from your theme, and
+`.of(context)` therefore follows your own dark-mode switch on rebuild.
+
 ### Branding, and which constructor follows the device
 
 **Brand with the default constructor.** It sets only the roles you name, so
