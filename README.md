@@ -813,6 +813,31 @@ picker theme. A white-label entitlement may explicitly set
 `SeatLayerView` remains protocol 1; the host continues to own any surrounding
 test-event chrome there.
 
+### The seat-view panorama's words are native too
+
+The 2D "View from here" panorama used to draw its own header line, disclosure
+caption and `PREVIEW` badge, and on a phone all three landed under the native
+price rail. Against a runtime advertising `native-seat-view-chrome-v1` the
+picker adds `seatViewTitle`, `seatViewCaption` and `seatViewBadge` to the
+suppression above and prints those words itself, on
+`SeatLayerSeatViewChrome` — a caption strip and disclosure badge in the
+picker's palette, placed clear of the rail and the dock.
+
+The strings arrive already localized on `evt seatView.changed`, so nothing is
+re-derived on this side; `SeatLayerSeatView.real` is what separates an authored
+capture of the actual seat from one the engine drew out of the venue's
+geometry, and the badge word is whichever of the two the runtime translated.
+The panorama's CLOSE button deliberately stays web-side: it is the buyer's only
+way out of a full-screen picture.
+
+The widget is composable like every other part — `SeatLayerPickerBuilders(
+seatViewChrome:)` replaces it, `SeatLayerPickerChromeOptions(
+showSeatViewChrome: false)` hides it, and `SeatLayerPickerStyles(
+seatViewChromeStyle:)` restyles the strip. Hiding it does **not** hand the
+words back to the runtime, which was asked at `init` to stop drawing them, so a
+host that hides it owns the disclosure itself. An older runtime is never asked
+to suppress anything and keeps drawing its own.
+
 ## Read-only picker
 
 Use `SeatLayerPickerOptions(readOnly: true)` to inspect a map, current

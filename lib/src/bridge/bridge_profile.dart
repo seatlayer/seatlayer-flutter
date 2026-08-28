@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../payloads.dart';
 import '../seat_layer_configuration.dart';
 import 'bridge_protocol.dart';
 
@@ -62,7 +63,17 @@ class SeatLayerBridgeProfile {
 
   bool get isPicker => surface == 'picker';
 
-  Map<String, Object?> initPayload(SeatLayerConfiguration configuration) {
+  /// The `init` reply for [configuration], as answered to [bundle]'s `hello`.
+  ///
+  /// [bundle] is what the runtime just advertised. It is read only to suppress
+  /// chrome the runtime has told us it can hand over instead of drawing — never
+  /// to change the surface, the profile's identity or anything a reload turns
+  /// on, because [equivalentTo] does not see it and a difference it caused
+  /// would not reboot the runtime.
+  Map<String, Object?> initPayload(
+    SeatLayerConfiguration configuration, {
+    BundleInfo? bundle,
+  }) {
     final payload = configuration.initPayload(protocolRange: protocolRange);
     if (!isPicker) return payload;
 
@@ -72,6 +83,20 @@ class SeatLayerBridgeProfile {
     final currentChrome = Map<String, Object?>.from(
       payload['chrome']! as Map<String, Object?>,
     )..addAll(chrome);
+    // The 2D panorama's own header, caption and badge. Suppressed only on a
+    // runtime that has said it will report those words on `seatView.changed`
+    // instead — asking an older one to drop them would take the disclosure off
+    // the screen entirely, leaving a buyer looking at a drawn illustration with
+    // nothing saying so. The CLOSE button is deliberately not in this list: the
+    // panorama is full screen and native chrome does not reach into it.
+    if (bundle != null &&
+        bundle.supportsCapability(seatLayerSeatViewChromeCapability)) {
+      currentChrome.addAll(const <String, Object?>{
+        'seatViewTitle': false,
+        'seatViewCaption': false,
+        'seatViewBadge': false,
+      });
+    }
 
     return <String, Object?>{
       ...payload,

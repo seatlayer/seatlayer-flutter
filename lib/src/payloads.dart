@@ -686,6 +686,14 @@ class ReadyInfo {
       );
 }
 
+/// Advertised by a runtime that reports the 2D panorama's own words instead of
+/// drawing them, so a native host can print them on its own chrome.
+///
+/// Named here rather than beside the picker because both sides of the bridge
+/// need it: the handshake reads it to decide what to suppress, and the picker
+/// reads it to decide whether to draw.
+const String seatLayerSeatViewChromeCapability = 'native-seat-view-chrome-v1';
+
 /// What the bundle advertises in `hello`.
 class BundleInfo {
   const BundleInfo({

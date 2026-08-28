@@ -30,6 +30,7 @@ import 'picker_accessibility.dart';
 import 'picker_attribution.dart';
 import 'picker_errors.dart';
 import 'picker_prompts.dart';
+import 'picker_seat_view_chrome.dart';
 import 'picker_section_navigator.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -217,6 +218,23 @@ class _SeatLayerPickerAdaptiveLayoutState
                 (_dockVisible(state) ? resolved.layout.dockBarHeight : 0.0),
           ),
         );
+        // The panorama is full-screen web content inside the map surface, so
+        // its words are drawn over the same box the picture fills.
+        final seatViewChrome = _part(
+          context,
+          widget.builders.seatViewChrome,
+          chrome.showSeatViewChrome
+              ? SeatLayerSeatViewChrome(
+                  topInset: wide ? 12 : venue3DTopInset,
+                  bottomInset: wide
+                      ? 12
+                      : 10 +
+                          (_dockVisible(state)
+                              ? resolved.layout.dockBarHeight
+                              : 0.0),
+                )
+              : const SizedBox.shrink(),
+        );
         final testBadge = SeatLayerPickerTestModeIndicator(compact: !wide);
         final controls = _part(
           context,
@@ -402,6 +420,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                             bottom: 58,
                             child: accessibility,
                           ),
+                          Positioned.fill(child: seatViewChrome),
                           Positioned.fill(
                             child: _PickerPromptTransition(
                               scrimColor: pickerAlpha(resolved.background, .64),
@@ -556,6 +575,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                     ),
                   Positioned.fill(child: controls),
                   if (chrome.showVenue3DChrome) Positioned.fill(child: venue3D),
+                  Positioned.fill(child: seatViewChrome),
                   if (chrome.showDockBar)
                     Positioned(left: 0, right: 0, bottom: 0, child: dock),
                   Positioned.fill(

@@ -282,7 +282,8 @@ class SeatLayerController {
             return;
           }
           unawaited(
-            _client?.sendInit(profile.initPayload(config)) ?? Future.value(),
+            _client?.sendInit(profile.initPayload(config, bundle: info)) ??
+                Future.value(),
           );
         }
     }

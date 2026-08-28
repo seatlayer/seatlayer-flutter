@@ -76,6 +76,7 @@ class SeatLayerPickerChromeOptions {
     this.showDockBar = true,
     this.showConfirmCard = true,
     this.showVenue3DChrome = true,
+    this.showSeatViewChrome = true,
     this.showHoldPill = true,
     this.manageSystemOverlays = true,
   });
@@ -128,6 +129,13 @@ class SeatLayerPickerChromeOptions {
 
   /// Whether the seat-view/3D chrome renders over the immersive scene.
   final bool showVenue3DChrome;
+
+  /// Whether the native caption strip over the 2D seat-view panorama renders.
+  ///
+  /// Turning it off does NOT give the words back to the runtime: a runtime
+  /// advertising `native-seat-view-chrome-v1` was asked to suppress its own at
+  /// `init`, so a host that hides this owns the disclosure itself.
+  final bool showSeatViewChrome;
 
   /// Whether the header shows the hold countdown pill.
   final bool showHoldPill;

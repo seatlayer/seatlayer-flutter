@@ -113,6 +113,7 @@ class SeatLayerPickerStyles {
     this.chipShape,
     this.legendChipStyle,
     this.floorStripStyle,
+    this.seatViewChromeStyle,
     this.dockBarStyle,
     this.confirmCardStyle,
     this.sheetStyle,
@@ -142,6 +143,9 @@ class SeatLayerPickerStyles {
 
   /// The floor strip's chips on a multi-floor venue.
   final SeatLayerSurfaceStyle? floorStripStyle;
+
+  /// Caption strip drawn over the 2D seat-view panorama.
+  final SeatLayerSurfaceStyle? seatViewChromeStyle;
 
   /// The focused-section dock bar.
   final SeatLayerSurfaceStyle? dockBarStyle;
@@ -180,6 +184,9 @@ class SeatLayerPickerStyles {
           floorStripStyle: floorStripStyle == null
               ? other.floorStripStyle
               : floorStripStyle!.merge(other.floorStripStyle),
+          seatViewChromeStyle: seatViewChromeStyle == null
+              ? other.seatViewChromeStyle
+              : seatViewChromeStyle!.merge(other.seatViewChromeStyle),
           dockBarStyle: dockBarStyle == null
               ? other.dockBarStyle
               : dockBarStyle!.merge(other.dockBarStyle),
@@ -211,6 +218,7 @@ class SeatLayerPickerStyles {
       other.chipShape == chipShape &&
       other.legendChipStyle == legendChipStyle &&
       other.floorStripStyle == floorStripStyle &&
+      other.seatViewChromeStyle == seatViewChromeStyle &&
       other.dockBarStyle == dockBarStyle &&
       other.confirmCardStyle == confirmCardStyle &&
       other.sheetStyle == sheetStyle &&
@@ -226,6 +234,7 @@ class SeatLayerPickerStyles {
         chipShape,
         legendChipStyle,
         floorStripStyle,
+        seatViewChromeStyle,
         dockBarStyle,
         confirmCardStyle,
         sheetStyle,

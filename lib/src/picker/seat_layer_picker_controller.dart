@@ -26,6 +26,7 @@ const String _viewportInsetsCapability = 'viewport-insets-v1';
 /// Advertised by a runtime that hands its own chart-load beacon to the host.
 const String _chartLoadTraceCapability = 'chart-load-trace-v1';
 
+
 /// State and actions for one high-level picker session.
 ///
 /// One controller binds to one event and one mounted runtime at a time. All
@@ -106,6 +107,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   final Stopwatch _mountClock = Stopwatch();
   int? _tapToReadyMs;
   ReadyInfo? _readyInfo;
+  SeatLayerSeatView? _seatView;
 
   SeatLayerPickerOptions _options = const SeatLayerPickerOptions();
   SeatLayerPickerCallbacks _callbacks = const SeatLayerPickerCallbacks();
@@ -270,6 +272,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       _reloadGeneration += 1;
       _haptics.reset();
       _forgetViewportInsets();
+      _seatView = null;
       // A retry is a second open, and its own wait starts here.
       _tapToReadyMs = null;
       _readyInfo = null;
@@ -340,6 +343,10 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       _onChartLoadTrace(event.payload);
       return;
     }
+    if (event.name == 'seatView.changed') {
+      _onSeatViewChanged(event.payload);
+      return;
+    }
     if (event.name != 'picker.snapshot' && event.name != 'sys.ready') return;
     final raw = jGet(event.payload, 'snapshot') ??
         (event.name == 'picker.snapshot' ? event.payload : null);
@@ -358,6 +365,30 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   /// [SeatLayerPickerCallbacks.onChartLoad] is bound before the runtime mounts
   /// and is the surface most hosts want.
   Stream<SeatLayerChartLoad> get onChartLoad => _chartLoads.stream;
+
+  /// What the 2D "View from here" panorama is showing, or null when it is shut.
+  ///
+  /// Populated only on a runtime advertising `native-seat-view-chrome-v1`,
+  /// which is also the runtime whose own header, caption and badge this SDK
+  /// asks to be suppressed — so the words are drawn once, natively, and never
+  /// twice. Notifies listeners, so chrome bound to the controller repaints.
+  SeatLayerSeatView? get seatView =>
+      supportsNativeSeatViewChrome ? _seatView : null;
+
+  /// Whether the mounted runtime hands over the panorama's own words.
+  bool get supportsNativeSeatViewChrome {
+    final bundle = mapController.bundleInfo;
+    return bundle != null &&
+        bundle.supportsCapability(seatLayerSeatViewChromeCapability);
+  }
+
+  void _onSeatViewChanged(Object? payload) {
+    if (_disposed || !supportsNativeSeatViewChrome) return;
+    final next = SeatLayerSeatView.fromJson(jGet(payload, 'seatView'));
+    if (_seatView == next) return;
+    _seatView = next;
+    notifyListeners();
+  }
 
   void _onChartLoadTrace(Object? payload) {
     if (_disposed) return;

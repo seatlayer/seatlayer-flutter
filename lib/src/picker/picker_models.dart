@@ -918,3 +918,91 @@ UnmodifiableListView<SeatLayerCheckoutLineItem> checkoutLinesOf(
   SeatLayerPickerState state,
 ) =>
     UnmodifiableListView(state.cartLines);
+
+/// What the runtime's 2D "View from here" panorama is currently showing.
+///
+/// Arrives as `evt seatView.changed`, and arrives **whether or not the web is
+/// drawing those words**: suppressing the panorama's own header, caption and
+/// badge would otherwise leave a host with a rule to re-derive rather than a
+/// string to print, and the disclosure rules are not something two codebases
+/// should each keep a copy of.
+///
+/// Every string is already in the picker's active language, and arrives again
+/// after a live language switch.
+@immutable
+class SeatLayerSeatView {
+  /// Creates a seat-view description.
+  const SeatLayerSeatView({
+    this.seatId,
+    this.title,
+    this.caption,
+    this.badge,
+    this.real = false,
+    this.generated = false,
+    this.dragHint,
+  });
+
+  /// The renderer's seat id the panorama was opened for.
+  final String? seatId;
+
+  /// The header line — "View from Stalls D · C-6".
+  final String? title;
+
+  /// The disclosure caption — "Illustration · about 18 m from stage".
+  final String? caption;
+
+  /// The already-localized disclosure word — "Real 360°" or "Preview".
+  final String? badge;
+
+  /// Whether this is an AUTHORED capture of the actual seat.
+  ///
+  /// False for a view the engine drew out of the venue's geometry. This is the
+  /// distinction [badge] puts into words; read it rather than matching on the
+  /// word, which is translated.
+  final bool real;
+
+  /// Whether the image was synthesised rather than fetched.
+  final bool generated;
+
+  /// How to move the picture — "Drag to look around · pinch or scroll to zoom".
+  final String? dragHint;
+
+  /// Whether there is anything here worth drawing chrome for.
+  bool get hasContent =>
+      (title?.trim().isNotEmpty ?? false) ||
+      (caption?.trim().isNotEmpty ?? false) ||
+      (badge?.trim().isNotEmpty ?? false);
+
+  /// Decode `p.seatView`; null both for a closed panorama and for a payload
+  /// that is not an object, which are the same thing to a host.
+  static SeatLayerSeatView? fromJson(Object? value) {
+    if (jObj(value) == null) return null;
+    return SeatLayerSeatView(
+      seatId: jStr(jGet(value, 'seatId')),
+      title: jStr(jGet(value, 'title')),
+      caption: jStr(jGet(value, 'caption')),
+      badge: jStr(jGet(value, 'badge')),
+      real: jBool(jGet(value, 'real')) ?? false,
+      generated: jBool(jGet(value, 'generated')) ?? false,
+      dragHint: jStr(jGet(value, 'dragHint')),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeatLayerSeatView &&
+      other.seatId == seatId &&
+      other.title == title &&
+      other.caption == caption &&
+      other.badge == badge &&
+      other.real == real &&
+      other.generated == generated &&
+      other.dragHint == dragHint;
+
+  @override
+  int get hashCode =>
+      Object.hash(seatId, title, caption, badge, real, generated, dragHint);
+
+  @override
+  String toString() => 'SeatLayerSeatView($seatId, $badge)';
+}

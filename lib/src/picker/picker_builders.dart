@@ -56,6 +56,7 @@ class SeatLayerPickerBuilders {
     this.selectionTray,
     this.cartSheet,
     this.venue3D,
+    this.seatViewChrome,
     this.holdCountdown,
     this.actionError,
     this.checkoutBar,
@@ -114,6 +115,9 @@ class SeatLayerPickerBuilders {
 
   /// Replaces the chrome drawn over the immersive 3D scene.
   final SeatLayerPickerPartBuilder? venue3D;
+
+  /// Replaces the caption strip drawn over the 2D seat-view panorama.
+  final SeatLayerPickerPartBuilder? seatViewChrome;
 
   /// Replaces the hold countdown.
   final SeatLayerPickerPartBuilder? holdCountdown;
