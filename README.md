@@ -281,6 +281,36 @@ The picker fills the bounded space provided by its parent. Use it as an
 `Expanded` child or on a full page; do not put its map inside a competing
 gesture-driven `ListView` or `SingleChildScrollView`.
 
+### Prewarm from the event screen
+
+Opening the picker costs a WebView process start and a document fetch before
+the runtime has said a word — and all of it can happen while the buyer is
+still reading the event page. Call `SeatLayerPicker.prewarm()` from the screen
+they are already on:
+
+```dart
+class _EventPageState extends State<EventPage> {
+  @override
+  void initState() {
+    super.initState();
+    SeatLayerPicker.prewarm(); // the buyer is reading; start the page now
+  }
+  // …
+}
+```
+
+The next `SeatLayerPicker` mounts onto that page instead of starting one, and
+its `hello` — which the page emits with nobody listening yet — is replayed to
+the bridge on adoption, so the handshake is exactly the one it would have had.
+No event, no buyer token and no session are involved: only the immutable
+runtime page is loaded, and everything about the booking still travels at
+`init` when the picker opens.
+
+It is idempotent, so calling it on every build of the event screen is fine.
+An unclaimed page is thrown away after five minutes (`ttl:`), and immediately
+if the platform reports memory pressure — a head start must never be what gets
+your app killed. `SeatLayerPicker.cancelPrewarm()` gives it back early.
+
 Pan and pinch frames are rendered entirely inside the chart. They do not emit
 full picker snapshots or rebuild Flutter chrome on every touch frame; Flutter is
 notified only when a serializable state such as the active zoom rung actually

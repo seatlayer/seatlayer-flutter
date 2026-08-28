@@ -13,10 +13,13 @@ import 'payloads.dart';
 import 'seat_layer_configuration.dart';
 import 'seat_layer_controller.dart';
 import 'seat_layer_error.dart';
+import 'seat_layer_prewarm.dart';
 
 /// The JavaScript channel name the web bundle probes for
-/// (`window.SeatLayer.postMessage`). MUST be exactly this string.
-const String _channelName = 'SeatLayer';
+/// (`window.SeatLayer.postMessage`). MUST be exactly this string, and is
+/// shared with the prewarm so an adopted page keeps the channel it was made
+/// with rather than being given a second one under the same name.
+const String _channelName = seatLayerChannelName;
 
 /// A seat map.
 ///
@@ -74,9 +77,30 @@ class _SeatLayerViewState extends State<SeatLayerView> {
   late final WebViewController _web;
   int _generation = 0;
 
+  /// The prewarmed page this view adopted, for as long as it is mounted.
+  ///
+  /// Held rather than dropped after boot so `dispose` can detach its channel:
+  /// the page delivers into a controller this view is about to let go of.
+  SeatLayerWarmPage? _warm;
+
+  /// Whether the first boot still has a loaded page waiting for it.
+  bool _adoptWarmPage = false;
+
   @override
   void initState() {
     super.initState();
+    final warm =
+        SeatLayerRuntimePrewarm.claim(widget.configuration.assetPath);
+    if (warm != null) {
+      // The page is already loading, its channel is already installed, and
+      // whatever it has said so far is buffered. Adopt all three.
+      _warm = warm;
+      _adoptWarmPage = true;
+      _web = warm.controller
+        ..setNavigationDelegate(_navigationDelegate());
+      _boot();
+      return;
+    }
     _web = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
@@ -89,24 +113,7 @@ class _SeatLayerViewState extends State<SeatLayerView> {
           widget.controller.ingestRaw(message.message);
         },
       )
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onNavigationRequest: (request) =>
-              _allowsNavigation(widget.configuration.assetPath, request.url)
-                  ? NavigationDecision.navigate
-                  : NavigationDecision.prevent,
-          onWebResourceError: (error) {
-            // Only a hard failure of the main document should fail the load;
-            // sub-resource noise must not abort a working chart.
-            if (error.isForMainFrame ?? true) {
-              if (!mounted) return;
-              widget.controller.failWithTransport(
-                'page load failed: ${error.description}',
-              );
-            }
-          },
-        ),
-      );
+      ..setNavigationDelegate(_navigationDelegate());
 
     // Suppress WKWebView bounce and Android edge glow when the installed
     // platform adapter supports it. Some host apps override a newer
@@ -115,6 +122,23 @@ class _SeatLayerViewState extends State<SeatLayerView> {
     unawaited(_disablePlatformOverScroll());
     _boot();
   }
+
+  NavigationDelegate _navigationDelegate() => NavigationDelegate(
+        onNavigationRequest: (request) =>
+            _allowsNavigation(widget.configuration.assetPath, request.url)
+                ? NavigationDecision.navigate
+                : NavigationDecision.prevent,
+        onWebResourceError: (error) {
+          // Only a hard failure of the main document should fail the load;
+          // sub-resource noise must not abort a working chart.
+          if (error.isForMainFrame ?? true) {
+            if (!mounted) return;
+            widget.controller.failWithTransport(
+              'page load failed: ${error.description}',
+            );
+          }
+        },
+      );
 
   Future<void> _disablePlatformOverScroll() async {
     try {
@@ -149,6 +173,18 @@ class _SeatLayerViewState extends State<SeatLayerView> {
         },
       ),
     );
+
+    // A prewarmed page is already loading — or loaded, and already talking.
+    // Nothing to request; the handshake above is armed, so hand it the
+    // `hello` the page said before this view existed and every later message
+    // with it. Consumed once: a reload after this boots the page properly.
+    if (_adoptWarmPage) {
+      _adoptWarmPage = false;
+      // Routed through `widget` rather than bound to today's controller, so a
+      // later controller swap keeps receiving on the same page.
+      _warm!.attach((message) => widget.controller.ingestRaw(message));
+      return;
+    }
 
     try {
       final location = widget.configuration.assetPath;
@@ -210,6 +246,9 @@ class _SeatLayerViewState extends State<SeatLayerView> {
   @override
   void dispose() {
     _generation += 1;
+    // Nothing more from this page: the controller it was delivering into is
+    // being detached on the next line.
+    _warm?.detach();
     widget.controller.detachTransport();
     super.dispose();
   }
