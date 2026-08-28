@@ -1,7 +1,7 @@
 // Rebuilds `design/locale_strings.json` from the SeatLayer runtime's own
 // dictionaries.
 //
-//   node tool/extract_runtime_locales.mjs ../seatlayer-runtime/packages/core/src/i18n/locales
+//   node tool/extract_runtime_locales.mjs <SeatLayer runtime locale directory>
 //
 // The runtime already ships a translated dictionary per locale, reviewed by
 // the same people who review the web picker's wording. Re-translating the same
@@ -84,7 +84,7 @@ for (const file of fs.readdirSync(dir).filter((name) => name.endsWith('.ts')).so
 fs.writeFileSync(
   'design/locale_strings.json',
   `${JSON.stringify(
-    { source: 'seatlayer-runtime packages/core/src/i18n/locales', strings },
+    { source: 'the SeatLayer runtime locale dictionaries', strings },
     null,
     2,
   )}\n`,

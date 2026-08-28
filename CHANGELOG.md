@@ -1,5 +1,178 @@
 # Changelog
 
+## 0.3.1
+
+Defects found on a phone, the three the load measurements said the SDK owned,
+and the additive native-chrome contract that came out of them: the chart-load
+record, the seat-view panorama's words, and the floor strip's confirmed shape.
+
+**The system bars are the picker's**
+
+- The clock, the wifi glyph and the battery are drawn by the operating system
+  on a surface the picker owns, and nothing was telling it which side that
+  surface was on: a dark picker kept the platform's dark glyphs, which is
+  near-black on near-black. The drop-in now annotates `SystemUiOverlayStyle`
+  from the resolved palette — iOS `statusBarBrightness` names the ground,
+  Android `statusBarIconBrightness` names the glyphs, and both are filled in —
+  so it follows an `auto` flip live and goes dark for the immersive 3D scene
+  whatever side the picker is painted on. The page's own top safe-area strip
+  follows the scene palette with it, which closes a residual defect from the
+  release before: a white band above a black 3D view.
+- `SeatLayerPickerChromeOptions.manageSystemOverlays` (default true) opts out a
+  host that owns its own bars, and `seatLayerPickerOverlayStyle` is exported so
+  it can still ask what the picker would have set.
+
+**The dock's section name keeps its letters**
+
+- `Sponsor Ta… · 72 left` was two defects. The name sat in a `Flexible` next to
+  a `Spacer`, and two flex-1 children split the free space, so the name was
+  capped at half the bar and cut while there was still room to its right. And
+  nothing to its right ever gave way.
+- The row is planned before it is drawn. A measured ladder gives way right to
+  left — `72 left` becomes `72`, then goes; the Venue button drops to its
+  chevron, keeping its tooltip — and the first rung whose leftover holds the
+  whole name wins. Only when the narrowest rung still cannot hold it does the
+  name take a second line at 12 sp, and only then can it ellipsize. The step
+  controls never give way: they are how the buyer moves. Goldens at 390 and
+  320.
+
+**One load time covering the whole open**
+
+- The runtime's chart-load beacon now reaches the host (`evt
+  telemetry.chartLoad`, capability `chart-load-trace-v1`) and is decoded whole
+  into `SeatLayerChartLoadTrace` — the API, availability, normalise, renderer
+  and paint spans, the seat and floor counts, the chart's cache result, and the
+  three document-relative spans `documentMs` / `handshakeMs` / `bootMs`. Fields
+  this release does not model are kept verbatim on `raw`, so a runtime that adds
+  one is readable without an SDK release.
+- It is merged with the SDK's own measurement rather than surfaced alone. The
+  runtime's clock starts at its own document; the SDK's `ReadyInfo` starts when
+  the view armed its handshake; neither is what the buyer felt.
+  `SeatLayerChartLoad.tapToReadyMs` starts at the picker's **mount** — the frame
+  after the tap — so it is the same T0 whether or not the page was prewarmed,
+  and `hostMs` is that span less the page's own `bootMs`. On the reference
+  app's 3,513 ms cold open that outside-the-page share was 2,495 ms.
+- Reached as `SeatLayerPickerController.onChartLoad` (a broadcast stream) or
+  `SeatLayerPickerCallbacks(onChartLoad:)`. Fires once per render attempt,
+  success or failure. **Nothing is logged and nothing is sent anywhere** — it is
+  a hook for the host's own analytics.
+
+**The seat-view panorama's words are native**
+
+- The 3D scene went native-clean a round ago; the 2D `View from here` fallback
+  did not. It kept drawing its own header line, disclosure caption and `PREVIEW`
+  badge over the picture, and on a phone all three landed under the native price
+  rail — two owners drawing chrome in the same band.
+- Against a runtime advertising `native-seat-view-chrome-v1` the picker adds
+  `seatViewTitle`, `seatViewCaption` and `seatViewBadge` to its init suppression
+  and draws `SeatLayerSeatViewChrome` instead: a caption strip and disclosure
+  badge in the picker's palette, clear of the rail and the dock. The words
+  arrive already localized on `evt seatView.changed` and arrive again after a
+  live language switch, so nothing is re-derived here; `SeatLayerSeatView.real`
+  is what separates an authored capture of the seat from one the engine drew out
+  of the venue's geometry, so the badge never has to be recognised by its
+  translated word.
+- Composable like every other part: `SeatLayerPickerBuilders(seatViewChrome:)`,
+  `SeatLayerPickerChromeOptions(showSeatViewChrome:)` and
+  `SeatLayerPickerStyles(seatViewChromeStyle:)`. It takes no touch — every
+  gesture over the panorama is the panorama's.
+- The CLOSE button is deliberately not suppressed. It is the buyer's only way
+  out of a full-screen picture, and native chrome does not reach inside the
+  panorama to offer one. An older runtime is asked to suppress nothing and keeps
+  drawing its own, so the disclosure is on screen exactly once either way.
+
+**Floors read in the order the venue has them**
+
+- The runtime confirmed the floor contract and one negative with it: there is no
+  `level` field. The strip had been sorting floors top-down by it whenever every
+  floor carried one, which no floor does — dead by construction, and a sort that
+  would reorder half a venue the day a chart carried a partial level. Removed;
+  the snapshot's order is the venue's order, stage upward.
+- The "All floors" chip now needs both halves of the runtime's word: the
+  `floor-stack-v1` capability and a reported `floorMode`. A chip drawn on one
+  half alone would send `'all'` to a runtime with no such floor.
+- `SeatLayerPickerMapState.floorLabelStyle` is read alongside, for a host
+  drawing a strip of its own that wants to match the stacked view's badges.
+- `SeatLayerPickerStrings.allFloors` remains the one native chrome string with
+  no runtime dictionary key to take its translation from, and is now recorded as
+  an ask rather than as folklore. It keeps its English wording in every locale
+  until the key exists; override it for a multi-floor venue outside English.
+
+**Prewarm**
+
+- `SeatLayerPicker.prewarm()` loads the immutable runtime page from the screen
+  the buyer is already on, so a picker opened later mounts onto a page that is
+  already up. No event, no buyer token and no session: all of that still
+  travels at `init`. A page with no view yet still emits its bridge `hello`, so
+  the warm page installs the channel itself and buffers what it hears; the
+  claiming view arms its handshake first and replays the buffer, and the bridge
+  sees the same messages in the same order it would have seen live.
+- Idempotent. An unclaimed page expires (default five minutes) and is dropped
+  on memory pressure, blanked to `about:blank` before it is dereferenced.
+  `SeatLayerPicker.cancelPrewarm()` gives it back early.
+- **Measured on a reference app**, iOS Simulator, debug build. Three runs each,
+  same warm app process, tap to `sys.ready`, with a ten-second dwell on the
+  event screen — long enough that the prewarmed page is the re-loaded one,
+  which is the ordinary case.
+
+  | | run 1 | run 2 | run 3 | median |
+  | --- | ---: | ---: | ---: | ---: |
+  | without `prewarm()` | 3,182 | 3,610 | 3,262 | **3,262 ms** |
+  | with `prewarm()` | 2,925 | 2,061 | 2,192 | **2,192 ms** |
+
+  **1,070 ms off the median open, 33%.** The bridge-side span — the SDK's own
+  `ReadyInfo.timeToReadyMs` — moves 2,104 ms → 1,082 ms, so the saving is where
+  the diagnosis said it was: the WebView, not the runtime.
+
+  The first version of this shipped a warm *session* rather than a warm
+  WebView, and the reference app caught it: a page left for a minute
+  had already emitted `sys.error {code: 'host_timeout'}`, so the picker opened
+  on an error. A page past
+  `seatLayerPrewarmHandshakeWindow` is re-loaded when it is claimed.
+
+**`auto` follows the application, not only the device**
+
+- `SeatLayerThemeMode.auto` read `MediaQuery.platformBrightness`, which is the
+  device's setting and not the buyer's: an app with its own dark-mode switch
+  sits in dark mode on a light phone all the time, and the picker opened white
+  inside it. `auto` now asks `Theme.of(context).brightness` first — what that
+  switch moves, and what a Cupertino theme reports too — and falls back to the
+  device only where there is no Material or Cupertino theme to ask. Precedence:
+  an explicit `themeMode`, then the host's theme, then the device. Both
+  readings are live.
+
+**One call for an app that already has a palette**
+
+- `SeatLayerPickerThemeData.fromColorScheme(scheme)` and
+  `SeatLayerPickerThemeData.of(context)` map a Material palette onto the whole
+  picker: `primary`/`onPrimary` to the accent and its ink, so `Continue`,
+  `Select`, `Find N best seats`, the hold pill and the Map/3D control all carry
+  the brand at once; `surface`, `onSurface`, `onSurfaceVariant`,
+  `outlineVariant` and `error` to the grounds, ink, hairlines and failures.
+  `.of(context)` takes the theme's body typeface with the scheme.
+- Ticket categories are deliberately untouched. The legend chips, the dock's
+  section dot and the seats stand for prices, and a brand-coloured dot would
+  disagree with the chip it is supposed to match.
+- A `ColorScheme` names no recessed ground that works on both sides, so the
+  page under the chrome is derived as one small step toward black. Every role
+  is overridable.
+
+**Multi-floor venues**
+
+- `SeatLayerFloorStrip` is a chip row — `All floors`, then each floor top down
+  — under the price rail on the phone and beside the map when wide, reported in
+  the viewport insets with the rail so a focused section is still framed clear
+  of it. Hide it with `SeatLayerPickerChromeOptions(showFloorStrip: false)`,
+  replace it through `SeatLayerPickerBuilders(floorStrip:)`, restyle it with
+  `SeatLayerPickerStyles(floorStripStyle:)`.
+- Everything it draws comes from the snapshot, and it draws nothing it was not
+  told about: no chrome below two floors, and no all-floors chip unless the
+  runtime reports a `floorMode`. `SeatLayerPickerMapState.floorMode`,
+  `FloorInfo.level` and `SeatLayerPickerController.showAllFloors` are the
+  additive, capability-gated model behind it.
+- `SeatLayerPickerStrings.allFloors` is the one string the runtime has no
+  dictionary entry for and keeps English in every locale until it does.
+
 ## 0.3.0
 
 Phone parity round. The native chrome is rebuilt against the web picker's

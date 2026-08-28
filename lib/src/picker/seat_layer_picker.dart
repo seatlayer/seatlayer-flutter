@@ -7,12 +7,14 @@ import 'package:flutter/material.dart';
 
 import '../bridge/bridge_profile.dart';
 import '../seat_layer_configuration.dart';
+import '../seat_layer_prewarm.dart';
 import '../seat_layer_view.dart';
 import 'picker_adaptive_layout.dart';
 import 'picker_best_seats.dart';
 import 'picker_builders.dart';
 import 'picker_cart_list.dart';
 import 'picker_options.dart';
+import 'picker_system_overlay.dart';
 import 'picker_theme_sync.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -70,6 +72,62 @@ class SeatLayerPicker extends StatelessWidget {
   /// Called when the buyer dismisses the picker; omit to hide the control.
   final VoidCallback? onClose;
 
+  /// Start the runtime page now, so a picker opened later mounts onto it.
+  ///
+  /// **Call this from the screen the buyer is already on** — the event
+  /// details page, the moment it appears. Opening the picker costs a WebView
+  /// process start and a document fetch before the runtime has said a word;
+  /// measured on a reference app that is most of the wait, and all of it
+  /// can happen while the buyer is still reading. There is no event and no
+  /// buyer token involved: only the immutable page is loaded, and everything
+  /// about the session still travels at `init` when the picker opens.
+  ///
+  /// What it keeps is the **WebView**, not a live session. The runtime page
+  /// starts its own clock when it loads and gives up on the host after ten
+  /// seconds, so a page the buyer left sitting is re-loaded when the picker
+  /// claims it — a cache hit, measured at two milliseconds — while the web
+  /// content process, which is the expensive half, is already up. A buyer who
+  /// taps within a few seconds gets the loaded page and its greeting too.
+  ///
+  /// Idempotent, and safe to call from `initState` or a build. Calling it
+  /// again for a page that is already warm only refreshes how long it is
+  /// kept.
+  ///
+  /// The page is thrown away if nothing claims it within [ttl], and
+  /// immediately if the platform reports memory pressure — a convenience must
+  /// never be what gets the host application killed. Nothing is left behind
+  /// if the buyer never opens the picker.
+  ///
+  /// ```dart
+  /// @override
+  /// void initState() {
+  ///   super.initState();
+  ///   SeatLayerPicker.prewarm();
+  /// }
+  /// ```
+  ///
+  /// Pass [configuration] only if you point the SDK at a document of your own;
+  /// the default is the hosted runtime page every production view loads. A
+  /// bundled asset fixture is ignored, having nothing to gain.
+  static void prewarm({
+    SeatLayerConfiguration? configuration,
+    Duration ttl = seatLayerPrewarmDefaultTtl,
+  }) =>
+      SeatLayerRuntimePrewarm.start(
+        configuration?.assetPath ?? SeatLayerConfiguration.defaultAssetPath,
+        ttl: ttl,
+      );
+
+  /// Throw away any page [prewarm] started that nothing has claimed.
+  ///
+  /// Rarely needed — a warm page expires on its own and is dropped under
+  /// memory pressure. Reach for it when the buyer has demonstrably left, for
+  /// example on the way out of a whole event flow.
+  static void cancelPrewarm({SeatLayerConfiguration? configuration}) =>
+      SeatLayerRuntimePrewarm.discard(
+        configuration?.assetPath ?? SeatLayerConfiguration.defaultAssetPath,
+      );
+
   @override
   Widget build(BuildContext context) => SeatLayerPickerScope(
         configuration: configuration,
@@ -78,10 +136,15 @@ class SeatLayerPicker extends StatelessWidget {
         theme: theme,
         themeMode: themeMode,
         callbacks: callbacks,
-        child: SeatLayerPickerAdaptiveLayout(
-          onCheckout: onCheckout,
-          onClose: onClose,
-          builders: builders,
+        // The bars are dressed from inside the scope, so the style follows
+        // everything the palette does: an `auto` device flip, the organizer's
+        // branding arriving, and the immersive scene coming up.
+        child: PickerSystemOverlay(
+          child: SeatLayerPickerAdaptiveLayout(
+            onCheckout: onCheckout,
+            onClose: onClose,
+            builders: builders,
+          ),
         ),
       );
 }

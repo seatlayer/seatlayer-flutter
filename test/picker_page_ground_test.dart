@@ -3,7 +3,7 @@
 // `SeatLayerPickerPage` hands its top inset to a SafeArea rather than to the
 // header, so whatever the Scaffold paints shows through above the header. A
 // bare Scaffold paints the HOST application's `scaffoldBackgroundColor`, which
-// put a white band over a dark picker on the pilot's first dark screenshot.
+// put a white band over a dark picker on the first dark screenshot.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
@@ -62,14 +62,20 @@ void main() {
     expect(_scaffoldGround(tester), SeatLayerLightTokens.surface);
   });
 
-  testWidgets('the ground follows a device flip under auto', (tester) async {
+  testWidgets("the ground follows the host application's own theme under auto",
+      (tester) async {
     useFakeWebViewPlatform();
     usePhoneSurface(tester);
 
-    Widget build(Brightness platform) => MaterialApp(
-          theme: ThemeData.light(),
+    // `auto` asks the host first — the switch inside the app is the one the
+    // buyer actually moved. The device is left on light throughout, so this
+    // fails if the picker is still reading `platformBrightness`.
+    Widget build(Brightness host) => MaterialApp(
+          theme: ThemeData(brightness: host),
+          themeAnimationDuration: Duration.zero,
           builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(platformBrightness: platform),
+            data: MediaQuery.of(context)
+                .copyWith(platformBrightness: Brightness.light),
             child: child!,
           ),
           home: SeatLayerPickerPage(

@@ -43,6 +43,7 @@ class SeatLayerPickerBuilders {
     this.priceRail,
     this.legend,
     this.sectionNavigator,
+    this.floorStrip,
     this.dockBar,
     this.accessibilityFilters,
     this.map,
@@ -55,6 +56,7 @@ class SeatLayerPickerBuilders {
     this.selectionTray,
     this.cartSheet,
     this.venue3D,
+    this.seatViewChrome,
     this.holdCountdown,
     this.actionError,
     this.checkoutBar,
@@ -74,6 +76,9 @@ class SeatLayerPickerBuilders {
 
   /// Replaces the wide layout's section chip list.
   final SeatLayerPickerPartBuilder? sectionNavigator;
+
+  /// Replaces the multi-floor venue's floor chip strip.
+  final SeatLayerPickerPartBuilder? floorStrip;
 
   /// Replaces the phone's rung-2 dock bar.
   final SeatLayerPickerPartBuilder? dockBar;
@@ -110,6 +115,9 @@ class SeatLayerPickerBuilders {
 
   /// Replaces the chrome drawn over the immersive 3D scene.
   final SeatLayerPickerPartBuilder? venue3D;
+
+  /// Replaces the caption strip drawn over the 2D seat-view panorama.
+  final SeatLayerPickerPartBuilder? seatViewChrome;
 
   /// Replaces the hold countdown.
   final SeatLayerPickerPartBuilder? holdCountdown;

@@ -9,7 +9,7 @@ Every token reference (`size.dockBarHeight`, `color.dark.surface`,
 
 ## Corner radius: buttons are not pills
 
-**Decision, 2026-08-28 (owner).** Actions carry `radius.button` — 8 pt, which is
+**Decision, 2026-08-28.** Actions carry `radius.button` — 8 pt, which is
 what the web picker's own buttons measure: its primary call to action rounds to
 `calc(var(--sl-radius) * .55)` = 7.7 pt at the default 14 pt host radius, its
 confirm-card actions to 9 pt and its view/3D buttons to 8 pt. Material's default

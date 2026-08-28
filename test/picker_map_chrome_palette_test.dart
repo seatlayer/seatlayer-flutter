@@ -1,7 +1,7 @@
 // Chrome drawn on the map follows the MAP's palette, not the picker's side.
 //
 // The immersive scene is dark whatever side the picker is on. Anything capping
-// that surface has to go dark with it, or it reads as a mistake: the pilot's
+// that surface has to go dark with it, or it reads as a mistake: the first
 // 3D screenshots show an amber TEST MODE lozenge and a white cart sheet over a
 // dark venue, beside a header and legend that had already gone dark.
 import 'package:flutter/material.dart';

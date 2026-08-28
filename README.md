@@ -6,72 +6,65 @@
 [![Dart](https://img.shields.io/badge/Dart-%E2%89%A53.4-0175C2.svg)](https://dart.dev/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](LICENSE)
 
-The official SeatLayer Flutter package for adding a complete reserved-seating
-buyer flow to iOS and Android apps. The turnkey picker renders live inventory,
-native mobile controls, selection and validation, temporary holds, Best
-Available and a typed checkout handoff. A raw map/controller API remains
-available for applications that deliberately own every part of the UI.
+The official SeatLayer Flutter package for adding an interactive seating chart
+and seat picker to ticketing apps on iOS and Android. Render live seat
+availability, create temporary holds, find best-available seats, and hand
+secure booking to your trusted server.
 
-[Flutter documentation](https://docs.seatlayer.io/buyer-sdk/flutter/) ·
-[SeatLayer](https://seatlayer.io/) ·
-[Web buyer demo](https://app.seatlayer.io/demo/play/grand-theatre) ·
-[Android SDK](https://github.com/seatlayer/seatlayer-android) ·
-[React Native SDK](https://github.com/seatlayer/seatlayer-react-native)
+[SeatLayer Flutter package on pub.dev](https://pub.dev/packages/seatlayer) ·
+[Flutter seat-map documentation](https://docs.seatlayer.io/buyer-sdk/flutter/) ·
+[SeatLayer reserved-seating platform](https://seatlayer.io/) ·
+[Buyer seat-map demo (web)](https://app.seatlayer.io/demo/play/grand-theatre) ·
+[SeatLayer Android seat map SDK](https://github.com/seatlayer/seatlayer-android) ·
+[SeatLayer React Native SDK](https://github.com/seatlayer/seatlayer-react-native) ·
+[SeatLayer AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
 
-> **Release status:** `0.2.2` remains the published stable package.
-> [`0.3.0-dev.2`](https://pub.dev/packages/seatlayer/versions/0.3.0-dev.2)
-> is the published prerelease containing the `SeatLayerPicker` API described
-> below. Use that exact prerelease while validating; do not point a production
-> app at a moving Git branch.
+> **Production SDK:** `0.3.1` is the current Flutter release. Pin the documented
+> release and validate your event, checkout handoff, lifecycle, and supported
+> physical devices before rollout.
 
-## Install
+## Works as a native picker
 
-Install the published picker prerelease explicitly:
+**The venue map renders in a WebView. Every piece of chrome is a Flutter
+widget.** The header, price rail, floor strip, section dock, seat confirm card,
+cart sheet, checkout button and the captions over the 3D scene and the seat-view
+panorama are all Dart — drawn in your palette, laid out by Flutter, replaceable
+one at a time. The WebView draws the geometry: seats, labels, section shells,
+the immersive scene and the panorama photograph. The renderer is told at
+handshake that Flutter owns the furniture, so it draws none of its own: no
+second tooltip, no second test badge, no web button under a native one.
 
-```bash
-flutter pub add seatlayer:0.3.0-dev.2
-```
+Three ways in, and they are a ladder — each level keeps what the one below gave
+you. Level 2 is not an escape hatch and level 3 is not a rewrite: the drop-in is
+built from exactly the widgets level 3 hands you.
 
-The stable `0.2.2` package remains available through `flutter pub add
-seatlayer`, but does not contain this picker release. A Git commit pin is only
-needed for unpublished development work:
-
-```yaml
-dependencies:
-  seatlayer:
-    git:
-      url: https://github.com/seatlayer/seatlayer-flutter.git
-      ref: <exact-40-character-commit>
-```
-
-Then import the public library:
-
-```dart
-import 'package:seatlayer/seatlayer.dart';
-```
-
-## Two ways in
+| | You want | You write | You keep |
+| --- | --- | --- | --- |
+| **1** | The whole buyer flow, now | `SeatLayerPicker(…)` | Everything below |
+| **2** | It, in your brand and your words | A theme, a style slot, an option, a builder | The layout, the flow, the holds |
+| **3** | Your own screen | `SeatLayerPickerScope` + the widgets | Inventory, holds, snapshots, checkout |
 
 ```mermaid
 flowchart TD
-  A["SeatLayerConfiguration<br/>event + publishable key"] --> B{"How much layout<br/>do you want to own?"}
-  B -->|"None"| C["SeatLayerPicker<br/>drop-in"]
-  B -->|"All of it"| D["SeatLayerPickerScope"]
-  D --> E["SeatLayerChart"]
-  D --> F["SeatLayerPickerHeader<br/>SeatLayerPriceLegend<br/>SeatLayerDockBar"]
-  D --> G["SeatLayerConfirmCard<br/>SeatLayerCartSheet<br/>SeatLayerVenue3D"]
-  C --> H["onCheckout(handoff)"]
-  E --> H
-  F --> H
-  G --> H
-  H --> I["Your backend books the hold"]
+  A["SeatLayerConfiguration<br/>event + publishable key"] --> B{"How much<br/>do you own?"}
+  B -->|"Nothing"| C["SeatLayerPicker"]
+  B -->|"The look"| D["theme · style slots<br/>options · builders"]
+  B -->|"The screen"| E["SeatLayerPickerScope<br/>+ the widgets"]
+  C --> F["onCheckout(handoff)"]
+  D --> F
+  E --> F
+  F --> G["Your backend inspects<br/>and books the hold"]
 ```
 
-### Recipe 1 — drop-in
+## Quick start
 
-One widget. The complete buyer flow, on the approved phone UX by default.
+```bash
+flutter pub add seatlayer
+```
 
 ```dart
+import 'package:seatlayer/seatlayer.dart';
+
 SeatLayerPicker(
   configuration: SeatLayerConfiguration(
     event: 'ev_your_event',
@@ -83,628 +76,269 @@ SeatLayerPicker(
 )
 ```
 
-### Recipe 2 — composable
+That is the whole flow: live inventory, price and accessibility filters, section
+and floor navigation, seat confirmation, GA and table prompts, Best Available,
+the cart, a hold with its countdown, real venue 3D, the seat-view panorama and
+the checkout handoff. It fills the bounded space its parent gives it — do not
+nest it in a gesture-driven `ListView` or `SingleChildScrollView`.
 
-Place a scope, then arrange the parts yourself. Every widget below reads its
-state from the scope; none of them needs the drop-in layout.
+`SeatLayerPickerPage(configuration:, onCheckout:)` is the same widget as a route
+you push; `showSeatLayerPicker(context, configuration:, presentation:)` is it as
+a modal returning the handoff, or `null` if the buyer closes it. `adaptive` is
+edge-to-edge on a phone and a constrained dialog at 700 logical pixels or wider;
+`.fullScreen` / `.dialog` force one. Both intercept close and system back and
+release a picker-owned hold before the route leaves — a hold already handed to
+you is never released.
+
+**The runtime pin.** Production views load an immutable hosted document pinned
+by this package — `https://cdn.seatlayer.io/seatlayer-js@0.71.3/mobile.html`,
+exported as `seatLayerHostedWebVersion`. It moves only with an SDK release, so
+an app shipping a given `seatlayer` version always loads the same renderer;
+`SeatLayerConfiguration(assetPath:)` overrides it while validating one.
+
+Register that exact origin on the publishable key you use. For private,
+login-gated, presale, partner or channel inventory, drop `publicKey` and mint a
+short-lived, origin-bound buyer session from your own backend instead:
 
 ```dart
-SeatLayerPickerScope(
-  configuration: configuration,
-  themeMode: SeatLayerThemeMode.auto,
-  child: Column(
-    children: [
-      SeatLayerPickerHeader(compact: true, onClose: close),
-      Expanded(
-        child: Stack(
-          children: [
-            const Positioned.fill(child: SeatLayerChart()),
-            const Positioned(top: 8, left: 0, child: SeatLayerPriceLegend(compact: true)),
-            const Positioned.fill(child: SeatLayerPickerMapControls(compact: true)),
-            const Positioned(left: 0, right: 0, bottom: 0, child: SeatLayerDockBar()),
-            const Positioned.fill(child: SeatLayerVenue3D()),
-          ],
-        ),
-      ),
-      SeatLayerCartSheet(
-        expanded: expanded,
-        onExpandedChanged: (value) => setState(() => expanded = value),
-        onCheckout: (handoff) => bookOnYourBackend(handoff.holdId),
-      ),
-    ],
-  ),
+SeatLayerConfiguration(
+  event: 'ev_private',
+  buyerAccessTokenProvider: (request) =>
+      buyerBackend.mintSeatLayerAccess(request.reason),
 )
 ```
 
-## Widget catalogue
+Never ship a SeatLayer secret in the app binary or the WebView.
 
-| Widget | What it is | Standalone in a scope |
-| --- | --- | --- |
-| `SeatLayerPicker` | The drop-in buyer flow | n/a |
-| `SeatLayerChart` | The drawn map (alias of `SeatLayerPickerMap`) | yes |
-| `SeatLayerPickerHeader` | Event identity, hold pill, dismiss | yes |
-| `SeatLayerPriceLegend` | Price chips that filter the map | yes |
-| `SeatLayerDockBar` | Focused section, seats left, prev/next, Venue | yes |
-| `SeatLayerPickerMapControls` | Accessibility, fit, Map/3D in the corners | yes |
-| `SeatLayerConfirmCard` | The phone's one-seat decision card | yes |
-| `SeatLayerCartSheet` | Peek bar and content-height cart | yes |
-| `SeatLayerCartList` | The dense ticket list with run folding | yes |
-| `SeatLayerBestSeatsForm` | Two selects, a stepper, one action | yes |
-| `SeatLayerBookButton` | The full-width checkout call to action | yes |
-| `SeatLayerVenue3D` | Caption, seat stepper and exits over the 3D scene | yes |
-| `SeatLayerPickerAccessibilityFilters` | Access needs and the colourblind palette | yes |
-| `SeatLayerPickerTablePrompt` / `…GeneralAdmissionPrompt` | Quantity prompts | yes |
-| `SeatLayerPickerScope` | The state every widget above reads | n/a |
+## Customise the picker
 
-## Design system
+Four levels, cheapest first. None of them rebuilds the layout or the flow.
 
-The picker's colours, sizes, radii, elevations, type scale, motion table,
-haptic cues and default strings live in one platform-neutral file,
-[`design/tokens.json`](design/tokens.json), and the component catalogue that
-describes every widget in terms of those tokens lives in
-[`design/components.md`](design/components.md). The catalogue is written for a
-Swift, Kotlin or React Native engineer reproducing this design, and it uses the
-Dart API's names throughout.
-
-`lib/src/picker/picker_tokens.g.dart` is **generated** from the JSON and must
-not be hand-edited:
-
-```bash
-dart run tool/gen_tokens.dart          # sync:tokens — regenerate
-dart run tool/gen_tokens.dart --check  # fail if the generated file is stale
-```
-
-The theme presets, `SeatLayerPickerLayout`, `SeatLayerPickerMotion`, the haptic
-map and `SeatLayerPickerStrings` all read that file, and
-`test/design_tokens_test.dart` asserts them against the JSON as well as running
-the staleness check, so the two cannot drift.
-
-## Customisation
-
-The zero-configuration path is the approved phone experience. Everything about
-it is still yours to change.
-
-**Hide a part.** Every piece of chrome has a switch:
+**Colours and type — a theme.** One line adopts an app palette whole — before,
+the SeatLayer palette; after, yours, on the chrome and the drawn map together:
 
 ```dart
-options: const SeatLayerPickerOptions(
-  chrome: SeatLayerPickerChromeOptions(showDockBar: false),
-),
+theme: SeatLayerPickerThemeData.fromColorScheme(Theme.of(context).colorScheme),
 ```
 
-**Replace one part, keep the rest.** A builder receives the live state and the
-widget the drop-in would have rendered:
+**One control's shape — a style slot.** Every surface the picker draws has a
+slot on the theme, so one control changes without replacing the widget:
 
 ```dart
-builders: SeatLayerPickerBuilders(
-  cartSheet: (context, part) => MyOwnSheet(state: part.state, fallback: part.defaultChild),
-),
-```
-
-**Restyle one element, keep the widget.** Every control the picker draws has a
-style slot on the theme, so a single button can change shape without replacing
-the widget around it. The picker's buttons round to `radius.button` (8 pt, the
-web picker's own), so turning the peek bar's `Continue` into a pill is three
-lines:
-
-```dart
+// before: the picker's 8-pt button radius everywhere.
+// after: only the checkout action is a pill; every other button is untouched.
 theme: SeatLayerPickerThemeData.light(
   styles: SeatLayerPickerStyles(
     continueButtonStyle: FilledButton.styleFrom(shape: const StadiumBorder()),
   ),
-),
+)
 ```
 
-Every button moves together through `buttonRadius`, which is its own role
-rather than a fraction of `radius`: `SeatLayerPickerThemeData.light(radius: 20)`
-rounds the cards and sheets without growing pill actions.
+Slots: `primaryButtonStyle`, `secondaryButtonStyle`, `continueButtonStyle`,
+`iconButtonStyle`, `chipShape`, `legendChipStyle`, `floorStripStyle`,
+`seatViewChromeStyle`, `dockBarStyle`, `confirmCardStyle`, `sheetStyle`,
+`headerStyle`, `pillStyle`. Button slots take a Material `ButtonStyle`; surface
+slots take a `SeatLayerSurfaceStyle` (colour, shape, elevation, padding, type).
+Every widget owning a slot also takes `style:`, which wins for that one instance
+— `SeatLayerDockBar(style: SeatLayerSurfaceStyle(shape: …))`.
 
-The slots are `primaryButtonStyle`, `secondaryButtonStyle`,
-`continueButtonStyle`, `iconButtonStyle`, `chipShape`, `legendChipStyle`,
-`dockBarStyle`, `confirmCardStyle`, `sheetStyle`, `headerStyle` and
-`pillStyle`. Button slots take a Material `ButtonStyle`; surface slots take a
-`SeatLayerSurfaceStyle` (colour, shape, elevation, padding, type). Every widget
-that owns a slot also accepts a `style:` parameter, which wins over the theme
-for that one instance:
-
-```dart
-SeatLayerDockBar(style: SeatLayerSurfaceStyle(shape: const RoundedRectangleBorder()))
-```
-
-**Retune the sizes.** The spec's numbers are defaults, not constants:
+**Sizes, visibility and words — layout, chrome switches, strings.** The spec's
+numbers are defaults, not constants, and every buyer-facing string is an
+override:
 
 ```dart
+// before: the approved phone metrics and English defaults.
+// after: a taller dock, no floor strip, French wording.
 theme: const SeatLayerPickerThemeData.light(
   layout: SeatLayerPickerLayout(dockBarHeight: 60, sheetMaxHeightFraction: .5),
 ),
-```
-
-**Translate or reword anything.** Every buyer-facing string is an override:
-
-```dart
 options: SeatLayerPickerOptions(
-  strings: SeatLayerPickerStrings(
-    holdAndCheckout: 'Réserver et payer',
-    seatsLeft: (count) => '$count restants',
-  ),
+  chrome: const SeatLayerPickerChromeOptions(showFloorStrip: false),
+  strings: SeatLayerPickerStrings(holdAndCheckout: 'Réserver et payer'),
 ),
 ```
 
-**Or take the translations SeatLayer already ships.** The drawn map speaks
-thirty-seven languages; `SeatLayerPickerStrings.forLocale` gives the native
-chrome around it the same words, from the same reviewed dictionaries:
+Or take the thirty-seven translations SeatLayer already ships, from the same
+reviewed dictionaries the drawn map uses:
+`strings: SeatLayerPickerStrings.forLocale(Localizations.localeOf(context))`.
+It resolves by language, and by script for Chinese; an untranslated locale — and
+any entry with no runtime wording, currently just `allFloors` — keeps its
+English default, and the result is an ordinary `SeatLayerPickerStrings` you can
+still override on top of.
+
+**One whole part — a builder slot.** The builder receives the live state, the
+controller and the widget the drop-in would have rendered:
 
 ```dart
-options: SeatLayerPickerOptions(
-  strings: SeatLayerPickerStrings.forLocale(Localizations.localeOf(context)),
+// before: the picker's own cart sheet. after: yours, the rest untouched.
+builders: SeatLayerPickerBuilders(
+  cartSheet: (context, part) =>
+      MyOwnSheet(state: part.state, fallback: part.defaultChild),
 ),
 ```
 
-It resolves by language, and by script for Chinese. An untranslated locale —
-and any single entry the runtime has no wording for — keeps its English
-default, and the result is an ordinary `SeatLayerPickerStrings`, so you can
-still override any entry on top of it.
+Slots: `map`, `header`, `legend`, `floorStrip`, `sectionNavigator`, `dockBar`,
+`accessibilityFilters`, `mapControls`, `selectionTray`, `cartSheet`,
+`checkoutBar`, `venue3D`, `seatViewChrome`.
 
-**Hear about every action.** All callbacks are optional:
+The test badge and the required attribution have no builder slot: colours and
+type follow your theme, but required chrome cannot be returned as an empty
+widget — a white-label entitlement turns attribution off, server-side. Organizer
+ticket categories are likewise never rebranded, because they mean a price.
+
+## Build your own layout
+
+Place a `SeatLayerPickerScope` and arrange the widgets yourself. Each reads its
+own state from the scope, so nothing needs the drop-in layout:
+
+```dart
+SeatLayerPickerScope(
+  configuration: configuration,
+  themeMode: SeatLayerThemeMode.auto,
+  child: Column(children: [
+    SeatLayerPickerHeader(compact: true, onClose: close),
+    const Expanded(child: Stack(children: [
+      Positioned.fill(child: SeatLayerChart()),
+      Positioned(top: 8, left: 0, child: SeatLayerPriceLegend(compact: true)),
+      Positioned(top: 40, left: 0, right: 0, child: SeatLayerFloorStrip()),
+      Positioned.fill(child: SeatLayerPickerMapControls(compact: true)),
+      Positioned(left: 0, right: 0, bottom: 0, child: SeatLayerDockBar()),
+      Positioned.fill(child: SeatLayerVenue3D()),
+      Positioned.fill(child: SeatLayerSeatViewChrome()),
+    ])),
+    SeatLayerCartSheet(expanded: expanded, onCheckout: book,
+        onExpandedChanged: (v) => setState(() => expanded = v)),
+  ]),
+)
+```
+
+**Every action is a callback.** All optional; a picker with none is still a
+complete buyer flow:
 
 ```dart
 callbacks: SeatLayerPickerCallbacks(
+  onReady: (info) => debugPrint('ready in ${info.timeToReadyMs} ms'),
+  onSelectionChanged: (seats) => setState(() => _seats = seats),
   onSectionFocused: (id) => analytics.log('section', id),
-  onSeatSelected: (seat) => analytics.log('seat', seat.label),
-  onThemeResolved: (brightness) => debugPrint('picker is $brightness'),
+  onHoldChanged: (hold, handoff) => _armCountdown(hold),
   onContinue: (handoff) => analytics.log('checkout', handoff.holdId),
-),
-```
-
-## Turnkey picker quick start
-
-This is the default integration. `SeatLayerPicker` supplies the adaptive
-layout, event identity, price and accessibility filters, section/floor/map
-controls, seat-tier confirmation, GA and variable-table prompts, Best
-Available, selection tray, hold countdown, attribution, one test-event badge,
-recoverable action errors, authored/chart-derived seat views, real venue 3D and
-the checkout CTA.
-
-```dart
-SeatLayerPicker(
-  configuration: SeatLayerConfiguration(
-    event: 'ev_your_event_key',
-    publicKey: 'pk_test_your_public_key',
-  ),
-  onCheckout: (handoff) {
-    openCheckout(holdId: handoff.holdId);
-  },
+  onError: (error) => report(error),
 )
 ```
 
-The picker fills the bounded space provided by its parent. Use it as an
-`Expanded` child or on a full page; do not put its map inside a competing
-gesture-driven `ListView` or `SingleChildScrollView`.
+Also `onSeatSelected`, `onSeatRemoved`, `onSeatViewOpened`,
+`onSelectionValidityChanged`, `onHoldExpired`, `onAccessExpired`,
+`onAccessUnavailable`, `onSelectedObjectUnavailable`, `onThemeResolved`,
+`onChartLoad`, `onClosed`.
 
-Pan and pinch frames are rendered entirely inside the chart. They do not emit
-full picker snapshots or rebuild Flutter chrome on every touch frame; Flutter is
-notified only when a serializable state such as the active zoom rung actually
-changes. The SDK also disables the platform WebView's document zoom,
-overscroll/bounce and edge glow, while isolating the map in its own repaint
-boundary. Hosts do not need gesture workarounds or app-specific scroll code.
-
-On a phone, the turnkey widget deliberately follows the web picker's map-first
-information hierarchy: a compact event header, one concise price rail, the map,
-and a 50-logical-pixel ticket-dock control row. Its bottom spacing is calculated
-from the remaining `MediaQuery` inset: gesture-style insets use a compact
-clearance in both collapsed and expanded states, while larger system-navigation
-bars are always kept clear. Required attribution is a small content-sized footer;
-when the API hides it, it reserves no layout height. The dock expands for Best
-Seats, selected tickets and checkout, and automatically opens after a new
-selection. Once tickets exist, the expanded sheet keeps a stable responsive
-height: only the ticket rows scroll, while the total, checkout action and
-required attribution remain pinned. Adding more tickets therefore never keeps
-pushing the map upward. The SDK does not add a second section rail above the map. Zoom
-in/out, fit, Map/real-3D, rotate/move and colorblind-safe controls stay
-available as compact floating buttons. Best Seats uses touch-friendly selector
-rows that open mobile choice sheets instead of cramped desktop dropdown menus.
-
-`SeatLayerPickerPage` leaves the bottom inset to the ticket dock, so a
-full-screen integration does not append a second empty safe-area strip. For a
-manual composition, `SeatLayerPickerMobileTicketPanel.bottomSafeArea` supports
-`adaptive` (the default), `full`, and `none`; choose `none` only when an ancestor
-already owns the bottom spacing. Choose `full` only when the host requires every
-logical pixel of the reported inset to remain empty. No fixed device height or
-app-specific bottom spacer is required.
-
-The usual display controls do not require a custom layout:
-
-```dart
-SeatLayerPicker(
-  configuration: configuration,
-  options: const SeatLayerPickerOptions(
-    enable3D: true,
-    enableSeatView: true,
-    max3DSeats: 30000, // optional; omit for the device-aware SDK default
-    chrome: SeatLayerPickerChromeOptions(
-      showHeader: true,
-      showPriceRail: true,
-      showZoomControls: true,
-      showViewModeControl: true,
-      showColorblindControl: true,
-    ),
-  ),
-  theme: const SeatLayerPickerThemeData.light(
-    accent: Color(0xFFE54558),
-    onAccent: Colors.white,
-    radius: 14,
-  ),
-  onCheckout: openCheckout,
-)
-```
-
-`SeatLayerPickerChromeOptions` controls only the turnkey composition. A custom
-composition can place the same public controls anywhere. Attribution is not a
-host visibility switch: the API-provided `branding.attributionRequired` value
-is authoritative.
-
-Venue 3D is a real, lazy-loaded WebGL scene, not the legacy isometric canvas
-projection. The base map stays interactive while the scene module loads and
-the SDK crossfades into it. After the first build, the scene stays mounted but
-idle while the buyer returns to the map, so repeated Map/3D comparison is
-instant and never churns the mobile WebGL context. Unsupported devices keep the
-complete 2D flow and do not show a dead control. `enable3D`, `enableSeatView`
-and `max3DSeats` let a host disable or constrain immersive rendering without
-changing its layout.
-Picker cards, ticket-dock changes, cart rows and immersive surfaces use one
-short motion language and honor the platform reduced-motion preference.
-
-### Branding, and which constructor follows the device
-
-**Brand with the default constructor.** It sets only the roles you name, so
-every ground role still comes from `themeMode` — and `SeatLayerThemeMode.auto`
-follows the device live, chrome and drawn map together:
-
-```dart
-SeatLayerPicker(
-  configuration: configuration,
-  themeMode: SeatLayerThemeMode.auto,
-  theme: const SeatLayerPickerThemeData(accent: Color(0xFFE54558)),
-  onCheckout: openCheckout,
-)
-```
-
-`SeatLayerPickerThemeData.light()` and `.dark()` are complete presets, not just
-white or black Flutter panels: each also sends a contrast-paired
-`SeatLayerMapThemeData` to the renderer for the canvas background, row labels,
-free text and the selection ring.
-
-**A preset pins the mode.** Because it supplies a whole explicit ground
-palette, and explicit roles win over the resolved mode, `themeMode: auto` with
-`.light()` never goes dark — the device flip changes nothing on screen. Reach
-for a preset when you *want* one fixed side, and drive it yourself if you want
-both:
-
-```dart
-final pickerTheme = Theme.of(context).brightness == Brightness.dark
-    ? const SeatLayerPickerThemeData.dark(accent: Color(0xFFFF5A6F))
-    : const SeatLayerPickerThemeData.light(accent: Color(0xFFE54558));
-```
-
-`themeMode` is available on `SeatLayerPicker`, `SeatLayerPickerScope`,
-`SeatLayerPickerPage` and `showSeatLayerPicker` alike.
-
-The compact price rail follows the web picker: tapping one price selects that
-single category and frames its seats; tapping the active price again returns to
-all categories.
-
-For public Platform inventory, register the exact hosted renderer origin
-`https://cdn.seatlayer.io` on the matching `pk_test_` key. Runtime 0.70
-bootstraps chart, availability, and public buyer access directly and keeps its
-grant in memory; your backend is not on the chart-loading path.
-
-For private, login-gated, presale, partner, or channel inventory, replace
-`publicKey` with a provider that calls your backend and mints a short-lived
-buyer session for that exact renderer origin:
-
-```dart
-final configuration = SeatLayerConfiguration(
-  event: 'ev_private',
-  buyerAccessTokenProvider: (request) =>
-      buyerBackend.mintSeatLayerAccess(request.reason),
-);
-```
-
-Never mint a buyer session with a SeatLayer secret inside the app.
-
-This unreleased wrapper vendors a deterministic runtime fixture built from
-SeatLayer runtime commit
-`d71db683520bf6c7034208e10806d59ddd7c5c0d`. Its `assets/seatlayer.js`
-SHA-256 is
-`cadcfaea8ebda2dbef175be4462673c64ba6fe79e5e856c9b466941088a5056b`;
-`assets/seatlayer.runtime.json` is the machine-readable provenance record. The
-hosted production URL remains a separately deployed immutable artifact.
-
-## Adaptive modal or full-screen picker
-
-Use the presentation helper when seat selection starts from a ticket button:
-
-```dart
-final handoff = await showSeatLayerPicker(
-  context,
-  configuration: configuration,
-  presentation: SeatLayerPickerPresentation.adaptive,
-);
-
-if (handoff != null) {
-  openCheckout(holdId: handoff.holdId);
-}
-```
-
-`adaptive` opens edge-to-edge on a compact phone and as a large constrained
-dialog at 700 logical pixels or wider. Explicit
-`SeatLayerPickerPresentation.fullScreen` and `.dialog` overrides are also
-available. The helper returns `null` when the buyer closes it.
-
-For an application-owned route:
-
-```dart
-SeatLayerPickerPage(
-  configuration: configuration,
-  onCheckout: (handoff) {
-    openCheckout(holdId: handoff.holdId);
-  },
-)
-```
-
-The page and modal helper intercept close and system back, await picker
-abandonment and release a picker-owned hold before removing the route. A hold
-already handed to the host is not released.
-
-## Build your own layout from public components
-
-Applications can rearrange the same native components without rebuilding
-inventory or hold logic:
-
-```dart
-final picker = SeatLayerPickerController();
-
-SeatLayerPickerScope(
-  controller: picker,
-  configuration: configuration,
-  child: Column(
-    children: [
-      const SeatLayerPickerPriceRail(),
-      const Expanded(
-        child: Stack(
-          children: [
-            SeatLayerPickerMap(),
-            Positioned(
-              top: 12,
-              left: 12,
-              child: SeatLayerPickerTestModeIndicator(),
-            ),
-            Positioned(
-              top: 12,
-              right: 12,
-              child: SeatLayerPickerZoomInButton(),
-            ),
-          ],
-        ),
-      ),
-      const SeatLayerPickerSelectionTray(),
-      const SeatLayerPickerAttribution(),
-      SeatLayerPickerCheckoutBar(onCheckout: openCheckout),
-    ],
-  ),
-)
-```
-
-Dispose a caller-created controller yourself. Before deliberately removing an
-externally controlled inline picker, await `picker.close()` so a picker-owned
-hold is acknowledged as released:
-
-```dart
-await picker.close();
-picker.dispose();
-```
-
-Custom controls use typed picker-v2 methods rather than raw bridge strings:
+**Drive it directly.** The controller speaks typed methods, not bridge strings:
 
 ```dart
 await picker.selectObjects(['A-12', 'A-13']);
-await picker.deselectCategories(['restricted-view']);
-await picker.setSelectableObjects(['A-12', 'A-13', 'A-14']);
 await picker.setMaxSelection(4);
-await picker.resumeHold(restoredHoldId); // restored as host-owned
-await picker.setBuyerView(SeatLayerBuyerView.venue3D);
-await picker.showSeatIn3D(seat); // enter or retarget without remounting
-await picker.openSeatView(seat); // authored 360° or chart-derived preview
-await picker.set3DNavigationMode(SeatLayer3DNavigationMode.move);
-
-// Required when custom native chrome covers the embedded map.
-await picker.setMapInteractionEnabled(false);
-try {
-  await showMyNativeSeatPrompt();
-} finally {
-  await picker.setMapInteractionEnabled(true);
-}
+await picker.focusSection('section-a');
+await picker.setFloor('mezzanine');     // or picker.showAllFloors()
+await picker.showSeatIn3D(seat);        // enter or retarget without remounting
+await picker.openSeatView(seat);        // authored 360° or drawn preview
+await picker.setViewportInsets(insets); // frame clear of your own chrome
 ```
 
-The public `0.3.0-dev` component baseline exports:
+Dispose a controller you created, and `await picker.close()` first so a
+picker-owned hold is acknowledged as released.
 
-- `SeatLayerPickerAdaptiveLayout`
-- `SeatLayerPickerMap`
-- `SeatLayerPickerHeader`
-- `SeatLayerPickerAttribution`
-- `SeatLayerPickerTestModeIndicator`
-- `SeatLayerPickerPriceRail`
-- `SeatLayerPickerSectionNavigator`
-- `SeatLayerPickerAccessibilityFilters`
-- `SeatLayerPickerFloorSelector`
-- `SeatLayerPickerMapControls`
-- `SeatLayerPickerOverviewButton`
-- `SeatLayerPickerZoomInButton`
-- `SeatLayerPickerZoomOutButton`
-- `SeatLayerPickerZoomToFitButton`
-- `SeatLayerPickerViewModeButton`
-- `SeatLayerPicker3DNavigationModeButton`
-- `SeatLayerPickerColorblindButton`
-- `SeatLayerPickerBestAvailable`
-- `SeatLayerPickerBestAvailablePanel`
-- `SeatLayerPickerMobileTicketPanel`
-- `SeatLayerPickerSeatConfirmation`
-- `SeatLayerPickerSeatViewButton`
-- `SeatLayerPickerSeat3DButton`
-- `SeatLayerPickerTablePrompt`
-- `SeatLayerPickerGeneralAdmissionPrompt`
-- `SeatLayerPickerSelectionTray`
-- `SeatLayerPickerTicketCard`
-- `SeatLayerPickerHoldCountdown`
-- `SeatLayerPickerCheckoutBar`
-- `SeatLayerPickerActionError`
-- `SeatLayerPickerLoadingView`
-- `SeatLayerPickerErrorView`
-- `SeatLayerPickerEmptyView`
+**Cover the map safely.** An `IgnorePointer` is not enough on iOS — UIKit can
+hit-test the WebView beneath composited Flutter chrome — so bracket your own
+overlay with `await picker.setMapInteractionEnabled(false)` and `true` in a
+`finally`, which makes the renderer's own DOM inert. The turnkey layout already
+does this around its decision chrome. Do not wrap the map in an app-level drag
+or scale recognizer and do not stream touch coordinates over the bridge: both
+fight the renderer's tap-versus-pan suppression.
 
-The default phone dock follows the web picker state hierarchy: with no
-selection it shows the minimum price and the optional Best Seats accelerator;
-with an unheld selection it shows ticket count, total and **Review**; with an
-active hold it shows the same summary and **Continue**. Best Seats never crowds
-the primary checkout path after a manual selection. The expanded cart uses
-vertical `SeatLayerPickerTicketCard` rows with buyer labels, category/tier,
-price, commercial warnings and a safe remove action. Ticket rows scroll inside
-a stable-height viewport while Total, Continue and required attribution remain
-visible. Manual layouts can set
-`SeatLayerPickerMobileTicketPanel.ticketPanelHeight`; the responsive default is
-still capped by `maxExpandedHeight`.
+**One back gesture, one ladder.** Android predictive back and the iOS edge swipe
+both reach the picker's `PopScope`, which walks seat card → section → overview →
+dismiss rather than leaving on the buyer's first try out. **Haptics** fire one
+cue on selection, removal, a section landing, a hold and a hold expiry, decided
+off the snapshot so they never buzz twice for one seat;
+`SeatLayerPickerOptions(haptics: false)` turns them off.
 
-`SeatLayerPickerSeatConfirmation` consumes the authored section, row and seat
-identity from the picker snapshot and self-wires View from here / See it in 3D
-when the runtime advertises those capabilities. Set `showSeatView` or `show3D`
-to false to hide either action, or pass `onViewFromSeat` / `onShow3D` to replace
-the SDK action. The standalone `SeatLayerPickerSeatViewButton` and
-`SeatLayerPickerSeat3DButton` follow the same rule: controller-backed by
-default, callback-replaceable, and absent rather than decorative when the
-capability is unavailable. Both inspection actions use the same neutral,
-accent-tinted treatment and adapt from one row to a vertical stack in narrow
-containers. The picker reserves its saturated accent for the primary Select
-action; Cancel stays neutral, so host themes cannot accidentally introduce a
-second competing Material color. The confirmation stays above the embedded
-platform view until the immersive command confirms its destination is mounted.
-The turnkey composition also sends `picker.setInteractionEnabled(false)` so
-the runtime makes its own DOM inert for the whole native decision state, while
-a Flutter `IgnorePointer` remains a visual-tree fallback. Both layers are
-required: UIKit can hit-test WKWebView beneath composited Flutter chrome even
-when the Flutter child itself ignores pointers. The originating tap therefore
-cannot select a second seat underneath.
+## Theme
 
-The lock applies only while native decision chrome is visible. As soon as the
-prompt closes, the renderer again owns one-finger pan and two-finger pinch
-inside the WebView. Do not wrap `SeatLayerPickerMap` in an app-level drag or
-scale recognizer and do not stream touch coordinates over the bridge: doing so
-competes with the renderer and breaks tap-versus-pan suppression. If a map can
-tap but cannot pan after a prompt closes, update/fix the SeatLayer runtime; it
-is not a Reference app page-level gesture concern.
-
-Targeted parts of the turnkey layout can also be wrapped or replaced through
-`SeatLayerPickerBuilders`. Every builder receives the immutable state, the
-session controller and the default child. The overall adaptive layout, test
-marker and required `Powered by SeatLayer` attribution deliberately have no
-replacement builder: theme colors and typography remain customizable, but required native
-chrome cannot be hidden by returning an empty widget. A fully manual
-`SeatLayerPickerScope` composition must include both required components as the
-example above does.
+`themeMode` resolves in one order: **your `themeMode` → your app's theme → the
+device.** `auto` reads `Theme.of(context).brightness` first, so it tracks the
+dark-mode switch inside your app — the setting the buyer actually chose — and
+falls back to `MediaQuery.platformBrightness` only when no Material or Cupertino
+theme sits above the picker. Either reading is live: flip your app's theme or
+the device appearance and the chrome **and the drawn map** repaint together, no
+reload, no lost selection, no moved camera.
 
 ```dart
-SeatLayerPicker(
-  configuration: configuration,
-  onCheckout: openCheckout,
-  builders: SeatLayerPickerBuilders(
-    header: (context, part) => DecoratedBox(
-      decoration: const BoxDecoration(color: Colors.black),
-      child: part.defaultChild,
-    ),
-  ),
-)
+themeMode: SeatLayerThemeMode.auto,
+theme: const SeatLayerPickerThemeData(accent: Color(0xFFE54558)),
 ```
 
-## Native chrome and one test-mode badge
+The default constructor sets only the roles you name, so every ground role still
+comes from `themeMode`. **A preset pins the mode:**
+`SeatLayerPickerThemeData.light()` and `.dark()` are complete ground palettes —
+each also sends a contrast-paired `SeatLayerMapThemeData` for the canvas
+background, row labels, free text and the selection ring — and an explicit
+ground outranks a resolved mode, so `themeMode: auto` with `.light()` never goes
+dark. Reach for a preset when you want one fixed side; pick the preset yourself
+if you want both.
 
-The high-level picker negotiates protocol 2 and declares Flutter as the native
-chrome owner. Its init contract sends:
+The status and navigation bars are the picker's surface, so the picker dresses
+them — light glyphs on a dark picker, dark on a light one, dark for the
+immersive scene either way, re-evaluated on every `auto` flip.
+`SeatLayerPickerChromeOptions(manageSystemOverlays: false)` opts out;
+`seatLayerPickerOverlayStyle(resolvedTheme)` still says what it would have set.
 
-```json
-{
-  "chrome": {
-    "owner": "native",
-    "seatTooltip": false,
-    "testModeIndicator": false,
-    "attribution": false
-  }
-}
-```
+## Performance
 
-The renderer therefore does not draw a second test badge. Flutter reads the
-event mode from the atomic picker snapshot and renders exactly one
-`SeatLayerPickerTestModeIndicator` plus one `Powered by SeatLayer` attribution
-when `branding.attributionRequired` is true. On phones the small attribution is
-in the expanded ticket-panel footer, matching the web picker; it never floats
-over the map and is absent while the 50-pixel dock is collapsed. Neither item
-can be replaced through `SeatLayerPickerBuilders`; both still inherit the
-picker theme. A white-label entitlement may explicitly set
-`attributionRequired: false`. A raw
-`SeatLayerView` remains protocol 1; the host continues to own any surrounding
-test-event chrome there.
+Opening the picker costs a WebView process start and a document fetch before the
+runtime has said a word — and all of it can happen while the buyer is still
+reading the event page. Call `SeatLayerPicker.prewarm()` from that screen's
+`initState`.
 
-## Read-only picker
+**Measured on a reference app** (iOS Simulator, debug build, three runs each,
+tap to ready): median **3,262 ms → 2,192 ms — 1,070 ms off the open, −33 %**. The
+bridge-side span moved 2,104 ms → 1,082 ms, so the saving is in the WebView, not
+the renderer.
 
-Use `SeatLayerPickerOptions(readOnly: true)` to inspect a map, current
-selection or restored hold without allowing inventory changes. The runtime
-blocks canvas selection, while native seat/GA/table prompts, selection deletes,
-Best Available and checkout are disabled. Category/accessibility filters,
-section and floor navigation, view modes and zoom remain available.
+No event, no buyer token and no session are involved: only the immutable page is
+loaded, and everything about the booking still travels at `init`. What is kept
+is the **WebView**, not a live session — the page gives up on a host after ten
+seconds, so one left sitting is re-loaded when the picker claims it (a cache
+hit) while the expensive web content process is already up. Idempotent, so
+calling it from every build is fine; an unclaimed page expires after five
+minutes (`ttl:`) and is dropped on memory pressure, and
+`SeatLayerPicker.cancelPrewarm()` gives it back early.
 
-The controller also enforces this boundary before sending a bridge command.
-Direct selection, hold and checkout actions fail with a typed
-`SeatLayerError` whose code is `read_only`, so a custom component cannot bypass
-the UI guard.
+Pan and pinch frames stay inside the chart: no picker snapshot and no Flutter
+rebuild per touch frame. Flutter hears about a gesture only when a serializable
+state, such as the zoom rung, changes.
 
-## Checkout and hold security
+## Checkout handoff
 
-The app selects and holds inventory. Your trusted backend inspects and books
-the hold after payment or order validation.
+The app selects and holds inventory. Your trusted backend inspects and books the
+hold after payment or order validation.
 
-`SeatLayerCheckoutHandoff` contains:
+`SeatLayerCheckoutHandoff` carries an opaque `holdId`, the server expiry, the
+currency, priced line items with object/category/tier identity and seat address,
+and a display total. The ordinary picker snapshot deliberately does **not**
+contain the `holdId`: it says only whether a hold is active, when it expires and
+who owns it. The capability crosses into Dart at the handoff and nowhere else.
 
-- opaque `holdId`;
-- server expiry;
-- currency;
-- priced line items with object/category/tier identity; and
-- a display total.
-
-The ordinary native picker snapshot intentionally does **not** contain the
-`holdId`; it exposes only whether a hold is active, its expiry and whether the
-picker or host owns it. The capability crosses into Dart only at the checkout
-handoff boundary.
-
-- Never ship a SeatLayer secret in the app binary or WebView.
+- Never ship a SeatLayer secret in the app or the WebView.
 - Never put buyer tokens or hold ids in logs, analytics or URLs.
 - Send the `holdId` only to your trusted checkout backend.
 - Inspect the hold server-side and calculate the charge from server data.
 - Reuse a stable host order id as the booking reference for safe retries.
 
-Calling checkout transfers hold ownership to the host. Closing or disposing
-the picker after that handoff must not release the hold. Before handoff, modal
-close releases a picker-owned hold. Process termination cannot guarantee a
-release, so the server TTL remains the final safety boundary.
-
-The built-in retry path also acknowledges `picker.destroy` before replacing a
-runtime that had reached Ready. A failed handshake has no live picker and
-retries immediately.
-
-If a turnkey `onCheckout` callback throws because host validation or navigation
-failed, the picker automatically attempts
-`picker.rejectHandoff {holdId}` before surfacing the original callback error.
-The runtime releases only the exact hold most recently handed off by that
-picker session; it cannot release an arbitrary resumed or host-owned hold. A
-custom flow that calls `controller.checkout()` directly can perform the same
-safe rollback explicitly:
+Checkout transfers ownership: closing the picker afterwards must not release the
+hold, while closing *before* handoff releases a picker-owned one. Process
+termination cannot guarantee a release, so the server TTL is the final boundary.
+If a turnkey `onCheckout` throws, the picker attempts `rejectHandoff {holdId}`
+before surfacing your error — it can release only the exact hold that session
+just handed over. A custom flow rolls back the same way:
 
 ```dart
 final handoff = await picker.checkout();
@@ -716,155 +350,237 @@ try {
 }
 ```
 
-`SeatLayerPickerOptions(initialHoldId: restoredHoldId)` always restores a
-host-owned hold. Ownership is not caller-configurable, and picker cart controls
-never alter or release that restored hold.
+`SeatLayerPickerOptions(initialHoldId:)` always restores a **host-owned** hold;
+ownership is not caller-configurable and picker cart controls never release it.
+`readOnly: true` inspects a map, selection or restored hold with inventory
+changes refused in the runtime *and* in the controller, which fails such a call
+with a typed `read_only` error rather than relying on hidden UI. Continue with
+[holds and secure server-side checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/).
 
-Continue with
-[holds and secure server-side checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
-before connecting payment and booking.
+## Telemetry
 
-## Advanced/raw seat map
-
-Use `SeatLayerView` only when the application wants to own all buyer chrome,
-selection presentation and hold orchestration. This is the stable `0.2.x`
-surface and remains source-compatible in `0.3`.
+The renderer measures its own load and hands you the same record; the SDK
+measures the half the page cannot see — WebView construction, process spin-up,
+whatever your app did before the page existed — and gives you both at once:
 
 ```dart
-class RawMap extends StatefulWidget {
-  const RawMap({super.key});
-
-  @override
-  State<RawMap> createState() => _RawMapState();
-}
-
-class _RawMapState extends State<RawMap> {
-  final controller = SeatLayerController();
-
-  @override
-  Widget build(BuildContext context) {
-    return SeatLayerView(
-      controller: controller,
-      configuration: SeatLayerConfiguration(
-        event: 'ev_your_event_key',
-        publicKey: 'pk_test_your_public_key',
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-}
+callbacks: SeatLayerPickerCallbacks(
+  onChartLoad: (load) => analytics.track('seatmap_open', <String, Object?>{
+    'tapToReadyMs': load.tapToReadyMs, // the whole wait, from the tap
+    'hostMs': load.hostMs,             // the part outside the page
+    'bootMs': load.trace.bootMs,       // the page's whole life
+    'renderMs': load.trace.ms,
+    'outcome': load.trace.outcome,
+  }),
+),
 ```
 
-Raw commands include `hold`, `resumeHold`, `extendHold`, `release`,
-`releaseLabels`, `bestAvailable`, `holdGA`, tier and selection controls,
-floors, colorblind-safe mode, view modes and map zoom. Raw events remain
-available as typed broadcast streams.
+`tapToReadyMs` starts when the picker **mounted**, so it is the same T0 with or
+without `prewarm()` and a prewarm shows up as a smaller number rather than a
+hidden one. `hostMs` is that span less the page's own `bootMs`: on a reference
+app's 3,513 ms cold open, 2,495 ms. Everything else the renderer measured is on
+`load.trace`, with unmodelled fields kept verbatim on `load.trace.raw`.
+`SeatLayerPickerController.onChartLoad` is the same record as a stream. It fires
+once per render attempt, success or failure. **The SDK logs nothing and sends
+nothing anywhere.**
 
-## Runtime and bridge architecture
+## Widget catalogue
 
-Production views load an immutable HTTPS mobile document in
-`webview_flutter`. Raw views request protocol 1. The complete picker requests
-protocol 2 and fails clearly unless its runtime advertises all required
-capabilities:
+Every widget below works standalone inside a `SeatLayerPickerScope`.
 
-```text
-picker-session-v2
-picker-snapshot-v1
-picker-actions-v1
-native-picker-chrome-v1
-checkout-handoff-v1
-checkout-handoff-reject-v1
-hold-ownership-v1
-cart-line-remove-v1
-table-quantity-v1
-```
+| Widget | What it draws |
+| --- | --- |
+| `SeatLayerChart` | The map itself (alias of `SeatLayerPickerMap`) |
+| `SeatLayerPickerHeader` | Event identity, hold pill, dismiss |
+| `SeatLayerPriceLegend` | Price chips that filter the map |
+| `SeatLayerFloorStrip` | Floor chips on a multi-floor venue |
+| `SeatLayerDockBar` | Focused section, seats left, prev/next, Venue |
+| `SeatLayerPickerMapControls` | Accessibility, fit, Map/3D in the corners |
+| `SeatLayerConfirmCard` | The phone's one-seat decision card |
+| `SeatLayerCartSheet` | Peek bar and content-height cart |
+| `SeatLayerCartList` | The dense ticket list with run folding |
+| `SeatLayerBestSeatsForm` | Two selects, a stepper, one action |
+| `SeatLayerBookButton` | The full-width checkout call to action |
+| `SeatLayerVenue3D` | Caption, seat stepper and exits over the 3D scene |
+| `SeatLayerSeatViewChrome` | Caption strip and badge over the panorama |
+| `SeatLayerPickerAccessibilityFilters` | Access needs, colourblind palette |
+| `SeatLayerPickerTablePrompt` / `…GeneralAdmissionPrompt` | Quantity prompts |
+| `SeatLayerPickerSectionNavigator` | Section list and stepping |
+| `SeatLayerPickerTestModeIndicator` | The one test-event badge |
+| `SeatLayerPickerAttribution` | `Powered by SeatLayer`, when required |
 
-With the default `enable3D: true` and `enableSeatView: true`, the picker also
-requires `venue-3d-v1`, `venue-3d-controls-v1` and `seat-view-v1`. Disabling an
-optional feature removes its bridge requirement. This fails closed against an
-old hosted runtime instead of showing a control that silently changes only the
-2D projection or does nothing.
+The individual corner controls (`…ZoomInButton`, `…ZoomToFitButton`,
+`…ViewModeControl`, `…ColorblindButton`, `…OverviewButton`,
+`…3DNavigationModeButton`), the status views (`…LoadingView`, `…ErrorView`,
+`…EmptyView`, `…ActionError`) and the seat inspection buttons
+(`…SeatViewButton`, `…Seat3DButton`) are exported too, all prefixed
+`SeatLayerPicker`. Each is absent rather than decorative when the runtime does
+not advertise the capability behind it.
 
-Picker state uses complete `seatlayer.picker.snapshot/1` replacements with a
-session id and monotonically increasing revision. Dart ignores stale revisions
-and serializes inventory-changing actions, including repeated checkout taps.
-Private buyer tokens remain memory-only and never enter snapshots.
+`SeatLayerView` remains for an application that owns *all* buyer chrome,
+selection presentation and hold orchestration itself: the stable `0.2.x`
+surface, still on protocol 1, source-compatible, with raw hold/selection/view
+commands and typed event streams.
 
-See [the mobile picker architecture and rollout](doc/mobile-picker-architecture-and-rollout.md)
-for the exact bridge schema, commands, ownership rules and validation gates.
+The picker itself requests protocol 2 and fails closed unless the runtime
+advertises every capability it needs, rather than showing a control that quietly
+does nothing. Its state arrives as complete `seatlayer.picker.snapshot/1`
+replacements with a session id and a monotonic revision; Dart drops stale
+revisions and serializes inventory-changing actions, repeated checkout taps
+included. Private buyer tokens stay in memory and never enter a snapshot. See
+[the picker architecture](doc/mobile-picker-architecture.md)
+for the bridge schema, ownership rules and validation gates.
 
-## Run the example
+## Design system
 
-Without configuration, the example keeps the existing offline raw protocol-v1
-fixture:
+The picker's colours, sizes, radii, elevations, type scale, motion table, haptic
+cues and default strings live in one platform-neutral file,
+[`design/tokens.json`](design/tokens.json); the catalogue describing every widget
+in terms of those tokens is [`design/components.md`](design/components.md),
+written so a Swift, Kotlin or React Native engineer can reproduce the design.
 
-```bash
-cd example
-flutter run
-```
+`lib/src/picker/picker_tokens.g.dart` is **generated** from that JSON by
+`dart run tool/gen_tokens.dart` (`--check` fails if it is stale) and must not be
+hand-edited. The presets, `SeatLayerPickerLayout`, `SeatLayerPickerMotion`, the
+haptic map and `SeatLayerPickerStrings` all read the file, and
+`design_tokens_test.dart` asserts them against it, so the two cannot drift.
 
-Supply a controlled event to exercise the high-level picker:
+## Migration
 
-```bash
-flutter run --dart-define=SEATLAYER_EVENT=ev_your_test_event \
-  --dart-define=SEATLAYER_PUBLIC_KEY=pk_test_your_public_key
-```
+From 0.2.x or 0.3.0-dev:
 
-During hosted-runtime development, override only the picker document being
-validated:
+- `SeatLayerView` and `SeatLayerController` are unchanged; a 0.2.x integration
+  compiles as-is.
 
-```bash
-flutter run \
-  --dart-define=SEATLAYER_EVENT=ev_your_test_event \
-  --dart-define=SEATLAYER_RUNTIME_URL=https://cdn.example/mobile.html
-```
+- `SeatLayerPickerSelectionTray` → **`SeatLayerCartList`**;
+  `SeatLayerPickerBestAvailablePanel` → **`SeatLayerBestSeatsForm`**. Both old
+  names remain as deprecated aliases and go away at 0.4.
+- `SeatLayerPickerMobileTicketPanel` is **removed**. The phone cart is
+  `SeatLayerCartSheet` with `SeatLayerCartList` inside it, and its height comes
+  from `SeatLayerPickerLayout.sheetMaxHeightFraction`, not a panel-height
+  parameter.
+- Chrome is no longer a rail of buttons over the map: corner controls, the
+  one-line dock and the confirm card replaced it, and visibility lives on
+  `SeatLayerPickerChromeOptions`.
+- `SeatLayerPickerThemeData.light(accent:)` pins the picker light. To follow the
+  device, use `themeMode: SeatLayerThemeMode.auto` with the default constructor.
 
-A runtime that is not published yet can be served from the host machine and
-named the same way, which is how a bridge change is proved against a real app
-before it ships:
+## Frequently asked questions
 
-```bash
-# in the runtime checkout, after its CDN build
-python3 -m http.server 8181 --directory cdn/dist/seatlayer-js@<version>
+### How do I add a seat map to a Flutter app?
 
-flutter run \
-  --dart-define=SEATLAYER_EVENT=ev_your_test_event \
-  --dart-define=SEATLAYER_RUNTIME_URL=http://localhost:8181/mobile.html
-```
+Add the [`seatlayer` package](https://pub.dev/packages/seatlayer) and place a
+`SeatLayerPicker` with your event key on a route. That is the whole buyer flow —
+map, filters, seat confirmation, cart, holds and the checkout handoff. The quick
+start above is complete; the
+[Flutter seat-map integration guide](https://docs.seatlayer.io/buyer-sdk/flutter/)
+covers lifecycle, commands and events in depth. `SeatLayerView` remains for an
+app that wants only the raw map and owns every control itself.
 
-An iOS simulator and an Android emulator both reach the host machine's server.
-The API answers according to the publishable key's registered origins, so the
-local origin has to be registered on the key as well.
+### Is SeatLayer a Flutter widget or only a WebView snippet?
 
-Omitting `SEATLAYER_RUNTIME_URL` uses the package's immutable runtime pin. A
-development runtime must use an allowed origin for private buyer access; an
-origin-bound token minted for `https://cdn.seatlayer.io` cannot be replayed on
-an unrelated preview domain.
+Native Flutter chrome around a WebView map. The header, price rail, floor strip,
+dock, confirm card, cart sheet and checkout button are Flutter widgets with a
+typed Dart controller; `webview_flutter` loads SeatLayer's immutable hosted
+runtime for the drawn map itself. Take it as the `SeatLayerPicker` drop-in, or
+compose the same public widgets yourself inside a `SeatLayerPickerScope`. The
+renderer is told Flutter owns the chrome, so it draws none of its own.
 
-## Release path
+### Which Flutter platforms are supported?
 
-The `0.3.0-dev.2` prerelease has completed this path:
+The package declares and supports iOS and Android. It does not currently claim
+Flutter web, macOS, Windows, or Linux support.
 
-1. push reviewed source changes to the Flutter GitHub branch;
-2. pin an exact commit in the Reference app development app;
-3. validate public/private access, section focus, reserved seats, Best
-   Available, holds, expiry and close behavior on iOS and Android;
-4. complete one safe hold → payment → server booking journey;
-5. publish and revalidate the `0.3.0-dev.2` prerelease; and
-6. publish stable `0.3.0` only after the documented exit gates pass.
+### How does seat booking work in a Flutter ticketing app?
 
-The remaining cross-SDK work is to freeze the JSON fixtures and reproduce the
-proven contract in React Native, iOS and Android SDKs.
+The app never books seats or processes payment directly. It selects inventory
+and creates a temporary hold. Send the opaque `holdId` to your trusted backend,
+calculate the charge from server-inspected hold items, process the order, and
+book with a stable `bookingRef`.
 
-## Platform support
+### How do temporary seat holds work?
 
-The package declares iOS and Android support. It does not currently claim
-Flutter web, macOS, Windows or Linux support.
+When a buyer selects seats, the SDK creates a temporary hold that reserves the
+inventory against concurrent buyers for a limited window. The hold expires
+automatically if checkout does not complete — `onHoldExpired` tells the app to
+return the buyer to the map — and `extendHold` and `resumeHold` cover longer
+checkouts and app restarts. This prevents double-selling without locking seats
+forever.
+
+### Can I use my own payment provider?
+
+Yes. SeatLayer never processes payment inside the seat map. The app hands the
+`holdId` to your backend, and your backend charges through any payment
+provider you already use — Stripe, Adyen, Razorpay, or your own — before
+booking the hold through the
+[server-side checkout flow](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/).
+
+### Can I try the Flutter seat map without a SeatLayer account or API key?
+
+Yes. The repository's example app runs on a packaged offline fixture — no
+account, event key or backend needed — and exercises the real Flutter view,
+bridge, renderer, commands and event streams. The fixture now lives with the
+example rather than in the published package, so it costs your app nothing.
+Create a free SeatLayer test event when you are ready to validate live
+inventory, holds, expiry, conflicts and checkout.
+
+### Can I restyle the picker without rebuilding it?
+
+Yes, at four levels that all keep the layout and the flow: a theme (or
+`SeatLayerPickerThemeData.fromColorScheme` for an app palette), a per-surface
+style slot and per-widget `style:`, the layout/chrome/strings options, and a
+builder slot that replaces one whole part while the rest stays. See
+[Customise the picker](https://docs.seatlayer.io/buyer-sdk/flutter/customise/).
+
+### Can I build a completely different seat-picker layout?
+
+Yes. `SeatLayerPickerScope` plus the composable widgets is a supported path, not
+an escape hatch: the drop-in is built from exactly those widgets, and you keep
+inventory, holds, snapshots and the checkout handoff. See
+[Build your own layout](https://docs.seatlayer.io/buyer-sdk/flutter/custom-layout/).
+
+### Does the Flutter seat map support light and dark mode?
+
+Yes, live. `SeatLayerThemeMode.auto` follows your app's theme first and the
+device second, and repaints the Flutter chrome and the drawn map together —
+without reloading, without losing the selection and without moving the camera.
+A `.light()` or `.dark()` preset pins one side deliberately.
+
+## Continue your Flutter integration
+
+- [Follow the Flutter seat-map integration guide](https://docs.seatlayer.io/buyer-sdk/flutter/)
+  for setup, lifecycle, commands, events, and runtime requirements.
+- [Customise the picker](https://docs.seatlayer.io/buyer-sdk/flutter/customise/)
+  with themes, style slots, layout metrics, strings and builder slots.
+- [Build your own layout](https://docs.seatlayer.io/buyer-sdk/flutter/custom-layout/)
+  from the composable widgets under a `SeatLayerPickerScope`.
+- [Read the picker architecture](https://docs.seatlayer.io/buyer-sdk/flutter/architecture/)
+  for the bridge contract, snapshots, capabilities and chrome ownership.
+- [Measure performance and telemetry](https://docs.seatlayer.io/buyer-sdk/flutter/performance/)
+  with `prewarm()` and the chart-load record.
+- [Connect seat holds to secure server-side checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
+  without exposing booking credentials in the app.
+- [Run the complete checkout example](https://docs.seatlayer.io/examples/complete-checkout/)
+  to connect the buyer hold id to payment and idempotent booking.
+- [Compare SeatLayer's mobile seat map SDKs](https://docs.seatlayer.io/buyer-sdk/mobile/)
+  when choosing between Flutter, React Native, and the native iOS and Android
+  packages.
+- [Explore the 3D seating chart for web buyers](https://seatlayer.io/3d-seat-map/)
+  as a separate browser capability when comparing the wider buyer experience.
+- [Point AI coding agents at the SeatLayer docs index](https://docs.seatlayer.io/llms.txt)
+  (`llms.txt`) for an agent-readable map of the documentation.
+
+## SeatLayer SDK ecosystem
+
+| Surface | Package or source |
+| --- | --- |
+| Flutter | [`seatlayer`](https://pub.dev/packages/seatlayer) (this package) |
+| JavaScript | [`@seatlayer/js`](https://www.npmjs.com/package/@seatlayer/js) |
+| React | [`@seatlayer/react`](https://www.npmjs.com/package/@seatlayer/react) |
+| React Native | [`@seatlayer/react-native`](https://www.npmjs.com/package/@seatlayer/react-native) |
+| iOS | [`seatlayer-ios`](https://github.com/seatlayer/seatlayer-ios) |
+| Android | [`seatlayer-android`](https://github.com/seatlayer/seatlayer-android) |
+| Server SDKs | [Node.js, Python, PHP, Ruby, .NET, Java, and Go](https://docs.seatlayer.io/server-sdk/install/) |
 
 ## Development
 
@@ -872,12 +588,13 @@ Flutter web, macOS, Windows or Linux support.
 flutter pub get
 flutter analyze
 flutter test
-dart run tool/gen_tokens.dart   # sync:tokens, after editing design/tokens.json
+flutter test --tags golden        # recorded and enforced on macOS
+dart run tool/gen_tokens.dart     # after editing design/tokens.json
 dart pub publish --dry-run
 ```
 
-Verification must remain proportional to the changed behavior. Live checkout
-and buyer credentials belong only in protected, manually dispatched end-to-end
+Verification stays proportional to the changed behaviour. Live checkout and
+buyer credentials belong only in protected, manually dispatched end-to-end
 validation.
 
 ## License

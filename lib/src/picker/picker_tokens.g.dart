@@ -264,6 +264,9 @@ abstract final class SeatLayerStringTokens {
   /// Venue
   static const String overview = 'Venue';
 
+  /// All floors
+  static const String allFloors = 'All floors';
+
   /// Previous section
   static const String previousSection = 'Previous section';
 

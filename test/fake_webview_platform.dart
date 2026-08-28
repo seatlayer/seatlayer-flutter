@@ -32,12 +32,30 @@ class FakeWebViewPlatform extends WebViewPlatform with MockPlatformInterfaceMixi
   /// Every document the tree asked a WebView to load, in order.
   final List<String> loads = <String>[];
 
+  /// The JavaScript channels installed on each controller, in creation order.
+  ///
+  /// Recorded so a test can play the page's part: a prewarmed runtime posts
+  /// its bridge `hello` before any view exists, and nothing else can produce
+  /// that message.
+  final List<Map<String, JavaScriptChannelParams>> channels =
+      <Map<String, JavaScriptChannelParams>>[];
+
+  /// Deliver [message] from the page running on controller [controller].
+  void postFromPage(String message, {int controller = 0}) {
+    final params = channels[controller]['SeatLayer'];
+    if (params == null) {
+      throw StateError('controller $controller has no SeatLayer channel');
+    }
+    params.onMessageReceived(JavaScriptMessage(message: message));
+  }
+
   @override
   PlatformWebViewController createPlatformWebViewController(
     PlatformWebViewControllerCreationParams params,
   ) {
     controllersCreated += 1;
-    return _FakeController(params, this);
+    channels.add(<String, JavaScriptChannelParams>{});
+    return _FakeController(params, this, channels.length - 1);
   }
 
   @override
@@ -55,9 +73,11 @@ class FakeWebViewPlatform extends WebViewPlatform with MockPlatformInterfaceMixi
 
 class _FakeController extends PlatformWebViewController
     with MockPlatformInterfaceMixin {
-  _FakeController(super.params, this._platform) : super.implementation();
+  _FakeController(super.params, this._platform, this._index)
+      : super.implementation();
 
   final FakeWebViewPlatform _platform;
+  final int _index;
 
   @override
   Future<void> setJavaScriptMode(JavaScriptMode javaScriptMode) async {}
@@ -74,7 +94,10 @@ class _FakeController extends PlatformWebViewController
   @override
   Future<void> addJavaScriptChannel(
     JavaScriptChannelParams javaScriptChannelParams,
-  ) async {}
+  ) async {
+    _platform.channels[_index][javaScriptChannelParams.name] =
+        javaScriptChannelParams;
+  }
 
   @override
   Future<void> setPlatformNavigationDelegate(

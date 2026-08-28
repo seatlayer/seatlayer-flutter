@@ -62,6 +62,15 @@ final class FakePickerMap extends SeatLayerController {
   final StreamController<EventSignal> _events =
       StreamController<EventSignal>.broadcast();
 
+  final StreamController<ReadyInfo> _ready =
+      StreamController<ReadyInfo>.broadcast();
+
+  @override
+  Stream<ReadyInfo> get onReady => _ready.stream;
+
+  /// Report a finished handshake, as [SeatLayerView] would.
+  void emitReady(ReadyInfo info) => _ready.add(info);
+
   /// The snapshot this fake currently reports.
   Map<String, Object?> current = pickerSnapshot();
 
@@ -90,6 +99,10 @@ final class FakePickerMap extends SeatLayerController {
     );
   }
 
+  /// Push one arbitrary bridge event, for the surfaces that are not snapshots.
+  void emitEvent(String name, Object? payload, {int sequence = 1}) => _events
+      .add(EventSignal(name: name, payload: payload, sequence: sequence));
+
   /// Commands whose name is [command].
   Iterable<(String, Object?)> callsTo(String command) =>
       calls.where((call) => call.$1 == command);
@@ -97,6 +110,7 @@ final class FakePickerMap extends SeatLayerController {
   @override
   void dispose() {
     unawaited(_events.close());
+    unawaited(_ready.close());
     super.dispose();
   }
 }
@@ -115,6 +129,14 @@ Widget pickerHarness(
   final picker = controller ?? SeatLayerPickerController(mapController: map);
   return MaterialApp(
     debugShowCheckedModeBanner: false,
+    // The harness models the ordinary case: an application that follows the
+    // device. `auto` asks the HOST theme first — that is the switch a buyer
+    // actually moves — so a test that only flipped `platformBrightness` here
+    // would be describing an app that had pinned itself to light.
+    theme: ThemeData(brightness: platformBrightness),
+    // MaterialApp cross-fades a theme change over 200ms. A test that pumps
+    // one frame after a flip would read the halfway theme.
+    themeAnimationDuration: Duration.zero,
     builder: (context, inner) => MediaQuery(
       data: MediaQuery.of(context).copyWith(
         platformBrightness: platformBrightness,

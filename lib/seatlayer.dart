@@ -42,9 +42,12 @@ export 'src/picker/picker_builders.dart'
 export 'src/picker/picker_cart_list.dart' show SeatLayerCartList;
 export 'src/picker/picker_cart_sheet.dart'
     show SeatLayerBookButton, SeatLayerCartSheet;
+export 'src/picker/picker_chart_load.dart'
+    show SeatLayerChartLoad, SeatLayerChartLoadTrace;
 export 'src/picker/picker_confirm_card.dart' show SeatLayerConfirmCard;
 export 'src/picker/picker_dock_bar.dart' show SeatLayerDockBar;
 export 'src/picker/picker_errors.dart' show SeatLayerPickerActionError;
+export 'src/picker/picker_floor_strip.dart' show SeatLayerFloorStrip;
 export 'src/picker/picker_haptics.dart' show PickerHapticCue;
 export 'src/picker/picker_header.dart'
     show SeatLayerPickerHeader, SeatLayerPickerHoldCountdown;
@@ -72,6 +75,7 @@ export 'src/picker/picker_seat_confirmation.dart'
         SeatLayerPickerSeat3DButton,
         SeatLayerPickerSeatConfirmation,
         SeatLayerPickerSeatViewButton;
+export 'src/picker/picker_seat_view_chrome.dart' show SeatLayerSeatViewChrome;
 export 'src/picker/picker_section_navigator.dart'
     show SeatLayerPickerSectionNavigator;
 export 'src/picker/picker_status_views.dart'
@@ -85,6 +89,8 @@ export 'src/picker/picker_status_views.dart'
 export 'src/picker/picker_strings.dart' show SeatLayerPickerStrings;
 export 'src/picker/picker_styles.dart'
     show SeatLayerPickerStyles, SeatLayerSurfaceStyle, seatLayerStyleRole;
+export 'src/picker/picker_system_overlay.dart'
+    show seatLayerPickerOverlayStyle;
 export 'src/picker/picker_tray_dense.dart'
     show
         SeatLayerTicketLine,
@@ -119,4 +125,6 @@ export 'src/picker/seat_layer_picker_theme.dart'
 export 'src/seat_layer_configuration.dart';
 export 'src/seat_layer_controller.dart';
 export 'src/seat_layer_error.dart';
+export 'src/seat_layer_prewarm.dart'
+    show seatLayerPrewarmDefaultTtl;
 export 'src/seat_layer_view.dart';

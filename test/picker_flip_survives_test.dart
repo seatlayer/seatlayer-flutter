@@ -1,6 +1,6 @@
 // A device appearance flip repaints. It must not disturb anything else.
 //
-// On the pilot, flipping the simulator to dark while the cart sheet was open
+// Flipping the simulator to dark while the cart sheet was open
 // with seats selected snapped the sheet shut and re-framed the camera off the
 // buyer's own section. Two causes, both here: the sheet's open/closed state
 // lived in widget state that a rebuild can replace, and the repaint travelled

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoTheme;
 import 'package:flutter/material.dart';
 
 import 'picker_layout.dart';
@@ -12,14 +13,19 @@ import 'seat_layer_picker_scope.dart';
 /// `theme: { mode }` at init and `picker.setThemeMode` afterwards, so the drawn
 /// map follows the native chrome instead of staying on the chart's own colours.
 enum SeatLayerThemeMode {
-  /// Follow the device, live: a system light/dark flip repaints without a
-  /// reload and without losing the buyer's selection.
+  /// Follow the host application, live.
+  ///
+  /// Resolved from `Theme.of(context).brightness` — the switch inside the app
+  /// the buyer actually chose — falling back to the device's appearance when
+  /// there is no Material or Cupertino theme to ask. Either one flipping
+  /// repaints the chrome and the drawn map without a reload and without
+  /// losing the buyer's selection.
   auto,
 
-  /// Always light, whatever the device is set to.
+  /// Always light, whatever the app and the device are set to.
   light,
 
-  /// Always dark, whatever the device is set to.
+  /// Always dark, whatever the app and the device are set to.
   dark;
 
   /// The wire value the runtime accepts for `theme.mode`.
@@ -174,6 +180,122 @@ class SeatLayerPickerThemeData
         divider = SeatLayerDarkTokens.divider,
         error = SeatLayerDarkTokens.error,
         warning = SeatLayerDarkTokens.warning;
+
+  /// The picker painted in an application's own Material palette.
+  ///
+  /// One call applies a whole brand: the accent every action, active state and
+  /// selected control uses comes from [ColorScheme.primary], the ink on it
+  /// from `onPrimary`, and the grounds, ink and hairlines from the surface
+  /// roles — so a red-primary app gets a red `Continue`, a red `Select`, a red
+  /// `Find N best seats`, a red hold pill and a red Map/3D control, with no
+  /// per-widget styling and nothing left on the SDK's own indigo.
+  ///
+  /// Category colours are deliberately NOT touched. The price legend, the
+  /// section dots and the seats themselves carry the organizer's ticket
+  /// categories, which mean something; recolouring them to the brand would
+  /// make the dock's dot disagree with the price it stands for.
+  ///
+  /// | picker role | `ColorScheme` |
+  /// | --- | --- |
+  /// | `accent` / `onAccent` | `primary` / `onPrimary` |
+  /// | `surface` — header, dock, sheet, cards | `surface` |
+  /// | `background` — the page under them | `surface`, stepped toward black |
+  /// | `text` / `mutedText` | `onSurface` / `onSurfaceVariant` |
+  /// | `divider` | `outlineVariant` |
+  /// | `error` | `error` |
+  ///
+  /// A `ColorScheme` has no recessed-page role that works in both modes, so
+  /// [background] is derived: the picker's chrome docks on a page one small
+  /// tonal step darker than itself, which reads as depth on a light palette
+  /// and on a dark one alike. Pass `background:` to say it yourself.
+  ///
+  /// **This pins the picker to the scheme's side**, exactly as
+  /// [SeatLayerPickerThemeData.light] and `.dark()` do, because it supplies a
+  /// complete explicit ground palette. That is what you want here: the scheme
+  /// came from the host's own theme, which is already on the side the host
+  /// chose. Use [SeatLayerPickerThemeData.of] to take that theme's scheme —
+  /// and its typeface — straight from the context.
+  ///
+  /// Every named argument overrides the mapping for one role.
+  factory SeatLayerPickerThemeData.fromColorScheme(
+    ColorScheme scheme, {
+    Color? accent,
+    Color? onAccent,
+    Color? background,
+    Color? surface,
+    Color? text,
+    Color? mutedText,
+    Color? divider,
+    Color? error,
+    Color? warning,
+    String? fontFamily,
+    double? radius,
+    double? buttonRadius,
+    ImageProvider? logo,
+    SeatLayerMapThemeData? mapTheme,
+    SeatLayerPickerLayout? layout,
+    SeatLayerPickerStyles? styles,
+  }) {
+    final ground = surface ?? scheme.surface;
+    return SeatLayerPickerThemeData(
+      accent: accent ?? scheme.primary,
+      onAccent: onAccent ?? scheme.onPrimary,
+      background: background ?? _recessed(ground),
+      surface: ground,
+      text: text ?? scheme.onSurface,
+      mutedText: mutedText ?? scheme.onSurfaceVariant,
+      divider: divider ?? scheme.outlineVariant,
+      error: error ?? scheme.error,
+      warning: warning,
+      fontFamily: fontFamily,
+      radius: radius,
+      buttonRadius: buttonRadius,
+      logo: logo,
+      mapTheme: mapTheme,
+      layout: layout,
+      styles: styles,
+    );
+  }
+
+  /// The picker painted in the palette and typeface of the ambient [Theme].
+  ///
+  /// The one-liner for an app that already has a brand:
+  ///
+  /// ```dart
+  /// SeatLayerPicker(
+  ///   configuration: configuration,
+  ///   theme: SeatLayerPickerThemeData.of(context),
+  ///   onCheckout: openCheckout,
+  /// )
+  /// ```
+  ///
+  /// Takes the host theme's [ColorScheme] through
+  /// [SeatLayerPickerThemeData.fromColorScheme] and its body typeface with it,
+  /// so the picker reads as a screen of the same application. Because the
+  /// scheme already carries the side the host is on, this follows an in-app
+  /// dark-mode switch as long as the widget calling it rebuilds — which it
+  /// does, since [Theme.of] registers the dependency.
+  factory SeatLayerPickerThemeData.of(
+    BuildContext context, {
+    Color? accent,
+    Color? onAccent,
+    double? radius,
+    double? buttonRadius,
+    ImageProvider? logo,
+    SeatLayerPickerStyles? styles,
+  }) {
+    final theme = Theme.of(context);
+    return SeatLayerPickerThemeData.fromColorScheme(
+      theme.colorScheme,
+      accent: accent,
+      onAccent: onAccent,
+      fontFamily: theme.textTheme.bodyMedium?.fontFamily,
+      radius: radius,
+      buttonRadius: buttonRadius,
+      logo: logo,
+      styles: styles,
+    );
+  }
 
   /// The preset for [brightness].
   factory SeatLayerPickerThemeData.forBrightness(Brightness brightness) =>
@@ -400,6 +522,16 @@ class SeatLayerResolvedPickerTheme {
         );
 }
 
+/// The page a picker's chrome docks on, one tonal step under [surface].
+///
+/// A `ColorScheme` names no recessed ground that works on both sides: the
+/// container roles step lighter in dark mode and darker in light, so neither
+/// reads as "under" in both. A small step toward black does, and it keeps the
+/// picker's own spatial model — chrome raised above a page, with the drawn map
+/// cut into it — on any palette a host hands over.
+Color _recessed(Color surface) =>
+    Color.lerp(surface, const Color(0xFF000000), .05)!;
+
 /// Black or white, whichever is legible on [accent].
 ///
 /// A host brands the picker by handing it one colour. Pairing that colour with
@@ -417,11 +549,25 @@ Color seatLayerOnAccentFor(Color accent) {
   return onWhite >= onBlack ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
 }
 
-/// Turn [mode] into a real side, reading the device for
+/// Turn [mode] into a real side, following the host for
 /// [SeatLayerThemeMode.auto].
 ///
-/// Reading it through [MediaQuery.platformBrightnessOf] is what makes `auto`
-/// live: the caller rebuilds when the device flips, with no reload.
+/// The precedence is **explicit [mode] > the host's own theme > the device**:
+///
+///  * [SeatLayerThemeMode.light] and [SeatLayerThemeMode.dark] are answers,
+///    not questions, and win over everything.
+///  * `auto` asks the host application first, through
+///    `Theme.of(context).brightness`. That is what an app's own dark-mode
+///    switch moves — `MaterialApp(themeMode: ...)`, or a Cupertino theme —
+///    and it is the setting the buyer actually chose. Reading the device
+///    instead left the picker light inside an app the buyer had put in dark
+///    mode, with the system still set to light.
+///  * With no Material or Cupertino theme above [context] there is nothing to
+///    ask, and `auto` falls back to [MediaQuery.platformBrightnessOf].
+///
+/// Both readings register a dependency, so `auto` is live either way: the
+/// caller rebuilds when the host flips its theme or the device flips its
+/// appearance, with no reload and no lost selection.
 Brightness resolveSeatLayerThemeBrightness(
   BuildContext context,
   SeatLayerThemeMode mode,
@@ -429,8 +575,23 @@ Brightness resolveSeatLayerThemeBrightness(
     switch (mode) {
       SeatLayerThemeMode.light => Brightness.light,
       SeatLayerThemeMode.dark => Brightness.dark,
-      SeatLayerThemeMode.auto => MediaQuery.platformBrightnessOf(context),
+      SeatLayerThemeMode.auto => _hostBrightness(context),
     };
+
+/// What the host application is painted in, or the device if it has no say.
+///
+/// `Theme.of` answers with a light fallback when nothing supplied a theme,
+/// which would read as "the host chose light" rather than as "the host did
+/// not choose". The ancestor is looked for explicitly so the two are told
+/// apart. `MaterialApp` and `CupertinoApp` both install one, so the fallback
+/// is reached only by a bare `WidgetsApp`.
+Brightness _hostBrightness(BuildContext context) => _hasHostTheme(context)
+    ? Theme.of(context).brightness
+    : MediaQuery.platformBrightnessOf(context);
+
+bool _hasHostTheme(BuildContext context) =>
+    context.findAncestorWidgetOfExactType<Theme>() != null ||
+    context.findAncestorWidgetOfExactType<CupertinoTheme>() != null;
 
 /// Resolve the palette for the picker chrome above [context].
 ///

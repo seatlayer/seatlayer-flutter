@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 
 import '../payloads.dart';
 import '../seat_layer_error.dart';
+import 'picker_chart_load.dart';
 import 'picker_models.dart';
 import 'picker_strings.dart';
 
@@ -63,6 +64,7 @@ class SeatLayerPickerChromeOptions {
     this.showHeader = true,
     this.showPriceRail = true,
     this.showFloorSelector = true,
+    this.showFloorStrip = true,
     this.showMapControls = true,
     this.showOverviewControl,
     this.showZoomControls,
@@ -74,7 +76,9 @@ class SeatLayerPickerChromeOptions {
     this.showDockBar = true,
     this.showConfirmCard = true,
     this.showVenue3DChrome = true,
+    this.showSeatViewChrome = true,
     this.showHoldPill = true,
+    this.manageSystemOverlays = true,
   });
 
   /// Whether the header renders.
@@ -85,6 +89,12 @@ class SeatLayerPickerChromeOptions {
 
   /// Whether the floor selector renders on a multi-floor venue.
   final bool showFloorSelector;
+
+  /// Whether the floor chip strip renders on a multi-floor venue.
+  ///
+  /// It draws nothing at all on a venue with fewer than two floors, so this
+  /// is only for a host that wants to place the strip itself.
+  final bool showFloorStrip;
 
   /// Whether any map corner control renders.
   final bool showMapControls;
@@ -120,8 +130,29 @@ class SeatLayerPickerChromeOptions {
   /// Whether the seat-view/3D chrome renders over the immersive scene.
   final bool showVenue3DChrome;
 
+  /// Whether the native caption strip over the 2D seat-view panorama renders.
+  ///
+  /// Turning it off does NOT give the words back to the runtime: a runtime
+  /// advertising `native-seat-view-chrome-v1` was asked to suppress its own at
+  /// `init`, so a host that hides this owns the disclosure itself.
+  final bool showSeatViewChrome;
+
   /// Whether the header shows the hold countdown pill.
   final bool showHoldPill;
+
+  /// Whether the picker dresses the device's status and navigation bars.
+  ///
+  /// On by default, and it is what keeps the clock, the wifi glyph and the
+  /// battery legible: the surface behind those bars is the picker's, so the
+  /// picker is the only thing that can know whether they need light icons or
+  /// dark ones. The style follows the resolved theme mode live — including an
+  /// `auto` device flip — and goes dark for the immersive 3D scene whatever
+  /// side the picker is painted on.
+  ///
+  /// Turn it off when the host application owns the bars, for example because
+  /// it presents the picker inside its own chrome and sets one style for the
+  /// whole app.
+  final bool manageSystemOverlays;
 
   /// Resolve [showOverviewControl] for a layout.
   bool overviewControlFor({required bool phone}) =>
@@ -251,6 +282,7 @@ class SeatLayerPickerCallbacks {
   /// Creates a callback set.
   const SeatLayerPickerCallbacks({
     this.onReady,
+    this.onChartLoad,
     this.onSelectionChanged,
     this.onSelectionValidityChanged,
     this.onHoldChanged,
@@ -270,6 +302,13 @@ class SeatLayerPickerCallbacks {
 
   /// The runtime finished its handshake.
   final ValueChanged<ReadyInfo>? onReady;
+
+  /// One chart load finished, measured from the buyer's tap.
+  ///
+  /// Fires once per render attempt, success or failure, and only on a runtime
+  /// advertising `chart-load-trace-v1`. Nothing is logged or sent by the SDK:
+  /// this is the hook for a host's own analytics. See [SeatLayerChartLoad].
+  final ValueChanged<SeatLayerChartLoad>? onChartLoad;
 
   /// The selected seats changed.
   final ValueChanged<List<SelectedSeat>>? onSelectionChanged;

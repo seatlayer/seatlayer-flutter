@@ -75,7 +75,7 @@ Map<String, Object?> pickerSnapshot({
       'salesClosed': false,
     },
     'branding': <String, Object?>{
-      'brandName': 'Reference app',
+      'brandName': 'Test Tickets',
       'attributionRequired': true,
       'accent': '#635BFF',
     },

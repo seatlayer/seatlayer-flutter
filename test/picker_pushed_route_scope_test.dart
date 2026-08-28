@@ -101,7 +101,7 @@ void main() {
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
-    // A DARK picker inside the harness's light Material app: exactly the pilot
+    // A DARK picker inside the harness's light Material app: exactly the
     // shape, where the sheet came up white under dark chrome.
     await tester.pumpWidget(
       pickerHarness(

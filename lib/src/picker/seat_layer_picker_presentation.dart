@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../seat_layer_configuration.dart';
 import 'picker_builders.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
+import 'picker_system_overlay.dart';
 import 'seat_layer_picker.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_theme.dart';
@@ -142,7 +144,7 @@ class _SeatLayerPickerPageState extends State<SeatLayerPickerPage> {
     // the bottom inset. This lets the dock adapt its gesture clearance instead
     // of inheriting an unavoidable empty strip in full-screen presentations.
     final content = SafeArea(bottom: false, child: picker);
-    return PopScope(
+    final page = PopScope(
       canPop: _allowPop,
       // Flutter 3.19 compatibility; newer SDKs prefer onPopInvokedWithResult.
       // ignore: deprecated_member_use
@@ -152,6 +154,18 @@ class _SeatLayerPickerPageState extends State<SeatLayerPickerPage> {
         }
       },
       child: widget.useScaffold ? _scaffold(content) : content,
+    );
+    if (!widget.options.chrome.manageSystemOverlays) return page;
+    // The picker's own region is sized to the picker, and the page deliberately
+    // hands the top inset to a SafeArea — so nothing inside it reaches the
+    // strip the status bar is drawn over. This region does, which is what makes
+    // the clock legible on a full-screen picker.
+    return _withResolvedTheme(
+      page,
+      (context, theme, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: seatLayerPickerOverlayStyle(theme),
+        child: child,
+      ),
     );
   }
 
@@ -163,23 +177,46 @@ class _SeatLayerPickerPageState extends State<SeatLayerPickerPage> {
   /// wore a white band above its own header. The ground is the surface the
   /// header docks on, so the strip reads as part of the header.
   ///
-  /// The colour is resolved through a listener rather than once, because the
-  /// organizer's branding only arrives with the first snapshot. [content] is
-  /// passed through untouched, so a new ground never rebuilds the picker.
-  Widget _scaffold(Widget content) =>
+  /// In the immersive scene that surface is the dark venue, so the strip
+  /// follows the scene palette too — otherwise a light picker keeps a white
+  /// band above a black 3D view.
+  Widget _scaffold(Widget content) => _withResolvedTheme(
+        content,
+        (context, theme, child) =>
+            Scaffold(backgroundColor: theme.surface, body: child),
+      );
+
+  /// Build [child] under the picker's currently resolved palette.
+  ///
+  /// Resolved through a listener rather than once, because the organizer's
+  /// branding and the immersive scene both arrive with a snapshot. [child] is
+  /// passed through untouched, so a new palette never rebuilds the picker.
+  Widget _withResolvedTheme(
+    Widget child,
+    Widget Function(
+      BuildContext context,
+      SeatLayerResolvedPickerTheme theme,
+      Widget child,
+    ) build,
+  ) =>
       ValueListenableBuilder<SeatLayerPickerState>(
         valueListenable: _controller,
-        child: content,
-        builder: (context, state, child) => Scaffold(
-          backgroundColor: resolveSeatLayerPickerTheme(
+        child: child,
+        builder: (context, state, inner) {
+          final resolved = resolveSeatLayerPickerTheme(
             context,
             state,
             widget.theme,
             brightness:
                 resolveSeatLayerThemeBrightness(context, widget.themeMode),
-          ).surface,
-          body: child,
-        ),
+          );
+          final venue3D = state.snapshot?.map.isVenue3D ?? false;
+          return build(
+            context,
+            venue3D ? resolved.immersive : resolved,
+            inner!,
+          );
+        },
       );
 }
 

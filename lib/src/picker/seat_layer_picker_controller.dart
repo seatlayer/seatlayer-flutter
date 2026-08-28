@@ -10,6 +10,7 @@ import '../payloads.dart';
 import '../seat_layer_configuration.dart';
 import '../seat_layer_controller.dart';
 import '../seat_layer_error.dart';
+import 'picker_chart_load.dart';
 import 'picker_haptics.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
@@ -21,6 +22,14 @@ const String _nativeChromeContractCapability = 'native-chrome-contract-v1';
 
 /// Advertised by a runtime that frames against host-reported viewport insets.
 const String _viewportInsetsCapability = 'viewport-insets-v1';
+
+/// Advertised by a runtime that stacks a multi-floor venue and accepts the
+/// `'all'` sentinel on `picker.setFloor`.
+const String _floorStackCapability = 'floor-stack-v1';
+
+/// Advertised by a runtime that hands its own chart-load beacon to the host.
+const String _chartLoadTraceCapability = 'chart-load-trace-v1';
+
 
 /// State and actions for one high-level picker session.
 ///
@@ -35,9 +44,15 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     _bridgeSubscription = this.mapController.onBridgeEvent.listen(
           _onBridgeEvent,
         );
-    _readySubscription = this.mapController.onReady.listen(
-          (info) => _callbacks.onReady?.call(info),
-        );
+    _readySubscription = this.mapController.onReady.listen((info) {
+      // T0 is the mount, not the handshake: the buyer's wait started when the
+      // picker appeared. Frozen here rather than read when the trace arrives,
+      // because the trace can land a frame or two later and that frame is not
+      // part of what the buyer waited for.
+      _readyInfo = info;
+      _tapToReadyMs = _mountClock.elapsedMilliseconds;
+      _callbacks.onReady?.call(info);
+    });
     _accessExpiredSubscription = this.mapController.onBuyerAccessExpired.listen(
           (event) => _callbacks.onAccessExpired?.call(event),
         );
@@ -88,6 +103,15 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   late final StreamSubscription<void> _holdExpiredSubscription;
   late final StreamSubscription<GAArea> _generalAdmissionSubscription;
   late final StreamSubscription<SeatLayerError> _errorSubscription;
+
+  final StreamController<SeatLayerChartLoad> _chartLoads =
+      StreamController<SeatLayerChartLoad>.broadcast();
+
+  /// Started when the picker mounts; the clock `tapToReadyMs` is read off.
+  final Stopwatch _mountClock = Stopwatch();
+  int? _tapToReadyMs;
+  ReadyInfo? _readyInfo;
+  SeatLayerSeatView? _seatView;
 
   SeatLayerPickerOptions _options = const SeatLayerPickerOptions();
   SeatLayerPickerCallbacks _callbacks = const SeatLayerPickerCallbacks();
@@ -252,6 +276,13 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       _reloadGeneration += 1;
       _haptics.reset();
       _forgetViewportInsets();
+      _seatView = null;
+      // A retry is a second open, and its own wait starts here.
+      _tapToReadyMs = null;
+      _readyInfo = null;
+      _mountClock
+        ..reset()
+        ..start();
       value = const SeatLayerPickerState.initializing();
     });
   }
@@ -278,6 +309,10 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     _options = options;
     _callbacks = callbacks;
     _runtimeAttached = true;
+    // T0 for `tapToReadyMs`. Only the first mount starts it: a controller
+    // handed to a second scope is a re-parent, not a second open, and
+    // restarting here would report the re-parent as the buyer's wait.
+    if (!_mountClock.isRunning && _tapToReadyMs == null) _mountClock.start();
     if (!_cartSheetInitialized) {
       _cartSheetInitialized = true;
       _cartSheetExpanded = !options.panelInitiallyCollapsed;
@@ -308,11 +343,75 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   }
 
   void _onBridgeEvent(EventSignal event) {
+    if (event.name == 'telemetry.chartLoad') {
+      _onChartLoadTrace(event.payload);
+      return;
+    }
+    if (event.name == 'seatView.changed') {
+      _onSeatViewChanged(event.payload);
+      return;
+    }
     if (event.name != 'picker.snapshot' && event.name != 'sys.ready') return;
     final raw = jGet(event.payload, 'snapshot') ??
         (event.name == 'picker.snapshot' ? event.payload : null);
     final snapshot = SeatLayerPickerSnapshot.fromJson(raw);
     if (snapshot != null) _applySnapshot(snapshot);
+  }
+
+  /// One chart load, as the runtime measured it and as this SDK did.
+  ///
+  /// Broadcast, so several listeners can watch it, and it emits nothing at all
+  /// on a runtime that does not advertise `chart-load-trace-v1` — the SDK never
+  /// synthesises a trace it was not given. Fires once per render attempt,
+  /// success or failure.
+  ///
+  /// A late listener misses the load it was late for; the drop-in's
+  /// [SeatLayerPickerCallbacks.onChartLoad] is bound before the runtime mounts
+  /// and is the surface most hosts want.
+  Stream<SeatLayerChartLoad> get onChartLoad => _chartLoads.stream;
+
+  /// What the 2D "View from here" panorama is showing, or null when it is shut.
+  ///
+  /// Populated only on a runtime advertising `native-seat-view-chrome-v1`,
+  /// which is also the runtime whose own header, caption and badge this SDK
+  /// asks to be suppressed — so the words are drawn once, natively, and never
+  /// twice. Notifies listeners, so chrome bound to the controller repaints.
+  SeatLayerSeatView? get seatView =>
+      supportsNativeSeatViewChrome ? _seatView : null;
+
+  /// Whether the mounted runtime hands over the panorama's own words.
+  bool get supportsNativeSeatViewChrome {
+    final bundle = mapController.bundleInfo;
+    return bundle != null &&
+        bundle.supportsCapability(seatLayerSeatViewChromeCapability);
+  }
+
+  void _onSeatViewChanged(Object? payload) {
+    if (_disposed || !supportsNativeSeatViewChrome) return;
+    final next = SeatLayerSeatView.fromJson(jGet(payload, 'seatView'));
+    if (_seatView == next) return;
+    _seatView = next;
+    notifyListeners();
+  }
+
+  void _onChartLoadTrace(Object? payload) {
+    if (_disposed) return;
+    final bundle = mapController.bundleInfo;
+    // Capability-gated consumption: a runtime that has not said it speaks this
+    // is not read for it, whatever happens to be on the wire.
+    if (bundle == null ||
+        !bundle.supportsCapability(_chartLoadTraceCapability)) {
+      return;
+    }
+    final trace = SeatLayerChartLoadTrace.fromJson(jGet(payload, 'trace'));
+    if (trace == null) return;
+    final load = SeatLayerChartLoad(
+      trace: trace,
+      tapToReadyMs: _tapToReadyMs,
+      ready: _readyInfo,
+    );
+    _callbacks.onChartLoad?.call(load);
+    if (_chartLoads.hasListener) _chartLoads.add(load);
   }
 
   void _applySnapshot(SeatLayerPickerSnapshot snapshot) {
@@ -529,11 +628,31 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         SeatLayerPickerBusyAction.updatingSelection,
       );
 
+  /// Draw only the floor [floorId].
   Future<void> setFloor(String floorId) => _mutation(
         'picker.setFloor',
         <String, Object?>{'floorId': floorId},
         SeatLayerPickerBusyAction.updatingSelection,
       );
+
+  /// Whether the mounted runtime can stack every floor at once.
+  ///
+  /// `snapshot.map.floorMode` says which mode the runtime is IN; this says the
+  /// runtime has modes at all. Chrome offering the choice needs both: a
+  /// snapshot that happens to carry a mode string from a runtime that never
+  /// advertised the capability is not a contract, and a chip that sent `'all'`
+  /// to a runtime with no such floor would be a command with nowhere to land.
+  bool get supportsFloorStack {
+    final bundle = mapController.bundleInfo;
+    return bundle != null && bundle.supportsCapability(_floorStackCapability);
+  }
+
+  /// Draw every floor of the venue at once.
+  ///
+  /// The same command as [setFloor] with the runtime's own sentinel, so a
+  /// host never has to know that `'all'` is a floor id the chart does not
+  /// contain. Runtimes that do not report `floorMode` ignore it.
+  Future<void> showAllFloors() => setFloor(seatLayerAllFloors);
 
   Future<void> setColorblindSafe(bool enabled) => _mutation(
         'picker.setColorblindSafe',
@@ -1107,6 +1226,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     unawaited(_holdExpiredSubscription.cancel());
     unawaited(_generalAdmissionSubscription.cancel());
     unawaited(_errorSubscription.cancel());
+    unawaited(_chartLoads.close());
     if (_ownsMapController) mapController.dispose();
     super.dispose();
   }

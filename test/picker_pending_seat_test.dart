@@ -4,7 +4,7 @@
 // `seatlayer.picker.snapshot/1` is built straight from `selection.seats`, so a
 // tapped seat is in the cart, the ticket count and the total from the moment
 // it is tapped — while the native confirm card is still asking whether the
-// buyer wants it. On the pilot that read as `1 ticket · €40` on the peek bar
+// buyer wants it. On a real device that read as `1 ticket · €40` on the peek bar
 // under the card, with a live Continue behind the scrim.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

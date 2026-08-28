@@ -553,15 +553,24 @@ class GAArea {
 
 /// One floor of a multi-floor venue.
 class FloorInfo {
-  const FloorInfo({required this.id, required this.name});
+  const FloorInfo({required this.id, required this.name, this.level});
   final String id;
   final String name;
+
+  /// Where this floor sits in the building, ground being zero.
+  ///
+  /// **The SeatLayer runtime does not send this** (confirmed against the
+  /// native-chrome contract, 2026-08-28), so it is null in practice and the
+  /// SDK orders nothing by it: the snapshot's own order is the venue's order,
+  /// stage upward, and it is the order the strip draws. Read leniently anyway,
+  /// so a chart that one day carries a level is not a decode failure.
+  final int? level;
 
   static FloorInfo? fromJson(Object? v) {
     final id = jStr(jGet(v, 'id'));
     final name = jStr(jGet(v, 'name'));
     if (id == null || name == null) return null;
-    return FloorInfo(id: id, name: name);
+    return FloorInfo(id: id, name: name, level: jInt(jGet(v, 'level')));
   }
 }
 
@@ -678,6 +687,14 @@ class ReadyInfo {
         timeToReadyMs: timeToReadyMs,
       );
 }
+
+/// Advertised by a runtime that reports the 2D panorama's own words instead of
+/// drawing them, so a native host can print them on its own chrome.
+///
+/// Named here rather than beside the picker because both sides of the bridge
+/// need it: the handshake reads it to decide what to suppress, and the picker
+/// reads it to decide whether to draw.
+const String seatLayerSeatViewChromeCapability = 'native-seat-view-chrome-v1';
 
 /// What the bundle advertises in `hello`.
 class BundleInfo {
