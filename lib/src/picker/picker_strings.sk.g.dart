@@ -21,6 +21,9 @@ String _findBestSeatsSk(int count) => count == 1
     ? 'Nájsť $count najlepšie miesto'
     : 'Nájsť $count najlepších miest';
 
+String _reselectSeatsSk(int count) =>
+    count == 1 ? 'Vybrať ho znova' : 'Vybrať ich znova';
+
 String _continueWithTotalSk(String money) => 'Pokračovať \u00b7 $money';
 
 /// The `sk` defaults for the native picker chrome.
@@ -57,5 +60,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsSk = SeatLayerPickerStrings(
   fromPrice: _fromPriceSk,
   ticketCount: _ticketCountSk,
   findBestSeats: _findBestSeatsSk,
+  reselectSeats: _reselectSeatsSk,
   continueWithTotal: _continueWithTotalSk,
 );

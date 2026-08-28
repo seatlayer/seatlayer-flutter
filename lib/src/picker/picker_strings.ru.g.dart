@@ -20,6 +20,9 @@ String _ticketCountRu(int count) =>
 String _findBestSeatsRu(int count) =>
     count == 1 ? 'Найти $count лучшее место' : 'Найти $count лучших места';
 
+String _reselectSeatsRu(int count) =>
+    count == 1 ? 'Выбрать его снова' : 'Выбрать их снова';
+
 String _continueWithTotalRu(String money) => 'Продолжить \u00b7 $money';
 
 /// The `ru` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsRu = SeatLayerPickerStrings(
   fromPrice: _fromPriceRu,
   ticketCount: _ticketCountRu,
   findBestSeats: _findBestSeatsRu,
+  reselectSeats: _reselectSeatsRu,
   continueWithTotal: _continueWithTotalRu,
 );

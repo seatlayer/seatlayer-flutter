@@ -20,6 +20,9 @@ String _ticketCountTr(int count) =>
 String _findBestSeatsTr(int count) =>
     count == 1 ? '$count en iyi koltuğu bul' : '$count en iyi koltuğu bul';
 
+String _reselectSeatsTr(int count) =>
+    count == 1 ? 'Onu tekrar seç' : 'Onları tekrar seç';
+
 String _continueWithTotalTr(String money) => 'Devam \u00b7 $money';
 
 /// The `tr` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   fromPrice: _fromPriceTr,
   ticketCount: _ticketCountTr,
   findBestSeats: _findBestSeatsTr,
+  reselectSeats: _reselectSeatsTr,
   continueWithTotal: _continueWithTotalTr,
 );

@@ -59,18 +59,23 @@ const Map<String, ({String parameter, String type, String placeholder})>
 };
 
 /// Strings with a singular and a plural form.
-const List<String> _plurals = <String>['ticketCount', 'findBestSeats'];
+const List<String> _plurals = <String>[
+  'ticketCount',
+  'findBestSeats',
+  'reselectSeats',
+];
 
 void main(List<String> args) {
   final check = args.contains('--check');
-  final raw = jsonDecode(File(_input).readAsStringSync()) as Map<String, Object?>;
+  final raw =
+      jsonDecode(File(_input).readAsStringSync()) as Map<String, Object?>;
   final table = raw['strings']! as Map<String, Object?>;
   final locales = table.keys.toList()..sort();
 
   final wanted = <String, String>{};
   for (final locale in locales) {
-    wanted[_pathFor(locale)] =
-        _formatted(_renderLocale(locale, (table[locale]! as Map<String, Object?>)));
+    wanted[_pathFor(locale)] = _formatted(
+        _renderLocale(locale, (table[locale]! as Map<String, Object?>)));
   }
   wanted[_indexFile] = _formatted(_renderIndex(locales));
 
@@ -217,7 +222,8 @@ String _renderIndex(List<String> locales) {
     )
     ..writeln('    <String, SeatLayerPickerStrings>{');
   for (final locale in locales) {
-    buffer.writeln("  '$locale': seatLayerPickerStrings${_identifier(locale)},");
+    buffer
+        .writeln("  '$locale': seatLayerPickerStrings${_identifier(locale)},");
   }
   buffer.writeln('};');
   return buffer.toString();

@@ -78,6 +78,26 @@ void main() {
     expect(german.findBestSeats(2), contains('2'));
   });
 
+  test('the recovery action is counted, not interpolated', () {
+    // It carries no number at all — the count only chooses between two
+    // sentences, so the singular and the plural must genuinely differ.
+    const english = SeatLayerPickerStrings();
+    expect(english.reselectSeats(1), 'Select it again');
+    expect(english.reselectSeats(3), 'Select them again');
+
+    // French marks the object's number on the pronoun, so the two forms of the
+    // translated sentence are genuinely different sentences.
+    final french = SeatLayerPickerStrings.forLocale(const Locale('fr'));
+    expect(french.reselectSeats(1), 'La sélectionner à nouveau');
+    expect(french.reselectSeats(3), 'Les sélectionner à nouveau');
+
+    // German says it one way whatever the number, and the generator must carry
+    // that through rather than invent a distinction the language does not make.
+    final german = SeatLayerPickerStrings.forLocale(const Locale('de'));
+    expect(german.reselectSeats(1), german.reselectSeats(3));
+    expect(german.reselectSeats(1), isNot('Select it again'));
+  });
+
   test('a language with no singular category uses one form for both', () {
     // Japanese has no `one` in Intl.PluralRules; the runtime's dictionary says
     // so by carrying only `.other`, and the generated form must not invent one.

@@ -21,6 +21,9 @@ String _findBestSeatsSr(int count) => count == 1
     ? 'Пронађи $count најбоље место'
     : 'Пронађи $count најбољих места';
 
+String _reselectSeatsSr(int count) =>
+    count == 1 ? 'Изаберите га поново' : 'Изаберите их поново';
+
 String _continueWithTotalSr(String money) => 'Настави \u00b7 $money';
 
 /// The `sr` defaults for the native picker chrome.
@@ -57,5 +60,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
   fromPrice: _fromPriceSr,
   ticketCount: _ticketCountSr,
   findBestSeats: _findBestSeatsSr,
+  reselectSeats: _reselectSeatsSr,
   continueWithTotal: _continueWithTotalSr,
 );

@@ -20,6 +20,9 @@ String _ticketCountAr(int count) =>
 String _findBestSeatsAr(int count) =>
     count == 1 ? 'ابحث عن $count أفضل مقعد' : 'ابحث عن أفضل $count مقعد';
 
+String _reselectSeatsAr(int count) =>
+    count == 1 ? 'اختره مرة أخرى' : 'اخترها مرة أخرى';
+
 String _continueWithTotalAr(String money) => 'متابعة \u00b7 $money';
 
 /// The `ar` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   fromPrice: _fromPriceAr,
   ticketCount: _ticketCountAr,
   findBestSeats: _findBestSeatsAr,
+  reselectSeats: _reselectSeatsAr,
   continueWithTotal: _continueWithTotalAr,
 );

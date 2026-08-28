@@ -21,6 +21,9 @@ String _findBestSeatsBg(int count) => count == 1
     ? 'Намери $count най-добро място'
     : 'Намери $count най-добри места';
 
+String _reselectSeatsBg(int count) =>
+    count == 1 ? 'Изберете го отново' : 'Изберете ги отново';
+
 String _continueWithTotalBg(String money) => 'Продължи \u00b7 $money';
 
 /// The `bg` defaults for the native picker chrome.
@@ -57,5 +60,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   fromPrice: _fromPriceBg,
   ticketCount: _ticketCountBg,
   findBestSeats: _findBestSeatsBg,
+  reselectSeats: _reselectSeatsBg,
   continueWithTotal: _continueWithTotalBg,
 );

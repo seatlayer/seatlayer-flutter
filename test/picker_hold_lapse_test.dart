@@ -133,7 +133,18 @@ void main() {
       find.text('They were held for 15 minutes. 2 could not be recovered'),
       findsOneWidget,
     );
-    expect(find.text('Select them again'), findsOneWidget);
+    // Three lapsed, one is still free, and the offer is counted on what it
+    // would RE-TAKE — so it is singular even though the hold was not.
+    expect(find.text('Select it again'), findsOneWidget);
+    expect(find.text('Select them again'), findsNothing);
+
+    await tester.tap(find.text('Select it again'));
+    await tester.pumpAndSettle();
+    expect(
+      (map.callsTo('picker.selectObjects').single.$2!
+          as Map<String, Object?>)['objects'],
+      <String>['A-1'],
+    );
   });
 
   testWidgets('nothing recoverable leaves the buyer on the map',

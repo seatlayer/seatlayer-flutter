@@ -424,8 +424,11 @@ abstract final class SeatLayerStringTokens {
   /// They were held for {n} minutes.
   static const String holdLapsedBody = 'They were held for {n} minutes.';
 
+  /// Select it again
+  static const String reselectSeatsOne = 'Select it again';
+
   /// Select them again
-  static const String reselectSeats = 'Select them again';
+  static const String reselectSeatsOther = 'Select them again';
 
   /// {n} could not be recovered
   static const String seatsNotRecovered = '{n} could not be recovered';

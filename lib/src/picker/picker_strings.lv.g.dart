@@ -20,6 +20,9 @@ String _ticketCountLv(int count) =>
 String _findBestSeatsLv(int count) =>
     count == 1 ? 'Atrast $count labāko vietu' : 'Atrast $count labākās vietas';
 
+String _reselectSeatsLv(int count) =>
+    count == 1 ? 'Izvēlēties to vēlreiz' : 'Izvēlēties tās vēlreiz';
+
 String _continueWithTotalLv(String money) => 'Turpināt \u00b7 $money';
 
 /// The `lv` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   fromPrice: _fromPriceLv,
   ticketCount: _ticketCountLv,
   findBestSeats: _findBestSeatsLv,
+  reselectSeats: _reselectSeatsLv,
   continueWithTotal: _continueWithTotalLv,
 );

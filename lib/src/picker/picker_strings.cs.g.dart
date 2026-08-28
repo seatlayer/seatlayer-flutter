@@ -20,6 +20,9 @@ String _ticketCountCs(int count) =>
 String _findBestSeatsCs(int count) =>
     count == 1 ? 'Najít $count nejlepší místo' : 'Najít $count nejlepších míst';
 
+String _reselectSeatsCs(int count) =>
+    count == 1 ? 'Vybrat ho znovu' : 'Vybrat je znovu';
+
 String _continueWithTotalCs(String money) => 'Pokračovat \u00b7 $money';
 
 /// The `cs` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   fromPrice: _fromPriceCs,
   ticketCount: _ticketCountCs,
   findBestSeats: _findBestSeatsCs,
+  reselectSeats: _reselectSeatsCs,
   continueWithTotal: _continueWithTotalCs,
 );

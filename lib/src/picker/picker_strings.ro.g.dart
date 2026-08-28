@@ -21,6 +21,9 @@ String _findBestSeatsRo(int count) => count == 1
     ? 'Găsește $count cel mai bun loc'
     : 'Găsește cele mai bune $count de locuri';
 
+String _reselectSeatsRo(int count) =>
+    count == 1 ? 'Selectează-l din nou' : 'Selectează-le din nou';
+
 String _continueWithTotalRo(String money) => 'Continuă \u00b7 $money';
 
 /// The `ro` defaults for the native picker chrome.
@@ -57,5 +60,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   fromPrice: _fromPriceRo,
   ticketCount: _ticketCountRo,
   findBestSeats: _findBestSeatsRo,
+  reselectSeats: _reselectSeatsRo,
   continueWithTotal: _continueWithTotalRo,
 );

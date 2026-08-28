@@ -35,7 +35,9 @@
       "ticketCount.one": "{count} تذكرة",
       "ticketCount.other": "{count} تذكرة",
       "findBestSeats.one": "ابحث عن {count} أفضل مقعد",
-      "findBestSeats.other": "ابحث عن أفضل {count} مقعد"
+      "findBestSeats.other": "ابحث عن أفضل {count} مقعد",
+      "reselectSeats.one": "اختره مرة أخرى",
+      "reselectSeats.other": "اخترها مرة أخرى"
     },
     "be": {
       "close": "Закрыць",
@@ -71,7 +73,9 @@
       "ticketCount.one": "{count} білет",
       "ticketCount.other": "{count} білета",
       "findBestSeats.one": "Знайсці {count} лепшае месца",
-      "findBestSeats.other": "Знайсці {count} лепшага месца"
+      "findBestSeats.other": "Знайсці {count} лепшага месца",
+      "reselectSeats.one": "Выбраць яго зноў",
+      "reselectSeats.other": "Выбраць іх зноў"
     },
     "bg": {
       "close": "Затвори",
@@ -107,7 +111,9 @@
       "ticketCount.one": "{count} билет",
       "ticketCount.other": "{count} билета",
       "findBestSeats.one": "Намери {count} най-добро място",
-      "findBestSeats.other": "Намери {count} най-добри места"
+      "findBestSeats.other": "Намери {count} най-добри места",
+      "reselectSeats.one": "Изберете го отново",
+      "reselectSeats.other": "Изберете ги отново"
     },
     "ca": {
       "close": "Tanca",
@@ -143,7 +149,9 @@
       "ticketCount.one": "{count} entrada",
       "ticketCount.other": "{count} entrades",
       "findBestSeats.one": "Busca {count} millor seient",
-      "findBestSeats.other": "Busca els {count} millors seients"
+      "findBestSeats.other": "Busca els {count} millors seients",
+      "reselectSeats.one": "Tornar-la a seleccionar",
+      "reselectSeats.other": "Tornar-les a seleccionar"
     },
     "cs": {
       "close": "Zavřít",
@@ -179,7 +187,9 @@
       "ticketCount.one": "{count} vstupenka",
       "ticketCount.other": "{count} vstupenek",
       "findBestSeats.one": "Najít {count} nejlepší místo",
-      "findBestSeats.other": "Najít {count} nejlepších míst"
+      "findBestSeats.other": "Najít {count} nejlepších míst",
+      "reselectSeats.one": "Vybrat ho znovu",
+      "reselectSeats.other": "Vybrat je znovu"
     },
     "cy": {
       "close": "Cau",
@@ -215,7 +225,9 @@
       "ticketCount.one": "{count} tocyn",
       "ticketCount.other": "{count} o docynnau",
       "findBestSeats.one": "Dod o hyd i'r {count} sedd orau",
-      "findBestSeats.other": "Dod o hyd i'r {count} o seddi gorau"
+      "findBestSeats.other": "Dod o hyd i'r {count} o seddi gorau",
+      "reselectSeats.one": "Dewisa hi eto",
+      "reselectSeats.other": "Dewisa nhw eto"
     },
     "da": {
       "close": "Luk",
@@ -251,7 +263,9 @@
       "ticketCount.one": "{count} billet",
       "ticketCount.other": "{count} billetter",
       "findBestSeats.one": "Find {count} bedste plads",
-      "findBestSeats.other": "Find {count} bedste pladser"
+      "findBestSeats.other": "Find {count} bedste pladser",
+      "reselectSeats.one": "Vælg den igen",
+      "reselectSeats.other": "Vælg dem igen"
     },
     "de": {
       "close": "Schließen",
@@ -287,7 +301,9 @@
       "ticketCount.one": "{count} Ticket",
       "ticketCount.other": "{count} Tickets",
       "findBestSeats.one": "{count} besten Platz finden",
-      "findBestSeats.other": "{count} beste Plätze finden"
+      "findBestSeats.other": "{count} beste Plätze finden",
+      "reselectSeats.one": "Erneut auswählen",
+      "reselectSeats.other": "Erneut auswählen"
     },
     "el": {
       "close": "Κλείσιμο",
@@ -323,7 +339,9 @@
       "ticketCount.one": "{count} εισιτήριο",
       "ticketCount.other": "{count} εισιτήρια",
       "findBestSeats.one": "Βρείτε {count} καλύτερη θέση",
-      "findBestSeats.other": "Βρείτε τις {count} καλύτερες θέσεις"
+      "findBestSeats.other": "Βρείτε τις {count} καλύτερες θέσεις",
+      "reselectSeats.one": "Επιλέξτε την ξανά",
+      "reselectSeats.other": "Επιλέξτε τις ξανά"
     },
     "en": {
       "close": "Close",
@@ -359,7 +377,9 @@
       "ticketCount.one": "{count} ticket",
       "ticketCount.other": "{count} tickets",
       "findBestSeats.one": "Find {count} best seat",
-      "findBestSeats.other": "Find {count} best seats"
+      "findBestSeats.other": "Find {count} best seats",
+      "reselectSeats.one": "Select it again",
+      "reselectSeats.other": "Select them again"
     },
     "es": {
       "close": "Cerrar",
@@ -395,7 +415,9 @@
       "ticketCount.one": "{count} entrada",
       "ticketCount.other": "{count} entradas",
       "findBestSeats.one": "Buscar {count} mejor asiento",
-      "findBestSeats.other": "Buscar {count} mejores asientos"
+      "findBestSeats.other": "Buscar {count} mejores asientos",
+      "reselectSeats.one": "Seleccionarla de nuevo",
+      "reselectSeats.other": "Seleccionarlas de nuevo"
     },
     "et": {
       "close": "Sulge",
@@ -431,7 +453,9 @@
       "ticketCount.one": "{count} pilet",
       "ticketCount.other": "{count} piletit",
       "findBestSeats.one": "Leia {count} parim koht",
-      "findBestSeats.other": "Leia {count} parimat kohta"
+      "findBestSeats.other": "Leia {count} parimat kohta",
+      "reselectSeats.one": "Vali see uuesti",
+      "reselectSeats.other": "Vali need uuesti"
     },
     "fa": {
       "close": "بستن",
@@ -467,7 +491,9 @@
       "ticketCount.one": "{count} بلیت",
       "ticketCount.other": "{count} بلیت",
       "findBestSeats.one": "پیدا کردن {count} بهترین صندلی",
-      "findBestSeats.other": "پیدا کردن {count} صندلی برتر"
+      "findBestSeats.other": "پیدا کردن {count} صندلی برتر",
+      "reselectSeats.one": "دوباره انتخابش کنید",
+      "reselectSeats.other": "دوباره انتخابشان کنید"
     },
     "fi": {
       "close": "Sulje",
@@ -503,7 +529,9 @@
       "ticketCount.one": "{count} lippu",
       "ticketCount.other": "{count} lippua",
       "findBestSeats.one": "Etsi {count} paras paikka",
-      "findBestSeats.other": "Etsi {count} parasta paikkaa"
+      "findBestSeats.other": "Etsi {count} parasta paikkaa",
+      "reselectSeats.one": "Valitse se uudelleen",
+      "reselectSeats.other": "Valitse ne uudelleen"
     },
     "fr": {
       "close": "Fermer",
@@ -539,7 +567,9 @@
       "ticketCount.one": "{count} billet",
       "ticketCount.other": "{count} billets",
       "findBestSeats.one": "Trouver {count} meilleure place",
-      "findBestSeats.other": "Trouver {count} meilleures places"
+      "findBestSeats.other": "Trouver {count} meilleures places",
+      "reselectSeats.one": "La sélectionner à nouveau",
+      "reselectSeats.other": "Les sélectionner à nouveau"
     },
     "he": {
       "close": "סגירה",
@@ -575,7 +605,9 @@
       "ticketCount.one": "{count} כרטיס",
       "ticketCount.other": "{count} כרטיסים",
       "findBestSeats.one": "מצאו {count} מושב הכי טוב",
-      "findBestSeats.other": "מצאו {count} מושבים הכי טובים"
+      "findBestSeats.other": "מצאו {count} מושבים הכי טובים",
+      "reselectSeats.one": "בחר אותו שוב",
+      "reselectSeats.other": "בחר אותם שוב"
     },
     "hr": {
       "close": "Zatvori",
@@ -611,7 +643,9 @@
       "ticketCount.one": "{count} ulaznica",
       "ticketCount.other": "{count} ulaznica",
       "findBestSeats.one": "Pronađi {count} najbolje mjesto",
-      "findBestSeats.other": "Pronađi {count} najboljih mjesta"
+      "findBestSeats.other": "Pronađi {count} najboljih mjesta",
+      "reselectSeats.one": "Ponovno ga odaberite",
+      "reselectSeats.other": "Ponovno ih odaberite"
     },
     "hu": {
       "close": "Bezárás",
@@ -647,7 +681,9 @@
       "ticketCount.one": "{count} jegy",
       "ticketCount.other": "{count} jegy",
       "findBestSeats.one": "{count} legjobb hely keresése",
-      "findBestSeats.other": "{count} legjobb hely keresése"
+      "findBestSeats.other": "{count} legjobb hely keresése",
+      "reselectSeats.one": "Válassza ki újra",
+      "reselectSeats.other": "Válassza ki őket újra"
     },
     "it": {
       "close": "Chiudi",
@@ -683,7 +719,9 @@
       "ticketCount.one": "{count} biglietto",
       "ticketCount.other": "{count} biglietti",
       "findBestSeats.one": "Trova {count} posto migliore",
-      "findBestSeats.other": "Trova i {count} posti migliori"
+      "findBestSeats.other": "Trova i {count} posti migliori",
+      "reselectSeats.one": "Selezionalo di nuovo",
+      "reselectSeats.other": "Selezionali di nuovo"
     },
     "ja": {
       "close": "閉じる",
@@ -717,7 +755,8 @@
       "fromPrice": "{price}〜",
       "moreCount": "他 {count} 件",
       "ticketCount.other": "{count}枚",
-      "findBestSeats.other": "おすすめの{count}席を探す"
+      "findBestSeats.other": "おすすめの{count}席を探す",
+      "reselectSeats.other": "もう一度選ぶ"
     },
     "ku": {
       "close": "Bigire",
@@ -753,7 +792,9 @@
       "ticketCount.one": "{count} bilêt",
       "ticketCount.other": "{count} bilêt",
       "findBestSeats.one": "{count} cihê herî baş bibîne",
-      "findBestSeats.other": "{count} cihên herî baş bibîne"
+      "findBestSeats.other": "{count} cihên herî baş bibîne",
+      "reselectSeats.one": "Wî dîsa hilbijêre",
+      "reselectSeats.other": "Wan dîsa hilbijêre"
     },
     "lt": {
       "close": "Uždaryti",
@@ -789,7 +830,9 @@
       "ticketCount.one": "{count} bilietas",
       "ticketCount.other": "{count} bilietų",
       "findBestSeats.one": "Rasti {count} geriausią vietą",
-      "findBestSeats.other": "Rasti {count} geriausių vietų"
+      "findBestSeats.other": "Rasti {count} geriausių vietų",
+      "reselectSeats.one": "Pasirinkti ją dar kartą",
+      "reselectSeats.other": "Pasirinkti jas dar kartą"
     },
     "lv": {
       "close": "Aizvērt",
@@ -825,7 +868,9 @@
       "ticketCount.one": "{count} biļete",
       "ticketCount.other": "{count} biļetes",
       "findBestSeats.one": "Atrast {count} labāko vietu",
-      "findBestSeats.other": "Atrast {count} labākās vietas"
+      "findBestSeats.other": "Atrast {count} labākās vietas",
+      "reselectSeats.one": "Izvēlēties to vēlreiz",
+      "reselectSeats.other": "Izvēlēties tās vēlreiz"
     },
     "nl": {
       "close": "Sluiten",
@@ -861,7 +906,9 @@
       "ticketCount.one": "{count} ticket",
       "ticketCount.other": "{count} tickets",
       "findBestSeats.one": "Zoek {count} beste plaats",
-      "findBestSeats.other": "Zoek {count} beste plaatsen"
+      "findBestSeats.other": "Zoek {count} beste plaatsen",
+      "reselectSeats.one": "Opnieuw selecteren",
+      "reselectSeats.other": "Opnieuw selecteren"
     },
     "no": {
       "close": "Lukk",
@@ -897,7 +944,9 @@
       "ticketCount.one": "{count} billett",
       "ticketCount.other": "{count} billetter",
       "findBestSeats.one": "Finn {count} beste plass",
-      "findBestSeats.other": "Finn {count} beste plasser"
+      "findBestSeats.other": "Finn {count} beste plasser",
+      "reselectSeats.one": "Velg den på nytt",
+      "reselectSeats.other": "Velg dem på nytt"
     },
     "pl": {
       "close": "Zamknij",
@@ -933,7 +982,9 @@
       "ticketCount.one": "{count} bilet",
       "ticketCount.other": "{count} biletu",
       "findBestSeats.one": "Znajdź {count} najlepsze miejsce",
-      "findBestSeats.other": "Znajdź {count} najlepszego miejsca"
+      "findBestSeats.other": "Znajdź {count} najlepszego miejsca",
+      "reselectSeats.one": "Wybierz je ponownie",
+      "reselectSeats.other": "Wybierz je ponownie"
     },
     "pt": {
       "close": "Fechar",
@@ -969,7 +1020,9 @@
       "ticketCount.one": "{count} bilhete",
       "ticketCount.other": "{count} bilhetes",
       "findBestSeats.one": "Encontrar {count} melhor lugar",
-      "findBestSeats.other": "Encontrar os {count} melhores lugares"
+      "findBestSeats.other": "Encontrar os {count} melhores lugares",
+      "reselectSeats.one": "Selecioná-lo novamente",
+      "reselectSeats.other": "Selecioná-los novamente"
     },
     "ro": {
       "close": "Închide",
@@ -1005,7 +1058,9 @@
       "ticketCount.one": "{count} bilet",
       "ticketCount.other": "{count} de bilete",
       "findBestSeats.one": "Găsește {count} cel mai bun loc",
-      "findBestSeats.other": "Găsește cele mai bune {count} de locuri"
+      "findBestSeats.other": "Găsește cele mai bune {count} de locuri",
+      "reselectSeats.one": "Selectează-l din nou",
+      "reselectSeats.other": "Selectează-le din nou"
     },
     "ru": {
       "close": "Закрыть",
@@ -1041,7 +1096,9 @@
       "ticketCount.one": "{count} билет",
       "ticketCount.other": "{count} билета",
       "findBestSeats.one": "Найти {count} лучшее место",
-      "findBestSeats.other": "Найти {count} лучших места"
+      "findBestSeats.other": "Найти {count} лучших места",
+      "reselectSeats.one": "Выбрать его снова",
+      "reselectSeats.other": "Выбрать их снова"
     },
     "sk": {
       "close": "Zavrieť",
@@ -1077,7 +1134,9 @@
       "ticketCount.one": "{count} vstupenka",
       "ticketCount.other": "{count} vstupeniek",
       "findBestSeats.one": "Nájsť {count} najlepšie miesto",
-      "findBestSeats.other": "Nájsť {count} najlepších miest"
+      "findBestSeats.other": "Nájsť {count} najlepších miest",
+      "reselectSeats.one": "Vybrať ho znova",
+      "reselectSeats.other": "Vybrať ich znova"
     },
     "sl": {
       "close": "Zapri",
@@ -1113,7 +1172,9 @@
       "ticketCount.one": "{count} vstopnica",
       "ticketCount.other": "{count} vstopnic",
       "findBestSeats.one": "Poišči {count} najboljši sedež",
-      "findBestSeats.other": "Poišči {count} najboljših sedežev"
+      "findBestSeats.other": "Poišči {count} najboljših sedežev",
+      "reselectSeats.one": "Znova ga izberite",
+      "reselectSeats.other": "Znova jih izberite"
     },
     "sr": {
       "close": "Затвори",
@@ -1149,7 +1210,9 @@
       "ticketCount.one": "{count} улазница",
       "ticketCount.other": "{count} улазница",
       "findBestSeats.one": "Пронађи {count} најбоље место",
-      "findBestSeats.other": "Пронађи {count} најбољих места"
+      "findBestSeats.other": "Пронађи {count} најбољих места",
+      "reselectSeats.one": "Изаберите га поново",
+      "reselectSeats.other": "Изаберите их поново"
     },
     "sv": {
       "close": "Stäng",
@@ -1185,7 +1248,9 @@
       "ticketCount.one": "{count} biljett",
       "ticketCount.other": "{count} biljetter",
       "findBestSeats.one": "Hitta {count} bästa plats",
-      "findBestSeats.other": "Hitta {count} bästa platser"
+      "findBestSeats.other": "Hitta {count} bästa platser",
+      "reselectSeats.one": "Välj den igen",
+      "reselectSeats.other": "Välj dem igen"
     },
     "tr": {
       "close": "Kapat",
@@ -1221,7 +1286,9 @@
       "ticketCount.one": "{count} bilet",
       "ticketCount.other": "{count} bilet",
       "findBestSeats.one": "{count} en iyi koltuğu bul",
-      "findBestSeats.other": "{count} en iyi koltuğu bul"
+      "findBestSeats.other": "{count} en iyi koltuğu bul",
+      "reselectSeats.one": "Onu tekrar seç",
+      "reselectSeats.other": "Onları tekrar seç"
     },
     "uk": {
       "close": "Закрити",
@@ -1257,7 +1324,9 @@
       "ticketCount.one": "{count} квиток",
       "ticketCount.other": "{count} квитка",
       "findBestSeats.one": "Знайти {count} найкраще місце",
-      "findBestSeats.other": "Знайти {count} найкращого місця"
+      "findBestSeats.other": "Знайти {count} найкращого місця",
+      "reselectSeats.one": "Вибрати його знову",
+      "reselectSeats.other": "Вибрати їх знову"
     },
     "zh-Hans": {
       "close": "关闭",
@@ -1291,7 +1360,8 @@
       "fromPrice": "{price} 起",
       "moreCount": "其余 {count} 项",
       "ticketCount.other": "{count} 张票",
-      "findBestSeats.other": "查找 {count} 个最佳座位"
+      "findBestSeats.other": "查找 {count} 个最佳座位",
+      "reselectSeats.other": "重新选择"
     },
     "zh-Hant": {
       "close": "關閉",
@@ -1325,7 +1395,8 @@
       "fromPrice": "{price} 起",
       "moreCount": "其餘 {count} 項",
       "ticketCount.other": "{count} 張票",
-      "findBestSeats.other": "尋找 {count} 個最佳座位"
+      "findBestSeats.other": "尋找 {count} 個最佳座位",
+      "reselectSeats.other": "重新選擇"
     }
   }
 }

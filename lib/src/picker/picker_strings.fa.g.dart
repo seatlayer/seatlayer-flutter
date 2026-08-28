@@ -20,6 +20,9 @@ String _findBestSeatsFa(int count) => count == 1
     ? 'پیدا کردن $count بهترین صندلی'
     : 'پیدا کردن $count صندلی برتر';
 
+String _reselectSeatsFa(int count) =>
+    count == 1 ? 'دوباره انتخابش کنید' : 'دوباره انتخابشان کنید';
+
 String _continueWithTotalFa(String money) => 'ادامه \u00b7 $money';
 
 /// The `fa` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   fromPrice: _fromPriceFa,
   ticketCount: _ticketCountFa,
   findBestSeats: _findBestSeatsFa,
+  reselectSeats: _reselectSeatsFa,
   continueWithTotal: _continueWithTotalFa,
 );

@@ -124,7 +124,7 @@ class _SeatLayerHoldLapseNoticeState extends State<SeatLayerHoldLapseNotice> {
               // instead of merging with it, so a null family there resolves to
               // the platform default rather than to the picker's face.
               child: Text(
-                strings.reselectSeats,
+                strings.reselectSeats(lapse.recoverableLabels.length),
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,

@@ -20,6 +20,9 @@ String _ticketCountFi(int count) =>
 String _findBestSeatsFi(int count) =>
     count == 1 ? 'Etsi $count paras paikka' : 'Etsi $count parasta paikkaa';
 
+String _reselectSeatsFi(int count) =>
+    count == 1 ? 'Valitse se uudelleen' : 'Valitse ne uudelleen';
+
 String _continueWithTotalFi(String money) => 'Jatka \u00b7 $money';
 
 /// The `fi` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   fromPrice: _fromPriceFi,
   ticketCount: _ticketCountFi,
   findBestSeats: _findBestSeatsFi,
+  reselectSeats: _reselectSeatsFi,
   continueWithTotal: _continueWithTotalFi,
 );

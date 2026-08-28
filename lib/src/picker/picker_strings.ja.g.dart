@@ -19,6 +19,8 @@ String _ticketCountJa(int count) => count == 1 ? '$count枚' : '$count枚';
 String _findBestSeatsJa(int count) =>
     count == 1 ? 'おすすめの$count席を探す' : 'おすすめの$count席を探す';
 
+String _reselectSeatsJa(int count) => count == 1 ? 'もう一度選ぶ' : 'もう一度選ぶ';
+
 String _continueWithTotalJa(String money) => '次へ \u00b7 $money';
 
 /// The `ja` defaults for the native picker chrome.
@@ -54,5 +56,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   fromPrice: _fromPriceJa,
   ticketCount: _ticketCountJa,
   findBestSeats: _findBestSeatsJa,
+  reselectSeats: _reselectSeatsJa,
   continueWithTotal: _continueWithTotalJa,
 );

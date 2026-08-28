@@ -21,6 +21,9 @@ String _findBestSeatsCy(int count) => count == 1
     ? 'Dod o hyd i\'r $count sedd orau'
     : 'Dod o hyd i\'r $count o seddi gorau';
 
+String _reselectSeatsCy(int count) =>
+    count == 1 ? 'Dewisa hi eto' : 'Dewisa nhw eto';
+
 String _continueWithTotalCy(String money) => 'Parhau \u00b7 $money';
 
 /// The `cy` defaults for the native picker chrome.
@@ -57,5 +60,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   fromPrice: _fromPriceCy,
   ticketCount: _ticketCountCy,
   findBestSeats: _findBestSeatsCy,
+  reselectSeats: _reselectSeatsCy,
   continueWithTotal: _continueWithTotalCy,
 );

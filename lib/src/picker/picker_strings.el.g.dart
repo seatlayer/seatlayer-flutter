@@ -21,6 +21,9 @@ String _findBestSeatsEl(int count) => count == 1
     ? 'Βρείτε $count καλύτερη θέση'
     : 'Βρείτε τις $count καλύτερες θέσεις';
 
+String _reselectSeatsEl(int count) =>
+    count == 1 ? 'Επιλέξτε την ξανά' : 'Επιλέξτε τις ξανά';
+
 String _continueWithTotalEl(String money) => 'Συνέχεια \u00b7 $money';
 
 /// The `el` defaults for the native picker chrome.
@@ -57,5 +60,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   fromPrice: _fromPriceEl,
   ticketCount: _ticketCountEl,
   findBestSeats: _findBestSeatsEl,
+  reselectSeats: _reselectSeatsEl,
   continueWithTotal: _continueWithTotalEl,
 );

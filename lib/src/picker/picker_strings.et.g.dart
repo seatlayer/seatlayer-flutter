@@ -20,6 +20,9 @@ String _ticketCountEt(int count) =>
 String _findBestSeatsEt(int count) =>
     count == 1 ? 'Leia $count parim koht' : 'Leia $count parimat kohta';
 
+String _reselectSeatsEt(int count) =>
+    count == 1 ? 'Vali see uuesti' : 'Vali need uuesti';
+
 String _continueWithTotalEt(String money) => 'Jätka \u00b7 $money';
 
 /// The `et` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   fromPrice: _fromPriceEt,
   ticketCount: _ticketCountEt,
   findBestSeats: _findBestSeatsEt,
+  reselectSeats: _reselectSeatsEt,
   continueWithTotal: _continueWithTotalEt,
 );

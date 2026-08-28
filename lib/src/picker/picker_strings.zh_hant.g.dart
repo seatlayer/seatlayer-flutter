@@ -19,6 +19,8 @@ String _ticketCountZhHant(int count) => count == 1 ? '$count 張票' : '$count �
 String _findBestSeatsZhHant(int count) =>
     count == 1 ? '尋找 $count 個最佳座位' : '尋找 $count 個最佳座位';
 
+String _reselectSeatsZhHant(int count) => count == 1 ? '重新選擇' : '重新選擇';
+
 String _continueWithTotalZhHant(String money) => '繼續 \u00b7 $money';
 
 /// The `zh-Hant` defaults for the native picker chrome.
@@ -55,5 +57,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       fromPrice: _fromPriceZhHant,
       ticketCount: _ticketCountZhHant,
       findBestSeats: _findBestSeatsZhHant,
+      reselectSeats: _reselectSeatsZhHant,
       continueWithTotal: _continueWithTotalZhHant,
     );

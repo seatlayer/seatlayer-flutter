@@ -20,6 +20,9 @@ String _ticketCountDa(int count) =>
 String _findBestSeatsDa(int count) =>
     count == 1 ? 'Find $count bedste plads' : 'Find $count bedste pladser';
 
+String _reselectSeatsDa(int count) =>
+    count == 1 ? 'Vælg den igen' : 'Vælg dem igen';
+
 String _continueWithTotalDa(String money) => 'Fortsæt \u00b7 $money';
 
 /// The `da` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   fromPrice: _fromPriceDa,
   ticketCount: _ticketCountDa,
   findBestSeats: _findBestSeatsDa,
+  reselectSeats: _reselectSeatsDa,
   continueWithTotal: _continueWithTotalDa,
 );

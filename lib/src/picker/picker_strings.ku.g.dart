@@ -20,6 +20,9 @@ String _ticketCountKu(int count) =>
 String _findBestSeatsKu(int count) =>
     count == 1 ? '$count cihê herî baş bibîne' : '$count cihên herî baş bibîne';
 
+String _reselectSeatsKu(int count) =>
+    count == 1 ? 'Wî dîsa hilbijêre' : 'Wan dîsa hilbijêre';
+
 String _continueWithTotalKu(String money) => 'Berdewam bike \u00b7 $money';
 
 /// The `ku` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   fromPrice: _fromPriceKu,
   ticketCount: _ticketCountKu,
   findBestSeats: _findBestSeatsKu,
+  reselectSeats: _reselectSeatsKu,
   continueWithTotal: _continueWithTotalKu,
 );

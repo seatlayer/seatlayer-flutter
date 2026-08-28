@@ -20,6 +20,9 @@ String _ticketCountSv(int count) =>
 String _findBestSeatsSv(int count) =>
     count == 1 ? 'Hitta $count bästa plats' : 'Hitta $count bästa platser';
 
+String _reselectSeatsSv(int count) =>
+    count == 1 ? 'Välj den igen' : 'Välj dem igen';
+
 String _continueWithTotalSv(String money) => 'Fortsätt \u00b7 $money';
 
 /// The `sv` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   fromPrice: _fromPriceSv,
   ticketCount: _ticketCountSv,
   findBestSeats: _findBestSeatsSv,
+  reselectSeats: _reselectSeatsSv,
   continueWithTotal: _continueWithTotalSv,
 );

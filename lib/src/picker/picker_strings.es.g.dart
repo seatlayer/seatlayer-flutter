@@ -21,6 +21,9 @@ String _findBestSeatsEs(int count) => count == 1
     ? 'Buscar $count mejor asiento'
     : 'Buscar $count mejores asientos';
 
+String _reselectSeatsEs(int count) =>
+    count == 1 ? 'Seleccionarla de nuevo' : 'Seleccionarlas de nuevo';
+
 String _continueWithTotalEs(String money) => 'Continuar \u00b7 $money';
 
 /// The `es` defaults for the native picker chrome.
@@ -57,5 +60,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsEs = SeatLayerPickerStrings(
   fromPrice: _fromPriceEs,
   ticketCount: _ticketCountEs,
   findBestSeats: _findBestSeatsEs,
+  reselectSeats: _reselectSeatsEs,
   continueWithTotal: _continueWithTotalEs,
 );

@@ -20,6 +20,9 @@ String _findBestSeatsHu(int count) => count == 1
     ? '$count legjobb hely keresése'
     : '$count legjobb hely keresése';
 
+String _reselectSeatsHu(int count) =>
+    count == 1 ? 'Válassza ki újra' : 'Válassza ki őket újra';
+
 String _continueWithTotalHu(String money) => 'Tovább \u00b7 $money';
 
 /// The `hu` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   fromPrice: _fromPriceHu,
   ticketCount: _ticketCountHu,
   findBestSeats: _findBestSeatsHu,
+  reselectSeats: _reselectSeatsHu,
   continueWithTotal: _continueWithTotalHu,
 );

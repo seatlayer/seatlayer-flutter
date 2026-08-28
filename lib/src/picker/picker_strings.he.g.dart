@@ -20,6 +20,9 @@ String _ticketCountHe(int count) =>
 String _findBestSeatsHe(int count) =>
     count == 1 ? 'מצאו $count מושב הכי טוב' : 'מצאו $count מושבים הכי טובים';
 
+String _reselectSeatsHe(int count) =>
+    count == 1 ? 'בחר אותו שוב' : 'בחר אותם שוב';
+
 String _continueWithTotalHe(String money) => 'המשך \u00b7 $money';
 
 /// The `he` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   fromPrice: _fromPriceHe,
   ticketCount: _ticketCountHe,
   findBestSeats: _findBestSeatsHe,
+  reselectSeats: _reselectSeatsHe,
   continueWithTotal: _continueWithTotalHe,
 );

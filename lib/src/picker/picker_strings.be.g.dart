@@ -20,6 +20,9 @@ String _ticketCountBe(int count) =>
 String _findBestSeatsBe(int count) =>
     count == 1 ? 'Знайсці $count лепшае месца' : 'Знайсці $count лепшага месца';
 
+String _reselectSeatsBe(int count) =>
+    count == 1 ? 'Выбраць яго зноў' : 'Выбраць іх зноў';
+
 String _continueWithTotalBe(String money) => 'Працягнуць \u00b7 $money';
 
 /// The `be` defaults for the native picker chrome.
@@ -56,5 +59,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   fromPrice: _fromPriceBe,
   ticketCount: _ticketCountBe,
   findBestSeats: _findBestSeatsBe,
+  reselectSeats: _reselectSeatsBe,
   continueWithTotal: _continueWithTotalBe,
 );

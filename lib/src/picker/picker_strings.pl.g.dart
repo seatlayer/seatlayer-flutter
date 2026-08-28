@@ -21,6 +21,9 @@ String _findBestSeatsPl(int count) => count == 1
     ? 'Znajdź $count najlepsze miejsce'
     : 'Znajdź $count najlepszego miejsca';
 
+String _reselectSeatsPl(int count) =>
+    count == 1 ? 'Wybierz je ponownie' : 'Wybierz je ponownie';
+
 String _continueWithTotalPl(String money) => 'Dalej \u00b7 $money';
 
 /// The `pl` defaults for the native picker chrome.
@@ -57,5 +60,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsPl = SeatLayerPickerStrings(
   fromPrice: _fromPricePl,
   ticketCount: _ticketCountPl,
   findBestSeats: _findBestSeatsPl,
+  reselectSeats: _reselectSeatsPl,
   continueWithTotal: _continueWithTotalPl,
 );

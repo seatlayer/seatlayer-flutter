@@ -51,6 +51,8 @@ const KEYS = {
   'ticketCount.other': 'picker.ticketsCount.other',
   'findBestSeats.one': 'picker.findBestSeatsCount.one',
   'findBestSeats.other': 'picker.findBestSeatsCount.other',
+  'reselectSeats.one': 'picker.holdLapsedSelectAgain.one',
+  'reselectSeats.other': 'picker.holdLapsedSelectAgain.other',
 };
 
 const dir = process.argv[2];

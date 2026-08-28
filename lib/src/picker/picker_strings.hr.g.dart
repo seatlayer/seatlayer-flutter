@@ -21,6 +21,9 @@ String _findBestSeatsHr(int count) => count == 1
     ? 'Pronađi $count najbolje mjesto'
     : 'Pronađi $count najboljih mjesta';
 
+String _reselectSeatsHr(int count) =>
+    count == 1 ? 'Ponovno ga odaberite' : 'Ponovno ih odaberite';
+
 String _continueWithTotalHr(String money) => 'Nastavi \u00b7 $money';
 
 /// The `hr` defaults for the native picker chrome.
@@ -57,5 +60,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   fromPrice: _fromPriceHr,
   ticketCount: _ticketCountHr,
   findBestSeats: _findBestSeatsHr,
+  reselectSeats: _reselectSeatsHr,
   continueWithTotal: _continueWithTotalHr,
 );

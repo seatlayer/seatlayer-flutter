@@ -21,6 +21,9 @@ String _findBestSeatsUk(int count) => count == 1
     ? 'Знайти $count найкраще місце'
     : 'Знайти $count найкращого місця';
 
+String _reselectSeatsUk(int count) =>
+    count == 1 ? 'Вибрати його знову' : 'Вибрати їх знову';
+
 String _continueWithTotalUk(String money) => 'Продовжити \u00b7 $money';
 
 /// The `uk` defaults for the native picker chrome.
@@ -57,5 +60,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   fromPrice: _fromPriceUk,
   ticketCount: _ticketCountUk,
   findBestSeats: _findBestSeatsUk,
+  reselectSeats: _reselectSeatsUk,
   continueWithTotal: _continueWithTotalUk,
 );
