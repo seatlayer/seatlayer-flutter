@@ -11,10 +11,10 @@ import 'package:webview_flutter/webview_flutter.dart';
 /// with, and a claimant re-points it rather than adding a second one.
 const String seatLayerChannelName = 'SeatLayer';
 
-/// How long an unclaimed warm page is kept before it is thrown away.
+/// How long an unclaimed prewarm is held before it is released.
 ///
-/// Long enough for a buyer to read an event page and decide; short enough that
-/// a page nobody wanted is not still holding a content process when they are
+/// Long enough for a buyer to read an event screen and decide; short enough
+/// that a prewarm nobody wanted is not still holding resources when they are
 /// three screens away.
 const Duration seatLayerPrewarmDefaultTtl = Duration(minutes: 5);
 

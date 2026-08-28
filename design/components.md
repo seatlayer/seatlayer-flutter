@@ -34,9 +34,8 @@ still win over it.
 
 ## Shared model
 
-Every component reads one **picker snapshot** published by the runtime over the
-bridge, and calls back into a **controller** that issues bridge commands. No
-component fetches anything itself.
+Every component reads one **picker snapshot** and calls back into a
+**controller**. No component fetches anything itself.
 
 Snapshot fields the catalogue refers to:
 
@@ -52,14 +51,13 @@ Snapshot fields the catalogue refers to:
 | `selection[]` | `SelectedSeat`: `label`, `sectionLabel`, `rowLabel`, `seatNumber`, `price`, `currency`, `objectType`, `tiers` |
 | `cart` | `lines[]`, `ticketCount`, `cartTotal` |
 | `hold` | `holdId`, `expiresAt`, `owner` |
-| `capabilities` | negotiated strings such as `venue3d`, `seatView`, `bestAvailable` |
+| `capabilities` | which optional features are available — venue 3D, seat view, best available |
 | `branding.attributionRequired` | whether the attribution line must render |
 
 Two rules bind every component:
 
-1. **The runtime owns the venue; native owns the chrome.** The init payload
-   carries `surface.chromeOwner = "native"`, and everything in this catalogue is
-   drawn natively on top of the WebView.
+1. **The venue map owns the venue; native owns the chrome.** Everything in
+   this catalogue is drawn natively, on top of the map.
 2. **A row name may already contain its section.** Print
    `rowLabel` with the section prefix removed (Dart: `pickerRowLabel`), or the
    card reads `Stalls D · Row Stalls D C`.

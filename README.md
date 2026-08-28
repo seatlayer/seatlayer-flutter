@@ -31,9 +31,9 @@ secure booking to your trusted server.
 cart sheet, checkout button and the captions over the 3D scene and the seat-view
 panorama are all Dart — drawn in your palette, laid out by Flutter, replaceable
 one at a time. The SeatLayer venue map draws the geometry: seats, labels,
-section shells, the immersive scene and the panorama photograph. The renderer is told at
-handshake that Flutter owns the furniture, so it draws none of its own: no
-second tooltip, no second test badge, no web button under a native one.
+section shells, the immersive scene and the panorama photograph. It knows
+Flutter owns the furniture, so it draws none of its own: no second tooltip, no
+second test badge, no duplicate button under a native one.
 
 Three ways in, and they are a ladder — each level keeps what the one below gave
 you. Level 2 is not an escape hatch and level 3 is not a rewrite: the drop-in is
@@ -91,13 +91,14 @@ edge-to-edge on a phone and a constrained dialog at 700 logical pixels or wider;
 release a picker-owned hold before the route leaves — a hold already handed to
 you is never released.
 
-**The runtime pin.** Production views load an immutable hosted document pinned
-by this package — `https://cdn.seatlayer.io/seatlayer-js@0.71.4/mobile.html`,
-exported as `seatLayerHostedWebVersion`. It moves only with an SDK release, so
-an app shipping a given `seatlayer` version always loads the same renderer;
-`SeatLayerConfiguration(assetPath:)` overrides it while validating one.
+**The renderer pin.** Each SDK release is pinned to a matching SeatLayer
+renderer version — exported as `seatLayerHostedWebVersion` — so an app on a
+given `seatlayer` version always gets the same renderer, and
+`SeatLayerConfiguration(assetPath:)` points it elsewhere while you validate a
+pre-release.
 
-Register that exact origin on the publishable key you use. For private,
+Register the SDK's renderer origin, `https://cdn.seatlayer.io` (exported as
+`seatLayerMobileOrigin`), on the publishable key you use. For private,
 login-gated, presale, partner or channel inventory, drop `publicKey` and mint a
 short-lived, origin-bound buyer session from your own backend instead:
 
@@ -245,7 +246,7 @@ Also `onSeatSelected`, `onSeatRemoved`, `onSeatViewOpened`,
 `onAccessUnavailable`, `onSelectedObjectUnavailable`, `onThemeResolved`,
 `onClosed`.
 
-**Drive it directly.** The controller speaks typed methods, not bridge strings:
+**Drive it directly.** The controller speaks typed Dart methods:
 
 ```dart
 await picker.selectObjects(['A-12', 'A-13']);
@@ -263,10 +264,10 @@ picker-owned hold is acknowledged as released.
 **Cover the map safely.** An `IgnorePointer` is not enough on iOS — UIKit can
 hit-test the venue map beneath composited Flutter chrome — so bracket your own
 overlay with `await picker.setMapInteractionEnabled(false)` and `true` in a
-`finally`, which makes the renderer's own DOM inert. The turnkey layout already
-does this around its decision chrome. Do not wrap the map in an app-level drag
-or scale recognizer and do not stream touch coordinates over the bridge: both
-fight the renderer's tap-versus-pan suppression.
+`finally`, which makes the map itself inert. The turnkey layout already does
+this around its decision chrome. Do not wrap the map in an app-level drag or
+scale recognizer and do not forward raw touch coordinates to it: both fight the
+map's own tap-versus-pan suppression.
 
 **One back gesture, one ladder.** Android predictive back and the iOS edge swipe
 both reach the picker's `PopScope`, which walks seat card → section → overview →
@@ -325,9 +326,9 @@ who owns it. The capability crosses into Dart at the handoff and nowhere else.
 Checkout transfers ownership: closing the picker afterwards must not release the
 hold, while closing *before* handoff releases a picker-owned one. Process
 termination cannot guarantee a release, so the server TTL is the final boundary.
-If a turnkey `onCheckout` throws, the picker attempts `rejectHandoff {holdId}`
-before surfacing your error — it can release only the exact hold that session
-just handed over. A custom flow rolls back the same way:
+If a turnkey `onCheckout` throws, the picker rejects the handoff before
+surfacing your error — it can release only the exact hold that session just
+handed over. A custom flow rolls back the same way:
 
 ```dart
 final handoff = await picker.checkout();
@@ -376,22 +377,20 @@ The individual corner controls (`…ZoomInButton`, `…ZoomToFitButton`,
 `…3DNavigationModeButton`), the status views (`…LoadingView`, `…ErrorView`,
 `…EmptyView`, `…ActionError`) and the seat inspection buttons
 (`…SeatViewButton`, `…Seat3DButton`) are exported too, all prefixed
-`SeatLayerPicker`. Each is absent rather than decorative when the runtime does
-not advertise the capability behind it.
+`SeatLayerPicker`. Each is absent rather than decorative when the venue map
+does not support what it drives.
 
 `SeatLayerView` remains for an application that owns *all* buyer chrome,
-selection presentation and hold orchestration itself: the stable `0.2.x`
-surface, still on protocol 1, source-compatible, with raw hold/selection/view
-commands and typed event streams.
+selection presentation and hold orchestration itself: the stable, source-
+compatible `0.2.x` surface, with raw hold/selection/view commands and typed
+event streams.
 
-The picker itself requests protocol 2 and fails closed unless the runtime
-advertises every capability it needs, rather than showing a control that quietly
-does nothing. Its state arrives as complete `seatlayer.picker.snapshot/1`
-replacements with a session id and a monotonic revision; Dart drops stale
-revisions and serializes inventory-changing actions, repeated checkout taps
+The picker fails closed rather than showing a control that quietly does
+nothing, and it reads one immutable state snapshot at a time: stale state is
+dropped, and inventory-changing actions are serialized, repeated checkout taps
 included. Private buyer tokens stay in memory and never enter a snapshot. See
-[the picker architecture](doc/mobile-picker-architecture.md)
-for the bridge schema, ownership rules and validation gates.
+[the picker architecture](doc/mobile-picker-architecture.md) for the layers,
+ownership rules and validation gates.
 
 ## Design system
 
@@ -456,8 +455,8 @@ booking the hold through the
 
 Yes. The repository's example app runs on a packaged offline fixture — no
 account, event key or backend needed — and exercises the real Flutter view,
-bridge, renderer, commands and event streams. The fixture now lives with the
-example rather than in the published package, so it costs your app nothing.
+venue map, commands and event streams. The fixture lives with the example
+rather than in the published package, so it costs your app nothing.
 Create a free SeatLayer test event when you are ready to validate live
 inventory, holds, expiry, conflicts and checkout.
 
@@ -492,7 +491,7 @@ A `.light()` or `.dark()` preset pins one side deliberately.
 - [Build your own layout](https://docs.seatlayer.io/buyer-sdk/flutter/custom-layout/)
   from the composable widgets under a `SeatLayerPickerScope`.
 - [Read the picker architecture](https://docs.seatlayer.io/buyer-sdk/flutter/architecture/)
-  for the bridge contract, snapshots, capabilities and chrome ownership.
+  for the layers, the snapshot model and chrome ownership.
 - [Connect seat holds to secure server-side checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
   without exposing booking credentials in the app.
 - [Run the complete checkout example](https://docs.seatlayer.io/examples/complete-checkout/)

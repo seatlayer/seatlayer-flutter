@@ -663,11 +663,8 @@ class ReadyInfo {
 
   /// Milliseconds from the view arming the handshake to `sys.ready`.
   ///
-  /// The whole cold path: map host creation, the page fetch over the network,
-  /// bundle parse, handshake, and the chart's first render. It is the number
-  /// that decides whether a buyer thinks the app is broken, and it is not
-  /// visible from either side alone — the web side cannot see the map host being
-  /// created, and the app cannot see the chart finish rendering.
+  /// The whole cold path, end to end, up to the chart's first render. It is
+  /// the number that decides whether a buyer thinks the app is broken.
   ///
   /// Nothing is logged with it. Report it to your own analytics if you want it;
   /// an SDK that prints timings into a host's console is a nuisance, and one

@@ -6,9 +6,9 @@ import 'bridge_protocol.dart';
 
 /// Internal handshake profile shared by the raw chart and high-level picker.
 ///
-/// The raw [SeatLayerView] deliberately remains on protocol 1. The additive
-/// picker profile requests protocol 2 and fails closed when the hosted runtime
-/// cannot provide the state/action contract needed by native picker chrome.
+/// The raw [SeatLayerView] keeps its original profile. The additive picker
+/// profile fails closed when the renderer cannot provide the state/action
+/// contract that native picker chrome needs.
 @immutable
 class SeatLayerBridgeProfile {
   const SeatLayerBridgeProfile._({

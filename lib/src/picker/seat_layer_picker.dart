@@ -97,9 +97,9 @@ class SeatLayerPicker extends StatelessWidget {
   /// }
   /// ```
   ///
-  /// Pass [configuration] only if you point the SDK at a document of your own;
-  /// the default is the hosted runtime page every production view loads. A
-  /// bundled asset fixture is ignored, having nothing to gain.
+  /// Pass [configuration] only if you have pointed the SDK somewhere of your
+  /// own with `assetPath`; the default is the renderer this SDK release is
+  /// pinned to. A bundled asset fixture is ignored, having nothing to gain.
   static void prewarm({
     SeatLayerConfiguration? configuration,
     Duration ttl = seatLayerPrewarmDefaultTtl,

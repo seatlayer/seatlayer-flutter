@@ -77,9 +77,9 @@ class _MissingEventKey extends StatelessWidget {
 /// Optional: `SEATLAYER_API_BASE` points the session at another API origin, and
 /// `SEATLAYER_THEME_MODE=auto|light|dark` pins the picker's appearance.
 ///
-/// During runtime development, also provide the immutable HTTPS test document:
+/// While validating a pre-release renderer, also point the SDK at it:
 ///
-///   --dart-define=SEATLAYER_RUNTIME_URL=https://.../mobile.html
+///   --dart-define=SEATLAYER_RUNTIME_URL=https://…
 class LivePickerDemo extends StatefulWidget {
   const LivePickerDemo({super.key});
 

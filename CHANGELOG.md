@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+Documentation only. The README, the public API documentation and the
+architecture note now describe the SDK's surface, its layers and its security
+boundary without narrating how the SeatLayer renderer is delivered. No API
+changed: `seatLayerHostedWebVersion`, `seatLayerMobileOrigin` and
+`SeatLayerConfiguration.assetPath` are all exactly as they were.
+
 ## 0.3.2
 
 Documentation only. The package page now shows the picker in motion: an

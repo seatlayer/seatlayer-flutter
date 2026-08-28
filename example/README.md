@@ -23,7 +23,7 @@ Optional defines:
 | --- | --- |
 | `SEATLAYER_API_BASE` | Points the session at another API origin. |
 | `SEATLAYER_THEME_MODE` | `auto` (default), `light` or `dark`. |
-| `SEATLAYER_RUNTIME_URL` | A runtime document to load instead of the package's pin: an immutable HTTPS page, or an `http://localhost` one served from a local runtime build. Omit it to use the pin. |
+| `SEATLAYER_RUNTIME_URL` | Load a renderer other than the package's pin — an HTTPS URL, or an `http://localhost` one served from a local build. Omit it to use the pin. |
 
 Choose an iOS or Android simulator or physical device. The seat map must remain
 inside its fixed-height or full-screen container so it can own pan and pinch
@@ -34,7 +34,7 @@ gestures.
 Neither is the default; both are chosen explicitly with `-t`.
 
 ```bash
-# The bridge, against the packaged offline fixture — no event key needed.
+# The raw map surface, against the packaged offline fixture — no event key needed.
 flutter run -t lib/offline_fixture_demo.dart
 
 # The native chrome over a canned snapshot, for design review. The map is a

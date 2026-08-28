@@ -23,9 +23,7 @@ const String _channelName = seatLayerChannelName;
 
 /// A seat map.
 ///
-/// Hosts a [WebViewWidget] running the immutable, version-pinned SeatLayer
-/// mobile page, performs the
-/// bridge handshake, and drives the chart through the supplied
+/// Renders the SeatLayer venue map and drives the chart through the supplied
 /// [SeatLayerController].
 ///
 /// ## Known constraint (v0.1)
@@ -58,7 +56,8 @@ class SeatLayerView extends StatefulWidget {
   /// [SeatLayerController.onReady].
   final void Function(ReadyInfo info)? onReady;
 
-  /// Called if the handshake fails (incompatible bundle, timeout, page load).
+  /// Called if the map cannot start — an incompatible renderer, a timeout, or
+  /// a failure to reach it.
   final void Function(SeatLayerError error)? onLoadError;
 
   /// Fill color behind the (transparent) web content.

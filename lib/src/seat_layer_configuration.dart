@@ -6,27 +6,30 @@ import 'payloads.dart';
 /// This SDK's version.
 const String seatLayerSdkVersion = '0.3.1';
 
-/// The immutable hosted web runtime used by production views.
+/// The SeatLayer renderer version this SDK release is pinned to.
 const String seatLayerHostedWebVersion = '0.71.4';
 
-/// Runtime retained only for the example app's explicit offline fixture.
+/// Renderer version retained only for the example app's offline fixture.
 ///
 /// The fixture itself lives in `example/assets/`, outside the published
-/// package: production always loads the immutable hosted page.
+/// package.
 const String seatLayerLegacyFixtureWebVersion = '0.68.0';
 
-/// Exact source commit used to build the vendored runtime fixture.
+/// Source commit the example's offline fixture was built from.
 const String seatLayerBundledRuntimeSourceCommit =
     'd71db683520bf6c7034208e10806d59ddd7c5c0d';
 
-/// SHA-256 of `assets/seatlayer.js` built from
+/// SHA-256 of the example's offline fixture, built from
 /// [seatLayerBundledRuntimeSourceCommit].
 const String seatLayerBundledRuntimeSha256 =
     'cadcfaea8ebda2dbef175be4462673c64ba6fe79e5e856c9b466941088a5056b';
 
-/// Byte length of the pinned vendored runtime fixture.
+/// Byte length of the example's offline fixture.
 const int seatLayerBundledRuntimeByteLength = 1181605;
 
+/// The origin the SDK loads the SeatLayer renderer from.
+///
+/// Register it on the publishable key you use.
 const String seatLayerMobileOrigin = 'https://cdn.seatlayer.io';
 const String seatLayerMobilePageUrl =
     '$seatLayerMobileOrigin/seatlayer-js@$seatLayerHostedWebVersion/mobile.html';
@@ -81,7 +84,7 @@ class SeatLayerConfiguration {
     }
   }
 
-  /// Production uses the immutable hosted page. Override only for a bundled,
+  /// The renderer this SDK release is pinned to. Override only for a bundled,
   /// self-contained demo or test fixture.
   static const String defaultAssetPath = seatLayerMobilePageUrl;
 
@@ -96,8 +99,7 @@ class SeatLayerConfiguration {
   /// Register [seatLayerMobileOrigin] on the matching key. For private,
   /// login-gated, presale, partner, or channel inventory use
   /// [buyerAccessTokenProvider] instead. An explicit
-  /// [buyerAccessTokenProvider] or [buyerAccessToken] takes precedence inside
-  /// the runtime.
+  /// [buyerAccessTokenProvider] or [buyerAccessToken] takes precedence.
   final String? publicKey;
 
   /// Max seats selectable at once (web default 10).
@@ -141,32 +143,21 @@ class SeatLayerConfiguration {
   /// How long to wait for `sys.ready` before failing the load.
   final Duration handshakeTimeout;
 
-  /// Free-form host identification sent in `init.host`, for server-side and
-  /// bundle-side diagnostics.
+  /// Free-form host identification, for server-side diagnostics.
   final Map<String, String> hostInfo;
 
-  /// Hosted production URL, or a Flutter asset key for an explicit fixture.
+  /// Where the view loads the SeatLayer renderer from.
   ///
-  /// Leave it alone in production: the default is the immutable, version-pinned
-  /// hosted page, and that pinning is what makes a shipped app's behaviour
-  /// reproducible.
+  /// Leave it alone in production: the default is the renderer version this
+  /// SDK release is pinned to, which is what makes a shipped app's behaviour
+  /// reproducible. Point it elsewhere to validate a pre-release renderer, or
+  /// at a Flutter asset key for a self-contained offline fixture.
   ///
-  /// Two other values are supported, both for development:
-  ///
-  /// - **An `http://localhost` page**, for testing against a runtime build that
-  ///   is not on the CDN yet — a release candidate, or a bridge change being
-  ///   proved against a real app before it ships. Serve the built runtime
-  ///   directory and point this at its `mobile.html`; an iOS simulator and an
-  ///   Android emulator both reach the host machine's server. The publishable
-  ///   key's registered origins govern what the API will answer, so the local
-  ///   origin has to be registered too.
-  /// - **A Flutter asset key**, for a self-contained offline fixture.
-  ///
-  /// Only the exact document named here may become the main frame; the view
-  /// refuses every other navigation.
+  /// The publishable key's registered origins govern what the API will
+  /// answer, so any origin you point this at has to be registered too.
   final String assetPath;
 
-  /// The `init` payload: `{ protocol, host, chrome, config }`.
+  /// The initialisation payload sent to the renderer.
   Map<String, Object?> initPayload({
     ProtocolRange protocolRange = ProtocolRange.native,
   }) {
