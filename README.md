@@ -389,6 +389,25 @@ final pickerTheme = Theme.of(context).brightness == Brightness.dark
 `themeMode` is available on `SeatLayerPicker`, `SeatLayerPickerScope`,
 `SeatLayerPickerPage` and `showSeatLayerPicker` alike.
 
+### The status bar is the picker's, too
+
+The surface behind the device's status and navigation bars is the picker's, so
+the picker dresses them: light glyphs on a dark picker, dark glyphs on a light
+one, re-evaluated when `SeatLayerThemeMode.auto` follows a device flip, and
+forced to the dark style for the immersive 3D scene whatever side the picker is
+painted on. Nothing to call — it is on by default.
+
+If your app owns the bars and sets one style for every screen, turn it off:
+
+```dart
+options: const SeatLayerPickerOptions(
+  chrome: SeatLayerPickerChromeOptions(manageSystemOverlays: false),
+),
+```
+
+`seatLayerPickerOverlayStyle(resolvedTheme)` is exported, so a host that opts
+out can still ask the picker what the bars should look like.
+
 The compact price rail follows the web picker: tapping one price selects that
 single category and frames its seats; tapping the active price again returns to
 all categories.

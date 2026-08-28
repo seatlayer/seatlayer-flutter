@@ -13,6 +13,7 @@ import 'picker_best_seats.dart';
 import 'picker_builders.dart';
 import 'picker_cart_list.dart';
 import 'picker_options.dart';
+import 'picker_system_overlay.dart';
 import 'picker_theme_sync.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -78,10 +79,15 @@ class SeatLayerPicker extends StatelessWidget {
         theme: theme,
         themeMode: themeMode,
         callbacks: callbacks,
-        child: SeatLayerPickerAdaptiveLayout(
-          onCheckout: onCheckout,
-          onClose: onClose,
-          builders: builders,
+        // The bars are dressed from inside the scope, so the style follows
+        // everything the palette does: an `auto` device flip, the organizer's
+        // branding arriving, and the immersive scene coming up.
+        child: PickerSystemOverlay(
+          child: SeatLayerPickerAdaptiveLayout(
+            onCheckout: onCheckout,
+            onClose: onClose,
+            builders: builders,
+          ),
         ),
       );
 }

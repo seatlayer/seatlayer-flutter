@@ -75,6 +75,7 @@ class SeatLayerPickerChromeOptions {
     this.showConfirmCard = true,
     this.showVenue3DChrome = true,
     this.showHoldPill = true,
+    this.manageSystemOverlays = true,
   });
 
   /// Whether the header renders.
@@ -122,6 +123,20 @@ class SeatLayerPickerChromeOptions {
 
   /// Whether the header shows the hold countdown pill.
   final bool showHoldPill;
+
+  /// Whether the picker dresses the device's status and navigation bars.
+  ///
+  /// On by default, and it is what keeps the clock, the wifi glyph and the
+  /// battery legible: the surface behind those bars is the picker's, so the
+  /// picker is the only thing that can know whether they need light icons or
+  /// dark ones. The style follows the resolved theme mode live — including an
+  /// `auto` device flip — and goes dark for the immersive 3D scene whatever
+  /// side the picker is painted on.
+  ///
+  /// Turn it off when the host application owns the bars, for example because
+  /// it presents the picker inside its own chrome and sets one style for the
+  /// whole app.
+  final bool manageSystemOverlays;
 
   /// Resolve [showOverviewControl] for a layout.
   bool overviewControlFor({required bool phone}) =>
