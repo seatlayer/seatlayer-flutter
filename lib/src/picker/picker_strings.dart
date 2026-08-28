@@ -57,7 +57,12 @@ class SeatLayerPickerStrings {
     this.hideLimitedView = SeatLayerStringTokens.hideLimitedView,
     this.colorblindSafe = SeatLayerStringTokens.colorblindSafe,
     this.applyFilters = SeatLayerStringTokens.applyFilters,
+    this.holdLapsedTitle = SeatLayerStringTokens.holdLapsedTitle,
+    this.reselectSeats = SeatLayerStringTokens.reselectSeats,
     this.accessNeeds = defaultAccessNeeds,
+    this.accessNeedWithCount = _defaultAccessNeedWithCount,
+    this.holdLapsedBody = _defaultHoldLapsedBody,
+    this.seatsNotRecovered = _defaultSeatsNotRecovered,
     this.ticketCount = _defaultTicketCount,
     this.seatsLeft = _defaultSeatsLeft,
     this.seatsFree = _defaultSeatsFree,
@@ -236,6 +241,15 @@ class SeatLayerPickerStrings {
   /// The sheet's action applying the chosen filters.
   final String applyFilters;
 
+  /// Told to the buyer once, when their hold has lapsed server-side.
+  ///
+  /// Stated as a fact rather than an apology or a warning: the seats are gone,
+  /// and the next line says what can be done about it.
+  final String holdLapsedTitle;
+
+  /// The action that takes the lapsed seats back, where they are still free.
+  final String reselectSeats;
+
   /// Names for the access needs the runtime can filter by, by wire key.
   ///
   /// A key the runtime reports and this map does not name is drawn under its
@@ -258,6 +272,19 @@ class SeatLayerPickerStrings {
     'plus-size': SeatLayerStringTokens.accessPlusSize,
     'lift-armrest': SeatLayerStringTokens.accessLiftArmrest,
   };
+
+  /// "Wheelchair · 12" — one access need and how many free seats offer it.
+  ///
+  /// Only used when the runtime reports counts; a need with none free is drawn
+  /// under its bare name and disabled instead, because "Wheelchair · 0" reads
+  /// as a filter worth trying.
+  final String Function(String need, int count) accessNeedWithCount;
+
+  /// "They were held for 15 minutes." — the window that has just closed.
+  final String Function(int minutes) holdLapsedBody;
+
+  /// "2 could not be recovered", after a partial re-selection.
+  final String Function(int count) seatsNotRecovered;
 
   /// "1 ticket" / "6 tickets".
   final String Function(int count) ticketCount;
@@ -285,6 +312,21 @@ class SeatLayerPickerStrings {
 
   /// "Stalls D · Row D · Seat 1", assembled from the parts that exist.
   final String Function(List<String> parts) seatIdentity;
+
+  /// The three sentences below take a value, so unlike every other default
+  /// they cannot be one `SeatLayerStringTokens` constant used as-is. The
+  /// wording still lives in `design/tokens.json` — the other SDK ports read
+  /// the same sentence — and only the substitution happens here.
+  static String _defaultAccessNeedWithCount(String need, int count) =>
+      SeatLayerStringTokens.accessNeedWithCount
+          .replaceAll('{need}', need)
+          .replaceAll('{count}', '$count');
+
+  static String _defaultHoldLapsedBody(int minutes) =>
+      SeatLayerStringTokens.holdLapsedBody.replaceAll('{n}', '$minutes');
+
+  static String _defaultSeatsNotRecovered(int count) =>
+      SeatLayerStringTokens.seatsNotRecovered.replaceAll('{n}', '$count');
 
   static String _defaultTicketCount(int count) =>
       count == 1 ? '1 ticket' : '$count tickets';

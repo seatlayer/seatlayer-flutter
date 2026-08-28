@@ -414,4 +414,19 @@ abstract final class SeatLayerStringTokens {
 
   /// Lift armrest
   static const String accessLiftArmrest = 'Lift armrest';
+
+  /// {need} · {count}
+  static const String accessNeedWithCount = '{need} · {count}';
+
+  /// Your seats were released.
+  static const String holdLapsedTitle = 'Your seats were released.';
+
+  /// They were held for {n} minutes.
+  static const String holdLapsedBody = 'They were held for {n} minutes.';
+
+  /// Select them again
+  static const String reselectSeats = 'Select them again';
+
+  /// {n} could not be recovered
+  static const String seatsNotRecovered = '{n} could not be recovered';
 }
