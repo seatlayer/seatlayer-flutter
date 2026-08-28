@@ -82,6 +82,13 @@ class SeatLayerPicker extends StatelessWidget {
   /// buyer token involved: only the immutable page is loaded, and everything
   /// about the session still travels at `init` when the picker opens.
   ///
+  /// What it keeps is the **WebView**, not a live session. The runtime page
+  /// starts its own clock when it loads and gives up on the host after ten
+  /// seconds, so a page the buyer left sitting is re-loaded when the picker
+  /// claims it — a cache hit, measured at two milliseconds — while the web
+  /// content process, which is the expensive half, is already up. A buyer who
+  /// taps within a few seconds gets the loaded page and its greeting too.
+  ///
   /// Idempotent, and safe to call from `initState` or a build. Calling it
   /// again for a page that is already warm only refreshes how long it is
   /// kept.

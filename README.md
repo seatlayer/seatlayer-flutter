@@ -320,12 +320,18 @@ class _EventPageState extends State<EventPage> {
 }
 ```
 
-The next `SeatLayerPicker` mounts onto that page instead of starting one, and
-its `hello` — which the page emits with nobody listening yet — is replayed to
-the bridge on adoption, so the handshake is exactly the one it would have had.
+The next `SeatLayerPicker` mounts onto that WebView instead of starting one.
 No event, no buyer token and no session are involved: only the immutable
 runtime page is loaded, and everything about the booking still travels at
 `init` when the picker opens.
+
+**What is kept is the WebView, not a live session.** The runtime page starts
+its own clock when it loads and gives up on the host after ten seconds, so a
+page the buyer left sitting is re-loaded when the picker claims it — a cache
+hit — while the web content process, the expensive half, is already up. A
+buyer who taps within a few seconds gets the loaded page and its `hello` too,
+replayed to the bridge in order, so the handshake is exactly the one it would
+have had.
 
 It is idempotent, so calling it on every build of the event screen is fine.
 An unclaimed page is thrown away after five minutes (`ttl:`), and immediately

@@ -18,6 +18,25 @@ const String seatLayerChannelName = 'SeatLayer';
 /// they are three screens away.
 const Duration seatLayerPrewarmDefaultTtl = Duration(minutes: 5);
 
+/// How long a warm page's own handshake is still worth adopting.
+///
+/// **Measured on the pilot, and the reason a prewarm is a warm WebView rather
+/// than a warm session.** The runtime page starts its own clock the moment it
+/// loads and gives up on the host after ten seconds
+/// (`sys.error {code: 'host_timeout'}`, `bridge/host.ts`). A buyer who reads
+/// an event page for a minute and then taps would have been handed a page that
+/// had already given up, and the picker opened on an error.
+///
+/// So a page older than this window is re-loaded when it is claimed. That
+/// costs the document again — which is a cache hit, measured at
+/// `transferSize=0` and 2 ms — and keeps what actually made the difference:
+/// the WebView process, which is 550-1,280 ms of cold `loadRequest` →
+/// `onPageStarted` on this simulator alone.
+///
+/// Six seconds rather than ten, so a claim that lands at the edge of the
+/// window still has time to send `init` before the page's own clock fires.
+const Duration seatLayerPrewarmHandshakeWindow = Duration(seconds: 6);
+
 /// A runtime page that was started before anything asked to look at it.
 ///
 /// The page emits its bridge `hello` as soon as it boots, which is normally
@@ -37,8 +56,21 @@ class SeatLayerWarmPage {
   final List<String> _buffered = <String>[];
   void Function(String message)? _sink;
   Timer? _expiry;
+  DateTime? _loadedAt;
   bool _claimed = false;
   bool _discarded = false;
+
+  /// Whether this page's own handshake is still worth adopting.
+  ///
+  /// False once the runtime's host timeout is close enough to matter; see
+  /// [seatLayerPrewarmHandshakeWindow]. A claimant that reads false re-loads
+  /// the document on the warm controller instead of replaying its greeting.
+  bool get hasLiveHandshake {
+    final loadedAt = _loadedAt;
+    if (loadedAt == null || _failed) return false;
+    return SeatLayerRuntimePrewarm.now().difference(loadedAt) <
+        seatLayerPrewarmHandshakeWindow;
+  }
 
   /// Whether this page failed to load and must not be handed to anyone.
   bool get isFailed => _failed;
@@ -53,12 +85,18 @@ class SeatLayerWarmPage {
     sink(message);
   }
 
-  /// Send every message the page emitted before [sink] existed, then keep
-  /// delivering live ones to it.
-  void attach(void Function(String message) sink) {
+  /// Deliver this page's messages to [sink] from now on.
+  ///
+  /// With [replay] the greeting the page made into an empty room is handed
+  /// over first, in the order it was said, so the bridge sees exactly what it
+  /// would have seen live. Without it the buffer is dropped, which is what a
+  /// claimant re-loading a stale page wants: that page's `hello` belongs to a
+  /// document that is about to be replaced.
+  void adopt(void Function(String message) sink, {required bool replay}) {
     _sink = sink;
     final pending = List<String>.of(_buffered);
     _buffered.clear();
+    if (!replay) return;
     for (final message in pending) {
       sink(message);
     }
@@ -77,6 +115,14 @@ abstract final class SeatLayerRuntimePrewarm {
   static final Map<String, SeatLayerWarmPage> _pages =
       <String, SeatLayerWarmPage>{};
   static _MemoryWatch? _memoryWatch;
+
+  /// The clock the handshake window is measured on.
+  ///
+  /// Real time, because the runtime page's own timeout is real time too — a
+  /// faked scheduler would not move it. Replaceable so a test can stand a page
+  /// past the window without waiting six seconds for it.
+  @visibleForTesting
+  static DateTime Function() now = DateTime.now;
 
   /// Every warm page currently held, for tests and diagnostics.
   @visibleForTesting
@@ -137,6 +183,7 @@ abstract final class SeatLayerRuntimePrewarm {
       // Capability fallback, exactly as SeatLayerView does.
     }
     try {
+      page._loadedAt = now();
       await page.controller.loadRequest(uri);
     } catch (_) {
       page._failed = true;
@@ -210,6 +257,7 @@ abstract final class SeatLayerRuntimePrewarm {
   /// Forget everything, for a test that must not inherit another's state.
   @visibleForTesting
   static void resetForTesting() {
+    now = DateTime.now;
     discardAll();
     final watch = _memoryWatch;
     if (watch != null) {

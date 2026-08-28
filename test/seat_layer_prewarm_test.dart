@@ -140,6 +140,32 @@ void main() {
     expect(ready, isNotNull, reason: 'the buffered hello was dropped');
   });
 
+  testWidgets('a page the buyer left sitting is re-loaded, not adopted stale',
+      (tester) async {
+    final fake = useFakeWebViewPlatform();
+    SeatLayerPicker.prewarm();
+    await tester.pump();
+    fake.postFromPage(_hello());
+
+    // The buyer read the event page for a minute. The runtime's own clock
+    // started when the document loaded and it gives up on the host after ten
+    // seconds, so a page adopted now would already have errored.
+    final loaded = SeatLayerRuntimePrewarm.now();
+    SeatLayerRuntimePrewarm.now =
+        () => loaded.add(const Duration(minutes: 1));
+
+    final controller = SeatLayerController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(_view(controller));
+    await tester.pump();
+
+    // The WebView — the expensive half — is still the warm one.
+    expect(fake.controllersCreated, 1);
+    // …but the document is requested again, which is a cache hit.
+    expect(fake.loads, hasLength(2));
+    expect(fake.loads.last, SeatLayerConfiguration.defaultAssetPath);
+  });
+
   testWidgets('a page nobody claimed is thrown away when its time is up',
       (tester) async {
     final fake = useFakeWebViewPlatform();

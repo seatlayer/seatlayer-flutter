@@ -174,17 +174,21 @@ class _SeatLayerViewState extends State<SeatLayerView> {
       ),
     );
 
-    // A prewarmed page is already loading — or loaded, and already talking.
-    // Nothing to request; the handshake above is armed, so hand it the
-    // `hello` the page said before this view existed and every later message
-    // with it. Consumed once: a reload after this boots the page properly.
+    // A prewarmed page brings its own channel, so route it here whether or
+    // not its greeting is still worth having. Through `widget` rather than
+    // bound to today's controller, so a later controller swap keeps receiving.
+    var adopted = false;
     if (_adoptWarmPage) {
       _adoptWarmPage = false;
-      // Routed through `widget` rather than bound to today's controller, so a
-      // later controller swap keeps receiving on the same page.
-      _warm!.attach((message) => widget.controller.ingestRaw(message));
-      return;
+      adopted = _warm!.hasLiveHandshake;
+      _warm!.adopt(
+        (message) => widget.controller.ingestRaw(message),
+        replay: adopted,
+      );
     }
+    // Its handshake is still live: the page is up and has already said hello,
+    // so replaying that is the whole boot. Nothing to request.
+    if (adopted) return;
 
     try {
       final location = widget.configuration.assetPath;
