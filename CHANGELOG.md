@@ -12,7 +12,11 @@ selection, hold, cart total, camera and rung all stay exactly where they were.
 
 A hold that lapsed while the buyer was away is now said out loud, once: a line
 in the cart sheet and a toast, never a dialog, with the seats that are still
-free offered back under `Select them again`. `onHoldExpired` still fires, and
+free offered back under `Select them again` — which re-selects them and holds
+them again, so the buyer lands back where they were rather than one step short
+of it. A seat sold between the offer and the tap is a real race, and it is
+reported the way every failed hold is reported, with the seats left selected and
+unheld rather than claimed. `onHoldExpired` still fires, and
 `SeatLayerPickerOptions(announceHoldLapse: false)` leaves the moment entirely to
 the host. `SeatLayerPickerOptions(refreshOnResume: false)` turns the refresh
 itself off. The route half needs `SeatLayerPicker.routeObserver` in

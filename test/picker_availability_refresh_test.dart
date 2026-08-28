@@ -12,11 +12,13 @@
 // the cart of the one buyer it was meant to help.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/bridge/bridge_protocol.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_availability.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/seat_layer_configuration.dart';
+import 'package:seatlayer/src/seat_layer_error.dart';
 
 import 'fake_webview_platform.dart';
 import 'picker_test_fixture.dart';
@@ -322,21 +324,22 @@ void main() {
     });
   });
 
-  testWidgets('coming back to the front refreshes instead of synchronizing',
+  testWidgets('a lifecycle reply that carries the read is the whole resume',
       (tester) async {
     final map = FakePickerMap(
       bundle: refreshingBundle(),
-      handler: (command, payload) async => availabilityRefresh(),
+      handler: (command, payload) async => lifecycleResult(),
     );
     addTearDown(map.dispose);
     useFakeWebViewPlatform();
     usePhoneSurface(tester);
 
-    await tester.pumpWidget(pickerHarness(
+    await tester.pumpWidget(
+      pickerHarness(
         map,
-        SeatLayerPickerAdaptiveLayout(
-          onCheckout: (_) async {},
-        )));
+        SeatLayerPickerAdaptiveLayout(onCheckout: (_) async {}),
+      ),
+    );
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
@@ -344,6 +347,88 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(map.callsTo('picker.lifecycle'), hasLength(1));
+    expect(
+      map.callsTo('picker.refreshAvailability'),
+      isEmpty,
+      reason: 'the foreground lifecycle read is the one that CONSUMES a lapse, '
+          'so a second read would be told the hold was fine and the buyer '
+          'would lose the seats with nothing said about them',
+    );
+    expect(map.callsTo('picker.getSnapshot'), isEmpty);
+  });
+
+  testWidgets(
+      'a lapse reported through the lifecycle reply is surfaced once, intact',
+      (tester) async {
+    var holdExpired = 0;
+    final map = FakePickerMap(
+      bundle: refreshingBundle(),
+      handler: (command, payload) async => lifecycleResult(
+        snapshot: lapsedRowSnapshot(revision: 4),
+        holdLapsed: true,
+        lapsedLabels: const <String>['A-1', 'A-2', 'A-3'],
+        recoverable: const <String>['A-1', 'A-2'],
+        revision: 4,
+      ),
+    );
+    addTearDown(map.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    final controller = SeatLayerPickerController(mapController: map);
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        SeatLayerPickerAdaptiveLayout(onCheckout: (_) async {}),
+        controller: controller,
+        options: const SeatLayerPickerOptions(holdTtl: Duration(minutes: 15)),
+        callbacks:
+            SeatLayerPickerCallbacks(onHoldExpired: () => holdExpired += 1),
+      ),
+    );
+    map.emit(heldRowSnapshot());
+    await tester.pumpAndSettle();
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+
+    expect(holdExpired, 1);
+    expect(controller.holdLapse, isNotNull);
+    expect(
+      controller.holdLapse!.recoverableLabels,
+      <String>['A-1', 'A-2'],
+      reason: 'the labels the lifecycle read reported have to survive; they '
+          'are the whole offer the buyer is about to be shown',
+    );
+    expect(controller.holdLapse!.recovery, SeatLayerRecovery.partial);
+    expect(controller.state.hold, isNull);
+    expect(find.text('Your seats were released.'), findsWidgets);
+  });
+
+  testWidgets('a lifecycle reply that carries no read falls back to a refresh',
+      (tester) async {
+    final map = FakePickerMap(
+      bundle: refreshingBundle(),
+      handler: (command, payload) async => command == 'picker.lifecycle'
+          ? lifecycleResult(carriesOutcome: false)
+          : availabilityRefresh(),
+    );
+    addTearDown(map.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        SeatLayerPickerAdaptiveLayout(onCheckout: (_) async {}),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+
     expect(map.callsTo('picker.refreshAvailability'), hasLength(1));
     expect(
       map.callsTo('picker.getSnapshot'),
@@ -378,5 +463,166 @@ void main() {
       hasLength(1),
       reason: 'the pre-existing resume synchronize is not part of the opt-out',
     );
+  });
+
+  test('a second read cannot downgrade a lapse the first one reported',
+      () async {
+    // The trap this exists for: the read that CONSUMES the lapse is the only
+    // one that sees it. Every read after it is truthfully told the hold is
+    // gone and nothing lapsed, and a controller that believed the last answer
+    // would wipe the offer the buyer was about to be shown.
+    var refreshes = 0;
+    final map = FakePickerMap(
+      bundle: refreshingBundle(),
+      handler: (command, payload) async {
+        refreshes += 1;
+        return refreshes == 1
+            ? availabilityRefresh(
+                snapshot: lapsedRowSnapshot(revision: 4),
+                holdLapsed: true,
+                lapsedLabels: const <String>['A-1', 'A-2', 'A-3'],
+                recoverable: const <String>['A-1', 'A-2', 'A-3'],
+                revision: 4,
+              )
+            : availabilityRefresh(
+                snapshot: lapsedRowSnapshot(revision: 5),
+                revision: 5,
+              );
+      },
+    );
+    addTearDown(map.dispose);
+    final controller = await _ready(
+      map,
+      snapshot: heldRowSnapshot(),
+      options: const SeatLayerPickerOptions(holdTtl: Duration(minutes: 15)),
+    );
+
+    await controller.refreshAvailability();
+    await controller.refreshAvailability();
+
+    expect(controller.holdLapse, isNotNull);
+    expect(
+      controller.holdLapse!.recoverableLabels,
+      <String>['A-1', 'A-2', 'A-3'],
+    );
+  });
+
+  group('taking the lapsed seats back', () {
+    FakePickerMap recoveringMap({
+      bool holdSelection = true,
+      Object? holdFailure,
+    }) =>
+        FakePickerMap(
+          bundle: refreshingBundle(holdSelection: holdSelection),
+          handler: (command, payload) async => switch (command) {
+            'picker.refreshAvailability' => availabilityRefresh(
+                snapshot: lapsedRowSnapshot(revision: 4),
+                holdLapsed: true,
+                lapsedLabels: const <String>['A-1', 'A-2', 'A-3'],
+                recoverable: const <String>['A-1', 'A-2', 'A-3'],
+                revision: 4,
+              ),
+            'picker.selectObjects' => <String, Object?>{
+                'revision': 5,
+                'snapshot': snapshotWithTicketCount(3, revision: 5),
+              },
+            'picker.holdSelection' => holdFailure != null
+                ? throw holdFailure
+                : <String, Object?>{
+                    'held': true,
+                    'labels': const <String>['A-1', 'A-2', 'A-3'],
+                    'expiresAt': 1999999999000.0,
+                    'revision': 6,
+                    'snapshot': heldRowSnapshot(revision: 6),
+                  },
+            _ => <String, Object?>{
+                'revision': 7,
+                'snapshot': lapsedRowSnapshot(revision: 7),
+              },
+          },
+        );
+
+    Future<SeatLayerPickerController> lapsed(FakePickerMap map) async {
+      final controller = await _ready(
+        map,
+        snapshot: heldRowSnapshot(),
+        options: const SeatLayerPickerOptions(holdTtl: Duration(minutes: 15)),
+      );
+      await controller.refreshAvailability();
+      return controller;
+    }
+
+    test('re-selects and holds again, so the countdown restarts', () async {
+      final map = recoveringMap();
+      addTearDown(map.dispose);
+      final controller = await lapsed(map);
+
+      await controller.reselectLapsedSeats();
+
+      expect(
+        map.calls.map((call) => call.$1).where(
+              (name) =>
+                  name == 'picker.selectObjects' ||
+                  name == 'picker.holdSelection',
+            ),
+        <String>['picker.selectObjects', 'picker.holdSelection'],
+        reason: 'the seats have to be chosen before they can be held',
+      );
+      expect(
+        (map.callsTo('picker.holdSelection').single.$2!
+            as Map<String, Object?>)['ttlMs'],
+        const Duration(minutes: 15).inMilliseconds,
+      );
+      expect(
+        map.callsTo('picker.continue'),
+        isEmpty,
+        reason: 'holding the seats again must not carry the buyer to checkout',
+      );
+      expect(controller.state.hold, isNotNull);
+      expect(controller.state.selection, hasLength(3));
+      expect(controller.holdLapse, isNull);
+    });
+
+    test('re-selects and stops on a runtime that cannot hold a selection',
+        () async {
+      final map = recoveringMap(holdSelection: false);
+      addTearDown(map.dispose);
+      final controller = await lapsed(map);
+
+      await controller.reselectLapsedSeats();
+
+      expect(map.callsTo('picker.selectObjects'), hasLength(1));
+      expect(
+        map.callsTo('picker.holdSelection'),
+        isEmpty,
+        reason: 'the hold then comes from the call to action on screen, as it '
+            'always has on this runtime',
+      );
+      expect(controller.state.selection, hasLength(3));
+    });
+
+    test('a sold_out on the re-hold is reported, not pretended away', () async {
+      final map = recoveringMap(
+        holdFailure: const SeatLayerError.bridge(
+          BridgeErrorPayload(code: 'sold_out', message: 'Those seats are gone'),
+        ),
+      );
+      addTearDown(map.dispose);
+      final controller = await lapsed(map);
+
+      await expectLater(
+        controller.reselectLapsedSeats(),
+        throwsA(isA<SeatLayerError>()),
+      );
+
+      expect((controller.state.error! as SeatLayerError).code, 'sold_out');
+      expect(
+        controller.state.hold,
+        isNull,
+        reason: 'the seats are selected and UNHELD; a cart claiming a hold '
+            'nobody has is worse than the race itself',
+      );
+      expect(controller.state.selection, hasLength(3));
+    });
   });
 }

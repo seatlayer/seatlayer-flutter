@@ -40,17 +40,23 @@ BundleInfo nativeChromeBundle({
     );
 
 /// A runtime that also speaks `availability-refresh-v1` and `access-needs-v1`.
-BundleInfo refreshingBundle() => nativeChromeBundle(
-      capabilities: const <String>[
+///
+/// [holdSelection] is the third capability, split out because an older runtime
+/// that can refresh but cannot hold a selection on its own is a real shape the
+/// recovery action has to degrade to.
+BundleInfo refreshingBundle({bool holdSelection = true}) => nativeChromeBundle(
+      capabilities: <String>[
         'native-chrome-contract-v1',
         'viewport-insets-v1',
         'availability-refresh-v1',
         'access-needs-v1',
+        if (holdSelection) 'hold-selection-v1',
       ],
-      commands: const <String>[
+      commands: <String>[
         'picker.setThemeMode',
         'picker.setViewportInsets',
         'picker.refreshAvailability',
+        if (holdSelection) 'picker.holdSelection',
       ],
     );
 

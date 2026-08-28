@@ -132,7 +132,11 @@ bought. The picker re-reads live availability whenever it comes back to the
 front, and reconciles the buyer's hold against the server rather than against
 the in-app countdown, which may never have fired at all. Seats the buyer had
 selected and lost reach `onSelectedObjectUnavailable`; a hold that lapsed is
-stated once in the cart sheet, with the still-free seats offered back.
+stated once in the cart sheet, and `Select them again` re-selects the seats that
+are still free and holds them, so the buyer is back where they were rather than
+one step short of it. A seat sold in the moment between the two is reported like
+any other failed hold, and the seats are left selected and unheld rather than
+claimed.
 
 Add `SeatLayerPicker.routeObserver` so the same thing happens when your own
 checkout screen pops back — that path never backgrounds the application, so

@@ -384,3 +384,33 @@ Map<String, Object?> lapsedRowSnapshot({int revision = 2}) {
   (snapshot['selection']! as Map<String, Object?>)['seats'] = <Object?>[];
   return snapshot;
 }
+
+/// A `picker.lifecycle` reply.
+///
+/// A FOREGROUND transition re-reads availability inside the runtime, so its
+/// reply carries the same outcome fields `picker.refreshAvailability` answers
+/// with — and that read is what CONSUMES the lapse. A background transition,
+/// and any runtime older than the contract, reports its state and nothing
+/// else: `holdLapsed` is ABSENT rather than false, which is the only thing
+/// that tells "the hold is fine" apart from "nobody looked".
+Map<String, Object?> lifecycleResult({
+  String state = 'foreground',
+  bool carriesOutcome = true,
+  Map<String, Object?>? snapshot,
+  List<String> lost = const <String>[],
+  bool holdLapsed = false,
+  List<String> lapsedLabels = const <String>[],
+  List<String> recoverable = const <String>[],
+  int revision = 2,
+}) =>
+    <String, Object?>{
+      'state': state,
+      'revision': revision,
+      if (carriesOutcome) ...<String, Object?>{
+        'lost': lost,
+        'holdLapsed': holdLapsed,
+        'lapsedLabels': lapsedLabels,
+        'recoverable': recoverable,
+      },
+      'snapshot': snapshot ?? pickerSnapshot(revision: revision),
+    };

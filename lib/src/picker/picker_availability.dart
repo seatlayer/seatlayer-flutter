@@ -18,6 +18,14 @@ const String seatLayerAvailabilityRefreshCapability = 'availability-refresh-v1';
 /// Advertised by a runtime that reports `snapshot.map.accessNeeds`.
 const String seatLayerAccessNeedsCapability = 'access-needs-v1';
 
+/// Advertised by a runtime that can hold the current selection on its own.
+///
+/// The difference from `picker.continue` is the whole reason it exists: this
+/// creates the hold and stops, minting no checkout handoff, so a buyer taking
+/// their lapsed seats back is not carried off to a payment screen they never
+/// asked for.
+const String seatLayerHoldSelectionCapability = 'hold-selection-v1';
+
 /// How much of a lapsed hold could be taken back.
 enum SeatLayerRecovery {
   /// Every seat the hold covered is still free.
@@ -104,6 +112,17 @@ class SeatLayerAvailabilityRefresh {
         : SeatLayerRecovery.partial;
   }
 
+  /// Whether [value] is a result that actually reports an availability read.
+  ///
+  /// `picker.lifecycle` answers a FOREGROUND transition with these same
+  /// fields, because the runtime re-reads availability as part of coming back;
+  /// a background transition answers with `{state, revision}` and an older
+  /// runtime with `{state}` alone. `holdLapsed` is therefore ABSENT rather
+  /// than false on the two that read nothing, which is the only thing that
+  /// tells "the hold is fine" apart from "nobody looked".
+  static bool carriesOutcome(Object? value) =>
+      jGet(value, 'holdLapsed') != null || jGet(value, 'lost') != null;
+
   /// Decode a `picker.refreshAvailability` result payload.
   ///
   /// Tolerant in the usual way: a runtime that answers with nothing useful
@@ -151,6 +170,17 @@ class SeatLayerHoldLapse {
     this.heldFor,
   });
 
+  /// The lapse [refresh] is reporting, held for [heldFor] where that is known.
+  factory SeatLayerHoldLapse.fromRefresh(
+    SeatLayerAvailabilityRefresh refresh, {
+    Duration? heldFor,
+  }) =>
+      SeatLayerHoldLapse(
+        lapsedLabels: refresh.lapsedLabels,
+        recoverableLabels: refresh.recoverableLabels,
+        heldFor: heldFor,
+      );
+
   /// The seats the hold covered.
   final List<String> lapsedLabels;
 
@@ -170,6 +200,17 @@ class SeatLayerHoldLapse {
       : recoverableLabels.length >= lapsedLabels.length
           ? SeatLayerRecovery.all
           : SeatLayerRecovery.partial;
+
+  /// Whether this record knows more about the lapse than [other] does.
+  ///
+  /// Two commands can report one lapse — a foreground `picker.lifecycle` and
+  /// `picker.refreshAvailability` — and on a resume both may run. The second
+  /// read of the same lapse commonly comes back with fewer seats still free,
+  /// so replacing the offer the buyer is looking at with the thinner answer
+  /// would take seats off the table for no reason. Only a record covering more
+  /// seats supersedes one already held.
+  bool supersedes(SeatLayerHoldLapse? other) =>
+      other == null || lapsedLabels.length > other.lapsedLabels.length;
 
   /// How many of the lapsed seats are gone for good.
   int get unrecoveredCount => (lapsedLabels.length - recoverableLabels.length)

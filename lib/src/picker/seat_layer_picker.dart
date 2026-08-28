@@ -273,21 +273,52 @@ class _SeatLayerPickerMapState extends State<SeatLayerPickerMap>
       AppLifecycleState.detached => 'detached',
       AppLifecycleState.hidden => 'hidden',
     };
-    unawaited(picker.setLifecycle(lifecycle).catchError((_) {}));
-    if (state != AppLifecycleState.resumed) return;
-    // A refresh already answers with a snapshot, so on a runtime that can do
-    // one there is nothing left for `picker.getSnapshot` to fetch. Sending
-    // both would be two round trips and two revisions for one answer, and the
-    // refresh is the one that also reports what the buyer lost.
-    final refreshing =
-        SeatLayerPickerScope.optionsOf(context).refreshOnResume &&
-            picker.supportsAvailabilityRefresh;
-    if (refreshing) {
-      unawaited(picker.refreshAvailability().catchError(
-            (Object _) => const SeatLayerAvailabilityRefresh.unsupported(),
-          ));
-    } else {
-      unawaited(picker.synchronize().catchError((_) {}));
+    unawaited(
+      _announceLifecycle(
+        picker,
+        lifecycle,
+        resumed: state == AppLifecycleState.resumed,
+      ),
+    );
+  }
+
+  /// Tell the runtime where the application went, and catch up if it did not.
+  ///
+  /// Strictly sequential, and that is the point. A foreground
+  /// `picker.lifecycle` re-reads availability inside the runtime and CONSUMES
+  /// what it finds — it is the call that clears a hold which ran out while the
+  /// application was away. Firing an independent `picker.refreshAvailability`
+  /// alongside it would race: whichever landed second would be told the hold
+  /// was fine, and the buyer would come back to seats that were simply gone
+  /// with nothing offered back. The lifecycle reply is therefore read first,
+  /// and a second read happens only when that reply carried none — an older
+  /// runtime, which answers with its state and nothing else.
+  Future<void> _announceLifecycle(
+    SeatLayerPickerController picker,
+    String lifecycle, {
+    required bool resumed,
+  }) async {
+    var outcome = const SeatLayerAvailabilityRefresh.unsupported();
+    try {
+      outcome = await picker.setLifecycle(lifecycle);
+    } catch (_) {
+      // Reporting the lifecycle is best effort; the catch-up below still runs.
+    }
+    if (!resumed || outcome.refreshed) return;
+    try {
+      // A refresh already answers with a snapshot, so on a runtime that can do
+      // one there is nothing left for `picker.getSnapshot` to fetch. Sending
+      // both would be two round trips and two revisions for one answer, and
+      // the refresh is the one that also reports what the buyer lost.
+      if (picker.options.refreshOnResume &&
+          picker.supportsAvailabilityRefresh) {
+        await picker.refreshAvailability();
+      } else {
+        await picker.synchronize();
+      }
+    } catch (_) {
+      // Catching up is housekeeping. A buyer mid-session is not shown a red
+      // panel because a background poll missed.
     }
   }
 

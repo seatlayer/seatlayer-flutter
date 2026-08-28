@@ -39,7 +39,8 @@ export 'src/picker/picker_availability.dart'
         SeatLayerHoldLapse,
         SeatLayerRecovery,
         seatLayerAccessNeedsCapability,
-        seatLayerAvailabilityRefreshCapability;
+        seatLayerAvailabilityRefreshCapability,
+        seatLayerHoldSelectionCapability;
 export 'src/picker/picker_best_seats.dart' show SeatLayerBestSeatsForm;
 export 'src/picker/picker_builders.dart'
     show

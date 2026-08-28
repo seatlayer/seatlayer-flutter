@@ -515,6 +515,38 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         bundle.supportsCapability(seatLayerAccessNeedsCapability);
   }
 
+  /// Whether the mounted runtime can hold the selection without checking out.
+  ///
+  /// The gate on the second half of [reselectLapsedSeats]. An older runtime
+  /// has no such command, and the recovery there re-selects and stops — the
+  /// hold then comes from the same call to action every other hold comes from.
+  bool get supportsHoldSelection {
+    final bundle = mapController.bundleInfo;
+    return bundle != null &&
+        bundle.supportsCapability(seatLayerHoldSelectionCapability);
+  }
+
+  /// Hold everything currently selected, without handing anything to checkout.
+  ///
+  /// [SeatLayerPickerOptions.holdTtl] travels when the session named one;
+  /// otherwise the runtime and server choose the window. The runtime refuses
+  /// to replace a hold that is already open (`hold_already_active`) rather
+  /// than silently reissuing one, so this is safe to call from chrome that
+  /// cannot see whether a hold exists.
+  ///
+  /// Fails the awaited call the way every other inventory action does — a
+  /// `sold_out` between choosing the seats and holding them is a real race —
+  /// and the failure reaches [SeatLayerPickerState.error], which is what the
+  /// inline action error draws.
+  Future<void> holdSelection() => _inventoryMutation(
+        'picker.holdSelection',
+        <String, Object?>{
+          if (_options.holdTtl != null)
+            'ttlMs': _options.holdTtl!.inMilliseconds,
+        },
+        SeatLayerPickerBusyAction.creatingHold,
+      );
+
   /// A hold that ended on its own and has not been shown to the buyer yet.
   ///
   /// Set by [refreshAvailability] from the server's answer, never from the
@@ -586,6 +618,21 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       if (error is SeatLayerError) _callbacks.onError?.call(error);
       return const SeatLayerAvailabilityRefresh.unsupported();
     }
+    _applyRefreshOutcome(refresh);
+    return refresh;
+  }
+
+  /// Act on one availability read, wherever it came from.
+  ///
+  /// Two commands can carry an outcome — `picker.refreshAvailability` and a
+  /// foreground `picker.lifecycle` — and on a resume both may run. Everything
+  /// here is therefore idempotent and order-independent: the expiry is
+  /// announced once per hold by [_reportHoldExpired], and a second outcome
+  /// never overwrites a recorded lapse with a thinner one. Trusting whichever
+  /// answer happened to arrive last is exactly how a lapse gets consumed by
+  /// one call and reported as `holdLapsed: false` by the next.
+  void _applyRefreshOutcome(SeatLayerAvailabilityRefresh refresh) {
+    if (_disposed) return;
     if (refresh.lostLabels.isNotEmpty) {
       // The same path a seat lost in the foreground already takes, so a host
       // that handles one handles both and no second surface exists.
@@ -596,19 +643,17 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         ),
       );
     }
-    if (refresh.holdLapsed) {
-      _holdLapse = SeatLayerHoldLapse(
-        lapsedLabels: refresh.lapsedLabels,
-        recoverableLabels: refresh.recoverableLabels,
-        heldFor: _options.holdTtl,
-      );
-      // The server is the authority here, not the local countdown: a timer in
-      // a suspended isolate may never have fired, so this is often the first
-      // and only notice that the hold is gone.
-      _reportHoldExpired();
-      notifyListeners();
-    }
-    return refresh;
+    if (!refresh.holdLapsed) return;
+    final next = SeatLayerHoldLapse.fromRefresh(
+      refresh,
+      heldFor: _options.holdTtl,
+    );
+    if (next.supersedes(_holdLapse)) _holdLapse = next;
+    // The server is the authority here, not the local countdown: a timer in a
+    // suspended isolate may never have fired, so this is often the first and
+    // only notice that the hold is gone.
+    _reportHoldExpired();
+    notifyListeners();
   }
 
   /// Fire the hold-expiry cue and callback at most once per hold.
@@ -642,11 +687,24 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   /// state: between the lapse and the buyer's tap the seats can go, and
   /// re-selecting from memory would put somebody else's seat in the cart.
   ///
-  /// This re-selects; it does not create the hold. `picker.continue` is the
-  /// only command that holds, and it also mints a checkout handoff the host
-  /// consumes — so calling it here would carry the buyer off to checkout when
-  /// all they said was that they wanted their seats back. The new hold comes
-  /// from the same call to action as every other one, which is on screen.
+  /// The seats are then held again, so the buyer leaves this action in the
+  /// state they were in before the lapse rather than one step short of it.
+  /// `picker.holdSelection` is what makes that possible: it creates the hold
+  /// and stops, where `picker.continue` would also mint a checkout handoff and
+  /// carry the buyer off to a payment screen they never asked for.
+  ///
+  /// On a runtime with no such command the seats are re-selected and nothing
+  /// else happens — the hold then comes from the same call to action every
+  /// other hold comes from, which is on screen.
+  ///
+  /// The re-hold can genuinely fail. Between the refresh that said a seat was
+  /// free and the tap that asks for it, somebody else can buy it, and the
+  /// runtime answers `sold_out`. That failure surfaces exactly where a failed
+  /// hold has always surfaced — the awaited Future and
+  /// [SeatLayerPickerState.error], which the inline action error draws — and
+  /// the seats are deliberately left selected and UNHELD rather than reported
+  /// as held, because a cart that claims a hold nobody has is the one outcome
+  /// worse than the race itself.
   Future<List<SelectedSeat>> reselectLapsedSeats() async {
     final lapse = _holdLapse;
     if (lapse == null || lapse.recoverableLabels.isEmpty) {
@@ -654,7 +712,9 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     }
     _holdLapse = null;
     notifyListeners();
-    return selectObjects(lapse.recoverableLabels);
+    await selectObjects(lapse.recoverableLabels);
+    if (supportsHoldSelection) await holdSelection();
+    return value.selection;
   }
 
   void _clearRefreshFlight(Future<SeatLayerAvailabilityRefresh> future) {
@@ -1183,15 +1243,39 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     );
   }
 
-  Future<void> setLifecycle(String state) => _mutation(
-        'picker.lifecycle',
-        <String, Object?>{
-          'state': state == 'resumed' || state == 'foreground'
-              ? 'foreground'
-              : 'background',
-        },
-        SeatLayerPickerBusyAction.synchronizing,
-      );
+  /// Tell the runtime the host application moved to the front or the back.
+  ///
+  /// A FOREGROUND transition re-reads availability inside the runtime, and the
+  /// reply carries the outcome of that read — the same fields
+  /// `picker.refreshAvailability` answers with. That is not a convenience: the
+  /// lifecycle read is what CONSUMES the lapse, so a picker that sent this and
+  /// then asked for a refresh would be told `holdLapsed: false` by the second
+  /// call and would leave the buyer's seats gone with nothing said about them.
+  /// Whoever sends this owns the answer.
+  ///
+  /// A background transition reads nothing and answers `{state, revision}`, as
+  /// does a runtime older than the contract. Both come back
+  /// [SeatLayerAvailabilityRefresh.unsupported], which is how a caller knows
+  /// it still has to ask.
+  Future<SeatLayerAvailabilityRefresh> setLifecycle(String state) async {
+    final foreground = state == 'resumed' || state == 'foreground';
+    final result = await _mutationResult(
+      'picker.lifecycle',
+      <String, Object?>{'state': foreground ? 'foreground' : 'background'},
+      SeatLayerPickerBusyAction.synchronizing,
+    );
+    if (!foreground || !SeatLayerAvailabilityRefresh.carriesOutcome(result)) {
+      return const SeatLayerAvailabilityRefresh.unsupported();
+    }
+    final refresh = SeatLayerAvailabilityRefresh.fromJson(result);
+    // Applied whatever `refreshOnResume` says. That option governs whether
+    // this SDK ASKS for a read; it cannot govern one the runtime has already
+    // performed, and throwing the answer away would leave a buyer whose hold
+    // the runtime just cleared with an empty cart and no account of why.
+    // `announceHoldLapse` is the switch for not showing the message.
+    _applyRefreshOutcome(refresh);
+    return refresh;
+  }
 
   /// Tear down the picker runtime and await its acknowledgement.
   ///
@@ -1252,6 +1336,15 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     Object? payload,
     SeatLayerPickerBusyAction busy,
   ) =>
+      _mutationResult(command, payload, busy);
+
+  /// [_mutation], handing back the reply for the commands that carry more than
+  /// a snapshot in it.
+  Future<Object?> _mutationResult(
+    String command,
+    Object? payload,
+    SeatLayerPickerBusyAction busy,
+  ) =>
       _serialize(() async {
         value = value.withBusy(busy);
         try {
@@ -1263,6 +1356,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
             final snapshot = value.snapshot;
             if (snapshot != null) value = value.applying(snapshot);
           }
+          return result;
         } catch (error) {
           value = value.withActionError(error);
           rethrow;
