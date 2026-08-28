@@ -1074,3 +1074,25 @@ class SeatLayerSeatView {
   @override
   String toString() => 'SeatLayerSeatView($seatId, $badge)';
 }
+
+/// Whether two selections name the same seats on the same tiers.
+///
+/// Identity and tier only: a snapshot repeats the whole selection on every
+/// revision, and comparing the objects would report a change every time the
+/// runtime re-serialised seats nothing had happened to.
+bool pickerSameSelection(List<SelectedSeat> left, List<SelectedSeat> right) {
+  if (left.length != right.length) return false;
+  for (var i = 0; i < left.length; i++) {
+    if (left[i].id != right[i].id || left[i].tierId != right[i].tierId) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/// Whether two validity reports say the same thing.
+bool pickerSameValidity(SelectionValidity? left, SelectionValidity? right) =>
+    left?.isValid == right?.isValid &&
+    left?.count == right?.count &&
+    left?.required == right?.required &&
+    left?.remaining == right?.remaining;

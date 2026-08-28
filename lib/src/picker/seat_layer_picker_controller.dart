@@ -15,6 +15,7 @@ import 'picker_chart_load.dart';
 import 'picker_haptics.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
+import 'picker_viewport_report.dart';
 import 'seat_layer_picker_theme.dart';
 
 /// Advertised by a runtime that speaks the native-chrome contract, including
@@ -115,15 +116,12 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   Future<SeatLayerCheckoutHandoff>? _checkoutInFlight;
   Future<void>? _closeInFlight;
   int _reloadGeneration = 0;
-  SeatLayerViewportInsets? _pendingViewportInsets;
+  late final PickerViewportReport _viewportReport =
+      PickerViewportReport(send: _sendViewportInsets);
   bool _cartSheetExpanded = false;
   bool _cartSheetInitialized = false;
   final Set<String> _confirmedLabels = <String>{};
   SelectedSeat? _confirmCardSeat;
-  bool _hasPendingViewportInsets = false;
-  SeatLayerViewportInsets? _sentViewportInsets;
-  bool _hasSentViewportInsets = false;
-  bool _viewportInsetsFlushScheduled = false;
   final Map<int, List<Completer<void>>> _revisionWaiters =
       <int, List<Completer<void>>>{};
   Future<SeatLayerAvailabilityRefresh>? _refreshInFlight;
@@ -273,7 +271,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       }
       _reloadGeneration += 1;
       _haptics.reset();
-      _forgetViewportInsets();
+      _viewportReport.forget();
       _seatView = null;
       // A retry is a second open, and its own wait starts here.
       _tapToReadyMs = null;
@@ -432,11 +430,11 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       _confirmCardSeat = null;
     }
 
-    if (!_sameSelection(previousSelection, snapshot.selection)) {
+    if (!pickerSameSelection(previousSelection, snapshot.selection)) {
       _callbacks.onSelectionChanged?.call(snapshot.selection);
     }
     if (snapshot.selectionValidity != null &&
-        !_sameValidity(previousValidity, snapshot.selectionValidity)) {
+        !pickerSameValidity(previousValidity, snapshot.selectionValidity)) {
       _callbacks.onSelectionValidityChanged?.call(snapshot.selectionValidity!);
     }
     final nextHold = snapshot.hold.active ? snapshot.hold : null;
@@ -889,35 +887,10 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   /// This reports where furniture is; it changes no inventory and produces no
   /// busy state, because a buyer resizing a sheet must not see the picker go
   /// busy underneath them.
-  Future<void> setViewportInsets(SeatLayerViewportInsets? insets) {
-    if (!supportsViewportInsets) return Future<void>.value();
-    final wanted = insets;
-    _pendingViewportInsets = wanted;
-    _hasPendingViewportInsets = true;
-    if (_viewportInsetsFlushScheduled) return Future<void>.value();
-    _viewportInsetsFlushScheduled = true;
-    final completer = Completer<void>();
-    // One send per frame. Native chrome settles over several layout passes —
-    // the dock animating in while the sheet re-measures — and each pass would
-    // otherwise mint its own command and its own map revision.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _viewportInsetsFlushScheduled = false;
-      if (!completer.isCompleted) {
-        completer.complete(_flushViewportInsets());
-      }
-    });
-    return completer.future;
-  }
-
-  /// Forget what was reported to a runtime that is going away.
-  ///
-  /// A fresh runtime frames against its whole surface until it is told
-  /// otherwise, so the next report has to be sent even when the numbers have
-  /// not moved.
-  void _forgetViewportInsets() {
-    _sentViewportInsets = null;
-    _hasSentViewportInsets = false;
-  }
+  Future<void> setViewportInsets(SeatLayerViewportInsets? insets) =>
+      supportsViewportInsets
+          ? _viewportReport.report(insets)
+          : Future<void>.value();
 
   /// Whether the mounted runtime accepts [setViewportInsets].
   bool get supportsViewportInsets {
@@ -927,21 +900,14 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         bundle.supportsCommand('picker.setViewportInsets');
   }
 
-  Future<void> _flushViewportInsets() {
-    if (_disposed || !_hasPendingViewportInsets) return Future<void>.value();
-    final wanted = _pendingViewportInsets;
-    _hasPendingViewportInsets = false;
-    if (_hasSentViewportInsets && _sentViewportInsets == wanted) {
-      return Future<void>.value();
-    }
-    _sentViewportInsets = wanted;
-    _hasSentViewportInsets = true;
+  Future<void> _sendViewportInsets(SeatLayerViewportInsets? insets) {
+    if (_disposed) return Future<void>.value();
     return _serialize(() async {
       await mapController.runBridgeCommand(
         'picker.setViewportInsets',
-        wanted == null
+        insets == null
             ? <String, Object?>{'insets': null}
-            : wanted.toBridgePayload(),
+            : insets.toBridgePayload(),
       );
     });
   }
@@ -1400,22 +1366,6 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     super.dispose();
   }
 }
-
-bool _sameSelection(List<SelectedSeat> left, List<SelectedSeat> right) {
-  if (left.length != right.length) return false;
-  for (var i = 0; i < left.length; i++) {
-    if (left[i].id != right[i].id || left[i].tierId != right[i].tierId) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool _sameValidity(SelectionValidity? left, SelectionValidity? right) =>
-    left?.isValid == right?.isValid &&
-    left?.count == right?.count &&
-    left?.required == right?.required &&
-    left?.remaining == right?.remaining;
 
 extension<T> on Iterable<T> {
   T? get firstOrNull {
