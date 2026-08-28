@@ -19,6 +19,8 @@ secure booking to your trusted server.
 [SeatLayer React Native SDK](https://github.com/seatlayer/seatlayer-react-native) ·
 [SeatLayer AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
 
+![Seat map picker running in a Flutter app: venue overview, section dock, seat confirmation, ticket list and the 3D venue view](https://raw.githubusercontent.com/seatlayer/seatlayer-flutter/main/doc/media/picker-flow.gif)
+
 > **Production SDK:** `0.3.1` is the current Flutter release. Pin the documented
 > release and validate your event, checkout handoff, lifecycle, and supported
 > physical devices before rollout.
