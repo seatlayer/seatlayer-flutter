@@ -532,21 +532,36 @@ class SeatLayerResolvedPickerTheme {
 Color _recessed(Color surface) =>
     Color.lerp(surface, const Color(0xFF000000), .05)!;
 
-/// Black or white, whichever is legible on [accent].
+/// The contrast a label on the accent has to clear.
+///
+/// The accented surfaces all carry bold text at 15sp or larger — `Continue`,
+/// `Hold seats & checkout`, `Select`, the Map/3D control, the accent pills —
+/// which WCAG sizes as large text, with a 3:1 floor. Below it the ink is not
+/// readable and the choice is not a preference.
+const double _onAccentContrastFloor = 3.0;
+
+/// White or black, whichever a brand accent should carry.
 ///
 /// A host brands the picker by handing it one colour. Pairing that colour with
 /// a FIXED ink is how a pale brand accent ends up carrying white text: the
 /// button renders, nobody's code fails, and the label is simply unreadable.
 ///
-/// The choice is WCAG relative luminance, the same measure the contrast ratio
-/// is defined on, so the winner is the higher of the two ratios. That is never
-/// below 4.58:1 — the two curves cross above the 4.5:1 floor — so an accent of
-/// any colour gets ink that passes AA for normal text.
+/// White is the answer wherever white is readable, because that is how a brand
+/// uses its own colour: a red, a blue, a purple or a deep green carries white
+/// on it everywhere else in the app, and the picker's buttons have to agree.
+/// Picking the merely-higher ratio does not agree — it hands a brand red black
+/// text, which is legible and still plainly wrong.
+///
+/// So white wins unless it drops under [_onAccentContrastFloor], and black
+/// takes over only for the accents where black is the obvious reading anyway:
+/// a yellow, a mint, a near-white tint. The handover is safe in both
+/// directions — an accent pale enough to fail white clears 7:1 on black — so
+/// whatever comes back is above the floor for every colour a host can send.
 Color seatLayerOnAccentFor(Color accent) {
-  final luminance = accent.computeLuminance();
-  final onWhite = 1.05 / (luminance + 0.05);
-  final onBlack = (luminance + 0.05) / 0.05;
-  return onWhite >= onBlack ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
+  final onWhite = 1.05 / (accent.computeLuminance() + 0.05);
+  return onWhite >= _onAccentContrastFloor
+      ? const Color(0xFFFFFFFF)
+      : const Color(0xFF000000);
 }
 
 /// Turn [mode] into a real side, following the host for

@@ -292,7 +292,11 @@ theme: const SeatLayerPickerThemeData(accent: Color(0xFFE54558)),
 ```
 
 The default constructor sets only the roles you name, so every ground role still
-comes from `themeMode`. **A preset pins the mode:**
+comes from `themeMode`. Name `accent` alone and the ink on it is derived for
+you: white, the colour a brand already puts on its own, unless the accent is
+pale enough that white cannot be read on it — a yellow, a mint, a near-white
+tint — where it turns black. Pass `onAccent` to say it yourself and the picker
+uses exactly that, whatever it reads like. **A preset pins the mode:**
 `SeatLayerPickerThemeData.light()` and `.dark()` are complete ground palettes —
 each also sends a contrast-paired `SeatLayerMapThemeData` for the canvas
 background, row labels, free text and the selection ring — and an explicit

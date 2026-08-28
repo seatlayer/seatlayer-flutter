@@ -1,8 +1,19 @@
 # Changelog
 
-## Unreleased
+## 0.3.3
 
-Documentation only. The README, the public API documentation and the
+A brand accent now carries white ink. When you hand the picker an accent
+without naming an ink for it, the picker was choosing whichever of black and
+white scored higher against it, and a brand red scores higher on black — so
+`Continue`, `Hold seats & checkout`, the confirm card's `Select`, the header
+tile, the Map/3D control and every accent pill came back with black text on a
+red button. White is what a brand puts on its own colour, so white is now the
+answer wherever white can be read, and black is kept for the pale accents where
+black is the obvious reading anyway: a yellow, a mint, a near-white tint.
+`onAccent` still names the ink outright, and a `ColorScheme` still brings its
+own `onPrimary`.
+
+Alongside it, documentation. The README, the public API documentation and the
 architecture note now describe the SDK's surface, its layers and its security
 boundary without narrating how the SeatLayer renderer is delivered. No API
 changed: `seatLayerHostedWebVersion`, `seatLayerMobileOrigin` and
