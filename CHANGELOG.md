@@ -45,6 +45,14 @@ are all gone stays on the sheet and goes dark, so "this venue has none" and
 list. Every name is still overridable through
 `SeatLayerPickerStrings.accessNeeds`.
 
+**Runtime pin**
+
+The hosted runtime moves to `seatlayer-js@0.71.5`. Views load
+`https://cdn.seatlayer.io/seatlayer-js@0.71.5/mobile.html`, which advertises the
+`availability-refresh-v1` and `access-needs-v1` capabilities this release
+consumes, and carries the matching fix for a hold whose lapse is decided by its
+own expiry rather than by what the seats report.
+
 A brand accent now carries white ink. When you hand the picker an accent
 without naming an ink for it, the picker was choosing whichever of black and
 white scored higher against it, and a brand red scores higher on black — so
