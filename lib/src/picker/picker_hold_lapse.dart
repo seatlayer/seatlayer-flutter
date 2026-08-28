@@ -114,16 +114,23 @@ class _SeatLayerHoldLapseNoticeState extends State<SeatLayerHoldLapseNotice> {
               style: TextButton.styleFrom(
                 foregroundColor: theme.accent,
                 visualDensity: VisualDensity.compact,
-                textStyle: TextStyle(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              onPressed: () => ignorePickerAction(
+                controller.reselectLapsedSeats().then((_) {}),
+              ),
+              // Styled on the child rather than through `styleFrom`: a
+              // ButtonStyle text style replaces the ambient one outright
+              // instead of merging with it, so a null family there resolves to
+              // the platform default rather than to the picker's face.
+              child: Text(
+                strings.reselectSeats,
+                style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
                   fontFamily: theme.fontFamily,
                 ),
               ),
-              onPressed: () => ignorePickerAction(
-                controller.reselectLapsedSeats().then((_) {}),
-              ),
-              child: Text(strings.reselectSeats),
             )
           else
             IconButton(

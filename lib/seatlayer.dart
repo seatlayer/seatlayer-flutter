@@ -56,9 +56,9 @@ export 'src/picker/picker_dock_bar.dart' show SeatLayerDockBar;
 export 'src/picker/picker_errors.dart' show SeatLayerPickerActionError;
 export 'src/picker/picker_floor_strip.dart' show SeatLayerFloorStrip;
 export 'src/picker/picker_haptics.dart' show PickerHapticCue;
-export 'src/picker/picker_hold_lapse.dart' show SeatLayerHoldLapseNotice;
 export 'src/picker/picker_header.dart'
     show SeatLayerPickerHeader, SeatLayerPickerHoldCountdown;
+export 'src/picker/picker_hold_lapse.dart' show SeatLayerHoldLapseNotice;
 export 'src/picker/picker_layout.dart' show SeatLayerPickerLayout;
 export 'src/picker/picker_legend.dart'
     show SeatLayerPickerPriceRail, SeatLayerPriceLegend;

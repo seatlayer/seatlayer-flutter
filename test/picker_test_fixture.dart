@@ -32,6 +32,7 @@ Map<String, Object?> pickerSnapshot({
   int? ticketCount,
   double? cartTotal,
   bool testEvent = true,
+  List<Object?>? accessNeeds,
 }) {
   final lines = withSelection
       ? <Object?>[
@@ -119,6 +120,7 @@ Map<String, Object?> pickerSnapshot({
       'floors': <Object?>[
         <String, Object?>{'id': 'ground', 'name': 'Ground floor'},
       ],
+      if (accessNeeds != null) 'accessNeeds': accessNeeds,
       'colorblindSafe': false,
       'hideLimitedView': false,
       'canZoomIn': true,
@@ -328,5 +330,57 @@ Map<String, Object?> bestAvailableHeldSnapshot({
   });
   cart['quantity'] = count;
   cart['total'] = count * 25.0;
+  return snapshot;
+}
+
+/// One `{ key, count }` entry as the runtime reports it.
+Map<String, Object?> accessNeed(String key, int count) =>
+    <String, Object?>{'key': key, 'count': count};
+
+/// A `picker.refreshAvailability` reply.
+///
+/// The refresh fields sit beside the snapshot, exactly as every other picker
+/// mutation answers, so the controller folds the new state in from the same
+/// reply that tells it what the buyer lost.
+Map<String, Object?> availabilityRefresh({
+  Map<String, Object?>? snapshot,
+  List<String> lost = const <String>[],
+  bool holdLapsed = false,
+  List<String> lapsedLabels = const <String>[],
+  List<String> recoverable = const <String>[],
+  int revision = 2,
+}) =>
+    <String, Object?>{
+      'refreshed': true,
+      'lost': lost,
+      'holdLapsed': holdLapsed,
+      'lapsedLabels': lapsedLabels,
+      'recoverable': recoverable,
+      'revision': revision,
+      'snapshot': snapshot ?? pickerSnapshot(revision: revision),
+    };
+
+/// Three seats the buyer holds, in one row.
+///
+/// The shape the refresh has to leave alone: the server calls A-1..A-3 `held`
+/// precisely because this buyer holds them.
+Map<String, Object?> heldRowSnapshot({int count = 3, int revision = 1}) {
+  final snapshot = snapshotWithTicketCount(count, revision: revision);
+  snapshot['hold'] = <String, Object?>{
+    'active': true,
+    'expiresAt': 1999999999000.0,
+    'ownership': 'picker',
+  };
+  return snapshot;
+}
+
+/// The same cart with no hold left on it, as a lapse leaves the session.
+Map<String, Object?> lapsedRowSnapshot({int revision = 2}) {
+  final snapshot = snapshotWithTicketCount(0, revision: revision);
+  final cart = snapshot['cart']! as Map<String, Object?>;
+  cart['items'] = <Object?>[];
+  cart['quantity'] = 0;
+  cart['total'] = 0.0;
+  (snapshot['selection']! as Map<String, Object?>)['seats'] = <Object?>[];
   return snapshot;
 }

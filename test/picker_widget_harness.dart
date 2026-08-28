@@ -39,6 +39,21 @@ BundleInfo nativeChromeBundle({
       commands: commands,
     );
 
+/// A runtime that also speaks `availability-refresh-v1` and `access-needs-v1`.
+BundleInfo refreshingBundle() => nativeChromeBundle(
+      capabilities: const <String>[
+        'native-chrome-contract-v1',
+        'viewport-insets-v1',
+        'availability-refresh-v1',
+        'access-needs-v1',
+      ],
+      commands: const <String>[
+        'picker.setThemeMode',
+        'picker.setViewportInsets',
+        'picker.refreshAvailability',
+      ],
+    );
+
 /// A map controller that answers every bridge command from a local snapshot.
 final class FakePickerMap extends SeatLayerController {
   /// Creates a fake runtime, optionally with a custom command [handler].
