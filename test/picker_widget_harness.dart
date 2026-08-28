@@ -115,6 +115,14 @@ Widget pickerHarness(
   final picker = controller ?? SeatLayerPickerController(mapController: map);
   return MaterialApp(
     debugShowCheckedModeBanner: false,
+    // The harness models the ordinary case: an application that follows the
+    // device. `auto` asks the HOST theme first — that is the switch a buyer
+    // actually moves — so a test that only flipped `platformBrightness` here
+    // would be describing an app that had pinned itself to light.
+    theme: ThemeData(brightness: platformBrightness),
+    // MaterialApp cross-fades a theme change over 200ms. A test that pumps
+    // one frame after a flip would read the halfway theme.
+    themeAnimationDuration: Duration.zero,
     builder: (context, inner) => MediaQuery(
       data: MediaQuery.of(context).copyWith(
         platformBrightness: platformBrightness,

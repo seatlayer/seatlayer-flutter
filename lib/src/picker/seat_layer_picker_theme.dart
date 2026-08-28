@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoTheme;
 import 'package:flutter/material.dart';
 
 import 'picker_layout.dart';
@@ -12,14 +13,19 @@ import 'seat_layer_picker_scope.dart';
 /// `theme: { mode }` at init and `picker.setThemeMode` afterwards, so the drawn
 /// map follows the native chrome instead of staying on the chart's own colours.
 enum SeatLayerThemeMode {
-  /// Follow the device, live: a system light/dark flip repaints without a
-  /// reload and without losing the buyer's selection.
+  /// Follow the host application, live.
+  ///
+  /// Resolved from `Theme.of(context).brightness` — the switch inside the app
+  /// the buyer actually chose — falling back to the device's appearance when
+  /// there is no Material or Cupertino theme to ask. Either one flipping
+  /// repaints the chrome and the drawn map without a reload and without
+  /// losing the buyer's selection.
   auto,
 
-  /// Always light, whatever the device is set to.
+  /// Always light, whatever the app and the device are set to.
   light,
 
-  /// Always dark, whatever the device is set to.
+  /// Always dark, whatever the app and the device are set to.
   dark;
 
   /// The wire value the runtime accepts for `theme.mode`.
@@ -417,11 +423,25 @@ Color seatLayerOnAccentFor(Color accent) {
   return onWhite >= onBlack ? const Color(0xFFFFFFFF) : const Color(0xFF000000);
 }
 
-/// Turn [mode] into a real side, reading the device for
+/// Turn [mode] into a real side, following the host for
 /// [SeatLayerThemeMode.auto].
 ///
-/// Reading it through [MediaQuery.platformBrightnessOf] is what makes `auto`
-/// live: the caller rebuilds when the device flips, with no reload.
+/// The precedence is **explicit [mode] > the host's own theme > the device**:
+///
+///  * [SeatLayerThemeMode.light] and [SeatLayerThemeMode.dark] are answers,
+///    not questions, and win over everything.
+///  * `auto` asks the host application first, through
+///    `Theme.of(context).brightness`. That is what an app's own dark-mode
+///    switch moves — `MaterialApp(themeMode: ...)`, or a Cupertino theme —
+///    and it is the setting the buyer actually chose. Reading the device
+///    instead left the picker light inside an app the buyer had put in dark
+///    mode, with the system still set to light.
+///  * With no Material or Cupertino theme above [context] there is nothing to
+///    ask, and `auto` falls back to [MediaQuery.platformBrightnessOf].
+///
+/// Both readings register a dependency, so `auto` is live either way: the
+/// caller rebuilds when the host flips its theme or the device flips its
+/// appearance, with no reload and no lost selection.
 Brightness resolveSeatLayerThemeBrightness(
   BuildContext context,
   SeatLayerThemeMode mode,
@@ -429,8 +449,23 @@ Brightness resolveSeatLayerThemeBrightness(
     switch (mode) {
       SeatLayerThemeMode.light => Brightness.light,
       SeatLayerThemeMode.dark => Brightness.dark,
-      SeatLayerThemeMode.auto => MediaQuery.platformBrightnessOf(context),
+      SeatLayerThemeMode.auto => _hostBrightness(context),
     };
+
+/// What the host application is painted in, or the device if it has no say.
+///
+/// `Theme.of` answers with a light fallback when nothing supplied a theme,
+/// which would read as "the host chose light" rather than as "the host did
+/// not choose". The ancestor is looked for explicitly so the two are told
+/// apart. `MaterialApp` and `CupertinoApp` both install one, so the fallback
+/// is reached only by a bare `WidgetsApp`.
+Brightness _hostBrightness(BuildContext context) => _hasHostTheme(context)
+    ? Theme.of(context).brightness
+    : MediaQuery.platformBrightnessOf(context);
+
+bool _hasHostTheme(BuildContext context) =>
+    context.findAncestorWidgetOfExactType<Theme>() != null ||
+    context.findAncestorWidgetOfExactType<CupertinoTheme>() != null;
 
 /// Resolve the palette for the picker chrome above [context].
 ///

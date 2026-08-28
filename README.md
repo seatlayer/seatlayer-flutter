@@ -419,6 +419,15 @@ final pickerTheme = Theme.of(context).brightness == Brightness.dark
 `themeMode` is available on `SeatLayerPicker`, `SeatLayerPickerScope`,
 `SeatLayerPickerPage` and `showSeatLayerPicker` alike.
 
+**What `auto` follows, in order: your `themeMode` → your app's theme → the
+device.** `auto` reads `Theme.of(context).brightness` first, so it tracks the
+dark-mode switch inside your app — `MaterialApp(themeMode:)`, or a Cupertino
+theme — which is the setting the buyer actually chose. Only when there is no
+Material or Cupertino theme above the picker does it fall back to
+`MediaQuery.platformBrightness`. Either reading is live: flip your app's theme
+or the device's appearance and the chrome and the drawn map repaint together,
+with no reload and no lost selection.
+
 ### The status bar is the picker's, too
 
 The surface behind the device's status and navigation bars is the picker's, so

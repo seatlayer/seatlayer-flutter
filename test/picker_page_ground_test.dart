@@ -62,14 +62,20 @@ void main() {
     expect(_scaffoldGround(tester), SeatLayerLightTokens.surface);
   });
 
-  testWidgets('the ground follows a device flip under auto', (tester) async {
+  testWidgets("the ground follows the host application's own theme under auto",
+      (tester) async {
     useFakeWebViewPlatform();
     usePhoneSurface(tester);
 
-    Widget build(Brightness platform) => MaterialApp(
-          theme: ThemeData.light(),
+    // `auto` asks the host first — the switch inside the app is the one the
+    // buyer actually moved. The device is left on light throughout, so this
+    // fails if the picker is still reading `platformBrightness`.
+    Widget build(Brightness host) => MaterialApp(
+          theme: ThemeData(brightness: host),
+          themeAnimationDuration: Duration.zero,
           builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(platformBrightness: platform),
+            data: MediaQuery.of(context)
+                .copyWith(platformBrightness: Brightness.light),
             child: child!,
           ),
           home: SeatLayerPickerPage(

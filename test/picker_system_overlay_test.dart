@@ -56,16 +56,12 @@ Future<SeatLayerPickerController> _pumpPage(
 Widget _page({
   required SeatLayerPickerController controller,
   SeatLayerThemeMode themeMode = SeatLayerThemeMode.auto,
-  Brightness platformBrightness = Brightness.light,
+  Brightness hostBrightness = Brightness.light,
   SeatLayerPickerOptions options = const SeatLayerPickerOptions(),
 }) =>
     MaterialApp(
-      theme: ThemeData.light(),
-      builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context)
-            .copyWith(platformBrightness: platformBrightness),
-        child: child!,
-      ),
+      theme: ThemeData(brightness: hostBrightness),
+      themeAnimationDuration: Duration.zero,
       home: SeatLayerPickerPage(
         configuration: SeatLayerConfiguration(event: 'ev_test'),
         controller: controller,
@@ -122,7 +118,8 @@ void main() {
     expect(style.systemNavigationBarIconBrightness, Brightness.light);
   });
 
-  testWidgets('the bars follow a device flip under auto', (tester) async {
+  testWidgets("the bars follow the host application's theme under auto",
+      (tester) async {
     useFakeWebViewPlatform();
     usePhoneSurface(tester);
     final map = FakePickerMap();
@@ -130,9 +127,9 @@ void main() {
     final controller = SeatLayerPickerController(mapController: map);
     addTearDown(controller.dispose);
 
-    Widget build(Brightness platform) => AnnotatedRegion<SystemUiOverlayStyle>(
+    Widget build(Brightness host) => AnnotatedRegion<SystemUiOverlayStyle>(
           value: _hostStyle,
-          child: _page(controller: controller, platformBrightness: platform),
+          child: _page(controller: controller, hostBrightness: host),
         );
 
     await tester.pumpWidget(build(Brightness.light));
