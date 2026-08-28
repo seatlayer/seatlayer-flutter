@@ -553,15 +553,22 @@ class GAArea {
 
 /// One floor of a multi-floor venue.
 class FloorInfo {
-  const FloorInfo({required this.id, required this.name});
+  const FloorInfo({required this.id, required this.name, this.level});
   final String id;
   final String name;
+
+  /// Where this floor sits in the building, ground being zero.
+  ///
+  /// Null on a runtime that does not report it, and on a chart whose floors
+  /// were never given one. Used only to order a floor list top-down, the way
+  /// a lift panel reads; without it the snapshot's own order stands.
+  final int? level;
 
   static FloorInfo? fromJson(Object? v) {
     final id = jStr(jGet(v, 'id'));
     final name = jStr(jGet(v, 'name'));
     if (id == null || name == null) return null;
-    return FloorInfo(id: id, name: name);
+    return FloorInfo(id: id, name: name, level: jInt(jGet(v, 'level')));
   }
 }
 

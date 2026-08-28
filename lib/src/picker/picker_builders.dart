@@ -43,6 +43,7 @@ class SeatLayerPickerBuilders {
     this.priceRail,
     this.legend,
     this.sectionNavigator,
+    this.floorStrip,
     this.dockBar,
     this.accessibilityFilters,
     this.map,
@@ -74,6 +75,9 @@ class SeatLayerPickerBuilders {
 
   /// Replaces the wide layout's section chip list.
   final SeatLayerPickerPartBuilder? sectionNavigator;
+
+  /// Replaces the multi-floor venue's floor chip strip.
+  final SeatLayerPickerPartBuilder? floorStrip;
 
   /// Replaces the phone's rung-2 dock bar.
   final SeatLayerPickerPartBuilder? dockBar;

@@ -45,6 +45,7 @@ export 'src/picker/picker_cart_sheet.dart'
 export 'src/picker/picker_confirm_card.dart' show SeatLayerConfirmCard;
 export 'src/picker/picker_dock_bar.dart' show SeatLayerDockBar;
 export 'src/picker/picker_errors.dart' show SeatLayerPickerActionError;
+export 'src/picker/picker_floor_strip.dart' show SeatLayerFloorStrip;
 export 'src/picker/picker_haptics.dart' show PickerHapticCue;
 export 'src/picker/picker_header.dart'
     show SeatLayerPickerHeader, SeatLayerPickerHoldCountdown;

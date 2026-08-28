@@ -63,6 +63,7 @@ class SeatLayerPickerChromeOptions {
     this.showHeader = true,
     this.showPriceRail = true,
     this.showFloorSelector = true,
+    this.showFloorStrip = true,
     this.showMapControls = true,
     this.showOverviewControl,
     this.showZoomControls,
@@ -86,6 +87,12 @@ class SeatLayerPickerChromeOptions {
 
   /// Whether the floor selector renders on a multi-floor venue.
   final bool showFloorSelector;
+
+  /// Whether the floor chip strip renders on a multi-floor venue.
+  ///
+  /// It draws nothing at all on a venue with fewer than two floors, so this
+  /// is only for a host that wants to place the strip itself.
+  final bool showFloorStrip;
 
   /// Whether any map corner control renders.
   final bool showMapControls;

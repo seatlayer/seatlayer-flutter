@@ -19,6 +19,7 @@ class SeatLayerPickerStrings {
     this.close = SeatLayerStringTokens.close,
     this.chooseSeats = SeatLayerStringTokens.chooseSeats,
     this.overview = SeatLayerStringTokens.overview,
+    this.allFloors = SeatLayerStringTokens.allFloors,
     this.previousSection = SeatLayerStringTokens.previousSection,
     this.nextSection = SeatLayerStringTokens.nextSection,
     this.backToVenue = SeatLayerStringTokens.backToVenue,
@@ -116,6 +117,13 @@ class SeatLayerPickerStrings {
 
   /// Dock-bar action returning the map to the venue overview.
   final String overview;
+
+  /// Floor-strip chip that puts every floor of the venue on screen at once.
+  ///
+  /// The one string here the SeatLayer runtime has no dictionary entry for, so
+  /// it keeps its English wording in every locale until one exists. A host
+  /// that ships a multi-floor venue outside English should override it.
+  final String allFloors;
 
   /// Tooltip on the dock bar's previous-section step.
   final String previousSection;

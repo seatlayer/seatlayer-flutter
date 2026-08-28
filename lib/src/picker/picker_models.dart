@@ -6,6 +6,12 @@ import '../json.dart';
 import '../open_enums.dart';
 import '../payloads.dart';
 
+/// The floor id that means "every floor at once".
+///
+/// Not a floor in the chart — the runtime's own sentinel for
+/// `picker.setFloor`, named here so nothing has to spell it twice.
+const String seatLayerAllFloors = 'all';
+
 enum SeatLayerHoldOwner { picker, host }
 
 enum SeatLayerPickerPhase { initializing, ready, unavailable, failed, closed }
@@ -529,6 +535,7 @@ class SeatLayerPickerMapState {
     required this.accessibilityFilter,
     required this.floors,
     this.activeFloorId,
+    this.floorMode,
     this.focusedSectionId,
     this.focusedSection,
     this.view3DTargetSeatId,
@@ -551,6 +558,13 @@ class SeatLayerPickerMapState {
   final Set<String> accessibilityFilter;
   final List<FloorInfo> floors;
 
+  /// Whether the runtime is drawing every floor or just [activeFloorId].
+  ///
+  /// `'all'` or `'single'`, and null on a runtime that does not report it —
+  /// which is how the floor chrome knows whether an "all floors" choice
+  /// exists at all rather than guessing one into being.
+  final String? floorMode;
+
   /// What the runtime is currently framing against, echoed back.
   ///
   /// Null on a runtime that predates the command, which frames against the
@@ -560,6 +574,12 @@ class SeatLayerPickerMapState {
 
   String get projection => viewMode;
   String? get floorId => activeFloorId;
+
+  /// Whether every floor is drawn at once.
+  bool get showsAllFloors => floorMode == 'all';
+
+  /// Whether this runtime lets the buyer choose between one floor and all.
+  bool get hasFloorModes => floorMode != null;
   bool get isVenue3D => buyerView == SeatLayerBuyerView.venue3D;
 
   factory SeatLayerPickerMapState.fromJson(Object? value) =>
@@ -594,6 +614,7 @@ class SeatLayerPickerMapState {
         floors: List<FloorInfo>.unmodifiable(
           jListOf(jGet(value, 'floors'), FloorInfo.fromJson),
         ),
+        floorMode: jStr(jGet(value, 'floorMode')),
         viewportInsets: SeatLayerViewportInsets.fromJson(
           jGet(value, 'viewportInsets'),
         ),

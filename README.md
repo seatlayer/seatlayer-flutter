@@ -125,6 +125,7 @@ SeatLayerPickerScope(
 | `SeatLayerPickerHeader` | Event identity, hold pill, dismiss | yes |
 | `SeatLayerPriceLegend` | Price chips that filter the map | yes |
 | `SeatLayerDockBar` | Focused section, seats left, prev/next, Venue | yes |
+| `SeatLayerFloorStrip` | Floor chips on a multi-floor venue | yes |
 | `SeatLayerPickerMapControls` | Accessibility, fit, Map/3D in the corners | yes |
 | `SeatLayerConfirmCard` | The phone's one-seat decision card | yes |
 | `SeatLayerCartSheet` | Peek bar and content-height cart | yes |
@@ -280,6 +281,26 @@ SeatLayerPicker(
 The picker fills the bounded space provided by its parent. Use it as an
 `Expanded` child or on a full page; do not put its map inside a competing
 gesture-driven `ListView` or `SingleChildScrollView`.
+
+### Multi-floor venues
+
+A theatre stacked three levels deep drawn all at once is a picture of a
+building, not a plan of one. `SeatLayerFloorStrip` is a chip row —
+`All floors`, then each floor top down — placed under the price rail in the
+drop-in and reported in the viewport insets with it, so the runtime keeps
+framing sections clear of it.
+
+It is entirely driven by the snapshot and **renders nothing it was not told
+about**: no chrome on a venue with fewer than two floors, and no `All floors`
+chip unless the runtime reports which floor mode it is in. Hide it with
+`SeatLayerPickerChromeOptions(showFloorStrip: false)`, replace it through
+`SeatLayerPickerBuilders(floorStrip: ...)`, restyle its chips with
+`SeatLayerPickerStyles(floorStripStyle: ...)`, or place
+`const SeatLayerFloorStrip()` yourself in a composed layout.
+
+`SeatLayerPickerStrings.allFloors` is the one string with no runtime
+translation yet, so it stays English until the runtime dictionaries carry one;
+override it if you ship a multi-floor venue in another language.
 
 ### Prewarm from the event screen
 

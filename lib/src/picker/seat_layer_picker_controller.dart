@@ -529,11 +529,19 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         SeatLayerPickerBusyAction.updatingSelection,
       );
 
+  /// Draw only the floor [floorId].
   Future<void> setFloor(String floorId) => _mutation(
         'picker.setFloor',
         <String, Object?>{'floorId': floorId},
         SeatLayerPickerBusyAction.updatingSelection,
       );
+
+  /// Draw every floor of the venue at once.
+  ///
+  /// The same command as [setFloor] with the runtime's own sentinel, so a
+  /// host never has to know that `'all'` is a floor id the chart does not
+  /// contain. Runtimes that do not report `floorMode` ignore it.
+  Future<void> showAllFloors() => setFloor(seatLayerAllFloors);
 
   Future<void> setColorblindSafe(bool enabled) => _mutation(
         'picker.setColorblindSafe',

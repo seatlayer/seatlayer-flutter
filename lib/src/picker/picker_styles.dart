@@ -112,6 +112,7 @@ class SeatLayerPickerStyles {
     this.iconButtonStyle,
     this.chipShape,
     this.legendChipStyle,
+    this.floorStripStyle,
     this.dockBarStyle,
     this.confirmCardStyle,
     this.sheetStyle,
@@ -138,6 +139,9 @@ class SeatLayerPickerStyles {
 
   /// The price legend's chips.
   final SeatLayerSurfaceStyle? legendChipStyle;
+
+  /// The floor strip's chips on a multi-floor venue.
+  final SeatLayerSurfaceStyle? floorStripStyle;
 
   /// The focused-section dock bar.
   final SeatLayerSurfaceStyle? dockBarStyle;
@@ -173,6 +177,9 @@ class SeatLayerPickerStyles {
           legendChipStyle: legendChipStyle == null
               ? other.legendChipStyle
               : legendChipStyle!.merge(other.legendChipStyle),
+          floorStripStyle: floorStripStyle == null
+              ? other.floorStripStyle
+              : floorStripStyle!.merge(other.floorStripStyle),
           dockBarStyle: dockBarStyle == null
               ? other.dockBarStyle
               : dockBarStyle!.merge(other.dockBarStyle),
@@ -203,6 +210,7 @@ class SeatLayerPickerStyles {
       other.iconButtonStyle == iconButtonStyle &&
       other.chipShape == chipShape &&
       other.legendChipStyle == legendChipStyle &&
+      other.floorStripStyle == floorStripStyle &&
       other.dockBarStyle == dockBarStyle &&
       other.confirmCardStyle == confirmCardStyle &&
       other.sheetStyle == sheetStyle &&
@@ -217,6 +225,7 @@ class SeatLayerPickerStyles {
         iconButtonStyle,
         chipShape,
         legendChipStyle,
+        floorStripStyle,
         dockBarStyle,
         confirmCardStyle,
         sheetStyle,

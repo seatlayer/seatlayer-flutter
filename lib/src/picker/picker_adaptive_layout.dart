@@ -21,6 +21,7 @@ import 'picker_legend.dart';
 import 'picker_map_controls.dart';
 import 'picker_venue_3d.dart';
 import 'picker_dock_bar.dart';
+import 'picker_floor_strip.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_options.dart';
@@ -150,6 +151,19 @@ class _SeatLayerPickerAdaptiveLayoutState
           widget.builders.sectionNavigator,
           const SeatLayerPickerSectionNavigator(),
         );
+        final floorStrip = _part(
+          context,
+          widget.builders.floorStrip,
+          chrome.showFloorStrip
+              ? SeatLayerFloorStrip(compact: !wide)
+              : const SizedBox.shrink(),
+        );
+        // Nothing is drawn on a venue with one floor, so nothing is reserved
+        // either: the band is reported only when the strip is really there.
+        final floorStripUp = chrome.showFloorStrip &&
+            (state.snapshot?.map.floors.length ?? 0) > 1;
+        final floorStripHeight =
+            SeatLayerFloorStrip.heightFor(compact: !wide);
         final dock = _part(
           context,
           widget.builders.dockBar,
@@ -409,6 +423,13 @@ class _SeatLayerPickerAdaptiveLayoutState
                       child: Column(
                         children: [
                           prices,
+                          // Beside the map rather than on it, so the wide
+                          // layout reports no band for it.
+                          if (floorStripUp)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: floorStrip,
+                            ),
                           sections,
                           Padding(
                             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
@@ -458,6 +479,8 @@ class _SeatLayerPickerAdaptiveLayoutState
               testBadge: state.isTestEvent,
               venue3D: venue3DUp,
               venue3DTopInset: venue3DTopInset,
+              floorStrip: floorStripUp,
+              floorStripHeight: floorStripHeight,
             ),
             bottom: _bottomBand(
               chrome: chrome,
@@ -501,6 +524,16 @@ class _SeatLayerPickerAdaptiveLayoutState
                       ],
                     ),
                   ),
+                  // The floors sit directly under the prices: both answer
+                  // "which of these seats am I looking at", and stacking them
+                  // keeps one band of map chrome rather than two.
+                  if (floorStripUp && !venue3DUp)
+                    Positioned(
+                      top: _mapChromeTop,
+                      left: 0,
+                      right: 0,
+                      child: floorStrip,
+                    ),
                   // The immersive scene puts `‹ Back to venue` in this
                   // corner; the badge steps below that pill rather than under
                   // it, measured from the same inset the pill is given.
@@ -509,6 +542,8 @@ class _SeatLayerPickerAdaptiveLayoutState
                       chrome: chrome,
                       venue3D: venue3DUp,
                       venue3DTopInset: venue3DTopInset,
+                      floorStrip: floorStripUp,
+                      floorStripHeight: floorStripHeight,
                     ),
                     left: 10,
                     child: testBadge,
@@ -571,17 +606,23 @@ class _SeatLayerPickerAdaptiveLayoutState
     required bool testBadge,
     required bool venue3D,
     required double venue3DTopInset,
+    required bool floorStrip,
+    required double floorStripHeight,
   }) {
     final rail = _topRailBand(
       chrome: chrome,
       venue3D: venue3D,
       venue3DTopInset: venue3DTopInset,
+      floorStrip: floorStrip,
+      floorStripHeight: floorStripHeight,
     );
     if (!testBadge) return rail;
     return _testBadgeTop(
           chrome: chrome,
           venue3D: venue3D,
           venue3DTopInset: venue3DTopInset,
+          floorStrip: floorStrip,
+          floorStripHeight: floorStripHeight,
         ) +
         SeatLayerPickerTestModeIndicator.compactHeight;
   }
@@ -591,12 +632,17 @@ class _SeatLayerPickerAdaptiveLayoutState
     required SeatLayerPickerChromeOptions chrome,
     required bool venue3D,
     required double venue3DTopInset,
+    required bool floorStrip,
+    required double floorStripHeight,
   }) {
     if (venue3D) {
       return chrome.showVenue3DChrome
           ? venue3DTopInset + SeatLayerVenue3D.backPillHeight
           : 0;
     }
+    // The floor chips are stacked directly under the rail, so the band the
+    // runtime must frame inside runs to the bottom of them.
+    if (floorStrip) return _mapChromeTop + floorStripHeight;
     return chrome.showPriceRail || chrome.showMapControls ? _mapChromeTop : 0;
   }
 
@@ -606,11 +652,15 @@ class _SeatLayerPickerAdaptiveLayoutState
     required SeatLayerPickerChromeOptions chrome,
     required bool venue3D,
     required double venue3DTopInset,
+    required bool floorStrip,
+    required double floorStripHeight,
   }) {
     final rail = _topRailBand(
       chrome: chrome,
       venue3D: venue3D,
       venue3DTopInset: venue3DTopInset,
+      floorStrip: floorStrip,
+      floorStripHeight: floorStripHeight,
     );
     return rail == 0 ? _railTop : rail + _badgeGap;
   }
