@@ -21,12 +21,19 @@ import 'seat_layer_picker_theme.dart';
 ///
 /// **It renders nothing unless there is a choice to make**: no floors, one
 /// floor, or a runtime that does not report floors at all, and the strip is an
-/// empty box. The "All floors" chip appears only when the runtime says which
-/// mode it is in — a runtime with no `floorMode` is never offered a mode it
-/// cannot honour.
+/// empty box. The "All floors" chip needs BOTH halves of the runtime's word —
+/// the `floor-stack-v1` capability, which says the runtime has modes, and a
+/// reported `floorMode`, which says which one it is in. A chip drawn on one
+/// half alone would send `'all'` to a runtime with no such floor.
 ///
-/// The default on a phone is the single main floor, which is the runtime's own
-/// default; this control shows what that is and lets the buyer change it.
+/// The floors are drawn in the order the snapshot gave them, which is the
+/// venue's own order from the stage upward. Nothing is re-sorted: the runtime
+/// does not report a level, and a sort key that is always null is a sort that
+/// only ever runs by accident.
+///
+/// The default below a 640 px map is one floor, not the stack, which is the
+/// runtime's own default; this control shows what that is and lets the buyer
+/// change it.
 ///
 /// Reads everything from the snapshot, so it works standalone inside a
 /// [SeatLayerPickerScope]. The drop-in places it directly under the top rail
@@ -61,7 +68,7 @@ class SeatLayerFloorStrip extends StatelessWidget {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
     final map = state.snapshot?.map;
-    final floors = _ordered(map?.floors ?? const <FloorInfo>[]);
+    final floors = map?.floors ?? const <FloorInfo>[];
     // One floor is not a choice, and neither is none.
     if (map == null || floors.length < 2) return const SizedBox.shrink();
 
@@ -74,10 +81,11 @@ class SeatLayerFloorStrip extends StatelessWidget {
             .merge(style);
     final busy = state.isBusy;
     final showsAll = map.showsAllFloors;
+    final offersAll = map.hasFloorModes && controller.supportsFloorStack;
 
     final chips = <Widget>[
-      // Only offered by a runtime that has told us it has modes at all.
-      if (map.hasFloorModes)
+      // Only offered by a runtime that has told us — twice — that it stacks.
+      if (offersAll)
         _FloorChip(
           label: strings.allFloors,
           selected: showsAll,
@@ -118,17 +126,6 @@ class SeatLayerFloorStrip extends StatelessWidget {
     onFloorChanged?.call(floorId);
   }
 
-  /// The floors top down, the way a lift panel reads.
-  ///
-  /// Only when every floor names its level: a partial ordering would move some
-  /// floors and leave others where the chart put them, which is worse than
-  /// leaving all of them alone.
-  static List<FloorInfo> _ordered(List<FloorInfo> floors) {
-    if (floors.any((floor) => floor.level == null)) return floors;
-    final sorted = List<FloorInfo>.of(floors)
-      ..sort((a, b) => b.level!.compareTo(a.level!));
-    return sorted;
-  }
 }
 
 class _FloorChip extends StatelessWidget {

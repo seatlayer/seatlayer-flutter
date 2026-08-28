@@ -23,6 +23,10 @@ const String _nativeChromeContractCapability = 'native-chrome-contract-v1';
 /// Advertised by a runtime that frames against host-reported viewport insets.
 const String _viewportInsetsCapability = 'viewport-insets-v1';
 
+/// Advertised by a runtime that stacks a multi-floor venue and accepts the
+/// `'all'` sentinel on `picker.setFloor`.
+const String _floorStackCapability = 'floor-stack-v1';
+
 /// Advertised by a runtime that hands its own chart-load beacon to the host.
 const String _chartLoadTraceCapability = 'chart-load-trace-v1';
 
@@ -630,6 +634,18 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         <String, Object?>{'floorId': floorId},
         SeatLayerPickerBusyAction.updatingSelection,
       );
+
+  /// Whether the mounted runtime can stack every floor at once.
+  ///
+  /// `snapshot.map.floorMode` says which mode the runtime is IN; this says the
+  /// runtime has modes at all. Chrome offering the choice needs both: a
+  /// snapshot that happens to carry a mode string from a runtime that never
+  /// advertised the capability is not a contract, and a chip that sent `'all'`
+  /// to a runtime with no such floor would be a command with nowhere to land.
+  bool get supportsFloorStack {
+    final bundle = mapController.bundleInfo;
+    return bundle != null && bundle.supportsCapability(_floorStackCapability);
+  }
 
   /// Draw every floor of the venue at once.
   ///

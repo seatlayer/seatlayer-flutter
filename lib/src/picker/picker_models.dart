@@ -536,6 +536,7 @@ class SeatLayerPickerMapState {
     required this.floors,
     this.activeFloorId,
     this.floorMode,
+    this.floorLabelStyle,
     this.focusedSectionId,
     this.focusedSection,
     this.view3DTargetSeatId,
@@ -578,7 +579,18 @@ class SeatLayerPickerMapState {
   /// Whether every floor is drawn at once.
   bool get showsAllFloors => floorMode == 'all';
 
+  /// How the runtime marks a level in the stacked whole-venue view.
+  ///
+  /// `'number'` (the default) prints a `G` / `1` / `2` badge; `'name'` prints
+  /// the authored floor name. Null on a runtime that does not report it. The
+  /// native strip always prints names — this is here so a host drawing its own
+  /// can match what the map is showing.
+  final String? floorLabelStyle;
+
   /// Whether this runtime lets the buyer choose between one floor and all.
+  ///
+  /// The mode alone; `SeatLayerPickerController.supportsFloorStack` is the
+  /// other half of the gate, and chrome offering the choice needs both.
   bool get hasFloorModes => floorMode != null;
   bool get isVenue3D => buyerView == SeatLayerBuyerView.venue3D;
 
@@ -615,6 +627,7 @@ class SeatLayerPickerMapState {
           jListOf(jGet(value, 'floors'), FloorInfo.fromJson),
         ),
         floorMode: jStr(jGet(value, 'floorMode')),
+        floorLabelStyle: jStr(jGet(value, 'floorLabelStyle')),
         viewportInsets: SeatLayerViewportInsets.fromJson(
           jGet(value, 'viewportInsets'),
         ),

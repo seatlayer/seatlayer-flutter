@@ -2,16 +2,27 @@
 // building, not a plan of one: stalls, circle and gallery overlap and the
 // buyer cannot tell which seats are where. The strip is how they pick a level.
 //
-// Everything here is capability-gated on the snapshot. A runtime that reports
-// no floors, or one floor, or no `floorMode`, must produce no chrome at all —
-// the SDK never invents a control the runtime cannot honour.
+// Everything here is gated on the runtime's own word. A runtime that reports
+// no floors, or one floor, must produce no chrome at all, and the "All floors"
+// chip needs BOTH halves — the `floor-stack-v1` capability and a reported
+// `floorMode`. The SDK never invents a control the runtime cannot honour.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_floor_strip.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
+
+/// A runtime that stacks floors, which is what the all-floors chip needs.
+BundleInfo _stackingBundle() => nativeChromeBundle(
+      capabilities: const <String>[
+        'native-chrome-contract-v1',
+        'viewport-insets-v1',
+        'floor-stack-v1',
+      ],
+    );
 
 /// The fixture venue with [floors] and, optionally, a reported floor mode.
 Map<String, Object?> _venue({
@@ -21,11 +32,13 @@ Map<String, Object?> _venue({
 }) {
   final snapshot = pickerSnapshot(sections: pickerSections());
   final map = snapshot['map']! as Map<String, Object?>;
+  // Stage upward, which is the order the runtime reports and the order the
+  // strip must draw. No `level`: the runtime does not send one.
   map['floors'] = floors ??
       <Object?>[
-        <String, Object?>{'id': 'stalls', 'name': 'Stalls', 'level': 0},
-        <String, Object?>{'id': 'circle', 'name': 'Dress circle', 'level': 1},
-        <String, Object?>{'id': 'gallery', 'name': 'Gallery', 'level': 2},
+        <String, Object?>{'id': 'stalls', 'name': 'Stalls'},
+        <String, Object?>{'id': 'circle', 'name': 'Dress circle'},
+        <String, Object?>{'id': 'gallery', 'name': 'Gallery'},
       ];
   map['activeFloorId'] = activeFloorId;
   if (floorMode == null) {
@@ -41,8 +54,9 @@ Future<FakePickerMap> _pumpStrip(
   Map<String, Object?> snapshot, {
   Brightness brightness = Brightness.light,
   bool golden = false,
+  BundleInfo? bundle,
 }) async {
-  final map = FakePickerMap();
+  final map = FakePickerMap(bundle: bundle ?? _stackingBundle());
   addTearDown(map.dispose);
   usePhoneSurface(tester);
   const strip = SeatLayerFloorStrip();
@@ -75,35 +89,36 @@ void main() {
     expect(find.text('Gallery'), findsOneWidget);
   });
 
-  testWidgets('the floors read top down, the way a lift panel does',
+  testWidgets('the floors keep the order the snapshot gave them',
       (tester) async {
     await _pumpStrip(tester, _venue());
 
+    // The snapshot's order is the venue's order, stage upward. The runtime
+    // reports no level, so there is nothing to sort by and re-sorting on a key
+    // that is always null is a sort that only ever runs by accident.
     final order = tester
         .widgetList<Text>(find.byType(Text))
         .map((text) => text.data)
         .toList();
     expect(
       order,
-      <String>['All floors', 'Gallery', 'Dress circle', 'Stalls'],
+      <String>['All floors', 'Stalls', 'Dress circle', 'Gallery'],
     );
   });
 
-  testWidgets('floors with no level keep the order the chart gave them',
+  testWidgets('a level the SDK is handed anyway reorders nothing',
       (tester) async {
     await _pumpStrip(
       tester,
       _venue(
         floors: <Object?>[
-          <String, Object?>{'id': 'a', 'name': 'Lower'},
+          <String, Object?>{'id': 'a', 'name': 'Lower', 'level': 0},
           <String, Object?>{'id': 'b', 'name': 'Upper', 'level': 1},
         ],
         activeFloorId: 'a',
       ),
     );
 
-    // A partial ordering would move one floor and leave the other where it
-    // was, which reads as a bug rather than as an ordering.
     final order = tester
         .widgetList<Text>(find.byType(Text))
         .map((text) => text.data)
@@ -166,6 +181,32 @@ void main() {
     testWidgets('a runtime reporting no floorMode offers no all-floors chip',
         (tester) async {
       await _pumpStrip(tester, _venue(floorMode: null));
+
+      expect(find.text('All floors'), findsNothing);
+      expect(find.text('Stalls'), findsOneWidget);
+    });
+
+    testWidgets('and neither does one that never advertised floor-stack-v1',
+        (tester) async {
+      // A mode string on the snapshot is not the runtime's word that it has
+      // modes. Both halves, or no chip.
+      await _pumpStrip(tester, _venue(), bundle: nativeChromeBundle());
+
+      expect(find.text('All floors'), findsNothing);
+      expect(find.text('Stalls'), findsOneWidget);
+      expect(find.text('Gallery'), findsOneWidget);
+    });
+
+    testWidgets('nor does a runtime that never handshook at all',
+        (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerFloorStrip()),
+      );
+      map.emit(_venue());
+      await tester.pumpAndSettle();
 
       expect(find.text('All floors'), findsNothing);
       expect(find.text('Stalls'), findsOneWidget);

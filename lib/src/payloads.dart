@@ -559,9 +559,11 @@ class FloorInfo {
 
   /// Where this floor sits in the building, ground being zero.
   ///
-  /// Null on a runtime that does not report it, and on a chart whose floors
-  /// were never given one. Used only to order a floor list top-down, the way
-  /// a lift panel reads; without it the snapshot's own order stands.
+  /// **The SeatLayer runtime does not send this** (confirmed against the
+  /// native-chrome contract, 2026-08-28), so it is null in practice and the
+  /// SDK orders nothing by it: the snapshot's own order is the venue's order,
+  /// stage upward, and it is the order the strip draws. Read leniently anyway,
+  /// so a chart that one day carries a level is not a decode failure.
   final int? level;
 
   static FloorInfo? fromJson(Object? v) {
