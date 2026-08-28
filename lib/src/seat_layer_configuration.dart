@@ -7,7 +7,7 @@ import 'payloads.dart';
 const String seatLayerSdkVersion = '0.3.1';
 
 /// The immutable hosted web runtime used by production views.
-const String seatLayerHostedWebVersion = '0.71.3';
+const String seatLayerHostedWebVersion = '0.71.4';
 
 /// Runtime retained only for the example app's explicit offline fixture.
 ///
@@ -221,7 +221,7 @@ class SeatLayerConfiguration {
   /// Whether rebuilding a [SeatLayerConfiguration] produced the same runtime
   /// semantics. This intentionally does not use object identity: Flutter apps
   /// commonly construct configuration inline in `build`, and that must not
-  /// reload the WebView or erase a buyer's place in the map.
+  /// reload the venue map or erase a buyer's place in the map.
   bool semanticallyEquals(SeatLayerConfiguration other) =>
       event == other.event &&
       apiBase == other.apiBase &&

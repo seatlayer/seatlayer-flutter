@@ -873,7 +873,7 @@ class _SeatLayerPickerAdaptiveLayoutState
 
 /// One motion language for every native decision surface: scrim, seat card,
 /// GA/table prompts and their exit. The canvas remains mounted underneath, so
-/// opening a card never resets camera state or causes a WebView flash.
+/// opening a card never resets camera state or causes a map flash.
 class _PickerPromptTransition extends StatelessWidget {
   const _PickerPromptTransition({
     required this.scrimColor,

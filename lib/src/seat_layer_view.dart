@@ -293,7 +293,7 @@ class _SeatLayerViewState extends State<SeatLayerView> {
 
 /// Best-effort acknowledged teardown shared by configuration and controller
 /// replacement paths. Exposed only so the ordering can be tested without a
-/// platform WebView.
+/// platform view.
 @visibleForTesting
 Future<void> prepareSeatLayerRuntimeReload({
   required SeatLayerController oldController,

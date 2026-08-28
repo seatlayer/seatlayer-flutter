@@ -12,7 +12,7 @@ import 'seat_layer_picker_theme.dart';
 
 /// The chrome drawn over the immersive venue scene.
 ///
-/// The scene itself is the WebView; this is everything around it — where the
+/// The scene itself is the venue map; this is everything around it — where the
 /// buyer is sitting, how to move a seat either way, how to look at the whole
 /// venue, and how to get back to the map. It adopts the dark palette whatever
 /// the resolved theme mode is, because white chrome over a dark venue reads as

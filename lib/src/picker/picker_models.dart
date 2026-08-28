@@ -441,14 +441,14 @@ class SeatLayerPickerHold {
 /// How much of the map surface the host's own chrome is covering.
 ///
 /// The runtime frames the venue — `zoomToFit`, a focused section, the glide
-/// that follows a tap, a best-available result — against the whole WebView
+/// that follows a tap, a best-available result — against the whole map
 /// rectangle. Native chrome drawn over that rectangle therefore covers a
 /// perfectly framed venue. These insets shrink the rectangle the camera aims
 /// at without clipping anything: the map still draws and pans underneath the
 /// chrome, so nothing is hidden that the buyer cannot reach.
 ///
 /// Every side is in the same logical points Flutter lays out in, which is what
-/// the WebView reads as a CSS pixel.
+/// the venue map reads as a CSS pixel.
 @immutable
 class SeatLayerViewportInsets {
   /// Creates a set of insets; every omitted side is zero.

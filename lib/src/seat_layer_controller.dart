@@ -37,7 +37,7 @@ class SeatLayerController {
   Timer? _handshakeTimer;
 
   /// Runs from the view arming the handshake to `sys.ready`, which is the only
-  /// place the WHOLE cold start is visible: the web side cannot see the WebView
+  /// place the WHOLE cold start is visible: the web side cannot see the map host
   /// being created and the app cannot see the chart finish rendering.
   Stopwatch? _handshakeClock;
   bool _hasFinished = false;
@@ -473,7 +473,7 @@ class SeatLayerController {
       _run(command, payload);
 
   /// Detach the current page/transport without disposing this caller-owned
-  /// controller. A subsequent WebView load may attach a fresh bridge.
+  /// controller. A subsequent page load may attach a fresh bridge.
   @internal
   void detachTransport() {
     _handshakeTimer?.cancel();

@@ -32,7 +32,7 @@ enum SeatLayerThemeMode {
   String get raw => name;
 }
 
-/// Colours for the drawn map inside the WebView.
+/// Colours for the drawn venue map.
 @immutable
 class SeatLayerMapThemeData {
   /// Creates a partial map palette; omitted roles keep the chart's own colour.
@@ -346,7 +346,7 @@ class SeatLayerPickerThemeData
   /// Brand mark shown in the header, replacing the organizer's logo URL.
   final ImageProvider? logo;
 
-  /// Colours for the drawn map inside the WebView.
+  /// Colours for the drawn venue map.
   final SeatLayerMapThemeData? mapTheme;
 
   /// Sizes the phone chrome is built from.

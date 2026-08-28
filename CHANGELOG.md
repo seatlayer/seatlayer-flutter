@@ -2,9 +2,15 @@
 
 ## 0.3.1
 
-Defects found on a phone, the three the load measurements said the SDK owned,
-and the additive native-chrome contract that came out of them: the chart-load
-record, the seat-view panorama's words, and the floor strip's confirmed shape.
+Defects found on a phone, and the additive native-chrome contract that came out
+of them: the seat-view panorama's words and the floor strip's confirmed shape.
+
+**Runtime pin**
+
+- The hosted runtime moves to `seatlayer-js@0.71.4`. Views load
+  `https://cdn.seatlayer.io/seatlayer-js@0.71.4/mobile.html`, which advertises
+  the `native-seat-view-chrome-v1` and `floor-stack-v1` capabilities this
+  release consumes alongside the contract 0.3.0 already used.
 
 **The system bars are the picker's**
 
@@ -36,26 +42,9 @@ record, the seat-view panorama's words, and the floor strip's confirmed shape.
   controls never give way: they are how the buyer moves. Goldens at 390 and
   320.
 
-**One load time covering the whole open**
+**Callbacks**
 
-- The runtime's chart-load beacon now reaches the host (`evt
-  telemetry.chartLoad`, capability `chart-load-trace-v1`) and is decoded whole
-  into `SeatLayerChartLoadTrace` — the API, availability, normalise, renderer
-  and paint spans, the seat and floor counts, the chart's cache result, and the
-  three document-relative spans `documentMs` / `handshakeMs` / `bootMs`. Fields
-  this release does not model are kept verbatim on `raw`, so a runtime that adds
-  one is readable without an SDK release.
-- It is merged with the SDK's own measurement rather than surfaced alone. The
-  runtime's clock starts at its own document; the SDK's `ReadyInfo` starts when
-  the view armed its handshake; neither is what the buyer felt.
-  `SeatLayerChartLoad.tapToReadyMs` starts at the picker's **mount** — the frame
-  after the tap — so it is the same T0 whether or not the page was prewarmed,
-  and `hostMs` is that span less the page's own `bootMs`. On the reference
-  app's 3,513 ms cold open that outside-the-page share was 2,495 ms.
-- Reached as `SeatLayerPickerController.onChartLoad` (a broadcast stream) or
-  `SeatLayerPickerCallbacks(onChartLoad:)`. Fires once per render attempt,
-  success or failure. **Nothing is logged and nothing is sent anywhere** — it is
-  a hook for the host's own analytics.
+- Adds an optional `onChartLoad` callback.
 
 **The seat-view panorama's words are native**
 
@@ -110,25 +99,6 @@ record, the seat-view panorama's words, and the floor strip's confirmed shape.
 - Idempotent. An unclaimed page expires (default five minutes) and is dropped
   on memory pressure, blanked to `about:blank` before it is dereferenced.
   `SeatLayerPicker.cancelPrewarm()` gives it back early.
-- **Measured on a reference app**, iOS Simulator, debug build. Three runs each,
-  same warm app process, tap to `sys.ready`, with a ten-second dwell on the
-  event screen — long enough that the prewarmed page is the re-loaded one,
-  which is the ordinary case.
-
-  | | run 1 | run 2 | run 3 | median |
-  | --- | ---: | ---: | ---: | ---: |
-  | without `prewarm()` | 3,182 | 3,610 | 3,262 | **3,262 ms** |
-  | with `prewarm()` | 2,925 | 2,061 | 2,192 | **2,192 ms** |
-
-  **1,070 ms off the median open, 33%.** The bridge-side span — the SDK's own
-  `ReadyInfo.timeToReadyMs` — moves 2,104 ms → 1,082 ms, so the saving is where
-  the diagnosis said it was: the WebView, not the runtime.
-
-  The first version of this shipped a warm *session* rather than a warm
-  WebView, and the reference app caught it: a page left for a minute
-  had already emitted `sys.error {code: 'host_timeout'}`, so the picker opened
-  on an error. A page past
-  `seatLayerPrewarmHandshakeWindow` is re-loaded when it is claimed.
 
 **`auto` follows the application, not only the device**
 

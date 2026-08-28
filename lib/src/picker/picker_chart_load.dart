@@ -164,7 +164,7 @@ class SeatLayerChartLoadTrace {
   /// Milliseconds from document start to a ready chart: the page's whole life.
   ///
   /// Measured from `performance.timeOrigin`, so it composes with a native mark
-  /// directly. Everything before it — WebView construction, the process spin-up
+  /// directly. Everything before it — map host construction, the process spin-up
   /// and the host's own work — is outside the page and is what
   /// [SeatLayerChartLoad.hostMs] reports.
   final int? bootMs;
@@ -240,8 +240,8 @@ class SeatLayerChartLoadTrace {
 /// app can only see up to the moment the runtime says it is ready. Neither half
 /// is the number a buyer feels. This is both halves in one object: [trace] is
 /// what the page measured, [tapToReadyMs] is what the SDK measured, and
-/// [hostMs] is the difference — the WebView construction and the host's own
-/// work, which on a measured cold open was more than two thirds of the wait.
+/// [hostMs] is the difference — the map host construction and the host's own
+/// work.
 ///
 /// Nothing here is logged or transmitted by the SDK.
 @immutable
@@ -273,7 +273,7 @@ class SeatLayerChartLoad {
   /// armed the handshake, not when the picker mounted.
   final ReadyInfo? ready;
 
-  /// Milliseconds spent outside the runtime page: WebView construction, the
+  /// Milliseconds spent outside the runtime page: map host construction, the
   /// process spin-up and whatever the host did between mounting and arming.
   ///
   /// [tapToReadyMs] less the page's own [SeatLayerChartLoadTrace.bootMs]. Null

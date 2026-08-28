@@ -13,7 +13,7 @@ import 'seat_layer_picker_theme.dart';
 
 /// The caption strip and disclosure badge drawn over the seat-view panorama.
 ///
-/// The panorama itself is the WebView — the picture, its drag and pinch, and
+/// The panorama itself is the venue map — the picture, its drag and pinch, and
 /// its CLOSE button, which stays web-side because it is the buyer's only way
 /// back out of a full-screen image and native chrome does not reach into it.
 /// Everything that is *words* is drawn here instead: the seat the view is

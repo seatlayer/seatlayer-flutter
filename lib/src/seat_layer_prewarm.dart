@@ -14,27 +14,17 @@ const String seatLayerChannelName = 'SeatLayer';
 /// How long an unclaimed warm page is kept before it is thrown away.
 ///
 /// Long enough for a buyer to read an event page and decide; short enough that
-/// a WebView nobody wanted is not still holding a web content process when
-/// they are three screens away.
+/// a page nobody wanted is not still holding a content process when they are
+/// three screens away.
 const Duration seatLayerPrewarmDefaultTtl = Duration(minutes: 5);
 
 /// How long a warm page's own handshake is still worth adopting.
 ///
-/// **Measured, and the reason a prewarm is a warm WebView rather than a warm
-/// session.** The runtime page starts its own clock the moment it
-/// loads and gives up on the host after ten seconds
-/// (`sys.error {code: 'host_timeout'}`, `bridge/host.ts`). A buyer who reads
-/// an event page for a minute and then taps would have been handed a page that
-/// had already given up, and the picker opened on an error.
-///
-/// So a page older than this window is re-loaded when it is claimed. That
-/// costs the document again — which is a cache hit, measured at
-/// `transferSize=0` and 2 ms — and keeps what actually made the difference:
-/// the WebView process, which is 550-1,280 ms of cold `loadRequest` →
-/// `onPageStarted` on this simulator alone.
-///
-/// Six seconds rather than ten, so a claim that lands at the edge of the
-/// window still has time to send `init` before the page's own clock fires.
+/// The runtime page starts its own clock the moment it loads, so a page older
+/// than this window is re-loaded when it is claimed — a cache hit — while the
+/// host process it already started stays up. Six seconds rather than the
+/// runtime's own limit, so a claim landing at the edge of the window still has
+/// time to send `init`.
 const Duration seatLayerPrewarmHandshakeWindow = Duration(seconds: 6);
 
 /// A runtime page that was started before anything asked to look at it.

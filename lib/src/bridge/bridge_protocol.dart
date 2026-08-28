@@ -105,7 +105,7 @@ abstract final class BridgeErrorCode {
 
   /// Native-only: no reply arrived within the command timeout. This code has no
   /// web-side counterpart — the web bridge answers every `cmd`, so a missing
-  /// reply means the WebView itself stalled or was torn down.
+  /// reply means the page itself stalled or was torn down.
   static const String timeout = 'sl_timeout';
 }
 

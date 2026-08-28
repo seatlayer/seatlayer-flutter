@@ -6,7 +6,7 @@ import 'envelope.dart';
 
 /// The native→web send path. Implemented by [SeatLayerView]'s State over
 /// `WebViewController.runJavaScript`; tests substitute a double, which is what
-/// keeps the whole correlation/timeout layer testable without a WebView.
+/// keeps the whole correlation/timeout layer testable without a platform view.
 abstract interface class BridgeChannel {
   /// Push one envelope to the web side. Should never throw.
   Future<void> send(Envelope envelope);

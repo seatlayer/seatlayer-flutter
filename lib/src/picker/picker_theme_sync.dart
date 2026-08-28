@@ -32,14 +32,14 @@ class PickerBootTheme {
 /// Keeps the runtime's theme mode in step with the side the scope resolved.
 ///
 /// The mode is handed to [builder] frozen per reload generation on purpose: the
-/// bridge profile is part of what makes a [SeatLayerView] rebuild its WebView,
+/// bridge profile is part of what makes a [SeatLayerView] rebuild its map,
 /// so folding a later theme flip into the init config would tear the runtime
 /// down and take the buyer's selection with it. Every change after boot travels
 /// as `picker.setThemeMode` instead, which repaints in place.
 ///
 /// `auto` is resolved here rather than handed over as `auto`:
 /// [MediaQuery.platformBrightnessOf] is authoritative for the app, while
-/// `prefers-color-scheme` inside a WebView is not reliably the same answer.
+/// `prefers-color-scheme` inside the venue map is not reliably the same answer.
 class PickerThemeModeSync extends StatefulWidget {
   /// Creates a synchronizer that builds its child with the boot-time mode.
   const PickerThemeModeSync({super.key, required this.builder});

@@ -126,7 +126,7 @@ class Envelope {
   /// Accepts a JSON string (the shape the Flutter `JavaScriptChannel` delivers)
   /// or an already-structured object. Returns `null` for anything that is not a
   /// well-formed envelope — the bridge ignores those silently rather than
-  /// throwing, because a WebView can receive messages it does not own.
+  /// throwing, because a page can receive messages it does not own.
   ///
   /// One deliberate divergence from the web `decode`: the web side rejects a
   /// frame whose `k` is unknown, because a page may receive unrelated

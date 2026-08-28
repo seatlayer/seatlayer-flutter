@@ -37,7 +37,7 @@ sealed class SeatLayerError implements Exception {
   /// could complete.
   const factory SeatLayerError.destroyed() = DestroyedFailure;
 
-  /// The WebView could not be driven (script evaluation failed, page load).
+  /// The venue map could not be driven (script evaluation failed, page load).
   const factory SeatLayerError.transport(String detail) = TransportFailure;
 
   /// A reply arrived but did not match the expected shape.

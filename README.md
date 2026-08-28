@@ -25,12 +25,11 @@ secure booking to your trusted server.
 
 ## Works as a native picker
 
-**The venue map renders in a WebView. Every piece of chrome is a Flutter
-widget.** The header, price rail, floor strip, section dock, seat confirm card,
+**Every piece of chrome is a Flutter widget.** The header, price rail, floor strip, section dock, seat confirm card,
 cart sheet, checkout button and the captions over the 3D scene and the seat-view
 panorama are all Dart — drawn in your palette, laid out by Flutter, replaceable
-one at a time. The WebView draws the geometry: seats, labels, section shells,
-the immersive scene and the panorama photograph. The renderer is told at
+one at a time. The SeatLayer venue map draws the geometry: seats, labels,
+section shells, the immersive scene and the panorama photograph. The renderer is told at
 handshake that Flutter owns the furniture, so it draws none of its own: no
 second tooltip, no second test badge, no web button under a native one.
 
@@ -91,7 +90,7 @@ release a picker-owned hold before the route leaves — a hold already handed to
 you is never released.
 
 **The runtime pin.** Production views load an immutable hosted document pinned
-by this package — `https://cdn.seatlayer.io/seatlayer-js@0.71.3/mobile.html`,
+by this package — `https://cdn.seatlayer.io/seatlayer-js@0.71.4/mobile.html`,
 exported as `seatLayerHostedWebVersion`. It moves only with an SDK release, so
 an app shipping a given `seatlayer` version always loads the same renderer;
 `SeatLayerConfiguration(assetPath:)` overrides it while validating one.
@@ -108,7 +107,20 @@ SeatLayerConfiguration(
 )
 ```
 
-Never ship a SeatLayer secret in the app binary or the WebView.
+Never ship a SeatLayer secret in the app binary.
+
+**Open faster.** Call `SeatLayerPicker.prewarm()` when the event screen appears
+so the picker opens without a delay. It is safe to call on every build; an
+unused prewarm is released after a few minutes or on memory pressure, and
+`SeatLayerPicker.cancelPrewarm()` releases it early.
+
+```dart
+@override
+void initState() {
+  super.initState();
+  SeatLayerPicker.prewarm();
+}
+```
 
 ## Customise the picker
 
@@ -229,7 +241,7 @@ callbacks: SeatLayerPickerCallbacks(
 Also `onSeatSelected`, `onSeatRemoved`, `onSeatViewOpened`,
 `onSelectionValidityChanged`, `onHoldExpired`, `onAccessExpired`,
 `onAccessUnavailable`, `onSelectedObjectUnavailable`, `onThemeResolved`,
-`onChartLoad`, `onClosed`.
+`onClosed`.
 
 **Drive it directly.** The controller speaks typed methods, not bridge strings:
 
@@ -247,7 +259,7 @@ Dispose a controller you created, and `await picker.close()` first so a
 picker-owned hold is acknowledged as released.
 
 **Cover the map safely.** An `IgnorePointer` is not enough on iOS — UIKit can
-hit-test the WebView beneath composited Flutter chrome — so bracket your own
+hit-test the venue map beneath composited Flutter chrome — so bracket your own
 overlay with `await picker.setMapInteractionEnabled(false)` and `true` in a
 `finally`, which makes the renderer's own DOM inert. The turnkey layout already
 does this around its decision chrome. Do not wrap the map in an app-level drag
@@ -291,31 +303,6 @@ immersive scene either way, re-evaluated on every `auto` flip.
 `SeatLayerPickerChromeOptions(manageSystemOverlays: false)` opts out;
 `seatLayerPickerOverlayStyle(resolvedTheme)` still says what it would have set.
 
-## Performance
-
-Opening the picker costs a WebView process start and a document fetch before the
-runtime has said a word — and all of it can happen while the buyer is still
-reading the event page. Call `SeatLayerPicker.prewarm()` from that screen's
-`initState`.
-
-**Measured on a reference app** (iOS Simulator, debug build, three runs each,
-tap to ready): median **3,262 ms → 2,192 ms — 1,070 ms off the open, −33 %**. The
-bridge-side span moved 2,104 ms → 1,082 ms, so the saving is in the WebView, not
-the renderer.
-
-No event, no buyer token and no session are involved: only the immutable page is
-loaded, and everything about the booking still travels at `init`. What is kept
-is the **WebView**, not a live session — the page gives up on a host after ten
-seconds, so one left sitting is re-loaded when the picker claims it (a cache
-hit) while the expensive web content process is already up. Idempotent, so
-calling it from every build is fine; an unclaimed page expires after five
-minutes (`ttl:`) and is dropped on memory pressure, and
-`SeatLayerPicker.cancelPrewarm()` gives it back early.
-
-Pan and pinch frames stay inside the chart: no picker snapshot and no Flutter
-rebuild per touch frame. Flutter hears about a gesture only when a serializable
-state, such as the zoom rung, changes.
-
 ## Checkout handoff
 
 The app selects and holds inventory. Your trusted backend inspects and books the
@@ -327,7 +314,7 @@ and a display total. The ordinary picker snapshot deliberately does **not**
 contain the `holdId`: it says only whether a hold is active, when it expires and
 who owns it. The capability crosses into Dart at the handoff and nowhere else.
 
-- Never ship a SeatLayer secret in the app or the WebView.
+- Never ship a SeatLayer secret in the app.
 - Never put buyer tokens or hold ids in logs, analytics or URLs.
 - Send the `holdId` only to your trusted checkout backend.
 - Inspect the hold server-side and calculate the charge from server data.
@@ -356,33 +343,6 @@ ownership is not caller-configurable and picker cart controls never release it.
 changes refused in the runtime *and* in the controller, which fails such a call
 with a typed `read_only` error rather than relying on hidden UI. Continue with
 [holds and secure server-side checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/).
-
-## Telemetry
-
-The renderer measures its own load and hands you the same record; the SDK
-measures the half the page cannot see — WebView construction, process spin-up,
-whatever your app did before the page existed — and gives you both at once:
-
-```dart
-callbacks: SeatLayerPickerCallbacks(
-  onChartLoad: (load) => analytics.track('seatmap_open', <String, Object?>{
-    'tapToReadyMs': load.tapToReadyMs, // the whole wait, from the tap
-    'hostMs': load.hostMs,             // the part outside the page
-    'bootMs': load.trace.bootMs,       // the page's whole life
-    'renderMs': load.trace.ms,
-    'outcome': load.trace.outcome,
-  }),
-),
-```
-
-`tapToReadyMs` starts when the picker **mounted**, so it is the same T0 with or
-without `prewarm()` and a prewarm shows up as a smaller number rather than a
-hidden one. `hostMs` is that span less the page's own `bootMs`: on a reference
-app's 3,513 ms cold open, 2,495 ms. Everything else the renderer measured is on
-`load.trace`, with unmodelled fields kept verbatim on `load.trace.raw`.
-`SeatLayerPickerController.onChartLoad` is the same record as a stream. It fires
-once per render attempt, success or failure. **The SDK logs nothing and sends
-nothing anywhere.**
 
 ## Widget catalogue
 
@@ -445,26 +405,6 @@ hand-edited. The presets, `SeatLayerPickerLayout`, `SeatLayerPickerMotion`, the
 haptic map and `SeatLayerPickerStrings` all read the file, and
 `design_tokens_test.dart` asserts them against it, so the two cannot drift.
 
-## Migration
-
-From 0.2.x or 0.3.0-dev:
-
-- `SeatLayerView` and `SeatLayerController` are unchanged; a 0.2.x integration
-  compiles as-is.
-
-- `SeatLayerPickerSelectionTray` → **`SeatLayerCartList`**;
-  `SeatLayerPickerBestAvailablePanel` → **`SeatLayerBestSeatsForm`**. Both old
-  names remain as deprecated aliases and go away at 0.4.
-- `SeatLayerPickerMobileTicketPanel` is **removed**. The phone cart is
-  `SeatLayerCartSheet` with `SeatLayerCartList` inside it, and its height comes
-  from `SeatLayerPickerLayout.sheetMaxHeightFraction`, not a panel-height
-  parameter.
-- Chrome is no longer a rail of buttons over the map: corner controls, the
-  one-line dock and the confirm card replaced it, and visibility lives on
-  `SeatLayerPickerChromeOptions`.
-- `SeatLayerPickerThemeData.light(accent:)` pins the picker light. To follow the
-  device, use `themeMode: SeatLayerThemeMode.auto` with the default constructor.
-
 ## Frequently asked questions
 
 ### How do I add a seat map to a Flutter app?
@@ -477,14 +417,9 @@ start above is complete; the
 covers lifecycle, commands and events in depth. `SeatLayerView` remains for an
 app that wants only the raw map and owns every control itself.
 
-### Is SeatLayer a Flutter widget or only a WebView snippet?
+### Is SeatLayer a Flutter widget or only a JavaScript snippet?
 
-Native Flutter chrome around a WebView map. The header, price rail, floor strip,
-dock, confirm card, cart sheet and checkout button are Flutter widgets with a
-typed Dart controller; `webview_flutter` loads SeatLayer's immutable hosted
-runtime for the drawn map itself. Take it as the `SeatLayerPicker` drop-in, or
-compose the same public widgets yourself inside a `SeatLayerPickerScope`. The
-renderer is told Flutter owns the chrome, so it draws none of its own.
+It is a native Flutter picker — every control is a Flutter widget.
 
 ### Which Flutter platforms are supported?
 
@@ -556,8 +491,6 @@ A `.light()` or `.dark()` preset pins one side deliberately.
   from the composable widgets under a `SeatLayerPickerScope`.
 - [Read the picker architecture](https://docs.seatlayer.io/buyer-sdk/flutter/architecture/)
   for the bridge contract, snapshots, capabilities and chrome ownership.
-- [Measure performance and telemetry](https://docs.seatlayer.io/buyer-sdk/flutter/performance/)
-  with `prewarm()` and the chart-load record.
 - [Connect seat holds to secure server-side checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
   without exposing booking credentials in the app.
 - [Run the complete checkout example](https://docs.seatlayer.io/examples/complete-checkout/)

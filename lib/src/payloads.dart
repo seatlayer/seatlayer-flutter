@@ -663,10 +663,10 @@ class ReadyInfo {
 
   /// Milliseconds from the view arming the handshake to `sys.ready`.
   ///
-  /// The whole cold path: WebView creation, the page fetch over the network,
+  /// The whole cold path: map host creation, the page fetch over the network,
   /// bundle parse, handshake, and the chart's first render. It is the number
   /// that decides whether a buyer thinks the app is broken, and it is not
-  /// visible from either side alone — the web side cannot see the WebView being
+  /// visible from either side alone — the web side cannot see the map host being
   /// created, and the app cannot see the chart finish rendering.
   ///
   /// Nothing is logged with it. Report it to your own analytics if you want it;

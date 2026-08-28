@@ -822,7 +822,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   /// confirmation, quantity, loading, or error chrome owns the chart area.
   /// Custom layouts should do the same around any native overlay that covers a
   /// [SeatLayerPickerMap]. A visual [IgnorePointer] is not sufficient for an
-  /// iOS platform view: WKWebView can otherwise receive the same physical tap
+  /// iOS platform view: the map surface can otherwise receive the same physical tap
   /// beneath the Flutter overlay.
   ///
   /// Older compatible runtimes that do not advertise the command are left
