@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
 
 import '../bridge/bridge_client.dart';
 import '../json.dart';
@@ -12,6 +13,14 @@ import '../seat_layer_error.dart';
 import 'picker_haptics.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
+import 'seat_layer_picker_theme.dart';
+
+/// Advertised by a runtime that speaks the native-chrome contract, including
+/// `picker.setThemeMode`'s optional map ground.
+const String _nativeChromeContractCapability = 'native-chrome-contract-v1';
+
+/// Advertised by a runtime that frames against host-reported viewport insets.
+const String _viewportInsetsCapability = 'viewport-insets-v1';
 
 /// State and actions for one high-level picker session.
 ///
@@ -41,6 +50,13 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         .onSelectedObjectsUnavailable
         .listen((event) => _callbacks.onSelectedObjectUnavailable?.call(event));
     _holdExpiredSubscription = this.mapController.onHoldExpired.listen((_) {
+      if (_options.haptics) {
+        try {
+          playHaptic(PickerHapticCue.holdExpired);
+        } catch (_) {
+          // A cue is a nicety; there is nothing a host could do about it.
+        }
+      }
       _callbacks.onHoldExpired?.call();
     });
     _generalAdmissionSubscription = this.mapController.onGAClick.listen((area) {
@@ -83,12 +99,120 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   Future<SeatLayerCheckoutHandoff>? _checkoutInFlight;
   Future<void>? _closeInFlight;
   int _reloadGeneration = 0;
+  SeatLayerViewportInsets? _pendingViewportInsets;
+  bool _cartSheetExpanded = false;
+  bool _cartSheetInitialized = false;
+  final Set<String> _confirmedLabels = <String>{};
+  SelectedSeat? _confirmCardSeat;
+  bool _hasPendingViewportInsets = false;
+  SeatLayerViewportInsets? _sentViewportInsets;
+  bool _hasSentViewportInsets = false;
+  bool _viewportInsetsFlushScheduled = false;
   final Map<int, List<Completer<void>>> _revisionWaiters =
       <int, List<Completer<void>>>{};
 
   SeatLayerPickerState get state => value;
   SeatLayerPickerOptions get options => _options;
-  bool get canCheckout => value.canCheckout && !_options.readOnly;
+  /// Whether the buyer may hand this cart to checkout.
+  ///
+  /// False while a confirm card is open: the seat under it is already in the
+  /// runtime's selection, so without this the buyer could check out a seat
+  /// they were still being asked about, by pressing a button behind the scrim.
+  bool get canCheckout =>
+      value.canCheckout && !_options.readOnly && seatAwaitingConfirmation == null;
+
+  /// The seat a confirm card is standing over, unanswered.
+  ///
+  /// The runtime has no notion of an unconfirmed selection: a tapped seat is
+  /// in `selection` — and therefore in the cart, the ticket count and the
+  /// total — from the moment it is tapped. The confirm card is native chrome
+  /// drawn over that, so without this the buyer sees `1 ticket · €40` and a
+  /// live Continue behind a card that is still asking whether they want the
+  /// seat at all.
+  ///
+  /// Reported by whichever chrome is actually asking, so it is null in a
+  /// composed layout that shows no card — a seat nobody is asking about is
+  /// simply in the cart.
+  SelectedSeat? get seatAwaitingConfirmation => _confirmCardSeat;
+
+  /// The seat the picker would ask about next, if it asks at all.
+  ///
+  /// Null for a read-only session, for `confirmSelection: false`, once a hold
+  /// exists, and when every selected seat has been answered for.
+  @internal
+  SelectedSeat? get unansweredSeat {
+    if (_options.readOnly || !_options.confirmSelection) return null;
+    if (value.hold != null) return null;
+    for (final seat in value.selection.reversed) {
+      if (!_confirmedLabels.contains(seat.label)) return seat;
+    }
+    return null;
+  }
+
+  /// Tell the controller which seat the open confirm card is showing.
+  ///
+  /// Called from the chrome's build, so it deliberately does not notify: the
+  /// widgets that read it are built after it in the same pass, and every one
+  /// of them rebuilds with the layout that reports it.
+  @internal
+  void setConfirmCardSeat(SelectedSeat? seat) => _confirmCardSeat = seat;
+
+  /// Record that the buyer answered for [label], and take its card down.
+  @internal
+  void markSeatAnswered(String label) {
+    if (_disposed || !_confirmedLabels.add(label)) return;
+    if (_confirmCardSeat?.label == label) _confirmCardSeat = null;
+    notifyListeners();
+  }
+
+  /// The cart the buyer has actually agreed to.
+  ///
+  /// [SeatLayerPickerState.cartLines] less the seat whose card is still open,
+  /// matched on the runtime's own seat id where it gave one and on the
+  /// inventory label otherwise. Use it — and [confirmedTicketCount] and
+  /// [confirmedCartTotal] — for anything the buyer reads as a commitment.
+  List<SeatLayerCheckoutLineItem> get confirmedCartLines {
+    final pending = seatAwaitingConfirmation;
+    if (pending == null) return value.cartLines;
+    return List<SeatLayerCheckoutLineItem>.unmodifiable(
+      value.cartLines.where(
+        (line) => line.seatId == null
+            ? line.label != pending.label
+            : line.seatId != pending.id,
+      ),
+    );
+  }
+
+  /// How many tickets the buyer has agreed to.
+  int get confirmedTicketCount => seatAwaitingConfirmation == null
+      ? (value.snapshot?.ticketCount ?? value.cartLines.length)
+      : confirmedCartLines.fold<int>(0, (sum, line) => sum + line.quantity);
+
+  /// What the buyer has agreed to, in the cart's currency.
+  double get confirmedCartTotal => seatAwaitingConfirmation == null
+      ? (value.snapshot?.cartTotal ??
+          value.cartLines.fold<double>(0, (sum, line) => sum + line.total))
+      : confirmedCartLines.fold<double>(0, (sum, line) => sum + line.total);
+
+  /// Whether the buyer has the cart sheet open.
+  ///
+  /// Deliberately here and not in the chrome's own widget state. A theme flip,
+  /// a host rebuilding its route, a snapshot arriving — any of them can give
+  /// the layout a fresh [State], and an expanded sheet that snaps shut takes
+  /// the buyer's place in their own cart with it. The controller outlives all
+  /// of that, and a composed layout reads the same value the drop-in does.
+  bool get cartSheetExpanded => _cartSheetExpanded;
+
+  /// Open or collapse the cart sheet.
+  ///
+  /// Notifies listeners without touching [value]: the sheet is chrome, not
+  /// picker state, and nothing about it belongs in a snapshot.
+  void setCartSheetExpanded(bool expanded) {
+    if (_disposed || _cartSheetExpanded == expanded) return;
+    _cartSheetExpanded = expanded;
+    _cartSheetInitialized = true;
+    notifyListeners();
+  }
 
   @internal
   int get reloadGeneration => _reloadGeneration;
@@ -127,6 +251,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       }
       _reloadGeneration += 1;
       _haptics.reset();
+      _forgetViewportInsets();
       value = const SeatLayerPickerState.initializing();
     });
   }
@@ -153,6 +278,10 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     _options = options;
     _callbacks = callbacks;
     _runtimeAttached = true;
+    if (!_cartSheetInitialized) {
+      _cartSheetInitialized = true;
+      _cartSheetExpanded = !options.panelInitiallyCollapsed;
+    }
     _closing = false;
     if (value.phase == SeatLayerPickerPhase.closed ||
         value.phase == SeatLayerPickerPhase.failed) {
@@ -198,6 +327,13 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     final previousValidity = current?.selectionValidity;
     final previousHold = value.hold;
     value = value.applying(snapshot);
+    // A seat that left the selection takes its answer with it, so re-picking
+    // it asks again rather than joining the cart silently.
+    final live = snapshot.selection.map((seat) => seat.label).toSet();
+    _confirmedLabels.removeWhere((label) => !live.contains(label));
+    if (_confirmCardSeat != null && !live.contains(_confirmCardSeat!.label)) {
+      _confirmCardSeat = null;
+    }
 
     if (!_sameSelection(previousSelection, snapshot.selection)) {
       _callbacks.onSelectionChanged?.call(snapshot.selection);
@@ -404,6 +540,123 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         <String, Object?>{'on': enabled},
         SeatLayerPickerBusyAction.updatingSelection,
       );
+
+  /// Repaint the drawn map for [mode] without reloading the runtime.
+  ///
+  /// Pass null to hand the colours back to the chart. Runtimes that predate the
+  /// command are left unchanged rather than failing the action, so a theme flip
+  /// can never break an otherwise working session.
+  ///
+  /// [mapTheme] moves the map's own ground with the mode. It is needed because
+  /// an explicit ground outranks a mode inside the runtime: a host that named
+  /// map colours at boot — which this SDK does, frozen, so the venue matches
+  /// the chrome it booted under — has pinned the canvas, and no number of mode
+  /// changes can flip it afterwards. Sending the newly resolved colours with
+  /// the mode re-inks the venue in place, keeping the selection, the focused
+  /// section and the camera. It travels only to a runtime that advertises the
+  /// contract; older ones receive the mode alone, which is what they have
+  /// always received.
+  Future<void> setThemeMode(
+    SeatLayerThemeMode? mode, {
+    SeatLayerMapThemeData? mapTheme,
+  }) {
+    final bundle = mapController.bundleInfo;
+    if (bundle != null && !bundle.supportsCommand('picker.setThemeMode')) {
+      return Future<void>.value();
+    }
+    final carriesGround = mapTheme != null &&
+        bundle != null &&
+        bundle.supportsCapability(_nativeChromeContractCapability);
+    // Deliberately NOT a _mutation. Repainting changes no inventory and moves
+    // no geometry, so parking the picker on `changingView` only greys the
+    // chrome the buyer is looking at — and folding the reply's snapshot in
+    // mid-flip is how a colours-only command came to move the rung, which
+    // hides the dock, changes the insets the layout reports and re-frames the
+    // camera off the buyer's seat. Whatever the repaint really changed still
+    // arrives on the snapshot event stream, exactly as it does for
+    // `picker.setViewportInsets`.
+    return _serialize(() async {
+      await mapController.runBridgeCommand(
+        'picker.setThemeMode',
+        <String, Object?>{
+          'mode': mode?.raw,
+          if (carriesGround) 'mapTheme': mapTheme.toBridgeConfig(),
+        },
+      );
+    });
+  }
+
+  /// Tell the runtime how much of the map surface native chrome is covering.
+  ///
+  /// Persistent: the last value applies to every later fit and glide, so send
+  /// a new one whenever the chrome moves — the dock arriving with a focused
+  /// section, a sheet peeking, the rail hiding. Pass null to clear it and
+  /// frame against the whole surface again.
+  ///
+  /// Nothing is sent to a runtime that does not advertise `viewport-insets-v1`
+  /// and the command, which frames against the whole surface as it always has.
+  /// Repeated identical values are dropped, and several calls inside one frame
+  /// coalesce into the last, so a host may call this from every layout pass.
+  ///
+  /// This reports where furniture is; it changes no inventory and produces no
+  /// busy state, because a buyer resizing a sheet must not see the picker go
+  /// busy underneath them.
+  Future<void> setViewportInsets(SeatLayerViewportInsets? insets) {
+    if (!supportsViewportInsets) return Future<void>.value();
+    final wanted = insets;
+    _pendingViewportInsets = wanted;
+    _hasPendingViewportInsets = true;
+    if (_viewportInsetsFlushScheduled) return Future<void>.value();
+    _viewportInsetsFlushScheduled = true;
+    final completer = Completer<void>();
+    // One send per frame. Native chrome settles over several layout passes —
+    // the dock animating in while the sheet re-measures — and each pass would
+    // otherwise mint its own command and its own map revision.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _viewportInsetsFlushScheduled = false;
+      if (!completer.isCompleted) {
+        completer.complete(_flushViewportInsets());
+      }
+    });
+    return completer.future;
+  }
+
+  /// Forget what was reported to a runtime that is going away.
+  ///
+  /// A fresh runtime frames against its whole surface until it is told
+  /// otherwise, so the next report has to be sent even when the numbers have
+  /// not moved.
+  void _forgetViewportInsets() {
+    _sentViewportInsets = null;
+    _hasSentViewportInsets = false;
+  }
+
+  /// Whether the mounted runtime accepts [setViewportInsets].
+  bool get supportsViewportInsets {
+    final bundle = mapController.bundleInfo;
+    return bundle != null &&
+        bundle.supportsCapability(_viewportInsetsCapability) &&
+        bundle.supportsCommand('picker.setViewportInsets');
+  }
+
+  Future<void> _flushViewportInsets() {
+    if (_disposed || !_hasPendingViewportInsets) return Future<void>.value();
+    final wanted = _pendingViewportInsets;
+    _hasPendingViewportInsets = false;
+    if (_hasSentViewportInsets && _sentViewportInsets == wanted) {
+      return Future<void>.value();
+    }
+    _sentViewportInsets = wanted;
+    _hasSentViewportInsets = true;
+    return _serialize(() async {
+      await mapController.runBridgeCommand(
+        'picker.setViewportInsets',
+        wanted == null
+            ? <String, Object?>{'insets': null}
+            : wanted.toBridgePayload(),
+      );
+    });
+  }
 
   Future<void> setViewMode(SeatLayerViewMode mode) => _mutation(
         'picker.setViewMode',

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 import 'picker_models.dart';
+import 'picker_tokens.g.dart';
 
 /// One thing worth feeling.
 enum PickerHapticCue {
@@ -15,8 +16,18 @@ enum PickerHapticCue {
   sectionFocused,
 
   /// Seats are now actually held. The one moment in the flow where something
-  /// irreversible-feeling happened, so it gets the heaviest cue.
+  /// irreversible-feeling happened, so it gets a firm cue.
   holdCreated,
+
+  /// The hold ran out and the seats went back. The heaviest cue in the set,
+  /// and the only one for something the buyer did not do — it has to reach
+  /// them when they are not looking at the screen, which is exactly when a
+  /// hold lapses.
+  ///
+  /// Fired from the runtime's own expiry signal rather than from the snapshot:
+  /// a snapshot only shows a hold going inactive, and a buyer releasing their
+  /// seats deliberately must not feel like a loss.
+  holdExpired,
 }
 
 /// Decides WHICH haptic to fire, without knowing how to fire one.
@@ -107,10 +118,22 @@ class PickerHapticsPolicy {
 /// on. Nothing that depends on the buyer's seats may ever fail because a phone
 /// declined to buzz.
 void playPickerHaptic(PickerHapticCue cue) {
-  final Future<void> played = switch (cue) {
-    PickerHapticCue.selectionAdded => HapticFeedback.selectionClick(),
-    PickerHapticCue.sectionFocused => HapticFeedback.lightImpact(),
-    PickerHapticCue.holdCreated => HapticFeedback.mediumImpact(),
-  };
-  unawaited(played.catchError((Object _) {}));
+  unawaited(_fire(pickerHapticStrength(cue)).catchError((Object _) {}));
 }
+
+/// Which platform strength [cue] fires, named the way `design/tokens.json`
+/// names it so every SDK feels the same.
+String pickerHapticStrength(PickerHapticCue cue) => switch (cue) {
+      PickerHapticCue.selectionAdded => SeatLayerHapticTokens.selectionAdded,
+      PickerHapticCue.sectionFocused => SeatLayerHapticTokens.sectionFocused,
+      PickerHapticCue.holdCreated => SeatLayerHapticTokens.holdCreated,
+      PickerHapticCue.holdExpired => SeatLayerHapticTokens.holdExpired,
+    };
+
+Future<void> _fire(String strength) => switch (strength) {
+      'selection' => HapticFeedback.selectionClick(),
+      'light' => HapticFeedback.lightImpact(),
+      'medium' => HapticFeedback.mediumImpact(),
+      'heavy' => HapticFeedback.heavyImpact(),
+      _ => HapticFeedback.selectionClick(),
+    };

@@ -4,12 +4,15 @@ import 'open_enums.dart';
 import 'payloads.dart';
 
 /// This SDK's version.
-const String seatLayerSdkVersion = '0.3.0-dev.4';
+const String seatLayerSdkVersion = '0.3.0-dev.5';
 
 /// The immutable hosted web runtime used by production views.
-const String seatLayerHostedWebVersion = '0.70.0';
+const String seatLayerHostedWebVersion = '0.71.3';
 
-/// Runtime retained only for explicit offline demo/test fixtures.
+/// Runtime retained only for the example app's explicit offline fixture.
+///
+/// The fixture itself lives in `example/assets/`, outside the published
+/// package: production always loads the immutable hosted page.
 const String seatLayerLegacyFixtureWebVersion = '0.68.0';
 
 /// Exact source commit used to build the vendored runtime fixture.
@@ -24,10 +27,6 @@ const String seatLayerBundledRuntimeSha256 =
 /// Byte length of the pinned vendored runtime fixture.
 const int seatLayerBundledRuntimeByteLength = 1181605;
 
-@Deprecated(
-  'Use seatLayerHostedWebVersion; production no longer uses a bundled runtime.',
-)
-const String seatLayerBundledWebVersion = seatLayerHostedWebVersion;
 const String seatLayerMobileOrigin = 'https://cdn.seatlayer.io';
 const String seatLayerMobilePageUrl =
     '$seatLayerMobileOrigin/seatlayer-js@$seatLayerHostedWebVersion/mobile.html';
@@ -147,6 +146,24 @@ class SeatLayerConfiguration {
   final Map<String, String> hostInfo;
 
   /// Hosted production URL, or a Flutter asset key for an explicit fixture.
+  ///
+  /// Leave it alone in production: the default is the immutable, version-pinned
+  /// hosted page, and that pinning is what makes a shipped app's behaviour
+  /// reproducible.
+  ///
+  /// Two other values are supported, both for development:
+  ///
+  /// - **An `http://localhost` page**, for testing against a runtime build that
+  ///   is not on the CDN yet — a release candidate, or a bridge change being
+  ///   proved against a real app before it ships. Serve the built runtime
+  ///   directory and point this at its `mobile.html`; an iOS simulator and an
+  ///   Android emulator both reach the host machine's server. The publishable
+  ///   key's registered origins govern what the API will answer, so the local
+  ///   origin has to be registered too.
+  /// - **A Flutter asset key**, for a self-contained offline fixture.
+  ///
+  /// Only the exact document named here may become the main frame; the view
+  /// refuses every other navigation.
   final String assetPath;
 
   /// The `init` payload: `{ protocol, host, chrome, config }`.

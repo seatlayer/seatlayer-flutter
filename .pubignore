@@ -1,0 +1,19 @@
+# Build-round working material. Useful in the repository, dead weight in the
+# published archive — the parity screenshots alone are several megabytes every
+# consumer would download for a review that is already finished.
+doc/parity-screens/
+doc/parity-build-log.md
+doc/parity-build-spec-2026-08-27.md
+doc/parity-gap-table-2026-08-27.md
+
+# The offline fixture. It exists so the example app can run with no event key
+# and no network; production always loads the immutable hosted page, so a
+# 1.18 MB runtime in the archive is a cost every consumer pays for a path they
+# never take. Clone the repository to run the fixture.
+example/assets/
+
+# Local build output and the example's CocoaPods checkout.
+build/
+example/build/
+example/ios/Pods/
+example/ios/Flutter/ephemeral/

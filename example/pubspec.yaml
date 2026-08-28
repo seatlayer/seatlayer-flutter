@@ -20,3 +20,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/seatlayer.js
+    - assets/seatlayer.runtime.json
+    - assets/index.html
+    - assets/demo.html

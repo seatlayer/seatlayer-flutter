@@ -50,6 +50,212 @@ Then import the public library:
 import 'package:seatlayer/seatlayer.dart';
 ```
 
+## Two ways in
+
+```mermaid
+flowchart TD
+  A["SeatLayerConfiguration<br/>event + publishable key"] --> B{"How much layout<br/>do you want to own?"}
+  B -->|"None"| C["SeatLayerPicker<br/>drop-in"]
+  B -->|"All of it"| D["SeatLayerPickerScope"]
+  D --> E["SeatLayerChart"]
+  D --> F["SeatLayerPickerHeader<br/>SeatLayerPriceLegend<br/>SeatLayerDockBar"]
+  D --> G["SeatLayerConfirmCard<br/>SeatLayerCartSheet<br/>SeatLayerVenue3D"]
+  C --> H["onCheckout(handoff)"]
+  E --> H
+  F --> H
+  G --> H
+  H --> I["Your backend books the hold"]
+```
+
+### Recipe 1 — drop-in
+
+One widget. The complete buyer flow, on the approved phone UX by default.
+
+```dart
+SeatLayerPicker(
+  configuration: SeatLayerConfiguration(
+    event: 'ev_your_event',
+    publicKey: 'pk_test_your_key',
+  ),
+  themeMode: SeatLayerThemeMode.auto,
+  onCheckout: (handoff) => bookOnYourBackend(handoff.holdId),
+  onClose: () => Navigator.of(context).pop(),
+)
+```
+
+### Recipe 2 — composable
+
+Place a scope, then arrange the parts yourself. Every widget below reads its
+state from the scope; none of them needs the drop-in layout.
+
+```dart
+SeatLayerPickerScope(
+  configuration: configuration,
+  themeMode: SeatLayerThemeMode.auto,
+  child: Column(
+    children: [
+      SeatLayerPickerHeader(compact: true, onClose: close),
+      Expanded(
+        child: Stack(
+          children: [
+            const Positioned.fill(child: SeatLayerChart()),
+            const Positioned(top: 8, left: 0, child: SeatLayerPriceLegend(compact: true)),
+            const Positioned.fill(child: SeatLayerPickerMapControls(compact: true)),
+            const Positioned(left: 0, right: 0, bottom: 0, child: SeatLayerDockBar()),
+            const Positioned.fill(child: SeatLayerVenue3D()),
+          ],
+        ),
+      ),
+      SeatLayerCartSheet(
+        expanded: expanded,
+        onExpandedChanged: (value) => setState(() => expanded = value),
+        onCheckout: (handoff) => bookOnYourBackend(handoff.holdId),
+      ),
+    ],
+  ),
+)
+```
+
+## Widget catalogue
+
+| Widget | What it is | Standalone in a scope |
+| --- | --- | --- |
+| `SeatLayerPicker` | The drop-in buyer flow | n/a |
+| `SeatLayerChart` | The drawn map (alias of `SeatLayerPickerMap`) | yes |
+| `SeatLayerPickerHeader` | Event identity, hold pill, dismiss | yes |
+| `SeatLayerPriceLegend` | Price chips that filter the map | yes |
+| `SeatLayerDockBar` | Focused section, seats left, prev/next, Venue | yes |
+| `SeatLayerPickerMapControls` | Accessibility, fit, Map/3D in the corners | yes |
+| `SeatLayerConfirmCard` | The phone's one-seat decision card | yes |
+| `SeatLayerCartSheet` | Peek bar and content-height cart | yes |
+| `SeatLayerCartList` | The dense ticket list with run folding | yes |
+| `SeatLayerBestSeatsForm` | Two selects, a stepper, one action | yes |
+| `SeatLayerBookButton` | The full-width checkout call to action | yes |
+| `SeatLayerVenue3D` | Caption, seat stepper and exits over the 3D scene | yes |
+| `SeatLayerPickerAccessibilityFilters` | Access needs and the colourblind palette | yes |
+| `SeatLayerPickerTablePrompt` / `…GeneralAdmissionPrompt` | Quantity prompts | yes |
+| `SeatLayerPickerScope` | The state every widget above reads | n/a |
+
+## Design system
+
+The picker's colours, sizes, radii, elevations, type scale, motion table,
+haptic cues and default strings live in one platform-neutral file,
+[`design/tokens.json`](design/tokens.json), and the component catalogue that
+describes every widget in terms of those tokens lives in
+[`design/components.md`](design/components.md). The catalogue is written for a
+Swift, Kotlin or React Native engineer reproducing this design, and it uses the
+Dart API's names throughout.
+
+`lib/src/picker/picker_tokens.g.dart` is **generated** from the JSON and must
+not be hand-edited:
+
+```bash
+dart run tool/gen_tokens.dart          # sync:tokens — regenerate
+dart run tool/gen_tokens.dart --check  # fail if the generated file is stale
+```
+
+The theme presets, `SeatLayerPickerLayout`, `SeatLayerPickerMotion`, the haptic
+map and `SeatLayerPickerStrings` all read that file, and
+`test/design_tokens_test.dart` asserts them against the JSON as well as running
+the staleness check, so the two cannot drift.
+
+## Customisation
+
+The zero-configuration path is the approved phone experience. Everything about
+it is still yours to change.
+
+**Hide a part.** Every piece of chrome has a switch:
+
+```dart
+options: const SeatLayerPickerOptions(
+  chrome: SeatLayerPickerChromeOptions(showDockBar: false),
+),
+```
+
+**Replace one part, keep the rest.** A builder receives the live state and the
+widget the drop-in would have rendered:
+
+```dart
+builders: SeatLayerPickerBuilders(
+  cartSheet: (context, part) => MyOwnSheet(state: part.state, fallback: part.defaultChild),
+),
+```
+
+**Restyle one element, keep the widget.** Every control the picker draws has a
+style slot on the theme, so a single button can change shape without replacing
+the widget around it. The picker's buttons round to `radius.button` (8 pt, the
+web picker's own), so turning the peek bar's `Continue` into a pill is three
+lines:
+
+```dart
+theme: SeatLayerPickerThemeData.light(
+  styles: SeatLayerPickerStyles(
+    continueButtonStyle: FilledButton.styleFrom(shape: const StadiumBorder()),
+  ),
+),
+```
+
+Every button moves together through `buttonRadius`, which is its own role
+rather than a fraction of `radius`: `SeatLayerPickerThemeData.light(radius: 20)`
+rounds the cards and sheets without growing pill actions.
+
+The slots are `primaryButtonStyle`, `secondaryButtonStyle`,
+`continueButtonStyle`, `iconButtonStyle`, `chipShape`, `legendChipStyle`,
+`dockBarStyle`, `confirmCardStyle`, `sheetStyle`, `headerStyle` and
+`pillStyle`. Button slots take a Material `ButtonStyle`; surface slots take a
+`SeatLayerSurfaceStyle` (colour, shape, elevation, padding, type). Every widget
+that owns a slot also accepts a `style:` parameter, which wins over the theme
+for that one instance:
+
+```dart
+SeatLayerDockBar(style: SeatLayerSurfaceStyle(shape: const RoundedRectangleBorder()))
+```
+
+**Retune the sizes.** The spec's numbers are defaults, not constants:
+
+```dart
+theme: const SeatLayerPickerThemeData.light(
+  layout: SeatLayerPickerLayout(dockBarHeight: 60, sheetMaxHeightFraction: .5),
+),
+```
+
+**Translate or reword anything.** Every buyer-facing string is an override:
+
+```dart
+options: SeatLayerPickerOptions(
+  strings: SeatLayerPickerStrings(
+    holdAndCheckout: 'Réserver et payer',
+    seatsLeft: (count) => '$count restants',
+  ),
+),
+```
+
+**Or take the translations SeatLayer already ships.** The drawn map speaks
+thirty-seven languages; `SeatLayerPickerStrings.forLocale` gives the native
+chrome around it the same words, from the same reviewed dictionaries:
+
+```dart
+options: SeatLayerPickerOptions(
+  strings: SeatLayerPickerStrings.forLocale(Localizations.localeOf(context)),
+),
+```
+
+It resolves by language, and by script for Chinese. An untranslated locale —
+and any single entry the runtime has no wording for — keeps its English
+default, and the result is an ordinary `SeatLayerPickerStrings`, so you can
+still override any entry on top of it.
+
+**Hear about every action.** All callbacks are optional:
+
+```dart
+callbacks: SeatLayerPickerCallbacks(
+  onSectionFocused: (id) => analytics.log('section', id),
+  onSeatSelected: (seat) => analytics.log('seat', seat.label),
+  onThemeResolved: (brightness) => debugPrint('picker is $brightness'),
+  onContinue: (handoff) => analytics.log('checkout', handoff.holdId),
+),
+```
+
 ## Turnkey picker quick start
 
 This is the default integration. `SeatLayerPicker` supplies the adaptive
@@ -148,18 +354,40 @@ changing its layout.
 Picker cards, ticket-dock changes, cart rows and immersive surfaces use one
 short motion language and honor the platform reduced-motion preference.
 
-`SeatLayerPickerThemeData.light()` is a complete light preset, not just white
-Flutter panels. It sends a contrast-paired `SeatLayerMapThemeData` to the
-renderer for the canvas background, row labels, free text and selection ring.
-`SeatLayerPickerThemeData.dark()` supplies the matching high-contrast dark
-native chrome and map palette. Use either preset with a brand accent, or use the
-regular constructor to override any role individually:
+### Branding, and which constructor follows the device
+
+**Brand with the default constructor.** It sets only the roles you name, so
+every ground role still comes from `themeMode` — and `SeatLayerThemeMode.auto`
+follows the device live, chrome and drawn map together:
+
+```dart
+SeatLayerPicker(
+  configuration: configuration,
+  themeMode: SeatLayerThemeMode.auto,
+  theme: const SeatLayerPickerThemeData(accent: Color(0xFFE54558)),
+  onCheckout: openCheckout,
+)
+```
+
+`SeatLayerPickerThemeData.light()` and `.dark()` are complete presets, not just
+white or black Flutter panels: each also sends a contrast-paired
+`SeatLayerMapThemeData` to the renderer for the canvas background, row labels,
+free text and the selection ring.
+
+**A preset pins the mode.** Because it supplies a whole explicit ground
+palette, and explicit roles win over the resolved mode, `themeMode: auto` with
+`.light()` never goes dark — the device flip changes nothing on screen. Reach
+for a preset when you *want* one fixed side, and drive it yourself if you want
+both:
 
 ```dart
 final pickerTheme = Theme.of(context).brightness == Brightness.dark
     ? const SeatLayerPickerThemeData.dark(accent: Color(0xFFFF5A6F))
     : const SeatLayerPickerThemeData.light(accent: Color(0xFFE54558));
 ```
+
+`themeMode` is available on `SeatLayerPicker`, `SeatLayerPickerScope`,
+`SeatLayerPickerPage` and `showSeatLayerPicker` alike.
 
 The compact price rail follows the web picker: tapping one price selects that
 single category and frames its seats; tapping the active price again returns to
@@ -596,10 +824,27 @@ flutter run \
   --dart-define=SEATLAYER_RUNTIME_URL=https://cdn.example/mobile.html
 ```
 
+A runtime that is not published yet can be served from the host machine and
+named the same way, which is how a bridge change is proved against a real app
+before it ships:
+
+```bash
+# in the runtime checkout, after its CDN build
+python3 -m http.server 8181 --directory cdn/dist/seatlayer-js@<version>
+
+flutter run \
+  --dart-define=SEATLAYER_EVENT=ev_your_test_event \
+  --dart-define=SEATLAYER_RUNTIME_URL=http://localhost:8181/mobile.html
+```
+
+An iOS simulator and an Android emulator both reach the host machine's server.
+The API answers according to the publishable key's registered origins, so the
+local origin has to be registered on the key as well.
+
 Omitting `SEATLAYER_RUNTIME_URL` uses the package's immutable runtime pin. A
-development runtime must use an allowed HTTPS origin for private buyer access;
-an origin-bound token minted for `https://cdn.seatlayer.io` cannot be replayed
-on an unrelated preview domain.
+development runtime must use an allowed origin for private buyer access; an
+origin-bound token minted for `https://cdn.seatlayer.io` cannot be replayed on
+an unrelated preview domain.
 
 ## Release path
 
@@ -627,6 +872,7 @@ Flutter web, macOS, Windows or Linux support.
 flutter pub get
 flutter analyze
 flutter test
+dart run tool/gen_tokens.dart   # sync:tokens, after editing design/tokens.json
 dart pub publish --dry-run
 ```
 

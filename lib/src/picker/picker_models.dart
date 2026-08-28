@@ -190,6 +190,7 @@ class SeatLayerPickerSectionSummary {
     this.zoneLabel,
     this.entrance,
     this.color,
+    this.dominantCategoryKey,
     this.seatsLeft,
     this.priceMin,
     this.priceMax,
@@ -202,6 +203,15 @@ class SeatLayerPickerSectionSummary {
   final String? zoneLabel;
   final String? entrance;
   final String? color;
+
+  /// The category most of this section's free seats belong to.
+  ///
+  /// Prefer it over [color] when the host paints its own dot: the key survives
+  /// a colourblind-safe palette, a category recolour and a legend that has
+  /// already resolved the same colour, where a copied hex does not. Absent on
+  /// a section with nothing free to be dominant.
+  final String? dominantCategoryKey;
+
   final int? seatsLeft;
   final double? priceMin;
   final double? priceMax;
@@ -217,6 +227,7 @@ class SeatLayerPickerSectionSummary {
       zoneLabel: jStr(jGet(value, 'zoneLabel')),
       entrance: jStr(jGet(value, 'entrance')),
       color: jStr(jGet(value, 'color')),
+      dominantCategoryKey: jStr(jGet(value, 'dominantCategoryKey')),
       seatsLeft: jInt(jGet(value, 'seatsLeft')),
       priceMin: jDouble(jGet(value, 'priceMin')),
       priceMax: jDouble(jGet(value, 'priceMax')),
@@ -261,6 +272,10 @@ class SeatLayerCheckoutLineItem {
     this.displayLabel,
     this.displayType,
     this.tierId,
+    this.seatId,
+    this.sectionLabel,
+    this.rowLabel,
+    this.seatNumber,
   });
 
   final String lineKey;
@@ -274,6 +289,35 @@ class SeatLayerCheckoutLineItem {
   final double unitPrice;
   final String currency;
   final int quantity;
+
+  /// The renderer's own id for the seat this line stands for.
+  ///
+  /// Present whenever the runtime knew which seat the line is, which is the
+  /// reliable way to join a line back to the selection: an inventory label is
+  /// the primary key but it is not always what the line arrived under.
+  final String? seatId;
+
+  /// Where the seat is — `Stalls D`. Absent for a general-admission unit,
+  /// which has no seat.
+  final String? sectionLabel;
+
+  /// The seat's row — `C`. May be authored fully qualified (`Stalls D C`);
+  /// print it through `pickerRowLabel` rather than raw.
+  final String? rowLabel;
+
+  /// The seat's number in its row — `6`.
+  final String? seatNumber;
+
+  /// Whether the runtime named this line's seat on the line itself.
+  ///
+  /// Best Available clears the renderer selection before it holds, and a
+  /// resumed hold was never in one, so joining back to `selection` finds
+  /// nothing for exactly the two paths where the buyer did not tap the seat.
+  /// The address travels on the line for those.
+  bool get hasSeatIdentity =>
+      (sectionLabel?.trim().isNotEmpty ?? false) ||
+      (rowLabel?.trim().isNotEmpty ?? false) ||
+      (seatNumber?.trim().isNotEmpty ?? false);
 
   String get buyerFacingLabel => displayLabel ?? label;
   double get total => unitPrice * quantity;
@@ -296,6 +340,10 @@ class SeatLayerCheckoutLineItem {
       unitPrice: jDouble(jGet(value, 'unitPrice')) ?? 0,
       currency: jStr(jGet(value, 'currency')) ?? 'USD',
       quantity: jInt(jGet(value, 'quantity')) ?? 1,
+      seatId: jStr(jGet(value, 'seatId')),
+      sectionLabel: jStr(jGet(value, 'sectionLabel')),
+      rowLabel: jStr(jGet(value, 'rowLabel')),
+      seatNumber: jStr(jGet(value, 'seatNumber')),
     );
   }
 
@@ -384,6 +432,88 @@ class SeatLayerPickerHold {
   }
 }
 
+/// How much of the map surface the host's own chrome is covering.
+///
+/// The runtime frames the venue — `zoomToFit`, a focused section, the glide
+/// that follows a tap, a best-available result — against the whole WebView
+/// rectangle. Native chrome drawn over that rectangle therefore covers a
+/// perfectly framed venue. These insets shrink the rectangle the camera aims
+/// at without clipping anything: the map still draws and pans underneath the
+/// chrome, so nothing is hidden that the buyer cannot reach.
+///
+/// Every side is in the same logical points Flutter lays out in, which is what
+/// the WebView reads as a CSS pixel.
+@immutable
+class SeatLayerViewportInsets {
+  /// Creates a set of insets; every omitted side is zero.
+  const SeatLayerViewportInsets({
+    this.top = 0,
+    this.right = 0,
+    this.bottom = 0,
+    this.left = 0,
+  });
+
+  /// No chrome over the map.
+  static const SeatLayerViewportInsets zero = SeatLayerViewportInsets();
+
+  /// Height of the chrome covering the top of the map.
+  final double top;
+
+  /// Width of the chrome covering the right of the map.
+  final double right;
+
+  /// Height of the chrome covering the bottom of the map.
+  final double bottom;
+
+  /// Width of the chrome covering the left of the map.
+  final double left;
+
+  /// Whether every side is zero.
+  bool get isEmpty => top == 0 && right == 0 && bottom == 0 && left == 0;
+
+  /// The payload `picker.setViewportInsets` accepts.
+  ///
+  /// Negative and non-finite sides are floored to zero rather than sent: the
+  /// runtime answers `bad_payload` for them, and a mis-measured piece of
+  /// chrome must not fail an action the buyer started.
+  Map<String, Object?> toBridgePayload() => <String, Object?>{
+        'top': _wire(top),
+        'right': _wire(right),
+        'bottom': _wire(bottom),
+        'left': _wire(left),
+      };
+
+  static double _wire(double value) =>
+      value.isFinite && value > 0 ? value : 0.0;
+
+  static SeatLayerViewportInsets? fromJson(Object? value) {
+    if (jObj(value) == null) return null;
+    double side(String key) => _wire(jDouble(jGet(value, key)) ?? 0);
+    return SeatLayerViewportInsets(
+      top: side('top'),
+      right: side('right'),
+      bottom: side('bottom'),
+      left: side('left'),
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeatLayerViewportInsets &&
+      other.top == top &&
+      other.right == right &&
+      other.bottom == bottom &&
+      other.left == left;
+
+  @override
+  int get hashCode => Object.hash(top, right, bottom, left);
+
+  @override
+  String toString() =>
+      'SeatLayerViewportInsets(top: $top, right: $right, bottom: $bottom, '
+      'left: $left)';
+}
+
 @immutable
 class SeatLayerPickerMapState {
   const SeatLayerPickerMapState({
@@ -402,6 +532,7 @@ class SeatLayerPickerMapState {
     this.focusedSectionId,
     this.focusedSection,
     this.view3DTargetSeatId,
+    this.viewportInsets,
   });
 
   final String rung;
@@ -419,6 +550,13 @@ class SeatLayerPickerMapState {
   final Set<String> categoryFilter;
   final Set<String> accessibilityFilter;
   final List<FloorInfo> floors;
+
+  /// What the runtime is currently framing against, echoed back.
+  ///
+  /// Null on a runtime that predates the command, which frames against the
+  /// whole surface. A host can compare this with what it last sent to tell a
+  /// dropped command from an applied one without a round trip.
+  final SeatLayerViewportInsets? viewportInsets;
 
   String get projection => viewMode;
   String? get floorId => activeFloorId;
@@ -455,6 +593,9 @@ class SeatLayerPickerMapState {
         ),
         floors: List<FloorInfo>.unmodifiable(
           jListOf(jGet(value, 'floors'), FloorInfo.fromJson),
+        ),
+        viewportInsets: SeatLayerViewportInsets.fromJson(
+          jGet(value, 'viewportInsets'),
         ),
       );
 }

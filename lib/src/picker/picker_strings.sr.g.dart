@@ -1,0 +1,61 @@
+// GENERATED — do not edit.
+//
+// Source: design/locale_strings.json (sr)
+// Regenerate: dart run tool/gen_locale_strings.dart
+//
+// The wording is the SeatLayer runtime's own, so the drawn map and the native
+// chrome around it say the same things in the same words.
+
+import 'picker_strings.dart';
+
+String _seatsLeftSr(int count) => 'Преостало $count';
+
+String _moreCountSr(int count) => '+$count више';
+
+String _fromPriceSr(String money) => 'Од $money';
+
+String _ticketCountSr(int count) =>
+    count == 1 ? '$count улазница' : '$count улазница';
+
+String _findBestSeatsSr(int count) => count == 1
+    ? 'Пронађи $count најбоље место'
+    : 'Пронађи $count најбољих места';
+
+String _continueWithTotalSr(String money) => 'Настави \u00b7 $money';
+
+/// The `sr` defaults for the native picker chrome.
+const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
+  close: 'Затвори',
+  overview: 'Локација',
+  backToVenue: 'Назад на објекат',
+  cancel: 'Откажи',
+  select: 'Изабери',
+  viewFromHere: 'Поглед одавде',
+  openVenue360: 'Отвори објекат у 360°',
+  recentre: 'Поново центрирај на бину',
+  viewFromYourSeat: 'поглед са вашег места',
+  emptyTrayHint:
+      'Додирните место на плану или препустите нама да изаберемо најбоља доступна.',
+  anyTicketType: 'Било која врста улазнице',
+  anyVenueZone: 'Било која зона објекта',
+  bestSeats: 'Најбоља места',
+  showLess: 'Прикажи мање',
+  undo: 'Опозови',
+  holdAndCheckout: 'Резервиши места и плати',
+  poweredBy: 'Покреће SeatLayer',
+  testMode: 'ТЕСТ РЕЖИМ',
+  accessibility: 'Приступачност и боје',
+  accessibilityTitle: 'Приступачност и боје',
+  fitVenue: 'Прилагоди екрану',
+  loading: 'Учитавање плана места…',
+  errorMessage: 'План места се није учитао',
+  retry: 'Покушај поново',
+  hideLimitedView: 'Сакриј места са ограниченим погледом',
+  colorblindSafe: 'Боје прилагођене далтонизму',
+  seatsLeft: _seatsLeftSr,
+  moreCount: _moreCountSr,
+  fromPrice: _fromPriceSr,
+  ticketCount: _ticketCountSr,
+  findBestSeats: _findBestSeatsSr,
+  continueWithTotal: _continueWithTotalSr,
+);
