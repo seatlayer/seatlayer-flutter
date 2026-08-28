@@ -18,8 +18,11 @@ of it. A seat sold between the offer and the tap is a real race, and it is
 reported the way every failed hold is reported, with the seats left selected and
 unheld rather than claimed. `onHoldExpired` still fires, and
 `SeatLayerPickerOptions(announceHoldLapse: false)` leaves the moment entirely to
-the host. `SeatLayerPickerOptions(refreshOnResume: false)` turns the refresh
-itself off. The route half needs `SeatLayerPicker.routeObserver` in
+the host. `SeatLayerPickerOptions(refreshOnResume: false)` stops the SDK asking
+for a read of its own; an outcome the runtime volunteers on a foreground
+lifecycle is still applied, because it has already released the hold and
+discarding what it says would empty the buyer's cart without explaining it. The
+route half needs `SeatLayerPicker.routeObserver` in
 `MaterialApp.navigatorObservers`; without it the lifecycle half still works.
 New: `SeatLayerPickerController.refreshAvailability()`,
 `SeatLayerAvailabilityRefresh`, `SeatLayerHoldLapse`, `SeatLayerRecovery`,

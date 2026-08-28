@@ -248,6 +248,15 @@ class SeatLayerPickerOptions {
   /// works and nothing complains. Turning this off turns off BOTH triggers,
   /// for a host that refreshes on its own schedule.
   ///
+  /// It governs whether this SDK ASKS for a read — not whether it honours one
+  /// the runtime volunteers. A foreground `picker.lifecycle` re-reads
+  /// availability inside the runtime and the reply carries what it found, and
+  /// that outcome is applied whatever this is set to. It has to be: the
+  /// runtime has already cleared a hold that ran out, so throwing the answer
+  /// away would leave the buyer looking at an emptied cart with no account of
+  /// why. This is therefore not the switch for silence — [announceHoldLapse]
+  /// is, and it leaves [SeatLayerPickerCallbacks.onHoldExpired] firing.
+  ///
   /// Deliberately absent from [toBridgeConfig]: when to ask is a host-side
   /// decision about the host's own navigation, and the runtime has no view of
   /// either event.
