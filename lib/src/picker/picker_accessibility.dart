@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
+import 'picker_models.dart';
 import 'seat_layer_picker_scope.dart';
 import 'picker_styles.dart';
 import 'seat_layer_picker_theme.dart';
@@ -89,14 +90,32 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     var colorblind = initialColorblind;
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
-    // The needs the RUNTIME can filter by, in its own order, named from the
-    // string table. One the table has no name for is drawn under its wire key
-    // rather than dropped, so a need added on the runtime side is reachable
-    // before this side catches up.
-    final needs = <String, String>{
-      for (final key in strings.accessNeeds.keys)
-        key: strings.accessNeeds[key]!,
-    };
+    // What this EVENT actually offers, in the runtime's own order, named from
+    // the string table. One the table has no name for is drawn under its wire
+    // key rather than dropped, so a need added on the runtime side is
+    // reachable before this side catches up.
+    //
+    // A runtime that does not report its needs falls back to the full static
+    // list, which is what the sheet has always shown. The fallback is on an
+    // empty list rather than on the capability alone, because "reported
+    // nothing" and "reported that this venue offers nothing" are the same
+    // twelve dead chips either way, and the twelve are at least honest about
+    // what the filter can express.
+    final offered = controller.state.snapshot?.map.accessNeeds ??
+        const <SeatLayerAccessNeed>[];
+    final useOffered = controller.supportsAccessNeeds && offered.isNotEmpty;
+    final needs = <_AccessNeedChip>[
+      if (useOffered)
+        for (final need in offered)
+          _AccessNeedChip(
+            key: need.key,
+            label: strings.accessNeeds[need.key] ?? need.key,
+            count: need.count,
+          )
+      else
+        for (final entry in strings.accessNeeds.entries)
+          _AccessNeedChip(key: entry.key, label: entry.value),
+    ];
     // The sheet body is built INSIDE the scope and handed to the route, so the
     // route's builder — which runs under the Navigator overlay, above the
     // scope — still gets the picker's controller, strings and palette.
@@ -120,17 +139,30 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                     child: Wrap(
                       spacing: 7,
                       runSpacing: 7,
-                      children: needs.entries.map((entry) {
-                        final on = selected.contains(entry.key);
+                      children: needs.map((need) {
+                        final on = selected.contains(need.key);
+                        // A need with nothing free stays on the sheet and goes
+                        // dark. Removing it would say the venue has no such
+                        // seats, which is a different and usually wrong claim.
+                        final enabled = need.count == null || need.count! > 0;
                         return FilterChip(
                           selected: on,
-                          label: Text(entry.value),
-                          onSelected: (_) => setSheetState(() {
-                            selected = <String>{...selected};
-                            on
-                                ? selected.remove(entry.key)
-                                : selected.add(entry.key);
-                          }),
+                          label: Text(
+                            need.count == null || need.count == 0
+                                ? need.label
+                                : strings.accessNeedWithCount(
+                                    need.label,
+                                    need.count!,
+                                  ),
+                          ),
+                          onSelected: enabled
+                              ? (_) => setSheetState(() {
+                                    selected = <String>{...selected};
+                                    on
+                                        ? selected.remove(need.key)
+                                        : selected.add(need.key);
+                                  })
+                              : null,
                         );
                       }).toList(growable: false),
                     ),
@@ -188,4 +220,18 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
       await controller.setColorblindSafe(result.colorblind);
     }
   }
+}
+
+/// One chip on the accessibility sheet.
+///
+/// [count] is null when the runtime did not report one, which is the static
+/// fallback: no number is drawn and the chip stays live, because an unknown
+/// count is not a count of zero.
+@immutable
+class _AccessNeedChip {
+  const _AccessNeedChip({required this.key, required this.label, this.count});
+
+  final String key;
+  final String label;
+  final int? count;
 }

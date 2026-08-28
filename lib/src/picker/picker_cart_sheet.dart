@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'picker_best_seats.dart';
 import 'picker_cart_list.dart';
+import 'picker_hold_lapse.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
@@ -101,6 +102,11 @@ class SeatLayerCartSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Above the peek row, so it is read whether the sheet is open or
+            // shut: a buyer coming back from checkout is looking at a fifty
+            // point strip, and news about their seats cannot live inside a
+            // panel they would have to open first.
+            const SeatLayerHoldLapseNotice(),
             _PeekRow(
               expanded: expanded,
               hasTickets: hasTickets,

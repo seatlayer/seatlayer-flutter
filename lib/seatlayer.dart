@@ -33,6 +33,13 @@ export 'src/picker/picker_accessibility.dart'
 export 'src/picker/picker_adaptive_layout.dart'
     show SeatLayerPickerAdaptiveLayout;
 export 'src/picker/picker_attribution.dart' show SeatLayerPickerAttribution;
+export 'src/picker/picker_availability.dart'
+    show
+        SeatLayerAvailabilityRefresh,
+        SeatLayerHoldLapse,
+        SeatLayerRecovery,
+        seatLayerAccessNeedsCapability,
+        seatLayerAvailabilityRefreshCapability;
 export 'src/picker/picker_best_seats.dart' show SeatLayerBestSeatsForm;
 export 'src/picker/picker_builders.dart'
     show
@@ -49,6 +56,7 @@ export 'src/picker/picker_dock_bar.dart' show SeatLayerDockBar;
 export 'src/picker/picker_errors.dart' show SeatLayerPickerActionError;
 export 'src/picker/picker_floor_strip.dart' show SeatLayerFloorStrip;
 export 'src/picker/picker_haptics.dart' show PickerHapticCue;
+export 'src/picker/picker_hold_lapse.dart' show SeatLayerHoldLapseNotice;
 export 'src/picker/picker_header.dart'
     show SeatLayerPickerHeader, SeatLayerPickerHoldCountdown;
 export 'src/picker/picker_layout.dart' show SeatLayerPickerLayout;
@@ -89,8 +97,7 @@ export 'src/picker/picker_status_views.dart'
 export 'src/picker/picker_strings.dart' show SeatLayerPickerStrings;
 export 'src/picker/picker_styles.dart'
     show SeatLayerPickerStyles, SeatLayerSurfaceStyle, seatLayerStyleRole;
-export 'src/picker/picker_system_overlay.dart'
-    show seatLayerPickerOverlayStyle;
+export 'src/picker/picker_system_overlay.dart' show seatLayerPickerOverlayStyle;
 export 'src/picker/picker_tray_dense.dart'
     show
         SeatLayerTicketLine,
@@ -125,6 +132,5 @@ export 'src/picker/seat_layer_picker_theme.dart'
 export 'src/seat_layer_configuration.dart';
 export 'src/seat_layer_controller.dart';
 export 'src/seat_layer_error.dart';
-export 'src/seat_layer_prewarm.dart'
-    show seatLayerPrewarmDefaultTtl;
+export 'src/seat_layer_prewarm.dart' show seatLayerPrewarmDefaultTtl;
 export 'src/seat_layer_view.dart';

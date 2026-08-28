@@ -10,6 +10,7 @@ import '../seat_layer_configuration.dart';
 import '../seat_layer_prewarm.dart';
 import '../seat_layer_view.dart';
 import 'picker_adaptive_layout.dart';
+import 'picker_availability.dart';
 import 'picker_best_seats.dart';
 import 'picker_builders.dart';
 import 'picker_cart_list.dart';
@@ -72,6 +73,33 @@ class SeatLayerPicker extends StatelessWidget {
   /// Called when the buyer dismisses the picker; omit to hide the control.
   final VoidCallback? onClose;
 
+  /// Register this on your `MaterialApp` so the picker notices a route coming
+  /// back:
+  ///
+  /// ```dart
+  /// MaterialApp(
+  ///   navigatorObservers: <NavigatorObserver>[SeatLayerPicker.routeObserver],
+  ///   home: const MyHome(),
+  /// )
+  /// ```
+  ///
+  /// Pushing a checkout screen over the picker leaves it mounted and alive but
+  /// no longer looking: the application never backgrounded, so no lifecycle
+  /// event fires, and a buyer who backs out of checkout returns to a map that
+  /// was last true when they left it. With this observer registered the picker
+  /// re-reads availability on `didPopNext`, which is the exact moment it is in
+  /// front again.
+  ///
+  /// Entirely optional. Without it the picker simply never receives the route
+  /// callbacks — no exception, no assertion, and the lifecycle trigger still
+  /// covers the buyer leaving the application. Turn both off with
+  /// [SeatLayerPickerOptions.refreshOnResume].
+  ///
+  /// One observer for the whole application: a `RouteObserver` may be attached
+  /// to only one Navigator, and every picker in the app subscribes to this one.
+  static final RouteObserver<PageRoute<dynamic>> routeObserver =
+      RouteObserver<PageRoute<dynamic>>();
+
   /// Start the runtime page now, so a picker opened later mounts onto it.
   ///
   /// **Call this from the screen the buyer is already on** — the event details
@@ -131,13 +159,76 @@ class SeatLayerPicker extends StatelessWidget {
         // everything the palette does: an `auto` device flip, the organizer's
         // branding arriving, and the immersive scene coming up.
         child: PickerSystemOverlay(
-          child: SeatLayerPickerAdaptiveLayout(
-            onCheckout: onCheckout,
-            onClose: onClose,
-            builders: builders,
+          child: _PickerRouteResume(
+            child: SeatLayerPickerAdaptiveLayout(
+              onCheckout: onCheckout,
+              onClose: onClose,
+              builders: builders,
+            ),
           ),
         ),
       );
+}
+
+/// Refreshes availability when a route pushed over the picker pops back.
+///
+/// Deliberately a separate widget rather than more work inside
+/// [SeatLayerPickerMap]: the map owns the application lifecycle, this owns the
+/// navigator, and the two triggers fire in different circumstances — a payment
+/// sheet pushed in-app never backgrounds anything.
+class _PickerRouteResume extends StatefulWidget {
+  const _PickerRouteResume({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_PickerRouteResume> createState() => _PickerRouteResumeState();
+}
+
+class _PickerRouteResumeState extends State<_PickerRouteResume>
+    with RouteAware {
+  ModalRoute<dynamic>? _subscribedTo;
+  SeatLayerPickerController? _picker;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Read here rather than from the callback: `didPopNext` runs outside a
+    // build, and taking an inherited dependency there is how a widget ends up
+    // subscribed to a scope it is no longer under.
+    _picker = SeatLayerPickerScope.controllerOf(context);
+    final route = ModalRoute.of(context);
+    if (identical(route, _subscribedTo)) return;
+    if (_subscribedTo != null) SeatLayerPicker.routeObserver.unsubscribe(this);
+    _subscribedTo = null;
+    // Only a PageRoute: the observer is typed to those, and a picker inside a
+    // dialog or a bottom sheet has no "came back" moment of this kind.
+    if (route is PageRoute<dynamic>) {
+      SeatLayerPicker.routeObserver.subscribe(this, route);
+      _subscribedTo = route;
+    }
+  }
+
+  @override
+  void didPopNext() {
+    // Reached only when the host registered `SeatLayerPicker.routeObserver`;
+    // an unregistered observer never calls back, which is the silent degrade.
+    final picker = _picker;
+    if (!mounted || picker == null) return;
+    if (!picker.options.refreshOnResume) return;
+    unawaited(picker.refreshAvailability().catchError(
+          (Object _) => const SeatLayerAvailabilityRefresh.unsupported(),
+        ));
+  }
+
+  @override
+  void dispose() {
+    if (_subscribedTo != null) SeatLayerPicker.routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// The drawn seat map: geometry, seats, labels, hit testing and the 3D scene.
@@ -183,7 +274,19 @@ class _SeatLayerPickerMapState extends State<SeatLayerPickerMap>
       AppLifecycleState.hidden => 'hidden',
     };
     unawaited(picker.setLifecycle(lifecycle).catchError((_) {}));
-    if (state == AppLifecycleState.resumed) {
+    if (state != AppLifecycleState.resumed) return;
+    // A refresh already answers with a snapshot, so on a runtime that can do
+    // one there is nothing left for `picker.getSnapshot` to fetch. Sending
+    // both would be two round trips and two revisions for one answer, and the
+    // refresh is the one that also reports what the buyer lost.
+    final refreshing =
+        SeatLayerPickerScope.optionsOf(context).refreshOnResume &&
+            picker.supportsAvailabilityRefresh;
+    if (refreshing) {
+      unawaited(picker.refreshAvailability().catchError(
+            (Object _) => const SeatLayerAvailabilityRefresh.unsupported(),
+          ));
+    } else {
       unawaited(picker.synchronize().catchError((_) {}));
     }
   }
