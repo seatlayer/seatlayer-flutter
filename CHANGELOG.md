@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2
+
+Documentation only. The package page now shows the picker in motion: an
+animated walkthrough of the buyer flow and a still of a focused section
+replace the older example capture.
+
 ## 0.3.1
 
 Defects found on a phone, and the additive native-chrome contract that came out
