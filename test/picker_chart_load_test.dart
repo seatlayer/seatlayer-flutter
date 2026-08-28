@@ -16,7 +16,7 @@ import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
 
-/// The trace the pilot's iOS Simulator produced, verbatim from the contract.
+/// A trace in the shape the contract documents.
 Map<String, Object?> _trace({Map<String, Object?> overrides = const {}}) =>
     <String, Object?>{
       'event': 'ev_reference',

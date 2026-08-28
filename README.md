@@ -298,8 +298,8 @@ runtime has said a word — and all of it can happen while the buyer is still
 reading the event page. Call `SeatLayerPicker.prewarm()` from that screen's
 `initState`.
 
-**Measured on the pilot** (iOS Simulator, debug build, three runs each, tap to
-ready): median **3,262 ms → 2,192 ms — 1,070 ms off the open, −33 %**. The
+**Measured on a reference app** (iOS Simulator, debug build, three runs each,
+tap to ready): median **3,262 ms → 2,192 ms — 1,070 ms off the open, −33 %**. The
 bridge-side span moved 2,104 ms → 1,082 ms, so the saving is in the WebView, not
 the renderer.
 
@@ -377,8 +377,8 @@ callbacks: SeatLayerPickerCallbacks(
 
 `tapToReadyMs` starts when the picker **mounted**, so it is the same T0 with or
 without `prewarm()` and a prewarm shows up as a smaller number rather than a
-hidden one. `hostMs` is that span less the page's own `bootMs`: on the pilot's
-3,513 ms cold open, 2,495 ms. Everything else the renderer measured is on
+hidden one. `hostMs` is that span less the page's own `bootMs`: on a reference
+app's 3,513 ms cold open, 2,495 ms. Everything else the renderer measured is on
 `load.trace`, with unmodelled fields kept verbatim on `load.trace.raw`.
 `SeatLayerPickerController.onChartLoad` is the same record as a stream. It fires
 once per render attempt, success or failure. **The SDK logs nothing and sends
@@ -428,7 +428,7 @@ does nothing. Its state arrives as complete `seatlayer.picker.snapshot/1`
 replacements with a session id and a monotonic revision; Dart drops stale
 revisions and serializes inventory-changing actions, repeated checkout taps
 included. Private buyer tokens stay in memory and never enter a snapshot. See
-[the picker architecture and rollout](doc/mobile-picker-architecture-and-rollout.md)
+[the picker architecture](doc/mobile-picker-architecture.md)
 for the bridge schema, ownership rules and validation gates.
 
 ## Design system

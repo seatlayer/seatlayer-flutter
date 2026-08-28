@@ -77,7 +77,7 @@ class SeatLayerPicker extends StatelessWidget {
   /// **Call this from the screen the buyer is already on** — the event
   /// details page, the moment it appears. Opening the picker costs a WebView
   /// process start and a document fetch before the runtime has said a word;
-  /// measured on the Reference app pilot that is most of the wait, and all of it
+  /// measured on a reference app that is most of the wait, and all of it
   /// can happen while the buyer is still reading. There is no event and no
   /// buyer token involved: only the immutable page is loaded, and everything
   /// about the session still travels at `init` when the picker opens.

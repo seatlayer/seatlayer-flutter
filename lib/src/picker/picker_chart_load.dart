@@ -241,7 +241,7 @@ class SeatLayerChartLoadTrace {
 /// is the number a buyer feels. This is both halves in one object: [trace] is
 /// what the page measured, [tapToReadyMs] is what the SDK measured, and
 /// [hostMs] is the difference — the WebView construction and the host's own
-/// work, which on the pilot's cold open was more than two thirds of the wait.
+/// work, which on a measured cold open was more than two thirds of the wait.
 ///
 /// Nothing here is logged or transmitted by the SDK.
 @immutable

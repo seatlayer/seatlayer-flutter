@@ -25,10 +25,8 @@ dart run tool/gen_tokens.dart --check  # fail if the generated file is stale
 that generated file, and `test/design_tokens_test.dart` both compares them
 against the JSON and runs the `--check` guard, so the two cannot drift.
 
-## Planned move
+## One source for every mobile SDK
 
-This directory is the first home, not the final one. `tokens.json` is due to
-move to the runtime repository as
-`packages/core/design/picker-tokens.json`, where the same file will feed Swift,
-Kotlin and TypeScript generators alongside the Dart one. Keep it free of any
-key that only Dart could consume, so that move stays a file copy.
+`tokens.json` is the design source for the SeatLayer mobile SDKs, not for the
+Dart one alone: the same file is what a Swift, Kotlin or TypeScript generator
+reads. Keep it free of any key only Dart could consume.

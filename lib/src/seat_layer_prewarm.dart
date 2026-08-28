@@ -20,8 +20,8 @@ const Duration seatLayerPrewarmDefaultTtl = Duration(minutes: 5);
 
 /// How long a warm page's own handshake is still worth adopting.
 ///
-/// **Measured on the pilot, and the reason a prewarm is a warm WebView rather
-/// than a warm session.** The runtime page starts its own clock the moment it
+/// **Measured, and the reason a prewarm is a warm WebView rather than a warm
+/// session.** The runtime page starts its own clock the moment it
 /// loads and gives up on the host after ten seconds
 /// (`sys.error {code: 'host_timeout'}`, `bridge/host.ts`). A buyer who reads
 /// an event page for a minute and then taps would have been handed a page that

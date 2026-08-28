@@ -17,7 +17,7 @@ import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
 
-/// The pilot's own brand: Reference app red.
+/// A host brand that is nothing like the picker's own accent.
 const Color _brandRed = Color(0xFFE54558);
 
 ColorScheme _scheme(Brightness brightness) =>

@@ -3,7 +3,7 @@
 // `SeatLayerPickerPage` hands its top inset to a SafeArea rather than to the
 // header, so whatever the Scaffold paints shows through above the header. A
 // bare Scaffold paints the HOST application's `scaffoldBackgroundColor`, which
-// put a white band over a dark picker on the pilot's first dark screenshot.
+// put a white band over a dark picker on the first dark screenshot.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';

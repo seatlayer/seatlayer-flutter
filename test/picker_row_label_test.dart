@@ -22,7 +22,7 @@ void main() {
   });
 
   test('an ALL-CAPS abbreviation of the section comes off too', () {
-    // The shape the pilot showed: `GALL-H` printed under a section already
+    // The shape a real chart showed: `GALL-H` printed under a section already
     // named `Gallery`, and `ORCH-A` under `Orchestra`.
     expect(pickerRowLabel('GALL-H', 'Gallery'), 'H');
     expect(pickerRowLabel('ORCH-A', 'Orchestra'), 'A');

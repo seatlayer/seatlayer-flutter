@@ -2,12 +2,11 @@
 
 ## 0.3.1
 
-Defects the owner found on a phone, the three things the perf round said the
-SDK owned, and the additive native-chrome contract that came out of it: the
-chart-load beacon, the seat-view panorama's words, and the floor strip's
-confirmed shape.
+Defects found on a phone, the three the load measurements said the SDK owned,
+and the additive native-chrome contract that came out of them: the chart-load
+record, the seat-view panorama's words, and the floor strip's confirmed shape.
 
-**The system bars are the picker's** — the reported defect
+**The system bars are the picker's**
 
 - The clock, the wifi glyph and the battery are drawn by the operating system
   on a surface the picker owns, and nothing was telling it which side that
@@ -17,8 +16,8 @@ confirmed shape.
   Android `statusBarIconBrightness` names the glyphs, and both are filled in —
   so it follows an `auto` flip live and goes dark for the immersive 3D scene
   whatever side the picker is painted on. The page's own top safe-area strip
-  follows the scene palette with it, which closes the residual round five
-  recorded: a white band above a black 3D view.
+  follows the scene palette with it, which closes a residual defect from the
+  release before: a white band above a black 3D view.
 - `SeatLayerPickerChromeOptions.manageSystemOverlays` (default true) opts out a
   host that owns its own bars, and `seatLayerPickerOverlayStyle` is exported so
   it can still ask what the picker would have set.
@@ -51,8 +50,8 @@ confirmed shape.
   the view armed its handshake; neither is what the buyer felt.
   `SeatLayerChartLoad.tapToReadyMs` starts at the picker's **mount** — the frame
   after the tap — so it is the same T0 whether or not the page was prewarmed,
-  and `hostMs` is that span less the page's own `bootMs`. On the pilot's
-  3,513 ms cold open that outside-the-page share was 2,495 ms.
+  and `hostMs` is that span less the page's own `bootMs`. On the reference
+  app's 3,513 ms cold open that outside-the-page share was 2,495 ms.
 - Reached as `SeatLayerPickerController.onChartLoad` (a broadcast stream) or
   `SeatLayerPickerCallbacks(onChartLoad:)`. Fires once per render attempt,
   success or failure. **Nothing is logged and nothing is sent anywhere** — it is
@@ -111,12 +110,10 @@ confirmed shape.
 - Idempotent. An unclaimed page expires (default five minutes) and is dropped
   on memory pressure, blanked to `about:blank` before it is dereferenced.
   `SeatLayerPicker.cancelPrewarm()` gives it back early.
-- **Measured on the Reference app pilot**, iOS Simulator `iOS Simulator`
-  (iOS 26.5), event `27 aug event seatlayer`, debug build, hosted runtime
-  `seatlayer-js@0.71.3`. Three runs each, same warm app process, tap on
-  **BOOK NOW** to `sys.ready`, with a ten-second dwell on the event screen —
-  long enough that the prewarmed page is the re-loaded one, which is the
-  ordinary case.
+- **Measured on a reference app**, iOS Simulator, debug build. Three runs each,
+  same warm app process, tap to `sys.ready`, with a ten-second dwell on the
+  event screen — long enough that the prewarmed page is the re-loaded one,
+  which is the ordinary case.
 
   | | run 1 | run 2 | run 3 | median |
   | --- | ---: | ---: | ---: | ---: |
@@ -128,7 +125,7 @@ confirmed shape.
   the diagnosis said it was: the WebView, not the runtime.
 
   The first version of this shipped a warm *session* rather than a warm
-  WebView, and the pilot caught it: a page prewarmed and then left for a minute
+  WebView, and the reference app caught it: a page left for a minute
   had already emitted `sys.error {code: 'host_timeout'}`, so the picker opened
   on an error. A page past
   `seatLayerPrewarmHandshakeWindow` is re-loaded when it is claimed.

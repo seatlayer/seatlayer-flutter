@@ -1,5 +1,5 @@
 // Opening the picker spends a WebView process start and a document fetch
-// before the runtime has said a word. Measured on the Reference app pilot that is
+// before the runtime has said a word. Measured on a reference app that is
 // most of the wait — and all of it can happen while the buyer is still
 // reading the event page. `SeatLayerPicker.prewarm()` is that head start.
 //

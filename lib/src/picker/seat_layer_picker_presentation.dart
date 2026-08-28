@@ -179,7 +179,7 @@ class _SeatLayerPickerPageState extends State<SeatLayerPickerPage> {
   ///
   /// In the immersive scene that surface is the dark venue, so the strip
   /// follows the scene palette too — otherwise a light picker keeps a white
-  /// band above a black 3D view, which is the residual round five recorded.
+  /// band above a black 3D view.
   Widget _scaffold(Widget content) => _withResolvedTheme(
         content,
         (context, theme, child) =>

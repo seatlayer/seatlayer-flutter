@@ -1,5 +1,5 @@
 {
-  "source": "seatlayer-runtime packages/core/src/i18n/locales",
+  "source": "the SeatLayer runtime locale dictionaries",
   "strings": {
     "ar": {
       "close": "إغلاق",
