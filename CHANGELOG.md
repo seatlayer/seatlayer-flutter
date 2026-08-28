@@ -1,12 +1,21 @@
 # Changelog
 
-## 0.3.0-dev.5 (unreleased)
+## 0.3.0
 
 Phone parity round. The native chrome is rebuilt against the web picker's
 measured phone layout, and the package is prepared for a stable 0.3.0.
 
-**Native chrome contract** (needs a runtime advertising it; consumed
-capability-gated, so the hosted 0.70.0 build behaves exactly as before)
+**Runtime pin**
+
+- The hosted runtime moves to `seatlayer-js@0.71.3`. Views load
+  `https://cdn.seatlayer.io/seatlayer-js@0.71.3/mobile.html`, which advertises
+  protocol `1..2` plus the `native-chrome-contract-v1` and `viewport-insets-v1`
+  capabilities this release consumes. The offline demo/test fixture stays on its
+  byte-verified vendored `seatlayer-js@0.68.0` artifact — re-vendoring it is a
+  separate change from moving production onto a new hosted runtime.
+
+**Native chrome contract** (capability-gated at the handshake, so an app pinned
+to an older hosted runtime behaves exactly as it did before)
 
 - `SeatLayerViewportInsets` and
   `SeatLayerPickerController.setViewportInsets` report how much of the map

@@ -7,7 +7,7 @@ import 'payloads.dart';
 const String seatLayerSdkVersion = '0.3.0-dev.5';
 
 /// The immutable hosted web runtime used by production views.
-const String seatLayerHostedWebVersion = '0.70.0';
+const String seatLayerHostedWebVersion = '0.71.3';
 
 /// Runtime retained only for the example app's explicit offline fixture.
 ///
