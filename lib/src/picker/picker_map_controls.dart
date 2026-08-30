@@ -9,10 +9,11 @@ import 'seat_layer_picker_theme.dart';
 
 /// The controls that sit on the map itself.
 ///
-/// On a phone they go to the corners — accessibility bottom-left, fit-to-screen
-/// bottom-right, Map/3D top-right — because a vertical stack of six circles at
-/// one edge is a toolbar drawn over the venue the buyer is trying to read. The
-/// zoom pair is absent by default: pinch already does it, better.
+/// On a phone they go to the corners — accessibility bottom-left, Map/3D
+/// top-right, and one contextual camera action bottom-right. That action is
+/// zoom-out while inside a section and fit-to-screen at the venue overview.
+/// The full zoom pair is absent by default: pinch already handles continuous
+/// zoom without drawing a toolbar over the venue.
 ///
 /// The wide layout keeps the vertical rail, where there is room for it.
 class SeatLayerPickerMapControls extends StatelessWidget {
@@ -114,6 +115,11 @@ class _CornerControls extends StatelessWidget {
     // While the immersive scene is up there is no flat map to fit, filter or
     // pan, and SeatLayerVenue3D owns that corner. Only the way back stays.
     final onMap = !(state.snapshot?.map.isVenue3D ?? false);
+    final phoneZoomPair = chrome.zoomControlsFor(phone: true);
+    final canStepOut = onMap &&
+        chrome.showZoomToFitControl &&
+        !phoneZoomPair &&
+        state.snapshot?.map.focusedSection != null;
     return Stack(
       children: <Widget>[
         if (has3D)
@@ -128,13 +134,19 @@ class _CornerControls extends StatelessWidget {
             bottom: bottom,
             child: const SeatLayerPickerAccessibilityFilters(compact: true),
           ),
-        if (onMap && chrome.showZoomToFitControl)
+        if (canStepOut)
+          Positioned(
+            right: inset,
+            bottom: bottom,
+            child: const SeatLayerPickerOverviewButton(),
+          )
+        else if (onMap && chrome.showZoomToFitControl)
           Positioned(
             right: inset,
             bottom: bottom,
             child: const SeatLayerPickerZoomToFitButton(),
           ),
-        if (onMap && chrome.zoomControlsFor(phone: true))
+        if (onMap && phoneZoomPair)
           Positioned(
             right: inset,
             bottom: bottom + 42,
@@ -364,6 +376,11 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final map = controller.state.snapshot?.map;
     if (map?.isVenue3D != true) return const SizedBox.shrink();
+    final bundle = controller.mapController.bundleInfo;
+    if (bundle?.supportsCapability('venue-3d-controls-v1') != true ||
+        bundle?.supportsCommand('picker.setVenue3DNavigationMode') != true) {
+      return const SizedBox.shrink();
+    }
     final moving = map!.view3DNavigationMode == SeatLayer3DNavigationMode.move;
     return _ControlButton(
       icon: moving ? Icons.open_with_rounded : Icons.threesixty_rounded,

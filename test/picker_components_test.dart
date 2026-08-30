@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/bridge/bridge_client.dart';
+import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_status_views.dart';
@@ -19,14 +20,20 @@ import 'package:seatlayer/src/seat_layer_controller.dart';
 import 'package:seatlayer/src/seat_layer_error.dart';
 
 import 'picker_test_fixture.dart';
+import 'picker_widget_harness.dart' show nativeChromeBundle;
 
 final class _FakeMapController extends SeatLayerController {
-  _FakeMapController({this.handler});
+  _FakeMapController({this.handler, this.bundle});
 
   final Future<Object?> Function(String command, Object? payload)? handler;
+  final BundleInfo? bundle;
   final events = StreamController<EventSignal>.broadcast();
   final calls = <(String, Object?)>[];
   Map<String, Object?> current = pickerSnapshot();
+  int _sequence = 0;
+
+  @override
+  BundleInfo? get bundleInfo => bundle;
 
   @override
   Stream<EventSignal> get onBridgeEvent => events.stream;
@@ -42,8 +49,17 @@ final class _FakeMapController extends SeatLayerController {
   void emit(Map<String, Object?> snapshot) {
     current = snapshot;
     events.add(
-      EventSignal(name: 'picker.snapshot', payload: snapshot, sequence: 1),
+      EventSignal(
+        name: 'picker.snapshot',
+        payload: snapshot,
+        sequence: ++_sequence,
+      ),
     );
+  }
+
+  void emitEvent(String name, Object? payload) {
+    events
+        .add(EventSignal(name: name, payload: payload, sequence: ++_sequence));
   }
 
   @override
@@ -264,6 +280,33 @@ void main() {
     expect(confirmed, isTrue);
   });
 
+  testWidgets('wide confirmation price follows the pending ticket tier',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    await tester.pumpWidget(
+      _app(map, const SeatLayerPickerSeatConfirmation()),
+    );
+    map.emit(tieredSeatSnapshot());
+    await tester.pump();
+
+    expect(find.text('€100'), findsNWidgets(2));
+    expect(find.text('€60'), findsOneWidget);
+
+    await tester.tap(find.text('Child'));
+    await tester.pump();
+
+    expect(find.text('€100'), findsOneWidget);
+    expect(find.text('€60'), findsNWidgets(2));
+
+    await tester.tap(find.text('Select'));
+    await tester.pump();
+    expect(
+      map.calls.where((call) => call.$1 == 'picker.setSeatTier').single.$2,
+      <String, Object?>{'seatId': 'seat-a-1', 'tierId': 'child'},
+    );
+  });
+
   testWidgets('seat inspection actions stack on a narrow confirmation card',
       (tester) async {
     final map = _FakeMapController();
@@ -309,7 +352,7 @@ void main() {
     expect(map.calls.single.$2, <String, Object?>{'seatId': 'seat-a-1'});
   });
 
-  testWidgets('seat confirmation stays mounted until immersive view is ready',
+  testWidgets('seat confirmation waits for reported immersive state',
       (tester) async {
     final map = _FakeMapController();
     addTearDown(map.dispose);
@@ -335,7 +378,131 @@ void main() {
     ready.complete();
     await tester.pumpAndSettle();
 
+    // A completed custom callback is not proof that an immersive surface is
+    // mounted; the card only stands down for runtime-reported panorama/3D.
+    expect(find.text('Select'), findsOneWidget);
+  });
+
+  testWidgets(
+      'turnkey inspection stays pending through panorama and 3D, then restores',
+      (tester) async {
+    final map = _FakeMapController(
+      bundle: nativeChromeBundle(
+        capabilities: const <String>[
+          'native-chrome-contract-v1',
+          'viewport-insets-v1',
+          'native-seat-view-chrome-v1',
+        ],
+        commands: const <String>[
+          'picker.setThemeMode',
+          'picker.setViewportInsets',
+          'picker.setInteractionEnabled',
+        ],
+      ),
+    );
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(map.dispose);
+    addTearDown(picker.dispose);
+    const mapKey = ValueKey<String>('inspection-map-platform-view-double');
+    await tester.pumpWidget(
+      _app(
+        map,
+        SeatLayerPickerAdaptiveLayout(
+          onCheckout: _noopCheckout,
+          builders: SeatLayerPickerBuilders(
+            map: (context, part) => const SizedBox.expand(key: mapKey),
+          ),
+        ),
+        pickerController: picker,
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    IgnorePointer mapGate() => tester.widget<IgnorePointer>(
+          find.byWidgetPredicate(
+            (widget) => widget is IgnorePointer && widget.child?.key == mapKey,
+          ),
+        );
+
+    expect(find.text('Select'), findsOneWidget);
+    expect(picker.confirmedTicketCount, 0);
+    expect(picker.seatAwaitingConfirmation?.id, 'seat-a-1');
+
+    map.emit(pickerSnapshot(revision: 2, holdOwner: 'picker'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select'), findsOneWidget);
+    expect(picker.confirmedTicketCount, 0);
+    expect(picker.seatAwaitingConfirmation?.id, 'seat-a-1');
+
+    map.emitEvent('seatView.changed', <String, Object?>{
+      'seatView': <String, Object?>{
+        'seatId': 'seat-a-1',
+        'title': 'View from Gallery · A-1',
+        'real': true,
+        'generated': false,
+      },
+    });
+    await tester.pumpAndSettle();
+
     expect(find.text('Select'), findsNothing);
+    expect(mapGate().ignoring, isFalse);
+    expect(
+      find.byKey(
+        const ValueKey<String>('seatlayer-picker-prompt-transition'),
+      ),
+      findsNothing,
+    );
+    expect(
+      map.calls
+          .where((call) => call.$1 == 'picker.setInteractionEnabled')
+          .last
+          .$2,
+      <String, Object?>{'enabled': true},
+    );
+    expect(picker.confirmedTicketCount, 0);
+    expect(picker.seatAwaitingConfirmation?.id, 'seat-a-1');
+
+    map.emitEvent(
+      'seatView.changed',
+      <String, Object?>{'seatView': null},
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select'), findsOneWidget);
+    expect(
+      find.byKey(
+        const ValueKey<String>('seatlayer-picker-prompt-transition'),
+      ),
+      findsOneWidget,
+    );
+    expect(picker.confirmedTicketCount, 0);
+
+    final in3D = pickerSnapshot(revision: 4, holdOwner: 'picker');
+    final mapState = in3D['map']! as Map<String, Object?>;
+    mapState['buyerView'] = 'venue3d';
+    mapState['view3dTargetSeatId'] = 'seat-a-1';
+    map.emit(in3D);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select'), findsNothing);
+    expect(mapGate().ignoring, isFalse);
+    expect(
+      find.byKey(
+        const ValueKey<String>('seatlayer-picker-prompt-transition'),
+      ),
+      findsNothing,
+    );
+    expect(picker.confirmedTicketCount, 0);
+    expect(picker.seatAwaitingConfirmation?.id, 'seat-a-1');
+
+    map.emit(pickerSnapshot(revision: 5, holdOwner: 'picker'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select'), findsOneWidget);
+    expect(picker.confirmedTicketCount, 0);
+    expect(picker.seatAwaitingConfirmation?.id, 'seat-a-1');
   });
 
   testWidgets('turnkey prompt removes the map platform view from hit testing',

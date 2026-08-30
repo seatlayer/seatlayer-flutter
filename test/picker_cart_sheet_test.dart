@@ -43,7 +43,7 @@ void main() {
     expect(find.text('Continue · €25'), findsOneWidget);
     // The tray form is the only way into best seats.
     expect(find.text('Best seats'), findsNothing);
-    expect(_sheetHeight(tester), 50);
+    expect(_sheetHeight(tester), 44);
   });
 
   testWidgets('an empty peek offers the cheapest ticket, not a button',
@@ -64,6 +64,39 @@ void main() {
 
     expect(find.text('From €25'), findsOneWidget);
     expect(find.textContaining('Continue'), findsNothing);
+  });
+
+  testWidgets('the collapsed safe area carries required attribution only',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    Widget subject() => Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              padding: const EdgeInsets.only(bottom: 34),
+            ),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: _sheet(expanded: false),
+            ),
+          ),
+        );
+    await tester.pumpWidget(pickerHarness(map, subject()));
+    map.emit(pickerSnapshot(withSelection: false));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Powered by SeatLayer'), findsOneWidget);
+    expect(_sheetHeight(tester), 78);
+
+    final hidden = pickerSnapshot(revision: 2, withSelection: false);
+    (hidden['branding']! as Map<String, Object?>)['attributionRequired'] =
+        false;
+    map.emit(hidden);
+    await tester.pumpAndSettle();
+    expect(find.text('Powered by SeatLayer'), findsNothing);
+    expect(_sheetHeight(tester), 78);
   });
 
   testWidgets('the expanded header states the count once', (tester) async {

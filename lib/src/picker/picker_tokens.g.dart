@@ -111,8 +111,8 @@ abstract final class SeatLayerSizeTokens {
   /// `52`
   static const double dockBarHeight = 52;
 
-  /// `50`
-  static const double peekHeight = 50;
+  /// `44`
+  static const double peekHeight = 44;
 
   /// `0.6`
   static const double sheetMaxHeightFraction = 0.6;
@@ -432,4 +432,108 @@ abstract final class SeatLayerStringTokens {
 
   /// {n} could not be recovered
   static const String seatsNotRecovered = '{n} could not be recovered';
+
+  /// Remove ticket
+  static const String removeSeat = 'Remove ticket';
+
+  /// Expand cart
+  static const String expandCart = 'Expand cart';
+
+  /// Collapse cart
+  static const String collapseCart = 'Collapse cart';
+
+  /// Rotate venue
+  static const String orbitMode = 'Rotate venue';
+
+  /// Move venue
+  static const String panMode = 'Move venue';
+
+  /// General admission
+  static const String generalAdmission = 'General admission';
+
+  /// Choose the number of guests for this table
+  static const String chooseTableGuests =
+      'Choose the number of guests for this table';
+
+  /// Confirm table
+  static const String confirmTable = 'Confirm table';
+
+  /// Add tickets
+  static const String addTickets = 'Add tickets';
+
+  /// Select a ticket type
+  static const String selectTicketTier = 'Select a ticket type';
+
+  /// Requires the adjacent wheelchair place.
+  static const String tierCompanionGuidance =
+      'Requires the adjacent wheelchair place.';
+
+  /// {count} places currently available
+  static const String placesAvailable = '{count} places currently available';
+
+  /// Continue · {money}
+  static const String continueWithTotal = 'Continue · {money}';
+
+  /// Continue
+  static const String continueWord = 'Continue';
+
+  /// From {price}
+  static const String fromPrice = 'From {price}';
+
+  /// Find {count} best seats
+  static const String findBestSeats = 'Find {count} best seats';
+
+  /// Find {count} best seat
+  static const String findBestSeatsOne = 'Find {count} best seat';
+
+  /// Find {count} best seats
+  static const String findBestSeatsOther = 'Find {count} best seats';
+
+  /// {clock}
+  static const String heldFor = '{clock}';
+
+  /// +{count} more
+  static const String moreCount = '+{count} more';
+
+  /// Drag to move venue
+  static const String moveVenue = 'Drag to move venue';
+
+  /// Place {place}
+  static const String placeNumberIdentity = 'Place {place}';
+
+  /// Select them again
+  static const String reselectSeats = 'Select them again';
+
+  /// {parts}
+  static const String seatIdentity = '{parts}';
+
+  /// {count} seats
+  static const String seatsFree = '{count} seats';
+
+  /// {count} seat
+  static const String seatsFreeOne = '{count} seat';
+
+  /// {count} seats
+  static const String seatsFreeOther = '{count} seats';
+
+  /// {count} left
+  static const String seatsLeft = '{count} left';
+
+  /// {count} tickets
+  static const String ticketCount = '{count} tickets';
+
+  /// {count} ticket
+  static const String ticketCountOne = '{count} ticket';
+
+  /// {count} tickets
+  static const String ticketCountOther = '{count} tickets';
+
+  /// Row {row}
+  static const String rowIdentity = 'Row {row}';
+
+  /// Drag to rotate venue
+  static const String rotateVenue = 'Drag to rotate venue';
+
+  /// Seat {seat}
+  static const String seatNumberIdentity = 'Seat {seat}';
 }

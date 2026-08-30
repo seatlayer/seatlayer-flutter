@@ -162,7 +162,20 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   @internal
   SelectedSeat? get unansweredSeat {
     if (_options.readOnly || !_options.confirmSelection) return null;
-    if (value.hold != null) return null;
+    if (value.hold != null) {
+      // A hold present at startup is authoritative and needs no new question.
+      // If the runtime starts its picker hold while a card is already open,
+      // retain only that exact unanswered seat: inspecting it did not press
+      // Select, and it must remain excluded from cart/checkout totals.
+      final retained = _confirmCardSeat;
+      if (retained == null || _confirmedLabels.contains(retained.label)) {
+        return null;
+      }
+      for (final seat in value.selection.reversed) {
+        if (seat.id == retained.id && seat.label == retained.label) return seat;
+      }
+      return null;
+    }
     for (final seat in value.selection.reversed) {
       if (!_confirmedLabels.contains(seat.label)) return seat;
     }
@@ -1010,9 +1023,13 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       );
 
   /// Open the authored or chart-derived 360° view-from-seat surface.
-  Future<void> openSeatView(SelectedSeat seat) => _mutation(
+  Future<void> openSeatView(SelectedSeat seat) => openSeatViewById(seat.id);
+
+  /// Open the authored or chart-derived 360° surface for a runtime-reported
+  /// 3D target that is not necessarily part of the cart selection.
+  Future<void> openSeatViewById(String seatId) => _mutation(
         'picker.openSeatView',
-        <String, Object?>{'seatId': seat.id},
+        <String, Object?>{'seatId': seatId},
         SeatLayerPickerBusyAction.changingView,
       );
 

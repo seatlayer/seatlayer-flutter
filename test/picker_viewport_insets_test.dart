@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 
 import 'fake_webview_platform.dart';
 import 'picker_test_fixture.dart';
@@ -36,10 +37,14 @@ void main() {
       (tester) async {
     final map = FakePickerMap(bundle: nativeChromeBundle());
     addTearDown(map.dispose);
+    final controller = SeatLayerPickerController(mapController: map);
+    addTearDown(controller.dispose);
     useFakeWebViewPlatform();
     usePhoneSurface(tester);
 
-    await tester.pumpWidget(pickerHarness(map, _layout()));
+    await tester.pumpWidget(
+      pickerHarness(map, _layout(), controller: controller),
+    );
     map.emit(pickerSnapshot(sections: pickerSections(), rung: 'overview'));
     await tester.pumpAndSettle();
 
@@ -56,10 +61,16 @@ void main() {
     );
 
     map.emit(
-      pickerSnapshot(revision: 2, sections: pickerSections(), rung: 'seats'),
+      pickerSnapshot(
+        revision: controller.state.revision + 1,
+        sections: pickerSections(),
+        rung: 'seats',
+      ),
     );
     await tester.pumpAndSettle();
 
+    expect(controller.state.snapshot?.map.rung, 'seats');
+    expect(controller.state.snapshot?.map.focusedSectionId, 'section-a');
     final focused = _insetPayloads(map).last! as Map<String, Object?>;
     expect(
       focused['bottom'],
@@ -225,8 +236,8 @@ void main() {
     final inScene = _insetPayloads(map).last! as Map<String, Object?>;
 
     expect(inScene, isNot(onMap));
-    // 46 clear of the legend + a 36pt pill + 8 + the 20pt badge under it.
-    expect(inScene['top'], 110.0);
+    // 46 clear of the legend + a 44pt pill + 8 + the 20pt badge under it.
+    expect(inScene['top'], 118.0);
     // 10 + the dock + the seat deck, which has a caption once the buyer is
     // sitting somewhere.
     expect(
@@ -240,16 +251,28 @@ void main() {
       (tester) async {
     final map = FakePickerMap(bundle: nativeChromeBundle());
     addTearDown(map.dispose);
+    final controller = SeatLayerPickerController(mapController: map);
+    addTearDown(controller.dispose);
     useFakeWebViewPlatform();
     usePhoneSurface(tester);
 
-    await tester.pumpWidget(pickerHarness(map, _layout()));
-    map.emit(_inVenue3D());
+    await tester.pumpWidget(
+      pickerHarness(map, _layout(), controller: controller),
+    );
+    map.emit(
+      _inVenue3D(revision: controller.state.revision + 1),
+    );
     await tester.pumpAndSettle();
     final looking = _insetPayloads(map).last! as Map<String, Object?>;
 
-    map.emit(_inVenue3D(revision: 4, seatedOn: 'seat-a-1'));
+    map.emit(
+      _inVenue3D(
+        revision: controller.state.revision + 1,
+        seatedOn: 'seat-a-1',
+      ),
+    );
     await tester.pumpAndSettle();
+    expect(controller.state.snapshot?.map.view3DTargetSeatId, 'seat-a-1');
     final seated = _insetPayloads(map).last! as Map<String, Object?>;
 
     expect(

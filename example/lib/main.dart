@@ -145,11 +145,37 @@ class _LivePickerDemoState extends State<LivePickerDemo> {
         themeMode: _themeMode,
         callbacks: SeatLayerPickerCallbacks(
           onReady: (info) {
+            final helloToReadyMs = info.timeToHelloMs == null ||
+                    info.timeToReadyMs == null
+                ? null
+                : info.timeToReadyMs! - info.timeToHelloMs!;
             debugPrint(
               '[SeatLayerPickerExample] ready '
               'protocol=${info.protocolRevision} '
               'mode=${info.mode.raw} '
-              'event=${info.eventKey ?? "-"}',
+              'event=${info.eventKey ?? "-"} '
+              'timeToHelloMs=${info.timeToHelloMs} '
+              'helloToReadyMs=$helloToReadyMs '
+              'timeToReadyMs=${info.timeToReadyMs}',
+            );
+          },
+          onChartLoad: (load) {
+            final trace = load.trace;
+            debugPrint(
+              '[SeatLayerPickerPerf] '
+              'tapToReadyMs=${load.tapToReadyMs} '
+              'hostMs=${load.hostMs} '
+              'bootMs=${trace.bootMs} '
+              'documentMs=${trace.documentMs} '
+              'handshakeMs=${trace.handshakeMs} '
+              'renderMs=${trace.ms} '
+              'paintMs=${trace.paint} '
+              'availabilityMs=${trace.availabilityMs} '
+              'load=${trace.load} '
+              'chartCache=${trace.chartCache} '
+              'host=${trace.host} '
+              'platform=${trace.platform} '
+              'bundle=${trace.bundle}',
             );
           },
           onError: (error) {

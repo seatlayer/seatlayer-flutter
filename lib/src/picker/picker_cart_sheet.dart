@@ -97,14 +97,14 @@ class SeatLayerCartSheet extends StatelessWidget {
       elevation: surface.elevation ?? 12,
       shape: surface.shape,
       child: Padding(
-        padding: EdgeInsets.only(bottom: bottomInset),
+        padding: EdgeInsets.only(bottom: expanded ? bottomInset : 0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Above the peek row, so it is read whether the sheet is open or
-            // shut: a buyer coming back from checkout is looking at a fifty
-            // point strip, and news about their seats cannot live inside a
+            // shut: a buyer coming back from checkout is looking at a compact
+            // strip, and news about their seats cannot live inside a
             // panel they would have to open first.
             const SeatLayerHoldLapseNotice(),
             _PeekRow(
@@ -145,6 +145,11 @@ class SeatLayerCartSheet extends StatelessWidget {
                             ),
                     ),
             ),
+            if (!expanded && bottomInset > 0)
+              SizedBox(
+                height: bottomInset,
+                child: Center(child: attribution),
+              ),
           ],
         ),
       ),

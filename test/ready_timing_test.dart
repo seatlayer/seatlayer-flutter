@@ -56,8 +56,12 @@ void main() {
     // handshake and first render — measured at the one place both halves are
     // visible. Nothing is logged with it; reporting it is the host's call.
     final info = await ready;
+    expect(info.timeToHelloMs, isNotNull);
+    expect(info.timeToHelloMs, greaterThanOrEqualTo(0));
     expect(info.timeToReadyMs, isNotNull);
     expect(info.timeToReadyMs, greaterThanOrEqualTo(0));
+    expect(info.timeToReadyMs, greaterThanOrEqualTo(info.timeToHelloMs!));
+    expect(controller.readyInfo!.timeToHelloMs, info.timeToHelloMs);
     expect(controller.readyInfo!.timeToReadyMs, info.timeToReadyMs);
   });
 
@@ -67,6 +71,7 @@ void main() {
       mode: EventMode.live,
       transport: TransportName.flutter,
     );
+    expect(info.timeToHelloMs, isNull);
     expect(info.timeToReadyMs, isNull);
   });
 }

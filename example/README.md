@@ -48,6 +48,6 @@ Keep booking and secret-key calls in your backend. Read the
 [Flutter seat-map guide](https://docs.seatlayer.io/buyer-sdk/flutter/) and the
 [holds and checkout guide](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/)
 before connecting production checkout. You can also explore the
-[SeatLayer reserved-seating platform](https://seatlayer.io/) and the
+[SeatLayer SDK and API overview](https://seatlayer.io/developers/) and the
 [browser buyer demo](https://app.seatlayer.io/demo/play/grand-theatre); the
 browser demo demonstrates the buyer experience but is not a Flutter app.

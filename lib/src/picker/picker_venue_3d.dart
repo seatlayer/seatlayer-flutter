@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../open_enums.dart';
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_map_controls.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'seat_layer_picker_controller.dart';
@@ -29,7 +30,7 @@ class SeatLayerVenue3D extends StatelessWidget {
     this.bottomInset = 10,
   });
 
-  /// Replaces the built-in return to the seat map.
+  /// Replaces the built-in return from a seat target to the 3D venue.
   final VoidCallback? onBackToVenue;
 
   /// Space to leave at the top, clear of the header.
@@ -43,7 +44,7 @@ class SeatLayerVenue3D extends StatelessWidget {
   /// Published so a host stacking its own chrome under the scene's way back —
   /// the turnkey layout stacks the test-mode badge there — measures the same
   /// pill this widget draws instead of repeating a number.
-  static const double backPillHeight = 36;
+  static const double backPillHeight = 44;
 
   /// How tall the caption chip naming the buyer's seat is.
   static const double captionChipHeight = 28;
@@ -66,7 +67,9 @@ class SeatLayerVenue3D extends StatelessWidget {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
     final map = state.snapshot?.map;
-    final active = map?.isVenue3D ?? false;
+    final active =
+        (map?.isVenue3D ?? false) && controller.seatView?.hasContent != true;
+    final targeted = map?.view3DTargetSeatId != null;
     final theme = seatLayerPickerThemeOf(context).immersive;
     final strings = SeatLayerPickerScope.stringsOf(context);
 
@@ -83,21 +86,29 @@ class SeatLayerVenue3D extends StatelessWidget {
             ? const SizedBox.expand()
             : Stack(
                 children: <Widget>[
+                  if (targeted)
+                    Positioned(
+                      top: topInset,
+                      left: 10,
+                      child: _ImmersiveAction(
+                        theme: theme,
+                        icon: Icons.chevron_left_rounded,
+                        label: strings.backToVenue,
+                        onPressed: state.isBusy
+                            ? null
+                            : onBackToVenue ??
+                                () => ignorePickerAction(
+                                      controller.setBuyerView(
+                                        SeatLayerBuyerView.venue3D,
+                                        resetView: true,
+                                      ),
+                                    ),
+                      ),
+                    ),
                   Positioned(
                     top: topInset,
-                    left: 10,
-                    child: _ImmersiveAction(
-                      theme: theme,
-                      icon: Icons.chevron_left_rounded,
-                      label: strings.backToVenue,
-                      onPressed: state.isBusy
-                          ? null
-                          : onBackToVenue ??
-                              () => ignorePickerAction(
-                                    controller
-                                        .setBuyerView(SeatLayerBuyerView.map),
-                                  ),
-                    ),
+                    right: 10,
+                    child: const SeatLayerPicker3DNavigationModeButton(),
                   ),
                   Positioned(
                     left: 0,
@@ -123,76 +134,126 @@ class _SeatDeck extends StatelessWidget {
     final state = controller.state;
     final strings = SeatLayerPickerScope.stringsOf(context);
     final seats = state.selection;
-    final targetId = state.snapshot?.map.view3DTargetSeatId;
+    final snapshot = state.snapshot!;
+    final map = snapshot.map;
+    final targetId = map.view3DTargetSeatId;
     final index =
         targetId == null ? -1 : seats.indexWhere((seat) => seat.id == targetId);
-    final seated = index >= 0;
-    final previous = seated && index > 0 ? seats[index - 1] : null;
-    final next = seated && index < seats.length - 1 ? seats[index + 1] : null;
+    final target = map.view3DTargetSeat ?? (index >= 0 ? seats[index] : null);
+    final targeted = targetId != null;
+    final previousSeatId = map.reportsView3DPosition
+        ? map.view3DPreviousSeatId
+        : index > 0
+            ? seats[index - 1].id
+            : null;
+    final nextSeatId = map.reportsView3DPosition
+        ? map.view3DNextSeatId
+        : index >= 0 && index < seats.length - 1
+            ? seats[index + 1].id
+            : null;
     final busy = state.isBusy;
+    final bundle = controller.mapController.bundleInfo;
+    bool supports3DCommand(String command) =>
+        bundle?.supportsCapability('venue-3d-controls-v1') == true &&
+        bundle?.supportsCommand(command) == true;
+    final seatViewAvailable = targeted &&
+        snapshot.capabilities.contains('seatView') &&
+        bundle?.supportsCapability('seat-view-v1') == true &&
+        bundle?.supportsCommand('picker.openSeatView') == true;
+    final controls = <Widget>[
+      if (targeted) ...<Widget>[
+        _ImmersiveIcon(
+          theme: theme,
+          icon: Icons.chevron_left_rounded,
+          tooltip: strings.previousSeat,
+          onPressed: previousSeatId == null || busy
+              ? null
+              : () => _sit(controller, previousSeatId),
+        ),
+        if (seatViewAvailable)
+          _ImmersiveAction(
+            theme: theme,
+            icon: Icons.threesixty_rounded,
+            label: strings.viewFromHere,
+            onPressed: busy
+                ? null
+                : () => ignorePickerAction(
+                      controller.openSeatViewById(targetId),
+                    ),
+          ),
+        _ImmersiveIcon(
+          theme: theme,
+          icon: Icons.chevron_right_rounded,
+          tooltip: strings.nextSeat,
+          onPressed: nextSeatId == null || busy
+              ? null
+              : () => _sit(controller, nextSeatId),
+        ),
+        _ImmersiveIcon(
+          theme: theme,
+          icon: Icons.filter_center_focus_rounded,
+          tooltip: strings.recentre,
+          onPressed: busy
+              ? null
+              : () => ignorePickerAction(
+                    controller.setBuyerView(
+                      SeatLayerBuyerView.venue3D,
+                      flyToSeatId: targetId,
+                      resetView: true,
+                    ),
+                  ),
+        ),
+      ] else ...<Widget>[
+        if (supports3DCommand('picker.zoomOut'))
+          _ImmersiveIcon(
+            theme: theme,
+            icon: Icons.remove_rounded,
+            tooltip: 'Zoom out',
+            onPressed:
+                busy ? null : () => ignorePickerAction(controller.zoomOut()),
+          ),
+        if (supports3DCommand('picker.zoomToFit'))
+          _ImmersiveAction(
+            theme: theme,
+            icon: Icons.fit_screen_rounded,
+            label: strings.fitVenue,
+            onPressed:
+                busy ? null : () => ignorePickerAction(controller.zoomToFit()),
+          ),
+        if (supports3DCommand('picker.zoomIn'))
+          _ImmersiveIcon(
+            theme: theme,
+            icon: Icons.add_rounded,
+            tooltip: 'Zoom in',
+            onPressed:
+                busy ? null : () => ignorePickerAction(controller.zoomIn()),
+          ),
+      ],
+    ];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        if (seated)
+        if (target != null)
           _CaptionChip(
             theme: theme,
             text: strings.seatIdentity(<String>[
-              ...?_identityParts(state, seats[index]),
+              ...?_identityParts(state, target),
               strings.viewFromYourSeat,
             ]),
           ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            _ImmersiveIcon(
-              theme: theme,
-              icon: Icons.chevron_left_rounded,
-              tooltip: strings.previousSeat,
-              onPressed: previous == null || busy
-                  ? null
-                  : () => _sit(controller, previous),
-            ),
-            const SizedBox(width: 8),
-            _ImmersiveAction(
-              theme: theme,
-              icon: Icons.threesixty_rounded,
-              label: strings.openVenue360,
-              onPressed: busy
-                  ? null
-                  : () => ignorePickerAction(
-                        controller.setBuyerView(
-                          SeatLayerBuyerView.venue3D,
-                          resetView: true,
-                        ),
-                      ),
-            ),
-            const SizedBox(width: 8),
-            _ImmersiveIcon(
-              theme: theme,
-              icon: Icons.chevron_right_rounded,
-              tooltip: strings.nextSeat,
-              onPressed:
-                  next == null || busy ? null : () => _sit(controller, next),
-            ),
-            const SizedBox(width: 8),
-            _ImmersiveIcon(
-              theme: theme,
-              icon: Icons.filter_center_focus_rounded,
-              tooltip: strings.recentre,
-              onPressed: busy || !seated
-                  ? null
-                  : () => ignorePickerAction(
-                        controller.setBuyerView(
-                          SeatLayerBuyerView.venue3D,
-                          flyToSeatId: seats[index].id,
-                          resetView: true,
-                        ),
-                      ),
-            ),
-          ],
-        ),
+        if (controls.isNotEmpty) ...<Widget>[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              for (var index = 0; index < controls.length; index++) ...<Widget>[
+                if (index > 0) const SizedBox(width: 8),
+                controls[index],
+              ],
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -201,11 +262,11 @@ class _SeatDeck extends StatelessWidget {
   ///
   /// Retargeting the existing scene keeps the buyer seated; leaving 3D and
   /// re-entering would rebuild it and read as the map snapping back.
-  void _sit(SeatLayerPickerController controller, SelectedSeat seat) {
+  void _sit(SeatLayerPickerController controller, String seatId) {
     ignorePickerAction(
       controller.setBuyerView(
         SeatLayerBuyerView.venue3D,
-        flyToSeatId: seat.id,
+        flyToSeatId: seatId,
       ),
     );
   }
@@ -334,7 +395,7 @@ class _ImmersiveIcon extends StatelessWidget {
           onPressed: onPressed,
           visualDensity: VisualDensity.compact,
           padding: EdgeInsets.zero,
-          constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+          constraints: const BoxConstraints.tightFor(width: 44, height: 44),
           color: theme.text,
           disabledColor: pickerAlpha(theme.mutedText, .45),
           icon: Icon(icon, size: 20),

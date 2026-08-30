@@ -12,12 +12,32 @@
 // second.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
+
+BundleInfo _accessBundle({
+  bool access = true,
+  bool limited = false,
+  bool colorblind = true,
+}) =>
+    nativeChromeBundle(
+      capabilities: <String>[
+        'native-chrome-contract-v1',
+        if (access) 'access-needs-v1',
+        if (colorblind) 'colorblind-safe',
+      ],
+      commands: <String>[
+        'picker.setThemeMode',
+        if (access) 'picker.setAccessibilityFilter',
+        if (limited) 'picker.setLimitedViewFilter',
+        if (colorblind) 'picker.setColorblindSafe',
+      ],
+    );
 
 /// Every chip on the open sheet, in the order it is drawn.
 List<String> _chipLabels(WidgetTester tester) => tester
@@ -58,7 +78,7 @@ Future<void> _openSheet(
 void main() {
   testWidgets('only the needs this event offers render, in the runtime order',
       (tester) async {
-    final map = FakePickerMap(bundle: refreshingBundle());
+    final map = FakePickerMap(bundle: _accessBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -85,7 +105,7 @@ void main() {
 
   testWidgets('a need whose seats are gone stays, named and disabled',
       (tester) async {
-    final map = FakePickerMap(bundle: refreshingBundle());
+    final map = FakePickerMap(bundle: _accessBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -113,28 +133,58 @@ void main() {
     expect(_chipLabels(tester), <String>['Wheelchair', 'Companion · 6']);
   });
 
-  testWidgets('a runtime that reports nothing keeps the full static list',
+  testWidgets('an empty inventory does not invent the static taxonomy',
       (tester) async {
-    final map = FakePickerMap(bundle: nativeChromeBundle());
+    final map = FakePickerMap(bundle: _accessBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
     await _openSheet(tester, map, pickerSnapshot());
 
-    expect(
-      _chipLabels(tester),
-      SeatLayerPickerStrings.defaultAccessNeeds.values.toList(),
+    expect(_chipLabels(tester), isEmpty);
+    expect(find.text('Colourblind-friendly colours'), findsOneWidget);
+    expect(find.text('Hide limited-view seats'), findsNothing);
+  });
+
+  testWidgets('a limited-view-only event shows only its supported group',
+      (tester) async {
+    final map = FakePickerMap(
+      bundle: _accessBundle(access: false, limited: true, colorblind: false),
     );
-    expect(
-      _chipLabels(tester).any((label) => label.contains('·')),
-      isFalse,
-      reason: 'an unknown count is not a count, and drawing one would invent a '
-          'number the runtime never gave',
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+    final snapshot = pickerSnapshot();
+    final features = snapshot['features']! as Map<String, Object?>;
+    features['accessibilityFilter'] = false;
+    features['limitedViewFilter'] = true;
+
+    await _openSheet(tester, map, snapshot);
+
+    expect(_chipLabels(tester), isEmpty);
+    expect(find.text('Hide limited-view seats'), findsOneWidget);
+    expect(find.text('Colourblind-friendly colours'), findsNothing);
+  });
+
+  testWidgets('the control disappears when no filter operation is supported',
+      (tester) async {
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SeatLayerPickerAccessibilityFilters(compact: true),
+      ),
     );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(IconButton), findsNothing);
   });
 
   testWidgets('a host override still names the need', (tester) async {
-    final map = FakePickerMap(bundle: refreshingBundle());
+    final map = FakePickerMap(bundle: _accessBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 

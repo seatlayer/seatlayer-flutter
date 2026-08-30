@@ -187,6 +187,59 @@ Map<String, Object?> pickerSnapshot({
   };
 }
 
+/// One selected Gold seat whose Adult and Child prices exercise tier choice.
+Map<String, Object?> tieredSeatSnapshot() {
+  final snapshot = pickerSnapshot();
+  final tiers = <Object?>[
+    <String, Object?>{'id': 'adult', 'name': 'Adult', 'price': 100.0},
+    <String, Object?>{
+      'id': 'child',
+      'name': 'Child',
+      'price': 60.0,
+      'buyerMessage': 'For children aged 12 and under.',
+    },
+  ];
+  final catalog = snapshot['catalog']! as Map<String, Object?>;
+  catalog['categories'] = <Object?>[
+    <String, Object?>{
+      'key': 'standard',
+      'label': 'Gold',
+      'color': '#C69A08',
+      'priceMin': 60.0,
+      'priceMax': 100.0,
+      'available': 42,
+      'notForSale': false,
+      'tiers': tiers,
+    },
+  ];
+  final selection = snapshot['selection']! as Map<String, Object?>;
+  final seat = Map<String, Object?>.from(
+    (selection['seats']! as List<Object?>).single! as Map<String, Object?>,
+  );
+  selection['seats'] = <Object?>[
+    <String, Object?>{
+      ...seat,
+      'price': 100.0,
+      'tierId': 'adult',
+      'tiers': tiers,
+    },
+  ];
+  final cart = snapshot['cart']! as Map<String, Object?>;
+  final line = Map<String, Object?>.from(
+    (cart['items']! as List<Object?>).single! as Map<String, Object?>,
+  );
+  cart
+    ..['items'] = <Object?>[
+      <String, Object?>{
+        ...line,
+        'tierId': 'adult',
+        'unitPrice': 100.0,
+      },
+    ]
+    ..['total'] = 100.0;
+  return snapshot;
+}
+
 extension<T> on Iterable<T> {
   T? get firstOrNull {
     final iterator = this.iterator;

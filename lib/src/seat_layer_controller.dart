@@ -40,6 +40,7 @@ class SeatLayerController {
   /// place the WHOLE cold start is visible: the web side cannot see the map host
   /// being created and the app cannot see the chart finish rendering.
   Stopwatch? _handshakeClock;
+  int? _timeToHelloMs;
   bool _hasFinished = false;
   bool _disposed = false;
 
@@ -161,6 +162,7 @@ class SeatLayerController {
     _configuration = configuration;
     _profile = profile;
     _handshakeClock = Stopwatch()..start();
+    _timeToHelloMs = null;
     _hasFinished = false;
     _readyInfo = null;
     _bundleInfo = null;
@@ -220,6 +222,7 @@ class SeatLayerController {
   }
 
   void _handleHello(Object? payload) {
+    _timeToHelloMs ??= _handshakeClock?.elapsedMilliseconds;
     final info = BundleInfo.fromJson(payload);
     _bundleInfo = info;
 
@@ -295,6 +298,7 @@ class SeatLayerController {
         _finishHandshake(
           ReadyInfo.fromJson(
             payload,
+            timeToHelloMs: _timeToHelloMs,
             timeToReadyMs: _handshakeClock?.elapsedMilliseconds,
           ),
         );

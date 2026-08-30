@@ -59,8 +59,7 @@ void main() {
     expect(find.byType(SeatLayerDockBar), findsNothing);
   });
 
-  testWidgets('a system back at rung two returns to the overview',
-      (tester) async {
+  testWidgets('a system back at rung two climbs one map level', (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -80,7 +79,7 @@ void main() {
     scope.onPopInvokedWithResult!(false, null);
     await tester.pump();
 
-    expect(map.callsTo('picker.overview'), hasLength(1));
+    expect(map.callsTo('picker.zoomOut'), hasLength(1));
   });
 
   testWidgets('a system back at the overview is handed to the host',
@@ -131,11 +130,11 @@ void main() {
     await tester.pumpAndSettle();
 
     // The sheet took the gesture, so the map has not moved yet.
-    expect(map.callsTo('picker.overview'), isEmpty);
+    expect(map.callsTo('picker.zoomOut'), isEmpty);
 
     _popScope(tester).onPopInvokedWithResult!(false, null);
     await tester.pumpAndSettle();
-    expect(map.callsTo('picker.overview'), hasLength(1));
+    expect(map.callsTo('picker.zoomOut'), hasLength(1));
   });
 
   testWidgets('leaving rung two collapses the sheet with it', (tester) async {

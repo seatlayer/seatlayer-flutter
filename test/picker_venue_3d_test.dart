@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_legend.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
@@ -8,12 +9,41 @@ import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
 
+BundleInfo _venueBundle() => nativeChromeBundle(
+      capabilities: const <String>[
+        'native-chrome-contract-v1',
+        'viewport-insets-v1',
+        'venue-3d-controls-v1',
+        'seat-view-v1',
+        'native-seat-view-chrome-v1',
+      ],
+      commands: const <String>[
+        'picker.setThemeMode',
+        'picker.setViewportInsets',
+        'picker.setBuyerView',
+        'picker.setVenue3DNavigationMode',
+        'picker.openSeatView',
+        'picker.zoomIn',
+        'picker.zoomOut',
+        'picker.zoomToFit',
+      ],
+    );
+
 /// Three selected seats, with the scene sitting in one of them.
 Map<String, Object?> _seated({String at = 'seat-a-2', int revision = 3}) {
   final snapshot = snapshotWithTicketCount(3, revision: revision);
   final map = snapshot['map']! as Map<String, Object?>;
+  final selection = snapshot['selection']! as Map<String, Object?>;
+  final seats =
+      (selection['seats']! as List<Object?>).cast<Map<String, Object?>>();
+  final index = seats.indexWhere((seat) => seat['id'] == at);
   map['buyerView'] = 'venue3d';
   map['view3dTargetSeatId'] = at;
+  map['view3dTargetSeat'] = index < 0 ? null : seats[index];
+  map['view3dPreviousSeatId'] = index > 0 ? seats[index - 1]['id'] : null;
+  map['view3dNextSeatId'] =
+      index >= 0 && index < seats.length - 1 ? seats[index + 1]['id'] : null;
+  map['view3dFocusedSectionId'] = 'section-a';
   map['categoryFilter'] = <Object?>[];
   return snapshot;
 }
@@ -31,12 +61,14 @@ Map<String, Object?> _seatedInQualifiedRow() {
             'rowLabel': 'Stalls D C',
           })
       .toList(growable: false);
+  final map = snapshot['map']! as Map<String, Object?>;
+  map['view3dTargetSeat'] = (selection['seats']! as List<Object?>).first;
   return snapshot;
 }
 
 void main() {
   testWidgets('the chrome stays away until the scene is up', (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: _venueBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -44,12 +76,12 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
-    expect(find.text('Open venue 360°'), findsNothing);
+    expect(find.text('Venue'), findsNothing);
     expect(find.text('Back to venue'), findsNothing);
   });
 
   testWidgets('the caption says where the buyer is sitting', (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: _venueBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -62,12 +94,32 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Back to venue'), findsOneWidget);
-    expect(find.text('Open venue 360°'), findsOneWidget);
+    expect(find.text('View from here'), findsOneWidget);
+    expect(find.byTooltip('Drag to rotate venue'), findsOneWidget);
+  });
+
+  testWidgets('the phone exposes the exact-gated rotate and move mode',
+      (tester) async {
+    final map = FakePickerMap(bundle: _venueBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerVenue3D()));
+    map.emit(_seated());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Drag to rotate venue'));
+    await tester.pump();
+
+    expect(
+      map.callsTo('picker.setVenue3DNavigationMode').single.$2,
+      <String, Object?>{'mode': 'pan'},
+    );
   });
 
   testWidgets('the caption drops the section the row name repeats',
       (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: _venueBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -84,7 +136,7 @@ void main() {
 
   testWidgets('stepping retargets the scene rather than rebuilding it',
       (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: _venueBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -101,8 +153,42 @@ void main() {
     });
   });
 
+  testWidgets('the 3D target and row neighbour need not be in the cart',
+      (tester) async {
+    final map = FakePickerMap(bundle: _venueBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerVenue3D()));
+    final snapshot = _seated();
+    final mapState = snapshot['map']! as Map<String, Object?>;
+    mapState['view3dTargetSeatId'] = 'orchestra-e-29';
+    mapState['view3dTargetSeat'] = <String, Object?>{
+      'id': 'orchestra-e-29',
+      'label': 'E-29',
+      'sectionLabel': 'Orchestra',
+      'rowLabel': 'E',
+      'seatNumber': '29',
+    };
+    mapState['view3dPreviousSeatId'] = 'orchestra-e-28';
+    mapState['view3dNextSeatId'] = 'orchestra-e-30';
+    map.emit(snapshot);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Orchestra · Row E · Seat 29 · view from your seat'),
+      findsOneWidget,
+    );
+    await tester.tap(find.byTooltip('Next seat'));
+    await tester.pump();
+    expect(map.callsTo('picker.setBuyerView').single.$2, <String, Object?>{
+      'view': 'venue3d',
+      'flyToSeatId': 'orchestra-e-30',
+    });
+  });
+
   testWidgets('stepping stops at the ends', (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: _venueBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -114,9 +200,9 @@ void main() {
     expect(_iconEnabled(tester, 'Next seat'), isTrue);
   });
 
-  testWidgets('the venue view and the recentre reset the camera',
+  testWidgets('the target opens its lazy panorama and recentres the camera',
       (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: _venueBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -124,11 +210,10 @@ void main() {
     map.emit(_seated());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Open venue 360°'));
+    await tester.tap(find.text('View from here'));
     await tester.pump();
-    expect(map.callsTo('picker.setBuyerView').last.$2, <String, Object?>{
-      'view': 'venue3d',
-      'resetView': true,
+    expect(map.callsTo('picker.openSeatView').single.$2, <String, Object?>{
+      'seatId': 'seat-a-2',
     });
 
     await tester.tap(find.byTooltip('Recentre the view'));
@@ -140,8 +225,32 @@ void main() {
     });
   });
 
-  testWidgets('back to venue returns to the map', (tester) async {
-    final map = FakePickerMap();
+  testWidgets('an open panorama suppresses the venue controls', (tester) async {
+    final map = FakePickerMap(bundle: _venueBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerVenue3D()));
+    map.emit(_seated());
+    map.emitEvent('seatView.changed', <String, Object?>{
+      'seatView': <String, Object?>{
+        'seatId': 'seat-a-2',
+        'title': 'View from Gallery · A-2',
+        'real': true,
+        'generated': false,
+      },
+    });
+    await tester.pumpAndSettle();
+
+    expect(find.text('Back to venue'), findsNothing);
+    expect(find.text('View from here'), findsNothing);
+    expect(find.byTooltip('Next seat'), findsNothing);
+  });
+
+  testWidgets(
+      'back walks a seat target to 3D without duplicating the map toggle',
+      (tester) async {
+    final map = FakePickerMap(bundle: _venueBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -154,12 +263,57 @@ void main() {
 
     expect(
       map.callsTo('picker.setBuyerView').single.$2,
-      <String, Object?>{'view': 'map'},
+      <String, Object?>{'view': 'venue3d', 'resetView': true},
     );
+
+    // The preceding command response already advances the fake to revision 4.
+    final overview = _seated(revision: 5);
+    final overviewMap = overview['map']! as Map<String, Object?>;
+    overviewMap['view3dTargetSeatId'] = null;
+    overviewMap['view3dTargetSeat'] = null;
+    overviewMap['view3dPreviousSeatId'] = null;
+    overviewMap['view3dNextSeatId'] = null;
+    overviewMap['view3dFocusedSectionId'] = null;
+    overviewMap['focusedSectionId'] = null;
+    overviewMap['focusedSection'] = null;
+    overviewMap['rung'] = 'overview';
+    map.emit(overview);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Back to venue'), findsNothing);
+    expect(find.text('Seat map'), findsNothing);
+    expect(find.text('Fit venue'), findsOneWidget);
+  });
+
+  testWidgets('the 3D overview exposes zoom and fit camera controls',
+      (tester) async {
+    final map = FakePickerMap(bundle: _venueBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerVenue3D()));
+    final overview = _seated();
+    final overviewMap = overview['map']! as Map<String, Object?>;
+    overviewMap['view3dTargetSeatId'] = null;
+    overviewMap['view3dTargetSeat'] = null;
+    overviewMap['view3dPreviousSeatId'] = null;
+    overviewMap['view3dNextSeatId'] = null;
+    overviewMap['view3dFocusedSectionId'] = null;
+    map.emit(overview);
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Zoom out'), findsOneWidget);
+    expect(find.text('Fit venue'), findsOneWidget);
+    expect(find.byTooltip('Zoom in'), findsOneWidget);
+    expect(find.text('Back to venue'), findsNothing);
+
+    await tester.tap(find.text('Fit venue'));
+    await tester.pump();
+    expect(map.callsTo('picker.zoomToFit'), hasLength(1));
   });
 
   testWidgets('the chrome is dark over a light picker', (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: _venueBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -181,7 +335,7 @@ void main() {
 
   testWidgets('the map-only controls stand down while the scene is up',
       (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: _venueBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -201,7 +355,7 @@ void main() {
 
   testWidgets('the legend over the scene takes the scene palette',
       (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: _venueBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -224,7 +378,7 @@ void main() {
   group('goldens', () {
     for (final brightness in Brightness.values) {
       testWidgets('venue 3D golden — ${brightness.name}', (tester) async {
-        final map = FakePickerMap();
+        final map = FakePickerMap(bundle: _venueBundle());
         addTearDown(map.dispose);
         usePhoneSurface(tester);
 

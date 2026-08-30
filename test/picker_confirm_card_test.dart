@@ -33,6 +33,37 @@ void main() {
     expect(find.text('Select'), findsOneWidget);
   });
 
+  testWidgets('the phone card selects a tier and updates its headline price',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    map.emit(tieredSeatSnapshot());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Adult'), findsOneWidget);
+    expect(find.text('Child'), findsOneWidget);
+    expect(find.text('For children aged 12 and under.'), findsOneWidget);
+    expect(find.text('€100'), findsNWidgets(2));
+    expect(find.text('€60'), findsOneWidget);
+
+    await tester.tap(find.text('Child'));
+    await tester.pump();
+
+    expect(find.text('€100'), findsOneWidget);
+    expect(find.text('€60'), findsNWidgets(2));
+
+    await tester.tap(find.text('Select'));
+    await tester.pumpAndSettle();
+
+    expect(
+      map.callsTo('picker.setSeatTier').single.$2,
+      <String, Object?>{'seatId': 'seat-a-1', 'tierId': 'child'},
+    );
+  });
+
   testWidgets('the strip carries both pills when the event has both',
       (tester) async {
     final map = FakePickerMap();

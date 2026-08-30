@@ -131,7 +131,20 @@ void main() {
   });
 
   testWidgets('the accessibility sheet is a host wording too', (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(
+      bundle: nativeChromeBundle(
+        capabilities: const <String>[
+          'native-chrome-contract-v1',
+          'access-needs-v1',
+          'colorblind-safe',
+        ],
+        commands: const <String>[
+          'picker.setAccessibilityFilter',
+          'picker.setLimitedViewFilter',
+          'picker.setColorblindSafe',
+        ],
+      ),
+    );
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -153,13 +166,17 @@ void main() {
         ),
       ),
     );
-    map.emit(pickerSnapshot());
+    final snapshot = pickerSnapshot(
+      accessNeeds: <Object?>[accessNeed('wheelchair', 1)],
+    );
+    (snapshot['features']! as Map<String, Object?>)['limitedViewFilter'] = true;
+    map.emit(snapshot);
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.accessible_forward_rounded));
     await tester.pumpAndSettle();
 
     expect(find.text('Barrierefreiheit'), findsOneWidget);
-    expect(find.text('Rollstuhl'), findsOneWidget);
+    expect(find.text('Rollstuhl · 1'), findsOneWidget);
     expect(find.text('Filter anwenden'), findsOneWidget);
     expect(find.text('Sicht eingeschränkt ausblenden'), findsOneWidget);
     expect(find.text('Farbenblind-freundlich'), findsOneWidget);

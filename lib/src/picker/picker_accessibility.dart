@@ -2,10 +2,12 @@
 
 library;
 
+import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
 import 'picker_models.dart';
+import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'picker_styles.dart';
 import 'seat_layer_picker_theme.dart';
@@ -29,11 +31,16 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
     final snapshot = state.snapshot;
-    if (snapshot == null ||
-        !snapshot.capabilities.contains('accessibilityFilter')) {
+    final controller = SeatLayerPickerScope.controllerOf(context);
+    final available = _availability(controller, snapshot);
+    if (!available.any) {
       return const SizedBox.shrink();
     }
-    final active = snapshot.map.accessibilityFilter;
+    final activeCount = (available.accessibility
+            ? snapshot!.map.accessibilityFilter.length
+            : 0) +
+        (available.limited && snapshot?.map.hideLimitedView == true ? 1 : 0) +
+        (available.colorblind && snapshot?.map.colorblindSafe == true ? 1 : 0);
     final onPressed =
         state.isBusy ? null : () => ignorePickerAction(_show(context));
     if (compact) {
@@ -42,21 +49,21 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
       return SizedBox.square(
         dimension: size,
         child: IconButton(
-          tooltip: active.isEmpty
+          tooltip: activeCount == 0
               ? SeatLayerPickerScope.stringsOf(context).accessibility
-              : '${active.length} accessibility filters active',
+              : '$activeCount accessibility filters active',
           visualDensity: VisualDensity.compact,
           padding: EdgeInsets.zero,
           constraints: BoxConstraints.tightFor(width: size, height: size),
           style: IconButton.styleFrom(
             backgroundColor: theme.surface.withAlpha(240),
-            foregroundColor: active.isEmpty ? theme.text : theme.accent,
+            foregroundColor: activeCount == 0 ? theme.text : theme.accent,
             side: BorderSide(color: theme.divider),
           ),
           onPressed: onPressed,
           icon: Badge(
-            isLabelVisible: active.isNotEmpty,
-            label: Text('${active.length}'),
+            isLabelVisible: activeCount > 0,
+            label: Text('$activeCount'),
             child: const Icon(Icons.accessible_forward_rounded, size: 20),
           ),
         ),
@@ -69,22 +76,25 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
       onPressed: onPressed,
       icon: const Icon(Icons.accessible_forward_rounded, size: 18),
       label: Text(
-        active.isEmpty
+        activeCount == 0
             ? SeatLayerPickerScope.stringsOf(context).accessibility
-            : '${active.length} filters',
+            : '$activeCount filters',
       ),
     );
   }
 
   Future<void> _show(BuildContext context) async {
     final controller = SeatLayerPickerScope.controllerOf(context);
+    final snapshot = controller.state.snapshot;
+    final available = _availability(controller, snapshot);
+    if (!available.any || snapshot == null) return;
     final initial = <String>{
-      ...?controller.state.snapshot?.map.accessibilityFilter,
+      if (available.accessibility) ...snapshot.map.accessibilityFilter,
     };
     final initialHideLimited =
-        controller.state.snapshot?.map.hideLimitedView ?? false;
+        available.limited && snapshot.map.hideLimitedView;
     final initialColorblind =
-        controller.state.snapshot?.map.colorblindSafe ?? false;
+        available.colorblind && snapshot.map.colorblindSafe;
     var selected = initial;
     var hideLimited = initialHideLimited;
     var colorblind = initialColorblind;
@@ -95,26 +105,17 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     // key rather than dropped, so a need added on the runtime side is
     // reachable before this side catches up.
     //
-    // A runtime that does not report its needs falls back to the full static
-    // list, which is what the sheet has always shown. The fallback is on an
-    // empty list rather than on the capability alone, because "reported
-    // nothing" and "reported that this venue offers nothing" are the same
-    // twelve dead chips either way, and the twelve are at least honest about
-    // what the filter can express.
-    final offered = controller.state.snapshot?.map.accessNeeds ??
-        const <SeatLayerAccessNeed>[];
-    final useOffered = controller.supportsAccessNeeds && offered.isNotEmpty;
+    // Missing inventory truth fails closed. The static twelve-key vocabulary
+    // is not evidence that this event has any of those seats.
+    final offered = snapshot.map.accessNeeds;
     final needs = <_AccessNeedChip>[
-      if (useOffered)
+      if (available.accessibility)
         for (final need in offered)
           _AccessNeedChip(
             key: need.key,
             label: strings.accessNeeds[need.key] ?? need.key,
             count: need.count,
           )
-      else
-        for (final entry in strings.accessNeeds.entries)
-          _AccessNeedChip(key: entry.key, label: entry.value),
     ];
     // The sheet body is built INSIDE the scope and handed to the route, so the
     // route's builder — which runs under the Navigator overlay, above the
@@ -134,53 +135,57 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: Wrap(
-                      spacing: 7,
-                      runSpacing: 7,
-                      children: needs.map((need) {
-                        final on = selected.contains(need.key);
-                        // A need with nothing free stays on the sheet and goes
-                        // dark. Removing it would say the venue has no such
-                        // seats, which is a different and usually wrong claim.
-                        final enabled = need.count == null || need.count! > 0;
-                        return FilterChip(
-                          selected: on,
-                          label: Text(
-                            need.count == null || need.count == 0
-                                ? need.label
-                                : strings.accessNeedWithCount(
-                                    need.label,
-                                    need.count!,
-                                  ),
-                          ),
-                          onSelected: enabled
-                              ? (_) => setSheetState(() {
-                                    selected = <String>{...selected};
-                                    on
-                                        ? selected.remove(need.key)
-                                        : selected.add(need.key);
-                                  })
-                              : null,
-                        );
-                      }).toList(growable: false),
+                if (needs.isNotEmpty)
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Wrap(
+                        spacing: 7,
+                        runSpacing: 7,
+                        children: needs.map((need) {
+                          final on = selected.contains(need.key);
+                          // A need with nothing free stays on the sheet and
+                          // goes dark. Removing it would claim the venue has no
+                          // such seats, which is a different fact.
+                          final enabled = need.count == null || need.count! > 0;
+                          return FilterChip(
+                            selected: on,
+                            label: Text(
+                              need.count == null || need.count == 0
+                                  ? need.label
+                                  : strings.accessNeedWithCount(
+                                      need.label,
+                                      need.count!,
+                                    ),
+                            ),
+                            onSelected: enabled
+                                ? (_) => setSheetState(() {
+                                      selected = <String>{...selected};
+                                      on
+                                          ? selected.remove(need.key)
+                                          : selected.add(need.key);
+                                    })
+                                : null,
+                          );
+                        }).toList(growable: false),
+                      ),
                     ),
                   ),
-                ),
-                SwitchListTile.adaptive(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(strings.hideLimitedView),
-                  value: hideLimited,
-                  onChanged: (value) =>
-                      setSheetState(() => hideLimited = value),
-                ),
-                SwitchListTile.adaptive(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(strings.colorblindSafe),
-                  value: colorblind,
-                  onChanged: (value) => setSheetState(() => colorblind = value),
-                ),
+                if (available.limited)
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(strings.hideLimitedView),
+                    value: hideLimited,
+                    onChanged: (value) =>
+                        setSheetState(() => hideLimited = value),
+                  ),
+                if (available.colorblind)
+                  SwitchListTile.adaptive(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(strings.colorblindSafe),
+                    value: colorblind,
+                    onChanged: (value) =>
+                        setSheetState(() => colorblind = value),
+                  ),
                 const SizedBox(height: 8),
                 FilledButton(
                   style: seatLayerButtonShape(theme.buttonRadius),
@@ -212,21 +217,66 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
       builder: (_) => body,
     );
     if (result == null) return;
-    await controller.setAccessibilityFilter(result.types);
-    if (result.hideLimited != initialHideLimited) {
+    final live = _availability(controller, controller.state.snapshot);
+    if (live.accessibility && !setEquals(result.types, initial)) {
+      await controller.setAccessibilityFilter(result.types);
+    }
+    if (live.limited && result.hideLimited != initialHideLimited) {
       await controller.setLimitedViewHidden(result.hideLimited);
     }
-    if (result.colorblind != initialColorblind) {
+    if (live.colorblind && result.colorblind != initialColorblind) {
       await controller.setColorblindSafe(result.colorblind);
     }
   }
 }
 
+_FilterAvailability _availability(
+  SeatLayerPickerController controller,
+  SeatLayerPickerSnapshot? snapshot,
+) {
+  final bundle = controller.mapController.bundleInfo;
+  final nativeChrome =
+      bundle?.supportsCapability('native-chrome-contract-v1') == true;
+  final accessibility = snapshot != null &&
+      snapshot.capabilities.contains('accessibilityFilter') &&
+      controller.supportsAccessNeeds &&
+      snapshot.map.accessNeeds.isNotEmpty &&
+      nativeChrome &&
+      bundle?.supportsCommand('picker.setAccessibilityFilter') == true;
+  final limited = snapshot != null &&
+      snapshot.capabilities.contains('limitedViewFilter') &&
+      nativeChrome &&
+      bundle?.supportsCommand('picker.setLimitedViewFilter') == true;
+  final colorblind = snapshot != null &&
+      nativeChrome &&
+      bundle?.supportsCapability('colorblind-safe') == true &&
+      bundle?.supportsCommand('picker.setColorblindSafe') == true;
+  return _FilterAvailability(
+    accessibility: accessibility,
+    limited: limited,
+    colorblind: colorblind,
+  );
+}
+
+@immutable
+class _FilterAvailability {
+  const _FilterAvailability({
+    required this.accessibility,
+    required this.limited,
+    required this.colorblind,
+  });
+
+  final bool accessibility;
+  final bool limited;
+  final bool colorblind;
+
+  bool get any => accessibility || limited || colorblind;
+}
+
 /// One chip on the accessibility sheet.
 ///
-/// [count] is null when the runtime did not report one, which is the static
-/// fallback: no number is drawn and the chip stays live, because an unknown
-/// count is not a count of zero.
+/// [count] is nullable for forward-compatible callers even though current
+/// inventory reports include it.
 @immutable
 class _AccessNeedChip {
   const _AccessNeedChip({required this.key, required this.label, this.count});

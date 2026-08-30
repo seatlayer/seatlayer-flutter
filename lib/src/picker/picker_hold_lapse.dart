@@ -58,13 +58,22 @@ class _SeatLayerHoldLapseNoticeState extends State<SeatLayerHoldLapseNotice> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final messenger = ScaffoldMessenger.maybeOf(context);
+        final viewportHeight = MediaQuery.sizeOf(context).height;
+        final noticeBox = context.findRenderObject();
+        final noticeTop = noticeBox is RenderBox && noticeBox.hasSize
+            ? noticeBox.localToGlobal(Offset.zero).dy
+            : viewportHeight - theme.layout.peekHeight;
+        final bottomMargin =
+            (viewportHeight - noticeTop + 12).clamp(12.0, viewportHeight);
         messenger?.hideCurrentSnackBar();
         messenger?.showSnackBar(
           SnackBar(
             // The picker's own surface, not Material's inverse: left alone it
             // paints a white bar across a dark picker.
             backgroundColor: theme.surface,
+            behavior: SnackBarBehavior.floating,
             duration: SeatLayerPickerMotion.undoWindow,
+            margin: EdgeInsets.fromLTRB(12, 0, 12, bottomMargin),
             content: Text(
               body == null
                   ? strings.holdLapsedTitle

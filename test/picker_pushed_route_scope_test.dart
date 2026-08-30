@@ -129,7 +129,15 @@ void main() {
 
   testWidgets('the accessibility sheet is pushed with the scope and the theme',
       (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(
+      bundle: nativeChromeBundle(
+        capabilities: const <String>[
+          'native-chrome-contract-v1',
+          'access-needs-v1',
+        ],
+        commands: const <String>['picker.setAccessibilityFilter'],
+      ),
+    );
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
@@ -143,7 +151,11 @@ void main() {
         themeMode: SeatLayerThemeMode.dark,
       ),
     );
-    map.emit(pickerSnapshot());
+    map.emit(
+      pickerSnapshot(
+        accessNeeds: <Object?>[accessNeed('wheelchair', 1)],
+      ),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.accessible_forward_rounded));

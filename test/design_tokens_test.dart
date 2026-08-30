@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_haptics.dart';
@@ -20,7 +21,22 @@ Color _color(Object? value) {
   return Color(int.parse(hex.length == 6 ? 'ff$hex' : hex, radix: 16));
 }
 
+String _sha256(String path) =>
+    sha256.convert(File(path).readAsBytesSync()).toString();
+
 void main() {
+  test('the design inputs match the approved source lock', () {
+    final lock = jsonDecode(
+      File('design/source-lock.json').readAsStringSync(),
+    ) as Map<String, Object?>;
+    expect(lock['version'], 1);
+    expect(_sha256('design/tokens.json'), lock['tokensSha256']);
+    expect(
+      _sha256('design/locale_strings.json'),
+      lock['localeStringsSha256'],
+    );
+  });
+
   test('the light preset is design/tokens.json', () {
     const preset = SeatLayerPickerThemeData.light();
     final light = _section('color')['light']! as Map<String, Object?>;

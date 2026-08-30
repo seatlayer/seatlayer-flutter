@@ -115,6 +115,7 @@ class _SeatLayerPickerAdaptiveLayoutState
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
+    final panoramaUp = controller.seatView?.hasContent == true;
     final resolved = seatLayerPickerThemeOf(context);
     final body = LayoutBuilder(
       builder: (context, constraints) {
@@ -124,6 +125,10 @@ class _SeatLayerPickerAdaptiveLayoutState
                 constraints.maxWidth >= 840);
         final options = SeatLayerPickerScope.optionsOf(context);
         final chrome = options.chrome;
+        final venue3DUp =
+            !panoramaUp && (state.snapshot?.map.isVenue3D ?? false);
+        final immersiveUp = panoramaUp || venue3DUp;
+        final dockUp = !panoramaUp && !venue3DUp && _dockVisible(state);
         final map = _part(
           context,
           widget.builders.map,
@@ -140,31 +145,35 @@ class _SeatLayerPickerAdaptiveLayoutState
                 )
               : const SizedBox.shrink(),
         );
-        final prices = _part(
-          context,
-          widget.builders.legend ?? widget.builders.priceRail,
-          chrome.showPriceRail
-              ? SeatLayerPriceLegend(compact: !wide)
-              : const SizedBox.shrink(),
-        );
+        final prices = panoramaUp
+            ? const SizedBox.shrink()
+            : _part(
+                context,
+                widget.builders.legend ?? widget.builders.priceRail,
+                chrome.showPriceRail
+                    ? SeatLayerPriceLegend(compact: !wide)
+                    : const SizedBox.shrink(),
+              );
         final sections = _part(
           context,
           widget.builders.sectionNavigator,
           const SeatLayerPickerSectionNavigator(),
         );
-        final floorStrip = _part(
-          context,
-          widget.builders.floorStrip,
-          chrome.showFloorStrip
-              ? SeatLayerFloorStrip(compact: !wide)
-              : const SizedBox.shrink(),
-        );
+        final floorStrip = panoramaUp
+            ? const SizedBox.shrink()
+            : _part(
+                context,
+                widget.builders.floorStrip,
+                chrome.showFloorStrip
+                    ? SeatLayerFloorStrip(compact: !wide)
+                    : const SizedBox.shrink(),
+              );
         // Nothing is drawn on a venue with one floor, so nothing is reserved
         // either: the band is reported only when the strip is really there.
-        final floorStripUp = chrome.showFloorStrip &&
+        final floorStripUp = !panoramaUp &&
+            chrome.showFloorStrip &&
             (state.snapshot?.map.floors.length ?? 0) > 1;
-        final floorStripHeight =
-            SeatLayerFloorStrip.heightFor(compact: !wide);
+        final floorStripHeight = SeatLayerFloorStrip.heightFor(compact: !wide);
         final dock = _part(
           context,
           widget.builders.dockBar,
@@ -175,13 +184,15 @@ class _SeatLayerPickerAdaptiveLayoutState
             reserveBottomInset: !chrome.showTicketPanel,
           ),
         );
-        final accessibility = _part(
-          context,
-          widget.builders.accessibilityFilters,
-          chrome.showAccessibilityControl
-              ? SeatLayerPickerAccessibilityFilters(compact: !wide)
-              : const SizedBox.shrink(),
-        );
+        final accessibility = panoramaUp
+            ? const SizedBox.shrink()
+            : _part(
+                context,
+                widget.builders.accessibilityFilters,
+                chrome.showAccessibilityControl
+                    ? SeatLayerPickerAccessibilityFilters(compact: !wide)
+                    : const SizedBox.shrink(),
+              );
         final tray = _part(
           context,
           widget.builders.selectionTray,
@@ -207,17 +218,20 @@ class _SeatLayerPickerAdaptiveLayoutState
             actionError: null,
           ),
         );
-        final venue3DTopInset = chrome.showPriceRail ? 46.0 : 10.0;
-        final venue3D = _part(
-          context,
-          widget.builders.venue3D,
-          SeatLayerVenue3D(
-            // Clear the legend, which stays on screen in the scene's palette.
-            topInset: venue3DTopInset,
-            bottomInset: 10 +
-                (_dockVisible(state) ? resolved.layout.dockBarHeight : 0.0),
-          ),
-        );
+        final venue3DTopInset =
+            chrome.showPriceRail && !panoramaUp ? 46.0 : 10.0;
+        final venue3D = panoramaUp
+            ? const SizedBox.shrink()
+            : _part(
+                context,
+                widget.builders.venue3D,
+                SeatLayerVenue3D(
+                  // Clear the legend, which stays on screen in the scene's palette.
+                  topInset: venue3DTopInset,
+                  bottomInset:
+                      10 + (dockUp ? resolved.layout.dockBarHeight : 0.0),
+                ),
+              );
         // The panorama is full-screen web content inside the map surface, so
         // its words are drawn over the same box the picture fills.
         final seatViewChrome = _part(
@@ -228,28 +242,28 @@ class _SeatLayerPickerAdaptiveLayoutState
                   topInset: wide ? 12 : venue3DTopInset,
                   bottomInset: wide
                       ? 12
-                      : 10 +
-                          (_dockVisible(state)
-                              ? resolved.layout.dockBarHeight
-                              : 0.0),
+                      : 10 + (dockUp ? resolved.layout.dockBarHeight : 0.0),
                 )
               : const SizedBox.shrink(),
         );
-        final testBadge = SeatLayerPickerTestModeIndicator(compact: !wide);
-        final controls = _part(
-          context,
-          widget.builders.mapControls,
-          chrome.showMapControls
-              ? SeatLayerPickerMapControls(
-                  compact: !wide,
-                  bottomInset: !wide && _dockVisible(state)
-                      ? resolved.layout.dockBarHeight
-                      : 0,
-                  // On a phone the top rail below owns the Map/3D control.
-                  includeViewModeControl: wide,
-                )
-              : const SizedBox.shrink(),
-        );
+        final testBadge = panoramaUp
+            ? const SizedBox.shrink()
+            : SeatLayerPickerTestModeIndicator(compact: !wide);
+        final controls = panoramaUp
+            ? const SizedBox.shrink()
+            : _part(
+                context,
+                widget.builders.mapControls,
+                chrome.showMapControls
+                    ? SeatLayerPickerMapControls(
+                        compact: !wide,
+                        bottomInset:
+                            !wide && dockUp ? resolved.layout.dockBarHeight : 0,
+                        // On a phone the top rail below owns the Map/3D control.
+                        includeViewModeControl: wide,
+                      )
+                    : const SizedBox.shrink(),
+              );
         final best = _part(
           context,
           widget.builders.bestAvailable,
@@ -295,18 +309,18 @@ class _SeatLayerPickerAdaptiveLayoutState
               onCancel: (seat) => _removeSeat(controller, seat.label),
             ),
           );
-        } else if (pendingSeat != null && chrome.showConfirmCard) {
+        } else if (!immersiveUp &&
+            pendingSeat != null &&
+            chrome.showConfirmCard) {
           final capabilities = state.snapshot?.capabilities ?? const <String>{};
           final onViewFromSeat =
               options.enableSeatView && capabilities.contains('seatView')
                   ? (SelectedSeat seat) => _inspectSeat(
-                        seat,
                         () => controller.openSeatView(seat),
                       )
                   : null;
           final onShow3D = options.enable3D && capabilities.contains('venue3d')
               ? (SelectedSeat seat) => _inspectSeat(
-                    seat,
                     () => controller.showSeatIn3D(seat),
                   )
               : null;
@@ -341,13 +355,12 @@ class _SeatLayerPickerAdaptiveLayoutState
         } else {
           buyerPrompt = null;
         }
-        // Only a card that is actually on screen suppresses its seat. A seat
-        // nobody is asking about belongs in the cart, however the options are
-        // set: the GA and table prompts speak for their own units and are not
-        // a seat waiting on an answer.
+        // An immersive inspection temporarily takes the card off the picture,
+        // but it does not answer the buyer's Select/Cancel question. Keep that
+        // exact seat out of cart totals until they explicitly decide.
         controller.setConfirmCardSeat(
-          buyerPrompt != null &&
-                  pendingSeat != null &&
+          pendingSeat != null &&
+                  chrome.showConfirmCard &&
                   state.generalAdmissionCandidate == null &&
                   pendingSeat.bookingMode != 'variable'
               ? pendingSeat
@@ -421,12 +434,17 @@ class _SeatLayerPickerAdaptiveLayoutState
                             child: accessibility,
                           ),
                           Positioned.fill(child: seatViewChrome),
-                          Positioned.fill(
-                            child: _PickerPromptTransition(
-                              scrimColor: pickerAlpha(resolved.background, .64),
-                              child: buyerPrompt,
+                          if (!immersiveUp)
+                            Positioned.fill(
+                              key: const ValueKey<String>(
+                                'seatlayer-picker-prompt-transition',
+                              ),
+                              child: _PickerPromptTransition(
+                                scrimColor:
+                                    pickerAlpha(resolved.background, .64),
+                                child: buyerPrompt,
+                              ),
                             ),
-                          ),
                           if (statusOverlay != null)
                             Positioned.fill(child: statusOverlay),
                         ],
@@ -482,19 +500,18 @@ class _SeatLayerPickerAdaptiveLayoutState
 
         // The controls ride above the dock so neither covers the other; the
         // dock itself is edge-to-edge at the map's own bottom.
-        final dockLift =
-            _dockVisible(state) ? resolved.layout.dockBarHeight : 0.0;
+        final dockLift = dockUp ? resolved.layout.dockBarHeight : 0.0;
         // What of the map this composition is standing on. Only chrome drawn
         // OVER the map counts: the header and the cart sheet are rows of the
         // same Column, so the map surface begins and ends where they do and
         // the runtime already frames inside them. The rail and the dock are
         // not — they are stacked on the map — so a section framed to the whole
         // surface lands partly underneath them unless the runtime is told.
-        final venue3DUp = state.snapshot?.map.isVenue3D ?? false;
         _reportViewportInsets(
           SeatLayerViewportInsets(
             top: _topBand(
               chrome: chrome,
+              panorama: panoramaUp,
               testBadge: state.isTestEvent,
               venue3D: venue3DUp,
               venue3DTopInset: venue3DTopInset,
@@ -535,7 +552,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                             child: prices,
                           ),
                         ),
-                        if (chrome.showMapControls)
+                        if (chrome.showMapControls && !panoramaUp)
                           const Padding(
                             padding: EdgeInsets.only(right: 10),
                             child: SeatLayerPickerViewModeControl(),
@@ -576,14 +593,18 @@ class _SeatLayerPickerAdaptiveLayoutState
                   Positioned.fill(child: controls),
                   if (chrome.showVenue3DChrome) Positioned.fill(child: venue3D),
                   Positioned.fill(child: seatViewChrome),
-                  if (chrome.showDockBar)
+                  if (chrome.showDockBar && dockUp)
                     Positioned(left: 0, right: 0, bottom: 0, child: dock),
-                  Positioned.fill(
-                    child: _PickerPromptTransition(
-                      scrimColor: pickerAlpha(resolved.background, .64),
-                      child: buyerPrompt,
+                  if (!immersiveUp)
+                    Positioned.fill(
+                      key: const ValueKey<String>(
+                        'seatlayer-picker-prompt-transition',
+                      ),
+                      child: _PickerPromptTransition(
+                        scrimColor: pickerAlpha(resolved.background, .64),
+                        child: buyerPrompt,
+                      ),
                     ),
-                  ),
                   if (statusOverlay != null)
                     Positioned.fill(child: statusOverlay),
                 ],
@@ -623,12 +644,14 @@ class _SeatLayerPickerAdaptiveLayoutState
   /// gone and `‹ Back to venue` takes its place, at its own inset.
   static double _topBand({
     required SeatLayerPickerChromeOptions chrome,
+    required bool panorama,
     required bool testBadge,
     required bool venue3D,
     required double venue3DTopInset,
     required bool floorStrip,
     required double floorStripHeight,
   }) {
+    if (panorama) return 0;
     final rail = _topRailBand(
       chrome: chrome,
       venue3D: venue3D,
@@ -739,7 +762,9 @@ class _SeatLayerPickerAdaptiveLayoutState
       }
     }
     if (state.snapshot?.map.rung == 'seats') {
-      ignorePickerAction(controller.overview());
+      // Keep the web rung ladder: seats -> section -> venue, one Back gesture
+      // at a time. The next snapshot decides whether another rung remains.
+      ignorePickerAction(controller.zoomOut());
     }
   }
 
@@ -817,17 +842,14 @@ class _SeatLayerPickerAdaptiveLayoutState
 
   /// Hand the runtime the current chrome bands.
   ///
-  /// Called from `build`, which is where the numbers are known, and deferred
-  /// to after the frame so reporting furniture never runs inside layout. The
-  /// controller drops repeats and coalesces a frame's calls into one command.
+  /// Called from `build`, which is where the numbers are known. The controller
+  /// defers delivery until after the frame, drops repeats and coalesces a
+  /// frame's calls into one command.
   void _reportViewportInsets(SeatLayerViewportInsets insets) {
     if (_reportedInsets == insets) return;
     _reportedInsets = insets;
     final controller = SeatLayerPickerScope.controllerOf(context);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _reportedInsets != insets) return;
-      ignorePickerAction(controller.setViewportInsets(insets));
-    });
+    ignorePickerAction(controller.setViewportInsets(insets));
   }
 
   @override
@@ -844,19 +866,13 @@ class _SeatLayerPickerAdaptiveLayoutState
   }
 
   Future<void> _inspectSeat(
-    SelectedSeat seat,
     Future<void> Function() action,
   ) async {
     if (!mounted) return;
-    try {
-      await action();
-      // Do not uncover the embedded platform view until the runtime confirms
-      // its immersive surface is mounted. This also makes the card-to-view
-      // animation a handoff instead of a flash through the raw map.
-      if (mounted) _picker?.markSeatAnswered(seat.label);
-    } catch (_) {
-      rethrow;
-    }
+    // The controller only completes after the command is accepted. The
+    // runtime's panorama/3D state then hides the card without answering it,
+    // so returning to the map restores the same Select/Cancel decision.
+    await action();
   }
 
   Future<void> _removeSeat(
