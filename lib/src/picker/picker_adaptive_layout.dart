@@ -842,17 +842,14 @@ class _SeatLayerPickerAdaptiveLayoutState
 
   /// Hand the runtime the current chrome bands.
   ///
-  /// Called from `build`, which is where the numbers are known, and deferred
-  /// to after the frame so reporting furniture never runs inside layout. The
-  /// controller drops repeats and coalesces a frame's calls into one command.
+  /// Called from `build`, which is where the numbers are known. The controller
+  /// defers delivery until after the frame, drops repeats and coalesces a
+  /// frame's calls into one command.
   void _reportViewportInsets(SeatLayerViewportInsets insets) {
     if (_reportedInsets == insets) return;
     _reportedInsets = insets;
     final controller = SeatLayerPickerScope.controllerOf(context);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _reportedInsets != insets) return;
-      ignorePickerAction(controller.setViewportInsets(insets));
-    });
+    ignorePickerAction(controller.setViewportInsets(insets));
   }
 
   @override
