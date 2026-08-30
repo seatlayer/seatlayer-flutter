@@ -585,6 +585,11 @@ class SeatLayerPickerMapState {
     this.focusedSectionId,
     this.focusedSection,
     this.view3DTargetSeatId,
+    this.view3DTargetSeat,
+    this.view3DPreviousSeatId,
+    this.view3DNextSeatId,
+    this.view3DFocusedSectionId,
+    this.reportsView3DPosition = false,
     this.viewportInsets,
   });
 
@@ -593,6 +598,23 @@ class SeatLayerPickerMapState {
   final SeatLayerBuyerView buyerView;
   final SeatLayer3DNavigationMode view3DNavigationMode;
   final String? view3DTargetSeatId;
+
+  /// Buyer-display identity for the seat under the 3D camera, selected or not.
+  final SelectedSeat? view3DTargetSeat;
+
+  /// Same-row neighbours in authored inventory order.
+  final String? view3DPreviousSeatId;
+  final String? view3DNextSeatId;
+
+  /// The section framed by the 3D scene, separate from the 2D map focus.
+  final String? view3DFocusedSectionId;
+
+  /// Whether the runtime reports the explicit 3D target/neighbour contract.
+  ///
+  /// Null is a valid boundary value for a neighbour, so the SDK must retain
+  /// the difference between an old runtime that omitted the fields and a new
+  /// runtime saying there is no seat in that direction.
+  final bool reportsView3DPosition;
   final String? activeFloorId;
   final String? focusedSectionId;
   final SeatLayerPickerSectionSummary? focusedSection;
@@ -606,9 +628,9 @@ class SeatLayerPickerMapState {
 
   /// The access needs this event's chart offers, in the runtime's own order.
   ///
-  /// Empty on a runtime that does not advertise `access-needs-v1`, which is
-  /// why the accessibility sheet falls back to the full static list there: an
-  /// empty list means "not reported", never "this venue offers none".
+  /// Empty when the runtime reports that this chart offers no access need, or
+  /// when an older runtime does not advertise `access-needs-v1`. Chrome fails
+  /// closed in both cases instead of inventing filters that empty the map.
   final List<SeatLayerAccessNeed> accessNeeds;
 
   /// Whether the runtime is drawing every floor or just [activeFloorId].
@@ -659,6 +681,17 @@ class SeatLayerPickerMapState {
           jStr(jGet(value, 'view3dNavigationMode')) ?? 'orbit',
         ),
         view3DTargetSeatId: jStr(jGet(value, 'view3dTargetSeatId')),
+        view3DTargetSeat: SelectedSeat.fromJson(
+          jGet(value, 'view3dTargetSeat'),
+        ),
+        view3DPreviousSeatId: jStr(jGet(value, 'view3dPreviousSeatId')),
+        view3DNextSeatId: jStr(jGet(value, 'view3dNextSeatId')),
+        view3DFocusedSectionId: jStr(jGet(value, 'view3dFocusedSectionId')),
+        reportsView3DPosition: <String>[
+          'view3dPreviousSeatId',
+          'view3dNextSeatId',
+          'view3dFocusedSectionId',
+        ].any((key) => jObj(value)?.containsKey(key) ?? false),
         activeFloorId:
             jStr(jGet(value, 'activeFloorId')) ?? jStr(jGet(value, 'floorId')),
         focusedSectionId: jStr(jGet(value, 'focusedSectionId')),

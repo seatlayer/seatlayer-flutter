@@ -16,7 +16,7 @@ import 'seat_layer_picker_theme.dart';
 /// The dock is the phone's answer to "which section am I in, how much room is
 /// left here, and how do I get back". It renders only at rung 2 — the map
 /// focused on one section with its seats revealed — and slides away when the
-/// map returns to the venue overview.
+/// map climbs one level at a time, matching the web picker.
 ///
 /// It reads everything from the snapshot, so it works standalone inside a
 /// [SeatLayerPickerScope]; nothing about it is coupled to the drop-in layout.
@@ -30,7 +30,7 @@ class SeatLayerDockBar extends StatelessWidget {
     this.style,
   });
 
-  /// Replaces the built-in return to the venue overview.
+  /// Replaces the built-in one-level return from the seat map.
   final VoidCallback? onOverview;
 
   /// Called with the id of the section a step control moved to.
@@ -381,11 +381,11 @@ _DockPlan _planDock(
       _textWidth(value, inherited.merge(style), scaler, direction);
 
   final nameWidth = measure(name, nameStyle);
-  final longWidth =
-      countLong == null ? 0.0 : _separatorWidth + measure(countLong, countStyle);
-  final shortWidth = count == null
+  final longWidth = countLong == null
       ? 0.0
-      : _separatorWidth + measure('$count', countStyle);
+      : _separatorWidth + measure(countLong, countStyle);
+  final shortWidth =
+      count == null ? 0.0 : _separatorWidth + measure('$count', countStyle);
   // A `ButtonStyle` textStyle replaces the ambient default rather than
   // merging with it, so the button's own label is measured raw. The floor is
   // Material's minimum button width, which a short word in another language

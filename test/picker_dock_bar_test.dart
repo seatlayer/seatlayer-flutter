@@ -212,7 +212,8 @@ void main() {
     expect(_stepEnabled(tester, 'Next section'), isFalse);
   });
 
-  testWidgets('Venue returns the map to the overview', (tester) async {
+  testWidgets('Venue returns directly to all sections',
+      (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
 
@@ -250,8 +251,8 @@ void main() {
         (tester) async {
       await _pumpDockAt(tester, width: 390, name: 'Sponsor Tables');
 
-      expect(_nameParagraph(tester, 'Sponsor Tables').didExceedMaxLines,
-          isFalse);
+      expect(
+          _nameParagraph(tester, 'Sponsor Tables').didExceedMaxLines, isFalse);
       expect(find.text('73 left'), findsOneWidget);
       expect(find.text('Venue'), findsOneWidget);
     });
@@ -272,8 +273,8 @@ void main() {
         (tester) async {
       await _pumpDockAt(tester, width: 320, name: 'Sponsor Tables');
 
-      expect(_nameParagraph(tester, 'Sponsor Tables').didExceedMaxLines,
-          isFalse);
+      expect(
+          _nameParagraph(tester, 'Sponsor Tables').didExceedMaxLines, isFalse);
       expect(find.textContaining('73'), findsNothing);
       // The word goes; the control and its accessible name stay.
       expect(find.text('Venue'), findsNothing);

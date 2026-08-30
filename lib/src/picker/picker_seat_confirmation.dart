@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../open_enums.dart';
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_ticket_tiers.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -72,7 +73,9 @@ class _SeatLayerPickerSeatConfirmationState
       return const SizedBox.shrink();
     }
     final seat = widget.seat ?? controller.state.selection.lastOrNull;
-    if (seat == null || seat.label == _dismissedLabel) {
+    final immersiveUp = controller.seatView?.hasContent == true ||
+        (controller.state.snapshot?.map.isVenue3D ?? false);
+    if (seat == null || immersiveUp || seat.label == _dismissedLabel) {
       return const SizedBox.shrink();
     }
     _tierId ??= seat.tierId ?? seat.tiers?.firstOrNull?.id;
@@ -107,6 +110,8 @@ class _SeatLayerPickerSeatConfirmationState
         (seat.accessibility ?? const <String>[])
             .any((item) => item.toLowerCase().contains('wheelchair'));
     final tiers = seat.tiers ?? const <CategoryTier>[];
+    final selectedPrice = seatLayerPickerSelectedPrice(seat, _tierId);
+    final selectedCurrency = seatLayerPickerSelectedCurrency(seat, _tierId);
     final maxHeight = MediaQuery.sizeOf(context).height * .72;
     final capabilities =
         controller.state.snapshot?.capabilities ?? const <String>{};
@@ -218,12 +223,12 @@ class _SeatLayerPickerSeatConfirmationState
                               ),
                             ),
                           ),
-                          if (seat.price != null)
+                          if (selectedPrice != null)
                             Text(
                               pickerMoney(
                                 context,
-                                seat.price!,
-                                seat.currency ?? 'USD',
+                                selectedPrice,
+                                selectedCurrency,
                               ),
                               style: TextStyle(
                                 color: theme.text,
@@ -253,7 +258,7 @@ class _SeatLayerPickerSeatConfirmationState
                           for (final tier in tiers)
                             Padding(
                               padding: const EdgeInsets.only(bottom: 7),
-                              child: _SeatTierChoice(
+                              child: SeatLayerPickerSeatTierChoice(
                                 tier: tier,
                                 currency: seat.currency ?? 'USD',
                                 selected: _tierId == tier.id,
@@ -404,10 +409,6 @@ class _SeatLayerPickerSeatConfirmationState
   ) async {
     try {
       await action(seat);
-      // Keep the native card above the platform view until the runtime has
-      // actually mounted the seat-view/3D surface. Removing it first lets the
-      // tail of the same iOS tap reach WKWebView and select a seat underneath.
-      if (mounted) setState(() => _dismissedLabel = seat.label);
     } catch (_) {
       // Controller-backed actions already publish a typed picker error. A
       // custom action can render its own failure while this card stays put.
@@ -580,90 +581,6 @@ class _SeatIdentityField extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _SeatTierChoice extends StatelessWidget {
-  const _SeatTierChoice({
-    required this.tier,
-    required this.currency,
-    required this.selected,
-    required this.enabled,
-    required this.onTap,
-  });
-
-  final CategoryTier tier;
-  final String currency;
-  final bool selected;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = seatLayerPickerThemeOf(context);
-    final guidance = tier.buyerMessage ??
-        (tier.restriction == 'companion'
-            ? 'Requires the adjacent wheelchair place.'
-            : null);
-    return Material(
-      color: selected ? pickerAlpha(theme.accent, .10) : Colors.transparent,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(theme.radius),
-        side: BorderSide(
-          color: selected ? theme.accent : theme.divider,
-          width: selected ? 1.5 : 1,
-        ),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(theme.radius),
-        onTap: enabled ? onTap : null,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-          child: Row(
-            children: [
-              Icon(
-                selected
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.radio_button_unchecked_rounded,
-                color: selected ? theme.accent : theme.mutedText,
-                size: 20,
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      tier.name,
-                      style: TextStyle(
-                        color: theme.text,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    if (guidance != null)
-                      Text(
-                        guidance,
-                        style: TextStyle(
-                          color: theme.mutedText,
-                          fontSize: 11,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                pickerMoney(context, tier.price, tier.currency ?? currency),
-                style: TextStyle(
-                  color: theme.text,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

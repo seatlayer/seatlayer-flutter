@@ -13,7 +13,7 @@ secure booking to your trusted server.
 
 [SeatLayer Flutter package on pub.dev](https://pub.dev/packages/seatlayer) ·
 [Flutter seat-map documentation](https://docs.seatlayer.io/buyer-sdk/flutter/) ·
-[SeatLayer reserved-seating platform](https://seatlayer.io/) ·
+[SeatLayer SDK and API overview](https://seatlayer.io/developers/) ·
 [Buyer seat-map demo (web)](https://app.seatlayer.io/demo/play/grand-theatre) ·
 [SeatLayer Android seat map SDK](https://github.com/seatlayer/seatlayer-android) ·
 [SeatLayer React Native SDK](https://github.com/seatlayer/seatlayer-react-native) ·

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
+import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
+import 'package:seatlayer/src/picker/picker_dock_bar.dart';
 import 'package:seatlayer/src/picker/picker_legend.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
+import 'package:seatlayer/src/picker/picker_seat_view_chrome.dart';
 import 'package:seatlayer/src/picker/picker_status_views.dart';
 import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 
@@ -104,6 +107,45 @@ void main() {
     );
   });
 
+  testWidgets('a panorama leaves its web exit and gestures unobstructed',
+      (tester) async {
+    final map = FakePickerMap(
+      bundle: nativeChromeBundle(
+        capabilities: const <String>[
+          'native-chrome-contract-v1',
+          'viewport-insets-v1',
+          'native-seat-view-chrome-v1',
+        ],
+      ),
+    );
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout()));
+    final snapshot = _snapshotWithCategories(3);
+    (snapshot['map']! as Map<String, Object?>)['buyerView'] = 'venue3d';
+    map.emit(snapshot);
+    map.emitEvent('seatView.changed', <String, Object?>{
+      'seatView': <String, Object?>{
+        'seatId': 'seat-a-1',
+        'title': 'View from Gallery · A-1',
+        'caption': 'Drag to look around',
+        'real': true,
+        'generated': false,
+      },
+    });
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SeatLayerSeatViewChrome), findsOneWidget);
+    expect(find.byType(SeatLayerPriceLegend), findsNothing);
+    expect(find.byType(SeatLayerPickerMapControls), findsNothing);
+    expect(find.byType(SeatLayerPickerViewModeControl), findsNothing);
+    expect(find.byType(SeatLayerPickerAccessibilityFilters), findsNothing);
+    expect(find.byType(SeatLayerVenue3D), findsNothing);
+    expect(find.byType(SeatLayerPickerTestModeIndicator), findsNothing);
+    expect(find.byType(SeatLayerDockBar), findsNothing);
+  });
+
   testWidgets('the test badge stacks below the way back out of 3D',
       (tester) async {
     final map = FakePickerMap();
@@ -112,7 +154,17 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
     final snapshot = _snapshotWithCategories(8);
-    (snapshot['map']! as Map<String, Object?>)['buyerView'] = 'venue3d';
+    final mapState = snapshot['map']! as Map<String, Object?>;
+    final selectedSeat = ((snapshot['selection']!
+            as Map<String, Object?>)['seats']! as List<Object?>)
+        .single! as Map<String, Object?>;
+    mapState
+      ..['buyerView'] = 'venue3d'
+      ..['view3dTargetSeatId'] = selectedSeat['id']
+      ..['view3dTargetSeat'] = selectedSeat
+      ..['view3dPreviousSeatId'] = null
+      ..['view3dNextSeatId'] = null
+      ..['view3dFocusedSectionId'] = 'section-a';
     map.emit(snapshot);
     await tester.pumpAndSettle();
 
@@ -120,6 +172,7 @@ void main() {
       find.byType(SeatLayerPickerTestModeIndicator),
     );
     final back = tester.getRect(find.text('Back to venue'));
+    expect(find.byType(SeatLayerDockBar), findsNothing);
     expect(badge.top, greaterThanOrEqualTo(back.bottom));
     expect(
       badge.top,

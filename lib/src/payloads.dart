@@ -645,6 +645,7 @@ class ReadyInfo {
     required this.mode,
     required this.transport,
     this.eventKey,
+    this.timeToHelloMs,
     this.timeToReadyMs,
   });
 
@@ -661,6 +662,13 @@ class ReadyInfo {
   /// The event key the chart was built for.
   final String? eventKey;
 
+  /// Milliseconds from arming the handshake to the runtime's `hello`.
+  ///
+  /// This isolates WebView creation, document fetch and bundle evaluation from
+  /// the event/API work after `init`. Subtract it from [timeToReadyMs] for the
+  /// `hello` → ready span. Null outside a live handshake.
+  final int? timeToHelloMs;
+
   /// Milliseconds from the view arming the handshake to `sys.ready`.
   ///
   /// The whole cold path, end to end, up to the chart's first render. It is
@@ -673,7 +681,11 @@ class ReadyInfo {
   /// `null` for a [ReadyInfo] not produced by a live handshake.
   final int? timeToReadyMs;
 
-  factory ReadyInfo.fromJson(Object? payload, {int? timeToReadyMs}) =>
+  factory ReadyInfo.fromJson(
+    Object? payload, {
+    int? timeToHelloMs,
+    int? timeToReadyMs,
+  }) =>
       ReadyInfo(
         protocolRevision:
             jInt(jGet(payload, 'protocol')) ?? seatLayerProtocolMin,
@@ -681,6 +693,7 @@ class ReadyInfo {
         transport: transportNameOrNull(jGet(payload, 'transport')) ??
             const TransportNameUnknown(''),
         eventKey: jStr(jGet(jGet(payload, 'chart'), 'event')),
+        timeToHelloMs: timeToHelloMs,
         timeToReadyMs: timeToReadyMs,
       );
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
 import 'package:seatlayer/src/picker/picker_layout.dart';
 import 'package:seatlayer/src/picker/picker_legend.dart';
@@ -11,6 +12,19 @@ import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
 
 const SeatLayerPickerLayout _layout = SeatLayerPickerLayout();
+
+BundleInfo _colorblindBundle() => nativeChromeBundle(
+      capabilities: const <String>[
+        'native-chrome-contract-v1',
+        'viewport-insets-v1',
+        'colorblind-safe',
+      ],
+      commands: const <String>[
+        'picker.setThemeMode',
+        'picker.setViewportInsets',
+        'picker.setColorblindSafe',
+      ],
+    );
 
 void main() {
   group('header', () {
@@ -180,24 +194,25 @@ void main() {
           tester.getRect(find.byType(SeatLayerPickerViewModeControl));
       final access =
           tester.getRect(find.byType(SeatLayerPickerAccessibilityFilters));
-      final fit = tester.getRect(find.byType(SeatLayerPickerZoomToFitButton));
+      final stepOut = tester.getRect(find.byType(SeatLayerPickerOverviewButton));
 
       expect(segmented.right, closeTo(screen.right - 10, .5));
       expect(segmented.top, closeTo(screen.top + 10, .5));
       expect(access.left, closeTo(screen.left + 10, .5));
       expect(access.bottom, closeTo(screen.bottom - 10, .5));
-      expect(fit.right, closeTo(screen.right - 10, .5));
-      expect(fit.bottom, closeTo(screen.bottom - 10, .5));
+      expect(stepOut.right, closeTo(screen.right - 10, .5));
+      expect(stepOut.bottom, closeTo(screen.bottom - 10, .5));
 
       // Pinch already zooms, and the colourblind palette lives in the
       // accessibility sheet.
       expect(find.byType(SeatLayerPickerZoomInButton), findsNothing);
+      expect(find.byType(SeatLayerPickerZoomToFitButton), findsNothing);
       expect(find.byType(SeatLayerPickerColorblindButton), findsNothing);
     });
 
     testWidgets('the accessibility control is a 44-point target',
         (tester) async {
-      final map = FakePickerMap();
+      final map = FakePickerMap(bundle: _colorblindBundle());
       addTearDown(map.dispose);
       usePhoneSurface(tester);
 
@@ -250,8 +265,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final screen = tester.getRect(find.byType(SeatLayerPickerMapControls));
-      final fit = tester.getRect(find.byType(SeatLayerPickerZoomToFitButton));
-      expect(fit.bottom, closeTo(screen.bottom - 62, .5));
+      final stepOut = tester.getRect(find.byType(SeatLayerPickerOverviewButton));
+      expect(stepOut.bottom, closeTo(screen.bottom - 62, .5));
     });
 
     testWidgets('a host can ask for the zoom pair back', (tester) async {
@@ -302,7 +317,7 @@ void main() {
 
     testWidgets('the colourblind palette is inside the accessibility sheet',
         (tester) async {
-      final map = FakePickerMap();
+      final map = FakePickerMap(bundle: _colorblindBundle());
       addTearDown(map.dispose);
       usePhoneSurface(tester);
 
@@ -369,7 +384,7 @@ void main() {
       }, tags: goldenTag);
 
       testWidgets('map controls golden — ${brightness.name}', (tester) async {
-        final map = FakePickerMap();
+        final map = FakePickerMap(bundle: _colorblindBundle());
         addTearDown(map.dispose);
         usePhoneSurface(tester);
 

@@ -7,6 +7,7 @@ import '../payloads.dart';
 import 'picker_internal.dart';
 import 'picker_styles.dart';
 import 'picker_motion.dart';
+import 'picker_ticket_tiers.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -65,12 +66,18 @@ class SeatLayerConfirmCard extends StatefulWidget {
 }
 
 class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
+  String? _seatKey;
+  String? _tierId;
   String? _dismissedLabel;
 
   @override
   void didUpdateWidget(covariant SeatLayerConfirmCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.seat?.label != widget.seat?.label) _dismissedLabel = null;
+    if (oldWidget.seat?.label != widget.seat?.label) {
+      _seatKey = null;
+      _tierId = widget.seat?.tierId;
+      _dismissedLabel = null;
+    }
   }
 
   @override
@@ -81,9 +88,19 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     }
     final selection = controller.state.selection;
     final seat = widget.seat ?? (selection.isEmpty ? null : selection.last);
-    if (seat == null || seat.label == _dismissedLabel) {
+    final immersiveUp = controller.seatView?.hasContent == true ||
+        (controller.state.snapshot?.map.isVenue3D ?? false);
+    if (seat == null || immersiveUp) {
       return const SizedBox.shrink();
     }
+    final seatKey = '${seat.id}\u0000${seat.label}';
+    if (_seatKey != seatKey) {
+      _seatKey = seatKey;
+      _tierId = seat.tierId ?? seat.tiers?.firstOrNull?.id;
+      _dismissedLabel = null;
+    }
+    if (seat.label == _dismissedLabel) return const SizedBox.shrink();
+    _tierId ??= seat.tierId ?? seat.tiers?.firstOrNull?.id;
 
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
@@ -94,6 +111,9 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     final category = controller.state.categories
         .where((item) => item.key == seat.categoryKey)
         .firstOrNull;
+    final tiers = seat.tiers ?? const <CategoryTier>[];
+    final selectedPrice = seatLayerPickerSelectedPrice(seat, _tierId);
+    final selectedCurrency = seatLayerPickerSelectedCurrency(seat, _tierId);
 
     final seatView = widget.showSeatView &&
             options.enableSeatView &&
@@ -141,6 +161,8 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                   child: _IdentityRow(
                     seat: seat,
                     color: pickerColor(category?.color) ?? theme.accent,
+                    price: selectedPrice,
+                    currency: selectedCurrency,
                   ),
                 ),
                 if (hasStrip) ...[
@@ -150,12 +172,33 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                       seat: seat,
                       onViewFromSeat: seatView,
                       onShow3D: venue3D,
-                      onInspected: _dismiss,
                     ),
                   ),
                   const SizedBox(height: 10),
                 ] else
                   const SizedBox(height: 5),
+                if (tiers.length > 1)
+                  Flexible(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (final tier in tiers)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 7),
+                              child: SeatLayerPickerSeatTierChoice(
+                                tier: tier,
+                                currency: seat.currency ?? 'USD',
+                                selected: _tierId == tier.id,
+                                enabled: !controller.state.isBusy,
+                                onTap: () => setState(() => _tierId = tier.id),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
                 SizedBox(
                   height: layout.confirmActionHeight,
                   child: Row(
@@ -207,6 +250,9 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     final origin = _cardCentre();
     final callbacks = SeatLayerPickerScope.callbacksOf(context);
     try {
+      if (_tierId != null && _tierId != seat.tierId) {
+        await controller.setSeatTier(seat.id, _tierId);
+      }
       await widget.onConfirm?.call(seat);
       callbacks.onSeatSelected?.call(seat);
       if (!mounted) return;
@@ -265,10 +311,17 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
 }
 
 class _IdentityRow extends StatelessWidget {
-  const _IdentityRow({required this.seat, required this.color});
+  const _IdentityRow({
+    required this.seat,
+    required this.color,
+    required this.price,
+    required this.currency,
+  });
 
   final SelectedSeat seat;
   final Color color;
+  final double? price;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -312,10 +365,10 @@ class _IdentityRow extends StatelessWidget {
               ),
             ),
           ),
-          if (seat.price != null) ...[
+          if (price != null) ...[
             const SizedBox(width: 10),
             Text(
-              pickerMoney(context, seat.price!, seat.currency ?? 'USD'),
+              pickerMoney(context, price!, currency),
               softWrap: false,
               style: TextStyle(
                 color: theme.text,
@@ -353,13 +406,11 @@ class _InspectionStrip extends StatelessWidget {
     required this.seat,
     required this.onViewFromSeat,
     required this.onShow3D,
-    required this.onInspected,
   });
 
   final SelectedSeat seat;
   final FutureOr<void> Function(SelectedSeat seat)? onViewFromSeat;
   final FutureOr<void> Function(SelectedSeat seat)? onShow3D;
-  final ValueChanged<SelectedSeat> onInspected;
 
   @override
   Widget build(BuildContext context) {
@@ -412,7 +463,6 @@ class _InspectionStrip extends StatelessWidget {
       // immersive surface: removing it first lets the tail of the same iOS
       // tap reach the WebView and select a seat underneath.
       callbacks.onSeatViewOpened?.call(seat);
-      onInspected(seat);
     } catch (_) {
       // A controller-backed action already published a typed picker error.
     }
