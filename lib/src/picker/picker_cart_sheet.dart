@@ -82,16 +82,19 @@ class SeatLayerCartSheet extends StatelessWidget {
     final theme = seatLayerMapChromeThemeOf(context);
     final layout = theme.layout;
     final options = SeatLayerPickerScope.optionsOf(context);
-    final bottomInset =
-        reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0;
+    final bottomInset = reserveBottomInset
+        ? MediaQuery.paddingOf(context).bottom
+        : 0.0;
     final hasTickets = controller.confirmedCartLines.isNotEmpty;
     final maxSheet =
         MediaQuery.sizeOf(context).height * layout.sheetMaxHeightFraction;
-    final maxBody =
-        (maxSheet - layout.peekHeight - bottomInset).clamp(0.0, maxSheet);
+    final maxBody = (maxSheet - layout.peekHeight - bottomInset).clamp(
+      0.0,
+      maxSheet,
+    );
 
-    final surface =
-        (theme.styles.sheetStyle ?? const SeatLayerSurfaceStyle()).merge(style);
+    final surface = (theme.styles.sheetStyle ?? const SeatLayerSurfaceStyle())
+        .merge(style);
     return Material(
       color: surface.color ?? theme.surface,
       elevation: surface.elevation ?? 12,
@@ -112,14 +115,17 @@ class SeatLayerCartSheet extends StatelessWidget {
               hasTickets: hasTickets,
               onExpandedChanged: onExpandedChanged,
               onCheckout: onCheckout,
-              showBestSeatsShortcut: hasTickets &&
+              showBestSeatsShortcut:
+                  hasTickets &&
                   options.enableBestAvailable &&
                   !options.readOnly,
               continueStyle: continueButtonStyle,
             ),
             AnimatedSize(
               duration: SeatLayerPickerMotion.of(
-                  context, SeatLayerPickerMotion.sheet),
+                context,
+                SeatLayerPickerMotion.sheet,
+              ),
               curve: SeatLayerPickerMotion.easeEnter,
               alignment: Alignment.topCenter,
               child: !expanded
@@ -148,7 +154,7 @@ class SeatLayerCartSheet extends StatelessWidget {
             if (!expanded && bottomInset > 0)
               SizedBox(
                 height: bottomInset,
-                child: Center(child: attribution),
+                child: _TrailingAttribution(child: attribution),
               ),
           ],
         ),
@@ -192,13 +198,13 @@ class _PeekRow extends StatelessWidget {
 
     final label = hasTickets
         ? expanded
-            // Expanded, the total is on the call to action a thumb away; saying
-            // it again here is the same number three times on one screen.
-            ? strings.ticketCount(ticketCount)
-            : '${strings.ticketCount(ticketCount)} · ${pickerMoney(context, total, currency)}'
+              // Expanded, the total is on the call to action a thumb away; saying
+              // it again here is the same number three times on one screen.
+              ? strings.ticketCount(ticketCount)
+              : '${strings.ticketCount(ticketCount)} · ${pickerMoney(context, total, currency)}'
         : cheapest == null
-            ? strings.chooseTickets
-            : strings.fromPrice(pickerCompactMoney(cheapest, currency));
+        ? strings.chooseTickets
+        : strings.fromPrice(pickerCompactMoney(cheapest, currency));
 
     return InkWell(
       onTap: () => onExpandedChanged(!expanded),
@@ -251,27 +257,32 @@ class _PeekRow extends StatelessWidget {
                         // The shape merges LAST: `merge` fills this style's
                         // null fields, so a slot or an instance style that
                         // sets its own shape still wins.
-                        style: FilledButton.styleFrom(
-                          backgroundColor: theme.accent,
-                          foregroundColor: theme.onAccent,
-                          minimumSize: const Size(0, 34),
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          visualDensity: VisualDensity.compact,
-                          textStyle: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w800,
-                            fontFamily: theme.fontFamily,
-                          ),
-                        )
-                            .merge(
-                              continueStyle ??
-                                  theme.styles.resolvedContinueButtonStyle,
-                            )
-                            .merge(seatLayerButtonShape(theme.buttonRadius)),
+                        style:
+                            FilledButton.styleFrom(
+                                  backgroundColor: theme.accent,
+                                  foregroundColor: theme.onAccent,
+                                  minimumSize: const Size(0, 34),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                  textStyle: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    fontFamily: theme.fontFamily,
+                                  ),
+                                )
+                                .merge(
+                                  continueStyle ??
+                                      theme.styles.resolvedContinueButtonStyle,
+                                )
+                                .merge(
+                                  seatLayerButtonShape(theme.buttonRadius),
+                                ),
                         onPressed: controller.canCheckout
                             ? () => ignorePickerAction(
-                                  checkoutThroughHost(controller, onCheckout),
-                                )
+                                checkoutThroughHost(controller, onCheckout),
+                              )
                             : null,
                         child: Text(
                           strings.continueWithTotal(
@@ -372,7 +383,7 @@ class _EmptyBody extends StatelessWidget {
           ),
           bestSeats ?? const SeatLayerBestSeatsForm(),
           actionError ?? const SeatLayerPickerActionError(),
-          Center(child: attribution),
+          _TrailingAttribution(child: attribution),
         ],
       ),
     );
@@ -396,20 +407,32 @@ class _FilledBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
-              child: cartList ?? const SeatLayerCartList(),
-            ),
-          ),
-          actionError ?? const SeatLayerPickerActionError(),
-          checkoutBar ?? SeatLayerBookButton(onCheckout: onCheckout),
-          Center(child: attribution),
-        ],
-      );
+    mainAxisSize: MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Flexible(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+          child: cartList ?? const SeatLayerCartList(),
+        ),
+      ),
+      actionError ?? const SeatLayerPickerActionError(),
+      checkoutBar ?? SeatLayerBookButton(onCheckout: onCheckout),
+      _TrailingAttribution(child: attribution),
+    ],
+  );
+}
+
+class _TrailingAttribution extends StatelessWidget {
+  const _TrailingAttribution({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsetsDirectional.only(end: 8),
+    child: Align(alignment: AlignmentDirectional.centerEnd, child: child),
+  );
 }
 
 /// The one call to action that turns a cart into a hold.
@@ -419,11 +442,7 @@ class _FilledBody extends StatelessWidget {
 /// footer ended up being read as a second, different price.
 class SeatLayerBookButton extends StatelessWidget {
   /// Creates the checkout call to action.
-  const SeatLayerBookButton({
-    super.key,
-    required this.onCheckout,
-    this.style,
-  });
+  const SeatLayerBookButton({super.key, required this.onCheckout, this.style});
 
   /// Receives the hold once the runtime has created it.
   final SeatLayerCheckoutCallback onCheckout;
@@ -443,22 +462,23 @@ class SeatLayerBookButton extends StatelessWidget {
       child: FilledButton(
         // The shape merges LAST so `primaryButtonStyle` — or this instance's
         // own `style:` — can still reshape the button.
-        style: FilledButton.styleFrom(
-          backgroundColor: theme.accent,
-          foregroundColor: theme.onAccent,
-          minimumSize: const Size.fromHeight(46),
-          textStyle: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w800,
-            fontFamily: theme.fontFamily,
-          ),
-        )
-            .merge(style ?? theme.styles.primaryButtonStyle)
-            .merge(seatLayerButtonShape(theme.buttonRadius)),
+        style:
+            FilledButton.styleFrom(
+                  backgroundColor: theme.accent,
+                  foregroundColor: theme.onAccent,
+                  minimumSize: const Size.fromHeight(46),
+                  textStyle: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: theme.fontFamily,
+                  ),
+                )
+                .merge(style ?? theme.styles.primaryButtonStyle)
+                .merge(seatLayerButtonShape(theme.buttonRadius)),
         onPressed: controller.canCheckout
             ? () => ignorePickerAction(
-                  checkoutThroughHost(controller, onCheckout),
-                )
+                checkoutThroughHost(controller, onCheckout),
+              )
             : null,
         child: busy
             ? const SizedBox.square(

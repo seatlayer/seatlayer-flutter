@@ -120,7 +120,8 @@ class _SeatLayerPickerAdaptiveLayoutState
     final body = LayoutBuilder(
       builder: (context, constraints) {
         final requested = SeatLayerPickerScope.optionsOf(context).layout;
-        final wide = requested == SeatLayerPickerLayoutMode.wide ||
+        final wide =
+            requested == SeatLayerPickerLayoutMode.wide ||
             (requested == SeatLayerPickerLayoutMode.adaptive &&
                 constraints.maxWidth >= 840);
         final options = SeatLayerPickerScope.optionsOf(context);
@@ -170,7 +171,8 @@ class _SeatLayerPickerAdaptiveLayoutState
               );
         // Nothing is drawn on a venue with one floor, so nothing is reserved
         // either: the band is reported only when the strip is really there.
-        final floorStripUp = !panoramaUp &&
+        final floorStripUp =
+            !panoramaUp &&
             chrome.showFloorStrip &&
             (state.snapshot?.map.floors.length ?? 0) > 1;
         final floorStripHeight = SeatLayerFloorStrip.heightFor(compact: !wide);
@@ -178,8 +180,9 @@ class _SeatLayerPickerAdaptiveLayoutState
           context,
           widget.builders.dockBar,
           SeatLayerDockBar(
-            onSectionChanged:
-                SeatLayerPickerScope.callbacksOf(context).onSectionFocused,
+            onSectionChanged: SeatLayerPickerScope.callbacksOf(
+              context,
+            ).onSectionFocused,
             // The cart sheet below already reserves the device inset.
             reserveBottomInset: !chrome.showTicketPanel,
           ),
@@ -218,8 +221,9 @@ class _SeatLayerPickerAdaptiveLayoutState
             actionError: null,
           ),
         );
-        final venue3DTopInset =
-            chrome.showPriceRail && !panoramaUp ? 46.0 : 10.0;
+        final venue3DTopInset = chrome.showPriceRail && !panoramaUp
+            ? 46.0
+            : 10.0;
         final venue3D = panoramaUp
             ? const SizedBox.shrink()
             : _part(
@@ -257,8 +261,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                 chrome.showMapControls
                     ? SeatLayerPickerMapControls(
                         compact: !wide,
-                        bottomInset:
-                            !wide && dockUp ? resolved.layout.dockBarHeight : 0,
+                        bottomInset: !wide && dockUp
+                            ? resolved.layout.dockBarHeight
+                            : 0,
                         // On a phone the top rail below owns the Map/3D control.
                         includeViewModeControl: wide,
                       )
@@ -315,14 +320,12 @@ class _SeatLayerPickerAdaptiveLayoutState
           final capabilities = state.snapshot?.capabilities ?? const <String>{};
           final onViewFromSeat =
               options.enableSeatView && capabilities.contains('seatView')
-                  ? (SelectedSeat seat) => _inspectSeat(
-                        () => controller.openSeatView(seat),
-                      )
-                  : null;
+              ? (SelectedSeat seat) =>
+                    _inspectSeat(() => controller.openSeatView(seat))
+              : null;
           final onShow3D = options.enable3D && capabilities.contains('venue3d')
-              ? (SelectedSeat seat) => _inspectSeat(
-                    () => controller.showSeatIn3D(seat),
-                  )
+              ? (SelectedSeat seat) =>
+                    _inspectSeat(() => controller.showSeatIn3D(seat))
               : null;
           // The phone gets the one-line card; the wide layout keeps the
           // identity grid, which has the room for it.
@@ -368,23 +371,22 @@ class _SeatLayerPickerAdaptiveLayoutState
         );
         final Widget? statusOverlay = switch (state.phase) {
           SeatLayerPickerPhase.initializing => ColoredBox(
-              color: pickerAlpha(resolved.background, .84),
-              child: _part(
-                context,
-                widget.builders.loading,
-                const SeatLayerPickerLoadingView(),
-              ),
+            color: pickerAlpha(resolved.background, .84),
+            child: _part(
+              context,
+              widget.builders.loading,
+              const SeatLayerPickerLoadingView(),
             ),
+          ),
           SeatLayerPickerPhase.failed ||
-          SeatLayerPickerPhase.unavailable =>
-            ColoredBox(
-              color: pickerAlpha(resolved.background, .94),
-              child: _part(
-                context,
-                widget.builders.error,
-                const SeatLayerPickerErrorView(),
-              ),
+          SeatLayerPickerPhase.unavailable => ColoredBox(
+            color: pickerAlpha(resolved.background, .94),
+            child: _part(
+              context,
+              widget.builders.error,
+              const SeatLayerPickerErrorView(),
             ),
+          ),
           _ => null,
         };
         final mapSurface = IgnorePointer(
@@ -398,8 +400,10 @@ class _SeatLayerPickerAdaptiveLayoutState
         _syncMapInteraction(
           controller,
           enabled: buyerPrompt == null && statusOverlay == null,
-          unlockDelay:
-              SeatLayerPickerMotion.of(context, SeatLayerPickerMotion.exit),
+          unlockDelay: SeatLayerPickerMotion.of(
+            context,
+            SeatLayerPickerMotion.exit,
+          ),
         );
 
         if (wide) {
@@ -416,11 +420,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                       child: Stack(
                         children: [
                           Positioned.fill(child: mapSurface),
-                          Positioned(
-                            top: 12,
-                            left: 12,
-                            child: testBadge,
-                          ),
+                          Positioned(top: 12, left: 12, child: testBadge),
                           Positioned(top: 12, right: 12, child: controls),
                           if (chrome.showFloorSelector)
                             const Positioned(
@@ -440,8 +440,10 @@ class _SeatLayerPickerAdaptiveLayoutState
                                 'seatlayer-picker-prompt-transition',
                               ),
                               child: _PickerPromptTransition(
-                                scrimColor:
-                                    pickerAlpha(resolved.background, .64),
+                                scrimColor: pickerAlpha(
+                                  resolved.background,
+                                  .64,
+                                ),
                                 child: buyerPrompt,
                               ),
                             ),
@@ -454,8 +456,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                       width: 360,
                       decoration: BoxDecoration(
                         color: resolved.surface,
-                        border:
-                            Border(left: BorderSide(color: resolved.divider)),
+                        border: Border(
+                          left: BorderSide(color: resolved.divider),
+                        ),
                       ),
                       child: Column(
                         children: [
@@ -482,11 +485,15 @@ class _SeatLayerPickerAdaptiveLayoutState
                               ],
                             ),
                           ),
-                          Expanded(
-                            child: SingleChildScrollView(child: tray),
-                          ),
+                          Expanded(child: SingleChildScrollView(child: tray)),
                           actionError,
-                          attribution,
+                          const Padding(
+                            padding: EdgeInsetsDirectional.only(end: 8),
+                            child: Align(
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: attribution,
+                            ),
+                          ),
                           checkout,
                         ],
                       ),
@@ -860,14 +867,13 @@ class _SeatLayerPickerAdaptiveLayoutState
     if (_reportedInsets != null &&
         _reportedInsets != SeatLayerViewportInsets.zero) {
       ignorePickerAction(
-          _picker?.setViewportInsets(null) ?? Future<void>.value());
+        _picker?.setViewportInsets(null) ?? Future<void>.value(),
+      );
     }
     super.dispose();
   }
 
-  Future<void> _inspectSeat(
-    Future<void> Function() action,
-  ) async {
+  Future<void> _inspectSeat(Future<void> Function() action) async {
     if (!mounted) return;
     // The controller only completes after the command is accepted. The
     // runtime's panorama/3D state then hides the card without answering it,
@@ -906,10 +912,14 @@ class _PickerPromptTransition extends StatelessWidget {
     return IgnorePointer(
       ignoring: prompt == null,
       child: AnimatedSwitcher(
-        duration:
-            SeatLayerPickerMotion.of(context, SeatLayerPickerMotion.enter),
-        reverseDuration:
-            SeatLayerPickerMotion.of(context, SeatLayerPickerMotion.exit),
+        duration: SeatLayerPickerMotion.of(
+          context,
+          SeatLayerPickerMotion.enter,
+        ),
+        reverseDuration: SeatLayerPickerMotion.of(
+          context,
+          SeatLayerPickerMotion.exit,
+        ),
         switchInCurve: SeatLayerPickerMotion.easeEnter,
         switchOutCurve: SeatLayerPickerMotion.easeExit,
         transitionBuilder: (current, animation) {
@@ -936,9 +946,10 @@ class _PickerPromptTransition extends StatelessWidget {
         child: prompt == null
             ? const SizedBox.expand(key: ValueKey<String>('picker-prompt-none'))
             : ColoredBox(
-                key: ValueKey<Object>(
-                  (prompt.runtimeType, prompt.key ?? prompt.runtimeType),
-                ),
+                key: ValueKey<Object>((
+                  prompt.runtimeType,
+                  prompt.key ?? prompt.runtimeType,
+                )),
                 color: scrimColor,
                 // Each prompt owns its own insets: the phone confirm card is
                 // specified as the screen less one 16pt gutter, and a shared

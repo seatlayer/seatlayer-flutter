@@ -12,10 +12,10 @@ import 'picker_widget_harness.dart';
 Future<void> _noopCheckout(_) async {}
 
 Widget _sheet({bool expanded = true}) => SeatLayerCartSheet(
-      expanded: expanded,
-      onExpandedChanged: (_) {},
-      onCheckout: _noopCheckout,
-    );
+  expanded: expanded,
+  onExpandedChanged: (_) {},
+  onCheckout: _noopCheckout,
+);
 
 double _sheetHeight(WidgetTester tester) =>
     tester.getSize(find.byType(SeatLayerCartSheet)).height;
@@ -23,8 +23,9 @@ double _sheetHeight(WidgetTester tester) =>
 void main() {
   _identityJoinTests();
 
-  testWidgets('the peek states the cart and the way on, and nothing else',
-      (tester) async {
+  testWidgets('the peek states the cart and the way on, and nothing else', (
+    tester,
+  ) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -33,7 +34,9 @@ void main() {
       pickerHarness(
         map,
         Align(
-            alignment: Alignment.bottomCenter, child: _sheet(expanded: false)),
+          alignment: Alignment.bottomCenter,
+          child: _sheet(expanded: false),
+        ),
       ),
     );
     map.emit(pickerSnapshot());
@@ -46,8 +49,9 @@ void main() {
     expect(_sheetHeight(tester), 44);
   });
 
-  testWidgets('an empty peek offers the cheapest ticket, not a button',
-      (tester) async {
+  testWidgets('an empty peek offers the cheapest ticket, not a button', (
+    tester,
+  ) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -56,7 +60,9 @@ void main() {
       pickerHarness(
         map,
         Align(
-            alignment: Alignment.bottomCenter, child: _sheet(expanded: false)),
+          alignment: Alignment.bottomCenter,
+          child: _sheet(expanded: false),
+        ),
       ),
     );
     map.emit(pickerSnapshot(withSelection: false));
@@ -66,29 +72,34 @@ void main() {
     expect(find.textContaining('Continue'), findsNothing);
   });
 
-  testWidgets('the collapsed safe area carries required attribution only',
-      (tester) async {
+  testWidgets('the collapsed safe area carries required attribution only', (
+    tester,
+  ) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
     Widget subject() => Builder(
-          builder: (context) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              padding: const EdgeInsets.only(bottom: 34),
-            ),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: _sheet(expanded: false),
-            ),
-          ),
-        );
+      builder: (context) => MediaQuery(
+        data: MediaQuery.of(
+          context,
+        ).copyWith(padding: const EdgeInsets.only(bottom: 34)),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: _sheet(expanded: false),
+        ),
+      ),
+    );
     await tester.pumpWidget(pickerHarness(map, subject()));
     map.emit(pickerSnapshot(withSelection: false));
     await tester.pumpAndSettle();
 
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
     expect(_sheetHeight(tester), 78);
+    final attributionRect = tester.getRect(find.text('Powered by SeatLayer'));
+    final sheetRect = tester.getRect(find.byType(SeatLayerCartSheet));
+    expect(attributionRect.center.dx, greaterThan(sheetRect.center.dx));
+    expect(sheetRect.right - attributionRect.right, lessThanOrEqualTo(24));
 
     final hidden = pickerSnapshot(revision: 2, withSelection: false);
     (hidden['branding']! as Map<String, Object?>)['attributionRequired'] =
@@ -106,7 +117,9 @@ void main() {
 
     await tester.pumpWidget(
       pickerHarness(
-          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
     );
     map.emit(snapshotWithTicketCount(6));
     await tester.pumpAndSettle();
@@ -116,15 +129,18 @@ void main() {
     expect(find.text('Your tickets'), findsNothing);
   });
 
-  testWidgets('the sheet follows its content and stops at three fifths',
-      (tester) async {
+  testWidgets('the sheet follows its content and stops at three fifths', (
+    tester,
+  ) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
     await tester.pumpWidget(
       pickerHarness(
-          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
     );
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
@@ -143,23 +159,28 @@ void main() {
     expect(_sheetHeight(tester), oneTicket);
   });
 
-  testWidgets('an empty tray stays short and hides its hint from the eye',
-      (tester) async {
+  testWidgets('an empty tray stays short and hides its hint from the eye', (
+    tester,
+  ) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
     await tester.pumpWidget(
       pickerHarness(
-          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
     );
     map.emit(bestAvailableSnapshot());
     await tester.pumpAndSettle();
 
     expect(_sheetHeight(tester), lessThanOrEqualTo(200));
     expect(
-      find.text('Tap a seat on the map, or let us pick the best available '
-          'for you.'),
+      find.text(
+        'Tap a seat on the map, or let us pick the best available '
+        'for you.',
+      ),
       findsNothing,
     );
     expect(find.text('Find the best seats together'), findsNothing);
@@ -167,25 +188,25 @@ void main() {
     expect(find.text('Find 2 best seats'), findsOneWidget);
   });
 
-  testWidgets('the footer carries one full-width call to action',
-      (tester) async {
+  testWidgets('the footer carries one full-width call to action', (
+    tester,
+  ) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
     await tester.pumpWidget(
       pickerHarness(
-          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
     );
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
     expect(find.text('Hold seats & checkout'), findsOneWidget);
     expect(find.text('Total'), findsNothing);
-    expect(
-      tester.getSize(find.byType(SeatLayerBookButton)).width,
-      390,
-    );
+    expect(tester.getSize(find.byType(SeatLayerBookButton)).width, 390);
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
   });
 
@@ -196,7 +217,9 @@ void main() {
 
     await tester.pumpWidget(
       pickerHarness(
-          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
     );
     map.emit(snapshotWithTicketCount(6));
     await tester.pumpAndSettle();
@@ -213,7 +236,9 @@ void main() {
 
     await tester.pumpWidget(
       pickerHarness(
-          map, Align(alignment: Alignment.bottomCenter, child: _sheet())),
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
     );
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
@@ -296,8 +321,9 @@ void main() {
         ('many', _tenDistinctRows(), true),
         ('peek', pickerSnapshot(), false),
       ]) {
-        testWidgets('cart sheet golden ${entry.$1} — ${brightness.name}',
-            (tester) async {
+        testWidgets('cart sheet golden ${entry.$1} — ${brightness.name}', (
+          tester,
+        ) async {
           final map = FakePickerMap();
           addTearDown(map.dispose);
           usePhoneSurface(tester);
@@ -348,8 +374,9 @@ Map<String, Object?> _tenDistinctRows({int revision = 10}) {
 }
 
 void _identityJoinTests() {
-  testWidgets('a line whose label differs still finds its seat',
-      (tester) async {
+  testWidgets('a line whose label differs still finds its seat', (
+    tester,
+  ) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);

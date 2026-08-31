@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.4
+
+- Keeps API-required `Powered by SeatLayer` attribution at the bottom-right of
+  the native picker chrome on compact and wide layouts. Server branding remains
+  authoritative: a white-label entitlement hides it without a host-side switch.
+- Adds an automated public-repository hygiene gate to prevent internal planning,
+  audit evidence, machine-local paths, and credentials from entering releases.
+
 ## 0.3.3
 
 A picker that comes back to the front now finds out what changed while it was

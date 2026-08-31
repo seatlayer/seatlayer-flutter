@@ -9,3 +9,11 @@ build/
 example/build/
 example/ios/Pods/
 example/ios/Flutter/ephemeral/
+
+# Repository-only validation and contributor policy are not runtime package
+# payload. Pub consumers receive the SDK, public docs, and runnable example.
+.github/
+AGENTS.md
+scripts/
+test/
+tool/

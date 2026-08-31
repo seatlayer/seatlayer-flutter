@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - run: bash scripts/check-public-repository.sh
       - uses: subosito/flutter-action@v2
         with:
           # PINNED, not `channel: stable`. An unpinned stable meant the Flutter
