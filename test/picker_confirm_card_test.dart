@@ -574,17 +574,19 @@ void main() {
       expect(placement.notch, SeatLayerConfirmCardNotch.top);
     });
 
-    test('a runtime that does not say rests the card in the middle', () {
+    test('a runtime that does not say rests the card at the foot of the map',
+        () {
       final placement = seatLayerConfirmCardPlacement(
         seat: null,
         card: card,
         area: area,
+        bottomInset: 52,
       );
-      expect(placement.top, (600 - 140) / 2);
+      expect(placement.top, 600 - 52 - 140);
       expect(placement.notch, SeatLayerConfirmCardNotch.none);
     });
 
-    test('a centred card is still kept off the chrome under it', () {
+    test('a resting card is still kept off the chrome under it', () {
       final placement = seatLayerConfirmCardPlacement(
         seat: null,
         card: const Size(358, 400),

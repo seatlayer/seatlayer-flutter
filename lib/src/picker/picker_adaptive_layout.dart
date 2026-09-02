@@ -3,7 +3,6 @@ library;
 
 import 'dart:async';
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
@@ -665,7 +664,6 @@ class _SeatLayerPickerAdaptiveLayoutState
                         // seat's direction and points back at it, and the map
                         // it is covering is still the way out.
                         seatCard: seatCardUp,
-                        blurColor: pickerAlpha(resolved.background, .38),
                         anchor: seatCardUp ? pendingSeat?.screenPoint : null,
                         topInset: topBand,
                         bottomInset: bottomBand,
@@ -1062,7 +1060,6 @@ class _PickerPromptTransition extends StatelessWidget {
     required this.scrimColor,
     required this.child,
     this.seatCard = false,
-    this.blurColor,
     this.anchor,
     this.topInset = 0,
     this.bottomInset = 0,
@@ -1080,8 +1077,6 @@ class _PickerPromptTransition extends StatelessWidget {
   /// wide layout's dialog and the GA/table prompts keep the flat scrim.
   final bool seatCard;
 
-  /// The tint over the blurred map, when the blur is drawn at all.
-  final Color? blurColor;
 
   /// Where on the map the seat was drawn, if the runtime said.
   final Offset? anchor;
@@ -1179,7 +1174,6 @@ class _PickerPromptTransition extends StatelessWidget {
                   prompt.key ?? prompt.runtimeType,
                 )),
                 scrimColor: scrimColor,
-                blurColor: seatCard && !reducedMotion ? blurColor : null,
                 onDismiss: onDismiss,
                 // Each prompt owns its own insets: the phone confirm card is
                 // specified as the screen less one 16pt gutter, and a shared
@@ -1225,28 +1219,21 @@ class _PromptBackdrop extends StatelessWidget {
   const _PromptBackdrop({
     super.key,
     required this.scrimColor,
-    required this.blurColor,
     required this.onDismiss,
     required this.child,
   });
 
   final Color scrimColor;
 
-  /// The tint over the blur, or null to fall back to the flat [scrimColor].
-  final Color? blurColor;
 
   final VoidCallback? onDismiss;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final tint = blurColor;
-    final backdrop = tint == null
-        ? ColoredBox(color: scrimColor)
-        : BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
-            child: ColoredBox(color: tint),
-          );
+    // A flat dim, never a blur: the seat the card is asking about has to stay
+    // legible behind it, ring and all, or the question has no referent.
+    final backdrop = ColoredBox(color: scrimColor);
     return Stack(
       children: [
         // The dismissing tap belongs to the backdrop, not to the whole area:
@@ -1264,8 +1251,6 @@ class _PromptBackdrop extends StatelessWidget {
   }
 }
 
-/// How far the map is softened behind the seat card.
-const double _blurSigma = 6;
 
 /// Puts the seat card where the seat is, and points it back at the seat.
 ///

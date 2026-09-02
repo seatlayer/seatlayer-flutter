@@ -1268,10 +1268,10 @@ SeatLayerConfirmCardPlacement seatLayerConfirmCardPlacement({
   // pinning it to the top at least keeps its actions reachable.
   final lowest = math.max(ceiling, floor);
   if (seat == null) {
-    // Centred on the map, as it has been on every runtime so far, and clamped
-    // only where the chrome would otherwise stand on it.
+    // No seat to point at: rest at the foot of the map, the way the web card
+    // does, so the map above stays the buyer's and the card reads as a sheet.
     return SeatLayerConfirmCardPlacement(
-      top: ((area.height - card.height) / 2).clamp(ceiling, lowest),
+      top: lowest,
       notch: SeatLayerConfirmCardNotch.none,
     );
   }
