@@ -208,6 +208,25 @@ void usePhoneSurface(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
+/// Wait for everything on screen except an animation that never ends.
+///
+/// `pumpAndSettle` cannot be used while the confirm card is up. The card
+/// breathes under `Add seat` for as long as the buyer leaves it unanswered, so
+/// a settle pumps frames until the harness gives up rather than until the
+/// interface is still. This pumps a bounded sequence instead, and lands on the
+/// frame the breathing starts from: the arrival highlight has finished
+/// crossing the button, and the button is at exactly its resting size.
+Future<void> pumpToRest(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(pickerRestDelay);
+}
+
+/// How long past the first frame [pumpToRest] lands.
+///
+/// The confirm card's own `inviteBreatheDelay`: long enough for every arrival
+/// in the picker, and the one instant after it at which the breath is at zero.
+const Duration pickerRestDelay = Duration(milliseconds: 1000);
+
 /// Identifies the subtree a golden is taken of.
 const Key goldenSubjectKey = ValueKey<String>('seatlayer-golden-subject');
 

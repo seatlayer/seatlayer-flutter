@@ -165,7 +165,7 @@ void main() {
     expect(_scaffoldGround(tester), SeatLayerLightTokens.surface);
 
     map.emit(_in3D());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // A white clock over a black venue is the only legible answer, whatever
     // side the picker itself resolved to.

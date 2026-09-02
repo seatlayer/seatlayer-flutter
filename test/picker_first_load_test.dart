@@ -136,7 +136,7 @@ void main() {
     );
 
     framed.complete(null);
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(controller.state.mapFramed, isTrue);
     expect(find.byType(SeatLayerPickerLoadingView), findsNothing);
@@ -172,7 +172,7 @@ void main() {
     );
 
     never.complete(null);
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
   });
 
   testWidgets("the header borrows the host's event name until the runtime's "

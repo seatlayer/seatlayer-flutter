@@ -62,7 +62,7 @@ void main() {
       pickerHarness(map, _layout(), controller: controller),
     );
     map.emit(pickerSnapshot(sections: pickerSections(), rung: 'overview'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     final atOverview = _insetPayloads(map).last! as Map<String, Object?>;
     expect(
@@ -84,7 +84,7 @@ void main() {
         rung: 'seats',
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(controller.state.snapshot?.map.rung, 'seats');
     expect(controller.state.snapshot?.map.focusedSectionId, 'section-a');
@@ -105,7 +105,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     final settled = _insetPayloads(map).length;
 
     // Several rebuilds carrying the same chrome. Each would otherwise mint its
@@ -131,7 +131,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(map.callsTo('picker.setViewportInsets'), isEmpty);
   });
@@ -144,7 +144,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(map.callsTo('picker.setViewportInsets'), isEmpty);
   });
@@ -172,7 +172,7 @@ void main() {
     // A live event, so nothing at all is drawn over the map: the test badge
     // is not one of the chrome switches and would still stand on it.
     map.emit(pickerSnapshot(sections: pickerSections(), testEvent: false));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(
       _insetPayloads(map).last,
@@ -189,11 +189,11 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(_insetPayloads(map), isNotEmpty);
 
     await tester.pumpWidget(pickerHarness(map, const SizedBox.shrink()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(_insetPayloads(map).last, <String, Object?>{'insets': null});
   });
@@ -245,11 +245,11 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     final onMap = _insetPayloads(map).last! as Map<String, Object?>;
 
     map.emit(_inVenue3D(revision: 4));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     final inScene = _insetPayloads(map).last! as Map<String, Object?>;
 
     expect(inScene, isNot(onMap));
@@ -280,7 +280,7 @@ void main() {
     map.emit(
       _inVenue3D(revision: controller.state.revision + 1),
     );
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     final looking = _insetPayloads(map).last! as Map<String, Object?>;
 
     map.emit(
@@ -289,7 +289,7 @@ void main() {
         seatedOn: 'seat-a-1',
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(controller.state.snapshot?.map.view3DTargetSeatId, 'seat-a-1');
     final seated = _insetPayloads(map).last! as Map<String, Object?>;
 

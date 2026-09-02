@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_confirm_card.dart';
@@ -72,6 +74,24 @@ Map<String, Object?> _booth() {
   return <String, Object?>{...snapshot, 'selection': selection};
 }
 
+/// The same event with a different seat under the card.
+Map<String, Object?> _secondSeat() {
+  final snapshot = pickerSnapshot(revision: 2);
+  final selection = Map<String, Object?>.from(
+    snapshot['selection']! as Map<String, Object?>,
+  );
+  final seats = (selection['seats']! as List<Object?>)
+      .map((item) => Map<String, Object?>.from(item! as Map<String, Object?>))
+      .toList();
+  for (final seat in seats) {
+    seat['id'] = 'seat-a-2';
+    seat['label'] = 'A-2';
+    seat['seatNumber'] = '2';
+  }
+  selection['seats'] = seats;
+  return <String, Object?>{...snapshot, 'selection': selection};
+}
+
 /// A snapshot whose catalogue never mentions the selected seat's category.
 Map<String, Object?> _withoutCategory() {
   final snapshot = pickerSnapshot();
@@ -102,7 +122,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('SECTION'), findsOneWidget);
     expect(find.text('ROW'), findsOneWidget);
@@ -123,7 +143,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('Standard'), findsOneWidget);
     expect(find.text('42 left'), findsOneWidget);
@@ -147,7 +167,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(_withoutCategory());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('Standard'), findsNothing);
     expect(find.text('42 left'), findsNothing);
@@ -164,7 +184,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     final cancel = tester.getSize(_button('Cancel'));
     final add = tester.getSize(_button('Add seat'));
@@ -185,7 +205,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(_booth());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('Select'), findsOneWidget);
     expect(find.text('Add seat'), findsNothing);
@@ -198,7 +218,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     final eyebrow = tester.widget<Text>(find.text('SECTION')).style!;
     expect(eyebrow.fontSize, 8.5);
@@ -224,7 +244,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(_inVenue3D());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // The identity, the band and the two answers are the card's own, whatever
     // is behind it.
@@ -268,11 +288,11 @@ void main() {
     // The camera is still travelling: a card here asks about a seat the buyer
     // cannot see yet.
     map.emit(_inVenue3D(targeted: false));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(find.text('Add seat'), findsOneWidget);
 
     map.emit(_inVenue3D(revision: 3));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(find.text('Add seat'), findsOneWidget);
 
     // The panorama answers the same question the card asks — this seat, from
@@ -284,7 +304,7 @@ void main() {
         'generated': true,
       },
     });
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(find.text('Add seat'), findsNothing);
   });
 
@@ -295,10 +315,10 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(_inVenue3D());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     await tester.tap(find.text('View from this seat'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(map.callsTo('picker.openSeatView').single.$2, <String, Object?>{
       'seatId': 'seat-a-1',
@@ -315,7 +335,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(tieredSeatSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('Adult'), findsOneWidget);
     expect(find.text('Child'), findsOneWidget);
@@ -330,7 +350,7 @@ void main() {
     expect(find.text('€60'), findsNWidgets(2));
 
     await tester.tap(find.text('Add seat'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(
       map.callsTo('picker.setSeatTier').single.$2,
@@ -346,7 +366,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // Both ways into the seat ride the photograph itself, one per corner.
     expect(find.text('View from here'), findsOneWidget);
@@ -369,7 +389,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     final card = tester.getRect(
       find.byKey(const ValueKey<String>('seatlayer.confirm-card.surface')),
@@ -394,7 +414,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(_only3D());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('View from here'), findsNothing);
     expect(find.text('3D'), findsOneWidget);
@@ -423,7 +443,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(_withoutImmersiveFeatures());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('View from here'), findsNothing);
     expect(find.text('3D'), findsNothing);
@@ -439,7 +459,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(
       tester
@@ -468,10 +488,10 @@ void main() {
       ),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     await tester.tap(find.text('Add seat'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(selected, 2);
   });
 
@@ -489,7 +509,7 @@ void main() {
       ),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     await tester.tap(find.text('Add seat'));
     await tester.pump();
@@ -502,7 +522,7 @@ void main() {
     )) as Text).data}"');
     expect(order, <String>['committed', 'said "Added"']);
 
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(
       find.byKey(const ValueKey<String>('seatlayer.confirm-card.surface')),
       findsNothing,
@@ -541,10 +561,10 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(
       map.callsTo('picker.removeCartLine').single.$2,
@@ -564,7 +584,7 @@ void main() {
       ),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('Add seat'), findsNothing);
   });
@@ -576,7 +596,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(_almostSoldOut(8));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // The band states what is left and nothing more. A count that changes its
     // wording and its ink below some threshold is selling, not informing, and
@@ -598,7 +618,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(_almostSoldOut(0));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // A count the buyer cannot trust is worse than no count at all.
     expect(find.text('0 left'), findsNothing);
@@ -615,10 +635,10 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     await tester.drag(_surface, const Offset(0, 120));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(
       map.callsTo('picker.removeCartLine').map((call) => call.$2),
@@ -638,12 +658,12 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     final resting = tester.getTopLeft(_surface);
 
     // Short of the threshold: the card follows the finger and then returns.
     await tester.drag(_surface, const Offset(0, 40));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(map.callsTo('picker.removeCartLine'), isEmpty);
     expect(_surface, findsOneWidget);
@@ -663,14 +683,14 @@ void main() {
       pickerHarness(map, const SeatLayerConfirmCard(), controller: picker),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // Arriving over the seat is the lightest thing the card does.
     expect(felt, <PickerHapticCue>[PickerHapticCue.cardArrived]);
     expect(pickerHapticStrength(PickerHapticCue.cardArrived), 'light');
 
     await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(felt.last, PickerHapticCue.cardCancelled);
     expect(pickerHapticStrength(PickerHapticCue.cardCancelled), 'selection');
@@ -691,10 +711,10 @@ void main() {
       pickerHarness(map, const SeatLayerConfirmCard(), controller: picker),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     await tester.tap(find.text('Add seat'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(felt.last, PickerHapticCue.seatConfirmed);
     expect(pickerHapticStrength(PickerHapticCue.seatConfirmed), 'medium');
@@ -720,9 +740,9 @@ void main() {
       ),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     await tester.tap(find.text('Add seat'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(felt, isEmpty);
   });
@@ -743,6 +763,206 @@ void main() {
 
     expect(_surface, findsOneWidget);
     expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  group('the invitation', () {
+    // The breath is one `Transform.scale` around `Add seat` and one halo
+    // painted outside it, both driven off the same number. The scale is the
+    // half a test can read, and reading it is enough: a halo at rest and a
+    // button at rest are the same frame.
+
+    /// How far `Add seat` has swelled out of its resting size.
+    double swell(WidgetTester tester, [String label = 'Add seat']) => tester
+        .widget<Transform>(
+          find
+              .ancestor(of: find.text(label), matching: find.byType(Transform))
+              .first,
+        )
+        .transform
+        .getMaxScaleOnAxis();
+
+    /// Put a card on screen and leave it at the instant the breath starts.
+    Future<void> card(WidgetTester tester, {bool reduced = false}) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          reduced
+              ? _reducedMotion(const SeatLayerConfirmCard())
+              : const SeatLayerConfirmCard(),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await pumpToRest(tester);
+    }
+
+    testWidgets('breathes for as long as the buyer hesitates', (tester) async {
+      await card(tester);
+      expect(swell(tester), 1);
+
+      // Ten seconds of nothing — four breaths past where a bounded invitation
+      // would have given up.
+      for (var i = 0; i < 100; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+
+      // One more breath, sampled: it has to reach the top of it and come back.
+      var peak = 1.0;
+      var trough = 2.0;
+      for (var i = 0; i < 24; i++) {
+        peak = math.max(peak, swell(tester));
+        trough = math.min(trough, swell(tester));
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      // 1.02 at the top of the breath and 1 at the bottom, as the web's
+      // `slAddBreathe` keyframes have it.
+      expect(peak, closeTo(1.02, .001));
+      expect(trough, closeTo(1, .002));
+    });
+
+    testWidgets('stops on the first touch anywhere on the card, in one frame',
+        (tester) async {
+      await card(tester);
+      // 1200 ms into the breath is the top of it: the largest the button ever
+      // gets, and so the frame a stop is most visible on.
+      await tester.pump(const Duration(milliseconds: 1200));
+      expect(swell(tester), closeTo(1.02, .001));
+
+      final gesture = await tester.startGesture(tester.getCenter(_surface));
+      addTearDown(gesture.removePointer);
+      await tester.pump();
+
+      // Not eased back down: the card is being touched, and the invitation is
+      // over as of this frame.
+      expect(swell(tester), 1);
+      await gesture.up();
+      await tester.pump();
+      expect(swell(tester), 1);
+    });
+
+    testWidgets('stops when the button takes focus', (tester) async {
+      await card(tester);
+      await tester.pump(const Duration(milliseconds: 1200));
+      expect(swell(tester), closeTo(1.02, .001));
+
+      // A buyer who reached `Add seat` by keyboard has found it as surely as
+      // one who put a thumb on it.
+      final button = tester.widget<InkWell>(
+        find.ancestor(
+            of: find.text('Add seat'), matching: find.byType(InkWell)),
+      );
+      button.onFocusChange!(true);
+      await tester.pump();
+
+      expect(swell(tester), 1);
+    });
+
+    testWidgets('a card asking about a second seat invites again',
+        (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+      map.emit(pickerSnapshot());
+      await pumpToRest(tester);
+
+      // Answered by touching it: this card's invitation is over.
+      final gesture = await tester.startGesture(tester.getCenter(_surface));
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 1200));
+      expect(swell(tester), 1);
+
+      // A different seat is now being asked about, on the same button.
+      map.emit(_secondSeat());
+      await pumpToRest(tester);
+      await tester.pump(const Duration(milliseconds: 1200));
+
+      expect(swell(tester), closeTo(1.02, .001));
+    });
+
+    testWidgets('never starts under reduced motion', (tester) async {
+      await card(tester, reduced: true);
+
+      for (var i = 0; i < 40; i++) {
+        expect(swell(tester), 1);
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+      expect(tester.hasRunningAnimations, isFalse);
+    });
+
+    testWidgets('a press at the top of a breath still commits on the press',
+        (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      final order = <String>[];
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          SeatLayerConfirmCard(onConfirm: (_) async => order.add('committed')),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await pumpToRest(tester);
+      await tester.pump(const Duration(milliseconds: 1200));
+      expect(swell(tester), closeTo(1.02, .001));
+
+      await tester.tap(find.text('Add seat'));
+      await tester.pump();
+      await tester.pump();
+
+      // The seat is in the cart on the press, the button is back at its
+      // resting size, and it now says so.
+      expect(order, <String>['committed']);
+      expect(swell(tester, 'Added'), 1);
+      expect(find.text('Added'), findsOneWidget);
+
+      // The receipt is played out over the sweep, and only then does the card
+      // leave: a frame before the end of it the card is still on screen.
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(_surface, findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 120));
+      await tester.pump();
+      expect(_surface, findsNothing);
+    });
+
+    testWidgets('a plain tap on Add seat is not stolen by the card swipe',
+        (tester) async {
+      // The whole card is a vertical-drag target — pushing it down is the
+      // third answer — and `Add seat` sits inside that target. A tap with no
+      // movement in it has to reach the button rather than open a drag the
+      // buyer never made.
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      var confirmed = 0;
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          SeatLayerConfirmCard(onConfirm: (_) async => confirmed++),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await pumpToRest(tester);
+
+      final gesture =
+          await tester.startGesture(tester.getCenter(find.text('Add seat')));
+      await tester.pump(const Duration(milliseconds: 40));
+      await gesture.up();
+      await tester.pump();
+
+      expect(confirmed, 1);
+      expect(find.text('Added'), findsOneWidget);
+
+      // Let the receipt play out rather than leaving its timer behind.
+      await pumpToRest(tester);
+      expect(_surface, findsNothing);
+    });
   });
 
   group('placement', () {
@@ -848,7 +1068,7 @@ void main() {
           ),
         );
         map.emit(pickerSnapshot());
-        await tester.pumpAndSettle();
+        await pumpToRest(tester);
 
         await expectGolden(tester, 'confirm_card_strip_${brightness.name}');
       }, tags: goldenTag);
@@ -867,7 +1087,7 @@ void main() {
           ),
         );
         map.emit(_only3D());
-        await tester.pumpAndSettle();
+        await pumpToRest(tester);
 
         await expectGolden(tester, 'confirm_card_action_${brightness.name}');
       }, tags: goldenTag);
@@ -886,7 +1106,7 @@ void main() {
           ),
         );
         map.emit(_inVenue3D());
-        await tester.pumpAndSettle();
+        await pumpToRest(tester);
 
         await expectGolden(tester, 'confirm_card_3d_${brightness.name}');
       }, tags: goldenTag);
@@ -905,7 +1125,7 @@ void main() {
           ),
         );
         map.emit(_withoutImmersiveFeatures());
-        await tester.pumpAndSettle();
+        await pumpToRest(tester);
 
         await expectGolden(tester, 'confirm_card_plain_${brightness.name}');
       }, tags: goldenTag);

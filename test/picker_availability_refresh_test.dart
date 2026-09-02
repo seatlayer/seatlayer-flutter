@@ -470,10 +470,10 @@ void main() {
       ),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(map.callsTo('picker.lifecycle'), hasLength(1));
     expect(
@@ -516,10 +516,10 @@ void main() {
       ),
     );
     map.emit(heldRowSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(holdExpired, 1);
     expect(controller.holdLapse, isNotNull);
@@ -553,10 +553,10 @@ void main() {
       ),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(map.callsTo('picker.refreshAvailability'), hasLength(1));
     expect(
@@ -581,10 +581,10 @@ void main() {
       ),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(map.callsTo('picker.refreshAvailability'), isEmpty);
     expect(

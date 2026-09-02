@@ -112,7 +112,7 @@ void main() {
       pickerHarness(map, _layout(), controller: picker),
     );
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // The card is up, over the seat the buyer just tapped.
     expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
@@ -137,7 +137,7 @@ void main() {
       pickerHarness(map, _layout(), controller: picker),
     );
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(picker.canCheckout, isFalse);
     // Either withheld entirely, or offered and disabled — never live.
@@ -156,10 +156,10 @@ void main() {
       pickerHarness(map, _layout(), controller: picker),
     );
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     await tester.tap(find.text('Add seat'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(picker.seatAwaitingConfirmation, isNull);
     expect(picker.confirmedTicketCount, 1);
@@ -182,13 +182,13 @@ void main() {
       pickerHarness(map, _layout(), controller: picker),
     );
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     await tester.tap(find.text('Add seat'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // The buyer taps a second seat: one agreed to, one still being asked.
     map.emit(snapshotWithTicketCount(2, revision: 5));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(picker.seatAwaitingConfirmation?.label, 'A-2');
     expect(picker.confirmedTicketCount, 1);
@@ -212,11 +212,11 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // Beside the card, inside its gutter: still the venue, still a way out.
     await tester.tapAt(Offset(6, _mapOrigin(tester).dy + 200));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(
       map.callsTo('picker.removeCartLine').map((call) => call.$2),
@@ -239,7 +239,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
     map.emit(_seatDrawnAt(195, 520));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     final pointer = find.byType(SeatLayerConfirmCardPointer);
     expect(pointer, findsOneWidget);
@@ -266,7 +266,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
     map.emit(_seatDrawnAt(195, 40));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // The card only leaves its resting place to get off a seat it would have
     // covered. A seat this high was never in its way, so it stays where the
@@ -287,7 +287,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // Faded rather than hidden — what is already in the cart is context for
     // the seat being decided on — and out of reach, so nothing under the card
@@ -305,7 +305,7 @@ void main() {
     );
 
     await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(_pausedSheet(tester).opacity, 1);
   });
@@ -322,7 +322,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
     map.emit(pickerSnapshot(sections: pickerSections()));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
     expect(find.byType(SeatLayerConfirmCardPointer), findsNothing);
@@ -340,11 +340,11 @@ void main() {
     await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
     // Still travelling: nothing to ask about yet.
     map.emit(_inVenue3D(targeted: false));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
 
     map.emit(_inVenue3D(revision: 3));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
     // Its own action, and no pointer: in the scene the seat is the picture.
     expect(find.text('View from this seat'), findsOneWidget);
@@ -389,13 +389,13 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
     map.emit(_inVenue3D());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     final withCard = map.callsTo('picker.setViewportInsets').last.$2;
 
     // The card is transient chrome: answering it leaves the scene's own bands
     // exactly where the runtime already framed against them.
     await tester.tap(find.text('Add seat'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.byType(SeatLayerConfirmCard), findsNothing);
     expect(map.callsTo('picker.setViewportInsets').last.$2, withCard);
@@ -415,7 +415,7 @@ void main() {
       pickerHarness(map, const SizedBox.shrink(), controller: picker),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(picker.seatAwaitingConfirmation, isNull);
     expect(picker.confirmedTicketCount, 1);

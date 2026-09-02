@@ -73,9 +73,9 @@ Future<SeatLayerPickerController> _lapse(
     ),
   );
   map.emit(heldRowSnapshot());
-  await tester.pumpAndSettle();
+  await pumpToRest(tester);
   await controller.refreshAvailability();
-  await tester.pumpAndSettle();
+  await pumpToRest(tester);
   return controller;
 }
 
@@ -98,7 +98,7 @@ void main() {
     );
 
     await tester.tap(find.text('Select them again'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(
       (map.callsTo('picker.selectObjects').single.$2!
@@ -145,7 +145,7 @@ void main() {
     expect(find.text('Select them again'), findsNothing);
 
     await tester.tap(find.text('Select it again'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(
       (map.callsTo('picker.selectObjects').single.$2!
           as Map<String, Object?>)['objects'],
@@ -169,7 +169,7 @@ void main() {
     );
 
     await tester.tap(find.byIcon(Icons.close_rounded));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(find.text('Your seats were released.'), findsNothing);
   });
 
@@ -235,7 +235,7 @@ void main() {
       ),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     final before = map.callsTo('picker.refreshAvailability').length;
 
     // The host's own checkout screen, over the still-mounted picker. Nothing
@@ -246,9 +246,9 @@ void main() {
         MaterialPageRoute<void>(builder: (_) => const Scaffold()),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     navigator.currentState!.pop();
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(map.callsTo('picker.refreshAvailability'), hasLength(before + 1));
   });
@@ -274,16 +274,16 @@ void main() {
       ),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     unawaited(
       navigator.currentState!.push<void>(
         MaterialPageRoute<void>(builder: (_) => const Scaffold()),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     navigator.currentState!.pop();
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(tester.takeException(), isNull);
     expect(map.callsTo('picker.refreshAvailability'), isEmpty);

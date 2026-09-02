@@ -36,8 +36,7 @@ class _CancelButton extends StatelessWidget {
           pickerAlpha(theme.divider, theme.divider.a * .44),
       shape: seatLayerStyleRole(style?.shape) ??
           RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(SeatLayerRadiusTokens.button),
+            borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.button),
             side: BorderSide(color: theme.divider),
           ),
       clipBehavior: Clip.antiAlias,
@@ -58,7 +57,7 @@ class _CancelButton extends StatelessWidget {
                         : theme.mutedText),
                 fontSize: 13,
                 height: 1.15,
-                fontWeight: FontWeight.w800,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                 fontFamily: theme.fontFamily,
               ).merge(seatLayerStyleRole(style?.textStyle)),
             ),
@@ -68,14 +67,6 @@ class _CancelButton extends StatelessWidget {
     );
   }
 }
-
-/// How many breaths the invitation takes before it rests.
-///
-/// Bounded on purpose, where the web widget's is not. An animation with no end
-/// is movement in the corner of the eye for as long as the buyer hesitates,
-/// and a card that will not stop moving reads as a card that has not finished
-/// loading.
-const int _inviteBreaths = 3;
 
 /// How far the breath's halo reaches, and how deep its colour goes.
 const double _inviteHalo = 6;
@@ -88,7 +79,8 @@ const double _inviteSwell = .02;
 ///
 /// Three things happen here, and each says something the still button cannot.
 /// On arrival one highlight crosses it: this is the thing to press. While it
-/// waits it breathes, slowly, three times: the offer is still open. On the
+/// waits it breathes, slowly, for as long as it waits: the offer is still
+/// open, and it is the buyer's own hesitation that keeps it open. On the
 /// press its own ink fills from the left under a drawn check and the word
 /// turns to "Added": the ticket is in the cart. Only the last of the three is
 /// about the buyer's own action, and the ticket was counted before the sweep
@@ -99,6 +91,7 @@ class _AddSeatButton extends StatefulWidget {
     required this.added,
     required this.invite,
     required this.onPressed,
+    required this.onInviteEnd,
     this.style,
   });
 
@@ -109,6 +102,13 @@ class _AddSeatButton extends StatefulWidget {
 
   /// Whether the arrival highlight and the breath play at all.
   final bool invite;
+
+  /// The buyer has found this button, so the card can stop pointing at it.
+  ///
+  /// Reaching the button by keyboard is the same answer as putting a finger on
+  /// the card: the invitation has done its job and must not keep moving under
+  /// a focus ring the buyer is already reading.
+  final VoidCallback onInviteEnd;
 
   final VoidCallback? onPressed;
   final ButtonStyle? style;
@@ -134,18 +134,69 @@ class _AddSeatButtonState extends State<_AddSeatButton>
     duration: SeatLayerPickerMotion.pressSweep,
   );
 
+  /// Whether the invitation is still running.
+  ///
+  /// The breath has no end of its own — it stops because the buyer answered
+  /// it — so the controller alone cannot say whether the button is inviting or
+  /// merely parked at some value it was stopped on.
+  bool _inviting = false;
+
+  /// How many invitations this button has played.
+  int _inviteRun = 0;
+
   @override
   void initState() {
     super.initState();
-    if (widget.invite) _invite.forward();
+    if (widget.invite) _startInvite();
+  }
+
+  /// Play the wait, the highlight and the second wait once, then breathe.
+  ///
+  /// The breath loops over the tail of the same clock rather than on a second
+  /// controller, so `_elapsed` keeps meaning the same thing after the first
+  /// pass: past the highlight's window for good, and cycling through one
+  /// breath's worth of the span.
+  void _startInvite() {
+    _inviting = true;
+    // Which invitation this is. Cancelling a run completes its ticker future
+    // too, so without a token a card restarting for a second seat would take
+    // the first card's completion as its own and start breathing early.
+    final run = ++_inviteRun;
+    _invite.forward().whenCompleteOrCancel(() {
+      if (!mounted || !_inviting || run != _inviteRun) return;
+      _invite.repeat(
+        min: _inviteBreatheDelayMs / _inviteSpan.inMilliseconds,
+        max: 1,
+        period: SeatLayerPickerMotion.inviteBreathe,
+      );
+    });
+  }
+
+  /// End the invitation, and end it at rest.
+  ///
+  /// [_inviting] is cleared before the controller is stopped so the frame that
+  /// draws the answer already draws no halo: a breath frozen half-way out is a
+  /// button that looks permanently swollen.
+  void _stopInvite() {
+    if (!_inviting) return;
+    _inviting = false;
+    _invite.stop();
   }
 
   @override
   void didUpdateWidget(covariant _AddSeatButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!widget.invite && oldWidget.invite) _invite.stop();
+    if (!widget.invite && oldWidget.invite) _stopInvite();
+    // A card asking about a second seat is a second card: the buyer has not
+    // answered this one yet, so it points at itself from the beginning again
+    // rather than inheriting the last card's spent invitation.
+    if (widget.invite && !oldWidget.invite) {
+      _press.value = 0;
+      _invite.value = 0;
+      _startInvite();
+    }
     if (widget.added && !oldWidget.added) {
-      _invite.stop();
+      _stopInvite();
       _press.forward();
     }
   }
@@ -161,9 +212,8 @@ class _AddSeatButtonState extends State<_AddSeatButton>
   double get _elapsed => _invite.value * _inviteSpan.inMilliseconds;
 
   /// How much of the arrival highlight has crossed the button.
-  double get _sweep => ((_elapsed - _inviteDelayMs) / _inviteSweepMs)
-      .clamp(0.0, 1.0)
-      .toDouble();
+  double get _sweep =>
+      ((_elapsed - _inviteDelayMs) / _inviteSweepMs).clamp(0.0, 1.0).toDouble();
 
   @override
   Widget build(BuildContext context) {
@@ -183,8 +233,7 @@ class _AddSeatButtonState extends State<_AddSeatButton>
         (disabled ? pickerAlpha(theme.mutedText, .58) : theme.onAccent);
     final shape = seatLayerStyleRole(widget.style?.shape) ??
         RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.circular(SeatLayerRadiusTokens.button),
+          borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.button),
         );
     return AnimatedBuilder(
       animation: Listenable.merge(<Listenable>[_invite, _press]),
@@ -214,6 +263,9 @@ class _AddSeatButtonState extends State<_AddSeatButton>
                   ),
                   InkWell(
                     onTap: widget.onPressed,
+                    onFocusChange: (focused) {
+                      if (focused) widget.onInviteEnd();
+                    },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -245,7 +297,8 @@ class _AddSeatButtonState extends State<_AddSeatButton>
                                   color: ink,
                                   fontSize: 13,
                                   height: 1.15,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: seatLayerBoldWeight(
+                                      context, FontWeight.w800),
                                   fontFamily: theme.fontFamily,
                                 ).merge(
                                   seatLayerStyleRole(widget.style?.textStyle),
@@ -268,18 +321,35 @@ class _AddSeatButtonState extends State<_AddSeatButton>
 
   /// Where in the current breath the button is: 0 at rest, 1 at the top.
   ///
-  /// Zero before the breathing starts and zero again once the last breath is
-  /// out, so the button ends the invitation at exactly its resting size.
+  /// Zero before the breathing starts and zero the instant the invitation is
+  /// answered, so the button leaves the invitation at exactly its resting
+  /// size. In between it is the web's own two-keyframe breath: out to the top
+  /// by the halfway mark and back down again, each half eased in and out
+  /// rather than one cosine across the whole cycle — a cosine is symmetric but
+  /// not the same curve, and the peak is where the eye reads the amplitude.
   double get _breath {
+    if (!_inviting) return 0;
     final since = _elapsed - _inviteBreatheDelayMs;
-    if (since <= 0 || _invite.value >= 1) return 0;
-    return (1 - math.cos((since / _inviteBreatheMs) * 2 * math.pi)) / 2;
+    if (since <= 0) return 0;
+    final phase = (since / _inviteBreatheMs).clamp(0.0, 1.0).toDouble();
+    return phase < .5
+        ? _inviteEase.transform(phase * 2)
+        : 1 - _inviteEase.transform((phase - .5) * 2);
   }
 }
 
-/// How long the whole invitation lasts, wait and breaths together.
+/// The invitation's clock: the wait before the breathing, then one breath.
+///
+/// The breath loops over the last [SeatLayerPickerMotion.inviteBreathe] of it
+/// for as long as the card is unanswered, so this is the span of the first
+/// pass rather than of the whole invitation — the invitation has no length,
+/// only an end, and the buyer decides when.
 final Duration _inviteSpan = SeatLayerPickerMotion.inviteBreatheDelay +
-    (SeatLayerPickerMotion.inviteBreathe * _inviteBreaths);
+    SeatLayerPickerMotion.inviteBreathe;
+
+/// The curve each half of a breath travels, matching the web's
+/// `--slm-mo-inout` `cubic-bezier(.4,0,.6,1)`.
+const Curve _inviteEase = Cubic(.4, 0, .6, 1);
 
 final double _inviteDelayMs =
     SeatLayerPickerMotion.inviteDelay.inMilliseconds.toDouble();
@@ -307,7 +377,10 @@ class _InviteHalo extends CustomPainter {
         Radius.circular(SeatLayerRadiusTokens.button + (spread / 2)),
       ),
       Paint()
-        ..color = pickerAlpha(color, _inviteHaloInk * (1 - breath))
+        // The colour holds and only the reach grows, as a box-shadow's spread
+        // does: a halo that fades as it widens reads as a ripple leaving the
+        // button, and this one is the button itself swelling.
+        ..color = pickerAlpha(color, _inviteHaloInk)
         ..style = PaintingStyle.stroke
         ..strokeWidth = spread,
     );
@@ -493,7 +566,8 @@ class _FlyingSeatState extends State<_FlyingSeat>
                                 color: _flyingInk(widget.color),
                                 fontSize: 11,
                                 height: 1,
-                                fontWeight: FontWeight.w700,
+                                fontWeight: seatLayerBoldWeight(
+                                    context, FontWeight.w700),
                                 fontFamily: widget.fontFamily,
                               ),
                             ),
@@ -514,5 +588,6 @@ class _FlyingSeatState extends State<_FlyingSeat>
 const double _flyRise = .22;
 
 /// Ink that reads on a category colour nobody chose for legibility.
-Color _flyingInk(Color fill) =>
-    fill.computeLuminance() > .5 ? const Color(0xFF111111) : const Color(0xFFFFFFFF);
+Color _flyingInk(Color fill) => fill.computeLuminance() > .5
+    ? const Color(0xFF111111)
+    : const Color(0xFFFFFFFF);

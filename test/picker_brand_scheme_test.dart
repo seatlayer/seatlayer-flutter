@@ -186,7 +186,9 @@ void main() {
           ),
         );
         map.emit(pickerSnapshot());
-        await tester.pumpAndSettle();
+        // The card's invitation never settles on its own, so the golden is
+        // taken on the frame the breathing starts from: the button at rest.
+        await pumpToRest(tester);
 
         await expectGolden(tester, 'brand_confirm_card_${brightness.name}');
       }, tags: goldenTag);

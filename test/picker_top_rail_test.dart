@@ -64,7 +64,7 @@ void main() {
 
       await tester.pumpWidget(pickerHarness(map, _layout()));
       map.emit(_snapshotWithCategories(count));
-      await tester.pumpAndSettle();
+      await pumpToRest(tester);
 
       final control = find.byType(SeatLayerPickerViewModeControl);
       expect(control, findsOneWidget);
@@ -86,7 +86,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
     map.emit(_snapshotWithCategories(8));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     final surface = _mapRect(tester);
     final prices = tester.getRect(find.byType(SeatLayerPriceLegend));
@@ -120,7 +120,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
     map.emit(_snapshotWithCategories(3));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     final badge = tester.getRect(find.byType(SeatLayerPickerTestModeIndicator));
     expect(badge.top - _mapRect(tester).top, closeTo(8, .5));
@@ -140,7 +140,7 @@ void main() {
     final snapshot = _snapshotWithCategories(3);
     (snapshot['map']! as Map<String, Object?>)['buyerView'] = 'venue3d';
     map.emit(snapshot);
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // Nothing is drawn above it: `‹ Back to venue` only appears once the
     // scene is aimed at a seat.
@@ -156,13 +156,13 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
     map.emit(_snapshotWithCategories(5));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(find.byType(SeatLayerPriceLegend), findsOneWidget);
 
     final snapshot = _snapshotWithCategories(5, revision: 2);
     (snapshot['map']! as Map<String, Object?>)['buyerView'] = 'venue3d';
     map.emit(snapshot);
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // A price is a fact about a seat; in the scene the buyer is choosing where
     // to stand. The band would also cost the venue forty-four points of sky.
@@ -177,7 +177,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
     map.emit(_snapshotWithCategories(8));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(
       find.descendant(
@@ -195,7 +195,7 @@ void main() {
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
     map.emit(_snapshotWithCategories(1));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(
       find.descendant(
@@ -233,7 +233,7 @@ void main() {
         'generated': false,
       },
     });
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.byType(SeatLayerSeatViewChrome), findsOneWidget);
     expect(find.byType(SeatLayerPriceLegend), findsNothing);
@@ -265,7 +265,7 @@ void main() {
       ..['view3dNextSeatId'] = null
       ..['view3dFocusedSectionId'] = 'section-a';
     map.emit(snapshot);
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     final badge = tester.getRect(
       find.byType(SeatLayerPickerTestModeIndicator),
@@ -289,7 +289,7 @@ void main() {
       pickerHarness(map, const SeatLayerPickerTestModeIndicator(compact: true)),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // The badge is drawn ON the map and the layout reserves exactly
     // `compactHeight` for it, so the two have to agree whatever the words and
@@ -311,7 +311,7 @@ void main() {
       pickerHarness(map, const SeatLayerPickerMapControls(compact: true)),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.byType(SeatLayerPickerViewModeControl), findsOneWidget);
   });
