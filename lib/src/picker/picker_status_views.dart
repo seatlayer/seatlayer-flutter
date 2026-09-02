@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../seat_layer_error.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
+import 'picker_motion.dart';
 import 'picker_options.dart';
 import 'picker_strings.dart';
 import 'picker_cart_sheet.dart';
@@ -228,7 +229,7 @@ class SeatLayerPickerLoadingView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          CircularProgressIndicator(color: palette.accent),
+          _VenueSilhouette(accent: palette.accent),
           const SizedBox(height: 16),
           Text(
             words.loading,
@@ -242,6 +243,148 @@ class SeatLayerPickerLoadingView extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The space the silhouette is drawn in, and the aspect it keeps.
+const Size _silhouetteBox = Size(200, 140);
+
+/// One breath of the loading silhouette, in and out.
+const Duration _silhouetteBreath = Duration(milliseconds: 1600);
+
+/// A venue in outline, breathing, while the real one is on its way.
+///
+/// The same shape the web picker draws while it loads: three seating shells
+/// around a stage. A spinner says only that something is happening; this says
+/// what is about to arrive, so the map does not read as a second load when it
+/// replaces it.
+class _VenueSilhouette extends StatefulWidget {
+  const _VenueSilhouette({required this.accent});
+
+  /// The picker's accent, spent faintly — this is a placeholder, not a
+  /// picture, and it must not compete with the map that lands on top of it.
+  final Color accent;
+
+  @override
+  State<_VenueSilhouette> createState() => _VenueSilhouetteState();
+}
+
+class _VenueSilhouetteState extends State<_VenueSilhouette>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _breath = AnimationController(
+    vsync: this,
+    duration: _silhouetteBreath,
+    value: 1,
+  );
+
+  late final Animation<double> _opacity = _breath
+      .drive(CurveTween(curve: Curves.easeInOut))
+      .drive(Tween<double>(begin: .55, end: 1));
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // A viewer who asked for less movement gets the silhouette at full
+    // strength and perfectly still, rather than a faster version of it.
+    if (SeatLayerPickerMotion.reduced(context)) {
+      _breath.stop();
+      _breath.value = 1;
+      return;
+    }
+    if (!_breath.isAnimating) _breath.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _breath.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+        opacity: _opacity,
+        child: CustomPaint(
+          size: _silhouetteBox,
+          painter: _VenueSilhouettePainter(accent: widget.accent),
+        ),
+      );
+}
+
+/// Draws the shells and the stage inside [_silhouetteBox], scaled to fit.
+class _VenueSilhouettePainter extends CustomPainter {
+  const _VenueSilhouettePainter({required this.accent});
+
+  final Color accent;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final horizontal = size.width / _silhouetteBox.width;
+    final vertical = size.height / _silhouetteBox.height;
+    // Fit, never fill: the shells keep their proportions in whatever box a
+    // host's own loading slot gives them.
+    final scale = horizontal < vertical ? horizontal : vertical;
+    if (scale <= 0) return;
+    canvas.save();
+    canvas.translate(
+      (size.width - _silhouetteBox.width * scale) / 2,
+      (size.height - _silhouetteBox.height * scale) / 2,
+    );
+    canvas.scale(scale);
+
+    final fill = Paint()..color = pickerAlpha(accent, .14);
+    final hairline = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = pickerAlpha(accent, .28);
+
+    final shells = <Path>[
+      _shell(left: 20, right: 180, top: 92, ry: 52, depth: 14, deepRy: 62),
+      _shell(left: 32, right: 168, top: 74, ry: 42, depth: 12, deepRy: 50),
+      _shell(left: 46, right: 154, top: 58, ry: 32, depth: 10, deepRy: 38),
+    ];
+    for (final shell in shells) {
+      canvas
+        ..drawPath(shell, fill)
+        ..drawPath(shell, hairline);
+    }
+
+    final stage = RRect.fromRectAndRadius(
+      const Rect.fromLTWH(62, 16, 76, 16),
+      const Radius.circular(4),
+    );
+    canvas
+      ..drawRRect(stage, fill)
+      ..drawRRect(stage, hairline)
+      ..restore();
+  }
+
+  /// One seating shell: a shallow arc over a deeper one, closed into a band.
+  Path _shell({
+    required double left,
+    required double right,
+    required double top,
+    required double ry,
+    required double depth,
+    required double deepRy,
+  }) {
+    final rx = (right - left) / 2;
+    return Path()
+      ..moveTo(left, top)
+      ..arcToPoint(
+        Offset(right, top),
+        radius: Radius.elliptical(rx, ry),
+      )
+      ..lineTo(right, top + depth)
+      ..arcToPoint(
+        Offset(left, top + depth),
+        radius: Radius.elliptical(rx + 14, deepRy),
+        clockwise: false,
+      )
+      ..close();
+  }
+
+  @override
+  bool shouldRepaint(_VenueSilhouettePainter oldDelegate) =>
+      oldDelegate.accent != accent;
 }
 
 /// What the picker shows when the seat map could not be loaded.
