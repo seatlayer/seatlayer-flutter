@@ -53,6 +53,15 @@ class SeatLayerPickerStrings {
     this.showLess = SeatLayerStringTokens.showLess,
     this.undo = SeatLayerStringTokens.undo,
     this.holdAndCheckout = SeatLayerStringTokens.holdAndCheckout,
+    this.continueWord = SeatLayerStringTokens.continueWord,
+    this.salesClosedCta = SeatLayerStringTokens.salesClosedCta,
+    this.confirmOrCancelSeat = SeatLayerStringTokens.confirmOrCancelSeat,
+    this.confirmYourTickets = SeatLayerStringTokens.confirmYourTickets,
+    this.securingSeats = SeatLayerStringTokens.securingSeats,
+    this.openingCheckout = SeatLayerStringTokens.openingCheckout,
+    this.adjustSelection = SeatLayerStringTokens.adjustSelection,
+    this.chooseMore = _defaultChooseMore,
+    this.removeTickets = _defaultRemoveTickets,
     this.poweredBy = SeatLayerStringTokens.poweredBy,
     this.testMode = SeatLayerStringTokens.testMode,
     this.testModeLong = SeatLayerStringTokens.testModeLong,
@@ -260,6 +269,62 @@ class SeatLayerPickerStrings {
   /// Cart-sheet footer call to action.
   final String holdAndCheckout;
 
+  /// The wide layout's call to action, beside a total it does not repeat.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String continueWord;
+
+  /// The call to action on an event that is no longer selling.
+  ///
+  /// One of the six sentences the checkout call to action wears INSTEAD of its
+  /// own label whenever it cannot be pressed. A grey button that says
+  /// "Hold seats & checkout" states only that nothing will happen; these say
+  /// why, so the buyer knows what to do about it.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String salesClosedCta;
+
+  /// The call to action while a seat's confirm card is still unanswered.
+  ///
+  /// The seat is already in the runtime's selection, so the button would
+  /// otherwise look live behind a card that is still asking about it.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String confirmOrCancelSeat;
+
+  /// The same sentence for a table or general-admission quantity prompt, where
+  /// the buyer is answering for tickets rather than for one named seat.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String confirmYourTickets;
+
+  /// The call to action while the runtime is creating the hold.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String securingSeats;
+
+  /// The call to action while the host is opening its checkout.
+  ///
+  /// The hold exists and has been handed over; the button stays down until the
+  /// host's screen is up, because a second press would buy nothing and read as
+  /// a failure.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String openingCheckout;
+
+  /// The call to action on a selection the event's own rules reject, where
+  /// nothing more specific can be said than that it has to change.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String adjustSelection;
+
   /// Required SeatLayer attribution.
   final String poweredBy;
 
@@ -357,6 +422,20 @@ class SeatLayerPickerStrings {
   /// "1 ticket" / "6 tickets".
   final String Function(int count) ticketCount;
 
+  /// "Choose 2 more" — a selection the event's rules will accept once that
+  /// many further places are picked.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String Function(int count) chooseMore;
+
+  /// "Remove 1 ticket" / "Remove 3 tickets" — counted on the tickets the
+  /// buyer has to give up, not on the ones they may keep.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String Function(int count) removeTickets;
+
   /// "74 left" — a section with some seats already sold.
   final String Function(int count) seatsLeft;
 
@@ -409,6 +488,14 @@ class SeatLayerPickerStrings {
   static String _defaultTicketCount(int count) =>
       count == 1 ? '1 ticket' : '$count tickets';
 
+  static String _defaultChooseMore(int count) =>
+      SeatLayerStringTokens.chooseMore.replaceAll('{count}', '$count');
+
+  static String _defaultRemoveTickets(int count) => (count == 1
+          ? SeatLayerStringTokens.removeTicketsOne
+          : SeatLayerStringTokens.removeTicketsOther)
+      .replaceAll('{count}', '$count');
+
   static String _defaultSeatsLeft(int count) => '$count left';
 
   static String _defaultOnlyLeft(int count) =>
@@ -421,11 +508,10 @@ class SeatLayerPickerStrings {
 
   static String _defaultContinueWithTotal(String money) => 'Continue · $money';
 
-  static String _defaultFindBestSeats(int count) =>
-      (count == 1
-              ? SeatLayerStringTokens.findBestSeatsOne
-              : SeatLayerStringTokens.findBestSeatsOther)
-          .replaceAll('{count}', '$count');
+  static String _defaultFindBestSeats(int count) => (count == 1
+          ? SeatLayerStringTokens.findBestSeatsOne
+          : SeatLayerStringTokens.findBestSeatsOther)
+      .replaceAll('{count}', '$count');
 
   static String _defaultMoreCount(int count) => '+$count more';
 

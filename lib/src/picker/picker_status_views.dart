@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 
 import '../seat_layer_error.dart';
 import 'picker_internal.dart';
-import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_options.dart';
 import 'picker_strings.dart';
 import 'picker_cart_sheet.dart';
+import 'picker_checkout_cta.dart';
 import 'seat_layer_picker_scope.dart';
 import 'picker_tokens.g.dart';
 import 'picker_styles.dart';
@@ -182,27 +182,25 @@ class SeatLayerPickerCheckoutBar extends StatelessWidget {
                   ],
                 ),
               ),
-              FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: theme.accent,
-                  foregroundColor: theme.onAccent,
-                  minimumSize: const Size(156, 48),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(theme.buttonRadius),
+              SeatLayerCheckoutCta(
+                label: (context) =>
+                    SeatLayerPickerScope.stringsOf(context).continueWord,
+                onPressed: () => checkoutThroughHost(controller, onCheckout),
+                builder: (context, cta, onPressed) => FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.accent,
+                    foregroundColor: theme.onAccent,
+                    minimumSize: const Size(156, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(theme.buttonRadius),
+                    ),
+                  ),
+                  onPressed: onPressed,
+                  child: SeatLayerCheckoutCtaLabel(
+                    cta: cta,
+                    color: theme.onAccent,
                   ),
                 ),
-                onPressed: controller.canCheckout
-                    ? () => ignorePickerAction(
-                          checkoutThroughHost(controller, onCheckout),
-                        )
-                    : null,
-                child:
-                    state.busyAction == SeatLayerPickerBusyAction.creatingHold
-                        ? const SizedBox.square(
-                            dimension: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Continue'),
               ),
             ],
           ),

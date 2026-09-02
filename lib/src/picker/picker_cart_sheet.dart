@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'picker_best_seats.dart';
 import 'picker_cart_list.dart';
+import 'picker_checkout_cta.dart';
 import 'picker_hold_lapse.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
@@ -281,45 +282,62 @@ class _PeekRow extends StatelessWidget {
                               const Icon(Icons.auto_awesome_rounded, size: 18),
                         ),
                       if (!expanded && hasTickets) ...[
-                        FilledButton(
-                          // The shape merges LAST: `merge` fills this style's
-                          // null fields, so a slot or an instance style that
-                          // sets its own shape still wins.
-                          style: FilledButton.styleFrom(
-                            backgroundColor: theme.accent,
-                            foregroundColor: theme.onAccent,
-                            // A full-size target: this is the one
-                            // control the buyer came for, and it was
-                            // reaching thirty-four points inside a bar
-                            // the thumb reads as a button of its own.
-                            minimumSize: const Size(
-                              0,
-                              SeatLayerSizeTokens.minimumHitTarget,
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                            ),
-                            textStyle: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w800,
-                              fontFamily: theme.fontFamily,
-                            ),
-                          )
-                              .merge(
-                                continueStyle ??
-                                    theme.styles.resolvedContinueButtonStyle,
-                              )
-                              .merge(
-                                seatLayerButtonShape(theme.buttonRadius),
+                        SeatLayerCheckoutCta(
+                          // `Continue · €285` while the button is live. When it
+                          // is not, the resolver hands back a reason instead —
+                          // and a reason plus a price will not sit on one 44 pt
+                          // pill without wrapping, so the money goes and the
+                          // sentence stays. The count is still on the left of
+                          // this same row either way.
+                          label: (context) => strings.continueWithTotal(
+                            pickerMoney(context, total, currency),
+                          ),
+                          onPressed: () =>
+                              checkoutThroughHost(controller, onCheckout),
+                          builder: (context, cta, onPressed) => FilledButton(
+                            // The shape merges LAST: `merge` fills this
+                            // style's null fields, so a slot or an instance
+                            // style that sets its own shape still wins.
+                            style: FilledButton.styleFrom(
+                              backgroundColor: theme.accent,
+                              foregroundColor: theme.onAccent,
+                              // A full-size target: this is the one
+                              // control the buyer came for, and it was
+                              // reaching thirty-four points inside a bar
+                              // the thumb reads as a button of its own.
+                              minimumSize: const Size(
+                                0,
+                                SeatLayerSizeTokens.minimumHitTarget,
                               ),
-                          onPressed: controller.canCheckout
-                              ? () => ignorePickerAction(
-                                    checkoutThroughHost(controller, onCheckout),
-                                  )
-                              : null,
-                          child: Text(
-                            strings.continueWithTotal(
-                              pickerMoney(context, total, currency),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                              ),
+                              textStyle: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: theme.fontFamily,
+                              ),
+                            )
+                                .merge(
+                                  continueStyle ??
+                                      theme.styles.resolvedContinueButtonStyle,
+                                )
+                                .merge(
+                                  seatLayerButtonShape(theme.buttonRadius),
+                                ),
+                            onPressed: onPressed,
+                            // A reason is several times the width of
+                            // `Continue · €285`, and this row also carries the
+                            // ticket count and the sheet's chevron. Capping the
+                            // words — and not the button, which would then
+                            // stretch to the cap — leaves the count its own
+                            // space on every phone width.
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 240),
+                              child: SeatLayerCheckoutCtaLabel(
+                                cta: cta,
+                                color: theme.onAccent,
+                              ),
                             ),
                           ),
                         ),
@@ -545,6 +563,9 @@ class _TrailingAttribution extends StatelessWidget {
 /// Full width, and carrying nothing but its own label: the total is already on
 /// the peek bar a thumb away, and stating it twice on one sheet is how the
 /// footer ended up being read as a second, different price.
+///
+/// When it cannot be pressed it says why — see [seatLayerCheckoutCtaState],
+/// which the collapsed pill and the wide layout's checkout bar resolve too.
 class SeatLayerBookButton extends StatelessWidget {
   /// Creates the checkout call to action.
   const SeatLayerBookButton({super.key, required this.onCheckout, this.style});
@@ -559,37 +580,30 @@ class SeatLayerBookButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final theme = seatLayerMapChromeThemeOf(context);
-    final strings = SeatLayerPickerScope.stringsOf(context);
-    final busy =
-        controller.state.busyAction == SeatLayerPickerBusyAction.creatingHold;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 6),
-      child: FilledButton(
-        // The shape merges LAST so `primaryButtonStyle` — or this instance's
-        // own `style:` — can still reshape the button.
-        style: FilledButton.styleFrom(
-          backgroundColor: theme.accent,
-          foregroundColor: theme.onAccent,
-          minimumSize: const Size.fromHeight(46),
-          textStyle: TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w800,
-            fontFamily: theme.fontFamily,
-          ),
-        )
-            .merge(style ?? theme.styles.primaryButtonStyle)
-            .merge(seatLayerButtonShape(theme.buttonRadius)),
-        onPressed: controller.canCheckout
-            ? () => ignorePickerAction(
-                  checkoutThroughHost(controller, onCheckout),
-                )
-            : null,
-        child: busy
-            ? const SizedBox.square(
-                dimension: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : Text(strings.holdAndCheckout),
+      child: SeatLayerCheckoutCta(
+        label: (context) =>
+            SeatLayerPickerScope.stringsOf(context).holdAndCheckout,
+        onPressed: () => checkoutThroughHost(controller, onCheckout),
+        builder: (context, cta, onPressed) => FilledButton(
+          // The shape merges LAST so `primaryButtonStyle` — or this instance's
+          // own `style:` — can still reshape the button.
+          style: FilledButton.styleFrom(
+            backgroundColor: theme.accent,
+            foregroundColor: theme.onAccent,
+            minimumSize: const Size.fromHeight(46),
+            textStyle: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              fontFamily: theme.fontFamily,
+            ),
+          )
+              .merge(style ?? theme.styles.primaryButtonStyle)
+              .merge(seatLayerButtonShape(theme.buttonRadius)),
+          onPressed: onPressed,
+          child: SeatLayerCheckoutCtaLabel(cta: cta, color: theme.onAccent),
+        ),
       ),
     );
   }

@@ -1,24 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_best_seats.dart';
+import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_cart_list.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
 
+import 'fake_webview_platform.dart';
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
 
 Future<void> _noopCheckout(_) async {}
 
 Widget _sheet({bool expanded = true}) => SeatLayerCartSheet(
-  expanded: expanded,
-  onExpandedChanged: (_) {},
-  onCheckout: _noopCheckout,
-);
+      expanded: expanded,
+      onExpandedChanged: (_) {},
+      onCheckout: _noopCheckout,
+    );
 
 double _sheetHeight(WidgetTester tester) =>
     tester.getSize(find.byType(SeatLayerCartSheet)).height;
+
+/// The fixture snapshot with a second €25 seat in the selection and the cart.
+///
+/// Two seats are what it takes to see a confirm card AND a cart at the same
+/// time: the picker asks about the last unanswered seat, so answering one
+/// leaves a ticket in the cart with a card still up over the other.
+Map<String, Object?> _twoSeatSnapshot() {
+  final snapshot = pickerSnapshot();
+  final selection = Map<String, Object?>.from(
+    snapshot['selection']! as Map<String, Object?>,
+  );
+  final seat = Map<String, Object?>.from(
+    (selection['seats']! as List<Object?>).single! as Map<String, Object?>,
+  );
+  selection['seats'] = <Object?>[
+    seat,
+    <String, Object?>{
+      ...seat,
+      'id': 'seat-b-2',
+      'label': 'B-2',
+      'displayLabel': 'Row B, Seat 2',
+      'rowLabel': 'B',
+      'seatNumber': '2',
+    },
+  ];
+  final cart = Map<String, Object?>.from(
+    snapshot['cart']! as Map<String, Object?>,
+  );
+  final line = Map<String, Object?>.from(
+    (cart['items']! as List<Object?>).single! as Map<String, Object?>,
+  );
+  cart['items'] = <Object?>[
+    line,
+    <String, Object?>{
+      ...line,
+      'lineKey': 'seat:B-2:adult',
+      'label': 'B-2',
+      'displayLabel': 'Row B, Seat 2',
+      'objectId': 'seat-b-2',
+    },
+  ];
+  cart['quantity'] = 2;
+  cart['total'] = 50.0;
+  return <String, Object?>{...snapshot, 'selection': selection, 'cart': cart};
+}
+
+/// The fixture snapshot for an event that has stopped selling.
+Map<String, Object?> _salesClosedSnapshot() {
+  final snapshot = pickerSnapshot();
+  final event = Map<String, Object?>.from(
+    snapshot['event']! as Map<String, Object?>,
+  )..['salesClosed'] = true;
+  return <String, Object?>{...snapshot, 'event': event};
+}
 
 void main() {
   _identityJoinTests();
@@ -160,7 +217,8 @@ void main() {
     );
   });
 
-  testWidgets('the grabber keeps its promise: a swipe opens and closes the sheet',
+  testWidgets(
+      'the grabber keeps its promise: a swipe opens and closes the sheet',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -179,14 +237,16 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
-    await tester.fling(find.byType(SeatLayerCartSheet), const Offset(0, -80), 900);
+    await tester.fling(
+        find.byType(SeatLayerCartSheet), const Offset(0, -80), 900);
     await tester.pumpAndSettle();
     expect(asked, isTrue);
 
     asked = null;
     await tester.pumpWidget(pickerHarness(map, sheet(true)));
     await tester.pumpAndSettle();
-    await tester.fling(find.byType(SeatLayerCartSheet), const Offset(0, 80), 900);
+    await tester.fling(
+        find.byType(SeatLayerCartSheet), const Offset(0, 80), 900);
     await tester.pumpAndSettle();
     expect(asked, isFalse);
   });
@@ -209,7 +269,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.getSize(find.widgetWithText(FilledButton, 'Continue · €25')).height,
+      tester
+          .getSize(find.widgetWithText(FilledButton, 'Continue · €25'))
+          .height,
       greaterThanOrEqualTo(44),
     );
   });
@@ -269,16 +331,16 @@ void main() {
     usePhoneSurface(tester);
 
     Widget subject() => Builder(
-      builder: (context) => MediaQuery(
-        data: MediaQuery.of(
-          context,
-        ).copyWith(padding: const EdgeInsets.only(bottom: 34)),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: _sheet(expanded: false),
-        ),
-      ),
-    );
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(padding: const EdgeInsets.only(bottom: 34)),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: _sheet(expanded: false),
+            ),
+          ),
+        );
     await tester.pumpWidget(pickerHarness(map, subject()));
     map.emit(pickerSnapshot(withSelection: false));
     await tester.pumpAndSettle();
@@ -400,6 +462,80 @@ void main() {
     expect(find.text('Total'), findsNothing);
     expect(tester.getSize(find.byType(SeatLayerBookButton)).width, 390);
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
+  });
+
+  testWidgets('the collapsed pill says why it cannot be pressed', (
+    tester,
+  ) async {
+    // A grey `Continue · €25` states only that pressing it did nothing. The
+    // reason it did nothing is a card standing over the map behind the
+    // buyer's thumb, and that is what the pill has to say — without the money,
+    // which will not share a 44 pt pill with a sentence.
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SeatLayerPickerAdaptiveLayout(onCheckout: _noopCheckout),
+        controller: picker,
+      ),
+    );
+    map.emit(_twoSeatSnapshot());
+    await tester.pumpAndSettle();
+
+    // One seat answered for, one still being asked about: the cart has
+    // something in it, so the pill is drawn — and it cannot be pressed.
+    await tester.tap(find.text('Add seat'));
+    await tester.pumpAndSettle();
+    expect(picker.seatAwaitingConfirmation?.label, 'A-1');
+    expect(find.text('1 ticket'), findsOneWidget);
+
+    expect(find.text('Confirm or cancel this seat'), findsOneWidget);
+    expect(find.text('Continue · €25'), findsNothing);
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Confirm or cancel this seat'),
+          )
+          .onPressed,
+      isNull,
+    );
+  });
+
+  testWidgets('the collapsed pill says when the event has stopped selling', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: _sheet(expanded: false),
+        ),
+      ),
+    );
+    map.emit(_salesClosedSnapshot());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Sales closed'), findsOneWidget);
+    expect(find.text('Continue · €25'), findsNothing);
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Sales closed'),
+          )
+          .onPressed,
+      isNull,
+    );
   });
 
   testWidgets('six seats in one row collapse to one line', (tester) async {
@@ -601,7 +737,6 @@ void _identityJoinTests() {
       isFalse,
     );
   });
-
 
   testWidgets('a line whose label differs still finds its seat', (
     tester,

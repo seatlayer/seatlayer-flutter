@@ -394,6 +394,24 @@ abstract final class SeatLayerStringTokens {
   /// Hold seats & checkout
   static const String holdAndCheckout = 'Hold seats & checkout';
 
+  /// Sales closed
+  static const String salesClosedCta = 'Sales closed';
+
+  /// Confirm or cancel this seat
+  static const String confirmOrCancelSeat = 'Confirm or cancel this seat';
+
+  /// Confirm your tickets
+  static const String confirmYourTickets = 'Confirm your tickets';
+
+  /// Securing your seats…
+  static const String securingSeats = 'Securing your seats…';
+
+  /// Opening secure checkout…
+  static const String openingCheckout = 'Opening secure checkout…';
+
+  /// Adjust your selection
+  static const String adjustSelection = 'Adjust your selection';
+
   /// Powered by SeatLayer
   static const String poweredBy = 'Powered by SeatLayer';
 
@@ -578,6 +596,18 @@ abstract final class SeatLayerStringTokens {
 
   /// Only {count} left
   static const String onlyLeft = 'Only {count} left';
+
+  /// Choose {count} more
+  static const String chooseMore = 'Choose {count} more';
+
+  /// Remove {count} tickets
+  static const String removeTickets = 'Remove {count} tickets';
+
+  /// Remove {count} ticket
+  static const String removeTicketsOne = 'Remove {count} ticket';
+
+  /// Remove {count} tickets
+  static const String removeTicketsOther = 'Remove {count} tickets';
 
   /// {count} tickets
   static const String ticketCount = '{count} tickets';
