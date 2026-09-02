@@ -7,30 +7,56 @@ names, deliberately: the four SDKs should agree on what things are called.
 Every token reference (`size.dockBarHeight`, `color.dark.surface`,
 `motion.duration.sheet`) resolves in [`tokens.json`](./tokens.json).
 
-## Corner radius: buttons are not pills
+This file is the catalogue: what each component is called, what it reads, and
+which slot restyles it. [`picker-spec.md`](./picker-spec.md) is the full
+specification — every state, every animation, every string and every capability,
+in buyer order. Where the two disagree, the spec is newer.
 
-**Decision, 2026-08-28.** Actions carry `radius.button` — 8 pt, which is
-what the web picker's own buttons measure: its primary call to action rounds to
-`calc(var(--sl-radius) * .55)` = 7.7 pt at the default 14 pt host radius, its
-confirm-card actions to 9 pt and its view/3D buttons to 8 pt. Material's default
-stadium button is therefore **wrong** for this design, and every native action
-overrides it: `Continue`, `Hold seats & checkout`, `Cancel`, `Select`, `Find N
-best seats`, `View from here`, `See it in 3D`, `Open venue 360°`, `Back to
-venue`, `Apply filters`, `Try again` and the prompts' pairs.
+## Corner radius: which surfaces are pills
+
+**Decision, 2026-08-28, restated after the web-parity round.** Actions carry
+`radius.button`, which is what the web picker's own buttons measure. Material's
+default stadium button is therefore wrong for this design, and every action that
+is not listed as a pill below overrides it.
 
 `radius.button` is its own role, not a fraction of `radius.base`: a brand that
-rounds its cards to 20 pt must not thereby grow pill buttons, and the organizer's
-branding radius is never inherited by it.
+rounds its cards to 20 pt must not thereby grow pill buttons, and the
+organizer's branding radius is never inherited by it. `radius.control` is the
+same value under its own name, for the form controls that are not actions —
+the best-seats selects and stepper.
 
-Exactly three things stay true pills, at `radius.pill` / `radius.chip` (999):
-the hold countdown pill, the price-legend chips, and the Map/3D segmented
-control. Round icon controls (map buttons, the 3D seat stepper) are circles and
-are unaffected.
+**True pills** (`radius.pill` / `radius.chip`, 999):
 
-Dart: `SeatLayerPickerThemeData(buttonRadius:)` moves every action at once, and
-the per-element slots — `primaryButtonStyle`, `secondaryButtonStyle`,
-`continueButtonStyle`, `iconButtonStyle` — and each widget's `style:` parameter
-still win over it.
+- the hold countdown pill and the sales-closed pill in the header, and the
+  header's close ring
+- the price-legend chips, including `All prices`
+- the Map | 3D segmented control, track and segments
+- the test-mode chip
+- the floor rail's track and its floor chips
+- the dock's `‹ ›` steps and its `‹ Venue` way out
+- the peek bar's `Continue · total`, and the empty bar's `✦ Find seats`
+- the seat card's photo-strip pills — `View from here` and `3D` — and the
+  flight chip that leaves the card
+- every piece of 3D chrome: the back pill, the deck's nav chips, the caption
+- the seat-view caption strip
+- a toast's action, the access panel's action, and the booked overlay's seat
+  list and `Back to map`
+
+**`radius.button`:**  the seat card's `Cancel` and `✓ Add seat`, its
+`See it in 3D` action and its tier rows; the sheet's `Hold seats & checkout`;
+the accessibility sheet's rows and `Apply filters`; `Try again`; the prompts'
+action pairs.
+
+**`radius.control`:** the best-seats selects, its stepper and its action.
+
+Round icon controls — the map buttons, the 3D seat stepper — are circles and
+are unaffected. The cart plate rounds to `radius.base × radius.smallRatio`; the
+seat card to `radius.confirmCard`; the sheet to `radius.sheet`.
+
+Dart: `SeatLayerPickerThemeData(buttonRadius:)` moves every `radius.button`
+action at once, and the per-element slots — `primaryButtonStyle`,
+`secondaryButtonStyle`, `continueButtonStyle`, `iconButtonStyle`, `chipShape` —
+and each widget's `style:` parameter still win over it.
 
 ## Shared model
 
@@ -48,9 +74,10 @@ Snapshot fields the catalogue refers to:
 | `map.categoryFilter` | the active price-chip filter |
 | `sections[]` | `id`, `label`, `displayLabel`, `color`, `seatsLeft`, `priceMin`, `priceMax`, `zoneId` |
 | `categories[]` | `key`, `label`, `color`, `priceMin` |
-| `selection[]` | `SelectedSeat`: `label`, `sectionLabel`, `rowLabel`, `seatNumber`, `price`, `currency`, `objectType`, `tiers` |
+| `selection[]` | `SelectedSeat`: `label`, `sectionLabel`, `rowLabel`, `seatNumber`, `price`, `currency`, `objectType`, `tiers`, `screenPoint` |
 | `cart` | `lines[]`, `ticketCount`, `cartTotal` |
 | `hold` | `holdId`, `expiresAt`, `owner` |
+| `access` | why access is limited, where it is — paused, revoked, expired, unverified |
 | `capabilities` | which optional features are available — venue 3D, seat view, best available |
 | `branding.attributionRequired` | whether the attribution line must render |
 
@@ -64,24 +91,34 @@ Two rules bind every component:
 
 ## Layout
 
-Phone below `size.phoneBreakpoint` (640). Wide at or above
-`size.wideBreakpoint` (840). The phone composition is a column:
+Measured off the picker's own container, never the device: phone below
+`size.phoneBreakpoint`, wide at or above `size.wideBreakpoint`. The phone
+composition is a column:
 
 ```
-Header                                  size.headerHeight
-┌ map surface (WebView) ─────────────────────────────────┐
-│  top rail: PriceLegend │ ViewModeControl               │
-│  TestModeBadge                                         │
-│  corner controls (accessibility ◦ fit)                 │
-│  ConfirmCard / Venue3D chrome / status overlay         │
-│  DockBar                              size.dockBarHeight│
-└────────────────────────────────────────────────────────┘
-CartSheet peek                          size.peekHeight
+Header                                     size.headerHeight
+PriceLegend band                           size.topRailHeight
+┌ map surface (WebView) ──────────────────────────────────┐
+│  TestModeBadge (top-left)   ViewModeControl (top-right) │
+│  FloorStrip (left rail)                                 │
+│  corner controls: accessibility ◦ zoom column           │
+│  toast · extend prompt (bottom centre)                  │
+│  ConfirmCard / Venue3D chrome / status overlay          │
+│  DockBar                                size.dockBarHeight│
+└─────────────────────────────────────────────────────────┘
+CartSheet peek                             size.peekHeight
 ```
 
-The legend and the Map/3D control share one rail rather than stacking, because
-their translated labels have no fixed width and either would otherwise be drawn
-over the other.
+The prices keep a band of their own between the header and the map: floated on
+the map's top edge, the last chip was clipped under the Map/3D control and seat
+numbers read through the gaps on a busy chart. The Map/3D control keeps the
+map's top-right corner on the line below, where the test badge sits at the other
+end.
+
+The header, the rail and the sheet are rows of the same column, so the map
+surface begins and ends where they do. Everything else in the diagram stands on
+the map and is reported to the runtime as viewport insets — see
+[`picker-spec.md`](./picker-spec.md) §2.3.
 
 ---
 
@@ -106,11 +143,17 @@ override** `style:`
 `chipShape` · **Instance override** `style:`
 
 - **Inputs** `categories[]`, `map.categoryFilter`, `event.currency`.
-- **States** chip idle / selected; empty (renders nothing); over the immersive
-  scene it adopts the dark palette whatever the resolved mode is.
-- **Anatomy** one horizontally scrolling row, 30 pt compact. Each chip: dot in
-  the category colour, then the price, `type.legendChip`. Idle ground is the
-  surface tinted 4 % with the ink; selected ground is the accent.
+- **States** chip idle / selected / sold out; empty (the band is not drawn);
+  not drawn at all while the immersive scene is up. The band takes the map
+  chrome's palette, so it darkens with the scene.
+- **Anatomy** a band of `size.topRailHeight` on `color.*.surface` with a
+  hairline beneath, holding one horizontally scrolling row. Each chip:
+  `size.legendChipHeight` of ink inside a `size.minimumHitTarget` reach, a dot
+  of `size.legendChipDotSize`, then the amount, `type.legendChip`. Idle ground
+  is `color.*.background` with a hairline; selected is the accent with
+  `color.*.onAccent` and a ring on the dot. `All prices` is pinned first and
+  never scrolls away. On the light theme the dot is the category colour mixed
+  into the surface under a full-strength ring of it.
 - **Callbacks** none.
 - **Commands** `picker.setCategoryFilter { keys, focus }` — the first tap
   filters and drills in, the second clears.
@@ -157,22 +200,30 @@ override** `style:`
 
 - **Inputs** the newest unconfirmed `SelectedSeat`, `capabilities`
   (`seatView`, `venue3d`), the event's seat-view photo.
-- **States** with photo and 3D (161 pt tall), with neither (89 pt); busy.
-- **Anatomy** screen width less `2 × size.confirmCardGutter`, capped at
-  `size.confirmCardMaxWidth`, radius `radius.card`, elevation
+- **States** with a photo, without one (a rail instead), 3D-only, with tiers,
+  with notices; resting or hugging the seat; committing.
+- **Anatomy** `size.confirmCardMaxWidth`, capped at the map width less
+  `2 × size.confirmCardGutter`, radius `radius.confirmCard`, elevation
   `elevation.confirmCard`.
-  1. Identity row, `size.confirmIdentityHeight`: dot, `Section · Row X · Seat
-     N` (`type.confirmIdentity`), price right. The section may ellipsize; the
-     row, seat and price may not.
-  2. Photo strip, `size.confirmPhotoHeight`, only when a photo or 3D exists,
-     with the `View from here` and `3D` pills overlaid.
-  3. Actions, `size.confirmActionHeight`: `Cancel` and `✓ Select`, split 1:1,
-     Select filled. The strip's `View from here` and `3D` controls are actions,
-     not chips: they carry `radius.button`.
-- **Motion** opens anchored to the tapped seat with `motion.curve.spring` over
-  `motion.duration.enter`; leaves over `motion.duration.exit`. Select fires the
-  `selectionAdded` haptic and a fly-to-peek indicator over
-  `motion.duration.fly`.
+  1. Identity grid, `size.confirmIdentityHeight`: section, row and seat as
+     three labelled cells (`type.confirmIdentity`), hairline-divided.
+  2. Category band, `size.confirmBandHeight`: a tint of the category colour
+     with a rail on its leading edge, the category name, `N left` and the price.
+  3. Photo strip, `size.confirmPhotoHeight`, only where a view-from-seat photo
+     exists, carrying the `View from here` and `3D` pills; otherwise a rail of
+     `size.confirmRailHeight` with the same pills in theme tokens.
+  4. Tiers (`size.confirmTierHeight`) and notices, where the seat has them.
+  5. Actions, `size.confirmActionHeight`: `Cancel` at about a third and
+     `✓ Add seat` at the rest, each in its own box at `radius.button` inside the
+     card's gutter.
+- **Placement** rests `size.confirmCardRestInset` above the map's foot; hugs
+  the seat at `size.confirmCardSeatGap` when it would otherwise cover it. Full
+  rule and constants: `picker-spec.md` §3.8.2.
+- **Motion** the map dims to ink behind it (`SeatLayerPickerStyles.scrimColor`);
+  the card springs in from the seat's side with `motion.curve.spring` over
+  `motion.duration.cardEnter`. `Add seat` invites once, breathes until touched,
+  and on the press sweeps, ticks and says `Added`. The seat counts on the press;
+  only the card's departure waits.
 - **Callbacks** `onConfirm`, `onCancel`, `onViewFromSeat`, `onShow3D`.
 - **Commands** `picker.openSeatView`, `picker.showSeatIn3D`,
   `picker.deselect` on cancel.
@@ -187,9 +238,13 @@ override** `style:`
 - **States** peek empty, peek with tickets, expanded empty (the best-seats
   form), expanded with tickets.
 - **Anatomy** radius `radius.sheet`, elevation `elevation.sheet`.
-  - **Peek** `size.peekHeight`: left `N tickets · total`, or `From <min>` when
-    empty (`type.peekSummary`); right the filled `Continue · total` and the
-    chevron. No best-seats control in the peek.
+  - **Peek** `size.peekHeight`: a grabber, then left `N tickets`, or
+    `From <min>` when empty (`type.peekSummary`); right the filled
+    `Continue · total` pill at `size.minimumHitTarget` and the chevron. With an
+    empty cart the pill is `✦ Find seats`, which opens the sheet on the
+    best-seats form — withheld where that form would be refused. The peek also
+    carries the securing, checkout and closed-sales lines; see
+    `picker-spec.md` §3.9.
   - **Expanded** content height, capped at
     `size.sheetMaxHeightFraction` of the screen; the empty tray is capped at
     `size.emptyTrayMaxHeight`. Header is one line, `N tickets` plus the ✦
@@ -225,9 +280,13 @@ override** `style:`
 **Instance override** `style:`
 
 - **Inputs** `cart`, `hold`, busy state.
-- **Anatomy** full width, 46 pt, radius `radius.button`, `type.bookButton`.
-  Carries its own label only — the total is already on the peek bar.
-- **States** idle, busy (spinner), disabled when checkout is not possible.
+- **Anatomy** full width, `size.checkoutButtonHeight`, radius `radius.button`,
+  `type.bookButton`. Carries its own label only — the total is already on the
+  peek bar.
+- **States** idle, busy (spinner), disabled with a reason. Disabled is a
+  designed state — a surface-toned ground, muted ink, an inset hairline — not
+  Material's own greys, which vanish on the dark scene sheet. The label ladder
+  is in `picker-spec.md` §3.10.3.
 - **Commands** `picker.checkout`, then `picker.rejectHandoff` if the host
   refuses the handoff, so a rejected hold is never stranded.
 
@@ -237,11 +296,13 @@ override** `style:`
 
 - **Inputs** the focused `SelectedSeat`, `map.isVenue3D`, `capabilities`.
 - **States** live seat view / venue 360°; stepper disabled in venue mode.
-- **Anatomy** the dark scene palette whatever the resolved mode is. `‹ Back to
-  venue` and `Open venue 360°` are actions at `radius.button`; the caption chip
-  naming the seat is a chip at `radius.chip`. Top-left
-  `‹ Back to venue`. Bottom: a caption chip naming the seat, then
-  `‹` previous seat, `Open venue 360°`, `›` next seat, and recentre.
+- **Anatomy** one dark glass whatever the resolved mode is —
+  `color.dark.immersiveGlass`, its border and ink, blurred by
+  `size.immersiveGlassBlur`; captions use the deeper caption glass. Every piece
+  is a pill. Top-left `‹ Back to venue` (`size.immersiveBackPillHeight`), drawn
+  only while the buyer is sitting in an exact seat. Bottom: a caption chip
+  naming the seat, then `‹` previous seat, `Open venue 360°`, `›` next seat, and
+  recentre, as chips of `size.immersiveNavChipHeight`.
 - **Motion** `motion.duration.immersive`.
 - **Commands** `picker.showSeatIn3D`, `picker.openVenue360`,
   `picker.setBuyerView`, `picker.recentre3D`.
@@ -265,4 +326,32 @@ override** `style:`
 - **Inputs** `event.mode`.
 - **Rules** required chrome: it has no host switch, and exactly one may render.
   It steps below the immersive scene's own back control rather than under it.
-- **Anatomy** an amber pill reading `strings.testMode`.
+- **Anatomy** a pill of `size.testChipHeight` at `radius.pill`, one recipe in
+  both themes: warning ink on the warning colour mixed into the surface, a
+  leading dot of `size.testChipDotSize`. Copy `strings.testMode`; the accessible
+  name keeps `strings.testModeLong`. Amber, never the accent — an environment
+  flag must not wear "buy" gold.
+
+---
+
+## Also in the catalogue
+
+These carry no separate entry here because their whole description is their
+specification. Names, slots and files:
+
+| Component | Slot | Spec |
+| --- | --- | --- |
+| `SeatLayerFloorStrip` | `floorStripStyle` | §3.7 |
+| `SeatLayerBestSeatsForm` | — | §3.11 |
+| `SeatLayerPickerToast` / `…ToastQueue` / `…ToastLayer` | — | §3.12 |
+| `SeatLayerPickerLoadingView` / `…ErrorView` / `…EmptyView` | — | §3.13.1–2 |
+| `SeatLayerPickerAccessPanel` | — | §3.13.3 |
+| `SeatLayerPickerSalesClosedStatement` / `…SalesClosedPill` | — | §3.13.4 |
+| `SeatLayerPickerSoldOutOverlay` | — | §3.13.5 |
+| `SeatLayerPickerExtendHoldPrompt` | — | §3.13.8 |
+| `SeatLayerPickerBookedOverlay` | — | §3.13.10 |
+| `SeatLayerPickerGeneralAdmissionPrompt` / `…TablePrompt` | — | §3.13.11–12 |
+| `SeatLayerPickerAccessibilityFilters` | — | §3.5 |
+| `SeatLayerSeatViewChrome` | `seatViewChromeStyle` | §3.15 |
+| `SeatLayerPickerAttribution` | — | §3.10.3 |
+| `SeatLayerCheckoutCta` (the one label resolver) | — | §3.9, §3.10.3 |
