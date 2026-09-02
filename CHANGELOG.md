@@ -29,25 +29,27 @@ chrome's palette and darkens with the 3D scene.
 The seat card is rebuilt around the question it asks: section, row and seat
 as three labelled cells; the category in a tinted band with its name, how
 many are left and the price; `See it in 3D` as a full-width action; `Cancel`
-a third of the row and `✓ Add seat` two thirds. `Add seat` invites once and
-breathes until the buyer touches the card, and on the press sweeps, ticks
-and says `Added` — the seat counts on the press. The card is a native moment:
-the map blurs behind it, it springs in from the seat's side with a light
-haptic cue, a swipe down or a tap on the map gives the seat back, and `Add
-seat` answers with a medium cue. On a runtime that reports the seat's screen
-point (`seat-screen-point-v1`) the card sits 12 pt above the seat with a
-pointer on the edge facing it; until then it is centred. A category running
-low says `Only N left` in warning ink. Nothing moves under reduced motion,
-and a host that turned haptics off feels none of it. New: `onlyLeft` string,
-`cardEnter` motion token, `SelectedSeat.screenPoint`.
+a third of the row and `✓ Add seat` two thirds, each in its own box inside the
+card's gutter. `Add seat` invites once and breathes until the buyer touches
+the card, and on the press sweeps, ticks and says `Added` — the seat counts on
+the press. The card is a native moment: the map dims to ink behind it (a style
+slot, `SeatLayerPickerStyles.scrimColor`) so the seat stays legible, the card
+springs in from the seat's side with a light haptic cue, a swipe down or a
+tap on the map gives the seat back, and `Add seat` answers with a medium cue.
+On a runtime that reports the seat's screen point (`seat-screen-point-v1`)
+the card sits 12 pt above the seat with a pointer on the edge facing it;
+until then it rests at the foot of the map. A category running low says
+`Only N left` in warning ink. Nothing moves under reduced motion, and a host
+that turned haptics off feels none of it. New: `addSeat`, `added`,
+`seeItIn3D`, `onlyLeft` and the eyebrow words; `cardEnter` motion token;
+`confirmBandHeight` layout token; `SelectedSeat.screenPoint`.
 
 The checkout call to action says why it is waiting: `Sales closed`, `Confirm
 or cancel this seat`, `Securing your seats…`, `Opening secure checkout…`, or
 what would fix a rejected selection (`Choose 1 more`, `Remove 2 tickets`,
 `Adjust your selection`). One resolver, `seatLayerCheckoutCtaState`, drives
 the collapsed pill, the sheet's button and the wide bar. New strings for each
-reason, and `continueWord`. New strings: `addSeat`, `added`, `seeItIn3D`, the eyebrow words, and
-`findSeats`; new layout tokens `confirmBandHeight`, `topRailHeight`.
+reason, and `continueWord`.
 
 The bottom cart grows full-size targets: a 56 pt peek bar with a 44 pt
 `Continue`; an empty bar offers `✦ Find seats`, which opens the sheet on the
@@ -55,8 +57,8 @@ best-seats form and is withheld where the form would be refused. Held rows
 wear a lock and a hairline; a row is named by its section, else its ticket
 type. The best-seats form is one track — stepper and ticket type, a zone row
 only where the venue has zones, a full-width button. Price chips, remove
-buttons and run rows all reach 44 pt. The test-event
-badge sits in the map's top-left corner in both views, stepping down only
+buttons and run rows all reach 44 pt; a swipe on the peek row opens and closes
+the sheet. New string: `findSeats`. The test-event badge sits in the map's top-left corner in both views, stepping down only
 while the scene's `Back to venue` pill is drawn. New layout token:
 `topRailHeight`. The `Powered by SeatLayer` credit is centred at the foot of
 the sheet, where a phone's rounded corner cannot clip it, and keeps its ink on
