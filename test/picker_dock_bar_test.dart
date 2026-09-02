@@ -87,7 +87,7 @@ void main() {
 
     expect(find.text('Gallery'), findsOneWidget);
     // 74 free, less the one seat the fixture's buyer has already picked there.
-    expect(find.text('73 left'), findsOneWidget);
+    expect(find.text('73 seats left'), findsOneWidget);
     expect(find.text('Venue'), findsOneWidget);
   });
 
@@ -253,29 +253,38 @@ void main() {
 
       expect(
           _nameParagraph(tester, 'Sponsor Tables').didExceedMaxLines, isFalse);
-      expect(find.text('73 left'), findsOneWidget);
+      expect(find.text('73 seats left'), findsOneWidget);
       expect(find.text('Venue'), findsOneWidget);
     });
 
-    testWidgets('a longer name collapses the count to the number',
+    testWidgets('a narrower bar collapses the count to the short form',
         (tester) async {
-      await _pumpDockAt(tester, width: 390, name: 'Sponsor Tables VIP');
+      await _pumpDockAt(tester, width: 360, name: 'Sponsor Tables VIP');
 
       expect(_nameParagraph(tester, 'Sponsor Tables VIP').didExceedMaxLines,
           isFalse);
       // The exact number survives; only the word it is counting goes.
-      expect(find.text('73'), findsOneWidget);
-      expect(find.text('73 left'), findsNothing);
+      expect(find.text('73 left'), findsOneWidget);
+      expect(find.text('73 seats left'), findsNothing);
       expect(find.text('Venue'), findsOneWidget);
     });
 
-    testWidgets('a narrow bar drops the count, then the Venue label',
+    testWidgets('a narrow bar drops the count and keeps the way out',
         (tester) async {
       await _pumpDockAt(tester, width: 320, name: 'Sponsor Tables');
 
       expect(
           _nameParagraph(tester, 'Sponsor Tables').didExceedMaxLines, isFalse);
       expect(find.textContaining('73'), findsNothing);
+      expect(find.text('Venue'), findsOneWidget);
+    });
+
+    testWidgets('the narrowest bar drops the Venue label, not the control',
+        (tester) async {
+      await _pumpDockAt(tester, width: 280, name: 'Sponsor Tables');
+
+      expect(
+          _nameParagraph(tester, 'Sponsor Tables').didExceedMaxLines, isFalse);
       // The word goes; the control and its accessible name stay.
       expect(find.text('Venue'), findsNothing);
       expect(find.byTooltip('Venue'), findsOneWidget);
@@ -368,12 +377,12 @@ void main() {
     await tester.pumpAndSettle();
 
     // One seat, in `Gallery`, which is section-a's label in the fixture.
-    expect(find.text('73 left'), findsOneWidget);
-    expect(find.text('74 left'), findsNothing);
+    expect(find.text('73 seats left'), findsOneWidget);
+    expect(find.text('74 seats left'), findsNothing);
 
     map.emit(_galleryPicks(3, revision: 4));
     await tester.pumpAndSettle();
-    expect(find.text('71 left'), findsOneWidget);
+    expect(find.text('71 seats left'), findsOneWidget);
   });
 
   testWidgets('a seat in another section leaves this one alone',
@@ -391,7 +400,7 @@ void main() {
     map.emit(snapshot);
     await tester.pumpAndSettle();
 
-    expect(find.text('74 left'), findsOneWidget);
+    expect(find.text('74 seats left'), findsOneWidget);
   });
 
   testWidgets('a section that reports no count still reports none',

@@ -1,19 +1,58 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 import '../open_enums.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_accessibility.dart';
+import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
+/// The dark glass every piece of 3D chrome is drawn on.
+///
+/// Deliberately theme-independent: this floats over a rendered venue, not over
+/// the picker's own ground, and white chrome over a lit stage reads as a
+/// mistake in either palette. One recipe — a near-black fill at 62 %, a
+/// one-point white hairline at 22 %, and a six-point blur behind both — so the
+/// back pill, the deck's chips and the caption cannot drift apart.
+Widget seatLayerImmersiveGlass({
+  required Widget child,
+  double blur = SeatLayerSizeTokens.immersiveGlassBlur,
+  Color fill = SeatLayerDarkTokens.immersiveGlass,
+  Color border = SeatLayerDarkTokens.immersiveGlassBorder,
+  bool circular = false,
+  double? radius,
+}) {
+  final ShapeBorder shape = circular
+      ? CircleBorder(side: BorderSide(color: border))
+      : radius != null
+          ? RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(radius),
+              side: BorderSide(color: border),
+            )
+          : StadiumBorder(side: BorderSide(color: border));
+  return ClipPath(
+    clipper: ShapeBorderClipper(shape: shape),
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+      child: DecoratedBox(
+        decoration: ShapeDecoration(color: fill, shape: shape),
+        child: child,
+      ),
+    ),
+  );
+}
+
 /// The controls that sit on the map itself.
 ///
-/// On a phone they go to the corners — accessibility bottom-left, Map/3D
-/// top-right, and one contextual camera action bottom-right. That action is
-/// zoom-out while inside a section and fit-to-screen at the venue overview.
-/// The full zoom pair is absent by default: pinch already handles continuous
-/// zoom without drawing a toolbar over the venue.
+/// On a phone they go to the map's anchor regions — accessibility bottom-left,
+/// Map/3D top-right, and the camera column bottom-right. That column is
+/// fit-to-venue at the overview, and gains a zoom-out above it once the map is
+/// deep enough to have somewhere to come back from. Zoom-in is absent by
+/// default: pinch already handles continuous zoom without drawing a toolbar
+/// over the venue.
 ///
 /// The wide layout keeps the vertical rail, where there is room for it.
 class SeatLayerPickerMapControls extends StatelessWidget {
@@ -21,7 +60,7 @@ class SeatLayerPickerMapControls extends StatelessWidget {
   const SeatLayerPickerMapControls({
     super.key,
     this.compact = false,
-    this.edgeInset = 10,
+    this.edgeInset = SeatLayerSizeTokens.mapAnchorInset,
     this.bottomInset = 0,
     this.includeViewModeControl = true,
   });
@@ -116,10 +155,23 @@ class _CornerControls extends StatelessWidget {
     // pan, and SeatLayerVenue3D owns that corner. Only the way back stays.
     final onMap = !(state.snapshot?.map.isVenue3D ?? false);
     final phoneZoomPair = chrome.zoomControlsFor(phone: true);
-    final canStepOut = onMap &&
-        chrome.showZoomToFitControl &&
-        !phoneZoomPair &&
-        state.snapshot?.map.focusedSection != null;
+    // Deep in the venue — a section framed, its seats out — the map has
+    // somewhere to come back from, and only then is there a `−` to draw.
+    // Pinch is what zooms in, so `+` is never here unless the host asks.
+    final deep = onMap && state.snapshot?.map.focusedSection != null;
+    final zoomColumn = <Widget>[
+      if (onMap && phoneZoomPair) const SeatLayerPickerZoomInButton(),
+      if (onMap && (phoneZoomPair || deep))
+        const SeatLayerPickerZoomOutButton(),
+      if (onMap && chrome.showZoomToFitControl)
+        const SeatLayerPickerZoomToFitButton(),
+    ];
+    final bottomLeftColumn = <Widget>[
+      if (onMap && chrome.colorblindControlFor(phone: true))
+        const SeatLayerPickerColorblindButton(),
+      if (onMap && chrome.showAccessibilityControl)
+        const SeatLayerPickerAccessibilityFilters(compact: true),
+    ];
     return Stack(
       children: <Widget>[
         if (has3D)
@@ -128,54 +180,64 @@ class _CornerControls extends StatelessWidget {
             right: inset,
             child: const SeatLayerPickerViewModeControl(),
           ),
-        if (onMap && chrome.showAccessibilityControl)
+        if (bottomLeftColumn.isNotEmpty)
           Positioned(
             left: inset,
             bottom: bottom,
-            child: const SeatLayerPickerAccessibilityFilters(compact: true),
-          ),
-        if (canStepOut)
-          Positioned(
-            right: inset,
-            bottom: bottom,
-            child: const SeatLayerPickerOverviewButton(),
-          )
-        else if (onMap && chrome.showZoomToFitControl)
-          Positioned(
-            right: inset,
-            bottom: bottom,
-            child: const SeatLayerPickerZoomToFitButton(),
-          ),
-        if (onMap && phoneZoomPair)
-          Positioned(
-            right: inset,
-            bottom: bottom + 42,
-            child: const Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                SeatLayerPickerZoomInButton(),
-                SizedBox(height: 6),
-                SeatLayerPickerZoomOutButton(),
-              ],
+            child: _AnchorColumn(
+              gap: SeatLayerSizeTokens.mapAnchorGap,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: bottomLeftColumn,
             ),
           ),
-        if (onMap &&
-            chrome.overviewControlFor(phone: true) &&
-            state.snapshot?.map.focusedSection != null)
+        if (zoomColumn.isNotEmpty)
+          Positioned(
+            right: inset,
+            bottom: bottom,
+            child: _AnchorColumn(
+              gap: SeatLayerSizeTokens.zoomColumnGap,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: zoomColumn,
+            ),
+          ),
+        if (onMap && chrome.overviewControlFor(phone: true) && deep)
           Positioned(
             left: inset,
             top: inset,
             child: const SeatLayerPickerOverviewButton(),
           ),
-        if (onMap && chrome.colorblindControlFor(phone: true))
-          Positioned(
-            left: inset,
-            bottom: bottom + 52,
-            child: const SeatLayerPickerColorblindButton(),
-          ),
       ],
     );
   }
+}
+
+/// One of the map's anchor regions: a column of controls with an even gap.
+///
+/// The regions are what stop a floating control from landing on top of
+/// another one, so every stack of chrome goes through one rather than being
+/// positioned against a number of its own.
+class _AnchorColumn extends StatelessWidget {
+  const _AnchorColumn({
+    required this.gap,
+    required this.crossAxisAlignment,
+    required this.children,
+  });
+
+  final double gap;
+  final CrossAxisAlignment crossAxisAlignment;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: crossAxisAlignment,
+        children: <Widget>[
+          for (var index = 0; index < children.length; index++) ...<Widget>[
+            if (index > 0) SizedBox(height: gap),
+            children[index],
+          ],
+        ],
+      );
 }
 
 /// Map or 3D, as one segmented control.
@@ -187,7 +249,7 @@ class SeatLayerPickerViewModeControl extends StatelessWidget {
   const SeatLayerPickerViewModeControl({super.key});
 
   /// How tall the control is; the segments are built to this.
-  static const double height = 32;
+  static const double height = SeatLayerSizeTokens.viewModeControlHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -199,33 +261,56 @@ class SeatLayerPickerViewModeControl extends StatelessWidget {
     final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final is3D = state.snapshot?.map.isVenue3D ?? false;
-    return Material(
-      color: pickerAlpha(theme.surface, .94),
-      shape: StadiumBorder(side: BorderSide(color: theme.divider)),
-      elevation: 3,
-      clipBehavior: Clip.antiAlias,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          _Segment(
-            label: strings.mapView,
-            selected: !is3D,
-            onPressed: state.isBusy || !is3D
-                ? null
-                : () => ignorePickerAction(
-                      controller.setBuyerView(SeatLayerBuyerView.map),
-                    ),
-          ),
-          _Segment(
-            label: strings.venue3D,
-            selected: is3D,
-            onPressed: state.isBusy || is3D
-                ? null
-                : () => ignorePickerAction(
-                      controller.setBuyerView(SeatLayerBuyerView.venue3D),
-                    ),
-          ),
-        ],
+    // A track with the two halves inside it: the pill the buyer is in is
+    // filled, the one they can move to is quiet, and the plate under both says
+    // the pair is one control rather than two buttons that happen to touch.
+    return Semantics(
+      container: true,
+      label: strings.venueView,
+      // A Container, not a DecoratedBox: the hairline is part of the track's
+      // measured height, the way a border-box is on the web, so the pair
+      // stands exactly as tall as the layout reserves for it.
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.surface,
+          borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
+          border: Border.all(color: theme.divider),
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: pickerAlpha(const Color(0xFF000000), .65),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+              spreadRadius: -16,
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(3),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _Segment(
+              label: strings.mapView,
+              tooltip: strings.flat2dMap,
+              selected: !is3D,
+              onPressed: state.isBusy || !is3D
+                  ? null
+                  : () => ignorePickerAction(
+                        controller.setBuyerView(SeatLayerBuyerView.map),
+                      ),
+            ),
+            const SizedBox(width: 2),
+            _Segment(
+              label: strings.venue3D,
+              tooltip: strings.interactive3dVenueView,
+              selected: is3D,
+              onPressed: state.isBusy || is3D
+                  ? null
+                  : () => ignorePickerAction(
+                        controller.setBuyerView(SeatLayerBuyerView.venue3D),
+                      ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -234,11 +319,13 @@ class SeatLayerPickerViewModeControl extends StatelessWidget {
 class _Segment extends StatelessWidget {
   const _Segment({
     required this.label,
+    required this.tooltip,
     required this.selected,
     required this.onPressed,
   });
 
   final String label;
+  final String tooltip;
   final bool selected;
   final VoidCallback? onPressed;
 
@@ -248,25 +335,40 @@ class _Segment extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      child: Material(
-        color: selected ? theme.accent : const Color(0x00000000),
-        child: InkWell(
-          onTap: onPressed,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: SeatLayerPickerViewModeControl.height,
-              minWidth: 46,
-            ),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: selected ? theme.onAccent : theme.text,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    fontFamily: theme.fontFamily,
+      tooltip: tooltip,
+      child: Tooltip(
+        message: tooltip,
+        child: Material(
+          color: selected ? theme.accent : const Color(0x00000000),
+          shape: const StadiumBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onPressed,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: SeatLayerSizeTokens.viewModeButtonHeight,
+                minWidth: SeatLayerSizeTokens.viewModeButtonMinWidth,
+              ),
+              // Both factors, so a half is the size of its own label plus its
+              // minimum — not whatever room the corner it is placed in has.
+              child: Center(
+                widthFactor: 1,
+                heightFactor: 1,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      color: selected ? theme.onAccent : theme.mutedText,
+                      fontSize: SeatLayerSizeTokens.viewModeLabelFontSize,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing:
+                          SeatLayerSizeTokens.viewModeLabelFontSize * .04,
+                      fontFamily: theme.fontFamily,
+                    ),
                   ),
                 ),
               ),
@@ -305,7 +407,7 @@ class SeatLayerPickerZoomInButton extends StatelessWidget {
     final map = controller.state.snapshot?.map;
     return _ControlButton(
       icon: Icons.add_rounded,
-      tooltip: 'Zoom in',
+      tooltip: SeatLayerPickerScope.stringsOf(context).zoomIn,
       onPressed: map?.canZoomIn == false ? null : controller.zoomIn,
     );
   }
@@ -322,7 +424,7 @@ class SeatLayerPickerZoomOutButton extends StatelessWidget {
     final map = controller.state.snapshot?.map;
     return _ControlButton(
       icon: Icons.remove_rounded,
-      tooltip: 'Zoom out',
+      tooltip: SeatLayerPickerScope.stringsOf(context).zoomOut,
       onPressed: map?.canZoomOut == false ? null : controller.zoomOut,
     );
   }
@@ -388,17 +490,38 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final moving = map!.view3DNavigationMode == SeatLayer3DNavigationMode.move;
-    return _ControlButton(
-      icon: moving ? Icons.open_with_rounded : Icons.threesixty_rounded,
-      tooltip: moving ? 'Drag to move venue' : 'Drag to rotate venue',
-      active: true,
-      onPressed: controller.state.isBusy
-          ? null
-          : () => controller.set3DNavigationMode(
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    final onPressed = controller.state.isBusy
+        ? null
+        : () => ignorePickerAction(
+              controller.set3DNavigationMode(
                 moving
                     ? SeatLayer3DNavigationMode.rotate
                     : SeatLayer3DNavigationMode.move,
               ),
+            );
+    // This control only ever exists over the rendered venue, so it wears the
+    // scene's glass rather than the picker's own surface.
+    return seatLayerImmersiveGlass(
+      circular: true,
+      child: IconButton(
+        tooltip: moving ? strings.moveVenue : strings.rotateVenue,
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(
+          width: SeatLayerSizeTokens.immersiveNavCloseSize,
+          height: SeatLayerSizeTokens.immersiveNavCloseSize,
+        ),
+        style: const ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll<Color>(Color(0x00000000)),
+        ),
+        color: SeatLayerDarkTokens.immersiveGlassInk,
+        disabledColor: pickerAlpha(SeatLayerDarkTokens.immersiveGlassInk, .6),
+        icon: Icon(
+          moving ? Icons.open_with_rounded : Icons.threesixty_rounded,
+          size: SeatLayerSizeTokens.immersiveBackIconSize + 3,
+        ),
+      ),
     );
   }
 }

@@ -41,8 +41,10 @@ import 'picker_section_navigator.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
-/// The breathing room between two stacked pieces of map chrome.
-const double _badgeGap = 8;
+/// The gap between two stacked pieces of map chrome, and how far a floating
+/// control stands off the map's edge — one pair for every anchor region.
+const double _badgeGap = SeatLayerSizeTokens.mapAnchorGap;
+const double _mapInset = SeatLayerSizeTokens.mapAnchorInset;
 
 /// Where the phone's map chrome starts, below the map's own top edge.
 const double _railTop = 8;
@@ -53,7 +55,7 @@ const double _railTop = 8;
 /// The prices are a row above the map rather than on it; only the Map/3D
 /// control shares the map's top edge, and when it does the scene's chrome
 /// steps below it — see `_immersiveTopInset`.
-const double _venue3DRestingInset = 10;
+const double _venue3DRestingInset = _mapInset;
 
 /// How long the map may be held back waiting to be framed.
 ///
@@ -247,17 +249,19 @@ class _SeatLayerPickerAdaptiveLayoutState
             actionError: null,
           ),
         );
+        // What chrome standing on the map's bottom edge has to clear.
+        final mapChromeBottom =
+            _mapInset + (dockUp ? resolved.layout.dockBarHeight : 0.0);
         final venue3D = panoramaUp
             ? const SizedBox.shrink()
             : _part(
                 context,
                 widget.builders.venue3D,
                 SeatLayerVenue3D(
-                  // The scene's own chrome starts at the map's edge: the
-                  // prices are a row above the map, not a band on it.
+                  // The scene's chrome starts at the map's edge: the prices
+                  // are a row above the map, not a band on it.
                   topInset: immersiveTopInset,
-                  bottomInset:
-                      10 + (dockUp ? resolved.layout.dockBarHeight : 0.0),
+                  bottomInset: mapChromeBottom,
                 ),
               );
         // The panorama is full-screen web content inside the map surface, so
@@ -267,10 +271,8 @@ class _SeatLayerPickerAdaptiveLayoutState
           widget.builders.seatViewChrome,
           chrome.showSeatViewChrome
               ? SeatLayerSeatViewChrome(
-                  topInset: wide ? 12 : immersiveTopInset,
-                  bottomInset: wide
-                      ? 12
-                      : 10 + (dockUp ? resolved.layout.dockBarHeight : 0.0),
+                  topInset: wide ? _mapInset : immersiveTopInset,
+                  bottomInset: wide ? _mapInset : mapChromeBottom,
                 )
               : const SizedBox.shrink(),
         );
@@ -459,17 +461,19 @@ class _SeatLayerPickerAdaptiveLayoutState
                       child: Stack(
                         children: [
                           Positioned.fill(child: mapSurface),
-                          Positioned(top: 12, left: 12, child: testBadge),
-                          Positioned(top: 12, right: 12, child: controls),
+                          Positioned(
+                              top: _mapInset, left: _mapInset, child: testBadge),
+                          Positioned(
+                              top: _mapInset, right: _mapInset, child: controls),
                           if (chrome.showFloorSelector)
                             const Positioned(
-                              left: 12,
-                              bottom: 12,
+                              left: _mapInset,
+                              bottom: _mapInset,
                               child: SeatLayerPickerFloorSelector(),
                             ),
                           Positioned(
-                            left: 12,
-                            bottom: 58,
+                            left: _mapInset,
+                            bottom: _bottomLeftLift(resolved.layout),
                             child: accessibility,
                           ),
                           Positioned.fill(child: seatViewChrome),
@@ -565,7 +569,11 @@ class _SeatLayerPickerAdaptiveLayoutState
         // are a band of their own between the header and the map, so the last
         // chip is never clipped under the control and no seat number is read
         // through either of them.
-        final railUp = !panoramaUp && chrome.showPriceRail;
+        //
+        // The immersive scene has no rail: a price is a fact about a seat, and
+        // in 3D the buyer is choosing where to stand, not what to spend. The
+        // band would also cost the scene forty-four points of sky.
+        final railUp = !panoramaUp && !venue3DUp && chrome.showPriceRail;
         // The band caps the map the way the header does, so it takes the map
         // chrome palette and goes dark with the immersive scene.
         final railTheme = seatLayerMapChromeThemeOf(context);
@@ -637,13 +645,13 @@ class _SeatLayerPickerAdaptiveLayoutState
                       floorStrip: floorStripUp,
                       floorStripHeight: floorStripHeight,
                     ),
-                    left: 10,
+                    left: _mapInset,
                     child: testBadge,
                   ),
                   if (viewModeControlUp)
                     const Positioned(
                       top: _railTop,
-                      right: 10,
+                      right: _mapInset,
                       child: SizedBox(
                         height: SeatLayerPickerViewModeControl.height,
                         child: SeatLayerPickerViewModeControl(),
@@ -651,8 +659,8 @@ class _SeatLayerPickerAdaptiveLayoutState
                     ),
                   if (chrome.showFloorSelector)
                     Positioned(
-                      left: 10,
-                      bottom: 62 + dockLift,
+                      left: _mapInset,
+                      bottom: dockLift + _bottomLeftLift(resolved.layout),
                       child: const SeatLayerPickerFloorSelector(),
                     ),
                   Positioned.fill(child: controls),
@@ -856,9 +864,13 @@ class _SeatLayerPickerAdaptiveLayoutState
     if (!venue3D || !chrome.showVenue3DChrome) return dock;
     final seated = state.snapshot?.map.view3DTargetSeatId != null;
     final deck =
-        10 + dockLift + SeatLayerVenue3D.seatDeckHeight(seated: seated);
+        _mapInset + dockLift + SeatLayerVenue3D.seatDeckHeight(seated: seated);
     return deck > dock ? deck : dock;
   }
+
+  /// One gap above whatever else shares the map's bottom-left corner.
+  static double _bottomLeftLift(SeatLayerPickerLayout layout) =>
+      _mapInset + layout.accessibilityControlSize + _badgeGap;
 
   /// Whether the picker still has a rung of its own to descend.
   bool _ownsBackGesture(SeatLayerPickerState state) =>

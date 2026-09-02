@@ -31,10 +31,12 @@ const double _badgeBand = 8 + SeatLayerPickerViewModeControl.height;
 
 /// The badge once the scene's way back is drawn above it — and the way back
 /// itself steps under the Map/3D control that shares the map's top line.
-const double _seatedBadgeBand =
-    (8 + SeatLayerPickerViewModeControl.height + 8) +
-        SeatLayerVenue3D.backPillHeight + 8 +
-        SeatLayerPickerTestModeIndicator.compactHeight;
+const double _seatedBadgeBand = (8 +
+        SeatLayerPickerViewModeControl.height +
+        SeatLayerVenue3D.captionGap) +
+    SeatLayerVenue3D.backPillHeight +
+    SeatLayerVenue3D.captionGap +
+    SeatLayerPickerTestModeIndicator.compactHeight;
 
 /// The picker with the immersive scene up, optionally sitting in a seat.
 Map<String, Object?> _inVenue3D({int revision = 3, String? seatedOn}) {
@@ -303,7 +305,9 @@ void main() {
     );
     expect(
       seated['bottom']! as double,
-      (looking['bottom']! as double) + 36,
+      (looking['bottom']! as double) +
+          SeatLayerVenue3D.captionChipHeight +
+          SeatLayerVenue3D.captionGap,
       reason: 'the caption chip plus its gap',
     );
   });

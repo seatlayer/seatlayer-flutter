@@ -4,6 +4,7 @@ import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_legend.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
+import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 
 import 'picker_test_fixture.dart';
@@ -330,7 +331,9 @@ void main() {
     final caption = tester.widget<Text>(
       find.text('Gallery · Row A · Seat 2 · view from your seat'),
     );
-    expect(caption.style!.color, const Color(0xFFEEF1F8));
+    // The scene's own caption ink, not the picker's text colour: this floats
+    // over a rendered venue and is the same in either palette.
+    expect(caption.style!.color, SeatLayerDarkTokens.immersiveCaptionInk);
   });
 
   testWidgets('the map-only controls stand down while the scene is up',

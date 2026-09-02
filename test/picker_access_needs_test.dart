@@ -39,18 +39,48 @@ BundleInfo _accessBundle({
       ],
     );
 
-/// Every chip on the open sheet, in the order it is drawn.
-List<String> _chipLabels(WidgetTester tester) => tester
-    .widgetList<FilterChip>(find.byType(FilterChip))
-    .map((chip) => ((chip.label as Text).data)!)
+/// Every access-need row on the open sheet, in the order it is drawn.
+///
+/// A row is read as `label` or `label · count`, which is the pair of things it
+/// draws — the provision and how much of it is left.
+List<String> _rowLabels(WidgetTester tester) => tester
+    .widgetList<Semantics>(
+      find.descendant(
+        of: find.byType(SingleChildScrollView),
+        matching: find.byType(Semantics),
+      ),
+    )
+    .where((row) => row.properties.toggled != null)
+    .map((row) {
+      final label = row.properties.label!;
+      final count = _countFor(tester, label);
+      return count == null ? label : '$label · $count';
+    })
     .toList(growable: false);
 
-bool _chipEnabled(WidgetTester tester, String label) =>
-    tester
-        .widgetList<FilterChip>(find.byType(FilterChip))
-        .firstWhere((chip) => (chip.label as Text).data == label)
-        .onSelected !=
-    null;
+/// The count drawn at the end of the row named [label], if it draws one.
+String? _countFor(WidgetTester tester, String label) {
+  final texts = tester
+      .widgetList<Text>(
+        find.descendant(
+          of: find.ancestor(
+            of: find.text(label),
+            matching: find.byType(Row),
+          ).first,
+          matching: find.byType(Text),
+        ),
+      )
+      .map((text) => text.data)
+      .where((data) => data != null && data != label)
+      .toList(growable: false);
+  return texts.isEmpty ? null : texts.last;
+}
+
+bool _rowEnabled(WidgetTester tester, String label) => tester
+    .widgetList<Semantics>(
+      find.ancestor(of: find.text(label), matching: find.byType(Semantics)),
+    )
+    .any((row) => row.properties.enabled == true);
 
 /// Mount the control, open its sheet, and settle.
 Future<void> _openSheet(
@@ -95,8 +125,12 @@ void main() {
     );
 
     expect(
-      _chipLabels(tester),
-      <String>['Step-free · 12', 'Wheelchair · 4', 'Companion · 4'],
+      _rowLabels(tester),
+      <String>[
+        'Step-free · 12 free',
+        'Wheelchair · 4 free',
+        'Companion · 4 free',
+      ],
       reason: 'the runtime already ordered these; re-sorting them here would '
           'be a second opinion about the same venue',
     );
@@ -120,17 +154,91 @@ void main() {
       ),
     );
 
-    expect(_chipLabels(tester), <String>['Wheelchair', 'Companion · 6']);
     expect(
-      _chipEnabled(tester, 'Wheelchair'),
+      _rowLabels(tester),
+      <String>['Wheelchair · None left', 'Companion · 6 free'],
+    );
+    expect(
+      _rowEnabled(tester, 'Wheelchair'),
       isFalse,
       reason: 'a filter that can only ever return nothing must not be tappable',
     );
-    expect(_chipEnabled(tester, 'Companion · 6'), isTrue);
+    expect(_rowEnabled(tester, 'Companion'), isTrue);
 
     await tester.tap(find.text('Wheelchair'));
     await tester.pumpAndSettle();
-    expect(_chipLabels(tester), <String>['Wheelchair', 'Companion · 6']);
+    expect(
+      _rowLabels(tester),
+      <String>['Wheelchair · None left', 'Companion · 6 free'],
+    );
+  });
+
+  testWidgets('a wheelchair row says the companion place beside it stays',
+      (tester) async {
+    final map = FakePickerMap(bundle: _accessBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await _openSheet(
+      tester,
+      map,
+      pickerSnapshot(
+        accessNeeds: <Object?>[
+          accessNeed('wheelchair', 4),
+          accessNeed('companion', 4),
+        ],
+      ),
+    );
+
+    expect(
+      find.text('Companion places beside them stay selectable'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a chart with no companion places makes no such promise',
+      (tester) async {
+    final map = FakePickerMap(bundle: _accessBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await _openSheet(
+      tester,
+      map,
+      pickerSnapshot(accessNeeds: <Object?>[accessNeed('wheelchair', 4)]),
+    );
+
+    expect(
+      find.text('Companion places beside them stay selectable'),
+      findsNothing,
+    );
+  });
+
+  testWidgets('a chart with no provisions at all is named Display options',
+      (tester) async {
+    // The control is still worth having — the palette lives behind it — but
+    // calling it accessibility on a chart that authors none would promise
+    // seats this venue does not have.
+    final map = FakePickerMap(
+      bundle: _accessBundle(access: false, colorblind: true),
+    );
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const Align(
+          alignment: Alignment.bottomLeft,
+          child: SeatLayerPickerAccessibilityFilters(compact: true),
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Display options'), findsOneWidget);
+    expect(find.byTooltip('Accessibility and view filters'), findsNothing);
   });
 
   testWidgets('an empty inventory does not invent the static taxonomy',
@@ -141,7 +249,7 @@ void main() {
 
     await _openSheet(tester, map, pickerSnapshot());
 
-    expect(_chipLabels(tester), isEmpty);
+    expect(_rowLabels(tester), isEmpty);
     expect(find.text('Colourblind-friendly colours'), findsOneWidget);
     expect(find.text('Hide limited-view seats'), findsNothing);
   });
@@ -160,7 +268,7 @@ void main() {
 
     await _openSheet(tester, map, snapshot);
 
-    expect(_chipLabels(tester), isEmpty);
+    expect(_rowLabels(tester), isEmpty);
     expect(find.text('Hide limited-view seats'), findsOneWidget);
     expect(find.text('Colourblind-friendly colours'), findsNothing);
   });
@@ -205,8 +313,8 @@ void main() {
     );
 
     expect(
-      _chipLabels(tester),
-      <String>['Rollstuhlplatz · 3', 'quiet-room · 1'],
+      _rowLabels(tester),
+      <String>['Rollstuhlplatz · 3 free', 'quiet-room · 1 free'],
       reason: 'the override wins, and a need this table has no name for is '
           'still reachable under its wire key',
     );

@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
+import 'picker_motion.dart';
+import 'picker_tokens.g.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -43,28 +45,51 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
         (available.colorblind && snapshot?.map.colorblindSafe == true ? 1 : 0);
     final onPressed =
         state.isBusy ? null : () => ignorePickerAction(_show(context));
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    // A chart with no access provisions at all has nothing behind this
+    // control but how the map is drawn, and the icon says which of the two
+    // this is before it is opened: the ISO wheelchair when the venue authors
+    // provisions, a palette when all it offers is colour.
+    final provisions = available.accessibility;
+    final name = provisions ? strings.accessibility : strings.displayOptions;
+    final icon = provisions
+        ? Icons.accessible_forward_rounded
+        : Icons.palette_outlined;
     if (compact) {
       final theme = seatLayerPickerThemeOf(context);
       final size = theme.layout.accessibilityControlSize;
-      return SizedBox.square(
-        dimension: size,
-        child: IconButton(
-          tooltip: activeCount == 0
-              ? SeatLayerPickerScope.stringsOf(context).accessibility
-              : '$activeCount accessibility filters active',
-          visualDensity: VisualDensity.compact,
-          padding: EdgeInsets.zero,
-          constraints: BoxConstraints.tightFor(width: size, height: size),
-          style: IconButton.styleFrom(
-            backgroundColor: theme.surface.withAlpha(240),
-            foregroundColor: activeCount == 0 ? theme.text : theme.accent,
-            side: BorderSide(color: theme.divider),
-          ),
-          onPressed: onPressed,
-          icon: Badge(
-            isLabelVisible: activeCount > 0,
-            label: Text('$activeCount'),
-            child: const Icon(Icons.accessible_forward_rounded, size: 20),
+      return DecoratedBox(
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: Color(0x40000000),
+              blurRadius: 20,
+              spreadRadius: -12,
+              offset: Offset(0, 8),
+            ),
+          ],
+        ),
+        child: SizedBox.square(
+          dimension: size,
+          child: IconButton(
+            tooltip: activeCount == 0
+                ? name
+                : '$activeCount accessibility filters active',
+            visualDensity: VisualDensity.compact,
+            padding: EdgeInsets.zero,
+            constraints: BoxConstraints.tightFor(width: size, height: size),
+            style: IconButton.styleFrom(
+              backgroundColor: theme.surface,
+              foregroundColor: activeCount == 0 ? theme.text : theme.accent,
+              side: BorderSide(color: theme.divider),
+            ),
+            onPressed: onPressed,
+            icon: Badge(
+              isLabelVisible: activeCount > 0,
+              label: Text('$activeCount'),
+              child: Icon(icon, size: _controlIconSize),
+            ),
           ),
         ),
       );
@@ -74,12 +99,8 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
         seatLayerPickerThemeOf(context).buttonRadius,
       ),
       onPressed: onPressed,
-      icon: const Icon(Icons.accessible_forward_rounded, size: 18),
-      label: Text(
-        activeCount == 0
-            ? SeatLayerPickerScope.stringsOf(context).accessibility
-            : '$activeCount filters',
-      ),
+      icon: Icon(icon, size: 18),
+      label: Text(activeCount == 0 ? name : '$activeCount filters'),
     );
   }
 
@@ -108,13 +129,20 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     // Missing inventory truth fails closed. The static twelve-key vocabulary
     // is not evidence that this event has any of those seats.
     final offered = snapshot.map.accessNeeds;
-    final needs = <_AccessNeedChip>[
+    // The companion note is only true of a chart that authors companion
+    // places, so it is drawn from the same inventory the rows are.
+    final hasCompanionPlaces =
+        offered.any((need) => need.key == _companionNeedKey);
+    final needs = <_AccessNeedRow>[
       if (available.accessibility)
         for (final need in offered)
-          _AccessNeedChip(
+          _AccessNeedRow(
             key: need.key,
             label: strings.accessNeeds[need.key] ?? need.key,
             count: need.count,
+            note: hasCompanionPlaces && need.key == _wheelchairNeedKey
+                ? strings.companionSeatsNote
+                : null,
           )
     ];
     // The sheet body is built INSIDE the scope and handed to the route, so the
@@ -138,27 +166,26 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                 if (needs.isNotEmpty)
                   Flexible(
                     child: SingleChildScrollView(
-                      child: Wrap(
-                        spacing: 7,
-                        runSpacing: 7,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: needs.map((need) {
                           final on = selected.contains(need.key);
                           // A need with nothing free stays on the sheet and
                           // goes dark. Removing it would claim the venue has no
                           // such seats, which is a different fact.
                           final enabled = need.count == null || need.count! > 0;
-                          return FilterChip(
-                            selected: on,
-                            label: Text(
-                              need.count == null || need.count == 0
-                                  ? need.label
-                                  : strings.accessNeedWithCount(
-                                      need.label,
-                                      need.count!,
-                                    ),
-                            ),
-                            onSelected: enabled
-                                ? (_) => setSheetState(() {
+                          return _AccessOptionRow(
+                            icon: Icons.accessible_rounded,
+                            label: need.label,
+                            note: need.note,
+                            count: need.count == null
+                                ? null
+                                : need.count! > 0
+                                    ? strings.accessFreeCount(need.count!)
+                                    : strings.accessNoneLeft,
+                            value: on,
+                            onChanged: enabled
+                                ? () => setSheetState(() {
                                       selected = <String>{...selected};
                                       on
                                           ? selected.remove(need.key)
@@ -171,20 +198,20 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                     ),
                   ),
                 if (available.limited)
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(strings.hideLimitedView),
+                  _AccessOptionRow(
+                    icon: Icons.contrast_rounded,
+                    label: strings.hideLimitedView,
                     value: hideLimited,
-                    onChanged: (value) =>
-                        setSheetState(() => hideLimited = value),
+                    onChanged: () =>
+                        setSheetState(() => hideLimited = !hideLimited),
                   ),
                 if (available.colorblind)
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(strings.colorblindSafe),
+                  _AccessOptionRow(
+                    icon: Icons.contrast_rounded,
+                    label: strings.colorblindSafe,
                     value: colorblind,
-                    onChanged: (value) =>
-                        setSheetState(() => colorblind = value),
+                    onChanged: () =>
+                        setSheetState(() => colorblind = !colorblind),
                   ),
                 const SizedBox(height: 8),
                 FilledButton(
@@ -273,15 +300,206 @@ class _FilterAvailability {
   bool get any => accessibility || limited || colorblind;
 }
 
-/// One chip on the accessibility sheet.
+/// One row on the accessibility sheet.
 ///
 /// [count] is nullable for forward-compatible callers even though current
-/// inventory reports include it.
+/// inventory reports include it. A `null` count means "not counted": the row
+/// draws no number and is never disabled, which is different from zero.
 @immutable
-class _AccessNeedChip {
-  const _AccessNeedChip({required this.key, required this.label, this.count});
+class _AccessNeedRow {
+  const _AccessNeedRow({
+    required this.key,
+    required this.label,
+    this.count,
+    this.note,
+  });
 
   final String key;
   final String label;
   final int? count;
+  final String? note;
+}
+
+/// The runtime's own key for the two provisions the sheet says more about.
+const String _wheelchairNeedKey = 'wheelchair';
+const String _companionNeedKey = 'companion';
+
+/// How large the map control's drawn glyph is.
+const double _controlIconSize = 21;
+
+/// One switchable line: an icon cell, what it is, how many are free, and the
+/// switch that turns it on.
+///
+/// The whole row is the control — a 44-point line, not a 20-point switch at
+/// the end of one — so the buyer aims at the words rather than at the toggle.
+class _AccessOptionRow extends StatelessWidget {
+  const _AccessOptionRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.onChanged,
+    this.note,
+    this.count,
+  });
+
+  final IconData icon;
+  final String label;
+  final String? note;
+  final String? count;
+  final bool value;
+  final VoidCallback? onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    final enabled = onChanged != null;
+    return Semantics(
+      toggled: value,
+      enabled: enabled,
+      label: label,
+      child: Opacity(
+        opacity: enabled ? 1 : _disabledRowOpacity,
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: onChanged,
+            borderRadius: BorderRadius.circular(theme.buttonRadius),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: SeatLayerSizeTokens.minimumHitTarget,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SeatLayerSizeTokens.accessRowPaddingX,
+                  vertical: SeatLayerSizeTokens.accessRowPaddingY,
+                ),
+                child: Row(
+                  children: <Widget>[
+                    SizedBox(
+                      width: SeatLayerSizeTokens.accessRowIconCell,
+                      child: Icon(icon, size: 16, color: theme.mutedText),
+                    ),
+                    const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Text(
+                            label,
+                            style: TextStyle(
+                              color: theme.text,
+                              fontSize:
+                                  SeatLayerSizeTokens.accessRowLabelFontSize,
+                              fontWeight: FontWeight.w700,
+                              height: 1.25,
+                              fontFamily: theme.fontFamily,
+                            ),
+                          ),
+                          if (note != null) ...<Widget>[
+                            const SizedBox(height: 1),
+                            Text(
+                              note!,
+                              style: TextStyle(
+                                color: theme.mutedText,
+                                fontSize:
+                                    SeatLayerSizeTokens.accessRowNoteFontSize,
+                                fontWeight: FontWeight.w600,
+                                height: 1.3,
+                                fontFamily: theme.fontFamily,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (count != null) ...<Widget>[
+                      const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
+                      Text(
+                        count!,
+                        style: TextStyle(
+                          color: theme.mutedText,
+                          fontSize: SeatLayerSizeTokens.accessRowNoteFontSize,
+                          fontWeight: FontWeight.w800,
+                          fontFeatures: const <FontFeature>[
+                            FontFeature.tabularFigures(),
+                          ],
+                          fontFamily: theme.fontFamily,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
+                    _AccessSwitch(on: value, theme: theme),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A row that cannot be turned on is dimmed rather than removed.
+const double _disabledRowOpacity = .58;
+
+/// The switch drawn at the end of a row.
+///
+/// Drawn rather than a Material [Switch]: the platform control is half again
+/// as tall as this line and would set the row's height instead of sitting in
+/// it. The row carries the semantics, so this is decoration.
+class _AccessSwitch extends StatelessWidget {
+  const _AccessSwitch({required this.on, required this.theme});
+
+  final bool on;
+  final SeatLayerResolvedPickerTheme theme;
+
+  @override
+  Widget build(BuildContext context) {
+    const width = SeatLayerSizeTokens.accessSwitchWidth;
+    const height = SeatLayerSizeTokens.accessSwitchHeight;
+    const knob = SeatLayerSizeTokens.accessSwitchKnob;
+    const inset = (height - knob) / 2;
+    final duration = SeatLayerPickerMotion.of(
+      context,
+      SeatLayerPickerMotion.crossfade,
+    );
+    return ExcludeSemantics(
+      child: AnimatedContainer(
+        duration: duration,
+        curve: Curves.ease,
+        width: width,
+        height: height,
+        decoration: ShapeDecoration(
+          color: on ? theme.accent : pickerAlpha(theme.mutedText, .32),
+          shape: const StadiumBorder(),
+        ),
+        child: AnimatedAlign(
+          duration: duration,
+          curve: Curves.ease,
+          alignment:
+              on ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: inset),
+            child: Container(
+              width: knob,
+              height: knob,
+              decoration: BoxDecoration(
+                color: theme.surface,
+                shape: BoxShape.circle,
+                boxShadow: const <BoxShadow>[
+                  BoxShadow(
+                    color: Color(0x59000000),
+                    blurRadius: 3,
+                    offset: Offset(0, 1),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

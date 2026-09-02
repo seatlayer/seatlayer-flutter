@@ -7,6 +7,7 @@ import '../payloads.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'picker_styles.dart';
+import 'picker_tokens.g.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -61,7 +62,14 @@ class SeatLayerFloorStrip extends StatelessWidget {
   final SeatLayerSurfaceStyle? style;
 
   /// How tall the strip is, so a layout can report the band it covers.
-  static double heightFor({bool compact = true}) => compact ? 30 : 36;
+  ///
+  /// The track's own padding on both sides of a chip, which is what the web
+  /// picker's floor rail measures.
+  static double heightFor({bool compact = true}) =>
+      (compact
+          ? SeatLayerSizeTokens.floorChipHeight
+          : SeatLayerSizeTokens.floorChipHeight + 6) +
+      _trackPadding * 2;
 
   @override
   Widget build(BuildContext context) {
@@ -109,14 +117,26 @@ class SeatLayerFloorStrip extends StatelessWidget {
         ),
     ];
 
-    return SizedBox(
-      height: heightFor(compact: compact),
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: compact ? 10 : 12),
-        itemCount: chips.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 6),
-        itemBuilder: (context, index) => chips[index],
+    // One track, not a row of loose chips: the floors are one control with a
+    // choice in it, and the pill around them is what says so. It scrolls
+    // inside itself, so a venue with six levels never pushes the map about.
+    return Center(
+      child: Material(
+        color: pickerAlpha(theme.surface, .92),
+        shape: StadiumBorder(side: BorderSide(color: theme.divider)),
+        elevation: chipStyle.elevation ?? 2,
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(
+          height: heightFor(compact: compact),
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(_trackPadding),
+            itemCount: chips.length,
+            separatorBuilder: (_, __) => const SizedBox(width: _trackGap),
+            itemBuilder: (context, index) => chips[index],
+          ),
+        ),
       ),
     );
   }
@@ -125,8 +145,20 @@ class SeatLayerFloorStrip extends StatelessWidget {
     ignorePickerAction(controller.setFloor(floorId));
     onFloorChanged?.call(floorId);
   }
-
 }
+
+/// The track's own padding, and the gap between two chips inside it.
+///
+/// Both are deliberately tight: on a phone the rail is a control the buyer
+/// glances at, and air inside it only makes the track wider than the map can
+/// spare.
+const double _trackPadding = SeatLayerSizeTokens.floorRailPadding;
+const double _trackGap = SeatLayerSizeTokens.floorRailGap;
+
+/// `.05em` of tracking on the chip label, which is what the web's floor rail
+/// carries. Expressed in points against the compact size, as Flutter's
+/// [TextStyle.letterSpacing] is absolute.
+const double _chipTracking = SeatLayerSizeTokens.floorChipFontSize * 0.05;
 
 class _FloorChip extends StatelessWidget {
   const _FloorChip({
@@ -150,40 +182,45 @@ class _FloorChip extends StatelessWidget {
         button: true,
         selected: selected,
         label: label,
+        // Inside the track a chip is a segment, not a card: unselected it is
+        // transparent on the track's own ground and reads as muted text, and
+        // only the floor being drawn wears the accent.
         child: Material(
-          color: selected
-              ? theme.accent
-              : style.color ??
-                  Color.alphaBlend(pickerAlpha(theme.text, .04), theme.surface),
+          color: selected ? theme.accent : style.color ?? Colors.transparent,
           elevation: style.elevation ?? 0,
-          shape: style.shape ??
-              theme.styles.chipShape?.copyWith(
-                side:
-                    BorderSide(color: selected ? theme.accent : theme.divider),
-              ) ??
-              StadiumBorder(
-                side:
-                    BorderSide(color: selected ? theme.accent : theme.divider),
-              ),
+          shape: style.shape ?? theme.styles.chipShape ?? const StadiumBorder(),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onPressed,
-            child: Padding(
-              padding: style.padding ??
-                  EdgeInsets.symmetric(horizontal: compact ? 10 : 12),
-              child: Center(
-                child: ExcludeSemantics(
-                  child: Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: selected ? theme.onAccent : theme.text,
-                      fontSize:
-                          compact ? theme.layout.legendChipFontSize : 12,
-                      fontWeight: FontWeight.w800,
-                      fontFamily: theme.fontFamily,
-                    ).merge(style.textStyle),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: compact
+                    ? SeatLayerSizeTokens.floorChipHeight
+                    : SeatLayerSizeTokens.floorChipHeight + 6,
+              ),
+              child: Padding(
+                padding: style.padding ??
+                    EdgeInsets.symmetric(
+                      horizontal: compact
+                          ? SeatLayerSizeTokens.floorChipPaddingX
+                          : SeatLayerSizeTokens.floorChipPaddingX + 3,
+                    ),
+                child: Center(
+                  child: ExcludeSemantics(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: selected ? theme.onAccent : theme.mutedText,
+                        fontSize: compact
+                            ? SeatLayerSizeTokens.floorChipFontSize
+                            : SeatLayerSizeTokens.floorChipFontSize + 1,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: _chipTracking,
+                        fontFamily: theme.fontFamily,
+                      ).merge(style.textStyle),
+                    ),
                   ),
                 ),
               ),

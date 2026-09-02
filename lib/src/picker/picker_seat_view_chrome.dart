@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
 import 'picker_models.dart';
+import 'picker_map_controls.dart';
 import 'picker_motion.dart';
 import 'picker_styles.dart';
 import 'picker_tokens.g.dart';
@@ -129,68 +130,73 @@ class _CaptionStrip extends StatelessWidget {
     final caption = view.caption?.trim();
     final badge = view.badge?.trim();
 
-    return Material(
-      color: surface.color ?? pickerAlpha(theme.surface, .92),
-      elevation: surface.elevation ?? 0,
-      shape: surface.shape ??
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(theme.radius),
-            side: BorderSide(color: theme.divider),
-          ),
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: surface.padding ??
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
+    // The same dark glass the 3D scene's chrome wears: this floats over a
+    // photograph of unknown brightness, so it is drawn against its own ground
+    // rather than against the picker's theme.
+    final body = Padding(
+      padding: surface.padding ??
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (title != null && title.isNotEmpty)
+                  Text(
+                    title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: SeatLayerDarkTokens.immersiveGlassInk,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ).merge(surface.textStyle),
+                  ),
+                if (caption != null && caption.isNotEmpty) ...<Widget>[
                   if (title != null && title.isNotEmpty)
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: theme.text,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        fontFamily: theme.fontFamily,
-                      ).merge(surface.textStyle),
-                    ),
-                  if (caption != null && caption.isNotEmpty) ...<Widget>[
-                    if (title != null && title.isNotEmpty)
-                      const SizedBox(height: 3),
-                    Text(
-                      caption,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: theme.mutedText,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: theme.fontFamily,
+                    const SizedBox(height: 3),
+                  Text(
+                    caption,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: pickerAlpha(
+                        SeatLayerDarkTokens.immersiveGlassInk,
+                        .78,
                       ),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: theme.fontFamily,
                     ),
-                  ],
+                  ),
                 ],
-              ),
+              ],
             ),
-            if (badge != null && badge.isNotEmpty) ...<Widget>[
-              const SizedBox(width: 10),
-              _DisclosureBadge(
-                text: badge,
-                real: view.real,
-                theme: theme,
-              ),
-            ],
+          ),
+          if (badge != null && badge.isNotEmpty) ...<Widget>[
+            const SizedBox(width: 10),
+            _DisclosureBadge(
+              text: badge,
+              real: view.real,
+              theme: theme,
+            ),
           ],
-        ),
+        ],
       ),
     );
+    final shaped = surface.color != null || surface.shape != null
+        ? Material(
+            color: surface.color ?? pickerAlpha(theme.surface, .92),
+            elevation: surface.elevation ?? 0,
+            shape: surface.shape,
+            clipBehavior: Clip.antiAlias,
+            child: body,
+          )
+        : seatLayerImmersiveGlass(radius: theme.radius, child: body);
+    return shaped;
   }
 }
 
@@ -246,21 +252,22 @@ class _DragHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Center(
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: pickerAlpha(theme.surface, .8),
-            borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.chip),
-          ),
+        child: seatLayerImmersiveGlass(
+          blur: SeatLayerSizeTokens.immersiveCaptionBlur,
+          fill: SeatLayerDarkTokens.immersiveCaption,
+          border: SeatLayerDarkTokens.immersiveCaptionBorder,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: Text(
               text,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: theme.mutedText,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
+                color: SeatLayerDarkTokens.immersiveCaptionInk,
+                fontSize: SeatLayerSizeTokens.immersiveCaptionFontSize,
+                fontWeight: FontWeight.w800,
+                letterSpacing:
+                    SeatLayerSizeTokens.immersiveCaptionFontSize * 0.03,
                 fontFamily: theme.fontFamily,
               ),
             ),

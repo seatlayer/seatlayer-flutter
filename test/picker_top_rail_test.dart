@@ -8,6 +8,7 @@ import 'package:seatlayer/src/picker/picker_legend.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
 import 'package:seatlayer/src/picker/picker_seat_view_chrome.dart';
 import 'package:seatlayer/src/picker/picker_status_views.dart';
+import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 
 import 'picker_test_fixture.dart';
@@ -26,14 +27,15 @@ Widget _layout() => SeatLayerPickerAdaptiveLayout(
     );
 
 /// Where the map surface itself begins and ends.
-Rect _mapRect(WidgetTester tester) => tester.getRect(find.byKey(_mapSurfaceKey));
+Rect _mapRect(WidgetTester tester) =>
+    tester.getRect(find.byKey(_mapSurfaceKey));
 
 /// A snapshot whose catalogue carries [count] sellable categories.
 ///
 /// Prices climb so no two chips are the same width, which is how a real
 /// venue's legend runs off the end of the rail.
-Map<String, Object?> _snapshotWithCategories(int count) {
-  final snapshot = pickerSnapshot();
+Map<String, Object?> _snapshotWithCategories(int count, {int revision = 1}) {
+  final snapshot = pickerSnapshot(revision: revision);
   final catalog = snapshot['catalog']! as Map<String, Object?>;
   catalog['categories'] = List<Object?>.generate(count, (index) {
     final price = 45.0 + index * 35;
@@ -88,19 +90,20 @@ void main() {
 
     final surface = _mapRect(tester);
     final prices = tester.getRect(find.byType(SeatLayerPriceLegend));
-    final control =
-        tester.getRect(find.byType(SeatLayerPickerViewModeControl));
+    final control = tester.getRect(find.byType(SeatLayerPickerViewModeControl));
 
     // The band is chrome of the same Column as the header: the map starts
     // under it, so no seat number is ever read through a price chip. The
     // Map/3D control keeps the map's own top-right corner.
     expect(prices.bottom, lessThanOrEqualTo(surface.top));
     expect(control.top - surface.top, closeTo(8, .5));
-    expect(surface.right - control.right, closeTo(10, .5));
+    expect(
+      surface.right - control.right,
+      closeTo(SeatLayerSizeTokens.mapAnchorInset, .5),
+    );
     for (final chip in find
         .descendant(
-            of: find.byType(SeatLayerPriceLegend),
-            matching: find.byType(Text))
+            of: find.byType(SeatLayerPriceLegend), matching: find.byType(Text))
         .evaluate()) {
       expect(
         tester.getRect(find.byWidget(chip.widget)).overlaps(surface),
@@ -121,7 +124,10 @@ void main() {
 
     final badge = tester.getRect(find.byType(SeatLayerPickerTestModeIndicator));
     expect(badge.top - _mapRect(tester).top, closeTo(8, .5));
-    expect(badge.left - _mapRect(tester).left, closeTo(10, .5));
+    expect(
+      badge.left - _mapRect(tester).left,
+      closeTo(SeatLayerSizeTokens.mapAnchorInset, .5),
+    );
   });
 
   testWidgets('the badge keeps that corner in a scene with no seat targeted',
@@ -141,6 +147,26 @@ void main() {
     expect(find.text('Back to venue'), findsNothing);
     final badge = tester.getRect(find.byType(SeatLayerPickerTestModeIndicator));
     expect(badge.top - _mapRect(tester).top, closeTo(8, .5));
+  });
+
+  testWidgets('the immersive scene has no price rail', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout()));
+    map.emit(_snapshotWithCategories(5));
+    await tester.pumpAndSettle();
+    expect(find.byType(SeatLayerPriceLegend), findsOneWidget);
+
+    final snapshot = _snapshotWithCategories(5, revision: 2);
+    (snapshot['map']! as Map<String, Object?>)['buyerView'] = 'venue3d';
+    map.emit(snapshot);
+    await tester.pumpAndSettle();
+
+    // A price is a fact about a seat; in the scene the buyer is choosing where
+    // to stand. The band would also cost the venue forty-four points of sky.
+    expect(find.byType(SeatLayerPriceLegend), findsNothing);
   });
 
   testWidgets('a legend that runs off the rail fades rather than cuts',

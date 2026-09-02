@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../open_enums.dart';
@@ -10,6 +12,18 @@ import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_theme.dart';
+
+/// How far the scene's chrome stands off the picture's edges.
+const double _anchorInset = SeatLayerSizeTokens.mapAnchorInset;
+
+/// The gap between two chips on the seat deck.
+const double _chipGap = 6;
+
+/// `.03em` of tracking, expressed in points against each size that carries it.
+const double _backTracking =
+    SeatLayerSizeTokens.immersiveBackFontSize * 0.03;
+const double _captionTracking =
+    SeatLayerSizeTokens.immersiveCaptionFontSize * 0.03;
 
 /// The chrome drawn over the immersive venue scene.
 ///
@@ -44,23 +58,24 @@ class SeatLayerVenue3D extends StatelessWidget {
   /// Published so a host stacking its own chrome under the scene's way back —
   /// the turnkey layout stacks the test-mode badge there — measures the same
   /// pill this widget draws instead of repeating a number.
-  static const double backPillHeight = 44;
+  static const double backPillHeight =
+      SeatLayerSizeTokens.immersiveBackPillHeight;
 
   /// How tall the caption chip naming the buyer's seat is.
   static const double captionChipHeight = 28;
 
   /// The gap between the caption chip and the control row below it.
-  static const double captionGap = 8;
+  static const double captionGap = SeatLayerSizeTokens.mapAnchorGap;
 
   /// How tall the seat deck at the bottom of the scene is.
   ///
-  /// The controls are always there; the caption chip only once the buyer is
-  /// sitting in a seat. Published so the layout can report the band this
+  /// The chips are always there; the caption chip only once the buyer is
+  /// sitting in a seat, where it names the seat directly above the controls
+  /// that move between them. Published so the layout can report the band this
   /// chrome stands on without repeating either number.
   static double seatDeckHeight({required bool seated}) =>
       (seated ? captionChipHeight + captionGap : 0) +
-      captionGap +
-      backPillHeight;
+      SeatLayerSizeTokens.minimumHitTarget;
 
   @override
   Widget build(BuildContext context) {
@@ -89,10 +104,8 @@ class SeatLayerVenue3D extends StatelessWidget {
                   if (targeted)
                     Positioned(
                       top: topInset,
-                      left: 10,
-                      child: _ImmersiveAction(
-                        theme: theme,
-                        icon: Icons.chevron_left_rounded,
+                      left: _anchorInset,
+                      child: _BackPill(
                         label: strings.backToVenue,
                         onPressed: state.isBusy
                             ? null
@@ -107,7 +120,7 @@ class SeatLayerVenue3D extends StatelessWidget {
                     ),
                   Positioned(
                     top: topInset,
-                    right: 10,
+                    right: _anchorInset,
                     child: const SeatLayerPicker3DNavigationModeButton(),
                   ),
                   Positioned(
@@ -139,7 +152,6 @@ class _SeatDeck extends StatelessWidget {
     final targetId = map.view3DTargetSeatId;
     final index =
         targetId == null ? -1 : seats.indexWhere((seat) => seat.id == targetId);
-    final target = map.view3DTargetSeat ?? (index >= 0 ? seats[index] : null);
     final targeted = targetId != null;
     final previousSeatId = map.reportsView3DPosition
         ? map.view3DPreviousSeatId
@@ -208,7 +220,7 @@ class _SeatDeck extends StatelessWidget {
           _ImmersiveIcon(
             theme: theme,
             icon: Icons.remove_rounded,
-            tooltip: 'Zoom out',
+            tooltip: strings.zoomOut,
             onPressed:
                 busy ? null : () => ignorePickerAction(controller.zoomOut()),
           ),
@@ -224,36 +236,48 @@ class _SeatDeck extends StatelessWidget {
           _ImmersiveIcon(
             theme: theme,
             icon: Icons.add_rounded,
-            tooltip: 'Zoom in',
+            tooltip: strings.zoomIn,
             onPressed:
                 busy ? null : () => ignorePickerAction(controller.zoomIn()),
           ),
       ],
     ];
 
+    if (controls.isEmpty) return const SizedBox.shrink();
+    // Its own scroller, so a venue that grows another action never pushes one
+    // off the edge of a 320-point phone; centred while they all fit.
+    final row = SizedBox(
+      height: SeatLayerSizeTokens.minimumHitTarget,
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: _anchorInset),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: math.max(0, constraints.maxWidth - _anchorInset * 2),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                for (var index = 0; index < controls.length; index++) ...<
+                    Widget>[
+                  if (index > 0) const SizedBox(width: _chipGap),
+                  controls[index],
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    if (!targeted) return row;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        if (target != null)
-          _CaptionChip(
-            theme: theme,
-            text: strings.seatIdentity(<String>[
-              ...?_identityParts(state, target),
-              strings.viewFromYourSeat,
-            ]),
-          ),
-        if (controls.isNotEmpty) ...<Widget>[
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              for (var index = 0; index < controls.length; index++) ...<Widget>[
-                if (index > 0) const SizedBox(width: 8),
-                controls[index],
-              ],
-            ],
-          ),
-        ],
+        _SeatCaption(theme: theme),
+        const SizedBox(height: SeatLayerVenue3D.captionGap),
+        row,
       ],
     );
   }
@@ -271,7 +295,8 @@ class _SeatDeck extends StatelessWidget {
     );
   }
 
-  static List<String>? _identityParts(
+  /// The section, row and seat the scene is aimed at, in that order.
+  static List<String> identityParts(
     SeatLayerPickerState state,
     SelectedSeat seat,
   ) {
@@ -290,30 +315,74 @@ class _SeatDeck extends StatelessWidget {
   }
 }
 
-class _CaptionChip extends StatelessWidget {
-  const _CaptionChip({required this.theme, required this.text});
+/// Where the buyer is sitting, printed under the way out.
+class _SeatCaption extends StatelessWidget {
+  const _SeatCaption({required this.theme});
 
   final SeatLayerResolvedPickerTheme theme;
-  final String text;
 
   @override
-  Widget build(BuildContext context) => Center(
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: pickerAlpha(theme.surface, .88),
-            borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.chip),
+  Widget build(BuildContext context) {
+    final controller = SeatLayerPickerScope.controllerOf(context);
+    final state = controller.state;
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    final map = state.snapshot?.map;
+    final targetId = map?.view3DTargetSeatId;
+    if (map == null || targetId == null) return const SizedBox.shrink();
+    final index = state.selection.indexWhere((seat) => seat.id == targetId);
+    final target =
+        map.view3DTargetSeat ?? (index >= 0 ? state.selection[index] : null);
+    if (target == null) return const SizedBox.shrink();
+    return Center(
+      child: seatLayerImmersiveGlass(
+        blur: SeatLayerSizeTokens.immersiveCaptionBlur,
+        fill: SeatLayerDarkTokens.immersiveCaption,
+        border: SeatLayerDarkTokens.immersiveCaptionBorder,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          child: Text(
+            strings.seatIdentity(<String>[
+              ..._SeatDeck.identityParts(state, target),
+              strings.viewFromYourSeat,
+            ]),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: SeatLayerDarkTokens.immersiveCaptionInk,
+              fontSize: SeatLayerSizeTokens.immersiveCaptionFontSize,
+              fontWeight: FontWeight.w800,
+              letterSpacing: _captionTracking,
+              fontFamily: theme.fontFamily,
+            ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: theme.text,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                fontFamily: theme.fontFamily,
+        ),
+      ),
+    );
+  }
+}
+
+/// `‹ Back to venue` — the only way out of an exact seat.
+class _BackPill extends StatelessWidget {
+  const _BackPill({required this.label, required this.onPressed});
+
+  /// Carried only so the pill's accessible name is the drawn word.
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) => seatLayerImmersiveGlass(
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: onPressed,
+            customBorder: const StadiumBorder(),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: SeatLayerVenue3D.backPillHeight,
+              ),
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(start: 9, end: 13),
+                child: _BackPillContents(label: label),
               ),
             ),
           ),
@@ -321,6 +390,38 @@ class _CaptionChip extends StatelessWidget {
       );
 }
 
+/// Split out only so the pill's own padding can stay `const`.
+class _BackPillContents extends StatelessWidget {
+  const _BackPillContents({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        const Icon(
+          Icons.chevron_left_rounded,
+          size: SeatLayerSizeTokens.immersiveBackIconSize,
+          color: SeatLayerDarkTokens.immersiveGlassInk,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: const TextStyle(
+            color: SeatLayerDarkTokens.immersiveGlassInk,
+            fontSize: SeatLayerSizeTokens.immersiveBackFontSize,
+            fontWeight: FontWeight.w800,
+            letterSpacing: _backTracking,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A labelled chip on the seat deck.
 class _ImmersiveAction extends StatelessWidget {
   const _ImmersiveAction({
     required this.theme,
@@ -335,36 +436,40 @@ class _ImmersiveAction extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: pickerAlpha(theme.surface, .9),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(theme.buttonRadius),
-          side: BorderSide(color: theme.divider),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onPressed,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: SeatLayerVenue3D.backPillHeight,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(icon, size: 16, color: theme.text),
-                  const SizedBox(width: 6),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: theme.text,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w800,
-                      fontFamily: theme.fontFamily,
+  Widget build(BuildContext context) => seatLayerImmersiveGlass(
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: onPressed,
+            customBorder: const StadiumBorder(),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: SeatLayerSizeTokens.minimumHitTarget,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SeatLayerSizeTokens.immersiveNavChipPaddingX,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Icon(
+                      icon,
+                      size: SeatLayerSizeTokens.immersiveBackIconSize,
+                      color: SeatLayerDarkTokens.immersiveGlassInk,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 6),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        color: SeatLayerDarkTokens.immersiveGlassInk,
+                        fontSize: SeatLayerSizeTokens.immersiveNavChipFontSize,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: theme.fontFamily,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -372,6 +477,7 @@ class _ImmersiveAction extends StatelessWidget {
       );
 }
 
+/// A round chip on the seat deck: one glyph, no word.
 class _ImmersiveIcon extends StatelessWidget {
   const _ImmersiveIcon({
     required this.theme,
@@ -386,19 +492,23 @@ class _ImmersiveIcon extends StatelessWidget {
   final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: pickerAlpha(theme.surface, .9),
-        shape: CircleBorder(side: BorderSide(color: theme.divider)),
-        clipBehavior: Clip.antiAlias,
+  Widget build(BuildContext context) => seatLayerImmersiveGlass(
+        circular: true,
         child: IconButton(
           tooltip: tooltip,
           onPressed: onPressed,
-          visualDensity: VisualDensity.compact,
           padding: EdgeInsets.zero,
-          constraints: const BoxConstraints.tightFor(width: 44, height: 44),
-          color: theme.text,
-          disabledColor: pickerAlpha(theme.mutedText, .45),
-          icon: Icon(icon, size: 20),
+          constraints: const BoxConstraints.tightFor(
+            width: SeatLayerSizeTokens.minimumHitTarget,
+            height: SeatLayerSizeTokens.minimumHitTarget,
+          ),
+          style: const ButtonStyle(
+            backgroundColor: WidgetStatePropertyAll<Color>(Color(0x00000000)),
+          ),
+          color: SeatLayerDarkTokens.immersiveGlassInk,
+          disabledColor:
+              pickerAlpha(SeatLayerDarkTokens.immersiveGlassInk, .6),
+          icon: Icon(icon, size: SeatLayerSizeTokens.immersiveBackIconSize + 5),
         ),
       );
 }

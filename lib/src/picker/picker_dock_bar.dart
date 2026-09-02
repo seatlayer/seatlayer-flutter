@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 import '../payloads.dart';
@@ -7,6 +5,7 @@ import 'picker_internal.dart';
 import 'picker_styles.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
+import 'picker_tokens.g.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -146,13 +145,17 @@ class _DockContents extends StatelessWidget {
       fontWeight: FontWeight.w800,
       fontFamily: theme.fontFamily,
     );
+    // The count is drawn in the text colour, not the muted one: it is the
+    // fact the buyer is standing here to read, and a section with four seats
+    // left must not whisper it.
     final countStyle = TextStyle(
-      color: theme.mutedText,
+      color: theme.text,
       fontSize: _countFontSize,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w700,
       fontFamily: theme.fontFamily,
     );
     final venueStyle = TextStyle(
+      color: theme.accent,
       fontSize: _venueFontSize,
       fontWeight: FontWeight.w800,
       fontFamily: theme.fontFamily,
@@ -166,20 +169,22 @@ class _DockContents extends StatelessWidget {
           name: name,
           nameStyle: nameStyle,
           count: count,
-          countLong: count == null ? null : strings.seatsLeft(count),
+          countLong: count == null ? null : strings.seatsLeftInSection(count),
+          countShort: count == null ? null : strings.seatsLeft(count),
           countStyle: countStyle,
           venueLabel: strings.overview,
           venueStyle: venueStyle,
         );
         final shownCount = switch (plan.count) {
-          _DockCount.long => count == null ? null : strings.seatsLeft(count),
-          _DockCount.short => count?.toString(),
+          _DockCount.long =>
+            count == null ? null : strings.seatsLeftInSection(count),
+          _DockCount.short => count == null ? null : strings.seatsLeft(count),
           _DockCount.hidden => null,
         };
 
         return Row(
           children: [
-            const SizedBox(width: 12),
+            const SizedBox(width: _leadingInset),
             DecoratedBox(
               decoration: BoxDecoration(
                 color: pickerSectionColor(
@@ -189,9 +194,9 @@ class _DockContents extends StatelessWidget {
                 ),
                 shape: BoxShape.circle,
               ),
-              child: const SizedBox.square(dimension: 10),
+              child: const SizedBox.square(dimension: _dotSize),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: _itemGap),
             // The name has first claim on the width. Everything to its right
             // gives way in order — the count's own word, then the count, then
             // the Venue label — before the name loses a single letter, and it
@@ -213,7 +218,7 @@ class _DockContents extends StatelessWidget {
                     ),
                   ),
                   if (shownCount != null) ...[
-                    _DockSeparator(color: theme.mutedText),
+                    const SizedBox(width: _itemGap),
                     _CrossfadeText(
                       value: shownCount,
                       softWrap: false,
@@ -223,32 +228,27 @@ class _DockContents extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(width: _itemGap),
             _StepButton(
-              icon: Icons.chevron_left_rounded,
+              icon: Icons.arrow_back_rounded,
               tooltip: strings.previousSection,
               onPressed: previous == null || busy
                   ? null
                   : () => _step(controller, previous),
             ),
+            const SizedBox(width: _stepGap),
             _StepButton(
-              icon: Icons.chevron_right_rounded,
+              icon: Icons.arrow_forward_rounded,
               tooltip: strings.nextSection,
               onPressed:
                   next == null || busy ? null : () => _step(controller, next),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: _venueGap),
             if (plan.venueLabelled)
-              TextButton.icon(
-                style: TextButton.styleFrom(
-                  foregroundColor: theme.text,
-                  visualDensity: VisualDensity.compact,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: _venuePadding),
-                  textStyle: venueStyle,
-                ),
+              _VenueButton(
+                label: strings.overview,
+                style: venueStyle,
                 onPressed: onOverviewPressed,
-                icon: const Icon(Icons.chevron_left_rounded, size: 18),
-                label: Text(strings.overview),
               )
             else
               // The narrowest rung. The control keeps its name for anyone
@@ -258,7 +258,7 @@ class _DockContents extends StatelessWidget {
                 tooltip: strings.overview,
                 onPressed: onOverviewPressed,
               ),
-            const SizedBox(width: 6),
+            const SizedBox(width: _trailingInset),
           ],
         );
       },
@@ -275,61 +275,67 @@ class _DockContents extends StatelessWidget {
 }
 
 /// Type sizes the dock is drawn at.
-const double _nameFontSize = 13;
-const double _countFontSize = 13;
-const double _venueFontSize = 13;
+const double _nameFontSize = SeatLayerSizeTokens.dockNameFontSize;
+const double _countFontSize = SeatLayerSizeTokens.dockCountFontSize;
+const double _venueFontSize = SeatLayerSizeTokens.dockBackFontSize;
 
 /// The size the name drops to once it needs a second line.
 ///
-/// Two lines of 13 would crowd a 52-point bar; 12 leaves the same breathing
-/// room above and below that one line of 13 has.
+/// Two lines at the full size would crowd a 52-point bar; this leaves the
+/// same breathing room above and below that one full-size line has.
 const double _wrappedNameFontSize = 12;
+
+/// The dot naming the section's colour.
+const double _dotSize = SeatLayerSizeTokens.dockDotSize;
+
+/// The gap between two pieces of the row.
+const double _itemGap = 7;
+
+/// The gap between the two section step buttons.
+const double _stepGap = SeatLayerSizeTokens.dockNavGap;
+
+/// The gutters at each end of the bar.
+const double _leadingInset = SeatLayerSizeTokens.dockLeadingInset;
+const double _trailingInset = SeatLayerSizeTokens.dockTrailingInset;
 
 /// Everything the row spends before the name gets any width.
 ///
 /// The leading gutter, the category dot and the gap after it.
-const double _leadingWidth = 12 + 10 + 8;
+const double _leadingWidth = _leadingInset + _dotSize + _itemGap;
 
-/// What one icon control occupies.
+/// What one step control occupies.
 ///
-/// The icon box itself is 36, but Material adds its compact tap-target
-/// padding around it and the control lands 40 wide. Measured, not assumed —
-/// `the dock never overflows` in `picker_dock_bar_test.dart` fails if this
-/// ever drifts, because an underestimate here is a row that overflows.
-const double _stepWidth = 40;
+/// The drawn pill is [SeatLayerSizeTokens.dockNavWidth] wide and the control
+/// measures exactly that: it is laid out at a tight size rather than left to
+/// Material's own tap-target padding, which is what the taller hit box around
+/// it is for. `the dock never overflows` in `picker_dock_bar_test.dart` fails
+/// if this ever drifts, because an underestimate here is a row that overflows.
+const double _stepWidth = SeatLayerSizeTokens.dockNavWidth;
 
-/// The two section step buttons, which never give way — they are how the
-/// buyer moves, and a dock without them is a label.
-const double _stepsWidth = _stepWidth * 2;
+/// The two section step buttons and the gap between them. They never give way
+/// — they are how the buyer moves, and a dock without them is a label.
+const double _stepsWidth = _stepWidth * 2 + _stepGap;
 
 /// The gap between the steps and the way back to the venue.
-const double _venueGap = 4;
+const double _venueGap = 2;
 
-/// Horizontal padding inside the labelled Venue button, per side.
-const double _venuePadding = 10;
+/// Horizontal padding inside the labelled Venue pill: tighter behind the
+/// chevron than in front of the word, so the two read as one shape.
+const double _venuePaddingStart = 6;
+const double _venuePaddingEnd = 10;
 
-/// The Venue button's chevron, and the gap `TextButton.icon` puts after it.
-const double _venueIconWidth = 18 + 8;
-
-/// Material's minimum width for a button, which the labelled Venue control
-/// can never measure under however short its word is.
-const double _venueMinWidth = 64;
+/// The Venue pill's chevron, and the gap after it.
+const double _venueIconWidth = SeatLayerSizeTokens.dockBackChevronSize + 2;
 
 /// The Venue control once it is only its chevron.
 const double _venueIconOnlyWidth = _stepWidth;
 
-/// The trailing gutter.
-const double _trailingWidth = 6;
-
-/// The separator between the name and the count, with its own padding.
-const double _separatorWidth = 6 + 6 + 4;
-
 /// How much of the count survives at this width.
 enum _DockCount {
-  /// `72 left` — the count and the word that says what it counts.
+  /// `72 seats left` — the count and the word that says what it counts.
   long,
 
-  /// `72` — still an exact number, which is the part that matters.
+  /// `72 left` — the same count, shorter of a word.
   short,
 
   /// Nothing. The name and the controls are worth more than the count.
@@ -367,6 +373,7 @@ _DockPlan _planDock(
   required TextStyle nameStyle,
   required int? count,
   required String? countLong,
+  required String? countShort,
   required TextStyle countStyle,
   required String venueLabel,
   required TextStyle venueStyle,
@@ -381,30 +388,24 @@ _DockPlan _planDock(
       _textWidth(value, inherited.merge(style), scaler, direction);
 
   final nameWidth = measure(name, nameStyle);
-  final longWidth = countLong == null
-      ? 0.0
-      : _separatorWidth + measure(countLong, countStyle);
+  final longWidth =
+      countLong == null ? 0.0 : _itemGap + measure(countLong, countStyle);
   final shortWidth =
-      count == null ? 0.0 : _separatorWidth + measure('$count', countStyle);
-  // A `ButtonStyle` textStyle replaces the ambient default rather than
-  // merging with it, so the button's own label is measured raw. The floor is
-  // Material's minimum button width, which a short word in another language
-  // would otherwise be sized under.
-  final labelledVenue = math.max(
-    _venueMinWidth,
-    _venuePadding * 2 +
-        _venueIconWidth +
-        _textWidth(venueLabel, venueStyle, scaler, direction),
-  );
+      countShort == null ? 0.0 : _itemGap + measure(countShort, countStyle);
+  final labelledVenue = _venuePaddingStart +
+      _venueIconWidth +
+      measure(venueLabel, venueStyle) +
+      _venuePaddingEnd;
 
   double roomFor({required double countWidth, required double venueWidth}) =>
       width -
       _leadingWidth -
       countWidth -
+      _itemGap -
       _stepsWidth -
       _venueGap -
       venueWidth -
-      _trailingWidth;
+      _trailingInset;
 
   const rungs = <(_DockCount, bool)>[
     (_DockCount.long, true),
@@ -489,19 +490,73 @@ int? _seatsLeftForBuyer(
   return remaining < 0 ? 0 : remaining;
 }
 
-class _DockSeparator extends StatelessWidget {
-  const _DockSeparator({required this.color});
+/// The labelled way out: `‹ Venue`.
+///
+/// Outlined in the accent rather than filled with it. A filled pill would be
+/// the loudest thing in the bar, and the loudest thing in a seat picker is
+/// never the exit; a 12 % accent wash behind the word was tried on the web and
+/// measured 4.2:1, so the ground stays the plain surface.
+class _VenueButton extends StatelessWidget {
+  const _VenueButton({
+    required this.label,
+    required this.style,
+    required this.onPressed,
+  });
 
-  final Color color;
+  final String label;
+  final TextStyle style;
+  final VoidCallback? onPressed;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: Text(
-          '·',
-          style: TextStyle(color: pickerAlpha(color, .7), fontSize: 13),
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    return Semantics(
+      button: true,
+      enabled: onPressed != null,
+      child: SizedBox(
+        height: SeatLayerSizeTokens.minimumHitTarget,
+        child: TextButton(
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: const StadiumBorder(),
+          ),
+          child: Container(
+            height: SeatLayerSizeTokens.dockBackHeight,
+            padding: const EdgeInsetsDirectional.only(
+              start: _venuePaddingStart,
+              end: _venuePaddingEnd,
+            ),
+            decoration: ShapeDecoration(
+              color: theme.surface,
+              shape: StadiumBorder(
+                side: BorderSide(
+                  color: Color.alphaBlend(
+                    pickerAlpha(theme.accent, .55),
+                    theme.divider,
+                  ),
+                ),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Icon(
+                  Icons.chevron_left_rounded,
+                  size: SeatLayerSizeTokens.dockBackChevronSize,
+                  color: theme.accent,
+                ),
+                const SizedBox(width: 2),
+                Text(label, style: style),
+              ],
+            ),
+          ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 /// Text that changes in place instead of being swapped under the eye.
@@ -554,15 +609,39 @@ class _StepButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
+    final enabled = onPressed != null;
+    // The drawn pill is 34 × 36 and the control that carries it is 34 × 44:
+    // the bar has the height to give, and a 36-point target is under the
+    // touch floor. The pill is the button's icon so the taller box stays
+    // invisible.
     return IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
-      visualDensity: VisualDensity.compact,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-      color: theme.text,
-      disabledColor: pickerAlpha(theme.mutedText, .4),
-      icon: Icon(icon, size: 22),
+      constraints: const BoxConstraints.tightFor(
+        width: _stepWidth,
+        height: SeatLayerSizeTokens.minimumHitTarget,
+      ),
+      style: const ButtonStyle(
+        backgroundColor: WidgetStatePropertyAll<Color>(Color(0x00000000)),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      icon: Container(
+        width: _stepWidth,
+        height: SeatLayerSizeTokens.dockNavHeight,
+        decoration: ShapeDecoration(
+          color: Color.alphaBlend(
+            pickerAlpha(theme.surface, .88),
+            theme.background,
+          ),
+          shape: StadiumBorder(side: BorderSide(color: theme.divider)),
+        ),
+        child: Icon(
+          icon,
+          size: SeatLayerSizeTokens.dockNavIconSize,
+          color: enabled ? theme.text : pickerAlpha(theme.mutedText, .4),
+        ),
+      ),
     );
   }
 }
