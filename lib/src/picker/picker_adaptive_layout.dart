@@ -557,9 +557,14 @@ class _SeatLayerPickerAdaptiveLayoutState
                 children: <Widget>[
                   Expanded(child: prices),
                   if (chrome.showMapControls && !panoramaUp)
+                    // Its own height, centred in the band: left to the band
+                    // it grew to fill it and sat on the hairline.
                     const Padding(
                       padding: EdgeInsets.only(right: 10),
-                      child: SeatLayerPickerViewModeControl(),
+                      child: SizedBox(
+                        height: SeatLayerPickerViewModeControl.height,
+                        child: SeatLayerPickerViewModeControl(),
+                      ),
                     ),
                 ],
               ),

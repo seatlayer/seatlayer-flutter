@@ -186,6 +186,9 @@ class SeatLayerPickerViewModeControl extends StatelessWidget {
   /// Creates the Map / 3D segmented control.
   const SeatLayerPickerViewModeControl({super.key});
 
+  /// How tall the control is; the segments are built to this.
+  static const double height = 32;
+
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
@@ -250,7 +253,10 @@ class _Segment extends StatelessWidget {
         child: InkWell(
           onTap: onPressed,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 32, minWidth: 46),
+            constraints: const BoxConstraints(
+              minHeight: SeatLayerPickerViewModeControl.height,
+              minWidth: 46,
+            ),
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
