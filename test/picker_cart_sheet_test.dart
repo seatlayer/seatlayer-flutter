@@ -101,8 +101,11 @@ void main() {
     expect(_sheetHeight(tester), 78);
     final attributionRect = tester.getRect(find.text('Powered by SeatLayer'));
     final sheetRect = tester.getRect(find.byType(SeatLayerCartSheet));
-    expect(attributionRect.center.dx, greaterThan(sheetRect.center.dx));
-    expect(sheetRect.right - attributionRect.right, lessThanOrEqualTo(24));
+    // Centred: a phone's rounded corner clips whatever hugs the trailing edge.
+    expect(
+      (attributionRect.center.dx - sheetRect.center.dx).abs(),
+      lessThan(12),
+    );
 
     final hidden = pickerSnapshot(revision: 2, withSelection: false);
     (hidden['branding']! as Map<String, Object?>)['attributionRequired'] =

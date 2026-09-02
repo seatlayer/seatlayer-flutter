@@ -428,11 +428,12 @@ class _TrailingAttribution extends StatelessWidget {
 
   final Widget child;
 
+  // Centred, not trailing: at the foot of a phone the trailing edge is the
+  // display's rounded corner, and a credit tucked into it lost its last
+  // letters behind the glass. The middle of the strip is the one place every
+  // phone shows whole.
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsetsDirectional.only(end: 8),
-    child: Align(alignment: AlignmentDirectional.centerEnd, child: child),
-  );
+  Widget build(BuildContext context) => Center(child: child);
 }
 
 /// The one call to action that turns a cart into a hold.
