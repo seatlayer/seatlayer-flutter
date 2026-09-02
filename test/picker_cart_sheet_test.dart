@@ -160,6 +160,37 @@ void main() {
     );
   });
 
+  testWidgets('the grabber keeps its promise: a swipe opens and closes the sheet',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    bool? asked;
+    Widget sheet(bool expanded) => Align(
+          alignment: Alignment.bottomCenter,
+          child: SeatLayerCartSheet(
+            expanded: expanded,
+            onExpandedChanged: (value) => asked = value,
+            onCheckout: _noopCheckout,
+          ),
+        );
+    await tester.pumpWidget(pickerHarness(map, sheet(false)));
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    await tester.fling(find.byType(SeatLayerCartSheet), const Offset(0, -80), 900);
+    await tester.pumpAndSettle();
+    expect(asked, isTrue);
+
+    asked = null;
+    await tester.pumpWidget(pickerHarness(map, sheet(true)));
+    await tester.pumpAndSettle();
+    await tester.fling(find.byType(SeatLayerCartSheet), const Offset(0, 80), 900);
+    await tester.pumpAndSettle();
+    expect(asked, isFalse);
+  });
+
   testWidgets('the collapsed way on is a full-size target', (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);

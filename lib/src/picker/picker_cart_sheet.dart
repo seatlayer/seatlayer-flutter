@@ -85,9 +85,8 @@ class SeatLayerCartSheet extends StatelessWidget {
     final theme = seatLayerMapChromeThemeOf(context);
     final layout = theme.layout;
     final options = SeatLayerPickerScope.optionsOf(context);
-    final bottomInset = reserveBottomInset
-        ? MediaQuery.paddingOf(context).bottom
-        : 0.0;
+    final bottomInset =
+        reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0;
     final hasTickets = controller.confirmedCartLines.isNotEmpty;
     final maxSheet =
         MediaQuery.sizeOf(context).height * layout.sheetMaxHeightFraction;
@@ -96,8 +95,8 @@ class SeatLayerCartSheet extends StatelessWidget {
       maxSheet,
     );
 
-    final surface = (theme.styles.sheetStyle ?? const SeatLayerSurfaceStyle())
-        .merge(style);
+    final surface =
+        (theme.styles.sheetStyle ?? const SeatLayerSurfaceStyle()).merge(style);
     return Material(
       color: surface.color ?? theme.surface,
       elevation: surface.elevation ?? 12,
@@ -118,8 +117,7 @@ class SeatLayerCartSheet extends StatelessWidget {
               hasTickets: hasTickets,
               onExpandedChanged: onExpandedChanged,
               onCheckout: onCheckout,
-              showBestSeatsShortcut:
-                  hasTickets &&
+              showBestSeatsShortcut: hasTickets &&
                   options.enableBestAvailable &&
                   !options.readOnly,
               continueStyle: continueButtonStyle,
@@ -206,8 +204,8 @@ class _PeekRow extends StatelessWidget {
         // screen, which reads as two amounts until the buyer checks.
         ? strings.ticketCount(ticketCount)
         : cheapest == null
-        ? strings.chooseTickets
-        : strings.fromPrice(pickerCompactMoney(cheapest, currency));
+            ? strings.chooseTickets
+            : strings.fromPrice(pickerCompactMoney(cheapest, currency));
 
     // The empty bar's own way in. `From €42` states a price and offers nothing
     // to do about it, and the form that would is behind a sheet the buyer has
@@ -215,130 +213,147 @@ class _PeekRow extends StatelessWidget {
     // refused anyway — closed sales, best-available turned off, a read-only
     // session — and once a hold exists, because seats are already reserved.
     final options = SeatLayerPickerScope.optionsOf(context);
-    final offerFindSeats =
-        !expanded &&
+    final offerFindSeats = !expanded &&
         !hasTickets &&
         options.enableBestAvailable &&
         !options.readOnly &&
         state.event?.salesClosed != true &&
         state.hold == null;
 
-    return InkWell(
-      onTap: () => onExpandedChanged(!expanded),
-      child: SizedBox(
-        height: theme.layout.peekHeight,
-        child: Stack(
-          children: [
-            Positioned(
-              top: 5,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: pickerAlpha(theme.mutedText, .5),
-                    borderRadius: BorderRadius.circular(99),
+    // The grabber at the top of the row is a promise that the sheet can be
+    // pulled, so the row keeps it: a swipe up opens the sheet and a swipe
+    // down closes it, the way every native sheet on the platform moves.
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onVerticalDragEnd: (details) {
+        final velocity = details.primaryVelocity ?? 0;
+        if (velocity <= -_dragOpenVelocity && !expanded) {
+          onExpandedChanged(true);
+        } else if (velocity >= _dragOpenVelocity && expanded) {
+          onExpandedChanged(false);
+        }
+      },
+      child: InkWell(
+        onTap: () => onExpandedChanged(!expanded),
+        child: SizedBox(
+          height: theme.layout.peekHeight,
+          child: Stack(
+            children: [
+              Positioned(
+                top: 5,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: pickerAlpha(theme.mutedText, .5),
+                      borderRadius: BorderRadius.circular(99),
+                    ),
+                    child: const SizedBox(width: 32, height: 3),
                   ),
-                  child: const SizedBox(width: 32, height: 3),
                 ),
               ),
-            ),
-            Positioned.fill(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(18, 6, 6, 0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: theme.text,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          fontFamily: theme.fontFamily,
-                        ),
-                      ),
-                    ),
-                    if (expanded && showBestSeatsShortcut)
-                      IconButton(
-                        tooltip: strings.bestSeats,
-                        visualDensity: VisualDensity.compact,
-                        color: theme.accent,
-                        onPressed: () => _openBestSeats(context),
-                        icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-                      ),
-                    if (!expanded && hasTickets) ...[
-                      FilledButton(
-                        // The shape merges LAST: `merge` fills this style's
-                        // null fields, so a slot or an instance style that
-                        // sets its own shape still wins.
-                        style:
-                            FilledButton.styleFrom(
-                                  backgroundColor: theme.accent,
-                                  foregroundColor: theme.onAccent,
-                                  // A full-size target: this is the one
-                                  // control the buyer came for, and it was
-                                  // reaching thirty-four points inside a bar
-                                  // the thumb reads as a button of its own.
-                                  minimumSize: const Size(
-                                    0,
-                                    SeatLayerSizeTokens.minimumHitTarget,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                  ),
-                                  textStyle: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w800,
-                                    fontFamily: theme.fontFamily,
-                                  ),
-                                )
-                                .merge(
-                                  continueStyle ??
-                                      theme.styles.resolvedContinueButtonStyle,
-                                )
-                                .merge(
-                                  seatLayerButtonShape(theme.buttonRadius),
-                                ),
-                        onPressed: controller.canCheckout
-                            ? () => ignorePickerAction(
-                                checkoutThroughHost(controller, onCheckout),
-                              )
-                            : null,
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 6, 6, 0),
+                  child: Row(
+                    children: [
+                      Expanded(
                         child: Text(
-                          strings.continueWithTotal(
-                            pickerMoney(context, total, currency),
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: theme.text,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            fontFamily: theme.fontFamily,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                    ],
-                    if (offerFindSeats) ...[
-                      _FindSeatsPill(onPressed: () => onExpandedChanged(true)),
-                      const SizedBox(width: 8),
-                    ],
-                    AnimatedRotation(
-                      duration: SeatLayerPickerMotion.of(
-                        context,
-                        SeatLayerPickerMotion.sheet,
+                      if (expanded && showBestSeatsShortcut)
+                        IconButton(
+                          tooltip: strings.bestSeats,
+                          visualDensity: VisualDensity.compact,
+                          color: theme.accent,
+                          onPressed: () => _openBestSeats(context),
+                          icon:
+                              const Icon(Icons.auto_awesome_rounded, size: 18),
+                        ),
+                      if (!expanded && hasTickets) ...[
+                        FilledButton(
+                          // The shape merges LAST: `merge` fills this style's
+                          // null fields, so a slot or an instance style that
+                          // sets its own shape still wins.
+                          style: FilledButton.styleFrom(
+                            backgroundColor: theme.accent,
+                            foregroundColor: theme.onAccent,
+                            // A full-size target: this is the one
+                            // control the buyer came for, and it was
+                            // reaching thirty-four points inside a bar
+                            // the thumb reads as a button of its own.
+                            minimumSize: const Size(
+                              0,
+                              SeatLayerSizeTokens.minimumHitTarget,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                            ),
+                            textStyle: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              fontFamily: theme.fontFamily,
+                            ),
+                          )
+                              .merge(
+                                continueStyle ??
+                                    theme.styles.resolvedContinueButtonStyle,
+                              )
+                              .merge(
+                                seatLayerButtonShape(theme.buttonRadius),
+                              ),
+                          onPressed: controller.canCheckout
+                              ? () => ignorePickerAction(
+                                    checkoutThroughHost(controller, onCheckout),
+                                  )
+                              : null,
+                          child: Text(
+                            strings.continueWithTotal(
+                              pickerMoney(context, total, currency),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                      if (offerFindSeats) ...[
+                        _FindSeatsPill(
+                            onPressed: () => onExpandedChanged(true)),
+                        const SizedBox(width: 8),
+                      ],
+                      AnimatedRotation(
+                        duration: SeatLayerPickerMotion.of(
+                          context,
+                          SeatLayerPickerMotion.sheet,
+                        ),
+                        turns: expanded ? .5 : 0,
+                        child: Icon(
+                          Icons.keyboard_arrow_up_rounded,
+                          color: theme.mutedText,
+                        ),
                       ),
-                      turns: expanded ? .5 : 0,
-                      child: Icon(
-                        Icons.keyboard_arrow_up_rounded,
-                        color: theme.mutedText,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+
+  /// How fast a vertical swipe on the peek row must be to count, in px/s.
+  static const double _dragOpenVelocity = 250;
 
   static double? _cheapest(SeatLayerPickerState state) {
     final prices = <double>[
@@ -496,20 +511,20 @@ class _FilledBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-    mainAxisSize: MainAxisSize.min,
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      Flexible(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
-          child: cartList ?? const SeatLayerCartList(),
-        ),
-      ),
-      actionError ?? const SeatLayerPickerActionError(),
-      checkoutBar ?? SeatLayerBookButton(onCheckout: onCheckout),
-      _TrailingAttribution(child: attribution),
-    ],
-  );
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Flexible(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+              child: cartList ?? const SeatLayerCartList(),
+            ),
+          ),
+          actionError ?? const SeatLayerPickerActionError(),
+          checkoutBar ?? SeatLayerBookButton(onCheckout: onCheckout),
+          _TrailingAttribution(child: attribution),
+        ],
+      );
 }
 
 class _TrailingAttribution extends StatelessWidget {
@@ -552,23 +567,22 @@ class SeatLayerBookButton extends StatelessWidget {
       child: FilledButton(
         // The shape merges LAST so `primaryButtonStyle` — or this instance's
         // own `style:` — can still reshape the button.
-        style:
-            FilledButton.styleFrom(
-                  backgroundColor: theme.accent,
-                  foregroundColor: theme.onAccent,
-                  minimumSize: const Size.fromHeight(46),
-                  textStyle: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    fontFamily: theme.fontFamily,
-                  ),
-                )
-                .merge(style ?? theme.styles.primaryButtonStyle)
-                .merge(seatLayerButtonShape(theme.buttonRadius)),
+        style: FilledButton.styleFrom(
+          backgroundColor: theme.accent,
+          foregroundColor: theme.onAccent,
+          minimumSize: const Size.fromHeight(46),
+          textStyle: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+            fontFamily: theme.fontFamily,
+          ),
+        )
+            .merge(style ?? theme.styles.primaryButtonStyle)
+            .merge(seatLayerButtonShape(theme.buttonRadius)),
         onPressed: controller.canCheckout
             ? () => ignorePickerAction(
-                checkoutThroughHost(controller, onCheckout),
-              )
+                  checkoutThroughHost(controller, onCheckout),
+                )
             : null,
         child: busy
             ? const SizedBox.square(
