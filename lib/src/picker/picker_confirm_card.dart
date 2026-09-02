@@ -124,7 +124,6 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
         widget.show3D && options.enable3D && capabilities.contains('venue3d')
             ? widget.onShow3D ?? controller.showSeatIn3D
             : null;
-    final hasStrip = seatView != null || venue3D != null;
     final cardStyle =
         (theme.styles.confirmCardStyle ?? const SeatLayerSurfaceStyle())
             .merge(widget.style);
@@ -165,13 +164,29 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                     currency: selectedCurrency,
                   ),
                 ),
-                if (hasStrip) ...[
+                // The gradient stands in for the photograph `View from here`
+                // opens, so it is drawn only where that action exists. With
+                // just the 3D pill it was a 64 pt picture of nothing with one
+                // control floating in it; the pill alone, on the card's own
+                // surface, is the same offer without the empty frame.
+                if (seatView != null) ...[
                   SizedBox(
                     height: layout.confirmPhotoHeight,
                     child: _InspectionStrip(
                       seat: seat,
                       onViewFromSeat: seatView,
                       onShow3D: venue3D,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                ] else if (venue3D != null) ...[
+                  SizedBox(
+                    height: layout.confirmActionHeight,
+                    child: _InspectionStrip(
+                      seat: seat,
+                      onViewFromSeat: null,
+                      onShow3D: venue3D,
+                      photo: false,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -399,18 +414,24 @@ class _IdentityRow extends StatelessWidget {
 /// The photo strip, and the two ways to look at the seat that live on it.
 ///
 /// The snapshot carries no seat-view image URL, so the strip renders the
-/// neutral gradient in every case; the pills are what the buyer is actually
-/// reaching for, and they are gated on the runtime's own capabilities.
+/// neutral gradient wherever `View from here` is offered; the pills are what
+/// the buyer is actually reaching for, and they are gated on the runtime's own
+/// capabilities. Without that action the strip drops [photo] and becomes a
+/// plain row of pills on the card's own surface.
 class _InspectionStrip extends StatelessWidget {
   const _InspectionStrip({
     required this.seat,
     required this.onViewFromSeat,
     required this.onShow3D,
+    this.photo = true,
   });
 
   final SelectedSeat seat;
   final FutureOr<void> Function(SelectedSeat seat)? onViewFromSeat;
   final FutureOr<void> Function(SelectedSeat seat)? onShow3D;
+
+  /// Whether to draw the gradient that stands in for the seat photograph.
+  final bool photo;
 
   @override
   Widget build(BuildContext context) {
@@ -419,14 +440,19 @@ class _InspectionStrip extends StatelessWidget {
     final busy = SeatLayerPickerScope.stateOf(context).isBusy;
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: <Color>[
-            Color.alphaBlend(pickerAlpha(theme.accent, .22), theme.surface),
-            Color.alphaBlend(pickerAlpha(theme.text, .12), theme.surface),
-          ],
-        ),
+        gradient: photo
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: <Color>[
+                  Color.alphaBlend(
+                    pickerAlpha(theme.accent, .22),
+                    theme.surface,
+                  ),
+                  Color.alphaBlend(pickerAlpha(theme.text, .12), theme.surface),
+                ],
+              )
+            : null,
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -438,6 +464,7 @@ class _InspectionStrip extends StatelessWidget {
                 label: strings.viewFromHere,
                 onPressed:
                     busy ? null : () => _inspect(context, onViewFromSeat!),
+                onPhoto: photo,
               ),
             const Spacer(),
             if (onShow3D != null)
@@ -445,6 +472,7 @@ class _InspectionStrip extends StatelessWidget {
                 icon: Icons.view_in_ar_rounded,
                 label: strings.venue3D,
                 onPressed: busy ? null : () => _inspect(context, onShow3D!),
+                onPhoto: photo,
               ),
           ],
         ),
@@ -474,18 +502,29 @@ class _StripAction extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onPressed,
+    this.onPhoto = true,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback? onPressed;
 
+  /// Whether the pill sits on the seat photograph rather than on the card.
+  ///
+  /// A near-opaque surface pill lifts off the photograph; on the card's own
+  /// surface the same colour would be invisible, so it takes a faint tint of
+  /// the card's ink instead and stays readable as a control.
+  final bool onPhoto;
+
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
     final pill = theme.styles.pillStyle ?? const SeatLayerSurfaceStyle();
     return Material(
-      color: pill.color ?? pickerAlpha(theme.surface, .92),
+      color: pill.color ??
+          (onPhoto
+              ? pickerAlpha(theme.surface, .92)
+              : Color.alphaBlend(pickerAlpha(theme.text, .06), theme.surface)),
       elevation: pill.elevation ?? 0,
       // `View from here` and `3D` are actions, not chips, so they carry the
       // button radius rather than the chip's stadium.

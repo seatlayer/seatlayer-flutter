@@ -14,6 +14,15 @@ Map<String, Object?> _withoutImmersiveFeatures() {
   };
 }
 
+/// An event with the 3D venue but no seat photograph.
+Map<String, Object?> _only3D() {
+  final snapshot = pickerSnapshot();
+  return <String, Object?>{
+    ...snapshot,
+    'features': <String, Object?>{'bestAvailable': true, 'venue3d': true},
+  };
+}
+
 void main() {
   testWidgets('the card states one seat, its price, and nothing else',
       (tester) async {
@@ -80,6 +89,36 @@ void main() {
       tester.getSize(find.byType(SeatLayerConfirmCard)).height,
       158,
     );
+  });
+
+  testWidgets('3D alone gets a plain action row, not an empty picture',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    map.emit(_only3D());
+    await tester.pumpAndSettle();
+
+    expect(find.text('View from here'), findsNothing);
+    expect(find.text('3D'), findsOneWidget);
+    // The gradient stands in for a photograph nothing is going to open.
+    expect(
+      tester
+          .widgetList<DecoratedBox>(
+            find.ancestor(
+              of: find.text('3D'),
+              matching: find.byType(DecoratedBox),
+            ),
+          )
+          .where(
+            (box) => (box.decoration as BoxDecoration).gradient != null,
+          ),
+      isEmpty,
+    );
+    // 44 identity + 40 action row + 10 + 40 decision row.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 134);
   });
 
   testWidgets('an event with neither drops the strip entirely', (tester) async {
@@ -194,6 +233,25 @@ void main() {
         await tester.pumpAndSettle();
 
         await expectGolden(tester, 'confirm_card_strip_${brightness.name}');
+      }, tags: goldenTag);
+
+      testWidgets('confirm card golden with 3D only — ${brightness.name}',
+          (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
+
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            goldenSubject(const SeatLayerConfirmCard()),
+            platformBrightness: brightness,
+          ),
+        );
+        map.emit(_only3D());
+        await tester.pumpAndSettle();
+
+        await expectGolden(tester, 'confirm_card_action_${brightness.name}');
       }, tags: goldenTag);
 
       testWidgets('confirm card golden without strip — ${brightness.name}',

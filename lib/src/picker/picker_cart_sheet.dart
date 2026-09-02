@@ -197,11 +197,11 @@ class _PeekRow extends StatelessWidget {
     final cheapest = _cheapest(state);
 
     final label = hasTickets
-        ? expanded
-              // Expanded, the total is on the call to action a thumb away; saying
-              // it again here is the same number three times on one screen.
-              ? strings.ticketCount(ticketCount)
-              : '${strings.ticketCount(ticketCount)} · ${pickerMoney(context, total, currency)}'
+        // The money is on the call to action either way — `Continue · €285`
+        // collapsed, the checkout bar expanded — and it is a thumb away from
+        // here in both. Saying it here too is the same number twice on one
+        // screen, which reads as two amounts until the buyer checks.
+        ? strings.ticketCount(ticketCount)
         : cheapest == null
         ? strings.chooseTickets
         : strings.fromPrice(pickerCompactMoney(cheapest, currency));

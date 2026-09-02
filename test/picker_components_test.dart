@@ -140,7 +140,7 @@ void main() {
     );
     map.emit(pickerSnapshot());
     await tester.pump();
-    expect(find.text('TEST MODE · BOOKS NOTHING'), findsOneWidget);
+    expect(find.text('Test mode · books nothing'), findsOneWidget);
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
   });
 
@@ -165,7 +165,7 @@ void main() {
     map.emit(snapshot);
     await tester.pump();
 
-    expect(find.text('TEST MODE · BOOKS NOTHING'), findsOneWidget);
+    expect(find.text('Test mode · books nothing'), findsOneWidget);
     expect(find.text('Powered by SeatLayer'), findsNothing);
   });
 

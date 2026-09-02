@@ -1,5 +1,30 @@
 # Changelog
 
+## Unreleased
+
+The picker loads once. A prewarmed runtime page is now adopted only after the
+picker has been laid out, so the chart's first paint is at its final size
+instead of a smaller one that re-fits in front of the buyer; and the loading
+surface stays up until the runtime has framed the map inside the native chrome
+(with a short backstop for a runtime that never answers), then fades out. The
+loading surface itself is the venue silhouette the web picker shows rather
+than a spinner. `SeatLayerPickerOptions.eventName` lets a host name the event
+in the header before the runtime reports it, so the title does not swap once
+the chart arrives.
+
+Parity with the web picker's phone round: the test-event badge is a sentence
+case pill with a status dot (`Test mode`); a filtered price legend leads with
+an `All prices` chip that clears the filter; the confirm card draws its photo
+strip only where `View from here` exists, so a 3D-only card no longer carries
+an empty frame; the collapsed cart says `3 tickets` and leaves the total to
+`Continue · €285` rather than stating it twice. New strings: `allPrices`,
+`testModeLong`.
+
+**Runtime pin**
+
+The hosted runtime moves to `seatlayer-js@0.74.0`. Views load
+`https://cdn.seatlayer.io/seatlayer-js@0.74.0/mobile.html`.
+
 ## 0.3.4
 
 - Keeps API-required `Powered by SeatLayer` attribution at the bottom-right of

@@ -71,6 +71,16 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
     final currency = state.snapshot?.currency ?? 'USD';
     final active = state.snapshot?.map.categoryFilter ?? const <String>{};
     final direction = Directionality.of(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    // A filtered rail needs a way back out that is not "find the chip you
+    // tapped and tap it again" — on a 390 pt phone the chip that turned the
+    // filter on is often scrolled off the screen. It leads, so it is the first
+    // thing under the thumb, and it is absent while no filter is on, where it
+    // would only cost the rail a chip's width to say nothing.
+    final clearFilter = active.isEmpty ? 0 : 1;
+    final chipStyle =
+        (theme.styles.legendChipStyle ?? const SeatLayerSurfaceStyle())
+            .merge(widget.style);
 
     final Widget list = ListView.separated(
       // The trailing pad is the fade's own width, so a rail scrolled to its
@@ -80,14 +90,27 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
         end: SeatLayerPriceLegend.edgeFade,
       ),
       scrollDirection: Axis.horizontal,
-      itemCount: categories.length,
+      itemCount: categories.length + clearFilter,
       separatorBuilder: (_, __) => const SizedBox(width: 6),
       itemBuilder: (context, index) {
-        final category = categories[index];
+        if (index < clearFilter) {
+          return _LegendChip(
+            style: chipStyle,
+            label: strings.allPrices,
+            color: null,
+            selected: false,
+            compact: compact,
+            theme: theme,
+            semanticsLabel: strings.allPrices,
+            onPressed: () => ignorePickerAction(
+              controller.setCategoryFilter(const <String>{}, focus: false),
+            ),
+          );
+        }
+        final category = categories[index - clearFilter];
         final selected = active.contains(category.key);
         return _LegendChip(
-          style: (theme.styles.legendChipStyle ?? const SeatLayerSurfaceStyle())
-              .merge(widget.style),
+          style: chipStyle,
           label: compact
               ? pickerCompactMoney(category.priceMin, currency)
               : '${category.label} · '
@@ -189,7 +212,9 @@ class _LegendChip extends StatelessWidget {
 
   final SeatLayerSurfaceStyle style;
   final String label;
-  final Color color;
+
+  /// The category's colour, or null for a chip that names no category.
+  final Color? color;
   final bool selected;
   final bool compact;
   final String semanticsLabel;
@@ -225,12 +250,14 @@ class _LegendChip extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                DecoratedBox(
-                  decoration:
-                      BoxDecoration(color: color, shape: BoxShape.circle),
-                  child: SizedBox.square(dimension: compact ? 8 : 10),
-                ),
-                SizedBox(width: compact ? 5 : 7),
+                if (color != null) ...[
+                  DecoratedBox(
+                    decoration:
+                        BoxDecoration(color: color, shape: BoxShape.circle),
+                    child: SizedBox.square(dimension: compact ? 8 : 10),
+                  ),
+                  SizedBox(width: compact ? 5 : 7),
+                ],
                 ExcludeSemantics(
                   child: Text(
                     label,

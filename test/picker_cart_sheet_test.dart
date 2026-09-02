@@ -42,7 +42,10 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
-    expect(find.text('1 ticket · €25'), findsOneWidget);
+    // The count on the left, the money on the button — never the same number
+    // twice on one screen.
+    expect(find.text('1 ticket'), findsOneWidget);
+    expect(find.text('1 ticket · €25'), findsNothing);
     expect(find.text('Continue · €25'), findsOneWidget);
     // The tray form is the only way into best seats.
     expect(find.text('Best seats'), findsNothing);

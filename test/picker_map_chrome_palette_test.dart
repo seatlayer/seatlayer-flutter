@@ -2,7 +2,7 @@
 //
 // The immersive scene is dark whatever side the picker is on. Anything capping
 // that surface has to go dark with it, or it reads as a mistake: the first
-// 3D screenshots show an amber TEST MODE lozenge and a white cart sheet over a
+// 3D screenshots show an amber test-mode lozenge and a white cart sheet over a
 // dark venue, beside a header and legend that had already gone dark.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,7 +25,7 @@ Color _badgeGround(WidgetTester tester) {
   final box = tester.widget<DecoratedBox>(
     find
         .ancestor(
-          of: find.text('TEST MODE'),
+          of: find.text('Test mode'),
           matching: find.byType(DecoratedBox),
         )
         .first,
@@ -34,7 +34,7 @@ Color _badgeGround(WidgetTester tester) {
 }
 
 Color _badgeInk(WidgetTester tester) =>
-    tester.widget<Text>(find.text('TEST MODE')).style!.color!;
+    tester.widget<Text>(find.text('Test mode')).style!.color!;
 
 Color _sheetGround(WidgetTester tester) => tester
     .widget<Material>(

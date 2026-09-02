@@ -34,6 +34,7 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
     if (!state.isTestEvent) return const SizedBox.shrink();
+    final strings = SeatLayerPickerScope.stringsOf(context);
     // The badge is drawn ON the map, so it follows the map's palette — which
     // the immersive scene keeps dark whatever side the picker is on. A solid
     // amber lozenge over a dark venue reads as a highlighter stripe left on
@@ -41,34 +42,53 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
     // an amber hairline, which reads as the same badge in the same voice.
     final theme = seatLayerMapChromeThemeOf(context);
     final dark = theme.brightness == Brightness.dark;
-    return Semantics(
-      label: 'Test event. No real inventory will be booked.',
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: dark ? pickerAlpha(theme.surface, .92) : theme.warning,
-          borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
-          border: dark ? Border.all(color: theme.warning) : null,
-          boxShadow: const [
-            BoxShadow(color: Color(0x33000000), blurRadius: 8),
+    // Sentence case with a status dot, the way the web picker says it. Shouted
+    // capitals read as a warning about the buyer's own booking; this is a
+    // statement about the event, and a status light is how an interface says
+    // one.
+    final ink = dark ? theme.warning : const Color(0xFF1A1200);
+    final Widget pill = DecoratedBox(
+      decoration: BoxDecoration(
+        color: dark ? pickerAlpha(theme.surface, .92) : theme.warning,
+        borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
+        border: dark ? Border.all(color: theme.warning) : null,
+        boxShadow: const [
+          BoxShadow(color: Color(0x33000000), blurRadius: 8),
+        ],
+      ),
+      child: Padding(
+        // The compact badge takes its height from [compactHeight] rather than
+        // from padding around a glyph, because the layout reserves exactly
+        // that band on the map and a font that measures differently would
+        // otherwise push the badge out of it.
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 8 : 10,
+          vertical: compact ? 0 : 6,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            DecoratedBox(
+              decoration: BoxDecoration(color: ink, shape: BoxShape.circle),
+              child: const SizedBox.square(dimension: 5),
+            ),
+            const SizedBox(width: 5),
+            Text(
+              compact ? strings.testMode : strings.testModeLong,
+              style: TextStyle(
+                color: ink,
+                fontSize: 11,
+                fontWeight: FontWeight.w800,
+                fontFamily: theme.fontFamily,
+              ),
+            ),
           ],
         ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 8 : 10,
-            vertical: compact ? 4 : 6,
-          ),
-          child: Text(
-            compact ? 'TEST MODE' : 'TEST MODE · BOOKS NOTHING',
-            style: TextStyle(
-              color: dark ? theme.warning : const Color(0xFF1A1200),
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              letterSpacing: .6,
-              fontFamily: theme.fontFamily,
-            ),
-          ),
-        ),
       ),
+    );
+    return Semantics(
+      label: 'Test event. No real inventory will be booked.',
+      child: compact ? SizedBox(height: compactHeight, child: pill) : pill,
     );
   }
 }

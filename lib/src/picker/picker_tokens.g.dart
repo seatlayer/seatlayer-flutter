@@ -316,6 +316,9 @@ abstract final class SeatLayerStringTokens {
   /// Any venue zone
   static const String anyVenueZone = 'Any venue zone';
 
+  /// All prices
+  static const String allPrices = 'All prices';
+
   /// Ticket type
   static const String ticketType = 'Ticket type';
 
@@ -343,8 +346,11 @@ abstract final class SeatLayerStringTokens {
   /// Powered by SeatLayer
   static const String poweredBy = 'Powered by SeatLayer';
 
-  /// TEST MODE
-  static const String testMode = 'TEST MODE';
+  /// Test mode
+  static const String testMode = 'Test mode';
+
+  /// Test mode · books nothing
+  static const String testModeLong = 'Test mode · books nothing';
 
   /// Accessibility and view filters
   static const String accessibility = 'Accessibility and view filters';

@@ -36,6 +36,7 @@ class SeatLayerPickerStrings {
     this.emptyTrayHint = SeatLayerStringTokens.emptyTrayHint,
     this.anyTicketType = SeatLayerStringTokens.anyTicketType,
     this.anyVenueZone = SeatLayerStringTokens.anyVenueZone,
+    this.allPrices = SeatLayerStringTokens.allPrices,
     this.ticketType = SeatLayerStringTokens.ticketType,
     this.venueZone = SeatLayerStringTokens.venueZone,
     this.fewerTickets = SeatLayerStringTokens.fewerTickets,
@@ -46,6 +47,7 @@ class SeatLayerPickerStrings {
     this.holdAndCheckout = SeatLayerStringTokens.holdAndCheckout,
     this.poweredBy = SeatLayerStringTokens.poweredBy,
     this.testMode = SeatLayerStringTokens.testMode,
+    this.testModeLong = SeatLayerStringTokens.testModeLong,
     this.accessibility = SeatLayerStringTokens.accessibility,
     this.fitVenue = SeatLayerStringTokens.fitVenue,
     this.mapView = SeatLayerStringTokens.mapView,
@@ -178,6 +180,16 @@ class SeatLayerPickerStrings {
   /// Best-seats zone selector placeholder.
   final String anyVenueZone;
 
+  /// The price legend's way out of a category filter.
+  ///
+  /// Drawn as the rail's first chip while a filter is on, and gone again once
+  /// it is off, because a phone-width rail has no room for a chip that says
+  /// what is already true.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String allPrices;
+
   /// Best-seats category selector name.
   final String ticketType;
 
@@ -207,6 +219,12 @@ class SeatLayerPickerStrings {
 
   /// Badge shown on a test event.
   final String testMode;
+
+  /// The same badge where there is room to say what test mode means.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for the long form, so it
+  /// keeps its English wording in every locale until one exists.
+  final String testModeLong;
 
   /// Tooltip on the accessibility map control.
   final String accessibility;

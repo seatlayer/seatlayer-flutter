@@ -180,6 +180,28 @@ void main() {
     );
   });
 
+  testWidgets('the compact test badge fills the band the layout reserves',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerPickerTestModeIndicator(compact: true)),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    // The badge is drawn ON the map and the layout reserves exactly
+    // `compactHeight` for it, so the two have to agree whatever the words and
+    // the font metrics do.
+    expect(find.text('Test mode'), findsOneWidget);
+    expect(
+      tester.getSize(find.byType(SeatLayerPickerTestModeIndicator)).height,
+      SeatLayerPickerTestModeIndicator.compactHeight,
+    );
+  });
+
   testWidgets('a composed host still gets Map/3D from the map controls',
       (tester) async {
     final map = FakePickerMap();

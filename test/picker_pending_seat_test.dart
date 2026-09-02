@@ -45,7 +45,7 @@ void main() {
     expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
     expect(picker.seatAwaitingConfirmation?.label, 'A-1');
 
-    expect(find.text('1 ticket · €25'), findsNothing);
+    expect(find.text('1 ticket'), findsNothing);
     expect(picker.confirmedTicketCount, 0);
     expect(picker.confirmedCartTotal, 0);
     expect(picker.confirmedCartLines, isEmpty);
@@ -91,7 +91,7 @@ void main() {
     expect(picker.seatAwaitingConfirmation, isNull);
     expect(picker.confirmedTicketCount, 1);
     expect(picker.confirmedCartTotal, 25);
-    expect(find.text('1 ticket · €25'), findsOneWidget);
+    expect(find.text('1 ticket'), findsOneWidget);
     expect(picker.canCheckout, isTrue);
     expect(_continueButton(tester)?.onPressed, isNotNull);
   });

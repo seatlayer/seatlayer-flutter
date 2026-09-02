@@ -161,6 +161,49 @@ void main() {
       });
     });
 
+    testWidgets('a filtered rail leads with a way out of the filter',
+        (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerPriceLegend(compact: true)),
+      );
+      map.emit(pickerSnapshot(withSelection: false));
+      await tester.pumpAndSettle();
+
+      // First under the thumb, before the chip that turned the filter on.
+      final clear = find.text('All prices');
+      expect(clear, findsOneWidget);
+      expect(
+        tester.getRect(clear).left,
+        lessThan(tester.getRect(find.text('€25')).left),
+      );
+
+      await tester.tap(clear);
+      await tester.pump();
+
+      expect(
+          map.callsTo('picker.setCategoryFilter').single.$2, <String, Object?>{
+        'categoryKeys': null,
+      });
+    });
+
+    testWidgets('an unfiltered rail spends no width saying so', (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerPriceLegend(compact: true)),
+      );
+      map.emit(bestAvailableSnapshot(categoryFilter: <Object?>[]));
+      await tester.pumpAndSettle();
+
+      expect(find.text('All prices'), findsNothing);
+    });
+
     testWidgets('a not-for-sale category never appears', (tester) async {
       final map = FakePickerMap();
       addTearDown(map.dispose);
