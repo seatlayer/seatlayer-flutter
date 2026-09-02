@@ -108,6 +108,9 @@ abstract final class SeatLayerSizeTokens {
   /// `28`
   static const double headerLogoSize = 28;
 
+  /// `44`
+  static const double topRailHeight = 44;
+
   /// `52`
   static const double dockBarHeight = 52;
 

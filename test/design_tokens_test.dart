@@ -65,6 +65,7 @@ void main() {
     final size = _section('size');
     expect(layout.phoneBreakpoint, size['phoneBreakpoint']);
     expect(layout.headerHeight, size['headerHeight']);
+    expect(layout.topRailHeight, size['topRailHeight']);
     expect(layout.dockBarHeight, size['dockBarHeight']);
     expect(layout.peekHeight, size['peekHeight']);
     expect(layout.sheetMaxHeightFraction, size['sheetMaxHeightFraction']);

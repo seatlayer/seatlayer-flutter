@@ -35,14 +35,17 @@ import 'picker_section_navigator.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
-/// Where the phone's map chrome starts, below the top rail of prices.
-const double _mapChromeTop = 44;
-
 /// The breathing room between two stacked pieces of map chrome.
 const double _badgeGap = 8;
 
-/// Where the top rail itself begins.
+/// Where the phone's map chrome starts, below the map's own top edge.
 const double _railTop = 8;
+
+/// How much of the map the immersive scene's own chrome is given.
+///
+/// The prices are a row above the map rather than on it, so the scene's way
+/// back starts at the map's own edge like every other piece of map chrome.
+const double _venue3DTopInset = 10;
 
 /// How long the map may be held back waiting to be framed.
 ///
@@ -230,17 +233,15 @@ class _SeatLayerPickerAdaptiveLayoutState
             actionError: null,
           ),
         );
-        final venue3DTopInset = chrome.showPriceRail && !panoramaUp
-            ? 46.0
-            : 10.0;
         final venue3D = panoramaUp
             ? const SizedBox.shrink()
             : _part(
                 context,
                 widget.builders.venue3D,
                 SeatLayerVenue3D(
-                  // Clear the legend, which stays on screen in the scene's palette.
-                  topInset: venue3DTopInset,
+                  // The scene's own chrome starts at the map's edge: the
+                  // prices are a row above the map, not a band on it.
+                  topInset: _venue3DTopInset,
                   bottomInset:
                       10 + (dockUp ? resolved.layout.dockBarHeight : 0.0),
                 ),
@@ -252,7 +253,7 @@ class _SeatLayerPickerAdaptiveLayoutState
           widget.builders.seatViewChrome,
           chrome.showSeatViewChrome
               ? SeatLayerSeatViewChrome(
-                  topInset: wide ? 12 : venue3DTopInset,
+                  topInset: wide ? 12 : _venue3DTopInset,
                   bottomInset: wide
                       ? 12
                       : 10 + (dockUp ? resolved.layout.dockBarHeight : 0.0),
@@ -529,20 +530,56 @@ class _SeatLayerPickerAdaptiveLayoutState
         // The controls ride above the dock so neither covers the other; the
         // dock itself is edge-to-edge at the map's own bottom.
         final dockLift = dockUp ? resolved.layout.dockBarHeight : 0.0;
+        // `‹ Back to venue` is drawn only once the scene is aimed at a seat,
+        // so only then does anything stand in the badge's corner.
+        final backPillUp =
+            venue3DUp &&
+            chrome.showVenue3DChrome &&
+            state.snapshot?.map.view3DTargetSeatId != null;
+        // One chrome row, not map chrome: the prices and the Map/3D control
+        // are a band of their own between the header and the map, so the last
+        // chip is never clipped under the control and no seat number is read
+        // through either of them.
+        final railUp =
+            !panoramaUp && (chrome.showPriceRail || chrome.showMapControls);
+        // The band caps the map the way the header does, so it takes the map
+        // chrome palette and goes dark with the immersive scene.
+        final railTheme = seatLayerMapChromeThemeOf(context);
+        final topRail = Material(
+          color: railTheme.surface,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: railTheme.divider)),
+            ),
+            child: SizedBox(
+              height: resolved.layout.topRailHeight,
+              child: Row(
+                children: <Widget>[
+                  Expanded(child: prices),
+                  if (chrome.showMapControls && !panoramaUp)
+                    const Padding(
+                      padding: EdgeInsets.only(right: 10),
+                      child: SeatLayerPickerViewModeControl(),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
         // What of the map this composition is standing on. Only chrome drawn
-        // OVER the map counts: the header and the cart sheet are rows of the
-        // same Column, so the map surface begins and ends where they do and
-        // the runtime already frames inside them. The rail and the dock are
-        // not — they are stacked on the map — so a section framed to the whole
-        // surface lands partly underneath them unless the runtime is told.
+        // OVER the map counts: the header, the top rail and the cart sheet are
+        // rows of the same Column, so the map surface begins and ends where
+        // they do and the runtime already frames inside them. The floor strip,
+        // the test badge and the dock are not — they are stacked on the map —
+        // so a section framed to the whole surface lands partly underneath
+        // them unless the runtime is told.
         _reportViewportInsets(
           SeatLayerViewportInsets(
             top: _topBand(
-              chrome: chrome,
               panorama: panoramaUp,
               testBadge: state.isTestEvent,
               venue3D: venue3DUp,
-              venue3DTopInset: venue3DTopInset,
+              backPill: backPillUp,
               floorStrip: floorStripUp,
               floorStripHeight: floorStripHeight,
             ),
@@ -557,55 +594,28 @@ class _SeatLayerPickerAdaptiveLayoutState
         return Column(
           children: [
             header,
+            if (railUp) topRail,
             Expanded(
               child: Stack(
                 children: [
                   Positioned.fill(child: mapSurface),
-                  // One top rail: the prices scroll, the Map/3D control keeps
-                  // the width its own labels need, and neither is drawn over
-                  // the other in any language.
-                  Positioned(
-                    top: 8,
-                    left: 0,
-                    right: 0,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        // The rail stops short of the control: its soft edge
-                        // then finishes in clear space rather than against the
-                        // control's own edge, which reads as a cut.
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsetsDirectional.only(end: 8),
-                            child: prices,
-                          ),
-                        ),
-                        if (chrome.showMapControls && !panoramaUp)
-                          const Padding(
-                            padding: EdgeInsets.only(right: 10),
-                            child: SeatLayerPickerViewModeControl(),
-                          ),
-                      ],
-                    ),
-                  ),
-                  // The floors sit directly under the prices: both answer
-                  // "which of these seats am I looking at", and stacking them
-                  // keeps one band of map chrome rather than two.
+                  // The floors are the one piece of "which seats am I looking
+                  // at" chrome that stays on the map, so they start at the
+                  // map's own edge.
                   if (floorStripUp && !venue3DUp)
                     Positioned(
-                      top: _mapChromeTop,
+                      top: _railTop,
                       left: 0,
                       right: 0,
                       child: floorStrip,
                     ),
                   // The immersive scene puts `‹ Back to venue` in this
                   // corner; the badge steps below that pill rather than under
-                  // it, measured from the same inset the pill is given.
+                  // it, and only while the pill is actually drawn.
                   Positioned(
                     top: _testBadgeTop(
-                      chrome: chrome,
                       venue3D: venue3DUp,
-                      venue3DTopInset: venue3DTopInset,
+                      backPill: backPillUp,
                       floorStrip: floorStripUp,
                       floorStripHeight: floorStripHeight,
                     ),
@@ -667,74 +677,66 @@ class _SeatLayerPickerAdaptiveLayoutState
 
   /// How much of the map's top the phone's chrome is standing on.
   ///
-  /// The rail is one band the runtime must frame inside; the test badge is a
-  /// second, stacked under it, and a test event is not a rare case — it is
-  /// what every integration sees first. In the immersive scene the rail is
-  /// gone and `‹ Back to venue` takes its place, at its own inset.
+  /// The rail of prices is a row above the map rather than a band on it, so it
+  /// is deliberately not counted. What is left standing on the map is the
+  /// floor strip and, under it, the test badge — and a test event is not a
+  /// rare case, it is what every integration sees first. In the immersive
+  /// scene `‹ Back to venue` takes the strip's place, and only while the scene
+  /// is aimed at a seat.
   static double _topBand({
-    required SeatLayerPickerChromeOptions chrome,
     required bool panorama,
     required bool testBadge,
     required bool venue3D,
-    required double venue3DTopInset,
+    required bool backPill,
     required bool floorStrip,
     required double floorStripHeight,
   }) {
     if (panorama) return 0;
-    final rail = _topRailBand(
-      chrome: chrome,
+    final above = _aboveBadgeBand(
       venue3D: venue3D,
-      venue3DTopInset: venue3DTopInset,
+      backPill: backPill,
       floorStrip: floorStrip,
       floorStripHeight: floorStripHeight,
     );
-    if (!testBadge) return rail;
+    if (!testBadge) return above;
     return _testBadgeTop(
-          chrome: chrome,
           venue3D: venue3D,
-          venue3DTopInset: venue3DTopInset,
+          backPill: backPill,
           floorStrip: floorStrip,
           floorStripHeight: floorStripHeight,
         ) +
         SeatLayerPickerTestModeIndicator.compactHeight;
   }
 
-  /// The band the rail, or the scene's way back, occupies on its own.
-  static double _topRailBand({
-    required SeatLayerPickerChromeOptions chrome,
+  /// The band the floor strip, or the scene's way back, occupies on its own.
+  static double _aboveBadgeBand({
     required bool venue3D,
-    required double venue3DTopInset,
+    required bool backPill,
     required bool floorStrip,
     required double floorStripHeight,
   }) {
     if (venue3D) {
-      return chrome.showVenue3DChrome
-          ? venue3DTopInset + SeatLayerVenue3D.backPillHeight
-          : 0;
+      return backPill ? _venue3DTopInset + SeatLayerVenue3D.backPillHeight : 0;
     }
-    // The floor chips are stacked directly under the rail, so the band the
-    // runtime must frame inside runs to the bottom of them.
-    if (floorStrip) return _mapChromeTop + floorStripHeight;
-    return chrome.showPriceRail || chrome.showMapControls ? _mapChromeTop : 0;
+    if (floorStrip) return _railTop + floorStripHeight;
+    return 0;
   }
 
   /// Where the test-mode badge sits, which is one line under whatever is
-  /// above it — or at the rail's own start when nothing is.
+  /// above it — or at the map's own top corner when nothing is.
   static double _testBadgeTop({
-    required SeatLayerPickerChromeOptions chrome,
     required bool venue3D,
-    required double venue3DTopInset,
+    required bool backPill,
     required bool floorStrip,
     required double floorStripHeight,
   }) {
-    final rail = _topRailBand(
-      chrome: chrome,
+    final above = _aboveBadgeBand(
       venue3D: venue3D,
-      venue3DTopInset: venue3DTopInset,
+      backPill: backPill,
       floorStrip: floorStrip,
       floorStripHeight: floorStripHeight,
     );
-    return rail == 0 ? _railTop : rail + _badgeGap;
+    return above == 0 ? _railTop : above + _badgeGap;
   }
 
   /// How much of the map's bottom the phone's chrome is standing on.

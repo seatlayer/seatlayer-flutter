@@ -13,14 +13,20 @@ import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
 
+/// The stand-in map surface, so its rect can be measured.
+const Key _mapSurfaceKey = ValueKey<String>('seatlayer-test-map-surface');
+
 /// The layout with the WebView replaced, so the composition can be tested
 /// without a platform view.
 Widget _layout() => SeatLayerPickerAdaptiveLayout(
       onCheckout: (_) async {},
       builders: SeatLayerPickerBuilders(
-        map: (context, part) => const SizedBox.expand(),
+        map: (context, part) => const SizedBox.expand(key: _mapSurfaceKey),
       ),
     );
+
+/// Where the map surface itself begins and ends.
+Rect _mapRect(WidgetTester tester) => tester.getRect(find.byKey(_mapSurfaceKey));
 
 /// A snapshot whose catalogue carries [count] sellable categories.
 ///
@@ -61,14 +67,79 @@ void main() {
       final control = find.byType(SeatLayerPickerViewModeControl);
       expect(control, findsOneWidget);
       final prices = tester.getRect(find.byType(SeatLayerPriceLegend));
-      // Not merely "not overlapping": the rail's soft edge has to finish in
-      // clear space, or a half-shown chip still reads as a cut.
+      // They are siblings in one band now, so the rail ends where the control
+      // begins and the chips run out under the rail's own soft edge.
       expect(
-        tester.getRect(control).left - prices.right,
-        greaterThanOrEqualTo(8),
+        tester.getRect(control).left,
+        greaterThanOrEqualTo(prices.right),
       );
     });
   }
+
+  testWidgets('the top rail is a band above the map, never on it',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout()));
+    map.emit(_snapshotWithCategories(8));
+    await tester.pumpAndSettle();
+
+    final surface = _mapRect(tester);
+    final prices = tester.getRect(find.byType(SeatLayerPriceLegend));
+    final control =
+        tester.getRect(find.byType(SeatLayerPickerViewModeControl));
+
+    // The band is chrome of the same Column as the header: the map starts
+    // under it, so no seat number is ever read through a price chip.
+    expect(prices.bottom, lessThanOrEqualTo(surface.top));
+    expect(control.bottom, lessThanOrEqualTo(surface.top));
+    for (final chip in find
+        .descendant(
+            of: find.byType(SeatLayerPriceLegend),
+            matching: find.byType(Text))
+        .evaluate()) {
+      expect(
+        tester.getRect(find.byWidget(chip.widget)).overlaps(surface),
+        isFalse,
+      );
+    }
+  });
+
+  testWidgets('the test badge sits in the map\'s own top corner',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout()));
+    map.emit(_snapshotWithCategories(3));
+    await tester.pumpAndSettle();
+
+    final badge = tester.getRect(find.byType(SeatLayerPickerTestModeIndicator));
+    expect(badge.top - _mapRect(tester).top, closeTo(8, .5));
+    expect(badge.left - _mapRect(tester).left, closeTo(10, .5));
+  });
+
+  testWidgets('the badge keeps that corner in a scene with no seat targeted',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout()));
+    final snapshot = _snapshotWithCategories(3);
+    (snapshot['map']! as Map<String, Object?>)['buyerView'] = 'venue3d';
+    map.emit(snapshot);
+    await tester.pumpAndSettle();
+
+    // Nothing is drawn above it: `‹ Back to venue` only appears once the
+    // scene is aimed at a seat.
+    expect(find.text('Back to venue'), findsNothing);
+    final badge = tester.getRect(find.byType(SeatLayerPickerTestModeIndicator));
+    expect(badge.top - _mapRect(tester).top, closeTo(8, .5));
+  });
 
   testWidgets('a legend that runs off the rail fades rather than cuts',
       (tester) async {

@@ -16,6 +16,7 @@ class SeatLayerPickerLayout {
     this.wideBreakpoint = SeatLayerSizeTokens.wideBreakpoint,
     this.headerHeight = SeatLayerSizeTokens.headerHeight,
     this.headerLogoSize = SeatLayerSizeTokens.headerLogoSize,
+    this.topRailHeight = SeatLayerSizeTokens.topRailHeight,
     this.dockBarHeight = SeatLayerSizeTokens.dockBarHeight,
     this.peekHeight = SeatLayerSizeTokens.peekHeight,
     this.sheetMaxHeightFraction = SeatLayerSizeTokens.sheetMaxHeightFraction,
@@ -45,6 +46,9 @@ class SeatLayerPickerLayout {
 
   /// Edge length of the square brand tile inside the phone header.
   final double headerLogoSize;
+
+  /// Height of the phone's top rail of prices, between header and map.
+  final double topRailHeight;
 
   /// Height of the rung-2 dock bar, excluding the bottom safe area.
   final double dockBarHeight;
@@ -100,6 +104,7 @@ class SeatLayerPickerLayout {
     double? wideBreakpoint,
     double? headerHeight,
     double? headerLogoSize,
+    double? topRailHeight,
     double? dockBarHeight,
     double? peekHeight,
     double? sheetMaxHeightFraction,
@@ -122,6 +127,7 @@ class SeatLayerPickerLayout {
         wideBreakpoint: wideBreakpoint ?? this.wideBreakpoint,
         headerHeight: headerHeight ?? this.headerHeight,
         headerLogoSize: headerLogoSize ?? this.headerLogoSize,
+        topRailHeight: topRailHeight ?? this.topRailHeight,
         dockBarHeight: dockBarHeight ?? this.dockBarHeight,
         peekHeight: peekHeight ?? this.peekHeight,
         sheetMaxHeightFraction:
@@ -150,6 +156,7 @@ class SeatLayerPickerLayout {
       other.wideBreakpoint == wideBreakpoint &&
       other.headerHeight == headerHeight &&
       other.headerLogoSize == headerLogoSize &&
+      other.topRailHeight == topRailHeight &&
       other.dockBarHeight == dockBarHeight &&
       other.peekHeight == peekHeight &&
       other.sheetMaxHeightFraction == sheetMaxHeightFraction &&
@@ -173,6 +180,7 @@ class SeatLayerPickerLayout {
         wideBreakpoint,
         headerHeight,
         headerLogoSize,
+        topRailHeight,
         dockBarHeight,
         peekHeight,
         sheetMaxHeightFraction,

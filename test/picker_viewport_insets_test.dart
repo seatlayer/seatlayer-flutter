@@ -11,6 +11,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_status_views.dart';
+import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 
 import 'fake_webview_platform.dart';
@@ -21,6 +23,14 @@ Iterable<Object?> _insetPayloads(FakePickerMap map) =>
     map.callsTo('picker.setViewportInsets').map((call) => call.$2);
 
 Widget _layout() => SeatLayerPickerAdaptiveLayout(onCheckout: (_) async {});
+
+/// The band a test badge alone stands on: the map's own top corner.
+const double _badgeBand = 8 + SeatLayerPickerTestModeIndicator.compactHeight;
+
+/// The same badge once the scene's way back is drawn above it.
+const double _seatedBadgeBand =
+    10 + SeatLayerVenue3D.backPillHeight + 8 +
+        SeatLayerPickerTestModeIndicator.compactHeight;
 
 /// The picker with the immersive scene up, optionally sitting in a seat.
 Map<String, Object?> _inVenue3D({int revision = 3, String? seatedOn}) {
@@ -51,8 +61,9 @@ void main() {
     final atOverview = _insetPayloads(map).last! as Map<String, Object?>;
     expect(
       atOverview['top'],
-      72.0,
-      reason: 'the price rail caps the map, and the test badge sits under it',
+      _badgeBand,
+      reason: 'the price rail is a row above the map, so only the test badge '
+          'stands on it',
     );
     expect(
       atOverview['bottom'],
@@ -77,7 +88,7 @@ void main() {
       greaterThan(0),
       reason: 'the dock now stands on the bottom of the map',
     );
-    expect(focused['top'], 72.0);
+    expect(focused['top'], _badgeBand);
   });
 
   testWidgets('a settled layout stops reporting', (tester) async {
@@ -218,9 +229,9 @@ void main() {
 
   testWidgets('the immersive scene reports its own chrome, not the map rail',
       (tester) async {
-    // In 3D the rail is gone and the scene's own furniture takes its place:
-    // `‹ Back to venue` at the top, the seat deck at the bottom. Reporting the
-    // map's bands there would crop the venue against chrome that is not drawn.
+    // In 3D the scene's own furniture takes over: `‹ Back to venue` at the
+    // top once a seat is targeted, the seat deck at the bottom. Reporting a
+    // band for chrome that is not drawn would crop the venue for nothing.
     final map = FakePickerMap(bundle: nativeChromeBundle());
     addTearDown(map.dispose);
     useFakeWebViewPlatform();
@@ -236,8 +247,9 @@ void main() {
     final inScene = _insetPayloads(map).last! as Map<String, Object?>;
 
     expect(inScene, isNot(onMap));
-    // 46 clear of the legend + a 44pt pill + 8 + the 20pt badge under it.
-    expect(inScene['top'], 118.0);
+    // Looking around the venue, nothing is drawn in the badge's corner: the
+    // way back appears only once the scene is aimed at a seat.
+    expect(inScene['top'], _badgeBand);
     // 10 + the dock + the seat deck, which has a caption once the buyer is
     // sitting somewhere.
     expect(
@@ -275,6 +287,16 @@ void main() {
     expect(controller.state.snapshot?.map.view3DTargetSeatId, 'seat-a-1');
     final seated = _insetPayloads(map).last! as Map<String, Object?>;
 
+    expect(
+      looking['top'],
+      _badgeBand,
+      reason: 'nothing is drawn above the badge while looking around',
+    );
+    expect(
+      seated['top'],
+      _seatedBadgeBand,
+      reason: 'the badge steps below `Back to venue` once it is drawn',
+    );
     expect(
       seated['bottom']! as double,
       (looking['bottom']! as double) + 36,
