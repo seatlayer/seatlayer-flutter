@@ -24,7 +24,11 @@ class SeatLayerPickerAttribution extends StatelessWidget {
     if (state.branding?.attributionRequired != true) {
       return const SizedBox.shrink();
     }
-    final theme = seatLayerPickerThemeOf(context);
+    // The credit sits on the sheet, which takes the map chrome's palette — in
+    // the immersive scene that is the dark side whatever the picker is set to.
+    // Read from the picker's own palette, the words were dark ink on a dark
+    // sheet, and only the mark survived.
+    final theme = seatLayerMapChromeThemeOf(context);
     return Semantics(
       label: 'Powered by SeatLayer',
       child: Opacity(
@@ -46,6 +50,7 @@ class SeatLayerPickerAttribution extends StatelessWidget {
                   color: theme.text,
                   fontSize: compact ? 10 : 12,
                   fontWeight: FontWeight.w600,
+                  fontFamily: theme.fontFamily,
                   letterSpacing: compact ? .1 : .2,
                 ),
               ),
