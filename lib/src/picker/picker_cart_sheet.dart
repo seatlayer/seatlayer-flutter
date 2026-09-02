@@ -275,7 +275,15 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
       context,
       max: SeatLayerTypeScaleTokens.peek,
     );
-    final peekHeight = layout.peekHeight * peekScale;
+    // The pill grows a clock while seats are held, and a pill that wide
+    // reaches the grabber's own column; the head gives it the room rather
+    // than letting the way on cover the way up.
+    final clockRides = !controller.cartSheetExpanded &&
+        controller.confirmedCartLines.isNotEmpty &&
+        controller.state.hold != null;
+    final peekLift =
+        clockRides ? SeatLayerSizeTokens.peekClockLift * peekScale : 0.0;
+    final peekHeight = layout.peekHeight * peekScale + peekLift;
     final openHeadHeight = layout.sheetOpenHeadHeight * peekScale;
     final hasTickets = controller.confirmedCartLines.isNotEmpty;
     final salesClosed = controller.state.event?.salesClosed == true;
@@ -354,6 +362,7 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
                           body,
                           peekHeight - openHeadHeight,
                         ),
+                    lift: peekLift,
                     onExpandedChanged: _ask,
                     onCheckout: widget.onCheckout,
                     continueStyle: widget.continueButtonStyle,
@@ -467,6 +476,7 @@ class _PeekRow extends StatelessWidget {
   const _PeekRow({
     required this.expanded,
     required this.height,
+    this.lift = 0,
     required this.onExpandedChanged,
     required this.onCheckout,
     required this.continueStyle,
@@ -474,6 +484,9 @@ class _PeekRow extends StatelessWidget {
 
   final bool expanded;
   final double height;
+
+  /// Extra room above the bar so a pill carrying the clock clears the grabber.
+  final double lift;
   final ValueChanged<bool> onExpandedChanged;
   final SeatLayerCheckoutCallback onCheckout;
   final ButtonStyle? continueStyle;
@@ -515,6 +528,7 @@ class _PeekRow extends StatelessWidget {
       builder: (context, cta, onPressed) => _PeekHead(
         expanded: expanded,
         height: height,
+        lift: lift,
         cta: cta,
         onExpandedChanged: onExpandedChanged,
         onContinue: onPressed,
@@ -538,6 +552,7 @@ class _PeekHead extends StatefulWidget {
   const _PeekHead({
     required this.expanded,
     required this.height,
+    this.lift = 0,
     required this.cta,
     required this.onExpandedChanged,
     required this.onContinue,
@@ -546,6 +561,9 @@ class _PeekHead extends StatefulWidget {
 
   final bool expanded;
   final double height;
+
+  /// Extra room above the bar so a pill carrying the clock clears the grabber.
+  final double lift;
   final SeatLayerCheckoutCtaState cta;
   final ValueChanged<bool> onExpandedChanged;
   final VoidCallback? onContinue;
@@ -600,7 +618,7 @@ class _PeekHeadState extends State<_PeekHead> {
             ),
             Positioned.fill(
               child: Padding(
-                padding: const EdgeInsets.only(left: 12, right: 6),
+                padding: EdgeInsets.only(left: 12, right: 6, top: widget.lift),
                 child: Row(
                   children: [
                     Expanded(

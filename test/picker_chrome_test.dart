@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
+import 'package:seatlayer/src/picker/seat_layer_picker_scope.dart';
 import 'package:seatlayer/src/picker/picker_layout.dart';
 import 'package:seatlayer/src/picker/picker_legend.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
@@ -28,6 +29,7 @@ BundleInfo _colorblindBundle() => nativeChromeBundle(
     );
 
 void main() {
+  _headerClockTests();
   group('header', () {
     testWidgets('the phone header is one 38-point line', (tester) async {
       final map = FakePickerMap();
@@ -82,7 +84,13 @@ void main() {
         pickerHarness(map, const SeatLayerPickerHeader(compact: true)),
       );
       map.emit(pickerSnapshot(holdOwner: 'picker'));
-      await tester.pumpAndSettle();
+      await pumpToRest(tester);
+      // With the sheet open the peek pill carries no clock, so the header's
+      // is the one clock on screen.
+      SeatLayerPickerScope.controllerOf(
+        tester.element(find.byType(SeatLayerPickerHeader)),
+      ).setCartSheetExpanded(true);
+      await pumpToRest(tester);
 
       expect(find.byType(SeatLayerPickerHoldCountdown), findsOneWidget);
       // A status light and a clock, not a clock glyph: the dot is what turns
@@ -594,4 +602,27 @@ void main() {
       }, tags: goldenTag);
     }
   }, skip: goldenSkip);
+}
+
+void _headerClockTests() {
+  testWidgets('the header keeps one clock: it stands down while the peek carries it',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerPickerHeader(compact: true)),
+    );
+    map.emit(pickerSnapshot(holdOwner: 'picker'));
+    await pumpToRest(tester);
+    expect(find.byType(SeatLayerPickerHoldCountdown), findsNothing);
+
+    final controller = SeatLayerPickerScope.controllerOf(
+      tester.element(find.byType(SeatLayerPickerHeader)),
+    );
+    controller.setCartSheetExpanded(true);
+    await pumpToRest(tester);
+    expect(find.byType(SeatLayerPickerHoldCountdown), findsOneWidget);
+  });
 }

@@ -100,7 +100,12 @@ class SeatLayerPickerHeader extends StatelessWidget {
                       SeatLayerPickerSalesClosedPill(compact: compact)),
                   gap,
                 ],
-                if (showHoldPill && state.hold != null) ...[
+                // While the collapsed cart's pill carries the clock, the
+                // header's is one clock too many; it returns for the last
+                // minute, when the countdown is the point.
+                if (showHoldPill &&
+                    state.hold != null &&
+                    !_peekCarriesClock(context, state)) ...[
                   _air(compact, SeatLayerPickerHoldCountdown(compact: compact)),
                   gap,
                 ],
@@ -190,6 +195,15 @@ class _CloseRing extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Whether the collapsed cart's pill is already showing this hold's clock.
+bool _peekCarriesClock(BuildContext context, SeatLayerPickerState state) {
+  final controller = SeatLayerPickerScope.controllerOf(context);
+  if (controller.cartSheetExpanded) return false;
+  if (controller.confirmedCartLines.isEmpty) return false;
+  final remaining = state.holdRemaining(seatLayerPickerNow());
+  return remaining > SeatLayerPickerHoldCountdown.expiring;
 }
 
 class _EventTitle extends StatelessWidget {

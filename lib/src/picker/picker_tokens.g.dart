@@ -141,6 +141,9 @@ abstract final class SeatLayerSizeTokens {
   /// `50`
   static const double peekHeight = 50;
 
+  /// `8`
+  static const double peekClockLift = 8;
+
   /// `36`
   static const double sheetOpenHeadHeight = 36;
 

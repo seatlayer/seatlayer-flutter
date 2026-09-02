@@ -168,6 +168,12 @@ gate them, and the reference file.
 
 ### 3.1 Header
 
+While the collapsed cart's pill carries the hold clock, the header's hold pill
+is not drawn (the web's `data-peek-clock` rule); it returns for the last
+minute, when the countdown is the point. A pill carrying the clock reaches the
+grabber's column, so the collapsed head grows by `size.peekClockLift` and the
+bar sits below the grabber.
+
 **Name** `SeatLayerPickerHeader` · **slot** `headerStyle` · **file**
 `lib/src/picker/picker_header.dart`
 

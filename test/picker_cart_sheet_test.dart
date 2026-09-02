@@ -5,6 +5,7 @@ import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_cart_list.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_states.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
@@ -80,6 +81,7 @@ Map<String, Object?> _salesClosedSnapshot() {
 
 void main() {
   _identityJoinTests();
+  _clockTests();
 
   testWidgets('the peek states the cart and the way on, and nothing else', (
     tester,
@@ -908,3 +910,27 @@ void _identityJoinTests() {
 bool _grabber(WidgetTester tester) => tester
     .widgetList<SizedBox>(find.byType(SizedBox))
     .any((box) => box.width == 35 && box.height == 4);
+
+void _clockTests() {
+  testWidgets('a pill carrying the clock gets room under the grabber',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet(expanded: false)),
+      ),
+    );
+    map.emit(pickerSnapshot(holdOwner: 'picker'));
+    await pumpToRest(tester);
+
+    // Fifty points, plus the lift that keeps the way on off the way up.
+    expect(_sheetHeight(tester), 50 + SeatLayerSizeTokens.peekClockLift);
+    final pill = tester.getRect(find.widgetWithText(FilledButton, 'Continue'));
+    final sheet = tester.getRect(find.byType(SeatLayerCartSheet));
+    expect(pill.top - sheet.top, greaterThanOrEqualTo(8));
+  });
+}
