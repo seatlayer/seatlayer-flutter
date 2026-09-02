@@ -490,13 +490,16 @@ void main() {
     map.emit(in3D);
     await tester.pumpAndSettle();
 
-    expect(find.text('Add seat'), findsNothing);
-    expect(mapGate().ignoring, isFalse);
+    // The scene is not an answer to the card's question — the buyer is still
+    // outside the seat looking at it — so the card comes with it, and owns
+    // the tap while it is asking.
+    expect(find.text('Add seat'), findsOneWidget);
+    expect(mapGate().ignoring, isTrue);
     expect(
       find.byKey(
         const ValueKey<String>('seatlayer-picker-prompt-transition'),
       ),
-      findsNothing,
+      findsOneWidget,
     );
     expect(picker.confirmedTicketCount, 0);
     expect(picker.seatAwaitingConfirmation?.id, 'seat-a-1');

@@ -8,8 +8,11 @@
 // under the card, with a live Continue behind the scrim.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_confirm_card.dart';
+import 'package:seatlayer/src/picker/picker_tokens.g.dart';
+import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 
 import 'fake_webview_platform.dart';
@@ -34,6 +37,34 @@ Map<String, Object?> _seatDrawnAt(double x, double y) {
   selection['seats'] = seats;
   return <String, Object?>{...snapshot, 'selection': selection};
 }
+
+/// The same event with the buyer inside the 3D venue.
+///
+/// [targeted] is what the runtime reports once the camera has arrived at the
+/// tapped seat; before that the scene is still diving towards it.
+Map<String, Object?> _inVenue3D({bool targeted = true, int revision = 1}) {
+  final snapshot = pickerSnapshot(sections: pickerSections(), revision: revision);
+  final map = Map<String, Object?>.from(snapshot['map']! as Map<String, Object?>)
+    ..['buyerView'] = 'venue3d'
+    ..['view3dTargetSeatId'] = targeted ? 'seat-a-1' : null;
+  return <String, Object?>{...snapshot, 'map': map};
+}
+
+/// A runtime that draws the scene and reports what the chrome covers.
+BundleInfo _venue3DBundle() => nativeChromeBundle(
+      capabilities: const <String>[
+        'native-chrome-contract-v1',
+        'viewport-insets-v1',
+        'venue-3d-controls-v1',
+        'seat-view-v1',
+      ],
+      commands: const <String>[
+        'picker.setThemeMode',
+        'picker.setViewportInsets',
+        'picker.setBuyerView',
+        'picker.openSeatView',
+      ],
+    );
 
 /// Where the map surface starts, in the test surface's own coordinates.
 Offset _mapOrigin(WidgetTester tester) => tester.getTopLeft(
@@ -295,6 +326,79 @@ void main() {
 
     expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
     expect(find.byType(SeatLayerConfirmCardPointer), findsNothing);
+  });
+
+  testWidgets('the scene gets the card once it has dived to the seat',
+      (tester) async {
+    final map = FakePickerMap(bundle: _venue3DBundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
+    // Still travelling: nothing to ask about yet.
+    map.emit(_inVenue3D(targeted: false));
+    await tester.pumpAndSettle();
+    expect(find.byType(SeatLayerConfirmCard), findsNothing);
+
+    map.emit(_inVenue3D(revision: 3));
+    await tester.pumpAndSettle();
+    expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
+    // Its own action, and no pointer: in the scene the seat is the picture.
+    expect(find.text('View from this seat'), findsOneWidget);
+    expect(find.byType(SeatLayerConfirmCardPointer), findsNothing);
+
+    // The way between seats stays clear of the card.
+    final deck = tester.getRect(
+      find.descendant(
+        of: find.byType(SeatLayerVenue3D),
+        matching: find.byIcon(Icons.filter_center_focus_rounded),
+      ),
+    );
+    final card = tester.getRect(
+      find.byKey(const ValueKey<String>('seatlayer.confirm-card.surface')),
+    );
+    expect(card.bottom, lessThanOrEqualTo(deck.top));
+    // Ten points above the deck band exactly: the band is the map's own inset
+    // plus the deck, which is taller once the buyer is sitting somewhere.
+    final area = tester.getRect(
+      find.byKey(const ValueKey<String>('seatlayer-picker-prompt-transition')),
+    );
+    expect(
+      card.bottom,
+      closeTo(
+        area.bottom -
+            SeatLayerSizeTokens.mapAnchorInset -
+            SeatLayerVenue3D.seatDeckHeight(seated: true) -
+            SeatLayerSizeTokens.confirmCardImmersiveRestInset,
+        .01,
+      ),
+    );
+  });
+
+  testWidgets('the card never moves the band the runtime frames against',
+      (tester) async {
+    final map = FakePickerMap(bundle: _venue3DBundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
+    map.emit(_inVenue3D());
+    await tester.pumpAndSettle();
+    final withCard = map.callsTo('picker.setViewportInsets').last.$2;
+
+    // The card is transient chrome: answering it leaves the scene's own bands
+    // exactly where the runtime already framed against them.
+    await tester.tap(find.text('Add seat'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SeatLayerConfirmCard), findsNothing);
+    expect(map.callsTo('picker.setViewportInsets').last.$2, withCard);
   });
 
   testWidgets('a composed layout that asks nothing keeps the seat counted',

@@ -57,6 +57,10 @@ const double _railTop = 8;
 /// steps below it — see `_immersiveTopInset`.
 const double _venue3DRestingInset = _mapInset;
 
+/// How much closer to the foot the card rests in 3D: ten, not fourteen.
+const double _cardLift3D = seatLayerConfirmCardRestInset -
+    SeatLayerSizeTokens.confirmCardImmersiveRestInset;
+
 /// How long the map may be held back waiting to be framed.
 ///
 /// The insets normally settle on the frame after the first snapshot. This is
@@ -150,6 +154,8 @@ class _SeatLayerPickerAdaptiveLayoutState
         final venue3DUp =
             !panoramaUp && (state.snapshot?.map.isVenue3D ?? false);
         final immersiveUp = panoramaUp || venue3DUp;
+        // Whether the scene has finished diving to a seat.
+        final targeted = state.snapshot?.map.view3DTargetSeatId != null;
         final dockUp = !panoramaUp && !venue3DUp && _dockVisible(state);
         // The Map/3D control keeps the map's top-right corner, on its own
         // line under the prices: two lines cost the map thirty points and
@@ -342,7 +348,8 @@ class _SeatLayerPickerAdaptiveLayoutState
               onCancel: (seat) => _removeSeat(controller, seat.label),
             ),
           );
-        } else if (!immersiveUp &&
+        } else if (!panoramaUp &&
+            (!venue3DUp || targeted) &&
             pendingSeat != null &&
             chrome.showConfirmCard) {
           final capabilities = state.snapshot?.capabilities ?? const <String>{};
@@ -387,6 +394,8 @@ class _SeatLayerPickerAdaptiveLayoutState
         } else {
           buyerPrompt = null;
         }
+        // The same card over the scene, in its own dimensions.
+        final seatCard3D = seatCardUp && venue3DUp;
         // An immersive inspection temporarily takes the card off the picture,
         // but it does not answer the buyer's Select/Cancel question. Keep that
         // exact seat out of cart totals until they explicitly decide.
@@ -562,9 +571,7 @@ class _SeatLayerPickerAdaptiveLayoutState
         final dockLift = dockUp ? resolved.layout.dockBarHeight : 0.0;
         // `‹ Back to venue` is drawn only once the scene is aimed at a seat,
         // so only then does anything stand in the badge's corner.
-        final backPillUp = venue3DUp &&
-            chrome.showVenue3DChrome &&
-            state.snapshot?.map.view3DTargetSeatId != null;
+        final backPillUp = venue3DUp && chrome.showVenue3DChrome && targeted;
         // One chrome row, not map chrome: the prices and the Map/3D control
         // are a band of their own between the header and the map, so the last
         // chip is never clipped under the control and no seat number is read
@@ -608,7 +615,7 @@ class _SeatLayerPickerAdaptiveLayoutState
         );
         final bottomBand = _bottomBand(
           chrome: chrome,
-          state: state,
+          seated: targeted,
           dockLift: dockLift,
           venue3D: venue3DUp,
         );
@@ -668,26 +675,26 @@ class _SeatLayerPickerAdaptiveLayoutState
                   Positioned.fill(child: seatViewChrome),
                   if (chrome.showDockBar && dockUp)
                     Positioned(left: 0, right: 0, bottom: 0, child: dock),
-                  if (!immersiveUp)
+                  if (!immersiveUp || seatCard3D)
                     Positioned.fill(
                       key: const ValueKey<String>(
                         'seatlayer-picker-prompt-transition',
                       ),
                       child: _PickerPromptTransition(
-                        // The map pales to the ground while a card asks — the
-                        // web picker's own treatment — so the seat stays
-                        // legible and the card is the thing lit. An ink wash
-                        // was tried and turned the seat into colour.
-                        scrimColor: resolved.styles.scrimColor ??
-                            pickerAlpha(resolved.background, .64),
-                        // The phone's seat card is the product's one moment:
-                        // the map goes soft behind it, it arrives from the
-                        // seat's direction and points back at it, and the map
-                        // it is covering is still the way out.
+                        // The map pales while a card asks; the scene is dark.
+                        scrimColor: seatCard3D
+                            ? const Color(0x00000000)
+                            : resolved.styles.scrimColor ??
+                                pickerAlpha(resolved.background, .64),
+                        // The card arrives from the seat's direction and points
+                        // back at it. In the scene the seat IS the picture, so
+                        // nothing points at it and the card rests over it.
                         seatCard: seatCardUp,
-                        anchor: seatCardUp ? pendingSeat?.screenPoint : null,
+                        anchor: seatCard3D ? null : pendingSeat?.screenPoint,
                         topInset: topBand,
-                        bottomInset: bottomBand,
+                        // With no anchor in 3D this band only sets where the
+                        // card rests, so the lift is spent here.
+                        bottomInset: bottomBand - (seatCard3D ? _cardLift3D : 0),
                         onDismiss: seatCardUp && pendingSeat != null
                             ? () => _dismissSeatCard(controller, pendingSeat)
                             : null,
@@ -856,13 +863,12 @@ class _SeatLayerPickerAdaptiveLayoutState
   /// reported.
   static double _bottomBand({
     required SeatLayerPickerChromeOptions chrome,
-    required SeatLayerPickerState state,
+    required bool seated,
     required double dockLift,
     required bool venue3D,
   }) {
     final dock = chrome.showDockBar ? dockLift : 0.0;
     if (!venue3D || !chrome.showVenue3DChrome) return dock;
-    final seated = state.snapshot?.map.view3DTargetSeatId != null;
     final deck =
         _mapInset + dockLift + SeatLayerVenue3D.seatDeckHeight(seated: seated);
     return deck > dock ? deck : dock;
@@ -1118,9 +1124,8 @@ class _PickerPromptTransition extends StatelessWidget {
   /// Whether the prompt is the phone's seat card.
   ///
   /// The card is the only prompt that behaves like a native moment rather than
-  /// a dialog: a blurred backdrop, a spring from the seat's direction, a
-  /// pointer back at the seat, and a way out by tapping the map behind it. The
-  /// wide layout's dialog and the GA/table prompts keep the flat scrim.
+  /// a dialog: it springs from the seat's direction, points back at it, and
+  /// the map behind it is still the way out. Dialogs are centred instead.
   final bool seatCard;
 
   /// Where on the map the seat was drawn, if the runtime said.
@@ -1232,11 +1237,9 @@ class _PickerPromptTransition extends StatelessWidget {
   /// Whether the card rises into place rather than settling down onto it.
   ///
   /// Measured against the card's resting middle — halfway down whatever the
-  /// chrome has left of the map — rather than against where this particular
-  /// card ends up, which is not known until it has been laid out. A seat above
-  /// that line is a seat the card comes up from under. Without an anchor the
-  /// card rises: a surface arriving from the bottom of a phone is the one
-  /// entrance every buyer already knows.
+  /// chrome has left of the map — rather than against where this card ends
+  /// up, which is not known until it has been laid out. Without an anchor it
+  /// rises: arriving from the foot of a phone is the entrance buyers know.
   bool _arrivesFromBelow(Size area) {
     final seat = anchor;
     if (seat == null) return true;
@@ -1256,12 +1259,10 @@ const double _cardArrivalScale = .97;
 /// — but it is plainly not the surface being answered.
 const double _confirmingDim = .58;
 
-/// The map behind a prompt: blurred and tinted for the seat card, flat for
-/// everything else, and a way out either way.
+/// The map behind a prompt: a flat dim, and a way out through it.
 ///
-/// The map is never unmounted for this. Blurring what is already drawn keeps
-/// the venue present behind the decision — the buyer can still see the shape
-/// of where they are — where a flat scrim only hides it.
+/// The map is never unmounted for this, so the venue stays present behind the
+/// decision. Over the 3D scene the dim is transparent as well.
 class _PromptBackdrop extends StatelessWidget {
   const _PromptBackdrop({
     super.key,
@@ -1277,8 +1278,7 @@ class _PromptBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A flat dim, never a blur: the seat the card is asking about has to stay
-    // legible behind it, ring and all, or the question has no referent.
+    // Flat, never a blur: the seat being asked about stays legible behind it.
     final backdrop = ColoredBox(color: scrimColor);
     return Stack(
       children: [

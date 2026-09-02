@@ -19,9 +19,15 @@ part of 'picker_confirm_card.dart';
 /// A screen reader still hears the sentence: the grid is one semantics node
 /// carrying the same identity the rest of the picker reads out.
 class _IdentityGrid extends StatelessWidget {
-  const _IdentityGrid({required this.seat});
+  const _IdentityGrid({required this.seat, this.immersive = false});
 
   final SelectedSeat seat;
+
+  /// Whether the card is being read over the 3D venue, where the cells take a
+  /// point more padding and a point less type: the scene is behind the card
+  /// rather than beside it, so the grid can breathe and the names — read at a
+  /// glance against a venue the buyer is already inside — need less weight.
+  final bool immersive;
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +116,14 @@ class _IdentityGrid extends StatelessWidget {
   }) {
     final theme = seatLayerPickerThemeOf(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 7, 8, 6),
+      padding: immersive
+          ? const EdgeInsets.fromLTRB(
+              SeatLayerSizeTokens.confirmImmersiveCellSide,
+              SeatLayerSizeTokens.confirmImmersiveCellTop,
+              SeatLayerSizeTokens.confirmImmersiveCellSide,
+              SeatLayerSizeTokens.confirmImmersiveCellBottom,
+            )
+          : const EdgeInsets.fromLTRB(8, 7, 8, 6),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -143,7 +156,13 @@ class _IdentityGrid extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: theme.text,
-              fontSize: section ? 12.5 : 15,
+              fontSize: section
+                  ? (immersive
+                      ? SeatLayerSizeTokens.confirmImmersiveSectionFontSize
+                      : 12.5)
+                  : (immersive
+                      ? SeatLayerSizeTokens.confirmImmersiveValueFontSize
+                      : 15),
               height: section ? 1.2 : 1.1,
               fontWeight: FontWeight.w800,
               fontFamily: theme.fontFamily,
@@ -461,6 +480,69 @@ class _ActionRail extends StatelessWidget {
                 onPressed: onShow3D,
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The card's inspection row inside the 3D venue.
+///
+/// In the scene the venue is already the picture, so there is nothing for a
+/// photo strip to stand in for: the one view the buyer has not had is the one
+/// from the seat itself, and it takes the whole row rather than half of it.
+/// The web card puts `Save to compare` and a confidence teaser in the other
+/// half; neither has any data behind it in
+/// `seatlayer.picker.snapshot/1`, and a control that cannot say anything true
+/// is worse than an absent one.
+class _InspectionRow extends StatelessWidget {
+  const _InspectionRow({required this.onViewFromSeat});
+
+  final VoidCallback? onViewFromSeat;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    return ConstrainedBox(
+      constraints: const BoxConstraints(
+        minHeight: SeatLayerSizeTokens.minimumHitTarget,
+      ),
+      child: Material(
+        // The accent, held back to a tint: this is the way further in, not
+        // the answer to the card's question, and the answer is the only
+        // filled button on the card.
+        color: Color.alphaBlend(pickerAlpha(theme.accent, .12), theme.surface),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.button),
+          side: BorderSide(color: theme.divider),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onViewFromSeat,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.view_in_ar_rounded, size: 15, color: theme.text),
+                const SizedBox(width: 7),
+                Flexible(
+                  child: Text(
+                    strings.viewFromThisSeat,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: theme.text,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      fontFamily: theme.fontFamily,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -129,9 +129,18 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     }
     final selection = controller.state.selection;
     final seat = widget.seat ?? (selection.isEmpty ? null : selection.last);
-    final immersiveUp = controller.seatView?.hasContent == true ||
-        (controller.state.snapshot?.map.isVenue3D ?? false);
-    if (seat == null || immersiveUp) {
+    final map = controller.state.snapshot?.map;
+    // The panorama is the seat's own view: it answers the same question this
+    // card asks, so the card stands down for it. The 3D venue does not — the
+    // buyer is still looking at a seat from outside it — so the card comes
+    // back there, in its own dimensions, but only once the scene has actually
+    // dived to the seat. A card over a camera still travelling asks about a
+    // seat the buyer cannot see yet.
+    final panoramaUp = controller.seatView?.hasContent == true;
+    final immersive = !panoramaUp && (map?.isVenue3D ?? false);
+    if (seat == null ||
+        panoramaUp ||
+        (immersive && map?.view3DTargetSeatId == null)) {
       return const SizedBox.shrink();
     }
     final seatKey = '${seat.id}\u0000${seat.label}';
@@ -206,6 +215,10 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     final addLabel = seat.objectType == null || seat.objectType == ObjectType.seat
         ? strings.addSeat
         : strings.select;
+    // In the scene the venue is already the picture, so a photo strip has
+    // nothing left to stand in for: the one place the buyer has not looked
+    // from is the seat itself, and that becomes the card's inspection row.
+    final inspectUp = immersive && seatView != null;
 
     // The card sizes itself to its content and to the screen less one gutter
     // on each side; whoever places it decides where on the map it sits.
@@ -216,7 +229,12 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
         padding: EdgeInsets.symmetric(horizontal: layout.confirmCardGutter),
         child: ConstrainedBox(
           constraints: BoxConstraints(
-            maxWidth: layout.confirmCardMaxWidth,
+            // The scene gives the card its own width: there is no map legend
+            // to read around it, and the seat's own name is longer once the
+            // buyer is inside the venue looking at it.
+            maxWidth: immersive
+                ? SeatLayerSizeTokens.confirmCardImmersiveMaxWidth
+                : layout.confirmCardMaxWidth,
             maxHeight: MediaQuery.sizeOf(context).height * .72,
           ),
           child: Listener(
@@ -248,7 +266,7 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _IdentityGrid(seat: seat),
+                      _IdentityGrid(seat: seat, immersive: immersive),
                       // The band is the category speaking for itself: its
                       // colour, its name, how much of it is left, and what it
                       // costs. Without a category there is nothing for it to
@@ -266,7 +284,7 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                       // exists; 3D rides its far corner. With 3D alone there
                       // is no picture to stand in for, so the pills sit on a
                       // plain rail instead of in an empty frame.
-                      if (seatView != null)
+                      if (!immersive && seatView != null)
                         _PhotoStrip(
                           onViewFromSeat: controller.state.isBusy
                               ? null
@@ -275,7 +293,7 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                               ? null
                               : () => _inspect(seat, venue3D),
                         )
-                      else if (venue3D != null)
+                      else if (!immersive && venue3D != null)
                         _ActionRail(
                           onShow3D: controller.state.isBusy
                               ? null
@@ -310,13 +328,43 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                             ),
                           ),
                         ),
+                      if (inspectUp)
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            10,
+                            bodyContent
+                                ? SeatLayerSizeTokens.confirmImmersiveInspectGap
+                                : SeatLayerSizeTokens.confirmImmersiveBodyTop +
+                                    SeatLayerSizeTokens
+                                        .confirmImmersiveInspectGap,
+                            10,
+                            0,
+                          ),
+                          child: _InspectionRow(
+                            onViewFromSeat: controller.state.isBusy
+                                ? null
+                                : () => _inspect(seat, seatView),
+                          ),
+                        ),
                       // The two answers are boxes of their own inside the
                       // card's gutter, not a bar fused to its bottom edge: a
                       // corner-to-corner fill reads as the card's frame, not
                       // as a thing to press.
                       Padding(
-                        padding:
-                            EdgeInsets.fromLTRB(10, bodyContent ? 10 : 8, 10, 10),
+                        padding: EdgeInsets.fromLTRB(
+                          10,
+                          immersive
+                              ? (bodyContent || inspectUp
+                                  ? SeatLayerSizeTokens
+                                      .confirmImmersiveActionGap
+                                  : SeatLayerSizeTokens
+                                      .confirmImmersiveBodyTop)
+                              : (bodyContent ? 10 : 8),
+                          10,
+                          immersive
+                              ? SeatLayerSizeTokens.confirmImmersiveBodyBottom
+                              : 10,
+                        ),
                         child: SizedBox(
                           height: layout.confirmActionHeight,
                           child: LayoutBuilder(

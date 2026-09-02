@@ -34,6 +34,7 @@ class SeatLayerPickerStrings {
     this.viewFromHere = SeatLayerStringTokens.viewFromHere,
     this.venue3D = SeatLayerStringTokens.venue3D,
     this.seeItIn3D = SeatLayerStringTokens.seeItIn3D,
+    this.viewFromThisSeat = SeatLayerStringTokens.viewFromThisSeat,
     this.openVenue360 = SeatLayerStringTokens.openVenue360,
     this.previousSeat = SeatLayerStringTokens.previousSeat,
     this.nextSeat = SeatLayerStringTokens.nextSeat,
@@ -270,6 +271,10 @@ class SeatLayerPickerStrings {
 
   /// Confirm-card action opening the venue 3D scene.
   final String seeItIn3D;
+
+  /// Confirm-card action inside the 3D scene, where the venue is already up
+  /// and the only place left to look from is the seat itself.
+  final String viewFromThisSeat;
 
   /// 3D chrome action opening the full venue panorama.
   final String openVenue360;

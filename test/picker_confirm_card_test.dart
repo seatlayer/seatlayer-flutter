@@ -44,6 +44,18 @@ Map<String, Object?> _only3D() {
   };
 }
 
+/// The same event, with the buyer inside the 3D venue.
+///
+/// [targeted] is what the runtime reports once the camera has finished diving
+/// to the tapped seat; before that the scene is still travelling.
+Map<String, Object?> _inVenue3D({bool targeted = true, int revision = 1}) {
+  final snapshot = pickerSnapshot(revision: revision);
+  final map = Map<String, Object?>.from(snapshot['map']! as Map<String, Object?>)
+    ..['buyerView'] = 'venue3d'
+    ..['view3dTargetSeatId'] = targeted ? 'seat-a-1' : null;
+  return <String, Object?>{...snapshot, 'map': map};
+}
+
 /// A selection that is a booth rather than a seat.
 Map<String, Object?> _booth() {
   final snapshot = pickerSnapshot();
@@ -202,6 +214,97 @@ void main() {
     expect(seat.maxLines, 1);
     // 42 identity + 35 band + 64 photo strip + 8 + 44 decision row + 10.
     expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 203);
+  });
+
+  testWidgets('the card asks the same question inside the 3D venue',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    map.emit(_inVenue3D());
+    await tester.pumpAndSettle();
+
+    // The identity, the band and the two answers are the card's own, whatever
+    // is behind it.
+    expect(find.text('Gallery'), findsOneWidget);
+    expect(find.text('Standard'), findsOneWidget);
+    expect(find.text('42 left'), findsOneWidget);
+    expect(find.text('€25'), findsOneWidget);
+    expect(find.text('Cancel'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
+    // The scene is already the picture, so the photo strip and its pills are
+    // replaced by the one view the buyer has not had.
+    expect(find.text('View from here'), findsNothing);
+    expect(find.text('3D'), findsNothing);
+    expect(find.text('View from this seat'), findsOneWidget);
+    // Nothing is claimed about a seat the snapshot says nothing about: the
+    // web card's compare button and confidence teaser have no data behind
+    // them in `seatlayer.picker.snapshot/1`.
+    expect(find.textContaining('compare'), findsNothing);
+    expect(find.textContaining('unverified'), findsNothing);
+    // The card is its own width in the scene, and the cells and the values
+    // take the immersive numbers.
+    expect(tester.getSize(_surface).width, 342);
+    expect(tester.widget<Text>(find.text('Gallery')).style!.fontSize, 12);
+    expect(tester.widget<Text>(find.text('1')).style!.fontSize, 14);
+  });
+
+  testWidgets('the card waits for the scene to dive, and stands down in the '
+      'panorama', (tester) async {
+    final map = FakePickerMap(
+      bundle: nativeChromeBundle(
+        capabilities: const <String>[
+          'native-chrome-contract-v1',
+          'native-seat-view-chrome-v1',
+        ],
+      ),
+    );
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    // The camera is still travelling: a card here asks about a seat the buyer
+    // cannot see yet.
+    map.emit(_inVenue3D(targeted: false));
+    await tester.pumpAndSettle();
+    expect(find.text('Add seat'), findsNothing);
+
+    map.emit(_inVenue3D(revision: 3));
+    await tester.pumpAndSettle();
+    expect(find.text('Add seat'), findsOneWidget);
+
+    // The panorama answers the same question the card asks — this seat, from
+    // this seat — so the card stands down for it.
+    map.emitEvent('seatView.changed', <String, Object?>{
+      'seatView': <String, Object?>{
+        'seatId': 'seat-a-1',
+        'title': 'View from Gallery · A-1',
+        'generated': true,
+      },
+    });
+    await tester.pumpAndSettle();
+    expect(find.text('Add seat'), findsNothing);
+  });
+
+  testWidgets('the 3D inspection row opens the seat view', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    map.emit(_inVenue3D());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('View from this seat'));
+    await tester.pumpAndSettle();
+
+    expect(map.callsTo('picker.openSeatView').single.$2, <String, Object?>{
+      'seatId': 'seat-a-1',
+    });
+    // The card stays until the runtime has actually mounted the panorama.
+    expect(find.text('Add seat'), findsOneWidget);
   });
 
   testWidgets('the phone card selects a tier and updates its headline price',
@@ -767,6 +870,25 @@ void main() {
         await tester.pumpAndSettle();
 
         await expectGolden(tester, 'confirm_card_action_${brightness.name}');
+      }, tags: goldenTag);
+
+      testWidgets('confirm card golden in the 3D venue — ${brightness.name}',
+          (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
+
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            goldenSubject(const SeatLayerConfirmCard()),
+            platformBrightness: brightness,
+          ),
+        );
+        map.emit(_inVenue3D());
+        await tester.pumpAndSettle();
+
+        await expectGolden(tester, 'confirm_card_3d_${brightness.name}');
       }, tags: goldenTag);
 
       testWidgets('confirm card golden without strip — ${brightness.name}',
