@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+The hosted runtime moves to 0.76.0, the first release that reports seat-view
+thumbnails, sight lines and confidence summaries to the native chrome. It also
+brings the runtime's own changes to the map: sold seats drawn hollow, price
+band filtering that frames the matching seats, a tighter landing fit, and
+status cues whose ink follows the backdrop.
+
 The seat card can show the seat's own photograph. A runtime advertising
 `seat-view-thumbnail-v1` names an authored view image on each selected seat,
 how far the seat is from the stage, and what it is willing to say about how
