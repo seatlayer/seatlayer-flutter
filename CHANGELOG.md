@@ -31,8 +31,15 @@ as three labelled cells; the category in a tinted band with its name, how
 many are left and the price; `See it in 3D` as a full-width action; `Cancel`
 a third of the row and `✓ Add seat` two thirds. `Add seat` invites once and
 breathes until the buyer touches the card, and on the press sweeps, ticks
-and says `Added` — the seat counts on the press. Nothing moves under reduced
-motion. New strings: `addSeat`, `added`, `seeItIn3D`, the eyebrow words, and
+and says `Added` — the seat counts on the press. The card is a native moment:
+the map blurs behind it, it springs in from the seat's side with a light
+haptic cue, a swipe down or a tap on the map gives the seat back, and `Add
+seat` answers with a medium cue. On a runtime that reports the seat's screen
+point (`seat-screen-point-v1`) the card sits 12 pt above the seat with a
+pointer on the edge facing it; until then it is centred. A category running
+low says `Only N left` in warning ink. Nothing moves under reduced motion,
+and a host that turned haptics off feels none of it. New: `onlyLeft` string,
+`cardEnter` motion token, `SelectedSeat.screenPoint`. New strings: `addSeat`, `added`, `seeItIn3D`, the eyebrow words, and
 `findSeats`; new layout tokens `confirmBandHeight`, `topRailHeight`.
 
 The bottom cart grows full-size targets: a 56 pt peek bar with a 44 pt
