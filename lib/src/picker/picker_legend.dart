@@ -73,12 +73,11 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
     final active = state.snapshot?.map.categoryFilter ?? const <String>{};
     final direction = Directionality.of(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
-    // A filtered rail needs a way back out that is not "find the chip you
-    // tapped and tap it again" — on a 390 pt phone the chip that turned the
-    // filter on is often scrolled off the screen. It leads, so it is the first
-    // thing under the thumb, and it is absent while no filter is on, where it
-    // would only cost the rail a chip's width to say nothing.
-    final clearFilter = active.isEmpty ? 0 : 1;
+    // The rail leads with the way out of a filter, the way the web rail does:
+    // on a 390 pt phone the chip that turned the filter on is often scrolled
+    // off the screen, and a buyer who has not filtered yet reads the same
+    // first chip as "these are all the prices" — which is what it means.
+    const clearFilter = 1;
     final chipStyle =
         (theme.styles.legendChipStyle ?? const SeatLayerSurfaceStyle())
             .merge(widget.style);
@@ -99,7 +98,7 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
             style: chipStyle,
             label: strings.allPrices,
             color: null,
-            selected: false,
+            selected: active.isEmpty,
             compact: compact,
             theme: theme,
             semanticsLabel: strings.allPrices,

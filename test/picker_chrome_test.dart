@@ -228,7 +228,8 @@ void main() {
       });
     });
 
-    testWidgets('an unfiltered rail spends no width saying so', (tester) async {
+    testWidgets('an unfiltered rail leads with All prices, selected',
+        (tester) async {
       final map = FakePickerMap();
       addTearDown(map.dispose);
       usePhoneSurface(tester);
@@ -239,7 +240,12 @@ void main() {
       map.emit(bestAvailableSnapshot(categoryFilter: <Object?>[]));
       await tester.pumpAndSettle();
 
-      expect(find.text('All prices'), findsNothing);
+      final clear = find.text('All prices');
+      expect(clear, findsOneWidget);
+      // Selected ink on the leading chip, plain ink on every price chip: the
+      // rail says "all of these" without a filter being on.
+      Color ink(Finder text) => tester.widget<Text>(text).style!.color!;
+      expect(ink(clear), isNot(ink(find.text('€25'))));
     });
 
     testWidgets('a not-for-sale category never appears', (tester) async {
