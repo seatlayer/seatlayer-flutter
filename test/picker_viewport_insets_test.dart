@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_map_controls.dart';
 import 'package:seatlayer/src/picker/picker_status_views.dart';
 import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
@@ -24,12 +25,15 @@ Iterable<Object?> _insetPayloads(FakePickerMap map) =>
 
 Widget _layout() => SeatLayerPickerAdaptiveLayout(onCheckout: (_) async {});
 
-/// The band a test badge alone stands on: the map's own top corner.
-const double _badgeBand = 8 + SeatLayerPickerTestModeIndicator.compactHeight;
+/// The map's top line: the test badge in one corner and the Map/3D control
+/// in the other, and the control is the taller of the two.
+const double _badgeBand = 8 + SeatLayerPickerViewModeControl.height;
 
-/// The same badge once the scene's way back is drawn above it.
+/// The badge once the scene's way back is drawn above it — and the way back
+/// itself steps under the Map/3D control that shares the map's top line.
 const double _seatedBadgeBand =
-    10 + SeatLayerVenue3D.backPillHeight + 8 +
+    (8 + SeatLayerPickerViewModeControl.height + 8) +
+        SeatLayerVenue3D.backPillHeight + 8 +
         SeatLayerPickerTestModeIndicator.compactHeight;
 
 /// The picker with the immersive scene up, optionally sitting in a seat.

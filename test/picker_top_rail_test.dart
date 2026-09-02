@@ -67,11 +67,11 @@ void main() {
       final control = find.byType(SeatLayerPickerViewModeControl);
       expect(control, findsOneWidget);
       final prices = tester.getRect(find.byType(SeatLayerPriceLegend));
-      // They are siblings in one band now, so the rail ends where the control
-      // begins and the chips run out under the rail's own soft edge.
+      // Two lines: the prices have the band to themselves and the control
+      // sits on the map's top line under it, so nothing is ever clipped.
       expect(
-        tester.getRect(control).left,
-        greaterThanOrEqualTo(prices.right),
+        tester.getRect(control).top,
+        greaterThanOrEqualTo(prices.bottom),
       );
     });
   }
@@ -92,9 +92,11 @@ void main() {
         tester.getRect(find.byType(SeatLayerPickerViewModeControl));
 
     // The band is chrome of the same Column as the header: the map starts
-    // under it, so no seat number is ever read through a price chip.
+    // under it, so no seat number is ever read through a price chip. The
+    // Map/3D control keeps the map's own top-right corner.
     expect(prices.bottom, lessThanOrEqualTo(surface.top));
-    expect(control.bottom, lessThanOrEqualTo(surface.top));
+    expect(control.top - surface.top, closeTo(8, .5));
+    expect(surface.right - control.right, closeTo(10, .5));
     for (final chip in find
         .descendant(
             of: find.byType(SeatLayerPriceLegend),
