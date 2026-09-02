@@ -39,7 +39,14 @@ point (`seat-screen-point-v1`) the card sits 12 pt above the seat with a
 pointer on the edge facing it; until then it is centred. A category running
 low says `Only N left` in warning ink. Nothing moves under reduced motion,
 and a host that turned haptics off feels none of it. New: `onlyLeft` string,
-`cardEnter` motion token, `SelectedSeat.screenPoint`. New strings: `addSeat`, `added`, `seeItIn3D`, the eyebrow words, and
+`cardEnter` motion token, `SelectedSeat.screenPoint`.
+
+The checkout call to action says why it is waiting: `Sales closed`, `Confirm
+or cancel this seat`, `Securing your seats…`, `Opening secure checkout…`, or
+what would fix a rejected selection (`Choose 1 more`, `Remove 2 tickets`,
+`Adjust your selection`). One resolver, `seatLayerCheckoutCtaState`, drives
+the collapsed pill, the sheet's button and the wide bar. New strings for each
+reason, and `continueWord`. New strings: `addSeat`, `added`, `seeItIn3D`, the eyebrow words, and
 `findSeats`; new layout tokens `confirmBandHeight`, `topRailHeight`.
 
 The bottom cart grows full-size targets: a 56 pt peek bar with a 44 pt
