@@ -190,6 +190,11 @@ class SeatLayerPickerCheckoutBar extends StatelessWidget {
                   style: FilledButton.styleFrom(
                     backgroundColor: theme.accent,
                     foregroundColor: theme.onAccent,
+                    // A reason stated on a button that cannot be pressed still has to be
+                    // read, on the dark scene sheet as much as on the light one; Material's
+                    // own disabled greys vanish there.
+                    disabledBackgroundColor: pickerAlpha(theme.text, .08),
+                    disabledForegroundColor: pickerAlpha(theme.text, .55),
                     minimumSize: const Size(156, 48),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(theme.buttonRadius),

@@ -301,6 +301,11 @@ class _PeekRow extends StatelessWidget {
                             style: FilledButton.styleFrom(
                               backgroundColor: theme.accent,
                               foregroundColor: theme.onAccent,
+                              // A reason stated on a button that cannot be pressed still has to be
+                              // read, on the dark scene sheet as much as on the light one; Material's
+                              // own disabled greys vanish there.
+                              disabledBackgroundColor: pickerAlpha(theme.text, .08),
+                              disabledForegroundColor: pickerAlpha(theme.text, .55),
                               // A full-size target: this is the one
                               // control the buyer came for, and it was
                               // reaching thirty-four points inside a bar
@@ -592,6 +597,11 @@ class SeatLayerBookButton extends StatelessWidget {
           style: FilledButton.styleFrom(
             backgroundColor: theme.accent,
             foregroundColor: theme.onAccent,
+            // A reason stated on a button that cannot be pressed still has to be
+            // read, on the dark scene sheet as much as on the light one; Material's
+            // own disabled greys vanish there.
+            disabledBackgroundColor: pickerAlpha(theme.text, .08),
+            disabledForegroundColor: pickerAlpha(theme.text, .55),
             minimumSize: const Size.fromHeight(46),
             textStyle: TextStyle(
               fontSize: 15,
