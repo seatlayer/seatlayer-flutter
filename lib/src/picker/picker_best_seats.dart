@@ -64,33 +64,19 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // One track, read top to bottom: how many, of what, where, then go.
-        // The quantity and the ticket type share a line because the stepper is
-        // narrow and fixed; the zone is a line of its own because its values
-        // are venue names, which are the long ones.
-        Row(
-          children: [
-            _Stepper(
-              quantity: quantity,
-              maximum: maximum,
-              enabled: enabled,
-              onChanged: (value) => setState(() => _quantity = value),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _CompactSelect(
-                label: strings.ticketType,
-                placeholder: strings.anyTicketType,
-                value: _categoryKey,
-                entries: <(String, String)>[
-                  for (final category in categories)
-                    (category.key, category.label),
-                ],
-                enabled: enabled,
-                onChanged: (value) => setState(() => _categoryKey = value),
-              ),
-            ),
+        // One track, read top to bottom: of what, where, then how many and go.
+        // The ticket type and the zone each take a full line because their
+        // values are names, which are the long ones; the stepper is narrow and
+        // fixed, so it shares the last line with the action it feeds.
+        _CompactSelect(
+          label: strings.ticketType,
+          placeholder: strings.anyTicketType,
+          value: _categoryKey,
+          entries: <(String, String)>[
+            for (final category in categories) (category.key, category.label),
           ],
+          enabled: enabled,
+          onChanged: (value) => setState(() => _categoryKey = value),
         ),
         // A venue with no zones has nothing to choose between, so the row is
         // absent rather than offering a select whose only answer is "anywhere".
@@ -108,32 +94,45 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
           ),
         ],
         const SizedBox(height: 8),
-        FilledButton.icon(
-          style: FilledButton.styleFrom(
-            backgroundColor: theme.accent,
-            foregroundColor: theme.onAccent,
-            minimumSize: const Size.fromHeight(46),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(theme.buttonRadius),
+        Row(
+          children: [
+            _Stepper(
+              quantity: quantity,
+              maximum: maximum,
+              enabled: enabled,
+              onChanged: (value) => setState(() => _quantity = value),
             ),
-            textStyle: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              fontFamily: theme.fontFamily,
+            const SizedBox(width: 8),
+            Expanded(
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: theme.accent,
+                  foregroundColor: theme.onAccent,
+                  minimumSize: const Size(0, 46),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(theme.buttonRadius),
+                  ),
+                  textStyle: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: theme.fontFamily,
+                  ),
+                ),
+                onPressed: enabled ? () => _submit(controller, quantity) : null,
+                icon: _submitting
+                    ? const SizedBox.square(
+                        dimension: 14,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.auto_awesome_rounded, size: 16),
+                label: Text(
+                  strings.findBestSeats(quantity),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
-          ),
-          onPressed: enabled ? () => _submit(controller, quantity) : null,
-          icon: _submitting
-              ? const SizedBox.square(
-                  dimension: 14,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.auto_awesome_rounded, size: 16),
-          label: Text(
-            strings.findBestSeats(quantity),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
+          ],
         ),
       ],
     );

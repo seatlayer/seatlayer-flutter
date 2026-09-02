@@ -29,7 +29,7 @@ void main() {
     expect(find.text('Ticket type'), findsNothing);
   });
 
-  testWidgets('quantity and type share row one, the zone gets row two',
+  testWidgets('type, then zone, then the stepper beside the action',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -57,7 +57,8 @@ void main() {
       tester.getSize(boxes.first).height,
       const SeatLayerPickerLayout().selectorHeight,
     );
-    // The stepper is fixed, so the type select beside it never moves.
+    // The stepper is fixed and shares the last line with the action it
+    // feeds, under both selects.
     final stepper = tester.getRect(
       find.ancestor(
         of: find.byTooltip('More tickets'),
@@ -65,7 +66,10 @@ void main() {
       ).first,
     );
     expect(stepper.width, 112);
-    expect(stepper.top, tester.getRect(boxes.first).top);
+    expect(stepper.top, greaterThanOrEqualTo(zone.bottom));
+    final action = tester.getRect(find.byType(FilledButton));
+    expect(action.left, greaterThanOrEqualTo(stepper.right));
+    expect((action.center.dy - stepper.center.dy).abs(), lessThan(1));
   });
 
   testWidgets('a venue with no zones is not asked which zone', (tester) async {
