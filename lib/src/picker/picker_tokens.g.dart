@@ -114,17 +114,17 @@ abstract final class SeatLayerSizeTokens {
   /// `52`
   static const double dockBarHeight = 52;
 
-  /// `44`
-  static const double peekHeight = 44;
+  /// `56`
+  static const double peekHeight = 56;
 
   /// `0.6`
   static const double sheetMaxHeightFraction = 0.6;
 
-  /// `150`
-  static const double emptyTrayMaxHeight = 150;
+  /// `190`
+  static const double emptyTrayMaxHeight = 190;
 
-  /// `40`
-  static const double denseLineHeight = 40;
+  /// `44`
+  static const double denseLineHeight = 44;
 
   /// `5`
   static const int denseVisibleLines = 5;
@@ -135,17 +135,20 @@ abstract final class SeatLayerSizeTokens {
   /// `360`
   static const double confirmCardMaxWidth = 360;
 
-  /// `44`
-  static const double confirmIdentityHeight = 44;
+  /// `56`
+  static const double confirmIdentityHeight = 56;
+
+  /// `34`
+  static const double confirmBandHeight = 34;
 
   /// `64`
   static const double confirmPhotoHeight = 64;
 
-  /// `40`
-  static const double confirmActionHeight = 40;
+  /// `44`
+  static const double confirmActionHeight = 44;
 
-  /// `40`
-  static const double selectorHeight = 40;
+  /// `44`
+  static const double selectorHeight = 44;
 
   /// `44`
   static const double accessibilityControlSize = 44;
@@ -237,8 +240,17 @@ abstract final class SeatLayerMotionTokens {
   /// `300` ms
   static const int immersive = 300;
 
+  /// `300` ms
+  static const int pressSweep = 300;
+
   /// `4000` ms — deliberately outside the budget.
   static const int undoWindow = 4000;
+
+  /// `700` ms — deliberately outside the budget.
+  static const int inviteSweep = 700;
+
+  /// `1600` ms — deliberately outside the budget.
+  static const int inviteBreathe = 1600;
 }
 
 /// Which platform haptic each cue fires.
@@ -285,11 +297,32 @@ abstract final class SeatLayerStringTokens {
   /// Select
   static const String select = 'Select';
 
+  /// Add seat
+  static const String addSeat = 'Add seat';
+
+  /// Added
+  static const String added = 'Added';
+
+  /// Section
+  static const String sectionWord = 'Section';
+
+  /// Row
+  static const String rowWord = 'Row';
+
+  /// Seat
+  static const String seatWord = 'Seat';
+
+  /// Place
+  static const String placeWord = 'Place';
+
   /// View from here
   static const String viewFromHere = 'View from here';
 
   /// 3D
   static const String venue3D = '3D';
+
+  /// See it in 3D
+  static const String seeItIn3D = 'See it in 3D';
 
   /// Open venue 360°
   static const String openVenue360 = 'Open venue 360°';
@@ -336,6 +369,9 @@ abstract final class SeatLayerStringTokens {
 
   /// Best seats
   static const String bestSeats = 'Best seats';
+
+  /// Find seats
+  static const String findSeats = 'Find seats';
 
   /// Show less
   static const String showLess = 'Show less';
@@ -489,14 +525,14 @@ abstract final class SeatLayerStringTokens {
   /// From {price}
   static const String fromPrice = 'From {price}';
 
-  /// Find {count} best seats
-  static const String findBestSeats = 'Find {count} best seats';
+  /// Find {count} seats together
+  static const String findBestSeats = 'Find {count} seats together';
 
-  /// Find {count} best seat
-  static const String findBestSeatsOne = 'Find {count} best seat';
+  /// Find {count} seat
+  static const String findBestSeatsOne = 'Find {count} seat';
 
-  /// Find {count} best seats
-  static const String findBestSeatsOther = 'Find {count} best seats';
+  /// Find {count} seats together
+  static const String findBestSeatsOther = 'Find {count} seats together';
 
   /// {clock}
   static const String heldFor = '{clock}';

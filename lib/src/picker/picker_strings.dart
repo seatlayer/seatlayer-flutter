@@ -25,8 +25,15 @@ class SeatLayerPickerStrings {
     this.backToVenue = SeatLayerStringTokens.backToVenue,
     this.cancel = SeatLayerStringTokens.cancel,
     this.select = SeatLayerStringTokens.select,
+    this.addSeat = SeatLayerStringTokens.addSeat,
+    this.added = SeatLayerStringTokens.added,
+    this.sectionWord = SeatLayerStringTokens.sectionWord,
+    this.rowWord = SeatLayerStringTokens.rowWord,
+    this.seatWord = SeatLayerStringTokens.seatWord,
+    this.placeWord = SeatLayerStringTokens.placeWord,
     this.viewFromHere = SeatLayerStringTokens.viewFromHere,
     this.venue3D = SeatLayerStringTokens.venue3D,
+    this.seeItIn3D = SeatLayerStringTokens.seeItIn3D,
     this.openVenue360 = SeatLayerStringTokens.openVenue360,
     this.previousSeat = SeatLayerStringTokens.previousSeat,
     this.nextSeat = SeatLayerStringTokens.nextSeat,
@@ -42,6 +49,7 @@ class SeatLayerPickerStrings {
     this.fewerTickets = SeatLayerStringTokens.fewerTickets,
     this.moreTickets = SeatLayerStringTokens.moreTickets,
     this.bestSeats = SeatLayerStringTokens.bestSeats,
+    this.findSeats = SeatLayerStringTokens.findSeats,
     this.showLess = SeatLayerStringTokens.showLess,
     this.undo = SeatLayerStringTokens.undo,
     this.holdAndCheckout = SeatLayerStringTokens.holdAndCheckout,
@@ -144,14 +152,42 @@ class SeatLayerPickerStrings {
   /// Confirm-card dismissal.
   final String cancel;
 
-  /// Confirm-card acceptance.
+  /// Confirm-card acceptance, for hosts that still render their own card.
+  ///
+  /// The SDK's card says [addSeat]: it names the thing the press does, where
+  /// "Select" named the state the seat was already in when the card opened.
   final String select;
+
+  /// Confirm-card acceptance: "Add seat".
+  final String addSeat;
+
+  /// What [addSeat] becomes for the moment after it is pressed.
+  final String added;
+
+  /// Eyebrow over the confirm card's section cell.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for the four bare place
+  /// words below, so they keep their English wording in every locale until one
+  /// exists. A host shipping outside English should override them.
+  final String sectionWord;
+
+  /// Eyebrow over the confirm card's row cell, where the chart authored none.
+  final String rowWord;
+
+  /// Eyebrow over the confirm card's seat cell.
+  final String seatWord;
+
+  /// Eyebrow over the seat cell of a booth, whose seats are places.
+  final String placeWord;
 
   /// Confirm-card pill opening the seat-view photo.
   final String viewFromHere;
 
-  /// Confirm-card pill opening the venue 3D scene.
+  /// Short 3D label, on surfaces with no room for a sentence.
   final String venue3D;
+
+  /// Confirm-card action opening the venue 3D scene.
+  final String seeItIn3D;
 
   /// 3D chrome action opening the full venue panorama.
   final String openVenue360;
@@ -204,6 +240,15 @@ class SeatLayerPickerStrings {
 
   /// Name of the best-seats feature.
   final String bestSeats;
+
+  /// The collapsed cart's shortcut into the best-seats form.
+  ///
+  /// Two words, because it sits on a pill beside the cheapest price on a
+  /// phone-width bar.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String findSeats;
 
   /// Collapses an expanded dense ticket list.
   final String showLess;
@@ -368,7 +413,11 @@ class SeatLayerPickerStrings {
 
   static String _defaultContinueWithTotal(String money) => 'Continue · $money';
 
-  static String _defaultFindBestSeats(int count) => 'Find $count best seats';
+  static String _defaultFindBestSeats(int count) =>
+      (count == 1
+              ? SeatLayerStringTokens.findBestSeatsOne
+              : SeatLayerStringTokens.findBestSeatsOther)
+          .replaceAll('{count}', '$count');
 
   static String _defaultMoreCount(int count) => '+$count more';
 

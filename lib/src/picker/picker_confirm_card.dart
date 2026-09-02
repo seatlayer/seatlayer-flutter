@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../open_enums.dart';
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_models.dart';
+import 'picker_strings.dart';
 import 'picker_styles.dart';
 import 'picker_motion.dart';
 import 'picker_ticket_tiers.dart';
@@ -15,11 +18,15 @@ import 'seat_layer_picker_theme.dart';
 /// The phone's one-seat decision surface.
 ///
 /// A buyer who has just tapped a seat is answering one question — this seat,
-/// this price, yes or no — so the card carries the seat's identity, its price,
-/// the two ways to look at it, and the two answers. The category name is
-/// deliberately absent: the map is already painted in the category's colour and
-/// the dot repeats it, so spelling it out costs a line to say what the section
-/// name mostly said.
+/// this price, yes or no — so the card is read top to bottom as that question:
+/// where the seat is, what it costs, what it looks like from there, and then
+/// the two answers.
+///
+/// Where it is comes first as a grid rather than a sentence. `Gallery · Row A ·
+/// Seat 1` reads as one long label a buyer has to parse; three labelled cells —
+/// section, row, seat — let the eye land on the number it came for. The
+/// category and the price share the band under it, tinted in the category's own
+/// colour, which is the same colour the seat is painted on the map.
 ///
 /// Everything comes from the scope, so this works standalone inside a
 /// [SeatLayerPickerScope].
@@ -70,6 +77,17 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
   String? _tierId;
   String? _dismissedLabel;
 
+  /// Whether the buyer has touched this card yet.
+  ///
+  /// The invitation — one highlight across `Add seat`, then a slow breath —
+  /// exists to say where the answer is. A buyer whose finger is already on the
+  /// card has found it, so the first pointer down anywhere on the card ends the
+  /// invitation for good.
+  bool _touched = false;
+
+  /// Whether the press has been committed and the button now says "Added".
+  bool _added = false;
+
   @override
   void didUpdateWidget(covariant SeatLayerConfirmCard oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -77,6 +95,8 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       _seatKey = null;
       _tierId = widget.seat?.tierId;
       _dismissedLabel = null;
+      _touched = false;
+      _added = false;
     }
   }
 
@@ -98,6 +118,8 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       _seatKey = seatKey;
       _tierId = seat.tierId ?? seat.tiers?.firstOrNull?.id;
       _dismissedLabel = null;
+      _touched = false;
+      _added = false;
     }
     if (seat.label == _dismissedLabel) return const SizedBox.shrink();
     _tierId ??= seat.tierId ?? seat.tiers?.firstOrNull?.id;
@@ -128,6 +150,9 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
         (theme.styles.confirmCardStyle ?? const SeatLayerSurfaceStyle())
             .merge(widget.style);
 
+    final categoryColor = pickerColor(category?.color) ?? theme.accent;
+    final invite = !_touched && !SeatLayerPickerMotion.reduced(context);
+
     // The card sizes itself to its content and to the screen less one gutter
     // on each side; whoever places it decides where on the map it sits.
     return Align(
@@ -140,110 +165,135 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
             maxWidth: layout.confirmCardMaxWidth,
             maxHeight: MediaQuery.sizeOf(context).height * .72,
           ),
-          child: Material(
-            key: const ValueKey<String>('seatlayer.confirm-card.surface'),
-            color: cardStyle.color ?? theme.surface,
-            elevation: cardStyle.elevation ?? 18,
-            shadowColor: pickerAlpha(const Color(0xFF000000), .26),
-            shape: cardStyle.shape ??
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(theme.radius + 4),
-                  side: BorderSide(color: pickerAlpha(theme.divider, .9)),
-                ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                SizedBox(
-                  height: layout.confirmIdentityHeight,
-                  child: _IdentityRow(
-                    seat: seat,
-                    color: pickerColor(category?.color) ?? theme.accent,
-                    price: selectedPrice,
-                    currency: selectedCurrency,
+          child: Listener(
+            onPointerDown: (_) {
+              if (!_touched) setState(() => _touched = true);
+            },
+            child: Material(
+              key: const ValueKey<String>('seatlayer.confirm-card.surface'),
+              color: cardStyle.color ?? theme.surface,
+              elevation: cardStyle.elevation ?? 18,
+              shadowColor: pickerAlpha(const Color(0xFF000000), .26),
+              shape: cardStyle.shape ??
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(theme.radius + 4),
+                    side: BorderSide(color: pickerAlpha(theme.divider, .9)),
                   ),
-                ),
-                // The gradient stands in for the photograph `View from here`
-                // opens, so it is drawn only where that action exists. With
-                // just the 3D pill it was a 64 pt picture of nothing with one
-                // control floating in it; the pill alone, on the card's own
-                // surface, is the same offer without the empty frame.
-                if (seatView != null) ...[
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
                   SizedBox(
-                    height: layout.confirmPhotoHeight,
-                    child: _InspectionStrip(
-                      seat: seat,
-                      onViewFromSeat: seatView,
-                      onShow3D: venue3D,
-                    ),
+                    height: layout.confirmIdentityHeight,
+                    child: _IdentityGrid(seat: seat),
                   ),
-                  const SizedBox(height: 10),
-                ] else if (venue3D != null) ...[
+                  // The band is the category speaking for itself: its colour,
+                  // its name, how much of it is left, and what it costs.
+                  // Without a category there is nothing for it to say, and a
+                  // price with no name beside it belongs nowhere on this card.
+                  if (category != null)
+                    SizedBox(
+                      height: layout.confirmBandHeight,
+                      child: _CategoryBand(
+                        category: category,
+                        color: categoryColor,
+                        price: selectedPrice,
+                        currency: selectedCurrency,
+                      ),
+                    ),
+                  // The gradient stands in for the photograph `View from here`
+                  // opens, so it is drawn only where that action exists.
+                  if (seatView != null) ...[
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: layout.confirmPhotoHeight,
+                      child: _PhotoStrip(
+                        onViewFromSeat: controller.state.isBusy
+                            ? null
+                            : () => _inspect(seat, seatView),
+                      ),
+                    ),
+                  ],
+                  // 3D is a place to go, not a badge on a picture, so it is a
+                  // full-width action of its own — legible, and big enough to
+                  // hit — rather than a pill floating in an empty frame.
+                  if (venue3D != null) ...[
+                    const SizedBox(height: 10),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: SizedBox(
+                        height: layout.confirmActionHeight,
+                        child: _SecondaryAction(
+                          icon: Icons.view_in_ar_rounded,
+                          label: strings.seeItIn3D,
+                          onPressed: controller.state.isBusy
+                              ? null
+                              : () => _inspect(seat, venue3D),
+                        ),
+                      ),
+                    ),
+                  ],
+                  SizedBox(
+                    height: seatView == null && venue3D == null ? 5 : 10,
+                  ),
+                  if (tiers.length > 1)
+                    Flexible(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (final tier in tiers)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 7),
+                                child: SeatLayerPickerSeatTierChoice(
+                                  tier: tier,
+                                  currency: seat.currency ?? 'USD',
+                                  selected: _tierId == tier.id,
+                                  enabled: !controller.state.isBusy,
+                                  onTap: () =>
+                                      setState(() => _tierId = tier.id),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
                   SizedBox(
                     height: layout.confirmActionHeight,
-                    child: _InspectionStrip(
-                      seat: seat,
-                      onViewFromSeat: null,
-                      onShow3D: venue3D,
-                      photo: false,
+                    child: Row(
+                      children: [
+                        // One third to leave, two thirds to accept: the two
+                        // answers are not equally likely, and the card should
+                        // not pretend that they are.
+                        Expanded(
+                          child: _CancelButton(
+                            label: strings.cancel,
+                            style: theme.styles.secondaryButtonStyle,
+                            onPressed: controller.state.isBusy
+                                ? null
+                                : () => _cancel(controller, seat),
+                          ),
+                        ),
+                        const SizedBox(width: 1),
+                        Expanded(
+                          flex: 2,
+                          child: _AddSeatButton(
+                            label: _added ? strings.added : strings.addSeat,
+                            added: _added,
+                            invite: invite,
+                            style: theme.styles.primaryButtonStyle,
+                            onPressed: controller.state.isBusy
+                                ? null
+                                : () => _confirm(controller, seat),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 10),
-                ] else
-                  const SizedBox(height: 5),
-                if (tiers.length > 1)
-                  Flexible(
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (final tier in tiers)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 7),
-                              child: SeatLayerPickerSeatTierChoice(
-                                tier: tier,
-                                currency: seat.currency ?? 'USD',
-                                selected: _tierId == tier.id,
-                                enabled: !controller.state.isBusy,
-                                onTap: () => setState(() => _tierId = tier.id),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                SizedBox(
-                  height: layout.confirmActionHeight,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _CardButton(
-                          label: strings.cancel,
-                          filled: false,
-                          style: theme.styles.secondaryButtonStyle,
-                          onPressed: controller.state.isBusy
-                              ? null
-                              : () => _cancel(controller, seat),
-                        ),
-                      ),
-                      const SizedBox(width: 1),
-                      Expanded(
-                        child: _CardButton(
-                          label: strings.select,
-                          icon: Icons.check_rounded,
-                          filled: true,
-                          style: theme.styles.primaryButtonStyle,
-                          onPressed: controller.state.isBusy
-                              ? null
-                              : () => _confirm(controller, seat),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -264,6 +314,7 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     // would buzz twice for one seat.
     final origin = _cardCentre();
     final callbacks = SeatLayerPickerScope.callbacksOf(context);
+    final reduced = SeatLayerPickerMotion.reduced(context);
     try {
       if (_tierId != null && _tierId != seat.tierId) {
         await controller.setSeatTier(seat.id, _tierId);
@@ -271,10 +322,33 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       await widget.onConfirm?.call(seat);
       callbacks.onSeatSelected?.call(seat);
       if (!mounted) return;
+      // The facts never wait for the picture: the ticket is in the cart and
+      // the peek total has already changed by the time the button admits it.
+      if (!reduced) {
+        setState(() => _added = true);
+        await Future<void>.delayed(SeatLayerPickerMotion.pressSweep);
+        if (!mounted) return;
+      }
       _flyToPeek(origin);
       _dismiss(seat);
     } catch (_) {
       // The controller keeps the typed failure in picker state for native UI.
+    }
+  }
+
+  Future<void> _inspect(
+    SelectedSeat seat,
+    FutureOr<void> Function(SelectedSeat seat) action,
+  ) async {
+    final callbacks = SeatLayerPickerScope.callbacksOf(context);
+    try {
+      await action(seat);
+      // The card stays put until the runtime has actually mounted the
+      // immersive surface: removing it first lets the tail of the same iOS
+      // tap reach the WebView and select a seat underneath.
+      callbacks.onSeatViewOpened?.call(seat);
+    } catch (_) {
+      // A controller-backed action already published a typed picker error.
     }
   }
 
@@ -325,23 +399,26 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
   }
 }
 
-class _IdentityRow extends StatelessWidget {
-  const _IdentityRow({
-    required this.seat,
-    required this.color,
-    required this.price,
-    required this.currency,
-  });
+/// Where the seat is, as labelled cells rather than one long sentence.
+///
+/// Section, row and seat each get their own cell with a small eyebrow over the
+/// value, so the buyer checking a row letter reads one word instead of parsing
+/// `Gallery · Row A · Seat 1`. The section takes whatever the other two leave,
+/// because it is the only one of the three that is ever a real name; with no
+/// section to show, the remaining cells share the width evenly.
+///
+/// A screen reader still hears the sentence: the grid is one semantics node
+/// carrying the same identity the rest of the picker reads out.
+class _IdentityGrid extends StatelessWidget {
+  const _IdentityGrid({required this.seat});
 
   final SelectedSeat seat;
-  final Color color;
-  final double? price;
-  final String currency;
 
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
+    final section = seat.sectionLabel?.trim() ?? '';
     final row = pickerRowLabel(
       seat.rowLabel,
       seat.sectionLabel,
@@ -350,34 +427,176 @@ class _IdentityRow extends StatelessWidget {
         seat.sectionLabel,
       ),
     );
-    final parts = <String>[
-      if (seat.sectionLabel?.trim().isNotEmpty ?? false)
-        seat.sectionLabel!.trim(),
-      if (row.isNotEmpty) '${_rowWord(seat)} $row',
-      '${_seatWord(seat)} ${seat.seatNumber?.trim().isNotEmpty ?? false ? seat.seatNumber!.trim() : seat.buyerFacingLabel}',
+    final number = seat.seatNumber?.trim().isNotEmpty ?? false
+        ? seat.seatNumber!.trim()
+        : seat.buyerFacingLabel;
+    final rowWord = _rowWord(seat, strings);
+    final seatWord = _seatWord(seat, strings);
+    final cells = <(String, String)>[
+      if (section.isNotEmpty) (strings.sectionWord, section),
+      if (row.isNotEmpty) (rowWord, row),
+      (seatWord, number),
     ];
+    final children = <Widget>[];
+    for (var index = 0; index < cells.length; index++) {
+      if (index > 0) {
+        children.add(
+          Container(
+            width: 1,
+            margin: const EdgeInsets.symmetric(vertical: 10),
+            color: pickerAlpha(theme.divider, .9),
+          ),
+        );
+      }
+      final cell = _cell(context, cells[index].$1, cells[index].$2);
+      children.add(
+        section.isEmpty || index == 0
+            ? Expanded(child: cell)
+            : ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 54, maxWidth: 120),
+                child: cell,
+              ),
+      );
+    }
+    return Semantics(
+      container: true,
+      label: strings.seatIdentity(<String>[
+        if (section.isNotEmpty) section,
+        if (row.isNotEmpty) '$rowWord $row',
+        '$seatWord $number',
+      ]),
+      child: ExcludeSemantics(child: Row(children: children)),
+    );
+  }
+
+  Widget _cell(BuildContext context, String eyebrow, String value) {
+    final theme = seatLayerPickerThemeOf(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            eyebrow.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: theme.mutedText,
+              fontSize: 10,
+              height: 1.2,
+              letterSpacing: .8,
+              fontWeight: FontWeight.w800,
+              fontFamily: theme.fontFamily,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: theme.text,
+              fontSize: 18,
+              height: 1.1,
+              fontWeight: FontWeight.w800,
+              fontFamily: theme.fontFamily,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// What the chart calls a row, where it called it anything.
+  static String _rowWord(SelectedSeat seat, SeatLayerPickerStrings strings) =>
+      seat.displayType?.trim().isNotEmpty ?? false
+          ? seat.displayType!.trim()
+          : seat.rowType?.trim().isNotEmpty ?? false
+              ? seat.rowType!.trim()
+              : strings.rowWord;
+
+  static String _seatWord(SelectedSeat seat, SeatLayerPickerStrings strings) =>
+      seat.objectType == ObjectType.booth
+          ? strings.placeWord
+          : strings.seatWord;
+}
+
+/// The category, in the category's own colour, and what it costs.
+///
+/// The map is already painted in these colours, so the band is the one place
+/// on the card where naming the category earns its line: the buyer matches the
+/// tint to the seat they just tapped. The price lives here rather than on the
+/// button, where it would be the same number the cart is about to say.
+class _CategoryBand extends StatelessWidget {
+  const _CategoryBand({
+    required this.category,
+    required this.color,
+    required this.price,
+    required this.currency,
+  });
+
+  final SeatLayerPickerCategory category;
+  final Color color;
+  final double? price;
+  final String currency;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Color.alphaBlend(pickerAlpha(color, .11), theme.surface),
+      ),
       child: Row(
         children: [
+          SizedBox(
+            width: 3,
+            height: double.infinity,
+            child: ColoredBox(color: color),
+          ),
+          const SizedBox(width: 9),
           DecoratedBox(
             decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            child: const SizedBox.square(dimension: 10),
+            child: const SizedBox.square(dimension: 6),
           ),
-          const SizedBox(width: 8),
-          // The place ellipsizes; the row, the seat and the price never do —
-          // a truncated seat number is a different seat.
-          Flexible(
-            child: Text(
-              strings.seatIdentity(parts),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: theme.text,
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                fontFamily: theme.fontFamily,
-              ),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    category.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: theme.text,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      fontFamily: theme.fontFamily,
+                    ),
+                  ),
+                ),
+                // How much of this category is left, where availability knows.
+                if (category.available > 0) ...[
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      strings.seatsLeft(category.available),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: theme.mutedText,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: theme.fontFamily,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           if (price != null) ...[
@@ -387,113 +606,57 @@ class _IdentityRow extends StatelessWidget {
               softWrap: false,
               style: TextStyle(
                 color: theme.text,
-                fontSize: 15,
-                fontWeight: FontWeight.w900,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
                 fontFamily: theme.fontFamily,
               ),
             ),
           ],
+          const SizedBox(width: 12),
         ],
       ),
     );
   }
-
-  static String _rowWord(SelectedSeat seat) {
-    final authored = seat.displayType?.trim().isNotEmpty ?? false
-        ? seat.displayType!.trim()
-        : seat.rowType?.trim().isNotEmpty ?? false
-            ? seat.rowType!.trim()
-            : 'Row';
-    return authored;
-  }
-
-  static String _seatWord(SelectedSeat seat) =>
-      seat.objectType == ObjectType.booth ? 'Place' : 'Seat';
 }
 
-/// The photo strip, and the two ways to look at the seat that live on it.
+/// The seat photograph's stand-in, with the way into it.
 ///
-/// The snapshot carries no seat-view image URL, so the strip renders the
-/// neutral gradient wherever `View from here` is offered; the pills are what
-/// the buyer is actually reaching for, and they are gated on the runtime's own
-/// capabilities. Without that action the strip drops [photo] and becomes a
-/// plain row of pills on the card's own surface.
-class _InspectionStrip extends StatelessWidget {
-  const _InspectionStrip({
-    required this.seat,
-    required this.onViewFromSeat,
-    required this.onShow3D,
-    this.photo = true,
-  });
+/// The snapshot carries no seat-view image URL, so the strip renders a neutral
+/// gradient wherever `View from here` is offered, and the pill rides its
+/// top-right corner the way a control on a photograph does. Without that
+/// action there is no picture to stand in for and the strip is not drawn.
+class _PhotoStrip extends StatelessWidget {
+  const _PhotoStrip({required this.onViewFromSeat});
 
-  final SelectedSeat seat;
-  final FutureOr<void> Function(SelectedSeat seat)? onViewFromSeat;
-  final FutureOr<void> Function(SelectedSeat seat)? onShow3D;
-
-  /// Whether to draw the gradient that stands in for the seat photograph.
-  final bool photo;
+  final VoidCallback? onViewFromSeat;
 
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
-    final busy = SeatLayerPickerScope.stateOf(context).isBusy;
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: photo
-            ? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: <Color>[
-                  Color.alphaBlend(
-                    pickerAlpha(theme.accent, .22),
-                    theme.surface,
-                  ),
-                  Color.alphaBlend(pickerAlpha(theme.text, .12), theme.surface),
-                ],
-              )
-            : null,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: Row(
-          children: [
-            if (onViewFromSeat != null)
-              _StripAction(
-                icon: Icons.visibility_outlined,
-                label: strings.viewFromHere,
-                onPressed:
-                    busy ? null : () => _inspect(context, onViewFromSeat!),
-                onPhoto: photo,
-              ),
-            const Spacer(),
-            if (onShow3D != null)
-              _StripAction(
-                icon: Icons.view_in_ar_rounded,
-                label: strings.venue3D,
-                onPressed: busy ? null : () => _inspect(context, onShow3D!),
-                onPhoto: photo,
-              ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color.alphaBlend(pickerAlpha(theme.accent, .22), theme.surface),
+            Color.alphaBlend(pickerAlpha(theme.text, .12), theme.surface),
           ],
         ),
       ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Align(
+          alignment: Alignment.topRight,
+          child: _StripAction(
+            icon: Icons.visibility_outlined,
+            label: strings.viewFromHere,
+            onPressed: onViewFromSeat,
+          ),
+        ),
+      ),
     );
-  }
-
-  Future<void> _inspect(
-    BuildContext context,
-    FutureOr<void> Function(SelectedSeat seat) action,
-  ) async {
-    final callbacks = SeatLayerPickerScope.callbacksOf(context);
-    try {
-      await action(seat);
-      // The card stays put until the runtime has actually mounted the
-      // immersive surface: removing it first lets the tail of the same iOS
-      // tap reach the WebView and select a seat underneath.
-      callbacks.onSeatViewOpened?.call(seat);
-    } catch (_) {
-      // A controller-backed action already published a typed picker error.
-    }
   }
 }
 
@@ -502,32 +665,22 @@ class _StripAction extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onPressed,
-    this.onPhoto = true,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback? onPressed;
 
-  /// Whether the pill sits on the seat photograph rather than on the card.
-  ///
-  /// A near-opaque surface pill lifts off the photograph; on the card's own
-  /// surface the same colour would be invisible, so it takes a faint tint of
-  /// the card's ink instead and stays readable as a control.
-  final bool onPhoto;
-
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
     final pill = theme.styles.pillStyle ?? const SeatLayerSurfaceStyle();
     return Material(
-      color: pill.color ??
-          (onPhoto
-              ? pickerAlpha(theme.surface, .92)
-              : Color.alphaBlend(pickerAlpha(theme.text, .06), theme.surface)),
+      // A near-opaque surface pill lifts off the photograph underneath it.
+      color: pill.color ?? pickerAlpha(theme.surface, .92),
       elevation: pill.elevation ?? 0,
-      // `View from here` and `3D` are actions, not chips, so they carry the
-      // button radius rather than the chip's stadium.
+      // `View from here` is an action, not a chip, so it carries the button
+      // radius rather than the chip's stadium.
       shape: pill.shape ??
           RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(theme.buttonRadius),
@@ -559,44 +712,28 @@ class _StripAction extends StatelessWidget {
   }
 }
 
-class _CardButton extends StatelessWidget {
-  const _CardButton({
+/// A full-width, quietly tinted action on the card's own surface.
+class _SecondaryAction extends StatelessWidget {
+  const _SecondaryAction({
+    required this.icon,
     required this.label,
-    required this.filled,
     required this.onPressed,
-    this.icon,
-    this.style,
   });
 
+  final IconData icon;
   final String label;
-  final bool filled;
   final VoidCallback? onPressed;
-  final IconData? icon;
-  final ButtonStyle? style;
 
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
-    final disabled = onPressed == null;
-    final background = filled
-        ? theme.accent
-        : Color.alphaBlend(pickerAlpha(theme.text, .04), theme.surface);
-    final ink = filled ? theme.onAccent : theme.text;
-    final styledGround = seatLayerStyleRole(
-      style?.backgroundColor,
-      disabled: disabled,
-    );
-    final styledInk =
-        seatLayerStyleRole(style?.foregroundColor, disabled: disabled);
+    final ink =
+        onPressed == null ? pickerAlpha(theme.mutedText, .58) : theme.text;
     return Material(
-      color: styledGround ??
-          (disabled
-              ? Color.alphaBlend(
-                  pickerAlpha(theme.mutedText, .16),
-                  theme.surface,
-                )
-              : background),
-      shape: seatLayerStyleRole(style?.shape),
+      color: Color.alphaBlend(pickerAlpha(theme.text, .06), theme.surface),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(theme.buttonRadius),
+      ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
@@ -604,19 +741,20 @@ class _CardButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (icon != null) ...[
-                Icon(icon, size: 16, color: styledInk ?? ink),
-                const SizedBox(width: 6),
-              ],
-              Text(
-                label,
-                style: TextStyle(
-                  color: styledInk ??
-                      (disabled ? pickerAlpha(theme.mutedText, .58) : ink),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  fontFamily: theme.fontFamily,
-                ).merge(seatLayerStyleRole(style?.textStyle)),
+              Icon(icon, size: 16, color: ink),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: theme.fontFamily,
+                  ),
+                ),
               ),
             ],
           ),
@@ -624,6 +762,269 @@ class _CardButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The card's quiet answer: no fill, so it never competes with `Add seat`.
+class _CancelButton extends StatelessWidget {
+  const _CancelButton({
+    required this.label,
+    required this.onPressed,
+    this.style,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final ButtonStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    final disabled = onPressed == null;
+    final styledGround = seatLayerStyleRole(
+      style?.backgroundColor,
+      disabled: disabled,
+    );
+    final styledInk =
+        seatLayerStyleRole(style?.foregroundColor, disabled: disabled);
+    return Material(
+      color: styledGround ?? const Color(0x00000000),
+      shape: seatLayerStyleRole(style?.shape),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onPressed,
+        child: Center(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: styledInk ?? pickerAlpha(theme.text, disabled ? .34 : .8),
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              fontFamily: theme.fontFamily,
+            ).merge(seatLayerStyleRole(style?.textStyle)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// How many breaths the invitation takes before it rests.
+///
+/// Bounded on purpose. An animation with no end is movement in the corner of
+/// the eye for as long as the buyer hesitates, and a card that will not stop
+/// moving reads as a card that has not finished loading.
+const int _inviteBreaths = 3;
+
+/// The card's recommended answer, and the small theatre around it.
+///
+/// Three things happen here, and each says something the still button cannot.
+/// On arrival one highlight crosses it: this is the thing to press. While it
+/// waits it breathes, slowly, three times: the offer is still open. On the
+/// press its own ink fills from the left under a drawn check and the word
+/// turns to "Added": the ticket is in the cart. Only the last of the three is
+/// about the buyer's own action, and the ticket was counted before the sweep
+/// started — this is a receipt, not a progress bar.
+class _AddSeatButton extends StatefulWidget {
+  const _AddSeatButton({
+    required this.label,
+    required this.added,
+    required this.invite,
+    required this.onPressed,
+    this.style,
+  });
+
+  final String label;
+
+  /// Whether the press has been committed and the button is now a receipt.
+  final bool added;
+
+  /// Whether the arrival highlight and the breath play at all.
+  final bool invite;
+
+  final VoidCallback? onPressed;
+  final ButtonStyle? style;
+
+  @override
+  State<_AddSeatButton> createState() => _AddSeatButtonState();
+}
+
+class _AddSeatButtonState extends State<_AddSeatButton>
+    with TickerProviderStateMixin {
+  late final AnimationController _sweep = AnimationController(
+    vsync: this,
+    duration: SeatLayerPickerMotion.inviteSweep,
+  );
+  late final AnimationController _breathe = AnimationController(
+    vsync: this,
+    duration: SeatLayerPickerMotion.inviteBreathe * _inviteBreaths,
+  );
+  late final AnimationController _press = AnimationController(
+    vsync: this,
+    duration: SeatLayerPickerMotion.pressSweep,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.invite) {
+      _sweep.forward().whenComplete(() {
+        if (mounted && widget.invite && !widget.added) _breathe.forward();
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _AddSeatButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.invite && oldWidget.invite) {
+      _sweep.stop();
+      _breathe.stop();
+    }
+    if (widget.added && !oldWidget.added) {
+      _sweep.stop();
+      _breathe.stop();
+      _press.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _sweep.dispose();
+    _breathe.dispose();
+    _press.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    final disabled = widget.onPressed == null;
+    final styledGround = seatLayerStyleRole(
+      widget.style?.backgroundColor,
+      disabled: disabled,
+    );
+    final styledInk =
+        seatLayerStyleRole(widget.style?.foregroundColor, disabled: disabled);
+    final ground = styledGround ??
+        (disabled
+            ? Color.alphaBlend(pickerAlpha(theme.mutedText, .16), theme.surface)
+            : theme.accent);
+    final ink = styledInk ??
+        (disabled ? pickerAlpha(theme.mutedText, .58) : theme.onAccent);
+    return Material(
+      color: ground,
+      shape: seatLayerStyleRole(widget.style?.shape),
+      clipBehavior: Clip.antiAlias,
+      child: AnimatedBuilder(
+        animation: Listenable.merge(<Listenable>[_sweep, _breathe, _press]),
+        builder: (context, _) => Stack(
+          fit: StackFit.expand,
+          children: [
+            IgnorePointer(
+              child: CustomPaint(
+                painter: _AddSeatFinish(
+                  ink: ink,
+                  sweep: _sweep.value,
+                  breathe: _breathe.value,
+                  press: _press.value,
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: widget.onPressed,
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // The check is drawn rather than swapped in: it grows out
+                    // of the press it is answering.
+                    Transform.scale(
+                      scale: widget.added ? _checkScale : 1,
+                      child: Icon(Icons.check_rounded, size: 16, color: ink),
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        widget.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: ink,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          fontFamily: theme.fontFamily,
+                        ).merge(seatLayerStyleRole(widget.style?.textStyle)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  double get _checkScale =>
+      .7 +
+      (.3 * Curves.easeOutBack.transform((_press.value * 1.6).clamp(0.0, 1.0)));
+}
+
+/// Everything painted over `Add seat`: the arrival highlight, the breath, and
+/// the press filling the button with its own ink from the left.
+class _AddSeatFinish extends CustomPainter {
+  const _AddSeatFinish({
+    required this.ink,
+    required this.sweep,
+    required this.breathe,
+    required this.press,
+  });
+
+  final Color ink;
+  final double sweep;
+  final double breathe;
+  final double press;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    if (press > 0) {
+      canvas.drawRect(
+        Rect.fromLTWH(0, 0, size.width * press, size.height),
+        Paint()..color = pickerAlpha(ink, .18),
+      );
+    }
+    if (breathe > 0 && breathe < 1) {
+      final glow = (1 - math.cos(breathe * _inviteBreaths * 2 * math.pi)) / 2;
+      canvas.drawRect(rect, Paint()..color = pickerAlpha(ink, .09 * glow));
+    }
+    if (sweep > 0 && sweep < 1) {
+      final centre = (sweep * 3) - 1.5;
+      canvas.drawRect(
+        rect,
+        Paint()
+          ..shader = LinearGradient(
+            begin: Alignment(centre - .7, 0),
+            end: Alignment(centre + .7, 0),
+            colors: <Color>[
+              pickerAlpha(ink, 0),
+              pickerAlpha(ink, .26),
+              pickerAlpha(ink, 0),
+            ],
+          ).createShader(rect),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_AddSeatFinish oldDelegate) =>
+      oldDelegate.ink != ink ||
+      oldDelegate.sweep != sweep ||
+      oldDelegate.breathe != breathe ||
+      oldDelegate.press != press;
 }
 
 class _FlyingDot extends StatefulWidget {

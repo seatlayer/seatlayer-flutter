@@ -85,7 +85,7 @@ void main() {
     map.emit(pickerSnapshot(sections: pickerSections()));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Select'));
+    await tester.tap(find.text('Add seat'));
     await tester.pumpAndSettle();
 
     expect(picker.seatAwaitingConfirmation, isNull);
@@ -110,7 +110,7 @@ void main() {
     );
     map.emit(pickerSnapshot(sections: pickerSections()));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Select'));
+    await tester.tap(find.text('Add seat'));
     await tester.pumpAndSettle();
 
     // The buyer taps a second seat: one agreed to, one still being asked.

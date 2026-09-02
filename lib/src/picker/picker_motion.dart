@@ -32,12 +32,10 @@ abstract final class SeatLayerPickerMotion {
       Duration(milliseconds: SeatLayerMotionTokens.sheet);
 
   /// A selected seat flying from the confirm card to the peek bar.
-  static const Duration fly =
-      Duration(milliseconds: SeatLayerMotionTokens.fly);
+  static const Duration fly = Duration(milliseconds: SeatLayerMotionTokens.fly);
 
   /// One seat of a best-available result popping in.
-  static const Duration pop =
-      Duration(milliseconds: SeatLayerMotionTokens.pop);
+  static const Duration pop = Duration(milliseconds: SeatLayerMotionTokens.pop);
 
   /// Between consecutive members of a set.
   static const Duration stagger =
@@ -54,6 +52,22 @@ abstract final class SeatLayerPickerMotion {
   /// The immersive 3D chrome settling onto the scene.
   static const Duration immersive =
       Duration(milliseconds: SeatLayerMotionTokens.immersive);
+
+  /// A pressed action filling with its own ink, left to right.
+  static const Duration pressSweep =
+      Duration(milliseconds: SeatLayerMotionTokens.pressSweep);
+
+  /// The one highlight that crosses a newly arrived primary action.
+  ///
+  /// Longer than anything in [catalog] on purpose: this is not the interface
+  /// answering the buyer, it is the interface pointing at the answer, and a
+  /// pointing gesture the eye can miss has not pointed at anything.
+  static const Duration inviteSweep =
+      Duration(milliseconds: SeatLayerMotionTokens.inviteSweep);
+
+  /// One breath of the same action while it waits to be pressed.
+  static const Duration inviteBreathe =
+      Duration(milliseconds: SeatLayerMotionTokens.inviteBreathe);
 
   /// How long an undo stays offered after a ticket is removed.
   ///
@@ -75,6 +89,7 @@ abstract final class SeatLayerPickerMotion {
     'crossfade': crossfade,
     'toast': toast,
     'immersive': immersive,
+    'pressSweep': pressSweep,
   };
 
   /// The one overshoot in the system, reserved for a buyer's own action

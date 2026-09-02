@@ -10,6 +10,7 @@ import 'package:seatlayer/src/picker/picker_status_views.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_attribution.dart';
 import 'package:seatlayer/src/picker/picker_errors.dart';
+import 'package:seatlayer/src/picker/picker_motion.dart';
 import 'package:seatlayer/src/picker/picker_seat_confirmation.dart';
 import 'package:seatlayer/src/picker/picker_section_navigator.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
@@ -425,14 +426,14 @@ void main() {
           ),
         );
 
-    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
     expect(picker.confirmedTicketCount, 0);
     expect(picker.seatAwaitingConfirmation?.id, 'seat-a-1');
 
     map.emit(pickerSnapshot(revision: 2, holdOwner: 'picker'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
     expect(picker.confirmedTicketCount, 0);
     expect(picker.seatAwaitingConfirmation?.id, 'seat-a-1');
 
@@ -446,7 +447,7 @@ void main() {
     });
     await tester.pumpAndSettle();
 
-    expect(find.text('Select'), findsNothing);
+    expect(find.text('Add seat'), findsNothing);
     expect(mapGate().ignoring, isFalse);
     expect(
       find.byKey(
@@ -454,6 +455,9 @@ void main() {
       ),
       findsNothing,
     );
+    // Unlocking waits one exit duration on a real timer, so that the tail of
+    // the tap that closed the card cannot reach the WebView underneath it.
+    await tester.pump(SeatLayerPickerMotion.exit);
     expect(
       map.calls
           .where((call) => call.$1 == 'picker.setInteractionEnabled')
@@ -470,7 +474,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
     expect(
       find.byKey(
         const ValueKey<String>('seatlayer-picker-prompt-transition'),
@@ -486,7 +490,7 @@ void main() {
     map.emit(in3D);
     await tester.pumpAndSettle();
 
-    expect(find.text('Select'), findsNothing);
+    expect(find.text('Add seat'), findsNothing);
     expect(mapGate().ignoring, isFalse);
     expect(
       find.byKey(
@@ -500,7 +504,7 @@ void main() {
     map.emit(pickerSnapshot(revision: 5, holdOwner: 'picker'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
     expect(picker.confirmedTicketCount, 0);
     expect(picker.seatAwaitingConfirmation?.id, 'seat-a-1');
   });
@@ -533,7 +537,7 @@ void main() {
           ),
         );
 
-    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
     expect(mapGate().ignoring, isTrue);
     await tester.pump();
     final locks = map.calls
@@ -542,10 +546,10 @@ void main() {
     expect(locks, hasLength(1));
     expect(locks.single.$2, <String, Object?>{'enabled': false});
 
-    await tester.tap(find.text('Select'));
+    await tester.tap(find.text('Add seat'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Select'), findsNothing);
+    expect(find.text('Add seat'), findsNothing);
     expect(mapGate().ignoring, isFalse);
     final interactionCalls = map.calls
         .where((call) => call.$1 == 'picker.setInteractionEnabled')

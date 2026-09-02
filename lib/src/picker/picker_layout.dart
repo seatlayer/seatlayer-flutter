@@ -26,10 +26,12 @@ class SeatLayerPickerLayout {
     this.confirmCardGutter = SeatLayerSizeTokens.confirmCardGutter,
     this.confirmCardMaxWidth = SeatLayerSizeTokens.confirmCardMaxWidth,
     this.confirmIdentityHeight = SeatLayerSizeTokens.confirmIdentityHeight,
+    this.confirmBandHeight = SeatLayerSizeTokens.confirmBandHeight,
     this.confirmPhotoHeight = SeatLayerSizeTokens.confirmPhotoHeight,
     this.confirmActionHeight = SeatLayerSizeTokens.confirmActionHeight,
     this.selectorHeight = SeatLayerSizeTokens.selectorHeight,
-    this.accessibilityControlSize = SeatLayerSizeTokens.accessibilityControlSize,
+    this.accessibilityControlSize =
+        SeatLayerSizeTokens.accessibilityControlSize,
     this.mapControlSize = SeatLayerSizeTokens.mapControlSize,
     this.attributionHeight = SeatLayerSizeTokens.attributionHeight,
     this.legendChipFontSize = SeatLayerSizeTokens.legendChipFontSize,
@@ -74,8 +76,11 @@ class SeatLayerPickerLayout {
   /// Ceiling for the confirm card's width.
   final double confirmCardMaxWidth;
 
-  /// Height of the confirm card's identity row.
+  /// Height of the confirm card's identity grid.
   final double confirmIdentityHeight;
+
+  /// Height of the confirm card's category band.
+  final double confirmBandHeight;
 
   /// Height of the confirm card's seat-view photo strip.
   final double confirmPhotoHeight;
@@ -114,6 +119,7 @@ class SeatLayerPickerLayout {
     double? confirmCardGutter,
     double? confirmCardMaxWidth,
     double? confirmIdentityHeight,
+    double? confirmBandHeight,
     double? confirmPhotoHeight,
     double? confirmActionHeight,
     double? selectorHeight,
@@ -139,6 +145,7 @@ class SeatLayerPickerLayout {
         confirmCardMaxWidth: confirmCardMaxWidth ?? this.confirmCardMaxWidth,
         confirmIdentityHeight:
             confirmIdentityHeight ?? this.confirmIdentityHeight,
+        confirmBandHeight: confirmBandHeight ?? this.confirmBandHeight,
         confirmPhotoHeight: confirmPhotoHeight ?? this.confirmPhotoHeight,
         confirmActionHeight: confirmActionHeight ?? this.confirmActionHeight,
         selectorHeight: selectorHeight ?? this.selectorHeight,
@@ -166,6 +173,7 @@ class SeatLayerPickerLayout {
       other.confirmCardGutter == confirmCardGutter &&
       other.confirmCardMaxWidth == confirmCardMaxWidth &&
       other.confirmIdentityHeight == confirmIdentityHeight &&
+      other.confirmBandHeight == confirmBandHeight &&
       other.confirmPhotoHeight == confirmPhotoHeight &&
       other.confirmActionHeight == confirmActionHeight &&
       other.selectorHeight == selectorHeight &&
@@ -190,6 +198,7 @@ class SeatLayerPickerLayout {
         confirmCardGutter,
         confirmCardMaxWidth,
         confirmIdentityHeight,
+        confirmBandHeight,
         confirmPhotoHeight,
         confirmActionHeight,
         selectorHeight,
