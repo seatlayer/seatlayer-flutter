@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 class SeatLayerPickerAttribution extends StatelessWidget {
   const SeatLayerPickerAttribution({
@@ -49,7 +50,7 @@ class SeatLayerPickerAttribution extends StatelessWidget {
                 style: TextStyle(
                   color: theme.text,
                   fontSize: compact ? 11 : 12,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
                   fontFamily: theme.fontFamily,
                   // `.02em` of the line's own size, as the web sets it.
                   letterSpacing: compact ? .22 : .24,

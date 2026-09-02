@@ -13,6 +13,7 @@ import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'picker_styles.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 /// The filters a buyer with an access need reaches for.
 ///
@@ -52,9 +53,8 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     // provisions, a palette when all it offers is colour.
     final provisions = available.accessibility;
     final name = provisions ? strings.accessibility : strings.displayOptions;
-    final icon = provisions
-        ? Icons.accessible_forward_rounded
-        : Icons.palette_outlined;
+    final icon =
+        provisions ? Icons.accessible_forward_rounded : Icons.palette_outlined;
     if (compact) {
       final theme = seatLayerPickerThemeOf(context);
       final size = theme.layout.accessibilityControlSize;
@@ -391,7 +391,8 @@ class _AccessOptionRow extends StatelessWidget {
                               color: theme.text,
                               fontSize:
                                   SeatLayerSizeTokens.accessRowLabelFontSize,
-                              fontWeight: FontWeight.w700,
+                              fontWeight:
+                                  seatLayerBoldWeight(context, FontWeight.w700),
                               height: 1.25,
                               fontFamily: theme.fontFamily,
                             ),
@@ -404,7 +405,8 @@ class _AccessOptionRow extends StatelessWidget {
                                 color: theme.mutedText,
                                 fontSize:
                                     SeatLayerSizeTokens.accessRowNoteFontSize,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: seatLayerBoldWeight(
+                                    context, FontWeight.w600),
                                 height: 1.3,
                                 fontFamily: theme.fontFamily,
                               ),
@@ -420,7 +422,8 @@ class _AccessOptionRow extends StatelessWidget {
                         style: TextStyle(
                           color: theme.mutedText,
                           fontSize: SeatLayerSizeTokens.accessRowNoteFontSize,
-                          fontWeight: FontWeight.w800,
+                          fontWeight:
+                              seatLayerBoldWeight(context, FontWeight.w800),
                           fontFeatures: const <FontFeature>[
                             FontFeature.tabularFigures(),
                           ],
@@ -478,8 +481,9 @@ class _AccessSwitch extends StatelessWidget {
         child: AnimatedAlign(
           duration: duration,
           curve: Curves.ease,
-          alignment:
-              on ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
+          alignment: on
+              ? AlignmentDirectional.centerEnd
+              : AlignmentDirectional.centerStart,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: inset),
             child: Container(

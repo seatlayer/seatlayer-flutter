@@ -12,6 +12,7 @@ import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 /// How far the scene's chrome stands off the picture's edges.
 const double _anchorInset = SeatLayerSizeTokens.mapAnchorInset;
@@ -20,8 +21,7 @@ const double _anchorInset = SeatLayerSizeTokens.mapAnchorInset;
 const double _chipGap = 6;
 
 /// `.03em` of tracking, expressed in points against each size that carries it.
-const double _backTracking =
-    SeatLayerSizeTokens.immersiveBackFontSize * 0.03;
+const double _backTracking = SeatLayerSizeTokens.immersiveBackFontSize * 0.03;
 const double _captionTracking =
     SeatLayerSizeTokens.immersiveCaptionFontSize * 0.03;
 
@@ -260,8 +260,9 @@ class _SeatDeck extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                for (var index = 0; index < controls.length; index++) ...<
-                    Widget>[
+                for (var index = 0;
+                    index < controls.length;
+                    index++) ...<Widget>[
                   if (index > 0) const SizedBox(width: _chipGap),
                   controls[index],
                 ],
@@ -350,7 +351,7 @@ class _SeatCaption extends StatelessWidget {
             style: TextStyle(
               color: SeatLayerDarkTokens.immersiveCaptionInk,
               fontSize: SeatLayerSizeTokens.immersiveCaptionFontSize,
-              fontWeight: FontWeight.w800,
+              fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
               letterSpacing: _captionTracking,
               fontFamily: theme.fontFamily,
             ),
@@ -409,10 +410,10 @@ class _BackPillContents extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: SeatLayerDarkTokens.immersiveGlassInk,
             fontSize: SeatLayerSizeTokens.immersiveBackFontSize,
-            fontWeight: FontWeight.w800,
+            fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
             letterSpacing: _backTracking,
           ),
         ),
@@ -464,7 +465,8 @@ class _ImmersiveAction extends StatelessWidget {
                       style: TextStyle(
                         color: SeatLayerDarkTokens.immersiveGlassInk,
                         fontSize: SeatLayerSizeTokens.immersiveNavChipFontSize,
-                        fontWeight: FontWeight.w700,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w700),
                         fontFamily: theme.fontFamily,
                       ),
                     ),
@@ -506,8 +508,7 @@ class _ImmersiveIcon extends StatelessWidget {
             backgroundColor: WidgetStatePropertyAll<Color>(Color(0x00000000)),
           ),
           color: SeatLayerDarkTokens.immersiveGlassInk,
-          disabledColor:
-              pickerAlpha(SeatLayerDarkTokens.immersiveGlassInk, .6),
+          disabledColor: pickerAlpha(SeatLayerDarkTokens.immersiveGlassInk, .6),
           icon: Icon(icon, size: SeatLayerSizeTokens.immersiveBackIconSize + 5),
         ),
       );

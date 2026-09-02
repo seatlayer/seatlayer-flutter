@@ -9,6 +9,7 @@ import 'picker_strings.dart';
 import 'picker_toast.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 /// Says, once, that a hold lapsed — and offers the seats back where it can.
 ///
@@ -80,7 +81,7 @@ class _SeatLayerHoldLapseNoticeState extends State<SeatLayerHoldLapseNotice> {
                   style: TextStyle(
                     color: theme.text,
                     fontSize: 13,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                     fontFamily: theme.fontFamily,
                   ),
                 ),
@@ -114,7 +115,7 @@ class _SeatLayerHoldLapseNoticeState extends State<SeatLayerHoldLapseNotice> {
                 strings.reselectSeats(lapse.recoverableLabels.length),
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                   fontFamily: theme.fontFamily,
                 ),
               ),

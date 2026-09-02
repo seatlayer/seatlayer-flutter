@@ -6,6 +6,7 @@ import 'picker_models.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 /// "Find me somewhere good", in one short track of controls.
 ///
@@ -140,7 +141,7 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
                     ),
                     textStyle: TextStyle(
                       fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                       fontFamily: theme.fontFamily,
                     ),
                   ),
@@ -261,7 +262,11 @@ class _CompactSelect extends StatelessWidget {
     return Semantics(
       label: label,
       child: Container(
-        height: theme.layout.bestSeatsSelectHeight,
+        height: seatLayerScaledExtent(
+          context,
+          theme.layout.bestSeatsSelectHeight,
+          max: SeatLayerTypeScaleTokens.sheet,
+        ),
         padding: const EdgeInsetsDirectional.only(start: 9, end: 10),
         decoration: BoxDecoration(
           color: theme.surface,
@@ -286,7 +291,7 @@ class _CompactSelect extends StatelessWidget {
             style: TextStyle(
               color: theme.text,
               fontSize: 12.5,
-              fontWeight: FontWeight.w700,
+              fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
               fontFamily: theme.fontFamily,
             ),
             items: <DropdownMenuItem<String?>>[
@@ -326,7 +331,11 @@ class _Stepper extends StatelessWidget {
       // Fixed, so the action beside it keeps one width whether the buyer is
       // asking for two seats or twelve.
       width: theme.layout.bestSeatsStepperWidth,
-      height: theme.layout.selectorHeight,
+      height: seatLayerScaledExtent(
+        context,
+        theme.layout.selectorHeight,
+        max: SeatLayerTypeScaleTokens.sheet,
+      ),
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         color: theme.surface,
@@ -351,7 +360,7 @@ class _Stepper extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: theme.text,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                   fontFamily: theme.fontFamily,
                   fontFeatures: const <FontFeature>[
                     FontFeature.tabularFigures(),
@@ -414,11 +423,10 @@ class _StepIcon extends StatelessWidget {
               child: Text(
                 glyph,
                 style: TextStyle(
-                  color: disabled
-                      ? pickerAlpha(theme.mutedText, .4)
-                      : theme.text,
+                  color:
+                      disabled ? pickerAlpha(theme.mutedText, .4) : theme.text,
                   fontSize: 14,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                   fontFamily: theme.fontFamily,
                 ),
               ),

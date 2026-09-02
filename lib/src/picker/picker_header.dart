@@ -9,6 +9,7 @@ import 'picker_models.dart';
 import 'seat_layer_picker_scope.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 /// Whose event this is, how long the seats are held, and the way out.
 ///
@@ -222,7 +223,7 @@ class _EventTitle extends StatelessWidget {
         style: TextStyle(
           color: theme.text,
           fontSize: SeatLayerSizeTokens.headerNameFontSize,
-          fontWeight: FontWeight.w700,
+          fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
           height: 1.2,
           fontFamily: theme.fontFamily,
         ),
@@ -239,7 +240,7 @@ class _EventTitle extends StatelessWidget {
           style: TextStyle(
             color: theme.text,
             fontSize: 16,
-            fontWeight: FontWeight.w800,
+            fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
             fontFamily: theme.fontFamily,
           ),
         ),
@@ -284,11 +285,11 @@ class _PickerBrandMark extends StatelessWidget {
           // A logo is a mark, not a picture: `cover` is what the web uses, so
           // a wordmark fills the square instead of shrinking inside it.
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _fallback(),
+          errorBuilder: (_, __, ___) => _fallback(context),
         ),
       );
     }
-    return _fallback();
+    return _fallback(context);
   }
 
   double get _radius => size < 30 ? SeatLayerRadiusTokens.headerLogo : 10;
@@ -297,7 +298,7 @@ class _PickerBrandMark extends StatelessWidget {
   ///
   /// A letter is the mark the web falls back to, and it is the one thing on
   /// the header that says whose event this is when no logo was uploaded.
-  Widget _fallback() {
+  Widget _fallback(BuildContext context) {
     final named = state.branding?.brandName ?? state.event?.name;
     final letter = named == null || named.trim().isEmpty
         ? null
@@ -322,7 +323,7 @@ class _PickerBrandMark extends StatelessWidget {
                   style: TextStyle(
                     color: theme.onAccent,
                     fontSize: size * .5,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                     fontFamily: theme.fontFamily,
                   ),
                 ),
@@ -403,6 +404,35 @@ class _SeatLayerPickerHoldCountdownState
     // countdown a buyer reads once and then stops looking at.
     final ink = expiring ? theme.onAccent : seatLayerAccentText(theme);
     final compact = widget.compact;
+    // What the pill SAYS, as opposed to what it draws. `m:ss` read aloud is
+    // either a time of day or two bare numbers, and a live region fed the
+    // running clock would speak once a second for a quarter of an hour. The
+    // spoken form is therefore throttled to the beats that matter: each
+    // minute mark while there is time, then every second of the last one,
+    // where a buyer is owed the count. Unchanged text is not re-announced, so
+    // the throttle IS the announcement policy.
+    final spoken = expiring
+        ? strings.holdSecondsLeft(remaining.inSeconds)
+        : strings.holdMinutesLeft(((remaining.inSeconds + 59) ~/ 60));
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      label: spoken,
+      child: ExcludeSemantics(
+        child: _pill(theme, ink, expiring, compact, minutes, seconds),
+      ),
+    );
+  }
+
+  Widget _pill(
+    SeatLayerResolvedPickerTheme theme,
+    Color ink,
+    bool expiring,
+    bool compact,
+    String minutes,
+    String seconds,
+  ) {
+    final strings = SeatLayerPickerScope.stringsOf(context);
     return DecoratedBox(
       decoration: BoxDecoration(
         color: expiring
@@ -422,12 +452,10 @@ class _SeatLayerPickerHoldCountdownState
             SizedBox(width: compact ? 5 : 6),
             Text(
               strings.heldFor('$minutes:$seconds'),
-              semanticsLabel:
-                  '${remaining.inMinutes} minutes $seconds seconds remaining',
               style: TextStyle(
                 color: ink,
                 fontSize: compact ? 11 : 12,
-                fontWeight: FontWeight.w700,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
                 fontFamily: theme.fontFamily,
                 fontFeatures: const <FontFeature>[
                   FontFeature.tabularFigures(),
@@ -570,7 +598,7 @@ class SeatLayerPickerSalesClosedPill extends StatelessWidget {
               style: TextStyle(
                 color: theme.text,
                 fontSize: compact ? 11 : 12,
-                fontWeight: FontWeight.w700,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
                 fontFamily: theme.fontFamily,
               ),
             ),

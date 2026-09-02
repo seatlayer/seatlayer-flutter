@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'picker_a11y.dart';
 import 'picker_internal.dart';
 import 'picker_styles.dart';
 import 'picker_tokens.g.dart';
@@ -153,10 +154,16 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
 
     return SizedBox(
       // The band, not the chip: the drawn chip stays twenty-four points, and
-      // the height around it is the part a thumb lands on.
-      height: compact
-          ? SeatLayerSizeTokens.minimumHitTarget
-          : SeatLayerSizeTokens.minimumHitTarget - 4,
+      // the height around it is the part a thumb lands on. Both grow with the
+      // buyer's text size, up to the rail's own clamp — a price the rail has
+      // cut in half is a price nobody can act on.
+      height: seatLayerScaledExtent(
+        context,
+        compact
+            ? SeatLayerSizeTokens.minimumHitTarget
+            : SeatLayerSizeTokens.minimumHitTarget - 4,
+        max: SeatLayerTypeScaleTokens.rail,
+      ),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: compact ? 10 : 12),
         child: Row(
@@ -264,12 +271,12 @@ class _LegendChip extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onPressed,
-        child: Center(child: _ink(chipStyle)),
+        child: Center(child: _ink(context, chipStyle)),
       ),
     );
   }
 
-  Widget _ink(SeatLayerSurfaceStyle chipStyle) {
+  Widget _ink(BuildContext context, SeatLayerSurfaceStyle chipStyle) {
     // A named category leads with its colour; the way out of a filter has no
     // colour to key, so it wears the rail's own surface and a heavier word.
     final naming = color != null;
@@ -280,7 +287,11 @@ class _LegendChip extends StatelessWidget {
       color: selected ? const Color(0x00000000) : theme.divider,
     );
     return SizedBox(
-      height: compact ? SeatLayerSizeTokens.legendChipHeight : 40,
+      height: seatLayerScaledExtent(
+        context,
+        compact ? SeatLayerSizeTokens.legendChipHeight : 40,
+        max: SeatLayerTypeScaleTokens.rail,
+      ),
       child: Material(
         color: ground,
         elevation: chipStyle.elevation ?? 0,

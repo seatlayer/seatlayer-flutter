@@ -448,6 +448,31 @@ abstract final class SeatLayerSizeTokens {
   static const double minimumHitTarget = 44;
 }
 
+/// How far each surface lets the platform grow its type.
+///
+/// A clamp is a promise about a layout, not a preference: past
+/// it the surface would clip or overflow rather than read
+/// larger. Surfaces that own the screen are absent on purpose.
+abstract final class SeatLayerTypeScaleTokens {
+  /// `1.3`
+  static const double rail = 1.3;
+
+  /// `1.3`
+  static const double dock = 1.3;
+
+  /// `1.3`
+  static const double peek = 1.3;
+
+  /// `1.3`
+  static const double card = 1.3;
+
+  /// `1.6`
+  static const double sheet = 1.6;
+
+  /// `1.6`
+  static const double state = 1.6;
+}
+
 /// Corner radii.
 abstract final class SeatLayerRadiusTokens {
   /// `14`
@@ -1207,4 +1232,23 @@ abstract final class SeatLayerStringTokens {
 
   /// Remove
   static const String removeWord = 'Remove';
+
+  /// {venue} seat map
+  static const String venueMap = '{venue} seat map';
+
+  /// Seats are picked with the controls around the map: the price rail above it, the section controls below it, and the ticket panel at the foot.
+  static const String venueMapHint =
+      'Seats are picked with the controls around the map: the price rail above it, the section controls below it, and the ticket panel at the foot.';
+
+  /// {count} minute left
+  static const String holdMinutesLeftOne = '{count} minute left';
+
+  /// {count} minutes left
+  static const String holdMinutesLeftOther = '{count} minutes left';
+
+  /// {count} second left
+  static const String holdSecondsLeftOne = '{count} second left';
+
+  /// {count} seconds left
+  static const String holdSecondsLeftOther = '{count} seconds left';
 }

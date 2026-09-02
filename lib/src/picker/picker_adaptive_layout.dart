@@ -2,7 +2,6 @@
 library;
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
@@ -32,9 +31,11 @@ import 'picker_motion.dart';
 import 'picker_options.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_controller.dart';
+import 'picker_a11y.dart';
 import 'picker_accessibility.dart';
 import 'picker_attribution.dart';
 import 'picker_errors.dart';
+import 'picker_prompt_presentation.dart';
 import 'picker_prompts.dart';
 import 'picker_seat_view_chrome.dart';
 import 'picker_section_navigator.dart';
@@ -93,6 +94,18 @@ class SeatLayerPickerAdaptiveLayout extends StatefulWidget {
 class _SeatLayerPickerAdaptiveLayoutState
     extends State<SeatLayerPickerAdaptiveLayout> {
   final GlobalKey _mapKey = GlobalKey(debugLabel: 'seatlayer-picker-map');
+
+  /// Where focus goes when a decision surface hands the screen back.
+  ///
+  /// A card that answers and leaves takes the focused button with it, and
+  /// focus with nowhere to go falls to the top of the tree — which puts a
+  /// screen-reader buyer back at the header after every seat. The map is
+  /// where they were, so the map is where they are put back. Out of the tab
+  /// order on purpose: it is a destination, not a control.
+  final FocusNode _mapFocus = FocusNode(
+    debugLabel: 'seatlayer-picker-map-region',
+    skipTraversal: true,
+  );
   bool _mapInteractionEnabled = true;
   int _mapInteractionGeneration = 0;
   Timer? _mapUnlockTimer;
@@ -257,7 +270,7 @@ class _SeatLayerPickerAdaptiveLayoutState
         );
         // What chrome standing on the map's bottom edge has to clear.
         final mapChromeBottom =
-            _mapInset + (dockUp ? resolved.layout.dockBarHeight : 0.0);
+            _mapInset + (dockUp ? SeatLayerDockBar.heightFor(context) : 0.0);
         final venue3D = panoramaUp
             ? const SizedBox.shrink()
             : _part(
@@ -293,8 +306,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                 chrome.showMapControls
                     ? SeatLayerPickerMapControls(
                         compact: !wide,
-                        bottomInset:
-                            !wide && dockUp ? resolved.layout.dockBarHeight : 0,
+                        bottomInset: !wide && dockUp
+                            ? SeatLayerDockBar.heightFor(context)
+                            : 0,
                         // On a phone the top rail below owns the Map/3D control.
                         includeViewModeControl: wide,
                       )
@@ -438,13 +452,31 @@ class _SeatLayerPickerAdaptiveLayoutState
                       ),
                     _ => null,
                   };
-        final mapSurface = IgnorePointer(
-          // Platform views participate in iOS gesture recognition before the
-          // Flutter overlay's onPressed callback runs. Explicitly remove the
-          // WebView from hit testing while any native decision surface owns
-          // the map; visual stacking alone does not prevent tap-through.
-          ignoring: buyerPrompt != null || statusOverlay != null,
-          child: map,
+        final strings = SeatLayerPickerScope.stringsOf(context);
+        final mapSurface = Semantics(
+          // One node, and it says so. The seats are drawn on a canvas inside
+          // the web view, which exposes nothing to assistive technology: a
+          // buyer listening to this screen cannot explore the venue, and the
+          // honest thing is to name the region and say where the controls
+          // that DO pick a seat are, rather than leave a silent rectangle
+          // filling most of the screen. Per-seat nodes are a runtime gap —
+          // see `design/picker-spec.md` 4.9.
+          container: true,
+          label: strings.venueMap(
+            state.event?.venue ?? state.event?.name ?? strings.venueView,
+          ),
+          hint: strings.venueMapHint,
+          child: Focus(
+            focusNode: _mapFocus,
+            child: IgnorePointer(
+              // Platform views participate in iOS gesture recognition before the
+              // Flutter overlay's onPressed callback runs. Explicitly remove the
+              // WebView from hit testing while any native decision surface owns
+              // the map; visual stacking alone does not prevent tap-through.
+              ignoring: buyerPrompt != null || statusOverlay != null,
+              child: map,
+            ),
+          ),
         );
         _syncMapInteraction(
           controller,
@@ -470,9 +502,13 @@ class _SeatLayerPickerAdaptiveLayoutState
                         children: [
                           Positioned.fill(child: mapSurface),
                           Positioned(
-                              top: _mapInset, left: _mapInset, child: testBadge),
+                              top: _mapInset,
+                              left: _mapInset,
+                              child: testBadge),
                           Positioned(
-                              top: _mapInset, right: _mapInset, child: controls),
+                              top: _mapInset,
+                              right: _mapInset,
+                              child: controls),
                           if (chrome.showFloorSelector)
                             const Positioned(
                               left: _mapInset,
@@ -490,7 +526,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                               key: const ValueKey<String>(
                                 'seatlayer-picker-prompt-transition',
                               ),
-                              child: _PickerPromptTransition(
+                              child: PickerPromptTransition(
                                 scrimColor: pickerAlpha(
                                   resolved.background,
                                   .64,
@@ -507,7 +543,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                           ),
                           // --- end toasts and buyer-facing states ---
                           Positioned.fill(
-                            child: _PickerStatusOverlay(overlay: statusOverlay),
+                            child: PickerStatusOverlay(overlay: statusOverlay),
                           ),
                         ],
                       ),
@@ -567,7 +603,7 @@ class _SeatLayerPickerAdaptiveLayoutState
 
         // The controls ride above the dock so neither covers the other; the
         // dock itself is edge-to-edge at the map's own bottom.
-        final dockLift = dockUp ? resolved.layout.dockBarHeight : 0.0;
+        final dockLift = dockUp ? SeatLayerDockBar.heightFor(context) : 0.0;
         // `‹ Back to venue` is drawn only once the scene is aimed at a seat,
         // so only then does anything stand in the badge's corner.
         final backPillUp = venue3DUp && chrome.showVenue3DChrome && targeted;
@@ -590,7 +626,12 @@ class _SeatLayerPickerAdaptiveLayoutState
               border: Border(bottom: BorderSide(color: railTheme.divider)),
             ),
             child: SizedBox(
-              height: resolved.layout.topRailHeight,
+              // The band grows with the chips inside it, to the rail's clamp.
+              height: seatLayerScaledExtent(
+                context,
+                resolved.layout.topRailHeight,
+                max: SeatLayerTypeScaleTokens.rail,
+              ),
               child: prices,
             ),
           ),
@@ -621,110 +662,191 @@ class _SeatLayerPickerAdaptiveLayoutState
         _reportViewportInsets(
           SeatLayerViewportInsets(top: topBand, bottom: bottomBand),
         );
+        // One reading order for the whole phone picker. The Column already
+        // reads top to bottom, but the Stack in the middle does not: its paint
+        // order puts the dock between two halves of the map's own chrome and
+        // the seat card after the toast that answers it. Every surface says
+        // where it belongs instead — see [SeatLayerPickerReadingOrder].
         return Column(
           children: [
-            header,
-            if (railUp) topRail,
+            seatLayerReadingOrder(SeatLayerPickerReadingOrder.header, header),
+            if (railUp)
+              seatLayerReadingOrder(
+                SeatLayerPickerReadingOrder.rail,
+                SeatLayerTypeScale.rail(child: topRail),
+              ),
             Expanded(
-              child: Stack(
-                children: [
-                  Positioned.fill(child: mapSurface),
-                  // The floors are the one piece of "which seats am I looking
-                  // at" chrome that stays on the map, so they start at the
-                  // map's own edge.
-                  if (floorStripUp && !venue3DUp)
-                    Positioned(
-                      top: _floorStripTop(viewModeControl: viewModeControlUp),
-                      left: 0,
-                      right: 0,
-                      child: floorStrip,
-                    ),
-                  // The immersive scene puts `‹ Back to venue` in this
-                  // corner; the badge steps below that pill rather than under
-                  // it, and only while the pill is actually drawn.
-                  Positioned(
-                    top: _testBadgeTop(
-                      venue3D: venue3DUp,
-                      backPill: backPillUp,
-                      backPillInset: immersiveTopInset,
-                      viewModeControl: viewModeControlUp,
-                      floorStrip: floorStripUp,
-                      floorStripHeight: floorStripHeight,
-                    ),
-                    left: _mapInset,
-                    child: testBadge,
-                  ),
-                  if (viewModeControlUp)
-                    const Positioned(
-                      top: _railTop,
-                      right: _mapInset,
-                      child: SizedBox(
-                        height: SeatLayerPickerViewModeControl.height,
-                        child: SeatLayerPickerViewModeControl(),
-                      ),
-                    ),
-                  if (chrome.showFloorSelector)
-                    Positioned(
-                      left: _mapInset,
-                      bottom: dockLift + _bottomLeftLift(resolved.layout),
-                      child: const SeatLayerPickerFloorSelector(),
-                    ),
-                  Positioned.fill(child: controls),
-                  if (chrome.showVenue3DChrome) Positioned.fill(child: venue3D),
-                  Positioned.fill(child: seatViewChrome),
-                  if (chrome.showDockBar && dockUp)
-                    Positioned(left: 0, right: 0, bottom: 0, child: dock),
-                  if (!immersiveUp || seatCard3D)
+              // The whole map band takes its own place in the order, so the
+              // Column's four rows are all keyed: a group with some keys and
+              // some without falls back to geometry for the unkeyed ones,
+              // which is how the map came to be read before the prices.
+              child: seatLayerReadingOrder(
+                SeatLayerPickerReadingOrder.map,
+                Stack(
+                  children: [
                     Positioned.fill(
-                      key: const ValueKey<String>(
-                        'seatlayer-picker-prompt-transition',
-                      ),
-                      child: _PickerPromptTransition(
-                        // The map pales while a card asks; the scene is dark.
-                        scrimColor: seatCard3D
-                            ? const Color(0x00000000)
-                            : resolved.styles.scrimColor ??
-                                pickerAlpha(resolved.background, .64),
-                        // The card arrives from the seat's direction and points
-                        // back at it. In the scene the seat IS the picture, so
-                        // nothing points at it and the card rests over it.
-                        seatCard: seatCardUp,
-                        anchor: seatCard3D ? null : pendingSeat?.screenPoint,
-                        topInset: topBand,
-                        // With no anchor in 3D this band only sets where the
-                        // card rests, so the lift is spent here.
-                        bottomInset: bottomBand - (seatCard3D ? _cardLift3D : 0),
-                        onDismiss: seatCardUp && pendingSeat != null
-                            ? () => _dismissSeatCard(controller, pendingSeat)
-                            : null,
-                        child: buyerPrompt,
+                      child: seatLayerReadingOrder(
+                        SeatLayerPickerReadingOrder.map,
+                        mapSurface,
                       ),
                     ),
-                  // --- toasts and buyer-facing states (P4) ---
-                  // Above the card, never over it: the message is the reply to
-                  // the tap that opened the card, and a reply printed across
-                  // Cancel / Add seat is a reply the buyer has to move to read.
-                  Positioned.fill(
-                    child: SeatLayerPickerToastLayer(
-                      bottomInset: bottomBand,
-                      lifted: seatCardUp,
+                    // The floors are the one piece of "which seats am I looking
+                    // at" chrome that stays on the map, so they start at the
+                    // map's own edge.
+                    if (floorStripUp && !venue3DUp)
+                      Positioned(
+                        top: _floorStripTop(viewModeControl: viewModeControlUp),
+                        left: 0,
+                        right: 0,
+                        child: seatLayerReadingOrder(
+                          SeatLayerPickerReadingOrder.mapChrome,
+                          floorStrip,
+                        ),
+                      ),
+                    // The immersive scene puts `‹ Back to venue` in this
+                    // corner; the badge steps below that pill rather than under
+                    // it, and only while the pill is actually drawn.
+                    Positioned(
+                      top: _testBadgeTop(
+                        venue3D: venue3DUp,
+                        backPill: backPillUp,
+                        backPillInset: immersiveTopInset,
+                        viewModeControl: viewModeControlUp,
+                        floorStrip: floorStripUp,
+                        floorStripHeight: floorStripHeight,
+                      ),
+                      left: _mapInset,
+                      child: seatLayerReadingOrder(
+                        SeatLayerPickerReadingOrder.mapChrome,
+                        testBadge,
+                      ),
                     ),
-                  ),
-                  Positioned.fill(
-                    child: SeatLayerPickerStateLayer(bottomInset: bottomBand),
-                  ),
-                  // --- end toasts and buyer-facing states ---
-                  Positioned.fill(
-                    child: _PickerStatusOverlay(overlay: statusOverlay),
-                  ),
-                ],
+                    if (viewModeControlUp)
+                      Positioned(
+                        top: _railTop,
+                        right: _mapInset,
+                        child: seatLayerReadingOrder(
+                          // It shares the rail's band, so it is read with the
+                          // prices rather than with the map's own corners.
+                          SeatLayerPickerReadingOrder.rail,
+                          const SizedBox(
+                            height: SeatLayerPickerViewModeControl.height,
+                            child: SeatLayerPickerViewModeControl(),
+                          ),
+                        ),
+                      ),
+                    if (chrome.showFloorSelector)
+                      Positioned(
+                        left: _mapInset,
+                        bottom: dockLift + _bottomLeftLift(resolved.layout),
+                        child: seatLayerReadingOrder(
+                          SeatLayerPickerReadingOrder.mapChrome,
+                          const SeatLayerPickerFloorSelector(),
+                        ),
+                      ),
+                    Positioned.fill(
+                      child: seatLayerReadingOrder(
+                        SeatLayerPickerReadingOrder.mapChrome,
+                        controls,
+                      ),
+                    ),
+                    if (chrome.showVenue3DChrome)
+                      Positioned.fill(
+                        child: seatLayerReadingOrder(
+                          SeatLayerPickerReadingOrder.mapChrome,
+                          venue3D,
+                        ),
+                      ),
+                    Positioned.fill(
+                      child: seatLayerReadingOrder(
+                        SeatLayerPickerReadingOrder.mapChrome,
+                        seatViewChrome,
+                      ),
+                    ),
+                    if (chrome.showDockBar && dockUp)
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: seatLayerReadingOrder(
+                          SeatLayerPickerReadingOrder.dock,
+                          SeatLayerTypeScale.dock(child: dock),
+                        ),
+                      ),
+                    if (!immersiveUp || seatCard3D)
+                      Positioned.fill(
+                        key: const ValueKey<String>(
+                          'seatlayer-picker-prompt-transition',
+                        ),
+                        child: PickerPromptTransition(
+                          readingOrder: SeatLayerPickerReadingOrder.prompt,
+                          // The map pales while a card asks; the scene is dark.
+                          scrimColor: seatCard3D
+                              ? const Color(0x00000000)
+                              : resolved.styles.scrimColor ??
+                                  pickerAlpha(resolved.background, .64),
+                          // The card arrives from the seat's direction and points
+                          // back at it. In the scene the seat IS the picture, so
+                          // nothing points at it and the card rests over it.
+                          seatCard: seatCardUp,
+                          anchor: seatCard3D ? null : pendingSeat?.screenPoint,
+                          topInset: topBand,
+                          // With no anchor in 3D this band only sets where the
+                          // card rests, so the lift is spent here.
+                          bottomInset:
+                              bottomBand - (seatCard3D ? _cardLift3D : 0),
+                          onDismiss: seatCardUp && pendingSeat != null
+                              ? () => _dismissSeatCard(controller, pendingSeat)
+                              : null,
+                          child: buyerPrompt,
+                        ),
+                      ),
+                    // --- toasts and buyer-facing states (P4) ---
+                    // Above the card, never over it: the message is the reply to
+                    // the tap that opened the card, and a reply printed across
+                    // Cancel / Add seat is a reply the buyer has to move to read.
+                    Positioned.fill(
+                      child: seatLayerReadingOrder(
+                        SeatLayerPickerReadingOrder.notice,
+                        SeatLayerTypeScale.state(
+                          child: SeatLayerPickerToastLayer(
+                            bottomInset: bottomBand,
+                            lifted: seatCardUp,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned.fill(
+                      child: seatLayerReadingOrder(
+                        SeatLayerPickerReadingOrder.notice,
+                        SeatLayerTypeScale.state(
+                          child: SeatLayerPickerStateLayer(
+                            bottomInset: bottomBand,
+                          ),
+                        ),
+                      ),
+                    ),
+                    // --- end toasts and buyer-facing states ---
+                    Positioned.fill(
+                      child: seatLayerReadingOrder(
+                        SeatLayerPickerReadingOrder.notice,
+                        SeatLayerTypeScale.state(
+                          child: PickerStatusOverlay(overlay: statusOverlay),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
             if (chrome.showTicketPanel)
-              _PausedWhileConfirming(
-                key: const ValueKey<String>('seatlayer-picker-sheet-pause'),
-                confirming: seatCardUp,
-                child: sheet,
+              seatLayerReadingOrder(
+                SeatLayerPickerReadingOrder.sheet,
+                PickerPausedWhileConfirming(
+                  key: const ValueKey<String>('seatlayer-picker-sheet-pause'),
+                  confirming: seatCardUp,
+                  child: sheet,
+                ),
               ),
           ],
         );
@@ -939,6 +1061,18 @@ class _SeatLayerPickerAdaptiveLayoutState
   Future<void> _confirmSeat(SelectedSeat seat) async {
     if (!mounted) return;
     _picker?.markSeatAnswered(seat.label);
+    _returnFocusToMap();
+  }
+
+  /// Put the buyer back on the map once the card that took the screen is done.
+  ///
+  /// After the frame that unmounts the card: requesting focus while the node
+  /// that has it is still mounted is a request the framework immediately
+  /// overrides.
+  void _returnFocusToMap() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _mapFocus.canRequestFocus) _mapFocus.requestFocus();
+    });
   }
 
   Future<void> _checkoutAndAnnounce(SeatLayerCheckoutHandoff handoff) async {
@@ -1030,6 +1164,7 @@ class _SeatLayerPickerAdaptiveLayoutState
 
   @override
   void dispose() {
+    _mapFocus.dispose();
     _mapUnlockTimer?.cancel();
     _framingGraceTimer?.cancel();
     // The runtime outlives this layout during a route swap, and chrome that is
@@ -1071,429 +1206,12 @@ class _SeatLayerPickerAdaptiveLayoutState
     try {
       await controller.removeObject(label);
     } finally {
-      if (mounted) controller.markSeatAnswered(label);
+      if (mounted) {
+        controller.markSeatAnswered(label);
+        // Giving a seat back ends the same dialog accepting one does, so the
+        // buyer is put back in the same place either way.
+        _returnFocusToMap();
+      }
     }
   }
-}
-
-/// One motion language for every native decision surface: scrim, seat card,
-/// GA/table prompts and their exit. The canvas remains mounted underneath, so
-/// opening a card never resets camera state or causes a map flash.
-/// The loading/failure overlay, fading out rather than popping.
-///
-/// The map is revealed by lifting this, so a hard cut is the one thing that
-/// makes a finished load look like a second one starting.
-class _PickerStatusOverlay extends StatelessWidget {
-  const _PickerStatusOverlay({required this.overlay});
-
-  /// What to cover the map with, or null to reveal it.
-  final Widget? overlay;
-
-  @override
-  Widget build(BuildContext context) => IgnorePointer(
-        ignoring: overlay == null,
-        child: AnimatedSwitcher(
-          // Arriving is not animated: the overlay is up before the buyer sees
-          // the route at all. Only its departure is watched.
-          duration: Duration.zero,
-          reverseDuration: SeatLayerPickerMotion.of(
-            context,
-            SeatLayerPickerMotion.exit,
-          ),
-          switchOutCurve: SeatLayerPickerMotion.easeExit,
-          child: overlay ?? const SizedBox.shrink(),
-        ),
-      );
-}
-
-class _PickerPromptTransition extends StatelessWidget {
-  const _PickerPromptTransition({
-    required this.scrimColor,
-    required this.child,
-    this.seatCard = false,
-    this.anchor,
-    this.topInset = 0,
-    this.bottomInset = 0,
-    this.onDismiss,
-  });
-
-  final Color scrimColor;
-  final Widget? child;
-
-  /// Whether the prompt is the phone's seat card.
-  ///
-  /// The card is the only prompt that behaves like a native moment rather than
-  /// a dialog: it springs from the seat's direction, points back at it, and
-  /// the map behind it is still the way out. Dialogs are centred instead.
-  final bool seatCard;
-
-  /// Where on the map the seat was drawn, if the runtime said.
-  final Offset? anchor;
-
-  /// The band of map the picker's own chrome is standing on, at the top.
-  final double topInset;
-
-  /// The same, at the bottom.
-  final double bottomInset;
-
-  /// Called when the buyer taps the map around the card.
-  final VoidCallback? onDismiss;
-
-  @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) => _build(context, constraints.biggest),
-      );
-
-  Widget _build(BuildContext context, Size area) {
-    final reducedMotion = MediaQuery.disableAnimationsOf(context);
-    final prompt = child;
-    final springy = seatCard && !reducedMotion;
-    return IgnorePointer(
-      ignoring: prompt == null,
-      child: AnimatedSwitcher(
-        duration: SeatLayerPickerMotion.of(
-          context,
-          seatCard
-              ? SeatLayerPickerMotion.cardEnter
-              : SeatLayerPickerMotion.enter,
-        ),
-        reverseDuration: SeatLayerPickerMotion.of(
-          context,
-          SeatLayerPickerMotion.exit,
-        ),
-        switchInCurve: SeatLayerPickerMotion.easeEnter,
-        switchOutCurve: SeatLayerPickerMotion.easeExit,
-        transitionBuilder: (current, animation) {
-          if (reducedMotion) return current;
-          final eased = CurvedAnimation(
-            parent: animation,
-            curve: SeatLayerPickerMotion.easeEnter,
-            reverseCurve: SeatLayerPickerMotion.easeExit,
-          );
-          if (springy) {
-            // The card comes from where the seat is: up from under the seat
-            // when the seat is high on the map, down onto it when it is low.
-            // Points, not a fraction of the card's own height — the distance
-            // is a property of the gesture, not of how tall the card is.
-            final dy = _arrivesFromBelow(area) ? _cardTravel : -_cardTravel;
-            return FadeTransition(
-              opacity: eased,
-              child: AnimatedBuilder(
-                animation: eased,
-                builder: (context, inner) => Transform.translate(
-                  offset: Offset(0, dy * (1 - eased.value)),
-                  child: inner,
-                ),
-                // Leaving is a shrink towards the peek bar the ticket just
-                // went to, so the card exits smaller than it entered.
-                child: ScaleTransition(
-                  scale: Tween<double>(begin: _cardArrivalScale, end: 1)
-                      .animate(eased),
-                  child: current,
-                ),
-              ),
-            );
-          }
-          return FadeTransition(
-            opacity: eased,
-            child: SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0, .035),
-                end: Offset.zero,
-              ).animate(eased),
-              child: ScaleTransition(
-                scale: Tween<double>(begin: .965, end: 1).animate(eased),
-                child: current,
-              ),
-            ),
-          );
-        },
-        child: prompt == null
-            ? const SizedBox.expand(key: ValueKey<String>('picker-prompt-none'))
-            : _PromptBackdrop(
-                key: ValueKey<Object>((
-                  prompt.runtimeType,
-                  prompt.key ?? prompt.runtimeType,
-                )),
-                scrimColor: scrimColor,
-                onDismiss: onDismiss,
-                // Each prompt owns its own insets: the phone confirm card is
-                // specified as the screen less one 16pt gutter, and a shared
-                // outer padding would quietly narrow it.
-                child: seatCard
-                    ? _SeatCardFrame(
-                        anchor: anchor,
-                        topInset: topInset,
-                        bottomInset: bottomInset,
-                        child: prompt,
-                      )
-                    : Center(child: prompt),
-              ),
-      ),
-    );
-  }
-
-  /// Whether the card rises into place rather than settling down onto it.
-  ///
-  /// Measured against the card's resting middle — halfway down whatever the
-  /// chrome has left of the map — rather than against where this card ends
-  /// up, which is not known until it has been laid out. Without an anchor it
-  /// rises: arriving from the foot of a phone is the entrance buyers know.
-  bool _arrivesFromBelow(Size area) {
-    final seat = anchor;
-    if (seat == null) return true;
-    return seat.dy <= (topInset + (area.height - bottomInset)) / 2;
-  }
-}
-
-/// How far the seat card travels on arrival, in logical points.
-const double _cardTravel = 10;
-
-/// How small it starts, so it grows into place rather than sliding into it.
-const double _cardArrivalScale = .97;
-
-/// How much of the cart sheet is left while the card is asking its question.
-///
-/// The sheet is still readable — the buyer can see what is already in the cart
-/// — but it is plainly not the surface being answered.
-const double _confirmingDim = .58;
-
-/// The map behind a prompt: a flat dim, and a way out through it.
-///
-/// The map is never unmounted for this, so the venue stays present behind the
-/// decision. Over the 3D scene the dim is transparent as well.
-class _PromptBackdrop extends StatelessWidget {
-  const _PromptBackdrop({
-    super.key,
-    required this.scrimColor,
-    required this.onDismiss,
-    required this.child,
-  });
-
-  final Color scrimColor;
-
-  final VoidCallback? onDismiss;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    // Flat, never a blur: the seat being asked about stays legible behind it.
-    final backdrop = ColoredBox(color: scrimColor);
-    return Stack(
-      children: [
-        // The dismissing tap belongs to the backdrop, not to the whole area:
-        // a detector wrapping both would take taps the card itself wanted.
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onDismiss,
-            child: backdrop,
-          ),
-        ),
-        Positioned.fill(child: child),
-      ],
-    );
-  }
-}
-
-/// The cart sheet while the seat card is up: dimmed, and out of reach.
-///
-/// A confirm card asks one question, and every other surface on the screen
-/// has to stop offering answers to it while it does. The map's own chrome is
-/// already behind the card's backdrop; the sheet is a sibling below the map,
-/// so it is paused here instead — faded rather than hidden, because what is
-/// already in the cart is context for the seat being decided on.
-class _PausedWhileConfirming extends StatelessWidget {
-  const _PausedWhileConfirming({
-    super.key,
-    required this.confirming,
-    required this.child,
-  });
-
-  /// Whether a seat card is up.
-  final bool confirming;
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => IgnorePointer(
-        ignoring: confirming,
-        child: AnimatedOpacity(
-          opacity: confirming ? _confirmingDim : 1,
-          duration: SeatLayerPickerMotion.of(
-            context,
-            SeatLayerPickerMotion.exit,
-          ),
-          curve: SeatLayerPickerMotion.easeEnter,
-          child: child,
-        ),
-      );
-}
-
-/// Puts the seat card where the seat is, and points it back at the seat.
-///
-/// The pointer is drawn here rather than inside the card because which edge
-/// carries it is a fact about the placement, not about the card. Both edges
-/// are reserved whatever happens, so the card's own box never changes size
-/// when the pointer moves from one edge to the other.
-class _SeatCardFrame extends StatefulWidget {
-  const _SeatCardFrame({
-    required this.anchor,
-    required this.topInset,
-    required this.bottomInset,
-    required this.child,
-  });
-
-  final Offset? anchor;
-  final double topInset;
-  final double bottomInset;
-  final Widget child;
-
-  @override
-  State<_SeatCardFrame> createState() => _SeatCardFrameState();
-}
-
-class _SeatCardFrameState extends State<_SeatCardFrame> {
-  /// Which edge points at the seat, once the card's height is known.
-  ///
-  /// Null until the first layout has measured the card. The position itself is
-  /// right from the first frame — the layout delegate knows the card's size
-  /// when it places it — so all this lags by one frame is which 8 pt strip the
-  /// pointer is painted in, inside a 320 ms arrival.
-  SeatLayerConfirmCardNotch? _notch;
-
-  void _report(SeatLayerConfirmCardNotch notch) {
-    if (_notch == notch) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _notch != notch) setState(() => _notch = notch);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final notch = widget.anchor == null
-        ? SeatLayerConfirmCardNotch.none
-        : _notch ?? SeatLayerConfirmCardNotch.none;
-    final theme = seatLayerPickerThemeOf(context);
-    final layout = theme.layout;
-    const radius = SeatLayerRadiusTokens.confirmCard;
-    return LayoutBuilder(
-      builder: (context, constraints) => CustomSingleChildLayout(
-        delegate: _SeatCardLayout(
-          anchor: widget.anchor,
-          topInset: widget.topInset,
-          bottomInset: widget.bottomInset,
-          onPlacement: _report,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _pointer(
-              constraints.maxWidth,
-              layout,
-              radius,
-              up: true,
-              drawn: notch == SeatLayerConfirmCardNotch.top,
-            ),
-            widget.child,
-            _pointer(
-              constraints.maxWidth,
-              layout,
-              radius,
-              up: false,
-              drawn: notch == SeatLayerConfirmCardNotch.bottom,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// One reserved pointer strip, drawn only on the edge facing the seat.
-  ///
-  /// Held inside the card's own rounded corners: a pointer growing out of a
-  /// corner reads as a torn edge rather than as an arrow, and it would be
-  /// pointing at a seat the card's radius has already moved away from.
-  Widget _pointer(
-    double width,
-    SeatLayerPickerLayout layout,
-    double radius, {
-    required bool up,
-    required bool drawn,
-  }) {
-    const height = _pointerHeight;
-    if (!drawn || !width.isFinite) {
-      return const SizedBox(height: height);
-    }
-    final cardWidth = math.min(
-      layout.confirmCardMaxWidth,
-      width - (layout.confirmCardGutter * 2),
-    );
-    final left = (width - cardWidth) / 2;
-    final x = widget.anchor!.dx.clamp(
-      left + radius + _pointerWidth,
-      left + cardWidth - radius - _pointerWidth,
-    );
-    return SizedBox(
-      height: height,
-      child: Stack(
-        children: [
-          Positioned(
-            left: x - (_pointerWidth / 2),
-            top: 0,
-            child: SeatLayerConfirmCardPointer(
-              up: up,
-              height: height,
-              width: _pointerWidth,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// How far the pointer reaches out of the card, and how wide its base is.
-const double _pointerHeight = 8;
-const double _pointerWidth = 18;
-
-/// Places the card+pointer box from [seatLayerConfirmCardPlacement].
-class _SeatCardLayout extends SingleChildLayoutDelegate {
-  const _SeatCardLayout({
-    required this.anchor,
-    required this.topInset,
-    required this.bottomInset,
-    required this.onPlacement,
-  });
-
-  final Offset? anchor;
-  final double topInset;
-  final double bottomInset;
-  final void Function(SeatLayerConfirmCardNotch notch) onPlacement;
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
-      constraints.loosen();
-
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    // The child is the card with one reserved pointer strip above and below,
-    // so the card itself is that much shorter than the box being placed.
-    final card = Size(childSize.width, childSize.height - (_pointerHeight * 2));
-    final placement = seatLayerConfirmCardPlacement(
-      seat: anchor,
-      card: card,
-      area: size,
-      topInset: topInset,
-      bottomInset: bottomInset,
-    );
-    onPlacement(placement.notch);
-    return Offset(0, placement.top - _pointerHeight);
-  }
-
-  @override
-  bool shouldRelayout(_SeatCardLayout oldDelegate) =>
-      oldDelegate.anchor != anchor ||
-      oldDelegate.topInset != topInset ||
-      oldDelegate.bottomInset != bottomInset;
 }

@@ -165,6 +165,10 @@ class SeatLayerPickerStrings {
     this.seatJustTakenByAnother = _defaultSeatJustTakenByAnother,
     this.chooseMinMaxGuests = _defaultChooseMinMaxGuests,
     this.placesAvailable = _defaultPlacesAvailable,
+    this.venueMap = _defaultVenueMap,
+    this.venueMapHint = SeatLayerStringTokens.venueMapHint,
+    this.holdMinutesLeft = _defaultHoldMinutesLeft,
+    this.holdSecondsLeft = _defaultHoldSecondsLeft,
   });
 
   /// The defaults for [locale], falling back to English.
@@ -855,6 +859,41 @@ class SeatLayerPickerStrings {
   /// "120 places currently available".
   final String Function(int count) placesAvailable;
 
+  /// "Royal Albert Hall seat map" — what a screen reader calls the drawn map.
+  ///
+  /// The map is one node to assistive technology: the runtime draws its seats
+  /// on a canvas inside a web view and cannot yet expose one node per seat
+  /// (see the runtime gap in `design/picker-spec.md` §4.9). Naming it after
+  /// the venue at least says what the unexplorable region *is*.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String Function(String venue) venueMap;
+
+  /// The hint that goes with [venueMap]: where the controls that pick a seat
+  /// are, given that the map itself cannot be explored by touch.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String venueMapHint;
+
+  /// "12 minutes left" — the hold countdown, spoken.
+  ///
+  /// The pill draws `m:ss`, which a screen reader would read as a time of day
+  /// or as two bare numbers. This is announced instead, and only at the minute
+  /// marks, so a live region does not speak once a second.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String Function(int count) holdMinutesLeft;
+
+  /// "45 seconds left" — the same countdown inside its last minute, where the
+  /// buyer is owed every second.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String Function(int count) holdSecondsLeft;
+
   /// The four sentences below take a value, so unlike every other default
   /// they cannot be one `SeatLayerStringTokens` constant used as-is. Three
   /// substitute a number into one sentence; the fourth picks between two
@@ -953,4 +992,17 @@ class SeatLayerPickerStrings {
 
   static String _defaultPlacesAvailable(int count) =>
       SeatLayerStringTokens.placesAvailable.replaceAll('{count}', '$count');
+
+  static String _defaultVenueMap(String venue) =>
+      SeatLayerStringTokens.venueMap.replaceAll('{venue}', venue);
+
+  static String _defaultHoldMinutesLeft(int count) => (count == 1
+          ? SeatLayerStringTokens.holdMinutesLeftOne
+          : SeatLayerStringTokens.holdMinutesLeftOther)
+      .replaceAll('{count}', '$count');
+
+  static String _defaultHoldSecondsLeft(int count) => (count == 1
+          ? SeatLayerStringTokens.holdSecondsLeftOne
+          : SeatLayerStringTokens.holdSecondsLeftOther)
+      .replaceAll('{count}', '$count');
 }

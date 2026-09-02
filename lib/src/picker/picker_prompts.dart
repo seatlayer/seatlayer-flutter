@@ -15,6 +15,7 @@ import 'picker_internal.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 /// How many guests will sit at one table.
 class SeatLayerPickerTablePrompt extends StatefulWidget {
@@ -232,7 +233,7 @@ class _StepperLabel extends StatelessWidget {
           style: TextStyle(
             color: theme.text,
             fontSize: 12,
-            fontWeight: FontWeight.w800,
+            fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
             fontFamily: theme.fontFamily,
           ),
         ),
@@ -282,7 +283,7 @@ class _PromptStepper extends StatelessWidget {
                 style: TextStyle(
                   color: theme.text,
                   fontSize: 19,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                   fontFamily: theme.fontFamily,
                   fontFeatures: const <FontFeature>[
                     FontFeature.tabularFigures(),
@@ -375,7 +376,8 @@ class _PromptActions extends StatelessWidget {
               onPressed: onDismiss,
               child: Text(
                 dismissLabel,
-                style: const TextStyle(fontWeight: FontWeight.w800),
+                style: TextStyle(
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800)),
               ),
             ),
           ),
@@ -391,7 +393,8 @@ class _PromptActions extends StatelessWidget {
               onPressed: onConfirm,
               child: Text(
                 confirmLabel,
-                style: const TextStyle(fontWeight: FontWeight.w800),
+                style: TextStyle(
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800)),
               ),
             ),
           ),
@@ -441,7 +444,7 @@ class _PromptSheet extends StatelessWidget {
                       color: theme.text,
                       fontSize: 22,
                       height: 1.15,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                       fontFamily: theme.fontFamily,
                     ),
                   ),

@@ -5,6 +5,7 @@ import 'picker_internal.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 CategoryTier? seatLayerPickerSelectedTier(
   SelectedSeat seat,
@@ -73,8 +74,7 @@ class SeatLayerPickerSeatTierChoice extends StatelessWidget {
       tier.price,
       tier.currency ?? currency,
     );
-    final radius =
-        BorderRadius.circular(SeatLayerRadiusTokens.button);
+    final radius = BorderRadius.circular(SeatLayerRadiusTokens.button);
     return Semantics(
       label: <String>[
         tier.name,
@@ -135,7 +135,8 @@ class SeatLayerPickerSeatTierChoice extends StatelessWidget {
                               style: TextStyle(
                                 color: theme.text,
                                 fontSize: 12.5,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: seatLayerBoldWeight(
+                                    context, FontWeight.w800),
                                 fontFamily: theme.fontFamily,
                               ),
                             ),
@@ -145,9 +146,8 @@ class SeatLayerPickerSeatTierChoice extends StatelessWidget {
                                 style: TextStyle(
                                   // The note is the reason the row exists once
                                   // it is chosen, so it takes the full ink.
-                                  color: selected
-                                      ? theme.text
-                                      : theme.mutedText,
+                                  color:
+                                      selected ? theme.text : theme.mutedText,
                                   fontSize: 10.5,
                                   height: 1.3,
                                   fontFamily: theme.fontFamily,
@@ -163,7 +163,8 @@ class SeatLayerPickerSeatTierChoice extends StatelessWidget {
                         style: TextStyle(
                           color: theme.text,
                           fontSize: 13,
-                          fontWeight: FontWeight.w800,
+                          fontWeight:
+                              seatLayerBoldWeight(context, FontWeight.w800),
                           fontFamily: theme.fontFamily,
                           fontFeatures: const <FontFeature>[
                             FontFeature.tabularFigures(),

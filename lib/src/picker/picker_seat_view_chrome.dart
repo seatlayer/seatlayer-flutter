@@ -11,6 +11,7 @@ import 'picker_styles.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 /// The caption strip and disclosure badge drawn over the seat-view panorama.
 ///
@@ -98,8 +99,8 @@ class SeatLayerSeatViewChrome extends StatelessWidget {
                         surface: surface,
                       ),
                       if (showDragHint &&
-                          (view.dragHint?.trim().isNotEmpty ?? false)) ...<
-                          Widget>[
+                          (view.dragHint?.trim().isNotEmpty ??
+                              false)) ...<Widget>[
                         const SizedBox(height: 8),
                         _DragHint(text: view.dragHint!.trim(), theme: theme),
                       ],
@@ -149,10 +150,10 @@ class _CaptionStrip extends StatelessWidget {
                     title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: SeatLayerDarkTokens.immersiveGlassInk,
                       fontSize: 14,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                     ).merge(surface.textStyle),
                   ),
                 if (caption != null && caption.isNotEmpty) ...<Widget>[
@@ -168,7 +169,7 @@ class _CaptionStrip extends StatelessWidget {
                         .78,
                       ),
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
                       fontFamily: theme.fontFamily,
                     ),
                   ),
@@ -233,7 +234,7 @@ class _DisclosureBadge extends StatelessWidget {
           style: TextStyle(
             color: ink,
             fontSize: 11,
-            fontWeight: FontWeight.w800,
+            fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
             letterSpacing: .2,
             fontFamily: theme.fontFamily,
           ),
@@ -265,7 +266,7 @@ class _DragHint extends StatelessWidget {
               style: TextStyle(
                 color: SeatLayerDarkTokens.immersiveCaptionInk,
                 fontSize: SeatLayerSizeTokens.immersiveCaptionFontSize,
-                fontWeight: FontWeight.w800,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                 letterSpacing:
                     SeatLayerSizeTokens.immersiveCaptionFontSize * 0.03,
                 fontFamily: theme.fontFamily,

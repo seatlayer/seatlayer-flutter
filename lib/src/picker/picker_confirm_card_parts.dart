@@ -57,16 +57,15 @@ class _IdentityGrid extends StatelessWidget {
     final children = <Widget>[];
     for (var index = 0; index < cells.length; index++) {
       if (index > 0) {
-        children.add(ColoredBox(color: theme.divider, child: const SizedBox(width: 1)));
+        children.add(
+            ColoredBox(color: theme.divider, child: const SizedBox(width: 1)));
       }
       children.add(
         Expanded(
           // The section is the only one of the three that is ever a real
           // name, so it gets the widest track and the seat number — always
           // short, always the thing the buyer came for — the narrowest.
-          flex: hasSection
-              ? _identityTracks[index]
-              : _identityEvenTrack,
+          flex: hasSection ? _identityTracks[index] : _identityEvenTrack,
           child: _cell(
             context,
             cells[index].$1,
@@ -140,7 +139,7 @@ class _IdentityGrid extends StatelessWidget {
               fontSize: 8.5,
               height: 1.2,
               letterSpacing: .85,
-              fontWeight: FontWeight.w800,
+              fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
               fontFamily: theme.fontFamily,
             ),
           ),
@@ -164,7 +163,7 @@ class _IdentityGrid extends StatelessWidget {
                       ? SeatLayerSizeTokens.confirmImmersiveValueFontSize
                       : 15),
               height: section ? 1.2 : 1.1,
-              fontWeight: FontWeight.w800,
+              fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
               fontFamily: theme.fontFamily,
             ),
           ),
@@ -231,10 +230,13 @@ class _CategoryBand extends StatelessWidget {
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final layout = theme.layout;
-    // A count the buyer cannot trust is worse than no count: availability the
-    // runtime has not reported yet arrives here as zero, and the band simply
-    // says nothing about it.
-    final known = category.available > 0;
+    // A count the buyer cannot trust is worse than no count. A runtime that
+    // reports live free seats is believed even at zero; an older one's
+    // availability reads zero before counts arrive, so only a positive
+    // number from it is printed, and otherwise the band says nothing.
+    final count =
+        category.free ?? (category.available > 0 ? category.available : null);
+    final known = count != null;
     final name = Text(
       category.label,
       maxLines: 1,
@@ -242,7 +244,7 @@ class _CategoryBand extends StatelessWidget {
       style: TextStyle(
         color: theme.text,
         fontSize: 12.5,
-        fontWeight: FontWeight.w800,
+        fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
         fontFamily: theme.fontFamily,
       ),
     );
@@ -286,13 +288,14 @@ class _CategoryBand extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        strings.seatsLeft(category.available),
+                        strings.seatsLeft(count),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: theme.mutedText,
                           fontSize: 11,
-                          fontWeight: FontWeight.w700,
+                          fontWeight:
+                              seatLayerBoldWeight(context, FontWeight.w700),
                           fontFamily: theme.fontFamily,
                           fontFeatures: const <FontFeature>[
                             FontFeature.tabularFigures(),
@@ -309,7 +312,8 @@ class _CategoryBand extends StatelessWidget {
                       style: TextStyle(
                         color: theme.text,
                         fontSize: 15,
-                        fontWeight: FontWeight.w800,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w800),
                         fontFamily: theme.fontFamily,
                         fontFeatures: const <FontFeature>[
                           FontFeature.tabularFigures(),
@@ -463,7 +467,11 @@ class _ActionRail extends StatelessWidget {
     final strings = SeatLayerPickerScope.stringsOf(context);
     final layout = theme.layout;
     return SizedBox(
-      height: layout.confirmRailHeight,
+      height: seatLayerScaledExtent(
+        context,
+        layout.confirmRailHeight,
+        max: SeatLayerTypeScaleTokens.card,
+      ),
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: pickerAlpha(theme.divider, theme.divider.a * .26),
@@ -536,7 +544,7 @@ class _InspectionRow extends StatelessWidget {
                     style: TextStyle(
                       color: theme.text,
                       fontSize: 12,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                       fontFamily: theme.fontFamily,
                     ),
                   ),
@@ -578,9 +586,7 @@ class _Pill extends StatelessWidget {
     final ink = onPlate ? _plateInk : theme.text;
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
-      side: onPlate
-          ? BorderSide.none
-          : BorderSide(color: theme.divider),
+      side: onPlate ? BorderSide.none : BorderSide(color: theme.divider),
     );
     final pill = Material(
       color: onPlate ? _plate : theme.surface,
@@ -603,7 +609,7 @@ class _Pill extends StatelessWidget {
                   style: TextStyle(
                     color: ink,
                     fontSize: 11,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                     fontFamily: theme.fontFamily,
                   ),
                 ),
@@ -621,8 +627,7 @@ class _Pill extends StatelessWidget {
           // The plate is translucent, so what is behind it is softened rather
           // than merely darkened — the same treatment the web pill gets.
           ? ClipRRect(
-              borderRadius:
-                  BorderRadius.circular(SeatLayerRadiusTokens.pill),
+              borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
                 child: pill,
@@ -675,7 +680,7 @@ class _TierPicker extends StatelessWidget {
                 color: theme.mutedText,
                 fontSize: 10,
                 letterSpacing: 1.2,
-                fontWeight: FontWeight.w800,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                 fontFamily: theme.fontFamily,
               ),
             ),
@@ -751,8 +756,7 @@ class _SeatNotices extends StatelessWidget {
                 pickerAlpha(_premium, .13),
                 theme.surface,
               ),
-              borderRadius:
-                  BorderRadius.circular(SeatLayerRadiusTokens.pill),
+              borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
               border: Border.all(
                 color: Color.alphaBlend(
                   pickerAlpha(_premium, .38),
@@ -773,7 +777,7 @@ class _SeatNotices extends StatelessWidget {
                       color: _premiumInk,
                       fontSize: 11,
                       letterSpacing: .22,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                       fontFamily: theme.fontFamily,
                     ),
                   ),
@@ -789,8 +793,7 @@ class _SeatNotices extends StatelessWidget {
               pickerAlpha(theme.warning, .13),
               theme.surface,
             ),
-            borderRadius:
-                BorderRadius.circular(SeatLayerRadiusTokens.button),
+            borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.button),
             border: Border.all(
               color: Color.alphaBlend(
                 pickerAlpha(theme.warning, .40),
@@ -823,7 +826,8 @@ class _SeatNotices extends StatelessWidget {
                           style: TextStyle(
                             color: theme.text,
                             fontSize: 12,
-                            fontWeight: FontWeight.w800,
+                            fontWeight:
+                                seatLayerBoldWeight(context, FontWeight.w800),
                             fontFamily: theme.fontFamily,
                           ),
                         ),
@@ -864,4 +868,3 @@ class _SeatNotices extends StatelessWidget {
 /// The premium badge's own gold, and the ink that reads on it.
 const Color _premium = Color(0xFFE8C15A);
 const Color _premiumInk = Color(0xFFC9A24B);
-

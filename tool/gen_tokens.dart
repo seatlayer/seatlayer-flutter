@@ -69,9 +69,7 @@ num _num(Object? value) => value! as num;
 
 String _double(Object? value) {
   final value0 = _num(value);
-  return value0 == value0.roundToDouble()
-      ? '${value0.toInt()}'
-      : '$value0';
+  return value0 == value0.roundToDouble() ? '${value0.toInt()}' : '$value0';
 }
 
 String _dartString(Object? value) {
@@ -86,6 +84,7 @@ String _render(Map<String, Object?> tokens) {
   final light = _map(_map(tokens['color'])['light']);
   final dark = _map(_map(tokens['color'])['dark']);
   final size = _map(tokens['size']);
+  final typeScaleClamp = _map(_map(tokens['type'])['scaleClamp']);
   final radius = _map(tokens['radius']);
   final elevation = _map(tokens['elevation']);
   final motion = _map(tokens['motion']);
@@ -142,6 +141,20 @@ String _render(Map<String, Object?> tokens) {
           ? '  static const int $key = ${_num(value).toInt()};'
           : '  static const double $key = ${_double(value)};',
     );
+  });
+  buffer
+    ..writeln('}')
+    ..writeln()
+    ..writeln('/// How far each surface lets the platform grow its type.')
+    ..writeln('///')
+    ..writeln('/// A clamp is a promise about a layout, not a preference: past')
+    ..writeln('/// it the surface would clip or overflow rather than read')
+    ..writeln('/// larger. Surfaces that own the screen are absent on purpose.')
+    ..writeln('abstract final class SeatLayerTypeScaleTokens {');
+  typeScaleClamp.forEach((key, value) {
+    if (key == 'note') return;
+    buffer.writeln('  /// `$value`');
+    buffer.writeln('  static const double $key = ${_double(value)};');
   });
   buffer
     ..writeln('}')

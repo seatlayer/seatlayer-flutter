@@ -15,6 +15,7 @@ import 'picker_checkout_cta.dart';
 import 'seat_layer_picker_scope.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 class SeatLayerPickerTestModeIndicator extends StatelessWidget {
   /// Creates the test-event badge.
@@ -68,7 +69,7 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
               style: TextStyle(
                 color: ink,
                 fontSize: SeatLayerSizeTokens.testChipFontSize,
-                fontWeight: FontWeight.w700,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
                 letterSpacing: SeatLayerSizeTokens.testChipFontSize * .01,
                 height: 1,
                 fontFamily: theme.fontFamily,
@@ -201,7 +202,8 @@ class SeatLayerPickerCheckoutBar extends StatelessWidget {
                       style: TextStyle(
                         color: theme.text,
                         fontSize: 18,
-                        fontWeight: FontWeight.w900,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w900),
                       ),
                     ),
                   ],
@@ -491,7 +493,7 @@ class SeatLayerPickerErrorView extends StatelessWidget {
               style: TextStyle(
                 color: palette.text,
                 fontSize: 15,
-                fontWeight: FontWeight.w800,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                 fontFamily: palette.fontFamily,
               ),
             ),
@@ -502,7 +504,7 @@ class SeatLayerPickerErrorView extends StatelessWidget {
               style: TextStyle(
                 color: palette.mutedText,
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
                 fontFamily: palette.fontFamily,
               ),
             ),
@@ -513,7 +515,7 @@ class SeatLayerPickerErrorView extends StatelessWidget {
               style: TextStyle(
                 color: palette.mutedText,
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
                 fontFamily: palette.fontFamily,
               ),
             ),
@@ -537,7 +539,7 @@ class SeatLayerPickerErrorView extends StatelessWidget {
                 words.retry,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
                   fontFamily: palette.fontFamily,
                 ),
               ),
@@ -566,7 +568,7 @@ class SeatLayerPickerEmptyView extends StatelessWidget {
           style: TextStyle(
             color: theme.mutedText,
             fontSize: 13,
-            fontWeight: FontWeight.w600,
+            fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
             fontFamily: theme.fontFamily,
           ),
         ),

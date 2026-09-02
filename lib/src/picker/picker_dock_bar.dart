@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../payloads.dart';
+import 'picker_a11y.dart';
 import 'picker_internal.dart';
 import 'picker_styles.dart';
 import 'picker_models.dart';
@@ -48,6 +49,20 @@ class SeatLayerDockBar extends StatelessWidget {
   /// Overrides [SeatLayerPickerStyles.dockBarStyle] for this bar.
   final SeatLayerSurfaceStyle? style;
 
+  /// How tall the bar is here, once the platform's text size has had its say.
+  ///
+  /// Fifty-two points is a height for type at 1.0. The name, the count and the
+  /// Venue word all grow with the buyer's setting, and a bar that stayed
+  /// fifty-two would clip them. Public because the composition that stacks the
+  /// dock on the map also has to tell the runtime what band it covers, and a
+  /// reported band that disagrees with the drawn one frames a section half
+  /// underneath it.
+  static double heightFor(BuildContext context) => seatLayerScaledExtent(
+        context,
+        seatLayerPickerThemeOf(context).layout.dockBarHeight,
+        max: SeatLayerTypeScaleTokens.dock,
+      );
+
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
@@ -56,7 +71,7 @@ class SeatLayerDockBar extends StatelessWidget {
     final theme = seatLayerPickerThemeOf(context);
     final bottomInset =
         reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0;
-    final height = theme.layout.dockBarHeight;
+    final height = SeatLayerDockBar.heightFor(context);
     final barStyle =
         (theme.styles.dockBarStyle ?? const SeatLayerSurfaceStyle())
             .merge(style);
@@ -142,7 +157,7 @@ class _DockContents extends StatelessWidget {
     final nameStyle = TextStyle(
       color: theme.text,
       fontSize: _nameFontSize,
-      fontWeight: FontWeight.w800,
+      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
       fontFamily: theme.fontFamily,
     );
     // The count is drawn in the text colour, not the muted one: it is the
@@ -151,13 +166,13 @@ class _DockContents extends StatelessWidget {
     final countStyle = TextStyle(
       color: theme.text,
       fontSize: _countFontSize,
-      fontWeight: FontWeight.w700,
+      fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
       fontFamily: theme.fontFamily,
     );
     final venueStyle = TextStyle(
       color: theme.accent,
       fontSize: _venueFontSize,
-      fontWeight: FontWeight.w800,
+      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
       fontFamily: theme.fontFamily,
     );
 
@@ -208,24 +223,41 @@ class _DockContents extends StatelessWidget {
             // which is what capped the name at half the row and cut
             // `Sponsor Ta…` while the bar still had room to its right.
             Expanded(
-              child: Row(
-                children: [
-                  Flexible(
-                    child: _CrossfadeText(
-                      value: name,
-                      maxLines: plan.nameLines,
-                      style: nameStyle.copyWith(fontSize: plan.nameFontSize),
-                    ),
+              // Where the buyer is, said once, whenever it changes. The dock
+              // is how a buyer moves between sections, and stepping to the
+              // next one changes nothing else on screen that a screen reader
+              // would notice — so the bar says where they have arrived and
+              // how much room is left there. The COUNT is spoken even at the
+              // widths that cannot draw it: what fits on a 320-point row is
+              // not a fact about what the buyer needs to know.
+              child: Semantics(
+                liveRegion: true,
+                container: true,
+                label: count == null
+                    ? name
+                    : '$name, ${strings.seatsLeftInSection(count)}',
+                child: ExcludeSemantics(
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: _CrossfadeText(
+                          value: name,
+                          maxLines: plan.nameLines,
+                          style:
+                              nameStyle.copyWith(fontSize: plan.nameFontSize),
+                        ),
+                      ),
+                      if (shownCount != null) ...[
+                        const SizedBox(width: _itemGap),
+                        _CrossfadeText(
+                          value: shownCount,
+                          softWrap: false,
+                          style: countStyle,
+                        ),
+                      ],
+                    ],
                   ),
-                  if (shownCount != null) ...[
-                    const SizedBox(width: _itemGap),
-                    _CrossfadeText(
-                      value: shownCount,
-                      softWrap: false,
-                      style: countStyle,
-                    ),
-                  ],
-                ],
+                ),
               ),
             ),
             const SizedBox(width: _itemGap),
@@ -524,7 +556,11 @@ class _VenueButton extends StatelessWidget {
             shape: const StadiumBorder(),
           ),
           child: Container(
-            height: SeatLayerSizeTokens.dockBackHeight,
+            height: seatLayerScaledExtent(
+              context,
+              SeatLayerSizeTokens.dockBackHeight,
+              max: SeatLayerTypeScaleTokens.dock,
+            ),
             padding: const EdgeInsetsDirectional.only(
               start: _venuePaddingStart,
               end: _venuePaddingEnd,

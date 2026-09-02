@@ -12,6 +12,7 @@ import 'picker_ticket_tiers.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 class SeatLayerPickerSeatConfirmation extends StatefulWidget {
   const SeatLayerPickerSeatConfirmation({
@@ -219,7 +220,8 @@ class _SeatLayerPickerSeatConfirmationState
                               style: TextStyle(
                                 color: theme.text,
                                 fontSize: 16,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: seatLayerBoldWeight(
+                                    context, FontWeight.w800),
                               ),
                             ),
                           ),
@@ -233,7 +235,8 @@ class _SeatLayerPickerSeatConfirmationState
                               style: TextStyle(
                                 color: theme.text,
                                 fontSize: 19,
-                                fontWeight: FontWeight.w900,
+                                fontWeight: seatLayerBoldWeight(
+                                    context, FontWeight.w900),
                               ),
                             ),
                         ],
@@ -251,7 +254,8 @@ class _SeatLayerPickerSeatConfirmationState
                             style: TextStyle(
                               color: theme.mutedText,
                               fontSize: 12,
-                              fontWeight: FontWeight.w800,
+                              fontWeight:
+                                  seatLayerBoldWeight(context, FontWeight.w800),
                             ),
                           ),
                           const SizedBox(height: 7),
@@ -309,9 +313,10 @@ class _SeatLayerPickerSeatConfirmationState
                                   ),
                                   overlayColor: pickerAlpha(theme.text, .055),
                                   side: BorderSide(color: theme.divider),
-                                  textStyle: const TextStyle(
+                                  textStyle: TextStyle(
                                     fontSize: 14,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: seatLayerBoldWeight(
+                                        context, FontWeight.w800),
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
@@ -341,9 +346,10 @@ class _SeatLayerPickerSeatConfirmationState
                                   elevation: 0,
                                   overlayColor:
                                       pickerAlpha(theme.onAccent, .12),
-                                  textStyle: const TextStyle(
+                                  textStyle: TextStyle(
                                     fontSize: 14,
-                                    fontWeight: FontWeight.w800,
+                                    fontWeight: seatLayerBoldWeight(
+                                        context, FontWeight.w800),
                                   ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(
@@ -473,7 +479,7 @@ class SeatLayerPickerSeatViewButton extends StatelessWidget {
             : null);
     if (action == null) return const SizedBox.shrink();
     return OutlinedButton.icon(
-      style: _seatInspectionButtonStyle(theme),
+      style: _seatInspectionButtonStyle(context, theme),
       onPressed: state.isBusy ? null : () => action(seat),
       icon: const Icon(Icons.visibility_outlined),
       label: const Text('View from here'),
@@ -507,7 +513,7 @@ class SeatLayerPickerSeat3DButton extends StatelessWidget {
     if (action == null) return const SizedBox.shrink();
     final alreadyIn3D = state.snapshot?.map.isVenue3D ?? false;
     return OutlinedButton.icon(
-      style: _seatInspectionButtonStyle(theme),
+      style: _seatInspectionButtonStyle(context, theme),
       onPressed: state.isBusy ? null : () => action(seat),
       icon: Icon(
         alreadyIn3D
@@ -520,6 +526,7 @@ class SeatLayerPickerSeat3DButton extends StatelessWidget {
 }
 
 ButtonStyle _seatInspectionButtonStyle(
+  BuildContext context,
   SeatLayerResolvedPickerTheme theme,
 ) =>
     OutlinedButton.styleFrom(
@@ -533,9 +540,9 @@ ButtonStyle _seatInspectionButtonStyle(
       overlayColor: pickerAlpha(theme.accent, .08),
       side: BorderSide(color: pickerAlpha(theme.accent, .18)),
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      textStyle: const TextStyle(
+      textStyle: TextStyle(
         fontSize: 13,
-        fontWeight: FontWeight.w800,
+        fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
       ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(theme.buttonRadius),
@@ -564,7 +571,7 @@ class _SeatIdentityField extends StatelessWidget {
             style: TextStyle(
               color: theme.mutedText,
               fontSize: 10,
-              fontWeight: FontWeight.w900,
+              fontWeight: seatLayerBoldWeight(context, FontWeight.w900),
               letterSpacing: 1.2,
             ),
           ),
@@ -577,7 +584,7 @@ class _SeatIdentityField extends StatelessWidget {
               color: theme.text,
               fontSize: 17,
               height: 1.05,
-              fontWeight: FontWeight.w900,
+              fontWeight: seatLayerBoldWeight(context, FontWeight.w900),
             ),
           ),
         ],
@@ -625,7 +632,8 @@ class _SeatNotice extends StatelessWidget {
                       title,
                       style: TextStyle(
                         color: theme.text,
-                        fontWeight: FontWeight.w800,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w800),
                       ),
                     ),
                     const SizedBox(height: 2),

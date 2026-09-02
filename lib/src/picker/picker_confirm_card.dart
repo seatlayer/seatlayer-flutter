@@ -3,9 +3,11 @@ import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 
 import '../open_enums.dart';
 import '../payloads.dart';
+import 'picker_a11y.dart';
 import 'picker_haptics.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
@@ -84,13 +86,19 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
   String? _tierId;
   String? _dismissedLabel;
 
-  /// Whether the buyer has touched this card yet.
+  /// Whether the buyer has found this card yet.
   ///
-  /// The invitation — one highlight across `Add seat`, then a slow breath —
-  /// exists to say where the answer is. A buyer whose finger is already on the
-  /// card has found it, so the first pointer down anywhere on the card ends the
-  /// invitation for good.
+  /// The invitation — one highlight across `Add seat`, then a slow breath that
+  /// keeps going for as long as the card goes unanswered — exists to say where
+  /// the answer is. A buyer whose finger is on the card, or whose keyboard
+  /// focus is on the button, has found it, so the first pointer down anywhere
+  /// on the card or focus on `Add seat` ends the invitation for good.
   bool _touched = false;
+
+  /// The buyer has found the answer; stop pointing at it.
+  void _endInvite() {
+    if (!_touched) setState(() => _touched = true);
+  }
 
   /// Whether the press has been committed and the button now says "Added".
   bool _added = false;
@@ -207,196 +215,280 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
         (loneTierNote?.isNotEmpty ?? false);
     // A booth, a table or a general-admission area is not a seat, and the
     // button must not call it one.
-    final addLabel = seat.objectType == null || seat.objectType == ObjectType.seat
-        ? strings.addSeat
-        : strings.select;
+    final addLabel =
+        seat.objectType == null || seat.objectType == ObjectType.seat
+            ? strings.addSeat
+            : strings.select;
     // In the scene the venue is already the picture, so a photo strip has
     // nothing left to stand in for: the one place the buyer has not looked
     // from is the seat itself, and that becomes the card's inspection row.
     final inspectUp = immersive && seatView != null;
 
+    // Everything the card is about, as one sentence. A screen reader that
+    // walked the drawn card would hear six unlabelled cells — a name, two
+    // numbers, a colour swatch, a word and an amount — in the order they are
+    // painted. The card is a dialog, so it is NAMED, and the name is the
+    // question it is asking: this seat, this category, this price.
+    final spokenIdentity = strings.seatIdentity(<String>[
+      if (seat.sectionLabel?.trim().isNotEmpty ?? false)
+        seat.sectionLabel!.trim(),
+      if (seat.rowLabel?.trim().isNotEmpty ?? false)
+        '${_IdentityGrid._rowWord(seat, strings)} '
+            '${seat.rowLabel!.trim()}',
+      '${_IdentityGrid._seatWord(seat, strings)} ${seat.buyerFacingLabel}',
+      if (category != null) category.label,
+      if (selectedPrice != null)
+        pickerMoney(context, selectedPrice, selectedCurrency),
+    ]);
+    final busy = controller.state.isBusy;
     // The card sizes itself to its content and to the screen less one gutter
     // on each side; whoever places it decides where on the map it sits.
-    return Align(
-      alignment: Alignment.center,
-      heightFactor: 1,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: layout.confirmCardGutter),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            // The scene gives the card its own width: there is no map legend
-            // to read around it, and the seat's own name is longer once the
-            // buyer is inside the venue looking at it.
-            maxWidth: immersive
-                ? SeatLayerSizeTokens.confirmCardImmersiveMaxWidth
-                : layout.confirmCardMaxWidth,
-            maxHeight: MediaQuery.sizeOf(context).height * .72,
-          ),
-          child: Listener(
-            onPointerDown: (_) {
-              if (!_touched) setState(() => _touched = true);
-            },
-            // Pushing the card down is the third answer, and the one a thumb
-            // reaches first. It follows the finger exactly as far as the
-            // threshold and then goes stiff, so the resistance itself says
-            // the card is already far enough to let go of. The follow is
-            // direct manipulation rather than decoration, so reduced motion
-            // leaves it alone — what it does drop is the theatre after it.
-            child: GestureDetector(
-              onVerticalDragUpdate: controller.state.isBusy
-                  ? null
-                  : (details) => setState(() => _drag += details.delta.dy),
-              onVerticalDragEnd: controller.state.isBusy
-                  ? null
-                  : (details) => _settleDrag(
-                        controller,
-                        seat,
-                        (details.primaryVelocity ?? 0).toDouble(),
-                      ),
-              child: Transform.translate(
-                offset: Offset(0, _rubberBand(_drag)),
-                child: _CardSurface(
-                  style: cardStyle,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _IdentityGrid(seat: seat, immersive: immersive),
-                      // The band is the category speaking for itself: its
-                      // colour, its name, how much of it is left, and what it
-                      // costs. Without a category there is nothing for it to
-                      // say, and a price with no name beside it belongs
-                      // nowhere on this card.
-                      if (category != null)
-                        _CategoryBand(
-                          category: category,
-                          color: categoryColor,
-                          price: selectedPrice,
-                          currency: selectedCurrency,
-                        ),
-                      // The picture is what `View from here` opens, so the
-                      // strip is drawn full-bleed only where that action
-                      // exists; 3D rides its far corner. With 3D alone there
-                      // is no picture to stand in for, so the pills sit on a
-                      // plain rail instead of in an empty frame.
-                      if (!immersive && seatView != null)
-                        _PhotoStrip(
-                          onViewFromSeat: controller.state.isBusy
-                              ? null
-                              : () => _inspect(seat, seatView),
-                          onShow3D: venue3D == null || controller.state.isBusy
-                              ? null
-                              : () => _inspect(seat, venue3D),
-                        )
-                      else if (!immersive && venue3D != null)
-                        _ActionRail(
-                          onShow3D: controller.state.isBusy
-                              ? null
-                              : () => _inspect(seat, venue3D),
-                        ),
-                      if (bodyContent)
-                        Flexible(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.fromLTRB(10, 8, 10, 0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                if (tiers.length > 1)
-                                  _TierPicker(
-                                    tiers: tiers,
-                                    currency: seat.currency ?? 'USD',
-                                    selectedId: _tierId,
-                                    enabled: !controller.state.isBusy,
-                                    onSelected: (id) =>
-                                        setState(() => _tierId = id),
-                                  )
-                                else if (loneTierNote != null &&
-                                    loneTierNote.isNotEmpty)
-                                  _TierNote(note: loneTierNote),
-                                if (premium || viewNotice != null || hasNote)
-                                  _SeatNotices(
-                                    premium: premium,
-                                    viewNotice: viewNotice,
-                                    note: hasNote ? note : null,
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      if (inspectUp)
-                        Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            10,
-                            bodyContent
-                                ? SeatLayerSizeTokens.confirmImmersiveInspectGap
-                                : SeatLayerSizeTokens.confirmImmersiveBodyTop +
-                                    SeatLayerSizeTokens
-                                        .confirmImmersiveInspectGap,
-                            10,
-                            0,
-                          ),
-                          child: _InspectionRow(
-                            onViewFromSeat: controller.state.isBusy
-                                ? null
-                                : () => _inspect(seat, seatView),
-                          ),
-                        ),
-                      // The two answers are boxes of their own inside the
-                      // card's gutter, not a bar fused to its bottom edge: a
-                      // corner-to-corner fill reads as the card's frame, not
-                      // as a thing to press.
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          10,
-                          immersive
-                              ? (bodyContent || inspectUp
-                                  ? SeatLayerSizeTokens
-                                      .confirmImmersiveActionGap
-                                  : SeatLayerSizeTokens
-                                      .confirmImmersiveBodyTop)
-                              : (bodyContent ? 10 : 8),
-                          10,
-                          immersive
-                              ? SeatLayerSizeTokens.confirmImmersiveBodyBottom
-                              : 10,
-                        ),
-                        child: SizedBox(
-                          height: layout.confirmActionHeight,
-                          child: LayoutBuilder(
-                            builder: (context, constraints) => Row(
-                              children: [
-                                // Just over a third to leave, the rest to
-                                // accept: the two answers are not equally
-                                // likely, and the card should not pretend
-                                // that they are.
-                                SizedBox(
-                                  width: constraints.maxWidth * _cancelShare,
-                                  child: _CancelButton(
-                                    label: strings.cancel,
-                                    style: theme.styles.secondaryButtonStyle,
-                                    onPressed: controller.state.isBusy
-                                        ? null
-                                        : () => _cancel(controller, seat),
+    return Semantics(
+      // A dialog, in every sense a native platform has one: it names itself,
+      // it owns the focus while it is up, and the map behind it is hidden
+      // (the composition's own BlockSemantics does that half).
+      scopesRoute: true,
+      namesRoute: true,
+      explicitChildNodes: true,
+      label: spokenIdentity,
+      // Both answers, reachable without hunting for the buttons. A rotor
+      // action is how a screen-reader buyer says yes or no to a card they
+      // have just been read.
+      customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+        CustomSemanticsAction(label: addLabel): () {
+          if (!busy) ignorePickerAction(_confirm(controller, seat));
+        },
+        CustomSemanticsAction(label: strings.cancel): () {
+          if (!busy) ignorePickerAction(_cancel(controller, seat));
+        },
+      },
+      child: SeatLayerTypeScale.card(
+        child: FocusTraversalGroup(
+          // Add seat first, Cancel second: the focus lands on the answer the
+          // card exists to collect, not on the way out of it. Drawn order is
+          // the other way round — Cancel is the narrow box on the left — and
+          // the two orders are allowed to disagree.
+          policy: OrderedTraversalPolicy(),
+          child: FocusScope(
+            autofocus: true,
+            child: Align(
+              alignment: Alignment.center,
+              heightFactor: 1,
+              child: Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: layout.confirmCardGutter),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    // The scene gives the card its own width: there is no map legend
+                    // to read around it, and the seat's own name is longer once the
+                    // buyer is inside the venue looking at it.
+                    maxWidth: immersive
+                        ? SeatLayerSizeTokens.confirmCardImmersiveMaxWidth
+                        : layout.confirmCardMaxWidth,
+                    maxHeight: MediaQuery.sizeOf(context).height * .72,
+                  ),
+                  child: Listener(
+                    onPointerDown: (_) => _endInvite(),
+                    // Pushing the card down is the third answer, and the one a thumb
+                    // reaches first. It follows the finger exactly as far as the
+                    // threshold and then goes stiff, so the resistance itself says
+                    // the card is already far enough to let go of. The follow is
+                    // direct manipulation rather than decoration, so reduced motion
+                    // leaves it alone — what it does drop is the theatre after it.
+                    child: GestureDetector(
+                      onVerticalDragUpdate: controller.state.isBusy
+                          ? null
+                          : (details) =>
+                              setState(() => _drag += details.delta.dy),
+                      onVerticalDragEnd: controller.state.isBusy
+                          ? null
+                          : (details) => _settleDrag(
+                                controller,
+                                seat,
+                                (details.primaryVelocity ?? 0).toDouble(),
+                              ),
+                      child: Transform.translate(
+                        offset: Offset(0, _rubberBand(_drag)),
+                        child: _CardSurface(
+                          style: cardStyle,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _IdentityGrid(seat: seat, immersive: immersive),
+                              // The band is the category speaking for itself: its
+                              // colour, its name, how much of it is left, and what it
+                              // costs. Without a category there is nothing for it to
+                              // say, and a price with no name beside it belongs
+                              // nowhere on this card.
+                              if (category != null)
+                                _CategoryBand(
+                                  category: category,
+                                  color: categoryColor,
+                                  price: selectedPrice,
+                                  currency: selectedCurrency,
+                                ),
+                              // The picture is what `View from here` opens, so the
+                              // strip is drawn full-bleed only where that action
+                              // exists; 3D rides its far corner. With 3D alone there
+                              // is no picture to stand in for, so the pills sit on a
+                              // plain rail instead of in an empty frame.
+                              if (!immersive && seatView != null)
+                                _PhotoStrip(
+                                  onViewFromSeat: controller.state.isBusy
+                                      ? null
+                                      : () => _inspect(seat, seatView),
+                                  onShow3D:
+                                      venue3D == null || controller.state.isBusy
+                                          ? null
+                                          : () => _inspect(seat, venue3D),
+                                )
+                              else if (!immersive && venue3D != null)
+                                _ActionRail(
+                                  onShow3D: controller.state.isBusy
+                                      ? null
+                                      : () => _inspect(seat, venue3D),
+                                ),
+                              if (bodyContent)
+                                Flexible(
+                                  child: SingleChildScrollView(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(10, 8, 10, 0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        if (tiers.length > 1)
+                                          _TierPicker(
+                                            tiers: tiers,
+                                            currency: seat.currency ?? 'USD',
+                                            selectedId: _tierId,
+                                            enabled: !controller.state.isBusy,
+                                            onSelected: (id) =>
+                                                setState(() => _tierId = id),
+                                          )
+                                        else if (loneTierNote != null &&
+                                            loneTierNote.isNotEmpty)
+                                          _TierNote(note: loneTierNote),
+                                        if (premium ||
+                                            viewNotice != null ||
+                                            hasNote)
+                                          _SeatNotices(
+                                            premium: premium,
+                                            viewNotice: viewNotice,
+                                            note: hasNote ? note : null,
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: _AddSeatButton(
-                                    label: _added ? strings.added : addLabel,
-                                    added: _added,
-                                    invite: invite,
-                                    style: theme.styles.primaryButtonStyle,
-                                    onPressed: controller.state.isBusy
+                              if (inspectUp)
+                                Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    10,
+                                    bodyContent
+                                        ? SeatLayerSizeTokens
+                                            .confirmImmersiveInspectGap
+                                        : SeatLayerSizeTokens
+                                                .confirmImmersiveBodyTop +
+                                            SeatLayerSizeTokens
+                                                .confirmImmersiveInspectGap,
+                                    10,
+                                    0,
+                                  ),
+                                  child: _InspectionRow(
+                                    onViewFromSeat: controller.state.isBusy
                                         ? null
-                                        : () => _confirm(controller, seat),
+                                        : () => _inspect(seat, seatView),
                                   ),
                                 ),
-                              ],
-                            ),
+                              // The two answers are boxes of their own inside the
+                              // card's gutter, not a bar fused to its bottom edge: a
+                              // corner-to-corner fill reads as the card's frame, not
+                              // as a thing to press.
+                              Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  10,
+                                  immersive
+                                      ? (bodyContent || inspectUp
+                                          ? SeatLayerSizeTokens
+                                              .confirmImmersiveActionGap
+                                          : SeatLayerSizeTokens
+                                              .confirmImmersiveBodyTop)
+                                      : (bodyContent ? 10 : 8),
+                                  10,
+                                  immersive
+                                      ? SeatLayerSizeTokens
+                                          .confirmImmersiveBodyBottom
+                                      : 10,
+                                ),
+                                child: SizedBox(
+                                  // Forty-four points of answer at the
+                                  // platform's default, and proportionally
+                                  // more once the buyer has scaled their text
+                                  // up: a fixed box would clip the word the
+                                  // whole card exists to offer. It stays a
+                                  // HEIGHT rather than a minimum because the
+                                  // button paints its arrival sweep in a
+                                  // Stack, which has no intrinsic height.
+                                  height: seatLayerScaledExtent(
+                                    context,
+                                    layout.confirmActionHeight,
+                                    max: SeatLayerTypeScaleTokens.card,
+                                  ),
+                                  child: LayoutBuilder(
+                                    builder: (context, constraints) => Row(
+                                      children: [
+                                        // Just over a third to leave, the rest to
+                                        // accept: the two answers are not equally
+                                        // likely, and the card should not pretend
+                                        // that they are.
+                                        FocusTraversalOrder(
+                                          order: const NumericFocusOrder(2),
+                                          child: SizedBox(
+                                            width: constraints.maxWidth *
+                                                _cancelShare,
+                                            child: _CancelButton(
+                                              label: strings.cancel,
+                                              style: theme
+                                                  .styles.secondaryButtonStyle,
+                                              onPressed: controller.state.isBusy
+                                                  ? null
+                                                  : () =>
+                                                      _cancel(controller, seat),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: FocusTraversalOrder(
+                                            order: const NumericFocusOrder(1),
+                                            child: _AddSeatButton(
+                                              label: _added
+                                                  ? strings.added
+                                                  : addLabel,
+                                              added: _added,
+                                              invite: invite,
+                                              onInviteEnd: _endInvite,
+                                              style: theme
+                                                  .styles.primaryButtonStyle,
+                                              onPressed: controller.state.isBusy
+                                                  ? null
+                                                  : () => _confirm(
+                                                      controller, seat),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),

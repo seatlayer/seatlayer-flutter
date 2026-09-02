@@ -355,3 +355,4 @@ specification. Names, slots and files:
 | `SeatLayerSeatViewChrome` | `seatViewChromeStyle` | §3.15 |
 | `SeatLayerPickerAttribution` | — | §3.10.3 |
 | `SeatLayerCheckoutCta` (the one label resolver) | — | §3.9, §3.10.3 |
+| `SeatLayerTypeScale` / `seatLayerReadingOrder` / `seatLayerBoldWeight` | — | §4.10 |

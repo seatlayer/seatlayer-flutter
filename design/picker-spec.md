@@ -662,10 +662,19 @@ short distance of the map's top, in which case it stays where it is.
 
 #### 3.8.6 Accessibility
 
-The card is a dialog: focus moves into it, the map behind it is hidden from
-assistive technology, and dismissing returns focus to where the tap came from.
-The identity reads as one sentence — section, row, seat, category, price — not
-as six unlabelled cells. `Add seat`'s accessible name says what will be added.
+The card is a dialog: it names itself, it scopes the route, everything painted
+before it is hidden from assistive technology, and dismissing returns focus to
+the map region. The identity reads as one sentence — section, row, seat,
+category, price — not as six unlabelled cells, and that sentence IS the
+dialog's name. Both answers are also custom actions on the card, so a rotor can
+say yes or no without hunting for the buttons.
+
+The first focusable is `Add seat`, not `Cancel`, though `Cancel` is drawn
+first: the focus lands on the answer the card exists to collect. Escape and the
+platform's back gesture both give the seat back. The card's type is clamped at
+`type.scaleClamp.card`, and its action row's height grows with that scale
+rather than clipping the word the card exists to offer. §4.10 has the whole
+picture, of which this is one surface.
 
 **Snapshot.** the newest unconfirmed `selection[]` entry (`label`,
 `sectionLabel`, `rowLabel`, `seatNumber`, `price`, `currency`, `objectType`,
@@ -1241,6 +1250,112 @@ not fake them, and do not design around their absence as if it were permanent.
 - **Confidence and comparison data on the 3D seat card.** The web card has a
   compare action and a confidence teaser in 3D. Neither has a snapshot field
   yet, so the native 3D card carries the 2D card's content.
+- **Per-seat accessibility nodes on the map.** The venue is drawn on a canvas
+  inside a web view, and a canvas exposes nothing to VoiceOver or TalkBack. The
+  map is therefore ONE named region with a hint that says where the controls
+  that pick a seat are (§4.10), which is honest but is not the design: a buyer
+  who cannot see the screen should be able to move seat by seat through a
+  section. Building that needs two things from the runtime — `seat-screen-point-v1`
+  for each seat's rectangle, so a native node can be placed over it, and a
+  `picker.listSeatsInView` command that answers with the seats currently drawn,
+  their identity, price and state. With both, the native side can mount a real
+  accessibility node per seat over the web view and hand its activation back as
+  an ordinary tap. Neither exists today, and nothing may pretend they do: a
+  fabricated seat list read out over a map that does not match it is worse than
+  a region that says it cannot be explored.
+
+### 4.10 Accessibility
+
+The picker is one screen with many surfaces, and most of what a buyer who is
+not looking at it needs is a property of the WHOLE screen rather than of any
+one component: the order the surfaces are read in, which of them speak without
+being asked, how far the type may grow, where focus goes when a surface hands
+the screen back. Those are specified here, once, and every port owes all of
+them. Per-component notes stay with their component in §3.
+
+**One reading order.** Assistive technology walks the picker in the buyer's own
+order — header, price rail, map, the chrome standing on the map, the section
+dock, any prompt, notices, the cart — and never in paint order. The phone
+composition is a column with a stack in the middle, and a stack's paint order
+puts the dock between two halves of the map's chrome and the seat card after
+the toast that answers it. Every surface therefore declares its place:
+
+| Order | Surface |
+| --- | --- |
+| 100 | header |
+| 200 | price rail, and the Map/3D control that shares its band |
+| 300 | the map, and everything stacked on it |
+| 400 | map chrome: floor rail, test chip, corner controls, 3D and seat-view chrome |
+| 500 | section dock |
+| 600 | seat card, general-admission and table prompts |
+| 700 | toasts, hold prompts, buyer-facing state overlays |
+| 800 | cart sheet |
+
+Two rules make this work in practice. Sibling surfaces are either **all**
+ordered or none are — a group with some ordered members falls back to geometry
+for the rest, which is how the map came to be read before the prices. And the
+order is declared once, at the composition root: each component is also
+mountable on its own, where there is no order to join. Dart file:
+`lib/src/picker/picker_a11y.dart`.
+
+**What each surface says.**
+
+- *Map* — one node, named `strings.venueMap` with the venue's name, and a hint
+  (`strings.venueMapHint`) that says the seats are picked with the controls
+  around it. See the runtime gap in §4.9: naming a region that cannot be
+  explored is the honest form of a canvas, not the intended design.
+- *Live regions*, and only these three: the peek summary, the section dock's
+  name and seats-left, and the hold countdown. Each changes without the buyer
+  touching it, and none says so any other way.
+- *The hold countdown is throttled.* `m:ss` read aloud is a time of day. The
+  pill announces `strings.holdMinutesLeft` at each minute mark, and
+  `strings.holdSecondsLeft` for every second of the last minute, where the
+  buyer is owed the count. Unchanged text is not re-announced, so the throttle
+  IS the policy — a live region fed a running clock speaks once a second for a
+  quarter of an hour.
+- *Toasts* are announced outright as well as being live regions: a toast that
+  arrives and leaves inside four seconds, inside a cross-fade, is a window a
+  live region cannot be relied on to catch.
+- *The seat card is a dialog*: it names itself with the identity sentence
+  (section, row, seat, category, price — §3.8.6), it scopes the route, and both
+  answers are custom actions on it so a rotor can say yes or no without hunting
+  for the buttons. While it is up, everything painted before it — the map, its
+  chrome, the dock — is hidden from assistive technology, exactly as a modal
+  route hides the page under it. Toasts and the cart stay audible: the toast is
+  the answer to the press, and the cart is what the seat is being added to.
+- *Every control is a button* with a name, and a state where it has one:
+  pressed, selected, expanded, toggled.
+
+**Dynamic type.** Every string scales with the platform's text-size setting, to
+a ceiling per surface (`type.scaleClamp` — rail, dock, peek and card at 1.3;
+sheet rows and buyer-facing states at 1.6). A clamp is a statement about a
+layout, not a preference: past it the surface clips, and a buyer who cannot read
+a clipped price is worse off than one reading a slightly smaller one. Prompts
+and dialogs have no clamp: they own the screen and they scroll.
+
+Heights follow the type. Every fixed height around text — the rail band and its
+chips, the dock bar, the collapsed cart, cart rows, the best-seats controls, the
+card's action row — is `base × the surface's clamped scale`, so the box grows
+with what is in it. Two consequences a port must not miss: the dock's reported
+viewport band (§2.3) has to be the height it actually draws, or a focused
+section lands under a dock that grew; and at the platform default of 1.0 every
+one of these is unchanged, which is what keeps the goldens still.
+
+**Focus.** The seat card's first focusable is `Add seat`, not `Cancel` — the
+drawn order is the other way round, and the two orders are allowed to disagree.
+Escape, and the platform's back gesture, give the seat back. When a decision
+surface hands the screen back — accepted or cancelled — focus returns to the
+map region rather than falling to the top of the tree, and a toast's action
+returns focus to whatever had it before the press.
+
+**Bold text.** The platform's `bold text` setting moves every weight in the
+picker two steps up, clamped at 900. Flutter honours the setting in exactly one
+widget, so the picker asks for itself; a port on a platform that applies it
+automatically should let the platform do it rather than double it.
+
+**Reduced motion** is §1.6 and `motion.reducedMotion`, and it is deliberately
+not repeated here: one setting with two homes is a setting a surface will read
+from the wrong one.
 
 ---
 

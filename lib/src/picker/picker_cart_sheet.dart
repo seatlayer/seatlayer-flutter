@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
+import 'picker_a11y.dart';
 import 'picker_best_seats.dart';
 import 'picker_cart_list.dart';
 import 'picker_checkout_cta.dart';
@@ -266,6 +267,16 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
     final layout = theme.layout;
     final bottomInset =
         widget.reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0;
+    // The collapsed bar is fifty points of type: at the platform's largest
+    // settings that type no longer fits fifty points, so the bar grows with
+    // it rather than clipping the total. Capped at the peek surface's own
+    // clamp, so a cart bar can never eat the map.
+    final peekScale = seatLayerTypeScaleOf(
+      context,
+      max: SeatLayerTypeScaleTokens.peek,
+    );
+    final peekHeight = layout.peekHeight * peekScale;
+    final openHeadHeight = layout.sheetOpenHeadHeight * peekScale;
     final hasTickets = controller.confirmedCartLines.isNotEmpty;
     final salesClosed = controller.state.event?.salesClosed == true;
     // Two ceilings, both a fraction of the screen capped at a fixed height:
@@ -277,13 +288,12 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
             screenHeight * layout.sheetMaxHeightFraction, layout.sheetMaxHeight)
         : _atMost(screenHeight * layout.emptyTrayMaxHeightFraction,
             layout.emptyTrayMaxHeight);
-    final maxBody =
-        (maxSheet - layout.sheetOpenHeadHeight).clamp(0.0, maxSheet);
+    final maxBody = (maxSheet - openHeadHeight).clamp(0.0, maxSheet);
     // The one height the web has no equivalent for: how far a FINGER may pull
     // the sheet past the ceiling the picker itself would stop at. Offered only
     // when the cart is taller than the ceiling — see [PickerSheetDetents].
     final fullBody = (screenHeight * layout.sheetFullHeightFraction -
-            layout.sheetOpenHeadHeight -
+            openHeadHeight -
             bottomInset)
         .clamp(maxBody, screenHeight);
     _detents = PickerSheetDetents(
@@ -328,24 +338,26 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
                 // a panel they would have to open first.
                 const SeatLayerHoldLapseNotice(),
                 const SeatLayerHoldEndingCue(),
-                _PeekRow(
-                  // The head answers to the FINGER, not to the last answer the
-                  // host gave: a sheet being dragged open is open, whatever the
-                  // controller has been told so far.
-                  expanded: open,
-                  // Fifty points shut, thirty-six open, and every height
-                  // between while the sheet is on its way: the head compresses
-                  // into its open form as the body appears from under it, so
-                  // the content the buyer is pulling on tracks their finger
-                  // exactly and the sheet's own edge never jumps.
-                  height: layout.peekHeight -
-                      _atMost(
-                        body,
-                        layout.peekHeight - layout.sheetOpenHeadHeight,
-                      ),
-                  onExpandedChanged: _ask,
-                  onCheckout: widget.onCheckout,
-                  continueStyle: widget.continueButtonStyle,
+                SeatLayerTypeScale.peek(
+                  child: _PeekRow(
+                    // The head answers to the FINGER, not to the last answer the
+                    // host gave: a sheet being dragged open is open, whatever the
+                    // controller has been told so far.
+                    expanded: open,
+                    // Fifty points shut, thirty-six open, and every height
+                    // between while the sheet is on its way: the head compresses
+                    // into its open form as the body appears from under it, so
+                    // the content the buyer is pulling on tracks their finger
+                    // exactly and the sheet's own edge never jumps.
+                    height: peekHeight -
+                        _atMost(
+                          body,
+                          peekHeight - openHeadHeight,
+                        ),
+                    onExpandedChanged: _ask,
+                    onCheckout: widget.onCheckout,
+                    continueStyle: widget.continueButtonStyle,
+                  ),
                 ),
                 // A window onto the body, never a resize of it. The body is
                 // laid out once at the height its content wants — up to the
@@ -355,52 +367,55 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
                 // second, and the buyer would watch their own order rewrap
                 // while they dragged.
                 ClipRect(
-                  child: SizedBox(
-                    height: body,
-                    width: double.infinity,
-                    child: OverflowBox(
-                      alignment: Alignment.bottomCenter,
-                      minHeight: 0,
-                      maxHeight: fullBody,
-                      // Offstage rather than absent while the sheet is shut: it
-                      // is still laid out, so the sheet always knows how tall
-                      // its cart is and opens straight to it, but it is not
-                      // painted, not touchable and not read out.
-                      child: Offstage(
-                        offstage: !open,
-                        child: PickerMeasuredHeight(
-                          onHeight: _onNatural,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              // An event that has stopped selling is a state
-                              // the tray states in its own words, not a set of
-                              // controls that quietly go grey. It stands above
-                              // the body either way: a cart the buyer can no
-                              // longer check out with needs the sentence as
-                              // much as an empty one does.
-                              if (salesClosed)
-                                const Padding(
-                                  padding: EdgeInsets.fromLTRB(10, 8, 10, 0),
-                                  child: SeatLayerPickerSalesClosedStatement(),
+                  child: SeatLayerTypeScale.sheet(
+                    child: SizedBox(
+                      height: body,
+                      width: double.infinity,
+                      child: OverflowBox(
+                        alignment: Alignment.bottomCenter,
+                        minHeight: 0,
+                        maxHeight: fullBody,
+                        // Offstage rather than absent while the sheet is shut: it
+                        // is still laid out, so the sheet always knows how tall
+                        // its cart is and opens straight to it, but it is not
+                        // painted, not touchable and not read out.
+                        child: Offstage(
+                          offstage: !open,
+                          child: PickerMeasuredHeight(
+                            onHeight: _onNatural,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                // An event that has stopped selling is a state
+                                // the tray states in its own words, not a set of
+                                // controls that quietly go grey. It stands above
+                                // the body either way: a cart the buyer can no
+                                // longer check out with needs the sentence as
+                                // much as an empty one does.
+                                if (salesClosed)
+                                  const Padding(
+                                    padding: EdgeInsets.fromLTRB(10, 8, 10, 0),
+                                    child:
+                                        SeatLayerPickerSalesClosedStatement(),
+                                  ),
+                                Flexible(
+                                  child: hasTickets
+                                      ? _FilledBody(
+                                          cartList: widget.cartList,
+                                          checkoutBar: widget.checkoutBar,
+                                          actionError: widget.actionError,
+                                          attribution: widget.attribution,
+                                          onCheckout: widget.onCheckout,
+                                        )
+                                      : _EmptyBody(
+                                          bestSeats: widget.bestSeats,
+                                          actionError: widget.actionError,
+                                          attribution: widget.attribution,
+                                        ),
                                 ),
-                              Flexible(
-                                child: hasTickets
-                                    ? _FilledBody(
-                                        cartList: widget.cartList,
-                                        checkoutBar: widget.checkoutBar,
-                                        actionError: widget.actionError,
-                                        attribution: widget.attribution,
-                                        onCheckout: widget.onCheckout,
-                                      )
-                                    : _EmptyBody(
-                                        bestSeats: widget.bestSeats,
-                                        actionError: widget.actionError,
-                                        attribution: widget.attribution,
-                                      ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -685,10 +700,27 @@ class _PeekSummaryState extends State<_PeekSummary>
       style: TextStyle(
         color: theme.text,
         fontSize: widget.expanded ? 14 : 12.5,
-        fontWeight: FontWeight.w700,
+        fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
         fontFamily: theme.fontFamily,
       ),
     );
+    return Semantics(
+      // The one line that says what the cart holds, and the only feedback a
+      // buyer gets when a tap on the map reaches a shut sheet. It is announced
+      // on change rather than on a timer: the sentence changes when the cart
+      // does, and never otherwise, so the live region speaks exactly as often
+      // as something happened.
+      liveRegion: true,
+      container: true,
+      label: widget.text,
+      child: ExcludeSemantics(
+        child: _bumped(text),
+      ),
+    );
+  }
+
+  /// The words, with the one beat of movement a changed count earns.
+  Widget _bumped(Widget text) {
     return AnimatedBuilder(
       animation: _bump,
       // Anchored on the leading edge, so the words grow out of the bar rather
@@ -751,7 +783,7 @@ class _ContinuePill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14),
         textStyle: TextStyle(
           fontSize: 12.5,
-          fontWeight: FontWeight.w800,
+          fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
           fontFamily: theme.fontFamily,
         ),
       )
@@ -837,11 +869,14 @@ class _PeekClockState extends State<_PeekClock> {
         strings.heldFor('$minutes:$seconds'),
         maxLines: 1,
         softWrap: false,
-        semanticsLabel:
-            '${remaining.inMinutes} minutes $seconds seconds remaining',
-        style: const TextStyle(
-          fontWeight: FontWeight.w700,
-          fontFeatures: <FontFeature>[FontFeature.tabularFigures()],
+        // The same throttle the header pill uses: `m:ss` is not a sentence,
+        // and a clock read once a second is a clock nobody can listen past.
+        semanticsLabel: remaining <= SeatLayerPickerHoldCountdown.expiring
+            ? strings.holdSecondsLeft(remaining.inSeconds)
+            : strings.holdMinutesLeft((remaining.inSeconds + 59) ~/ 60),
+        style: TextStyle(
+          fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
+          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
         ),
       ),
     );
@@ -925,7 +960,11 @@ class _FindSeatsPill extends StatelessWidget {
           onTap: onPressed,
           child: Center(
             child: Container(
-              height: theme.layout.findPillHeight,
+              height: seatLayerScaledExtent(
+                context,
+                theme.layout.findPillHeight,
+                max: SeatLayerTypeScaleTokens.peek,
+              ),
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: ShapeDecoration(
                 color: theme.accent,
@@ -946,7 +985,8 @@ class _FindSeatsPill extends StatelessWidget {
                       style: TextStyle(
                         color: theme.onAccent,
                         fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w700),
                         fontFamily: theme.fontFamily,
                       ),
                     ),
@@ -1092,7 +1132,7 @@ class SeatLayerBookButton extends StatelessWidget {
             minimumSize: Size.fromHeight(theme.layout.checkoutButtonHeight),
             textStyle: TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.w800,
+              fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
               fontFamily: theme.fontFamily,
             ),
           )

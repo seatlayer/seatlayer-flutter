@@ -12,6 +12,7 @@ import 'picker_tray_dense.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 /// The buyer's tickets, one full-target line each.
 ///
@@ -298,7 +299,11 @@ class _MoreRow extends StatelessWidget {
     return InkWell(
       onTap: onPressed,
       child: Container(
-        height: theme.layout.denseMoreRowHeight,
+        height: seatLayerScaledExtent(
+          context,
+          theme.layout.denseMoreRowHeight,
+          max: SeatLayerTypeScaleTokens.sheet,
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
           border: Border(top: BorderSide(color: theme.divider)),
@@ -311,7 +316,7 @@ class _MoreRow extends StatelessWidget {
               style: TextStyle(
                 color: theme.mutedText,
                 fontSize: 12.5,
-                fontWeight: FontWeight.w600,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
                 fontFamily: theme.fontFamily,
               ),
             ),
@@ -390,7 +395,11 @@ class _DenseLine extends StatelessWidget {
         enabled: removable && !line.held && run == null,
         onRemove: onRemove,
         child: Container(
-          height: theme.layout.denseLineHeight,
+          height: seatLayerScaledExtent(
+            context,
+            theme.layout.denseLineHeight,
+            max: SeatLayerTypeScaleTokens.sheet,
+          ),
           decoration: BoxDecoration(
             // A held row is inventory the server has already set aside. A wash
             // of the accent and a bar down its leading edge say so without
@@ -435,8 +444,9 @@ class _DenseLine extends StatelessWidget {
                             children: <InlineSpan>[
                               TextSpan(
                                 text: line.section,
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700),
+                                style: TextStyle(
+                                    fontWeight: seatLayerBoldWeight(
+                                        context, FontWeight.w700)),
                               ),
                               for (final part
                                   in identity.skip(1)) ...<InlineSpan>[
@@ -453,7 +463,8 @@ class _DenseLine extends StatelessWidget {
                           style: TextStyle(
                             color: theme.text,
                             fontSize: 13,
-                            fontWeight: FontWeight.w600,
+                            fontWeight:
+                                seatLayerBoldWeight(context, FontWeight.w600),
                             fontFamily: theme.fontFamily,
                             fontFeatures: const <FontFeature>[
                               FontFeature.tabularFigures(),
@@ -468,7 +479,8 @@ class _DenseLine extends StatelessWidget {
                           style: TextStyle(
                             color: theme.mutedText,
                             fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                            fontWeight:
+                                seatLayerBoldWeight(context, FontWeight.w600),
                             fontFamily: theme.fontFamily,
                             fontFeatures: const <FontFeature>[
                               FontFeature.tabularFigures(),
@@ -483,7 +495,8 @@ class _DenseLine extends StatelessWidget {
                         style: TextStyle(
                           color: theme.text,
                           fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                          fontWeight:
+                              seatLayerBoldWeight(context, FontWeight.w700),
                           fontFamily: theme.fontFamily,
                           fontFeatures: const <FontFeature>[
                             FontFeature.tabularFigures(),

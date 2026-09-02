@@ -20,6 +20,7 @@ import 'picker_tokens.g.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 /// Below this much time left, the buyer is offered more of it.
 const Duration seatLayerHoldExtendThreshold = Duration(minutes: 1);
@@ -72,7 +73,7 @@ class SeatLayerPickerSalesClosedStatement extends StatelessWidget {
             style: TextStyle(
               color: theme.text,
               fontSize: 13,
-              fontWeight: FontWeight.w800,
+              fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
               fontFamily: theme.fontFamily,
             ),
           ),
@@ -94,7 +95,7 @@ class SeatLayerPickerSalesClosedStatement extends StatelessWidget {
                 style: TextStyle(
                   color: theme.text,
                   fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
                   fontFamily: theme.fontFamily,
                 ),
               ),
@@ -140,7 +141,7 @@ class SeatLayerPickerSoldOutOverlay extends StatelessWidget {
                     color: theme.accent,
                     fontSize: 10,
                     letterSpacing: 2,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                     fontFamily: theme.fontFamily,
                   ),
                 ),
@@ -152,7 +153,7 @@ class SeatLayerPickerSoldOutOverlay extends StatelessWidget {
                     color: theme.text,
                     fontSize: 32,
                     height: 1.05,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                     fontFamily: theme.fontFamily,
                   ),
                 ),
@@ -313,7 +314,8 @@ class _SeatLayerPickerAccessPanelState
                             fontSize: 18,
                             height: 1.25,
                             letterSpacing: -.27,
-                            fontWeight: FontWeight.w800,
+                            fontWeight:
+                                seatLayerBoldWeight(context, FontWeight.w800),
                             fontFamily: theme.fontFamily,
                           ),
                         ),
@@ -348,7 +350,8 @@ class _SeatLayerPickerAccessPanelState
                               telling.action!,
                               style: TextStyle(
                                 fontSize: 13,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: seatLayerBoldWeight(
+                                    context, FontWeight.w800),
                                 fontFamily: theme.fontFamily,
                               ),
                             ),
@@ -533,7 +536,7 @@ class _SeatLayerPickerExtendHoldPromptState
                       color: theme.text,
                       fontSize: 12.5,
                       height: 1.35,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
                       fontFamily: theme.fontFamily,
                       fontFeatures: const <FontFeature>[
                         FontFeature.tabularFigures(),
@@ -558,7 +561,7 @@ class _SeatLayerPickerExtendHoldPromptState
                     _adding ? strings.addingEllipsis : strings.addTime,
                     style: TextStyle(
                       fontSize: 12.5,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                       fontFamily: theme.fontFamily,
                     ),
                   ),
@@ -626,7 +629,7 @@ class _SeatLayerPickerBookedOverlayState
                   style: TextStyle(
                     color: theme.text,
                     fontSize: 19,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                     fontFamily: theme.fontFamily,
                   ),
                 ),
@@ -668,7 +671,7 @@ class _SeatLayerPickerBookedOverlayState
                     strings.backToMap,
                     style: TextStyle(
                       fontSize: 12.5,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
                       fontFamily: theme.fontFamily,
                     ),
                   ),
@@ -738,7 +741,8 @@ class _BookedSeatList extends StatelessWidget {
                               style: TextStyle(
                                 color: theme.text,
                                 fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
+                                fontWeight: seatLayerBoldWeight(
+                                    context, FontWeight.w600),
                                 fontFamily: theme.fontFamily,
                               ),
                             ),
@@ -751,7 +755,8 @@ class _BookedSeatList extends StatelessWidget {
                                 style: TextStyle(
                                   color: theme.mutedText,
                                   fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: seatLayerBoldWeight(
+                                      context, FontWeight.w700),
                                   fontFamily: theme.fontFamily,
                                   fontFeatures: const <FontFeature>[
                                     FontFeature.tabularFigures(),

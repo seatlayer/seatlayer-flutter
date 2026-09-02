@@ -11,6 +11,7 @@ import 'picker_tokens.g.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 /// A chip row naming the floors of a multi-floor venue.
 ///
@@ -216,7 +217,8 @@ class _FloorChip extends StatelessWidget {
                         fontSize: compact
                             ? SeatLayerSizeTokens.floorChipFontSize
                             : SeatLayerSizeTokens.floorChipFontSize + 1,
-                        fontWeight: FontWeight.w600,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w600),
                         letterSpacing: _chipTracking,
                         fontFamily: theme.fontFamily,
                       ).merge(style.textStyle),

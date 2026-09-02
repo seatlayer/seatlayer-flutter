@@ -21,7 +21,7 @@ import 'package:seatlayer/src/seat_layer_controller.dart';
 import 'package:seatlayer/src/seat_layer_error.dart';
 
 import 'picker_test_fixture.dart';
-import 'picker_widget_harness.dart' show nativeChromeBundle;
+import 'picker_widget_harness.dart' show nativeChromeBundle, pumpToRest;
 
 final class _FakeMapController extends SeatLayerController {
   _FakeMapController({this.handler, this.bundle});
@@ -377,7 +377,7 @@ void main() {
     expect(find.text('Select'), findsOneWidget);
 
     ready.complete();
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // A completed custom callback is not proof that an immersive surface is
     // mounted; the card only stands down for runtime-reported panorama/3D.
@@ -418,7 +418,7 @@ void main() {
       ),
     );
     map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     IgnorePointer mapGate() => tester.widget<IgnorePointer>(
           find.byWidgetPredicate(
@@ -431,7 +431,7 @@ void main() {
     expect(picker.seatAwaitingConfirmation?.id, 'seat-a-1');
 
     map.emit(pickerSnapshot(revision: 2, holdOwner: 'picker'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('Add seat'), findsOneWidget);
     expect(picker.confirmedTicketCount, 0);
@@ -445,7 +445,7 @@ void main() {
         'generated': false,
       },
     });
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('Add seat'), findsNothing);
     expect(mapGate().ignoring, isFalse);
@@ -472,7 +472,7 @@ void main() {
       'seatView.changed',
       <String, Object?>{'seatView': null},
     );
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('Add seat'), findsOneWidget);
     expect(
@@ -488,7 +488,7 @@ void main() {
     mapState['buyerView'] = 'venue3d';
     mapState['view3dTargetSeatId'] = 'seat-a-1';
     map.emit(in3D);
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     // The scene is not an answer to the card's question — the buyer is still
     // outside the seat looking at it — so the card comes with it, and owns
@@ -505,7 +505,7 @@ void main() {
     expect(picker.seatAwaitingConfirmation?.id, 'seat-a-1');
 
     map.emit(pickerSnapshot(revision: 5, holdOwner: 'picker'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('Add seat'), findsOneWidget);
     expect(picker.confirmedTicketCount, 0);
@@ -550,7 +550,7 @@ void main() {
     expect(locks.single.$2, <String, Object?>{'enabled': false});
 
     await tester.tap(find.text('Add seat'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
 
     expect(find.text('Add seat'), findsNothing);
     expect(mapGate().ignoring, isFalse);

@@ -489,12 +489,14 @@ void main() {
       ),
     );
     map.emit(_twoSeatSnapshot());
-    await tester.pumpAndSettle();
+    // A confirm card is on screen throughout, and its invitation breathes
+    // until it is answered, so these waits are bounded rather than settles.
+    await pumpToRest(tester);
 
     // One seat answered for, one still being asked about: the cart has
     // something in it, so the pill is drawn — and it cannot be pressed.
     await tester.tap(find.text('Add seat'));
-    await tester.pumpAndSettle();
+    await pumpToRest(tester);
     expect(picker.seatAwaitingConfirmation?.label, 'A-1');
     expect(find.text('1 ticket'), findsOneWidget);
 

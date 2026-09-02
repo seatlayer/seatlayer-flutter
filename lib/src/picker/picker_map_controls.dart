@@ -9,6 +9,7 @@ import 'picker_accessibility.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
+import 'picker_a11y.dart';
 
 /// The dark glass every piece of 3D chrome is drawn on.
 ///
@@ -364,7 +365,7 @@ class _Segment extends StatelessWidget {
                     style: TextStyle(
                       color: selected ? theme.onAccent : theme.mutedText,
                       fontSize: SeatLayerSizeTokens.viewModeLabelFontSize,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                       letterSpacing:
                           SeatLayerSizeTokens.viewModeLabelFontSize * .04,
                       fontFamily: theme.fontFamily,

@@ -93,9 +93,7 @@ class _PickerThemeModeSyncState extends State<PickerThemeModeSync> {
       // onto the new side, and it repaints in place with the selection, the
       // focused section and the camera intact.
       unawaited(
-        picker
-            .setThemeMode(mode, mapTheme: mapTheme)
-            .catchError((Object _) {}),
+        picker.setThemeMode(mode, mapTheme: mapTheme).catchError((Object _) {}),
       );
     });
   }

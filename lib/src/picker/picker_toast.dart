@@ -13,6 +13,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../payloads.dart';
 import 'picker_availability.dart';
+import 'picker_a11y.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_strings.dart';
@@ -183,7 +184,7 @@ class SeatLayerPickerToastCard extends StatelessWidget {
         color: palette.text,
         fontSize: 12.5,
         height: 1.35,
-        fontWeight: FontWeight.w600,
+        fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
         fontFamily: palette.fontFamily,
       ),
     );
@@ -234,6 +235,20 @@ class _ToastAction extends StatelessWidget {
   final SeatLayerPickerToast toast;
   final SeatLayerResolvedPickerTheme theme;
 
+  /// Run the offer, and put the buyer back where they were.
+  ///
+  /// A toast is an interruption: it arrives beside whatever the buyer was
+  /// doing, and pressing `Select them again` must not leave the focus ring
+  /// stranded on a button that is about to be unmounted. The node that had
+  /// focus before the press gets it back once the action has been handed off.
+  void _act(BuildContext context) {
+    final restore = FocusManager.instance.primaryFocus;
+    toast.onAction?.call();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (restore != null && restore.context != null) restore.requestFocus();
+    });
+  }
+
   @override
   Widget build(BuildContext context) => ConstrainedBox(
         // A 44 pt hit box around a 30 pt pill: the pill is the drawn size the
@@ -251,12 +266,12 @@ class _ToastAction extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               shape: const StadiumBorder(),
             ),
-            onPressed: toast.onAction,
+            onPressed: () => _act(context),
             child: Text(
               toast.actionLabel!,
               style: TextStyle(
                 fontSize: 12.5,
-                fontWeight: FontWeight.w800,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                 fontFamily: theme.fontFamily,
               ),
             ),
@@ -306,6 +321,9 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
   StreamSubscription<void>? _expiries;
   SeatLayerHoldLapse? _toldAboutLapse;
   bool? _wasSalesClosed;
+
+  /// The last message spoken, so one toast is never announced twice.
+  String? _spoken;
 
   @override
   void didChangeDependencies() {
@@ -410,9 +428,27 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
 
   void _say(SeatLayerPickerToast toast) => _queue?.show(toast);
 
+  /// Read a new toast out, once.
+  ///
+  /// The card is a live region as well, which is what a screen reader reads
+  /// when the buyer's finger is already on the band. This is for the far more
+  /// common case: the toast arrives, is read, and is gone again inside four
+  /// seconds — a window a live region on a surface that is fading in and out
+  /// of an [AnimatedSwitcher] cannot be relied on to catch.
+  void _speak(SeatLayerPickerToast? toast) {
+    final message = toast?.message;
+    if (message == _spoken) return;
+    _spoken = message;
+    if (message == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) seatLayerAnnounce(context, message);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final toast = _queue?.current;
+    _speak(toast);
     final motion = SeatLayerPickerMotion.of(
       context,
       SeatLayerPickerMotion.enter,
