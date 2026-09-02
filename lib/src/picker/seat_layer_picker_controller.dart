@@ -265,6 +265,21 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   @visibleForTesting
   void Function(PickerHapticCue cue) playHaptic = playPickerHaptic;
 
+  /// Fire [cue], whether the policy inferred it from a snapshot or native
+  /// chrome witnessed it itself — a card arriving, or one of its two answers.
+  ///
+  /// Two gates, the same for every cue: a host that turned haptics off gets
+  /// none, and a device with no channel to buzz through is not an error — a
+  /// cue is a nicety, and the snapshot it came with is never dropped for it.
+  void emitHaptic(PickerHapticCue cue) {
+    if (_disposed || !_options.haptics) return;
+    try {
+      playHaptic(cue);
+    } catch (_) {
+      // Silent by design: there is nothing a host could do about it.
+    }
+  }
+
   Future<void> retry() {
     if (_disposed) return Future<void>.error(const SeatLayerError.destroyed());
     if (value.phase == SeatLayerPickerPhase.closed) {
@@ -464,26 +479,12 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       _holdLapse = null;
     }
 
-    // Every cue comes from here, and only from here: the snapshot is the one
-    // place selection, focus and hold are known to agree. Firing from the
-    // per-event signals as well would buzz twice for one seat.
-    if (_options.haptics) {
-      for (final cue in _haptics.onSnapshot(snapshot)) {
-        // A cue is a nicety; adopting the snapshot is not. Haptics reach a
-        // platform channel, and a channel is not always there — a headless
-        // test binding, a platform with no motor, an embedder that has torn
-        // its messenger down. None of that is a reason to drop a snapshot the
-        // buyer's seats depend on.
-        try {
-          playHaptic(cue);
-        } catch (_) {
-          // Silent by design: there is nothing a host could do about it.
-        }
-      }
-    } else {
-      // Keep the policy's memory current so turning haptics back on mid-session
-      // does not replay everything that happened while it was off.
-      _haptics.onSnapshot(snapshot);
+    // Every inferred cue comes from here, and only from here: the snapshot is
+    // the one place selection, focus and hold are known to agree. The policy
+    // always sees the snapshot, so turning haptics back on mid-session does
+    // not replay everything that happened while it was off.
+    for (final cue in _haptics.onSnapshot(snapshot)) {
+      emitHaptic(cue);
     }
 
     final completed = _revisionWaiters.keys

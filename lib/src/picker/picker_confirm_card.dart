@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../open_enums.dart';
 import '../payloads.dart';
+import 'picker_haptics.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'picker_strings.dart';
@@ -88,6 +89,18 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
   /// Whether the press has been committed and the button now says "Added".
   bool _added = false;
 
+  /// How far down the buyer has pushed the card, in logical points.
+  ///
+  /// Positive is towards the map's bottom edge, which is the direction the
+  /// card leaves in. Reset whenever the card is asking about a new seat.
+  double _drag = 0;
+
+  /// Whether an answer is already on its way, so a second one is ignored.
+  ///
+  /// A swipe that ends past the threshold and a tap on `Cancel` are two ways
+  /// to say the same thing, and a fling can land in the same frame as a tap.
+  bool _answering = false;
+
   @override
   void didUpdateWidget(covariant SeatLayerConfirmCard oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -97,6 +110,8 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       _dismissedLabel = null;
       _touched = false;
       _added = false;
+      _drag = 0;
+      _answering = false;
     }
   }
 
@@ -120,6 +135,9 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       _dismissedLabel = null;
       _touched = false;
       _added = false;
+      _drag = 0;
+      _answering = false;
+      _announceArrival(controller);
     }
     if (seat.label == _dismissedLabel) return const SizedBox.shrink();
     _tierId ??= seat.tierId ?? seat.tiers?.firstOrNull?.id;
@@ -169,130 +187,154 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
             onPointerDown: (_) {
               if (!_touched) setState(() => _touched = true);
             },
-            child: Material(
-              key: const ValueKey<String>('seatlayer.confirm-card.surface'),
-              color: cardStyle.color ?? theme.surface,
-              elevation: cardStyle.elevation ?? 18,
-              shadowColor: pickerAlpha(const Color(0xFF000000), .26),
-              shape: cardStyle.shape ??
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(theme.radius + 4),
-                    side: BorderSide(color: pickerAlpha(theme.divider, .9)),
-                  ),
-              clipBehavior: Clip.antiAlias,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  SizedBox(
-                    height: layout.confirmIdentityHeight,
-                    child: _IdentityGrid(seat: seat),
-                  ),
-                  // The band is the category speaking for itself: its colour,
-                  // its name, how much of it is left, and what it costs.
-                  // Without a category there is nothing for it to say, and a
-                  // price with no name beside it belongs nowhere on this card.
-                  if (category != null)
-                    SizedBox(
-                      height: layout.confirmBandHeight,
-                      child: _CategoryBand(
-                        category: category,
-                        color: categoryColor,
-                        price: selectedPrice,
-                        currency: selectedCurrency,
+            // Pushing the card down is the third answer, and the one a thumb
+            // reaches first. It follows the finger exactly as far as the
+            // threshold and then goes stiff, so the resistance itself says
+            // the card is already far enough to let go of. The follow is
+            // direct manipulation rather than decoration, so reduced motion
+            // leaves it alone — what it does drop is the theatre after it.
+            child: GestureDetector(
+              onVerticalDragUpdate: controller.state.isBusy
+                  ? null
+                  : (details) => setState(() => _drag += details.delta.dy),
+              onVerticalDragEnd: controller.state.isBusy
+                  ? null
+                  : (details) => _settleDrag(
+                        controller,
+                        seat,
+                        (details.primaryVelocity ?? 0).toDouble(),
                       ),
-                    ),
-                  // The gradient stands in for the photograph `View from here`
-                  // opens, so it is drawn only where that action exists.
-                  if (seatView != null) ...[
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: layout.confirmPhotoHeight,
-                      child: _PhotoStrip(
-                        onViewFromSeat: controller.state.isBusy
-                            ? null
-                            : () => _inspect(seat, seatView),
+              child: Transform.translate(
+                offset: Offset(0, _rubberBand(_drag)),
+                child: Material(
+                  key: const ValueKey<String>('seatlayer.confirm-card.surface'),
+                  color: cardStyle.color ?? theme.surface,
+                  elevation: cardStyle.elevation ?? 18,
+                  shadowColor: pickerAlpha(const Color(0xFF000000), .26),
+                  shape: cardStyle.shape ??
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(theme.radius + 4),
+                        side: BorderSide(color: pickerAlpha(theme.divider, .9)),
                       ),
-                    ),
-                  ],
-                  // 3D is a place to go, not a badge on a picture, so it is a
-                  // full-width action of its own — legible, and big enough to
-                  // hit — rather than a pill floating in an empty frame.
-                  if (venue3D != null) ...[
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: SizedBox(
-                        height: layout.confirmActionHeight,
-                        child: _SecondaryAction(
-                          icon: Icons.view_in_ar_rounded,
-                          label: strings.seeItIn3D,
-                          onPressed: controller.state.isBusy
-                              ? null
-                              : () => _inspect(seat, venue3D),
-                        ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SizedBox(
+                        height: layout.confirmIdentityHeight,
+                        child: _IdentityGrid(seat: seat),
                       ),
-                    ),
-                  ],
-                  SizedBox(
-                    height: seatView == null && venue3D == null ? 5 : 10,
-                  ),
-                  if (tiers.length > 1)
-                    Flexible(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (final tier in tiers)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 7),
-                                child: SeatLayerPickerSeatTierChoice(
-                                  tier: tier,
-                                  currency: seat.currency ?? 'USD',
-                                  selected: _tierId == tier.id,
-                                  enabled: !controller.state.isBusy,
-                                  onTap: () =>
-                                      setState(() => _tierId = tier.id),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  SizedBox(
-                    height: layout.confirmActionHeight,
-                    child: Row(
-                      children: [
-                        // One third to leave, two thirds to accept: the two
-                        // answers are not equally likely, and the card should
-                        // not pretend that they are.
-                        Expanded(
-                          child: _CancelButton(
-                            label: strings.cancel,
-                            style: theme.styles.secondaryButtonStyle,
-                            onPressed: controller.state.isBusy
-                                ? null
-                                : () => _cancel(controller, seat),
+                      // The band is the category speaking for itself: its
+                      // colour, its name, how much of it is left, and what it
+                      // costs. Without a category there is nothing for it to
+                      // say, and a price with no name beside it belongs
+                      // nowhere on this card.
+                      if (category != null)
+                        SizedBox(
+                          height: layout.confirmBandHeight,
+                          child: _CategoryBand(
+                            category: category,
+                            color: categoryColor,
+                            price: selectedPrice,
+                            currency: selectedCurrency,
                           ),
                         ),
-                        const SizedBox(width: 1),
-                        Expanded(
-                          flex: 2,
-                          child: _AddSeatButton(
-                            label: _added ? strings.added : strings.addSeat,
-                            added: _added,
-                            invite: invite,
-                            style: theme.styles.primaryButtonStyle,
-                            onPressed: controller.state.isBusy
+                      // The gradient stands in for the photograph that
+                      // `View from here` opens, so it is drawn only where
+                      // that action exists.
+                      if (seatView != null) ...[
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: layout.confirmPhotoHeight,
+                          child: _PhotoStrip(
+                            onViewFromSeat: controller.state.isBusy
                                 ? null
-                                : () => _confirm(controller, seat),
+                                : () => _inspect(seat, seatView),
                           ),
                         ),
                       ],
-                    ),
+                      // 3D is a place to go, not a badge on a picture, so it
+                      // is a full-width action of its own — legible, and big
+                      // enough to hit — rather than a pill floating in an
+                      // empty frame.
+                      if (venue3D != null) ...[
+                        const SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: SizedBox(
+                            height: layout.confirmActionHeight,
+                            child: _SecondaryAction(
+                              icon: Icons.view_in_ar_rounded,
+                              label: strings.seeItIn3D,
+                              onPressed: controller.state.isBusy
+                                  ? null
+                                  : () => _inspect(seat, venue3D),
+                            ),
+                          ),
+                        ),
+                      ],
+                      SizedBox(
+                        height: seatView == null && venue3D == null ? 5 : 10,
+                      ),
+                      if (tiers.length > 1)
+                        Flexible(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                for (final tier in tiers)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 7),
+                                    child: SeatLayerPickerSeatTierChoice(
+                                      tier: tier,
+                                      currency: seat.currency ?? 'USD',
+                                      selected: _tierId == tier.id,
+                                      enabled: !controller.state.isBusy,
+                                      onTap: () =>
+                                          setState(() => _tierId = tier.id),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      SizedBox(
+                        height: layout.confirmActionHeight,
+                        child: Row(
+                          children: [
+                            // One third to leave, two thirds to accept: the
+                            // two answers are not equally likely, and the
+                            // card should not pretend that they are.
+                            Expanded(
+                              child: _CancelButton(
+                                label: strings.cancel,
+                                style: theme.styles.secondaryButtonStyle,
+                                onPressed: controller.state.isBusy
+                                    ? null
+                                    : () => _cancel(controller, seat),
+                              ),
+                            ),
+                            const SizedBox(width: 1),
+                            Expanded(
+                              flex: 2,
+                              child: _AddSeatButton(
+                                label: _added ? strings.added : strings.addSeat,
+                                added: _added,
+                                invite: invite,
+                                style: theme.styles.primaryButtonStyle,
+                                onPressed: controller.state.isBusy
+                                    ? null
+                                    : () => _confirm(controller, seat),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -305,13 +347,51 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     if (mounted) setState(() => _dismissedLabel = seat.label);
   }
 
+  /// A light cue the first time this card asks about a seat.
+  ///
+  /// Fired after the frame that put it on screen rather than during it: a
+  /// build is not the place for a side effect, and a card that buzzes before
+  /// it is drawn is answering a tap the buyer cannot see the result of yet.
+  void _announceArrival(SeatLayerPickerController controller) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) controller.emitHaptic(PickerHapticCue.cardArrived);
+    });
+  }
+
+  /// How far the card actually moves when it has been pushed [drag] points.
+  ///
+  /// One to one until the card is far enough down to let go of, and a third
+  /// of that afterwards. Upward it barely moves at all: there is nothing above
+  /// the card to drag it towards.
+  static double _rubberBand(double drag) {
+    if (drag <= 0) return drag / 6;
+    if (drag <= _dismissDrag) return drag;
+    return _dismissDrag + ((drag - _dismissDrag) / 3);
+  }
+
+  /// The buyer let go: either the card leaves, or it springs back.
+  void _settleDrag(
+    SeatLayerPickerController controller,
+    SelectedSeat seat,
+    double velocity,
+  ) {
+    if (_drag >= _dismissDrag || velocity >= _dismissVelocity) {
+      unawaited(_cancel(controller, seat));
+      return;
+    }
+    setState(() => _drag = 0);
+  }
+
   Future<void> _confirm(
     SeatLayerPickerController controller,
     SelectedSeat seat,
   ) async {
-    // The seat already joined the selection when it was tapped, and the
-    // haptics policy has already spent its click on that. A second cue here
-    // would buzz twice for one seat.
+    if (_answering) return;
+    _answering = true;
+    // The tap that put the seat on the map earned the policy's light click;
+    // this is a different moment and a heavier one, because it is the press
+    // that decides what the buyer is going to pay for.
+    controller.emitHaptic(PickerHapticCue.seatConfirmed);
     final origin = _cardCentre();
     final callbacks = SeatLayerPickerScope.callbacksOf(context);
     final reduced = SeatLayerPickerMotion.reduced(context);
@@ -333,6 +413,8 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       _dismiss(seat);
     } catch (_) {
       // The controller keeps the typed failure in picker state for native UI.
+      // The card stays, so the answer must be offerable again.
+      _answering = false;
     }
   }
 
@@ -356,6 +438,11 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     SeatLayerPickerController controller,
     SelectedSeat seat,
   ) async {
+    if (_answering) return;
+    _answering = true;
+    // A tick, not an impact: giving a seat back is the buyer changing their
+    // mind, and nothing about that is worth a thump.
+    controller.emitHaptic(PickerHapticCue.cardCancelled);
     try {
       if (widget.onCancel != null) {
         await widget.onCancel!(seat);
@@ -365,6 +452,8 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       _dismiss(seat);
     } catch (_) {
       // The controller keeps the typed failure in picker state for native UI.
+      _answering = false;
+      if (mounted) setState(() => _drag = 0);
     }
   }
 
@@ -523,6 +612,26 @@ class _IdentityGrid extends StatelessWidget {
           : strings.seatWord;
 }
 
+/// How far down the card has to be pushed before letting go cancels.
+///
+/// Far enough that a thumb resting on the card while the map settles cannot
+/// reach it, and short enough to be one comfortable flick.
+const double _dismissDrag = 72;
+
+/// A downward flick this fast cancels however short it was.
+///
+/// Points per second. A deliberate flick clears it easily; the drift at the
+/// end of a slow, reconsidered drag does not.
+const double _dismissVelocity = 700;
+
+/// How few is few enough to say so.
+///
+/// A round dozen, chosen because it is the point where the number stops
+/// describing a section and starts describing the buyer's odds: above it the
+/// count is inventory, below it the count is a queue. Pressure the buyer can
+/// check against the map is honest; pressure at forty seats is not.
+const int _scarceRemaining = 12;
+
 /// The category, in the category's own colour, and what it costs.
 ///
 /// The map is already painted in these colours, so the band is the one place
@@ -546,6 +655,12 @@ class _CategoryBand extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
+    // Below the threshold the count stops being a fact about the category and
+    // becomes a reason to answer now, so it says so and takes the warning ink.
+    // Zero is not scarcity: a category with nothing left cannot be the one the
+    // buyer just tapped a seat in, and "Only 0 left" would be nonsense.
+    final scarce =
+        category.available > 0 && category.available <= _scarceRemaining;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Color.alphaBlend(pickerAlpha(color, .11), theme.surface),
@@ -584,13 +699,15 @@ class _CategoryBand extends StatelessWidget {
                   const SizedBox(width: 6),
                   Flexible(
                     child: Text(
-                      strings.seatsLeft(category.available),
+                      scarce
+                          ? strings.onlyLeft(category.available)
+                          : strings.seatsLeft(category.available),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: theme.mutedText,
+                        color: scarce ? theme.warning : theme.mutedText,
                         fontSize: 12,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: scarce ? FontWeight.w800 : FontWeight.w600,
                         fontFamily: theme.fontFamily,
                       ),
                     ),
@@ -1081,6 +1198,178 @@ class _FlyingDotState extends State<_FlyingDot>
           );
         },
       );
+}
+
+/// Which edge of the seat card points back at the seat, if any.
+enum SeatLayerConfirmCardNotch {
+  /// The card is centred and points at nothing: the runtime did not say where
+  /// on the map the seat was drawn.
+  none,
+
+  /// The card sits above the seat, so it points down at it.
+  bottom,
+
+  /// The card sits below the seat, so it points up at it.
+  top,
+}
+
+/// Where the seat card sits over the map, and which way it points.
+@immutable
+class SeatLayerConfirmCardPlacement {
+  /// Creates a placement.
+  const SeatLayerConfirmCardPlacement({required this.top, required this.notch});
+
+  /// The card's own top edge, in the map surface's coordinates.
+  final double top;
+
+  /// Which edge carries the pointer, if the seat's place is known.
+  final SeatLayerConfirmCardNotch notch;
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeatLayerConfirmCardPlacement &&
+      other.top == top &&
+      other.notch == notch;
+
+  @override
+  int get hashCode => Object.hash(top, notch);
+
+  @override
+  String toString() => 'SeatLayerConfirmCardPlacement($top, ${notch.name})';
+}
+
+/// The gap between the seat and the card's nearest edge.
+const double seatLayerConfirmCardSeatGap = 12;
+
+/// Where a card of [card] size belongs over a [area]-sized map.
+///
+/// The card wants to be near the seat without covering it, so it sits a
+/// [seatLayerConfirmCardSeatGap] above the seat and points down. Where there
+/// is not enough map above the seat for that — the seat is near the top, or
+/// the card is tall — it goes the same distance below and points up instead.
+/// With no [seat] it rests in the middle of whatever the chrome has left,
+/// which is where every runtime before `seat-screen-point-v1` puts it.
+///
+/// [topInset] and [bottomInset] are the bands the picker's own chrome stands
+/// on: the card must not slide under the floor strip or behind the dock, so
+/// both cases are clamped into what is left even when the clamp costs the card
+/// its gap. Pure, so the three cases are decided once and tested directly.
+SeatLayerConfirmCardPlacement seatLayerConfirmCardPlacement({
+  required Offset? seat,
+  required Size card,
+  required Size area,
+  double topInset = 0,
+  double bottomInset = 0,
+  double gap = seatLayerConfirmCardSeatGap,
+}) {
+  final ceiling = topInset;
+  final floor = area.height - bottomInset - card.height;
+  // A card taller than the band it has to live in cannot be clamped into it;
+  // pinning it to the top at least keeps its actions reachable.
+  final lowest = math.max(ceiling, floor);
+  if (seat == null) {
+    // Centred on the map, as it has been on every runtime so far, and clamped
+    // only where the chrome would otherwise stand on it.
+    return SeatLayerConfirmCardPlacement(
+      top: ((area.height - card.height) / 2).clamp(ceiling, lowest),
+      notch: SeatLayerConfirmCardNotch.none,
+    );
+  }
+  final above = seat.dy - gap - card.height;
+  if (above >= ceiling) {
+    return SeatLayerConfirmCardPlacement(
+      top: math.min(above, lowest),
+      notch: SeatLayerConfirmCardNotch.bottom,
+    );
+  }
+  return SeatLayerConfirmCardPlacement(
+    top: (seat.dy + gap).clamp(ceiling, lowest),
+    notch: SeatLayerConfirmCardNotch.top,
+  );
+}
+
+/// The pointer between the card and the seat it is about.
+///
+/// Drawn as part of the card rather than as a decoration on it: same surface,
+/// same hairline, and the hairline is erased where the two meet so the notch
+/// reads as the card's own edge pulled towards the seat.
+class SeatLayerConfirmCardPointer extends StatelessWidget {
+  /// Creates a pointer of [height] pointing [up] or down.
+  const SeatLayerConfirmCardPointer({
+    super.key,
+    required this.up,
+    this.height = 8,
+    this.width = 18,
+  });
+
+  /// Whether the tip points towards the top of the screen.
+  final bool up;
+
+  /// How far the tip reaches out of the card.
+  final double height;
+
+  /// How wide the pointer's base is where it leaves the card.
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    return SizedBox(
+      width: width,
+      height: height,
+      child: CustomPaint(
+        painter: _PointerPainter(
+          up: up,
+          surface: theme.surface,
+          border: pickerAlpha(theme.divider, .9),
+        ),
+      ),
+    );
+  }
+}
+
+class _PointerPainter extends CustomPainter {
+  const _PointerPainter({
+    required this.up,
+    required this.surface,
+    required this.border,
+  });
+
+  final bool up;
+  final Color surface;
+  final Color border;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path();
+    if (up) {
+      path
+        ..moveTo(0, size.height)
+        ..lineTo(size.width / 2, 0)
+        ..lineTo(size.width, size.height);
+    } else {
+      path
+        ..moveTo(0, 0)
+        ..lineTo(size.width / 2, size.height)
+        ..lineTo(size.width, 0);
+    }
+    canvas.drawPath(path, Paint()..color = surface);
+    // Only the two sloping sides are stroked: the base is where the card is,
+    // and a line there would draw the card's edge across its own pointer.
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = border
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_PointerPainter oldDelegate) =>
+      oldDelegate.up != up ||
+      oldDelegate.surface != surface ||
+      oldDelegate.border != border;
 }
 
 extension<T> on Iterable<T> {

@@ -150,6 +150,33 @@ void main() {
       );
     });
 
+    test('a seat carries where the runtime drew it, when it says', () {
+      final seat = SelectedSeat.fromJson({
+        'id': 's1',
+        'label': 'A-1',
+        'screenPoint': {'x': 120.5, 'y': 44},
+      })!;
+      expect(seat.screenPoint, const Offset(120.5, 44));
+    });
+
+    test('half a screen point is no screen point', () {
+      // Absent on every runtime before `seat-screen-point-v1`, and a point
+      // with one coordinate would aim native chrome at the map's corner.
+      SelectedSeat decode(Object? point) => SelectedSeat.fromJson({
+            'id': 's1',
+            'label': 'A-1',
+            if (point != null) 'screenPoint': point,
+          })!;
+      expect(decode(null).screenPoint, isNull);
+      expect(decode({'x': 12}).screenPoint, isNull);
+      expect(decode({'y': 12}).screenPoint, isNull);
+      expect(decode({'x': 'left', 'y': 12}).screenPoint, isNull);
+      expect(decode(<Object?>[1, 2]).screenPoint, isNull);
+      expect(decode('120,44').screenPoint, isNull);
+      expect(decode({'x': double.nan, 'y': 12}).screenPoint, isNull);
+      expect(decode({'x': double.infinity, 'y': 12}).screenPoint, isNull);
+    });
+
     test(
         'a seat missing its required id/label decodes to null (dropped by lists)',
         () {

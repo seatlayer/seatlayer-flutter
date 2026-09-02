@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' show Offset;
 
 import 'bridge/bridge_protocol.dart';
 import 'json.dart';
@@ -208,6 +209,7 @@ class SelectedSeat {
     this.maxOccupancy,
     this.accessibility,
     this.wheelchairSpaceType,
+    this.screenPoint,
   });
 
   final String id;
@@ -247,6 +249,16 @@ class SelectedSeat {
   final List<String>? accessibility;
   final String? wheelchairSpaceType;
 
+  /// Where the seat is drawn on the map, in the map surface's own logical
+  /// points, or null when the runtime does not report it.
+  ///
+  /// Present only from runtimes advertising `seat-screen-point-v1`; every
+  /// runtime shipped before it omits the field, and a map that has panned
+  /// since the seat was tapped makes even a reported point stale. Native
+  /// chrome may use it to point at the seat and must never need it: anything
+  /// that reads this has to be correct with null.
+  final Offset? screenPoint;
+
   /// What to show the buyer. Booking still uses [label].
   String get buyerFacingLabel => displayLabel ?? label;
 
@@ -281,7 +293,18 @@ class SelectedSeat {
           ? null
           : jListOf(jGet(v, 'accessibility'), (item) => jStr(item)),
       wheelchairSpaceType: jStr(jGet(v, 'wheelchairSpaceType')),
+      screenPoint: _screenPoint(jGet(v, 'screenPoint')),
     );
+  }
+
+  /// `{x, y}`, and nothing else. A point with one coordinate missing or
+  /// non-finite is not a place on the map, and half a point would aim native
+  /// chrome at the map's top-left corner rather than at the seat.
+  static Offset? _screenPoint(Object? v) {
+    final x = jDouble(jGet(v, 'x'));
+    final y = jDouble(jGet(v, 'y'));
+    if (x == null || y == null || !x.isFinite || !y.isFinite) return null;
+    return Offset(x, y);
   }
 }
 

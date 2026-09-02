@@ -1,10 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_confirm_card.dart';
+import 'package:seatlayer/src/picker/picker_haptics.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
+import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
+
+/// A category with almost nothing left in it.
+Map<String, Object?> _almostSoldOut(int available) {
+  final snapshot = pickerSnapshot();
+  final catalog = Map<String, Object?>.from(
+    snapshot['catalog']! as Map<String, Object?>,
+  );
+  final categories = (catalog['categories']! as List<Object?>)
+      .map((item) => Map<String, Object?>.from(item! as Map<String, Object?>))
+      .toList();
+  categories.first['available'] = available;
+  catalog['categories'] = categories;
+  return <String, Object?>{...snapshot, 'catalog': catalog};
+}
+
+/// The card's own surface, which is what a swipe grabs.
+Finder get _surface =>
+    find.byKey(const ValueKey<String>('seatlayer.confirm-card.surface'));
 
 Map<String, Object?> _withoutImmersiveFeatures() {
   final snapshot = pickerSnapshot();
@@ -354,6 +375,259 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Add seat'), findsNothing);
+  });
+
+  testWidgets('a nearly sold-out category says so, in the warning ink', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    map.emit(_almostSoldOut(8));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Only 8 left'), findsOneWidget);
+    expect(find.text('8 left'), findsNothing);
+    final ink = tester.widget<Text>(find.text('Only 8 left')).style!.color;
+    expect(ink, const SeatLayerPickerThemeData.light().warning);
+  });
+
+  testWidgets('a category with room left states the count plainly', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    // One more than the threshold: scarcity has to be a line, not a slope.
+    map.emit(_almostSoldOut(13));
+    await tester.pumpAndSettle();
+
+    expect(find.text('13 left'), findsOneWidget);
+    expect(find.text('Only 13 left'), findsNothing);
+  });
+
+  testWidgets('pushing the card down gives the seat back, once', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    await tester.drag(_surface, const Offset(0, 120));
+    await tester.pumpAndSettle();
+
+    expect(
+      map.callsTo('picker.removeCartLine').map((call) => call.$2),
+      <Object?>[
+        <String, Object?>{'label': 'A-1'},
+      ],
+    );
+    expect(_surface, findsNothing);
+  });
+
+  testWidgets('a push the card springs back from keeps the seat', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+    final resting = tester.getTopLeft(_surface);
+
+    // Short of the threshold: the card follows the finger and then returns.
+    await tester.drag(_surface, const Offset(0, 40));
+    await tester.pumpAndSettle();
+
+    expect(map.callsTo('picker.removeCartLine'), isEmpty);
+    expect(_surface, findsOneWidget);
+    expect(tester.getTopLeft(_surface), resting);
+  });
+
+  testWidgets('each answer is felt at its own weight', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    final felt = <PickerHapticCue>[];
+    picker.playHaptic = felt.add;
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerConfirmCard(), controller: picker),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    // Arriving over the seat is the lightest thing the card does.
+    expect(felt, <PickerHapticCue>[PickerHapticCue.cardArrived]);
+    expect(pickerHapticStrength(PickerHapticCue.cardArrived), 'light');
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(felt.last, PickerHapticCue.cardCancelled);
+    expect(pickerHapticStrength(PickerHapticCue.cardCancelled), 'selection');
+  });
+
+  testWidgets('Add seat is the firmest cue in the picking loop', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    final felt = <PickerHapticCue>[];
+    picker.playHaptic = felt.add;
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerConfirmCard(), controller: picker),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Add seat'));
+    await tester.pumpAndSettle();
+
+    expect(felt.last, PickerHapticCue.seatConfirmed);
+    expect(pickerHapticStrength(PickerHapticCue.seatConfirmed), 'medium');
+  });
+
+  testWidgets('a host that turned haptics off feels none of it', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    final felt = <PickerHapticCue>[];
+    picker.playHaptic = felt.add;
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SeatLayerConfirmCard(),
+        controller: picker,
+        options: const SeatLayerPickerOptions(haptics: false),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add seat'));
+    await tester.pumpAndSettle();
+
+    expect(felt, isEmpty);
+  });
+
+  testWidgets('reduced motion leaves nothing ticking behind the card', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(map, _reducedMotion(const SeatLayerConfirmCard())),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+    await tester.pump();
+
+    expect(_surface, findsOneWidget);
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  group('placement', () {
+    const area = Size(390, 600);
+    const card = Size(358, 140);
+
+    test('a seat with room above it gets the card above it', () {
+      final placement = seatLayerConfirmCardPlacement(
+        seat: const Offset(195, 400),
+        card: card,
+        area: area,
+      );
+      expect(placement.top, 400 - 12 - 140);
+      expect(placement.notch, SeatLayerConfirmCardNotch.bottom);
+    });
+
+    test('a seat too high for the card gets it below, pointing up', () {
+      final placement = seatLayerConfirmCardPlacement(
+        seat: const Offset(195, 100),
+        card: card,
+        area: area,
+        topInset: 40,
+      );
+      expect(placement.top, 100 + 12);
+      expect(placement.notch, SeatLayerConfirmCardNotch.top);
+    });
+
+    test('a runtime that does not say rests the card in the middle', () {
+      final placement = seatLayerConfirmCardPlacement(
+        seat: null,
+        card: card,
+        area: area,
+      );
+      expect(placement.top, (600 - 140) / 2);
+      expect(placement.notch, SeatLayerConfirmCardNotch.none);
+    });
+
+    test('a centred card is still kept off the chrome under it', () {
+      final placement = seatLayerConfirmCardPlacement(
+        seat: null,
+        card: const Size(358, 400),
+        area: area,
+        bottomInset: 140,
+      );
+      expect(placement.top, 600 - 140 - 400);
+      expect(placement.notch, SeatLayerConfirmCardNotch.none);
+    });
+
+    test('the card never slides behind the chrome below it', () {
+      final placement = seatLayerConfirmCardPlacement(
+        seat: const Offset(195, 590),
+        card: card,
+        area: area,
+        bottomInset: 120,
+      );
+      expect(placement.top, 600 - 120 - 140);
+      expect(placement.notch, SeatLayerConfirmCardNotch.bottom);
+    });
+
+    test('the card never slides under the chrome above it', () {
+      final placement = seatLayerConfirmCardPlacement(
+        seat: const Offset(195, 20),
+        card: card,
+        area: area,
+        topInset: 60,
+      );
+      expect(placement.top, 60);
+      expect(placement.notch, SeatLayerConfirmCardNotch.top);
+    });
+
+    test('a card taller than the band it lives in keeps its top edge', () {
+      final placement = seatLayerConfirmCardPlacement(
+        seat: const Offset(195, 300),
+        card: const Size(358, 700),
+        area: area,
+        topInset: 40,
+        bottomInset: 80,
+      );
+      expect(placement.top, 40);
+      expect(placement.notch, SeatLayerConfirmCardNotch.top);
+    });
   });
 
   group('goldens', () {

@@ -2,6 +2,8 @@
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
@@ -22,6 +24,8 @@ import 'picker_map_controls.dart';
 import 'picker_venue_3d.dart';
 import 'picker_dock_bar.dart';
 import 'picker_floor_strip.dart';
+import 'picker_haptics.dart';
+import 'picker_layout.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_options.dart';
@@ -315,6 +319,9 @@ class _SeatLayerPickerAdaptiveLayoutState
           });
         }
         _followRungToPeek(state);
+        // Whether the prompt below is the phone's seat card, which is the one
+        // prompt that arrives as a moment of its own rather than as a dialog.
+        var seatCardUp = false;
         final Widget? buyerPrompt;
         if (!options.readOnly && state.generalAdmissionCandidate != null) {
           buyerPrompt = _part(
@@ -349,6 +356,7 @@ class _SeatLayerPickerAdaptiveLayoutState
               : null;
           // The phone gets the one-line card; the wide layout keeps the
           // identity grid, which has the room for it.
+          seatCardUp = !wide;
           buyerPrompt = wide
               ? _part(
                   context,
@@ -573,25 +581,24 @@ class _SeatLayerPickerAdaptiveLayoutState
         // the test badge and the dock are not — they are stacked on the map —
         // so a section framed to the whole surface lands partly underneath
         // them unless the runtime is told.
+        final topBand = _topBand(
+          panorama: panoramaUp,
+          testBadge: state.isTestEvent,
+          venue3D: venue3DUp,
+          backPill: backPillUp,
+          backPillInset: immersiveTopInset,
+          viewModeControl: viewModeControlUp,
+          floorStrip: floorStripUp,
+          floorStripHeight: floorStripHeight,
+        );
+        final bottomBand = _bottomBand(
+          chrome: chrome,
+          state: state,
+          dockLift: dockLift,
+          venue3D: venue3DUp,
+        );
         _reportViewportInsets(
-          SeatLayerViewportInsets(
-            top: _topBand(
-              panorama: panoramaUp,
-              testBadge: state.isTestEvent,
-              venue3D: venue3DUp,
-              backPill: backPillUp,
-              backPillInset: immersiveTopInset,
-              viewModeControl: viewModeControlUp,
-              floorStrip: floorStripUp,
-              floorStripHeight: floorStripHeight,
-            ),
-            bottom: _bottomBand(
-              chrome: chrome,
-              state: state,
-              dockLift: dockLift,
-              venue3D: venue3DUp,
-            ),
-          ),
+          SeatLayerViewportInsets(top: topBand, bottom: bottomBand),
         );
         return Column(
           children: [
@@ -653,6 +660,18 @@ class _SeatLayerPickerAdaptiveLayoutState
                       ),
                       child: _PickerPromptTransition(
                         scrimColor: pickerAlpha(resolved.background, .64),
+                        // The phone's seat card is the product's one moment:
+                        // the map goes soft behind it, it arrives from the
+                        // seat's direction and points back at it, and the map
+                        // it is covering is still the way out.
+                        seatCard: seatCardUp,
+                        blurColor: pickerAlpha(resolved.background, .38),
+                        anchor: seatCardUp ? pendingSeat?.screenPoint : null,
+                        topInset: topBand,
+                        bottomInset: bottomBand,
+                        onDismiss: seatCardUp && pendingSeat != null
+                            ? () => _dismissSeatCard(controller, pendingSeat)
+                            : null,
                         child: buyerPrompt,
                       ),
                     ),
@@ -983,6 +1002,19 @@ class _SeatLayerPickerAdaptiveLayoutState
     await action();
   }
 
+  /// Give a seat back because the buyer tapped the map around its card.
+  ///
+  /// The scrim is not decoration: it is the rest of the venue, and tapping it
+  /// means "not this one" as plainly as the button does. It answers the same
+  /// way the button does, cue included.
+  Future<void> _dismissSeatCard(
+    SeatLayerPickerController controller,
+    SelectedSeat seat,
+  ) async {
+    controller.emitHaptic(PickerHapticCue.cardCancelled);
+    await _removeSeat(controller, seat.label);
+  }
+
   Future<void> _removeSeat(
     SeatLayerPickerController controller,
     String label,
@@ -1029,21 +1061,57 @@ class _PickerPromptTransition extends StatelessWidget {
   const _PickerPromptTransition({
     required this.scrimColor,
     required this.child,
+    this.seatCard = false,
+    this.blurColor,
+    this.anchor,
+    this.topInset = 0,
+    this.bottomInset = 0,
+    this.onDismiss,
   });
 
   final Color scrimColor;
   final Widget? child;
 
+  /// Whether the prompt is the phone's seat card.
+  ///
+  /// The card is the only prompt that behaves like a native moment rather than
+  /// a dialog: a blurred backdrop, a spring from the seat's direction, a
+  /// pointer back at the seat, and a way out by tapping the map behind it. The
+  /// wide layout's dialog and the GA/table prompts keep the flat scrim.
+  final bool seatCard;
+
+  /// The tint over the blurred map, when the blur is drawn at all.
+  final Color? blurColor;
+
+  /// Where on the map the seat was drawn, if the runtime said.
+  final Offset? anchor;
+
+  /// The band of map the picker's own chrome is standing on, at the top.
+  final double topInset;
+
+  /// The same, at the bottom.
+  final double bottomInset;
+
+  /// Called when the buyer taps the map around the card.
+  final VoidCallback? onDismiss;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) => _build(context, constraints.biggest),
+      );
+
+  Widget _build(BuildContext context, Size area) {
     final reducedMotion = MediaQuery.disableAnimationsOf(context);
     final prompt = child;
+    final springy = seatCard && !reducedMotion;
     return IgnorePointer(
       ignoring: prompt == null,
       child: AnimatedSwitcher(
         duration: SeatLayerPickerMotion.of(
           context,
-          SeatLayerPickerMotion.enter,
+          seatCard
+              ? SeatLayerPickerMotion.cardEnter
+              : SeatLayerPickerMotion.enter,
         ),
         reverseDuration: SeatLayerPickerMotion.of(
           context,
@@ -1058,6 +1126,37 @@ class _PickerPromptTransition extends StatelessWidget {
             curve: SeatLayerPickerMotion.easeEnter,
             reverseCurve: SeatLayerPickerMotion.easeExit,
           );
+          if (springy) {
+            // The card comes from where the seat is: up from under the seat
+            // when the seat is high on the map, down onto it when it is low.
+            // Points, not a fraction of the card's own height — the distance
+            // is a property of the gesture, not of how tall the card is.
+            final dy = _arrivesFromBelow(area) ? _cardTravel : -_cardTravel;
+            // The overshoot drives geometry only. Opacity stays on the eased
+            // animation: a spring past 1 is a card that is briefly more than
+            // opaque, which is not a thing, and the framework says so.
+            final sprung = CurvedAnimation(
+              parent: animation,
+              curve: SeatLayerPickerMotion.spring,
+              reverseCurve: SeatLayerPickerMotion.easeExit,
+            );
+            return FadeTransition(
+              opacity: eased,
+              child: AnimatedBuilder(
+                animation: sprung,
+                builder: (context, inner) => Transform.translate(
+                  offset: Offset(0, dy * (1 - sprung.value)),
+                  child: inner,
+                ),
+                // Leaving is a shrink towards the peek bar the ticket just
+                // went to, so the card exits smaller than it entered.
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: .96, end: 1).animate(sprung),
+                  child: current,
+                ),
+              ),
+            );
+          }
           return FadeTransition(
             opacity: eased,
             child: SlideTransition(
@@ -1074,18 +1173,263 @@ class _PickerPromptTransition extends StatelessWidget {
         },
         child: prompt == null
             ? const SizedBox.expand(key: ValueKey<String>('picker-prompt-none'))
-            : ColoredBox(
+            : _PromptBackdrop(
                 key: ValueKey<Object>((
                   prompt.runtimeType,
                   prompt.key ?? prompt.runtimeType,
                 )),
-                color: scrimColor,
+                scrimColor: scrimColor,
+                blurColor: seatCard && !reducedMotion ? blurColor : null,
+                onDismiss: onDismiss,
                 // Each prompt owns its own insets: the phone confirm card is
                 // specified as the screen less one 16pt gutter, and a shared
                 // outer padding would quietly narrow it.
-                child: Center(child: prompt),
+                child: seatCard
+                    ? _SeatCardFrame(
+                        anchor: anchor,
+                        topInset: topInset,
+                        bottomInset: bottomInset,
+                        child: prompt,
+                      )
+                    : Center(child: prompt),
               ),
       ),
     );
   }
+
+  /// Whether the card rises into place rather than settling down onto it.
+  ///
+  /// Measured against the card's resting middle — halfway down whatever the
+  /// chrome has left of the map — rather than against where this particular
+  /// card ends up, which is not known until it has been laid out. A seat above
+  /// that line is a seat the card comes up from under. Without an anchor the
+  /// card rises: a surface arriving from the bottom of a phone is the one
+  /// entrance every buyer already knows.
+  bool _arrivesFromBelow(Size area) {
+    final seat = anchor;
+    if (seat == null) return true;
+    return seat.dy <= (topInset + (area.height - bottomInset)) / 2;
+  }
+}
+
+/// How far the seat card travels on arrival, in logical points.
+const double _cardTravel = 16;
+
+/// The map behind a prompt: blurred and tinted for the seat card, flat for
+/// everything else, and a way out either way.
+///
+/// The map is never unmounted for this. Blurring what is already drawn keeps
+/// the venue present behind the decision — the buyer can still see the shape
+/// of where they are — where a flat scrim only hides it.
+class _PromptBackdrop extends StatelessWidget {
+  const _PromptBackdrop({
+    super.key,
+    required this.scrimColor,
+    required this.blurColor,
+    required this.onDismiss,
+    required this.child,
+  });
+
+  final Color scrimColor;
+
+  /// The tint over the blur, or null to fall back to the flat [scrimColor].
+  final Color? blurColor;
+
+  final VoidCallback? onDismiss;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final tint = blurColor;
+    final backdrop = tint == null
+        ? ColoredBox(color: scrimColor)
+        : BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: _blurSigma, sigmaY: _blurSigma),
+            child: ColoredBox(color: tint),
+          );
+    return Stack(
+      children: [
+        // The dismissing tap belongs to the backdrop, not to the whole area:
+        // a detector wrapping both would take taps the card itself wanted.
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onDismiss,
+            child: backdrop,
+          ),
+        ),
+        Positioned.fill(child: child),
+      ],
+    );
+  }
+}
+
+/// How far the map is softened behind the seat card.
+const double _blurSigma = 6;
+
+/// Puts the seat card where the seat is, and points it back at the seat.
+///
+/// The pointer is drawn here rather than inside the card because which edge
+/// carries it is a fact about the placement, not about the card. Both edges
+/// are reserved whatever happens, so the card's own box never changes size
+/// when the pointer moves from one edge to the other.
+class _SeatCardFrame extends StatefulWidget {
+  const _SeatCardFrame({
+    required this.anchor,
+    required this.topInset,
+    required this.bottomInset,
+    required this.child,
+  });
+
+  final Offset? anchor;
+  final double topInset;
+  final double bottomInset;
+  final Widget child;
+
+  @override
+  State<_SeatCardFrame> createState() => _SeatCardFrameState();
+}
+
+class _SeatCardFrameState extends State<_SeatCardFrame> {
+  /// Which edge points at the seat, once the card's height is known.
+  ///
+  /// Null until the first layout has measured the card. The position itself is
+  /// right from the first frame — the layout delegate knows the card's size
+  /// when it places it — so all this lags by one frame is which 8 pt strip the
+  /// pointer is painted in, inside a 320 ms arrival.
+  SeatLayerConfirmCardNotch? _notch;
+
+  void _report(SeatLayerConfirmCardNotch notch) {
+    if (_notch == notch) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _notch != notch) setState(() => _notch = notch);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final notch = widget.anchor == null
+        ? SeatLayerConfirmCardNotch.none
+        : _notch ?? SeatLayerConfirmCardNotch.none;
+    final theme = seatLayerPickerThemeOf(context);
+    final layout = theme.layout;
+    return LayoutBuilder(
+      builder: (context, constraints) => CustomSingleChildLayout(
+        delegate: _SeatCardLayout(
+          anchor: widget.anchor,
+          topInset: widget.topInset,
+          bottomInset: widget.bottomInset,
+          onPlacement: _report,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _pointer(
+              constraints.maxWidth,
+              layout,
+              theme.radius + 4,
+              up: true,
+              drawn: notch == SeatLayerConfirmCardNotch.top,
+            ),
+            widget.child,
+            _pointer(
+              constraints.maxWidth,
+              layout,
+              theme.radius + 4,
+              up: false,
+              drawn: notch == SeatLayerConfirmCardNotch.bottom,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// One reserved pointer strip, drawn only on the edge facing the seat.
+  ///
+  /// Held inside the card's own rounded corners: a pointer growing out of a
+  /// corner reads as a torn edge rather than as an arrow, and it would be
+  /// pointing at a seat the card's radius has already moved away from.
+  Widget _pointer(
+    double width,
+    SeatLayerPickerLayout layout,
+    double radius, {
+    required bool up,
+    required bool drawn,
+  }) {
+    const height = _pointerHeight;
+    if (!drawn || !width.isFinite) {
+      return const SizedBox(height: height);
+    }
+    final cardWidth = math.min(
+      layout.confirmCardMaxWidth,
+      width - (layout.confirmCardGutter * 2),
+    );
+    final left = (width - cardWidth) / 2;
+    final x = widget.anchor!.dx.clamp(
+      left + radius + _pointerWidth,
+      left + cardWidth - radius - _pointerWidth,
+    );
+    return SizedBox(
+      height: height,
+      child: Stack(
+        children: [
+          Positioned(
+            left: x - (_pointerWidth / 2),
+            top: 0,
+            child: SeatLayerConfirmCardPointer(
+              up: up,
+              height: height,
+              width: _pointerWidth,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// How far the pointer reaches out of the card, and how wide its base is.
+const double _pointerHeight = 8;
+const double _pointerWidth = 18;
+
+/// Places the card+pointer box from [seatLayerConfirmCardPlacement].
+class _SeatCardLayout extends SingleChildLayoutDelegate {
+  const _SeatCardLayout({
+    required this.anchor,
+    required this.topInset,
+    required this.bottomInset,
+    required this.onPlacement,
+  });
+
+  final Offset? anchor;
+  final double topInset;
+  final double bottomInset;
+  final void Function(SeatLayerConfirmCardNotch notch) onPlacement;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      constraints.loosen();
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    // The child is the card with one reserved pointer strip above and below,
+    // so the card itself is that much shorter than the box being placed.
+    final card = Size(childSize.width, childSize.height - (_pointerHeight * 2));
+    final placement = seatLayerConfirmCardPlacement(
+      seat: anchor,
+      card: card,
+      area: size,
+      topInset: topInset,
+      bottomInset: bottomInset,
+    );
+    onPlacement(placement.notch);
+    return Offset(0, placement.top - _pointerHeight);
+  }
+
+  @override
+  bool shouldRelayout(_SeatCardLayout oldDelegate) =>
+      oldDelegate.anchor != anchor ||
+      oldDelegate.topInset != topInset ||
+      oldDelegate.bottomInset != bottomInset;
 }

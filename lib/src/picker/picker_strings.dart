@@ -75,6 +75,7 @@ class SeatLayerPickerStrings {
     this.seatsNotRecovered = _defaultSeatsNotRecovered,
     this.ticketCount = _defaultTicketCount,
     this.seatsLeft = _defaultSeatsLeft,
+    this.onlyLeft = _defaultOnlyLeft,
     this.seatsFree = _defaultSeatsFree,
     this.fromPrice = _defaultFromPrice,
     this.continueWithTotal = _defaultContinueWithTotal,
@@ -359,6 +360,10 @@ class SeatLayerPickerStrings {
   /// "74 left" — a section with some seats already sold.
   final String Function(int count) seatsLeft;
 
+  /// "Only 8 left" — the same count, once it is small enough to be a reason
+  /// to decide now rather than a fact about the section.
+  final String Function(int count) onlyLeft;
+
   /// "74 seats" — a section with nothing sold yet.
   final String Function(int count) seatsFree;
 
@@ -405,6 +410,9 @@ class SeatLayerPickerStrings {
       count == 1 ? '1 ticket' : '$count tickets';
 
   static String _defaultSeatsLeft(int count) => '$count left';
+
+  static String _defaultOnlyLeft(int count) =>
+      SeatLayerStringTokens.onlyLeft.replaceAll('{count}', '$count');
 
   static String _defaultSeatsFree(int count) =>
       count == 1 ? '1 seat' : '$count seats';

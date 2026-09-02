@@ -18,6 +18,28 @@ import 'picker_widget_harness.dart';
 
 Widget _layout() => SeatLayerPickerAdaptiveLayout(onCheckout: (_) async {});
 
+/// The same snapshot, with the runtime reporting where it drew the seat.
+///
+/// `screenPoint` arrives with `seat-screen-point-v1`; every runtime before it
+/// omits the field, which is what [pickerSnapshot] itself still models.
+Map<String, Object?> _seatDrawnAt(double x, double y) {
+  final snapshot = pickerSnapshot(sections: pickerSections());
+  final selection = Map<String, Object?>.from(
+    snapshot['selection']! as Map<String, Object?>,
+  );
+  final seats = (selection['seats']! as List<Object?>)
+      .map((seat) => Map<String, Object?>.from(seat! as Map<String, Object?>))
+      .toList();
+  seats.first['screenPoint'] = <String, Object?>{'x': x, 'y': y};
+  selection['seats'] = seats;
+  return <String, Object?>{...snapshot, 'selection': selection};
+}
+
+/// Where the map surface starts, in the test surface's own coordinates.
+Offset _mapOrigin(WidgetTester tester) => tester.getTopLeft(
+      find.byKey(const ValueKey<String>('seatlayer-picker-prompt-transition')),
+    );
+
 /// The peek bar's Continue button, or null when it is not offered at all.
 FilledButton? _continueButton(WidgetTester tester) {
   final found = find.widgetWithText(FilledButton, 'Continue · €25');
@@ -125,6 +147,97 @@ void main() {
       'A-1',
       reason: 'the pending line is matched off, not the whole cart',
     );
+  });
+
+  testWidgets('tapping the map around the card gives the seat back', (
+    tester,
+  ) async {
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
+    map.emit(pickerSnapshot(sections: pickerSections()));
+    await tester.pumpAndSettle();
+
+    // Beside the card, inside its gutter: still the venue, still a way out.
+    await tester.tapAt(Offset(6, _mapOrigin(tester).dy + 200));
+    await tester.pumpAndSettle();
+
+    expect(
+      map.callsTo('picker.removeCartLine').map((call) => call.$2),
+      <Object?>[
+        <String, Object?>{'label': 'A-1'},
+      ],
+    );
+    expect(find.byType(SeatLayerConfirmCard), findsNothing);
+  });
+
+  testWidgets('a seat low on the map gets the card above it, pointing down', (
+    tester,
+  ) async {
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
+    map.emit(_seatDrawnAt(195, 520));
+    await tester.pumpAndSettle();
+
+    final pointer = find.byType(SeatLayerConfirmCardPointer);
+    expect(pointer, findsOneWidget);
+    expect(tester.widget<SeatLayerConfirmCardPointer>(pointer).up, isFalse);
+    // The card clears the seat rather than covering it.
+    final card = find.byKey(
+      const ValueKey<String>('seatlayer.confirm-card.surface'),
+    );
+    expect(
+      tester.getBottomLeft(card).dy - _mapOrigin(tester).dy,
+      lessThanOrEqualTo(520 - 12),
+    );
+  });
+
+  testWidgets('a seat too high for the card gets it below, pointing up', (
+    tester,
+  ) async {
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
+    map.emit(_seatDrawnAt(195, 40));
+    await tester.pumpAndSettle();
+
+    final pointer = find.byType(SeatLayerConfirmCardPointer);
+    expect(pointer, findsOneWidget);
+    expect(tester.widget<SeatLayerConfirmCardPointer>(pointer).up, isTrue);
+  });
+
+  testWidgets('a runtime that never says where the seat is points at nothing', (
+    tester,
+  ) async {
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
+    map.emit(pickerSnapshot(sections: pickerSections()));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
+    expect(find.byType(SeatLayerConfirmCardPointer), findsNothing);
   });
 
   testWidgets('a composed layout that asks nothing keeps the seat counted',

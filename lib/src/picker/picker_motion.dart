@@ -57,6 +57,14 @@ abstract final class SeatLayerPickerMotion {
   static const Duration pressSweep =
       Duration(milliseconds: SeatLayerMotionTokens.pressSweep);
 
+  /// The phone's seat card springing in from the seat's direction.
+  ///
+  /// Longer than [enter] because it is the one arrival with an overshoot in
+  /// it: a spring that lands in 260 ms reads as a bounce rather than as weight.
+  static const Duration cardEnter = Duration(
+    milliseconds: SeatLayerMotionTokens.cardEnter,
+  );
+
   /// The one highlight that crosses a newly arrived primary action.
   ///
   /// Longer than anything in [catalog] on purpose: this is not the interface
@@ -90,6 +98,7 @@ abstract final class SeatLayerPickerMotion {
     'toast': toast,
     'immersive': immersive,
     'pressSweep': pressSweep,
+    'cardEnter': cardEnter,
   };
 
   /// The one overshoot in the system, reserved for a buyer's own action

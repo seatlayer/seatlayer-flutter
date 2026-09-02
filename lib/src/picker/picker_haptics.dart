@@ -28,6 +28,19 @@ enum PickerHapticCue {
   /// a snapshot only shows a hold going inactive, and a buyer releasing their
   /// seats deliberately must not feel like a loss.
   holdExpired,
+
+  /// The phone's seat card arrived over the map. Light, because the buyer's
+  /// finger is still on the glass where the seat was: this is the surface
+  /// answering the tap, not news.
+  cardArrived,
+
+  /// The buyer pressed `Add seat`. The firmest cue in the picking loop — it is
+  /// the one tap that changes what they are going to pay for.
+  seatConfirmed,
+
+  /// The seat card was dismissed — the button, a tap outside, or a swipe down.
+  /// The lightest cue there is: nothing happened that the buyer has to notice.
+  cardCancelled,
 }
 
 /// Decides WHICH haptic to fire, without knowing how to fire one.
@@ -37,10 +50,16 @@ enum PickerHapticCue {
 /// that judgement is testable only if it is not tangled up with a platform
 /// channel.
 ///
-/// Every cue is derived from the snapshot stream, because the snapshot is the
-/// only place where selection, focus and hold are known to agree with each
-/// other. Reacting to a per-event selection signal as well would fire twice for
-/// one seat: the event and the snapshot that confirms it are the same news.
+/// This policy owns the cues that have to be *deduced*. The three seat-card
+/// cues are not: the card knows exactly when it arrived and which of its two
+/// answers was pressed, so it asks the controller for those directly and
+/// nothing here has to guess at them.
+///
+/// Every cue decided here is derived from the snapshot stream, because the
+/// snapshot is the only place where selection, focus and hold are known to
+/// agree with each other. Reacting to a per-event selection signal as well
+/// would fire twice for one seat: the event and the snapshot that confirms it
+/// are the same news.
 ///
 /// The rule that matters most is the seeding one: the FIRST snapshot never
 /// fires anything. A buyer returning to a picker that already has a focused
@@ -128,6 +147,9 @@ String pickerHapticStrength(PickerHapticCue cue) => switch (cue) {
       PickerHapticCue.sectionFocused => SeatLayerHapticTokens.sectionFocused,
       PickerHapticCue.holdCreated => SeatLayerHapticTokens.holdCreated,
       PickerHapticCue.holdExpired => SeatLayerHapticTokens.holdExpired,
+      PickerHapticCue.cardArrived => SeatLayerHapticTokens.cardArrived,
+      PickerHapticCue.seatConfirmed => SeatLayerHapticTokens.seatConfirmed,
+      PickerHapticCue.cardCancelled => SeatLayerHapticTokens.cardCancelled,
     };
 
 Future<void> _fire(String strength) => switch (strength) {

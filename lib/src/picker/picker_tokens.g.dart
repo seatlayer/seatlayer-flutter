@@ -243,6 +243,9 @@ abstract final class SeatLayerMotionTokens {
   /// `300` ms
   static const int pressSweep = 300;
 
+  /// `320` ms
+  static const int cardEnter = 320;
+
   /// `4000` ms — deliberately outside the budget.
   static const int undoWindow = 4000;
 
@@ -266,6 +269,15 @@ abstract final class SeatLayerHapticTokens {
 
   /// `heavy`
   static const String holdExpired = 'heavy';
+
+  /// `light`
+  static const String cardArrived = 'light';
+
+  /// `medium`
+  static const String seatConfirmed = 'medium';
+
+  /// `selection`
+  static const String cardCancelled = 'selection';
 }
 
 /// The English default for every buyer-facing chrome string.
@@ -563,6 +575,9 @@ abstract final class SeatLayerStringTokens {
 
   /// {count} left
   static const String seatsLeft = '{count} left';
+
+  /// Only {count} left
+  static const String onlyLeft = 'Only {count} left';
 
   /// {count} tickets
   static const String ticketCount = '{count} tickets';
