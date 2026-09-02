@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.0
 
 The hosted runtime moves to 0.76.0, the first release that reports seat-view
 thumbnails, sight lines and confidence summaries to the native chrome. It also

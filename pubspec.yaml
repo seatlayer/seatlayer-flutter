@@ -3,7 +3,7 @@ description: >-
   Flutter seat map SDK: a native seating chart and seat picker for iOS and
   Android ticketing apps, with live availability, best available, seat holds,
   3D views and secure checkout.
-version: 0.4.0
+version: 0.5.0
 homepage: https://seatlayer.io/developers/
 repository: https://github.com/seatlayer/seatlayer-flutter
 issue_tracker: https://github.com/seatlayer/seatlayer-flutter/issues

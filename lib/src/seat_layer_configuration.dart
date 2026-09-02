@@ -4,7 +4,7 @@ import 'open_enums.dart';
 import 'payloads.dart';
 
 /// This SDK's version.
-const String seatLayerSdkVersion = '0.4.0';
+const String seatLayerSdkVersion = '0.5.0';
 
 /// The SeatLayer renderer version this SDK release is pinned to.
 const String seatLayerHostedWebVersion = '0.76.0';
