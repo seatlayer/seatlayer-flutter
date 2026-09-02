@@ -966,9 +966,17 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   /// busy state, because a buyer resizing a sheet must not see the picker go
   /// busy underneath them.
   Future<void> setViewportInsets(SeatLayerViewportInsets? insets) =>
-      supportsViewportInsets
-          ? _viewportReport.report(insets)
-          : Future<void>.value();
+      (supportsViewportInsets
+              ? _viewportReport.report(insets)
+              : Future<void>.value())
+          .whenComplete(_noteMapFramed);
+
+  /// [SeatLayerPickerState.mapFramed], once a report settles with the picker
+  /// ready — in a microtask, never inside the build that asked for it.
+  void _noteMapFramed() {
+    if (_disposed || value.mapFramed || !value.isReady) return;
+    value = value.withMapFramed();
+  }
 
   /// Whether the mounted runtime accepts [setViewportInsets].
   bool get supportsViewportInsets {

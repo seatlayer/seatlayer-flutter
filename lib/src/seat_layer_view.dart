@@ -180,6 +180,15 @@ class _SeatLayerViewState extends State<SeatLayerView> {
     if (_adoptWarmPage) {
       _adoptWarmPage = false;
       adopted = _warm!.hasLiveHandshake;
+      if (adopted) {
+        // Replaying `hello` here would answer it with `init` from inside
+        // `initState`, and the renderer would draw its first chart against a
+        // WebView that has not been laid out yet — a map at the wrong size,
+        // refitting itself in front of the buyer a moment later. The page
+        // keeps buffering while we wait, so nothing is lost or reordered.
+        await _afterFirstFrame();
+        if (!mounted || generation != _generation) return;
+      }
       _warm!.adopt(
         (message) => widget.controller.ingestRaw(message),
         replay: adopted,
@@ -202,6 +211,19 @@ class _SeatLayerViewState extends State<SeatLayerView> {
         widget.controller.failWithTransport('could not load asset: $e');
       }
     }
+  }
+
+  /// Completes once a frame carrying this view has been laid out and drawn.
+  ///
+  /// Two steps rather than one: the post-frame callback runs at the end of the
+  /// frame this view was built in, and `endOfFrame` then carries us past the
+  /// frame after it — by which point the platform view has its real size.
+  Future<void> _afterFirstFrame() {
+    final laidOut = Completer<void>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      laidOut.complete(WidgetsBinding.instance.endOfFrame);
+    });
+    return laidOut.future;
   }
 
   @override

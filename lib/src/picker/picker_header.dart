@@ -108,7 +108,16 @@ class _EventTitle extends StatelessWidget {
     final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final event = state.event;
-    final name = event?.name ?? strings.chooseSeats;
+    // The runtime's own name wins the moment it arrives; until then the host's
+    // is a better placeholder than a generic instruction, because it is the
+    // name the buyer just tapped and the header never has to change its mind.
+    final placeholder = SeatLayerPickerScope.optionsOf(context).eventName;
+    final runtimeName = event?.name;
+    final name = runtimeName != null && runtimeName.isNotEmpty
+        ? runtimeName
+        : (placeholder != null && placeholder.isNotEmpty
+            ? placeholder
+            : strings.chooseSeats);
     if (compact) {
       // One line. A phone header that stacks a name over a venue spends the
       // height the map needs on words the buyer already chose their way past.

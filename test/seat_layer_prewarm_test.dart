@@ -140,6 +140,34 @@ void main() {
     expect(ready, isNotNull, reason: 'the buffered hello was dropped');
   });
 
+  testWidgets('the adopted page is answered only once the view is laid out',
+      (tester) async {
+    // The whole point of the wait. `init` is what starts the renderer, and a
+    // renderer started from `initState` draws its first chart against a
+    // WebView that has not been sized yet — a map at the wrong scale, refitted
+    // in front of the buyer a moment later, which reads as loading twice.
+    final fake = useFakeWebViewPlatform();
+    SeatLayerPicker.prewarm();
+    await tester.pump();
+    fake.postFromPage(_hello());
+
+    final controller = SeatLayerController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(_view(controller));
+
+    expect(
+      fake.sent('init'),
+      isFalse,
+      reason: 'the warm page was answered before its view had been laid out',
+    );
+
+    // …and nothing is lost by waiting: the greeting is still buffered, so the
+    // handshake completes on the very next frame.
+    await tester.pump();
+    await tester.pump();
+    expect(fake.sent('init'), isTrue);
+  });
+
   testWidgets('a page the buyer left sitting is re-loaded, not adopted stale',
       (tester) async {
     final fake = useFakeWebViewPlatform();

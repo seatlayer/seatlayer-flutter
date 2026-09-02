@@ -878,6 +878,7 @@ class SeatLayerPickerState {
     this.generalAdmissionCandidate,
     this.error,
     this.holdLapsed = false,
+    this.mapFramed = false,
   });
 
   const SeatLayerPickerState.initializing()
@@ -887,7 +888,8 @@ class SeatLayerPickerState {
         checkoutHandoff = null,
         generalAdmissionCandidate = null,
         error = null,
-        holdLapsed = false;
+        holdLapsed = false,
+        mapFramed = false;
 
   final SeatLayerPickerPhase phase;
   final SeatLayerPickerBusyAction busyAction;
@@ -904,6 +906,16 @@ class SeatLayerPickerState {
   /// this flag closes: a dead hold with a live clock, discovered at checkout.
   /// While it is set [hold] answers null, so nothing downstream can tick.
   final bool holdLapsed;
+
+  /// Whether the runtime has framed the map inside the chrome standing on it.
+  ///
+  /// False until the first viewport-inset report lands after the picker is
+  /// ready. The first snapshot arrives before the renderer has been told what
+  /// the native chrome covers, so a map revealed on that snapshot alone is
+  /// shown in one frame and re-fitted in the next — which a buyer reads as the
+  /// screen loading twice. Presentation only: nothing waits on this, and the
+  /// picker is fully ready and callable while it is still false.
+  final bool mapFramed;
 
   int get revision => snapshot?.revision ?? 0;
   String? get sessionId => snapshot?.sessionId;
@@ -953,6 +965,7 @@ class SeatLayerPickerState {
         snapshot: next,
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        mapFramed: mapFramed,
       );
 
   SeatLayerPickerState withBusy(SeatLayerPickerBusyAction action) =>
@@ -962,6 +975,7 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        mapFramed: mapFramed,
         holdLapsed: holdLapsed,
       );
 
@@ -971,6 +985,7 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        mapFramed: mapFramed,
         error: next,
         holdLapsed: holdLapsed,
       );
@@ -981,6 +996,7 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        mapFramed: mapFramed,
         error: next,
         holdLapsed: holdLapsed,
       );
@@ -992,6 +1008,7 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: area,
+        mapFramed: mapFramed,
         error: error,
         holdLapsed: holdLapsed,
       );
@@ -1002,6 +1019,7 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        mapFramed: mapFramed,
         holdLapsed: holdLapsed,
       );
 
@@ -1012,6 +1030,7 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: handoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        mapFramed: mapFramed,
         holdLapsed: holdLapsed,
       );
 
@@ -1020,6 +1039,7 @@ class SeatLayerPickerState {
         busyAction: SeatLayerPickerBusyAction.none,
         snapshot: snapshot,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        mapFramed: mapFramed,
         error: error,
         holdLapsed: holdLapsed,
       );
@@ -1035,8 +1055,24 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        mapFramed: mapFramed,
         error: error,
         holdLapsed: true,
+      );
+
+  /// The same state, with the map now framed inside the native chrome.
+  ///
+  /// One way only, until the runtime is reloaded and the state starts again
+  /// from [SeatLayerPickerState.initializing].
+  SeatLayerPickerState withMapFramed() => SeatLayerPickerState(
+        phase: phase,
+        busyAction: busyAction,
+        snapshot: snapshot,
+        checkoutHandoff: checkoutHandoff,
+        generalAdmissionCandidate: generalAdmissionCandidate,
+        error: error,
+        holdLapsed: holdLapsed,
+        mapFramed: true,
       );
 
   SeatLayerPickerState closed() => SeatLayerPickerState(
@@ -1045,6 +1081,7 @@ class SeatLayerPickerState {
         snapshot: snapshot,
         checkoutHandoff: checkoutHandoff,
         generalAdmissionCandidate: generalAdmissionCandidate,
+        mapFramed: mapFramed,
         holdLapsed: holdLapsed,
       );
 }

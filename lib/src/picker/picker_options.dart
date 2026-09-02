@@ -181,6 +181,7 @@ class SeatLayerPickerOptions {
     this.enableSeatView = true,
     this.max3DSeats,
     this.hideEventDetails = false,
+    this.eventName,
     this.panelInitiallyCollapsed = true,
     this.persistColorblindPreference = true,
     this.refreshOnResume = true,
@@ -228,6 +229,19 @@ class SeatLayerPickerOptions {
 
   /// Whether to suppress the event name and venue in the header.
   final bool hideEventDetails;
+
+  /// The event's name, shown in the header until the runtime reports its own;
+  /// the runtime's name wins once it arrives.
+  ///
+  /// The host already knows what the buyer tapped, and a header that says
+  /// "Choose your seats" for the first second and then swaps to the event's
+  /// name reads as the screen loading twice.
+  ///
+  /// Deliberately absent from [toBridgeConfig]: the runtime is the authority
+  /// on what this event is called, and this is only what the header borrows
+  /// while it waits. It is not part of the runtime profile either, so
+  /// changing it never reboots the map.
+  final String? eventName;
 
   /// Whether the cart sheet starts at its peek height.
   final bool panelInitiallyCollapsed;

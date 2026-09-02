@@ -44,6 +44,13 @@ const double _badgeGap = 8;
 /// Where the top rail itself begins.
 const double _railTop = 8;
 
+/// How long the map may be held back waiting to be framed.
+///
+/// The insets normally settle on the frame after the first snapshot. This is
+/// the backstop for a runtime that never answers: a buyer must never be left
+/// on a loading screen by a refinement.
+const Duration _mapFramingGrace = Duration(milliseconds: 700);
+
 /// The complete buyer seat picker, ready to place on a route.
 ///
 /// Everything below it is composable: each part is a public widget that works
@@ -75,6 +82,8 @@ class _SeatLayerPickerAdaptiveLayoutState
   String? _previousRung;
   SeatLayerViewportInsets? _reportedInsets;
   SeatLayerPickerController? _picker;
+  Timer? _framingGraceTimer;
+  bool _framingGraceLapsed = false;
 
   @override
   void didChangeDependencies() {
@@ -369,26 +378,37 @@ class _SeatLayerPickerAdaptiveLayoutState
               ? pendingSeat
               : null,
         );
-        final Widget? statusOverlay = switch (state.phase) {
-          SeatLayerPickerPhase.initializing => ColoredBox(
-            color: pickerAlpha(resolved.background, .84),
-            child: _part(
-              context,
-              widget.builders.loading,
-              const SeatLayerPickerLoadingView(),
-            ),
-          ),
-          SeatLayerPickerPhase.failed ||
-          SeatLayerPickerPhase.unavailable => ColoredBox(
-            color: pickerAlpha(resolved.background, .94),
-            child: _part(
-              context,
-              widget.builders.error,
-              const SeatLayerPickerErrorView(),
-            ),
-          ),
-          _ => null,
-        };
+        // Ready, but the runtime has not been told what the chrome covers yet:
+        // revealing the map now shows it at one framing and then re-fits it in
+        // front of the buyer. Held for the moment that takes, and never longer
+        // than [_mapFramingGrace] — a runtime that never answers must not be
+        // able to hang the picker on a loading screen.
+        _syncFramingGrace(state);
+        final framing = state.phase == SeatLayerPickerPhase.ready &&
+            !state.mapFramed &&
+            !_framingGraceLapsed;
+        final Widget? statusOverlay =
+            state.phase == SeatLayerPickerPhase.initializing || framing
+            ? ColoredBox(
+                color: pickerAlpha(resolved.background, .84),
+                child: _part(
+                  context,
+                  widget.builders.loading,
+                  const SeatLayerPickerLoadingView(),
+                ),
+              )
+            : switch (state.phase) {
+                SeatLayerPickerPhase.failed ||
+                SeatLayerPickerPhase.unavailable => ColoredBox(
+                  color: pickerAlpha(resolved.background, .94),
+                  child: _part(
+                    context,
+                    widget.builders.error,
+                    const SeatLayerPickerErrorView(),
+                  ),
+                ),
+                _ => null,
+              };
         final mapSurface = IgnorePointer(
           // Platform views participate in iOS gesture recognition before the
           // Flutter overlay's onPressed callback runs. Explicitly remove the
@@ -447,8 +467,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                                 child: buyerPrompt,
                               ),
                             ),
-                          if (statusOverlay != null)
-                            Positioned.fill(child: statusOverlay),
+                          Positioned.fill(
+                            child: _PickerStatusOverlay(overlay: statusOverlay),
+                          ),
                         ],
                       ),
                     ),
@@ -612,8 +633,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                         child: buyerPrompt,
                       ),
                     ),
-                  if (statusOverlay != null)
-                    Positioned.fill(child: statusOverlay),
+                  Positioned.fill(
+                    child: _PickerStatusOverlay(overlay: statusOverlay),
+                  ),
                 ],
               ),
             ),
@@ -847,13 +869,41 @@ class _SeatLayerPickerAdaptiveLayoutState
     ignorePickerAction(controller.setMapInteractionEnabled(enabled));
   }
 
+  /// Start, or retire, the wait for the map to be framed.
+  ///
+  /// Called from `build`. The clock starts when the picker becomes ready and
+  /// is thrown away the moment the map is framed — or the runtime is reloaded
+  /// and the phase leaves ready, which is when the next wait may begin.
+  void _syncFramingGrace(SeatLayerPickerState state) {
+    final waiting =
+        state.phase == SeatLayerPickerPhase.ready && !state.mapFramed;
+    if (!waiting) {
+      _framingGraceTimer?.cancel();
+      _framingGraceTimer = null;
+      if (state.phase != SeatLayerPickerPhase.ready) {
+        _framingGraceLapsed = false;
+      }
+      return;
+    }
+    if (_framingGraceLapsed || _framingGraceTimer != null) return;
+    _framingGraceTimer = Timer(_mapFramingGrace, () {
+      _framingGraceTimer = null;
+      if (!mounted) return;
+      setState(() => _framingGraceLapsed = true);
+    });
+  }
+
   /// Hand the runtime the current chrome bands.
   ///
   /// Called from `build`, which is where the numbers are known. The controller
   /// defers delivery until after the frame, drops repeats and coalesces a
   /// frame's calls into one command.
+  ///
+  /// Deliberately reported on every build rather than only when the numbers
+  /// move: an unchanged report costs nothing past the controller's own
+  /// de-duplication, and it is what tells the picker the map has been framed
+  /// once the runtime is ready — see [SeatLayerPickerState.mapFramed].
   void _reportViewportInsets(SeatLayerViewportInsets insets) {
-    if (_reportedInsets == insets) return;
     _reportedInsets = insets;
     final controller = SeatLayerPickerScope.controllerOf(context);
     ignorePickerAction(controller.setViewportInsets(insets));
@@ -862,6 +912,7 @@ class _SeatLayerPickerAdaptiveLayoutState
   @override
   void dispose() {
     _mapUnlockTimer?.cancel();
+    _framingGraceTimer?.cancel();
     // The runtime outlives this layout during a route swap, and chrome that is
     // gone must not keep cropping the venue.
     if (_reportedInsets != null &&
@@ -896,6 +947,33 @@ class _SeatLayerPickerAdaptiveLayoutState
 /// One motion language for every native decision surface: scrim, seat card,
 /// GA/table prompts and their exit. The canvas remains mounted underneath, so
 /// opening a card never resets camera state or causes a map flash.
+/// The loading/failure overlay, fading out rather than popping.
+///
+/// The map is revealed by lifting this, so a hard cut is the one thing that
+/// makes a finished load look like a second one starting.
+class _PickerStatusOverlay extends StatelessWidget {
+  const _PickerStatusOverlay({required this.overlay});
+
+  /// What to cover the map with, or null to reveal it.
+  final Widget? overlay;
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+        ignoring: overlay == null,
+        child: AnimatedSwitcher(
+          // Arriving is not animated: the overlay is up before the buyer sees
+          // the route at all. Only its departure is watched.
+          duration: Duration.zero,
+          reverseDuration: SeatLayerPickerMotion.of(
+            context,
+            SeatLayerPickerMotion.exit,
+          ),
+          switchOutCurve: SeatLayerPickerMotion.easeExit,
+          child: overlay ?? const SizedBox.shrink(),
+        ),
+      );
+}
+
 class _PickerPromptTransition extends StatelessWidget {
   const _PickerPromptTransition({
     required this.scrimColor,

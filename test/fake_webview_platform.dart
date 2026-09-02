@@ -32,6 +32,19 @@ class FakeWebViewPlatform extends WebViewPlatform with MockPlatformInterfaceMixi
   /// Every document the tree asked a WebView to load, in order.
   final List<String> loads = <String>[];
 
+  /// Every script the tree ran in a page, in order.
+  ///
+  /// native→web goes out as `runJavaScript`, so this is where a test reads
+  /// whether — and when — the bridge sent a command.
+  final List<String> scripts = <String>[];
+
+  /// Whether any script so far carried a bridge envelope of [kind].
+  ///
+  /// The envelope is JSON inside a JS string literal, so its own quotes are
+  /// escaped — `k` is the envelope's kind field.
+  bool sent(String kind) =>
+      scripts.any((script) => script.contains(r'\"k\":\"' '$kind' r'\"'));
+
   /// The JavaScript channels installed on each controller, in creation order.
   ///
   /// Recorded so a test can play the page's part: a prewarmed runtime posts
@@ -115,7 +128,9 @@ class _FakeController extends PlatformWebViewController
   }
 
   @override
-  Future<void> runJavaScript(String javaScript) async {}
+  Future<void> runJavaScript(String javaScript) async {
+    _platform.scripts.add(javaScript);
+  }
 
   @override
   Future<Object> runJavaScriptReturningResult(String javaScript) async => '';
