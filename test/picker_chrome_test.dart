@@ -6,6 +6,7 @@ import 'package:seatlayer/src/picker/picker_layout.dart';
 import 'package:seatlayer/src/picker/picker_legend.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
 
 import 'picker_test_fixture.dart';
@@ -28,7 +29,7 @@ BundleInfo _colorblindBundle() => nativeChromeBundle(
 
 void main() {
   group('header', () {
-    testWidgets('the phone header is one 56-point line', (tester) async {
+    testWidgets('the phone header is one 38-point line', (tester) async {
       final map = FakePickerMap();
       addTearDown(map.dispose);
       usePhoneSurface(tester);
@@ -50,6 +51,25 @@ void main() {
       // The venue is the second line the phone header does not have.
       expect(find.text('Riverside Auditorium'), findsNothing);
       expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+      // The ring is 26 points of ink; the target around it is the whole line
+      // and wide enough to reach the corner.
+      expect(
+        tester.getSize(find.byIcon(Icons.close_rounded)).height,
+        SeatLayerSizeTokens.headerCloseSize,
+      );
+      expect(
+        tester
+            .getSize(
+              find
+                  .ancestor(
+                    of: find.byIcon(Icons.close_rounded),
+                    matching: find.byType(GestureDetector),
+                  )
+                  .first,
+            )
+            .width,
+        greaterThanOrEqualTo(44),
+      );
     });
 
     testWidgets('the hold countdown is in the header and nowhere else',
@@ -136,7 +156,7 @@ void main() {
                   .first,
             )
             .height,
-        30,
+        SeatLayerSizeTokens.legendChipHeight,
       );
     });
 
@@ -257,6 +277,45 @@ void main() {
       expect(ink(clear), isNot(ink(find.text('€25'))));
     });
 
+    testWidgets('the way out of a filter never scrolls away', (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerPriceLegend(compact: true)),
+      );
+      map.emit(bestAvailableSnapshot(categoryFilter: <Object?>[]));
+      await tester.pumpAndSettle();
+
+      final before = tester.getRect(find.text('All prices'));
+      // The prices scroll under it; the chip that widens the map again does
+      // not go with them.
+      await tester.drag(find.text('€25'), const Offset(-200, 0));
+      await tester.pumpAndSettle();
+
+      expect(tester.getRect(find.text('All prices')), before);
+    });
+
+    testWidgets('a spread of prices reads as a floor', (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerPriceLegend(compact: true)),
+      );
+      final snapshot = pickerSnapshot(withSelection: false);
+      final categories = (snapshot['catalog']!
+          as Map<String, Object?>)['categories']! as List<Object?>;
+      (categories.first! as Map<String, Object?>)['priceMax'] = 90.0;
+      map.emit(snapshot);
+      await tester.pumpAndSettle();
+
+      // A range cannot fit a chip, so it becomes the price to beat.
+      expect(find.text('€25+'), findsOneWidget);
+    });
+
     testWidgets('a not-for-sale category never appears', (tester) async {
       final map = FakePickerMap();
       addTearDown(map.dispose);
@@ -285,26 +344,36 @@ void main() {
       map.emit(pickerSnapshot(withSelection: false));
       await tester.pumpAndSettle();
 
+      const inset = SeatLayerSizeTokens.mapAnchorInset;
       final screen = tester.getRect(find.byType(SeatLayerPickerMapControls));
       final segmented =
           tester.getRect(find.byType(SeatLayerPickerViewModeControl));
       final access =
           tester.getRect(find.byType(SeatLayerPickerAccessibilityFilters));
+      final fit = tester.getRect(find.byType(SeatLayerPickerZoomToFitButton));
       final stepOut =
-          tester.getRect(find.byType(SeatLayerPickerOverviewButton));
+          tester.getRect(find.byType(SeatLayerPickerZoomOutButton));
 
-      expect(segmented.right, closeTo(screen.right - 10, .5));
-      expect(segmented.top, closeTo(screen.top + 10, .5));
-      expect(access.left, closeTo(screen.left + 10, .5));
-      expect(access.bottom, closeTo(screen.bottom - 10, .5));
-      expect(stepOut.right, closeTo(screen.right - 10, .5));
-      expect(stepOut.bottom, closeTo(screen.bottom - 10, .5));
+      expect(segmented.right, closeTo(screen.right - inset, .5));
+      expect(segmented.top, closeTo(screen.top + inset, .5));
+      expect(access.left, closeTo(screen.left + inset, .5));
+      expect(access.bottom, closeTo(screen.bottom - inset, .5));
+      // The camera column: fit at the corner, and the way back out one gap
+      // above it, because the fixture is already inside a section.
+      expect(fit.right, closeTo(screen.right - inset, .5));
+      expect(fit.bottom, closeTo(screen.bottom - inset, .5));
+      expect(
+        fit.top - stepOut.bottom,
+        closeTo(SeatLayerSizeTokens.zoomColumnGap, .5),
+      );
 
-      // Pinch already zooms, and the colourblind palette lives in the
+      // Pinch already zooms in, and the colourblind palette lives in the
       // accessibility sheet.
       expect(find.byType(SeatLayerPickerZoomInButton), findsNothing);
-      expect(find.byType(SeatLayerPickerZoomToFitButton), findsNothing);
       expect(find.byType(SeatLayerPickerColorblindButton), findsNothing);
+      // The dock's `‹ Venue` is the phone's way back to the whole venue; a
+      // second one on the map would be the same door twice.
+      expect(find.byType(SeatLayerPickerOverviewButton), findsNothing);
     });
 
     testWidgets('the accessibility control is a 44-point target',
@@ -331,13 +400,36 @@ void main() {
       usePhoneSurface(tester);
 
       await tester.pumpWidget(
-        pickerHarness(map, const SeatLayerPickerViewModeControl()),
+        pickerHarness(
+          map,
+          const Align(
+            alignment: Alignment.topLeft,
+            child: SeatLayerPickerViewModeControl(),
+          ),
+        ),
       );
       map.emit(pickerSnapshot(withSelection: false));
       await tester.pumpAndSettle();
 
-      expect(find.text('Seat map'), findsOneWidget);
+      expect(find.text('Map'), findsOneWidget);
       expect(find.text('3D'), findsOneWidget);
+      // A track with two halves inside it, not two buttons that touch.
+      expect(
+        tester.getSize(find.byType(SeatLayerPickerViewModeControl)).height,
+        SeatLayerPickerViewModeControl.height,
+      );
+      for (final half in <String>['Map', '3D']) {
+        final ink = tester.getSize(
+          find
+              .ancestor(of: find.text(half), matching: find.byType(Material))
+              .first,
+        );
+        expect(ink.height, SeatLayerSizeTokens.viewModeButtonHeight);
+        expect(
+          ink.width,
+          greaterThanOrEqualTo(SeatLayerSizeTokens.viewModeButtonMinWidth),
+        );
+      }
 
       await tester.tap(find.text('3D'));
       await tester.pump();
@@ -362,9 +454,11 @@ void main() {
       await tester.pumpAndSettle();
 
       final screen = tester.getRect(find.byType(SeatLayerPickerMapControls));
-      final stepOut =
-          tester.getRect(find.byType(SeatLayerPickerOverviewButton));
-      expect(stepOut.bottom, closeTo(screen.bottom - 62, .5));
+      final fit = tester.getRect(find.byType(SeatLayerPickerZoomToFitButton));
+      expect(
+        fit.bottom,
+        closeTo(screen.bottom - 52 - SeatLayerSizeTokens.mapAnchorInset, .5),
+      );
     });
 
     testWidgets('a host can ask for the zoom pair back', (tester) async {

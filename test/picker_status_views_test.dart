@@ -201,7 +201,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Barrierefreiheit'), findsOneWidget);
-    expect(find.text('Rollstuhl · 1'), findsOneWidget);
+    expect(find.text('Rollstuhl'), findsOneWidget);
+    expect(find.text('1 free'), findsOneWidget);
     expect(find.text('Filter anwenden'), findsOneWidget);
     expect(find.text('Sicht eingeschränkt ausblenden'), findsOneWidget);
     expect(find.text('Farbenblind-freundlich'), findsOneWidget);

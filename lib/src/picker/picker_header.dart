@@ -32,7 +32,7 @@ class SeatLayerPickerHeader extends StatelessWidget {
   /// Whether to name the event and its venue.
   final bool showEventDetails;
 
-  /// Whether to render the phone's 56-point height.
+  /// Whether to render the phone's 38-point line.
   final bool compact;
 
   /// Whether to show the hold countdown while seats are held.
@@ -53,50 +53,136 @@ class SeatLayerPickerHeader extends StatelessWidget {
     final headerStyle =
         (theme.styles.headerStyle ?? const SeatLayerSurfaceStyle())
             .merge(style);
+    // The phone header is a 38-point line with 6 points of air above and
+    // below its tallest piece — a minimum, not a fixed height, so a buyer who
+    // has scaled their text up gets a taller header rather than a clipped one.
+    final gap = SizedBox(width: compact ? 8 : 12);
     return Material(
-      color: headerStyle.color ?? theme.surface,
+      // The header sits on the picker's ground, as the web's does; the rail
+      // under it is the first surface.
+      color: headerStyle.color ?? theme.background,
       elevation: headerStyle.elevation ?? 0,
       shape: headerStyle.shape,
       child: SafeArea(
         bottom: false,
-        child: SizedBox(
-          height: compact ? theme.layout.headerHeight : null,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: compact ? theme.layout.headerHeight : 0,
+          ),
           child: Padding(
-            padding: EdgeInsets.fromLTRB(compact ? 12 : 16, 0, 4, 0),
+            // No trailing pad on a phone: the close button carries its own, so
+            // its ring ends ten points from the edge while the target it
+            // answers to runs all the way out to the corner.
+            padding: compact
+                ? const EdgeInsets.only(left: 12)
+                : const EdgeInsets.fromLTRB(16, 12, 4, 12),
             child: Row(
               children: [
-                _PickerBrandMark(theme: theme, state: state, size: logoSize),
-                SizedBox(width: compact ? 10 : 12),
+                _air(
+                  compact,
+                  _PickerBrandMark(theme: theme, state: state, size: logoSize),
+                ),
+                gap,
                 Expanded(
-                  child: showEventDetails && !options.hideEventDetails
-                      ? _EventTitle(compact: compact)
-                      : const SizedBox.shrink(),
+                  child: _air(
+                    compact,
+                    showEventDetails && !options.hideEventDetails
+                        ? _EventTitle(compact: compact)
+                        : const SizedBox.shrink(),
+                  ),
                 ),
                 // Sales that have ended are a fact about the event, so they
                 // are stated beside its name — and never in the accent, which
                 // in this header means "your seats".
                 if (state.event?.salesClosed == true) ...[
-                  SeatLayerPickerSalesClosedPill(compact: compact),
-                  const SizedBox(width: 4),
+                  _air(compact,
+                      SeatLayerPickerSalesClosedPill(compact: compact)),
+                  gap,
                 ],
                 if (showHoldPill && state.hold != null) ...[
-                  SeatLayerPickerHoldCountdown(compact: compact),
-                  const SizedBox(width: 4),
+                  _air(compact, SeatLayerPickerHoldCountdown(compact: compact)),
+                  gap,
                 ],
                 if (onClose != null)
-                  IconButton(
-                    tooltip: strings.close,
-                    onPressed: onClose,
-                    color: theme.text,
-                    visualDensity: VisualDensity.compact,
-                    constraints: const BoxConstraints.tightFor(
-                      width: 40,
-                      height: 40,
-                    ),
-                    padding: EdgeInsets.zero,
-                    icon: Icon(Icons.close_rounded, size: compact ? 20 : 24),
-                  ),
+                  compact
+                      ? _CloseRing(onClose: onClose!, tooltip: strings.close)
+                      : IconButton(
+                          tooltip: strings.close,
+                          onPressed: onClose,
+                          color: theme.text,
+                          visualDensity: VisualDensity.compact,
+                          constraints: const BoxConstraints.tightFor(
+                            width: 40,
+                            height: 40,
+                          ),
+                          padding: EdgeInsets.zero,
+                          icon: const Icon(Icons.close_rounded, size: 24),
+                        ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Six points of air above and below a header piece, on a phone.
+///
+/// The close button's touch target is the whole height of the line, so the
+/// row itself carries no vertical padding; everything beside it takes its own.
+Widget _air(bool compact, Widget child) => compact
+    ? Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: child,
+      )
+    : child;
+
+/// The way out: a 26-point ring, inside a target that reaches the corner.
+///
+/// The web draws the same ring and hangs a 44-point pseudo-element off it,
+/// which can overflow its 38-point row; a Flutter hit box cannot leave its
+/// parent, so the target is the whole height of the header line and wide
+/// enough to reach the screen edge while the ring stays ten points clear of
+/// it.
+class _CloseRing extends StatelessWidget {
+  const _CloseRing({required this.onClose, required this.tooltip});
+
+  final VoidCallback onClose;
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerMapChromeThemeOf(context);
+    const ring = SeatLayerSizeTokens.headerCloseSize;
+    // The target is the line, so it has to be the line the header was told to
+    // draw rather than the default the tokens ship.
+    return Semantics(
+      button: true,
+      label: tooltip,
+      child: Tooltip(
+        message: tooltip,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onClose,
+          child: SizedBox(
+            width: ring + 20,
+            height: theme.layout.headerHeight,
+            child: Center(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: theme.divider),
+                ),
+                child: SizedBox.square(
+                  dimension: ring,
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 12,
+                    color: theme.mutedText,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -135,8 +221,9 @@ class _EventTitle extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: TextStyle(
           color: theme.text,
-          fontSize: 14,
-          fontWeight: FontWeight.w800,
+          fontSize: SeatLayerSizeTokens.headerNameFontSize,
+          fontWeight: FontWeight.w700,
+          height: 1.2,
           fontFamily: theme.fontFamily,
         ),
       );
@@ -189,12 +276,14 @@ class _PickerBrandMark extends StatelessWidget {
     final url = state.branding?.logoUrl;
     if (provider != null || url != null) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(size < 30 ? 6 : 10),
+        borderRadius: BorderRadius.circular(_radius),
         child: Image(
           image: provider ?? NetworkImage(url!),
           width: size,
           height: size,
-          fit: BoxFit.contain,
+          // A logo is a mark, not a picture: `cover` is what the web uses, so
+          // a wordmark fills the square instead of shrinking inside it.
+          fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => _fallback(),
         ),
       );
@@ -202,21 +291,45 @@ class _PickerBrandMark extends StatelessWidget {
     return _fallback();
   }
 
-  Widget _fallback() => DecoratedBox(
-        decoration: BoxDecoration(
-          color: theme.accent,
-          borderRadius: BorderRadius.circular(size < 30 ? 6 : 10),
+  double get _radius => size < 30 ? SeatLayerRadiusTokens.headerLogo : 10;
+
+  /// The organizer's initial, or the seat glyph when nothing is named.
+  ///
+  /// A letter is the mark the web falls back to, and it is the one thing on
+  /// the header that says whose event this is when no logo was uploaded.
+  Widget _fallback() {
+    final named = state.branding?.brandName ?? state.event?.name;
+    final letter = named == null || named.trim().isEmpty
+        ? null
+        : String.fromCharCode(named.trim().runes.first).toUpperCase();
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.accent,
+        borderRadius: BorderRadius.circular(_radius),
+      ),
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: Center(
+          child: letter == null
+              ? Icon(
+                  Icons.event_seat_rounded,
+                  size: size * .56,
+                  color: theme.onAccent,
+                )
+              : Text(
+                  letter,
+                  style: TextStyle(
+                    color: theme.onAccent,
+                    fontSize: size * .5,
+                    fontWeight: FontWeight.w800,
+                    fontFamily: theme.fontFamily,
+                  ),
+                ),
         ),
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Icon(
-            Icons.event_seat_rounded,
-            size: size * .56,
-            color: theme.onAccent,
-          ),
-        ),
-      );
+      ),
+    );
+  }
 }
 
 /// The instant every hold-derived surface reads its clock from.

@@ -27,7 +27,7 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
   ///
   /// Published because the badge is drawn ON the map, so the layout has to
   /// include it in the band it reports to the runtime.
-  static const double compactHeight = 20;
+  static const double compactHeight = SeatLayerSizeTokens.testChipHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -35,49 +35,42 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
     if (!state.isTestEvent) return const SizedBox.shrink();
     final strings = SeatLayerPickerScope.stringsOf(context);
     // The badge is drawn ON the map, so it follows the map's palette — which
-    // the immersive scene keeps dark whatever side the picker is on. A solid
-    // amber lozenge over a dark venue reads as a highlighter stripe left on
-    // the screen; on the dark side it becomes a dark pill with amber ink and
-    // an amber hairline, which reads as the same badge in the same voice.
+    // the immersive scene keeps dark whatever side the picker is on. One
+    // recipe serves every ground: a warm tint of the warning colour over
+    // whatever surface is behind it, a half-strength warning hairline, and ink
+    // walked toward the map's own text until it reads as a sentence rather
+    // than a highlighter stripe left on the screen.
     final theme = seatLayerMapChromeThemeOf(context);
-    final dark = theme.brightness == Brightness.dark;
     // Sentence case with a status dot, the way the web picker says it. Shouted
     // capitals read as a warning about the buyer's own booking; this is a
     // statement about the event, and a status light is how an interface says
     // one.
-    final ink = dark ? theme.warning : const Color(0xFF1A1200);
+    final ink = seatLayerWarningText(theme);
     final Widget pill = DecoratedBox(
       decoration: BoxDecoration(
-        color: dark ? pickerAlpha(theme.surface, .92) : theme.warning,
+        color: Color.alphaBlend(pickerAlpha(theme.warning, .16), theme.surface),
         borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
-        border: dark ? Border.all(color: theme.warning) : null,
-        boxShadow: const [
-          BoxShadow(color: Color(0x33000000), blurRadius: 8),
-        ],
+        border: Border.all(color: pickerAlpha(theme.warning, .5)),
       ),
       child: Padding(
         // The compact badge takes its height from [compactHeight] rather than
         // from padding around a glyph, because the layout reserves exactly
         // that band on the map and a font that measures differently would
         // otherwise push the badge out of it.
-        padding: EdgeInsets.symmetric(
-          horizontal: compact ? 8 : 10,
-          vertical: compact ? 0 : 6,
-        ),
+        padding: const EdgeInsetsDirectional.fromSTEB(8, 0, 10, 0),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            DecoratedBox(
-              decoration: BoxDecoration(color: ink, shape: BoxShape.circle),
-              child: const SizedBox.square(dimension: 5),
-            ),
-            const SizedBox(width: 5),
+            _TestModeDot(color: theme.warning),
+            const SizedBox(width: 7),
             Text(
               compact ? strings.testMode : strings.testModeLong,
               style: TextStyle(
                 color: ink,
-                fontSize: 11,
-                fontWeight: FontWeight.w800,
+                fontSize: SeatLayerSizeTokens.testChipFontSize,
+                fontWeight: FontWeight.w700,
+                letterSpacing: SeatLayerSizeTokens.testChipFontSize * .01,
+                height: 1,
                 fontFamily: theme.fontFamily,
               ),
             ),
@@ -87,10 +80,43 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
     );
     return Semantics(
       label: 'Test event. No real inventory will be booked.',
-      child: compact ? SizedBox(height: compactHeight, child: pill) : pill,
+      child: Tooltip(
+        message: strings.testModeExplained,
+        // The same chip at every width: an environment flag that changes shape
+        // with the layout reads as two different states of the event.
+        child: SizedBox(height: compactHeight, child: pill),
+      ),
     );
   }
 }
+
+/// The badge's status light: a warning dot inside its own halo.
+class _TestModeDot extends StatelessWidget {
+  const _TestModeDot({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          boxShadow: <BoxShadow>[
+            BoxShadow(color: pickerAlpha(color, .22), spreadRadius: 3),
+          ],
+        ),
+        child: const SizedBox.square(
+          dimension: SeatLayerSizeTokens.testChipDotSize,
+        ),
+      );
+}
+
+/// The warning colour, walked toward the picker's ink until it can be read.
+///
+/// Amber is chosen to be noticed as a light, not to be legible as 11 pt type;
+/// mixing it toward the surrounding text keeps the tone and buys the contrast.
+Color seatLayerWarningText(SeatLayerResolvedPickerTheme theme) =>
+    Color.lerp(theme.warning, theme.text, .52)!;
 
 class SeatLayerPickerFloorSelector extends StatelessWidget {
   const SeatLayerPickerFloorSelector({super.key});

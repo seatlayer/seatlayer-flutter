@@ -122,7 +122,8 @@ void main() {
       const SeatLayerMapThemeData.light().toBridgeConfig()['background'],
       '#e9edf4',
     );
-    expect(const SeatLayerPickerThemeData.light().surface, Colors.white);
+    // The web picker's light ground is white and its surfaces are the grey.
+    expect(const SeatLayerPickerThemeData.light().background, Colors.white);
   });
 }
 

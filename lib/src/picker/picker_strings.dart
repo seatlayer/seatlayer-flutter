@@ -81,9 +81,21 @@ class SeatLayerPickerStrings {
     this.poweredBy = SeatLayerStringTokens.poweredBy,
     this.testMode = SeatLayerStringTokens.testMode,
     this.testModeLong = SeatLayerStringTokens.testModeLong,
+    this.testModeExplained = SeatLayerStringTokens.testModeExplained,
     this.accessibility = SeatLayerStringTokens.accessibility,
+    this.displayOptions = SeatLayerStringTokens.displayOptions,
+    this.accessNoneLeft = SeatLayerStringTokens.accessNoneLeft,
+    this.companionSeatsNote = SeatLayerStringTokens.companionSeatsNote,
+    this.accessFreeCount = _defaultAccessFreeCount,
     this.fitVenue = SeatLayerStringTokens.fitVenue,
+    this.zoomIn = SeatLayerStringTokens.zoomIn,
+    this.zoomOut = SeatLayerStringTokens.zoomOut,
+    this.rotateVenue = SeatLayerStringTokens.rotateVenue,
+    this.moveVenue = SeatLayerStringTokens.moveVenue,
     this.mapView = SeatLayerStringTokens.mapView,
+    this.flat2dMap = SeatLayerStringTokens.flat2dMap,
+    this.interactive3dVenueView = SeatLayerStringTokens.interactive3dVenueView,
+    this.venueView = SeatLayerStringTokens.venueView,
     this.seatRemoved = SeatLayerStringTokens.seatRemoved,
     this.loading = SeatLayerStringTokens.loading,
     this.errorMessage = SeatLayerStringTokens.errorMessage,
@@ -100,6 +112,7 @@ class SeatLayerPickerStrings {
     this.seatsNotRecovered = _defaultSeatsNotRecovered,
     this.ticketCount = _defaultTicketCount,
     this.seatsLeft = _defaultSeatsLeft,
+    this.seatsLeftInSection = _defaultSeatsLeftInSection,
     this.onlyLeft = _defaultOnlyLeft,
     this.seatsFree = _defaultSeatsFree,
     this.fromPrice = _defaultFromPrice,
@@ -473,14 +486,76 @@ class SeatLayerPickerStrings {
   /// keeps its English wording in every locale until one exists.
   final String testModeLong;
 
+  /// What test mode means, offered as the badge's tooltip.
+  final String testModeExplained;
+
   /// Tooltip on the accessibility map control.
   final String accessibility;
+
+  /// The same control's name on a chart that authors no access provisions at
+  /// all, where the only thing behind it is how the map is drawn.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String displayOptions;
+
+  /// "None left" — a provision the venue has, and has sold out of.
+  ///
+  /// The row stays, dimmed: "this venue has no wheelchair spaces" and "its
+  /// wheelchair spaces are taken" are different facts.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String accessNoneLeft;
+
+  /// The note under a wheelchair row on a chart that also authors companion
+  /// places, so a buyer knows the seat beside them is still theirs to take.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String companionSeatsNote;
+
+  /// "12 free" — how many seats with this provision are still available.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String Function(int count) accessFreeCount;
 
   /// Tooltip on the fit-to-screen map control.
   final String fitVenue;
 
+  /// Tooltip on the zoom-in map control, which a phone only draws when the
+  /// host asks for the pair back: pinch is the gesture.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String zoomIn;
+
+  /// Tooltip on the zoom-out map control, which a phone draws once the map is
+  /// deep enough to have somewhere to come back from.
+  ///
+  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
+  /// its English wording in every locale until one exists.
+  final String zoomOut;
+
+  /// Tooltip on the 3D navigation-mode control while one finger rotates the
+  /// venue, which is what the control would change it to.
+  final String rotateVenue;
+
+  /// The same control's tooltip while one finger moves the venue instead.
+  final String moveVenue;
+
   /// Label of the map half of the Map/3D control.
   final String mapView;
+
+  /// Tooltip on the map half of the Map/3D control.
+  final String flat2dMap;
+
+  /// Tooltip on the 3D half of the Map/3D control.
+  final String interactive3dVenueView;
+
+  /// What the Map/3D control as a whole is called to a screen reader.
+  final String venueView;
 
   /// Message announced after a ticket is removed.
   final String seatRemoved;
@@ -574,6 +649,13 @@ class SeatLayerPickerStrings {
 
   /// "74 left" — a section with some seats already sold.
   final String Function(int count) seatsLeft;
+
+  /// "99 seats left" — the same count with the word it is counting, which is
+  /// what the dock says while it has the width for it.
+  ///
+  /// The SeatLayer runtime's dictionary carries the short form only, so this
+  /// one keeps its English wording in every locale until one exists.
+  final String Function(int count) seatsLeftInSection;
 
   /// "Only 8 left" — the same count, once it is small enough to be a reason
   /// to decide now rather than a fact about the section.
@@ -774,6 +856,9 @@ class SeatLayerPickerStrings {
   /// sentences on it. The wording still lives in `design/tokens.json` — the
   /// other SDK ports read the same sentences — and only the choosing happens
   /// here.
+  static String _defaultAccessFreeCount(int count) =>
+      SeatLayerStringTokens.accessFreeCount.replaceAll('{count}', '$count');
+
   static String _defaultAccessNeedWithCount(String need, int count) =>
       SeatLayerStringTokens.accessNeedWithCount
           .replaceAll('{need}', need)
@@ -801,6 +886,11 @@ class SeatLayerPickerStrings {
       .replaceAll('{count}', '$count');
 
   static String _defaultSeatsLeft(int count) => '$count left';
+
+  static String _defaultSeatsLeftInSection(int count) => (count == 1
+          ? SeatLayerStringTokens.seatsLeftInSectionOne
+          : SeatLayerStringTokens.seatsLeftInSectionOther)
+      .replaceAll('{count}', '$count');
 
   static String _defaultOnlyLeft(int count) =>
       SeatLayerStringTokens.onlyLeft.replaceAll('{count}', '$count');

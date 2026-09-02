@@ -24,10 +24,10 @@ class SeatLayerPriceLegend extends StatefulWidget {
 
   /// How wide each soft edge is where the row runs on past the viewport.
   ///
-  /// The trailing edge is also the gap the rail keeps clear of whatever sits
-  /// beside it, so the last chip is never a hard vertical cut against the
-  /// Map/3D control.
-  static const double edgeFade = 22;
+  /// Only the edge a chip is actually crossing is faded: a rail scrolled to
+  /// its end shows the last price whole, so a hidden chip never looks like the
+  /// end of the list and a rail that fits keeps both rounded ends.
+  static const double edgeFade = SeatLayerSizeTokens.legendRailEdgeFade;
 
   @override
   State<SeatLayerPriceLegend> createState() => _SeatLayerPriceLegendState();
@@ -73,54 +73,43 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
     final active = state.snapshot?.map.categoryFilter ?? const <String>{};
     final direction = Directionality.of(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
-    // The rail leads with the way out of a filter, the way the web rail does:
-    // on a 390 pt phone the chip that turned the filter on is often scrolled
-    // off the screen, and a buyer who has not filtered yet reads the same
-    // first chip as "these are all the prices" — which is what it means.
-    const clearFilter = 1;
     final chipStyle =
         (theme.styles.legendChipStyle ?? const SeatLayerSurfaceStyle())
             .merge(widget.style);
 
     final Widget list = ListView.separated(
-      // The trailing pad is the fade's own width, so a rail scrolled to its
-      // end shows the last chip whole rather than under the soft edge.
-      padding: EdgeInsetsDirectional.only(
-        start: compact ? 10 : 12,
-        end: SeatLayerPriceLegend.edgeFade,
-      ),
+      // One point of air, so a chip's border is not shaved by the scroller's
+      // own edge; the rail's ten points are outside it.
+      padding: const EdgeInsets.all(1),
       scrollDirection: Axis.horizontal,
-      itemCount: categories.length + clearFilter,
-      separatorBuilder: (_, __) => const SizedBox(width: 6),
+      itemCount: categories.length,
+      separatorBuilder: (_, __) => const SizedBox(width: 5),
       itemBuilder: (context, index) {
-        if (index < clearFilter) {
-          return _LegendChip(
-            style: chipStyle,
-            label: strings.allPrices,
-            color: null,
-            selected: active.isEmpty,
-            compact: compact,
-            theme: theme,
-            semanticsLabel: strings.allPrices,
-            onPressed: () => ignorePickerAction(
-              controller.setCategoryFilter(const <String>{}, focus: false),
-            ),
-          );
-        }
-        final category = categories[index - clearFilter];
+        final category = categories[index];
         final selected = active.contains(category.key);
+        // A spread cannot fit a chip, so it becomes a floor: "€30+" is honest
+        // and short, and the exact range is one tap away in the list. A
+        // category with no configured price is a real chart state, and a chip
+        // that is only a dot says nothing — so it wears its name instead.
+        final priced = category.priceMin > 0 || category.priceMax > 0;
+        final amount = !priced
+            ? null
+            : category.priceMin == category.priceMax
+                ? pickerMoney(context, category.priceMin, currency)
+                : '${pickerMoney(context, category.priceMin, currency)}+';
         return _LegendChip(
           style: chipStyle,
-          label: compact
-              ? pickerCompactMoney(category.priceMin, currency)
-              : '${category.label} · '
-                  '${pickerMoney(context, category.priceMin, currency)}',
+          label: amount == null
+              ? category.label
+              : compact
+                  ? amount
+                  : '${category.label} · $amount',
           color: pickerColor(category.color) ?? theme.accent,
           selected: selected,
           compact: compact,
           theme: theme,
-          semanticsLabel: '${category.label}, '
-              '${pickerMoney(context, category.priceMin, currency)}',
+          semanticsLabel:
+              amount == null ? category.label : '${category.label} — $amount',
           onPressed: () => ignorePickerAction(
             controller.setCategoryFilter(
               selected ? const <String>{} : <String>{category.key},
@@ -131,38 +120,76 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
       },
     );
 
-    return SizedBox(
-      // The band, not the chip: the drawn chip stays thirty points on a phone,
-      // and the extra height around it is the part a thumb lands on.
-      height: compact ? SeatLayerSizeTokens.minimumHitTarget : 40,
-      child: NotificationListener<ScrollMetricsNotification>(
+    final Widget scroller = NotificationListener<ScrollMetricsNotification>(
+      onNotification: (notification) {
+        _readEdges(notification.metrics);
+        return false;
+      },
+      child: NotificationListener<ScrollNotification>(
         onNotification: (notification) {
           _readEdges(notification.metrics);
           return false;
         },
-        child: NotificationListener<ScrollNotification>(
-          onNotification: (notification) {
-            _readEdges(notification.metrics);
-            return false;
+        child: ValueListenableBuilder<(bool, bool)>(
+          valueListenable: _edges,
+          child: list,
+          builder: (context, edges, child) {
+            final (leading, trailing) = edges;
+            if (!leading && !trailing) return child!;
+            return ShaderMask(
+              blendMode: BlendMode.dstIn,
+              shaderCallback: (bounds) => _edgeShader(
+                bounds,
+                direction: direction,
+                leading: leading,
+                trailing: trailing,
+              ),
+              child: child,
+            );
           },
-          child: ValueListenableBuilder<(bool, bool)>(
-            valueListenable: _edges,
-            child: list,
-            builder: (context, edges, child) {
-              final (leading, trailing) = edges;
-              if (!leading && !trailing) return child!;
-              return ShaderMask(
-                blendMode: BlendMode.dstIn,
-                shaderCallback: (bounds) => _edgeShader(
-                  bounds,
-                  direction: direction,
-                  leading: leading,
-                  trailing: trailing,
+        ),
+      ),
+    );
+
+    return SizedBox(
+      // The band, not the chip: the drawn chip stays twenty-four points, and
+      // the height around it is the part a thumb lands on.
+      height: compact
+          ? SeatLayerSizeTokens.minimumHitTarget
+          : SeatLayerSizeTokens.minimumHitTarget - 4,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: compact ? 10 : 12),
+        child: Row(
+          children: <Widget>[
+            // THE WAY OUT COMES FIRST AND NEVER SCROLLS AWAY. Every other chip
+            // narrows the map; without this one a buyer who pinned a category
+            // could only widen it again from a control two gestures deep
+            // inside a collapsed sheet. The web pins it with `position:sticky`
+            // inside the scroller; here it is simply not in the scroller,
+            // which is the same promise and needs no halo to hide chips
+            // sliding under it.
+            Padding(
+              padding: const EdgeInsetsDirectional.only(
+                start: 1,
+                top: 1,
+                bottom: 1,
+              ),
+              child: _LegendChip(
+                style: chipStyle,
+                label: strings.allPrices,
+                color: null,
+                selected: active.isEmpty,
+                compact: compact,
+                theme: theme,
+                semanticsLabel: strings.allPrices,
+                onPressed: () => ignorePickerAction(
+                  controller.setCategoryFilter(const <String>{}, focus: false),
                 ),
-                child: child,
-              );
-            },
-          ),
+              ),
+            ),
+            const SizedBox(width: 5),
+            Expanded(child: scroller),
+          ],
         ),
       ),
     );
@@ -242,37 +269,44 @@ class _LegendChip extends StatelessWidget {
     );
   }
 
-  Widget _ink(SeatLayerSurfaceStyle chipStyle) => SizedBox(
-        height: compact ? 30 : 40,
-        child: Material(
-        color: selected
-            ? theme.accent
-            : chipStyle.color ??
-                Color.alphaBlend(pickerAlpha(theme.text, .04), theme.surface),
+  Widget _ink(SeatLayerSurfaceStyle chipStyle) {
+    // A named category leads with its colour; the way out of a filter has no
+    // colour to key, so it wears the rail's own surface and a heavier word.
+    final naming = color != null;
+    final Color ground = selected
+        ? theme.accent
+        : chipStyle.color ?? (naming ? theme.background : theme.surface);
+    final BorderSide side = BorderSide(
+      color: selected ? const Color(0x00000000) : theme.divider,
+    );
+    return SizedBox(
+      height: compact ? SeatLayerSizeTokens.legendChipHeight : 40,
+      child: Material(
+        color: ground,
         elevation: chipStyle.elevation ?? 0,
         shape: chipStyle.shape ??
-            theme.styles.chipShape?.copyWith(
-              side: BorderSide(color: selected ? theme.accent : theme.divider),
-            ) ??
-            StadiumBorder(
-              side:
-                  BorderSide(color: selected ? theme.accent : theme.divider),
-            ),
+            theme.styles.chipShape?.copyWith(side: side) ??
+            StadiumBorder(side: side),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onPressed,
           child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 10),
+            padding: compact
+                ? const EdgeInsetsDirectional.fromSTEB(7, 0, 9, 0)
+                : const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (color != null) ...[
-                  DecoratedBox(
-                    decoration:
-                        BoxDecoration(color: color, shape: BoxShape.circle),
-                    child: SizedBox.square(dimension: compact ? 8 : 10),
+                  _CategoryDot(
+                    color: color!,
+                    theme: theme,
+                    selected: selected,
+                    size: compact
+                        ? SeatLayerSizeTokens.legendChipDotSize
+                        : SeatLayerSizeTokens.legendChipDotSize + 3,
                   ),
-                  SizedBox(width: compact ? 5 : 7),
+                  const SizedBox(width: 5),
                 ],
                 ExcludeSemantics(
                   child: Text(
@@ -280,8 +314,15 @@ class _LegendChip extends StatelessWidget {
                     style: TextStyle(
                       color: selected ? theme.onAccent : theme.text,
                       fontSize: compact ? theme.layout.legendChipFontSize : 12,
-                      fontWeight: FontWeight.w800,
+                      // The way out is the one chip that is a word rather than
+                      // a number, so it is set a little lighter than the
+                      // prices it leads.
+                      fontWeight:
+                          naming ? FontWeight.w800 : const FontWeight(750),
                       fontFamily: theme.fontFamily,
+                      fontFeatures: const <FontFeature>[
+                        FontFeature.tabularFigures(),
+                      ],
                     ),
                   ),
                 ),
@@ -291,4 +332,47 @@ class _LegendChip extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// The chip's colour key, drawn so it survives every ground it sits on.
+///
+/// On a light map the category colours are shown tinted rather than solid, and
+/// the swatch follows: a pale fill inside a full-strength ring, which is the
+/// same seat a buyer is looking for. A selected chip fills with the accent, so
+/// the ring turns to the accent's ink to stay visible.
+class _CategoryDot extends StatelessWidget {
+  const _CategoryDot({
+    required this.color,
+    required this.theme,
+    required this.selected,
+    required this.size,
+  });
+
+  final Color color;
+  final SeatLayerResolvedPickerTheme theme;
+  final bool selected;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final light = theme.brightness == Brightness.light;
+    final ring = selected
+        ? theme.onAccent
+        : light
+            ? color
+            : null;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: light && !selected
+            ? Color.alphaBlend(pickerAlpha(color, .32), theme.surface)
+            : color,
+        shape: BoxShape.circle,
+        border: ring == null
+            ? null
+            : Border.all(color: ring, width: 1.5, strokeAlign: 1),
+      ),
+      child: SizedBox.square(dimension: size),
+    );
+  }
 }

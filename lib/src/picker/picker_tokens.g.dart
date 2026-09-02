@@ -12,11 +12,11 @@ const int seatLayerTokensVersion = 1;
 
 /// The light palette.
 abstract final class SeatLayerLightTokens {
-  /// `#F6F7FB`
-  static const Color background = Color(0xFFF6F7FB);
-
   /// `#FFFFFF`
-  static const Color surface = Color(0xFFFFFFFF);
+  static const Color background = Color(0xFFFFFFFF);
+
+  /// `#F6F7FB`
+  static const Color surface = Color(0xFFF6F7FB);
 
   /// `#172033`
   static const Color text = Color(0xFF172033);
@@ -92,6 +92,24 @@ abstract final class SeatLayerDarkTokens {
 
   /// `#9B8AFB`
   static const Color mapSelection = Color(0xFF9B8AFB);
+
+  /// `#9E0A0E14`
+  static const Color immersiveGlass = Color(0x9E0A0E14);
+
+  /// `#38FFFFFF`
+  static const Color immersiveGlassBorder = Color(0x38FFFFFF);
+
+  /// `#E6EDF3`
+  static const Color immersiveGlassInk = Color(0xFFE6EDF3);
+
+  /// `#D10A0E16`
+  static const Color immersiveCaption = Color(0xD10A0E16);
+
+  /// `#33FFFFFF`
+  static const Color immersiveCaptionBorder = Color(0x33FFFFFF);
+
+  /// `#EEF3FB`
+  static const Color immersiveCaptionInk = Color(0xFFEEF3FB);
 }
 
 /// The measured sizes the phone chrome is built from.
@@ -102,11 +120,17 @@ abstract final class SeatLayerSizeTokens {
   /// `840`
   static const double wideBreakpoint = 840;
 
-  /// `56`
-  static const double headerHeight = 56;
+  /// `38`
+  static const double headerHeight = 38;
 
-  /// `28`
-  static const double headerLogoSize = 28;
+  /// `22`
+  static const double headerLogoSize = 22;
+
+  /// `26`
+  static const double headerCloseSize = 26;
+
+  /// `12.5`
+  static const double headerNameFontSize = 12.5;
 
   /// `44`
   static const double topRailHeight = 44;
@@ -231,6 +255,156 @@ abstract final class SeatLayerSizeTokens {
   /// `11`
   static const double legendChipFontSize = 11;
 
+  /// `24`
+  static const double legendChipHeight = 24;
+
+  /// `7`
+  static const double legendChipDotSize = 7;
+
+  /// `18`
+  static const double legendRailEdgeFade = 18;
+
+  /// `36`
+  static const double viewModeControlHeight = 36;
+
+  /// `38`
+  static const double viewModeButtonMinWidth = 38;
+
+  /// `28`
+  static const double viewModeButtonHeight = 28;
+
+  /// `9.5`
+  static const double viewModeLabelFontSize = 9.5;
+
+  /// `26`
+  static const double testChipHeight = 26;
+
+  /// `7`
+  static const double testChipDotSize = 7;
+
+  /// `11`
+  static const double testChipFontSize = 11;
+
+  /// `12`
+  static const double mapAnchorInset = 12;
+
+  /// `12`
+  static const double mapAnchorGap = 12;
+
+  /// `6`
+  static const double zoomColumnGap = 6;
+
+  /// `3`
+  static const double floorRailPadding = 3;
+
+  /// `1`
+  static const double floorRailGap = 1;
+
+  /// `28`
+  static const double floorChipHeight = 28;
+
+  /// `10`
+  static const double floorChipPaddingX = 10;
+
+  /// `10.5`
+  static const double floorChipFontSize = 10.5;
+
+  /// `26`
+  static const double floorInfoSize = 26;
+
+  /// `10`
+  static const double dockDotSize = 10;
+
+  /// `14`
+  static const double dockLeadingInset = 14;
+
+  /// `8`
+  static const double dockTrailingInset = 8;
+
+  /// `12.5`
+  static const double dockNameFontSize = 12.5;
+
+  /// `12.5`
+  static const double dockCountFontSize = 12.5;
+
+  /// `34`
+  static const double dockNavWidth = 34;
+
+  /// `36`
+  static const double dockNavHeight = 36;
+
+  /// `2`
+  static const double dockNavGap = 2;
+
+  /// `18`
+  static const double dockNavIconSize = 18;
+
+  /// `36`
+  static const double dockBackHeight = 36;
+
+  /// `12.5`
+  static const double dockBackFontSize = 12.5;
+
+  /// `18`
+  static const double dockBackChevronSize = 18;
+
+  /// `44`
+  static const double immersiveBackPillHeight = 44;
+
+  /// `11`
+  static const double immersiveBackFontSize = 11;
+
+  /// `15`
+  static const double immersiveBackIconSize = 15;
+
+  /// `32`
+  static const double immersiveNavChipHeight = 32;
+
+  /// `12`
+  static const double immersiveNavChipPaddingX = 12;
+
+  /// `12.5`
+  static const double immersiveNavChipFontSize = 12.5;
+
+  /// `32`
+  static const double immersiveNavCloseSize = 32;
+
+  /// `11.5`
+  static const double immersiveCaptionFontSize = 11.5;
+
+  /// `6`
+  static const double immersiveGlassBlur = 6;
+
+  /// `8`
+  static const double immersiveCaptionBlur = 8;
+
+  /// `20`
+  static const double accessRowIconCell = 20;
+
+  /// `10`
+  static const double accessRowGap = 10;
+
+  /// `8`
+  static const double accessRowPaddingX = 8;
+
+  /// `6`
+  static const double accessRowPaddingY = 6;
+
+  /// `12.5`
+  static const double accessRowLabelFontSize = 12.5;
+
+  /// `10.5`
+  static const double accessRowNoteFontSize = 10.5;
+
+  /// `34`
+  static const double accessSwitchWidth = 34;
+
+  /// `20`
+  static const double accessSwitchHeight = 20;
+
+  /// `16`
+  static const double accessSwitchKnob = 16;
+
   /// `232`
   static const double toastCardLift = 232;
 
@@ -263,6 +437,9 @@ abstract final class SeatLayerRadiusTokens {
 
   /// `999`
   static const double chip = 999;
+
+  /// `6`
+  static const double headerLogo = 6;
 
   /// `999`
   static const double pill = 999;
@@ -564,14 +741,46 @@ abstract final class SeatLayerStringTokens {
   /// Test mode · books nothing
   static const String testModeLong = 'Test mode · books nothing';
 
+  /// Bookings here are not real and no card is charged
+  static const String testModeExplained =
+      'Bookings here are not real and no card is charged';
+
   /// Accessibility and view filters
   static const String accessibility = 'Accessibility and view filters';
+
+  /// Display options
+  static const String displayOptions = 'Display options';
+
+  /// {count} free
+  static const String accessFreeCount = '{count} free';
+
+  /// None left
+  static const String accessNoneLeft = 'None left';
+
+  /// Companion places beside them stay selectable
+  static const String companionSeatsNote =
+      'Companion places beside them stay selectable';
 
   /// Fit venue
   static const String fitVenue = 'Fit venue';
 
-  /// Seat map
-  static const String mapView = 'Seat map';
+  /// Zoom in
+  static const String zoomIn = 'Zoom in';
+
+  /// Zoom out
+  static const String zoomOut = 'Zoom out';
+
+  /// Map
+  static const String mapView = 'Map';
+
+  /// Flat 2D map
+  static const String flat2dMap = 'Flat 2D map';
+
+  /// Interactive 3D venue view
+  static const String interactive3dVenueView = 'Interactive 3D venue view';
+
+  /// Venue view
+  static const String venueView = 'Venue view';
 
   /// Ticket removed
   static const String seatRemoved = 'Ticket removed';
@@ -736,6 +945,12 @@ abstract final class SeatLayerStringTokens {
 
   /// {count} left
   static const String seatsLeft = '{count} left';
+
+  /// {count} seat left
+  static const String seatsLeftInSectionOne = '{count} seat left';
+
+  /// {count} seats left
+  static const String seatsLeftInSectionOther = '{count} seats left';
 
   /// Only {count} left
   static const String onlyLeft = 'Only {count} left';
