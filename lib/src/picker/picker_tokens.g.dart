@@ -114,41 +114,110 @@ abstract final class SeatLayerSizeTokens {
   /// `52`
   static const double dockBarHeight = 52;
 
-  /// `56`
-  static const double peekHeight = 56;
+  /// `50`
+  static const double peekHeight = 50;
 
-  /// `0.6`
-  static const double sheetMaxHeightFraction = 0.6;
+  /// `36`
+  static const double sheetOpenHeadHeight = 36;
 
-  /// `190`
-  static const double emptyTrayMaxHeight = 190;
+  /// `35`
+  static const double sheetGrabberWidth = 35;
+
+  /// `4`
+  static const double sheetGrabberHeight = 4;
+
+  /// `4`
+  static const double sheetGrabberInset = 4;
+
+  /// `44`
+  static const double sheetToggleSize = 44;
+
+  /// `28`
+  static const double sheetToggleOpenSize = 28;
+
+  /// `0.72`
+  static const double sheetMaxHeightFraction = 0.72;
+
+  /// `480`
+  static const double sheetMaxHeight = 480;
+
+  /// `0.64`
+  static const double emptyTrayMaxHeightFraction = 0.64;
+
+  /// `380`
+  static const double emptyTrayMaxHeight = 380;
+
+  /// `36`
+  static const double findPillHeight = 36;
 
   /// `44`
   static const double denseLineHeight = 44;
 
-  /// `5`
-  static const int denseVisibleLines = 5;
+  /// `4`
+  static const int denseVisibleLines = 4;
 
-  /// `16`
-  static const double confirmCardGutter = 16;
+  /// `6`
+  static const int denseCollapseFrom = 6;
 
-  /// `360`
-  static const double confirmCardMaxWidth = 360;
+  /// `32`
+  static const double denseRemoveSize = 32;
 
-  /// `56`
-  static const double confirmIdentityHeight = 56;
+  /// `24`
+  static const double denseRunToggleWidth = 24;
 
-  /// `34`
-  static const double confirmBandHeight = 34;
+  /// `40`
+  static const double denseMoreRowHeight = 40;
+
+  /// `44`
+  static const double checkoutButtonHeight = 44;
+
+  /// `12`
+  static const double confirmCardGutter = 12;
+
+  /// `310`
+  static const double confirmCardMaxWidth = 310;
+
+  /// `14`
+  static const double confirmCardRestInset = 14;
+
+  /// `12`
+  static const double confirmCardSeatGap = 12;
+
+  /// `12`
+  static const double confirmCardTopInset = 12;
+
+  /// `18`
+  static const double confirmCardClearance = 18;
+
+  /// `42`
+  static const double confirmIdentityHeight = 42;
+
+  /// `30`
+  static const double confirmBandHeight = 30;
 
   /// `64`
   static const double confirmPhotoHeight = 64;
+
+  /// `44`
+  static const double confirmRailHeight = 44;
+
+  /// `28`
+  static const double confirmPillHeight = 28;
+
+  /// `38`
+  static const double confirmTierHeight = 38;
 
   /// `44`
   static const double confirmActionHeight = 44;
 
   /// `44`
   static const double selectorHeight = 44;
+
+  /// `34`
+  static const double bestSeatsSelectHeight = 34;
+
+  /// `112`
+  static const double bestSeatsStepperWidth = 112;
 
   /// `44`
   static const double accessibilityControlSize = 44;
@@ -162,6 +231,9 @@ abstract final class SeatLayerSizeTokens {
   /// `11`
   static const double legendChipFontSize = 11;
 
+  /// `232`
+  static const double toastCardLift = 232;
+
   /// `44`
   static const double minimumHitTarget = 44;
 }
@@ -171,14 +243,23 @@ abstract final class SeatLayerRadiusTokens {
   /// `14`
   static const double base = 14;
 
+  /// `0.55`
+  static const double smallRatio = 0.55;
+
   /// `18`
   static const double card = 18;
 
   /// `14`
   static const double sheet = 14;
 
-  /// `8`
-  static const double button = 8;
+  /// `9`
+  static const double button = 9;
+
+  /// `9`
+  static const double control = 9;
+
+  /// `15`
+  static const double confirmCard = 15;
 
   /// `999`
   static const double chip = 999;
@@ -234,26 +315,50 @@ abstract final class SeatLayerMotionTokens {
   /// `120` ms
   static const int crossfade = 120;
 
+  /// `240` ms
+  static const int bump = 240;
+
+  /// `240` ms
+  static const int chevron = 240;
+
   /// `200` ms
   static const int toast = 200;
 
   /// `300` ms
   static const int immersive = 300;
 
-  /// `300` ms
-  static const int pressSweep = 300;
+  /// `360` ms
+  static const int pressSweep = 360;
 
-  /// `320` ms
-  static const int cardEnter = 320;
+  /// `240` ms
+  static const int cardEnter = 240;
 
   /// `4000` ms — deliberately outside the budget.
   static const int undoWindow = 4000;
 
+  /// `300` ms — deliberately outside the budget.
+  static const int inviteDelay = 300;
+
   /// `700` ms — deliberately outside the budget.
   static const int inviteSweep = 700;
 
-  /// `1600` ms — deliberately outside the budget.
-  static const int inviteBreathe = 1600;
+  /// `1000` ms — deliberately outside the budget.
+  static const int inviteBreatheDelay = 1000;
+
+  /// `2400` ms — deliberately outside the budget.
+  static const int inviteBreathe = 2400;
+
+  /// `500` ms — deliberately outside the budget.
+  static const int confirmFlight = 500;
+
+  /// `4200` ms — deliberately outside the budget.
+  static const int toastDwell = 4200;
+
+  /// `900` ms — deliberately outside the budget.
+  static const int revealDelay = 900;
+
+  /// `650` ms — deliberately outside the budget.
+  static const int shellSweep = 650;
 }
 
 /// Which platform haptic each cue fires.
@@ -370,6 +475,15 @@ abstract final class SeatLayerStringTokens {
   /// Ticket type
   static const String ticketType = 'Ticket type';
 
+  /// Premium seat
+  static const String premiumSeat = 'Premium seat';
+
+  /// Restricted view
+  static const String restrictedView = 'Restricted view';
+
+  /// Obstructed view
+  static const String obstructedView = 'Obstructed view';
+
   /// Venue zone
   static const String venueZone = 'Venue zone';
 
@@ -382,6 +496,9 @@ abstract final class SeatLayerStringTokens {
   /// Best seats
   static const String bestSeats = 'Best seats';
 
+  /// Finding the best seats…
+  static const String findingBestSeats = 'Finding the best seats…';
+
   /// Find seats
   static const String findSeats = 'Find seats';
 
@@ -393,6 +510,32 @@ abstract final class SeatLayerStringTokens {
 
   /// Hold seats & checkout
   static const String holdAndCheckout = 'Hold seats & checkout';
+
+  /// Continue to checkout
+  static const String continueToCheckout = 'Continue to checkout';
+
+  /// Secure {count} more & checkout
+  static const String secureMoreAndCheckout = 'Secure {count} more & checkout';
+
+  /// Secure more
+  static const String secureMore = 'Secure more';
+
+  /// Select seats
+  static const String selectSeats = 'Select seats';
+
+  /// Pick your seats
+  static const String pickYourSeats = 'Pick your seats';
+
+  /// Sales are closed
+  static const String salesClosedPill = 'Sales are closed';
+
+  /// ✓ {count} secured · {total} — you won't be charged yet
+  static const String peekSecured =
+      '✓ {count} secured · {total} — you won\'t be charged yet';
+
+  /// Seats secured. Opening checkout…
+  static const String seatsSecuredOpeningCheckout =
+      'Seats secured. Opening checkout…';
 
   /// Sales closed
   static const String salesClosedCta = 'Sales closed';
@@ -511,11 +654,11 @@ abstract final class SeatLayerStringTokens {
   /// Remove ticket
   static const String removeSeat = 'Remove ticket';
 
-  /// Expand cart
-  static const String expandCart = 'Expand cart';
+  /// Open ticket panel
+  static const String expandCart = 'Open ticket panel';
 
-  /// Collapse cart
-  static const String collapseCart = 'Collapse cart';
+  /// Collapse ticket panel
+  static const String collapseCart = 'Collapse ticket panel';
 
   /// Rotate venue
   static const String orbitMode = 'Rotate venue';
@@ -555,14 +698,14 @@ abstract final class SeatLayerStringTokens {
   /// From {price}
   static const String fromPrice = 'From {price}';
 
-  /// Find {count} seats together
-  static const String findBestSeats = 'Find {count} seats together';
+  /// Find {count} best seats
+  static const String findBestSeats = 'Find {count} best seats';
 
-  /// Find {count} seat
-  static const String findBestSeatsOne = 'Find {count} seat';
+  /// Find {count} best seat
+  static const String findBestSeatsOne = 'Find {count} best seat';
 
-  /// Find {count} seats together
-  static const String findBestSeatsOther = 'Find {count} seats together';
+  /// Find {count} best seats
+  static const String findBestSeatsOther = 'Find {count} best seats';
 
   /// {clock}
   static const String heldFor = '{clock}';
@@ -626,4 +769,156 @@ abstract final class SeatLayerStringTokens {
 
   /// Seat {seat}
   static const String seatNumberIdentity = 'Seat {seat}';
+
+  /// Sales are closed
+  static const String salesClosed = 'Sales are closed';
+
+  /// Ticket sales for this event have ended.
+  static const String salesClosedCopy =
+      'Ticket sales for this event have ended.';
+
+  /// Sales are closed for this event.
+  static const String salesClosedToast = 'Sales are closed for this event.';
+
+  /// This event
+  static const String soldOutEyebrow = 'This event';
+
+  /// Sold out
+  static const String soldOutTitle = 'Sold out';
+
+  /// No reserved seats are currently available for this event.
+  static const String soldOutCopy =
+      'No reserved seats are currently available for this event.';
+
+  /// Your hold expired — the seats were released. Pick again.
+  static const String holdExpired =
+      'Your hold expired — the seats were released. Pick again.';
+
+  /// Your hold ended while you were away. That seat is still free.
+  static const String holdLapsedStillFreeOne =
+      'Your hold ended while you were away. That seat is still free.';
+
+  /// Your hold ended while you were away. Those seats are still free.
+  static const String holdLapsedStillFreeOther =
+      'Your hold ended while you were away. Those seats are still free.';
+
+  /// Your hold ended while you were away, and {count} of those seats has been taken. The rest are still free.
+  static const String holdLapsedSomeTakenOne =
+      'Your hold ended while you were away, and {count} of those seats has been taken. The rest are still free.';
+
+  /// Your hold ended while you were away, and {count} of those seats have been taken. The rest are still free.
+  static const String holdLapsedSomeTakenOther =
+      'Your hold ended while you were away, and {count} of those seats have been taken. The rest are still free.';
+
+  /// Your hold ended while you were away, and that seat has been taken.
+  static const String holdLapsedAllTakenOne =
+      'Your hold ended while you were away, and that seat has been taken.';
+
+  /// Your hold ended while you were away, and those seats have been taken.
+  static const String holdLapsedAllTakenOther =
+      'Your hold ended while you were away, and those seats have been taken.';
+
+  /// Your seats are held for {time}. Need more time?
+  static const String seatsHeldForNeedMoreTime =
+      'Your seats are held for {time}. Need more time?';
+
+  /// Add time
+  static const String addTime = 'Add time';
+
+  /// Adding…
+  static const String addingEllipsis = 'Adding…';
+
+  /// More time added — your seats are still held.
+  static const String moreTimeAdded =
+      'More time added — your seats are still held.';
+
+  /// Couldn't add more time — please head to checkout now.
+  static const String couldNotAddMoreTime =
+      'Couldn\'t add more time — please head to checkout now.';
+
+  /// Seat {label} was just taken by another buyer.
+  static const String seatJustTakenByAnother =
+      'Seat {label} was just taken by another buyer.';
+
+  /// One or more seats were just taken. Please pick again.
+  static const String seatsJustTaken =
+      'One or more seats were just taken. Please pick again.';
+
+  /// You're all set
+  static const String allSetTitle = 'You\'re all set';
+
+  /// confirmed. A confirmation is on its way.
+  static const String confirmedAndOnWay =
+      'confirmed. A confirmation is on its way.';
+
+  /// Back to map
+  static const String backToMap = 'Back to map';
+
+  /// The seat map didn't load
+  static const String mapDidNotLoad = 'The seat map didn\'t load';
+
+  /// Check your connection and try again.
+  static const String checkConnection = 'Check your connection and try again.';
+
+  /// These seats are on hold right now
+  static const String accessPausedTitle = 'These seats are on hold right now';
+
+  /// The organizer has paused this selection. Try again in a few minutes.
+  static const String accessPausedCopy =
+      'The organizer has paused this selection. Try again in a few minutes.';
+
+  /// This access link is no longer active
+  static const String accessRevokedTitle =
+      'This access link is no longer active';
+
+  /// Ask whoever sent you here for a new link to keep booking these seats.
+  static const String accessRevokedCopy =
+      'Ask whoever sent you here for a new link to keep booking these seats.';
+
+  /// Your seat session has expired
+  static const String accessExpiredTitle = 'Your seat session has expired';
+
+  /// Reload the seat map to continue. Seats already in your cart stay held until the timer ends.
+  static const String accessExpiredCopy =
+      'Reload the seat map to continue. Seats already in your cart stay held until the timer ends.';
+
+  /// We couldn't verify your access
+  static const String accessUnverifiedTitle = 'We couldn\'t verify your access';
+
+  /// You can still book anything shown as available. Contact whoever sent you here for access to the rest.
+  static const String accessUnverifiedCopy =
+      'You can still book anything shown as available. Contact whoever sent you here for access to the rest.';
+
+  /// Reload seat map
+  static const String reloadSeatMap = 'Reload seat map';
+
+  /// No selectable seats are currently available.
+  static const String noSelectableSeats =
+      'No selectable seats are currently available.';
+
+  /// Number of guests
+  static const String numberOfGuests = 'Number of guests';
+
+  /// Choose how many guests will sit together. This table is held exclusively for your party.
+  static const String chooseGuestsCopy =
+      'Choose how many guests will sit together. This table is held exclusively for your party.';
+
+  /// Fewer guests
+  static const String fewerGuests = 'Fewer guests';
+
+  /// More guests
+  static const String moreGuests = 'More guests';
+
+  /// Choose between {min} and {max} guests.
+  static const String chooseMinMaxGuests =
+      'Choose between {min} and {max} guests.';
+
+  /// Select table
+  static const String selectTable = 'Select table';
+
+  /// Update table
+  static const String updateTable = 'Update table';
+
+  /// Remove
+  static const String removeWord = 'Remove';
 }

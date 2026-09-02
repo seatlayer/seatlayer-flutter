@@ -120,6 +120,25 @@ final class FakePickerMap extends SeatLayerController {
     );
   }
 
+  final StreamController<SelectedObjectUnavailableEvent> _conflicts =
+      StreamController<SelectedObjectUnavailableEvent>.broadcast();
+
+  @override
+  Stream<SelectedObjectUnavailableEvent> get onSelectedObjectsUnavailable =>
+      _conflicts.stream;
+
+  /// Report [labels] as taken by another buyer.
+  ///
+  /// A conflict does not arrive as a snapshot — it is the runtime interrupting
+  /// with news about seats the buyer already had — so it has its own entry
+  /// point here rather than riding on [emit].
+  void emitConflict(List<String> labels) => _conflicts.add(
+        SelectedObjectUnavailableEvent(
+          labels: labels,
+          reason: const SelectedObjectUnavailableReason('taken'),
+        ),
+      );
+
   /// Push one arbitrary bridge event, for the surfaces that are not snapshots.
   void emitEvent(String name, Object? payload, {int sequence = 1}) => _events
       .add(EventSignal(name: name, payload: payload, sequence: sequence));
@@ -132,6 +151,7 @@ final class FakePickerMap extends SeatLayerController {
   void dispose() {
     unawaited(_events.close());
     unawaited(_ready.close());
+    unawaited(_conflicts.close());
     super.dispose();
   }
 }

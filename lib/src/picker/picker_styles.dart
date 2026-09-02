@@ -165,8 +165,8 @@ class SeatLayerPickerStyles {
 
   /// The wash over the map while a seat card or prompt is asking.
   ///
-  /// Null paints the theme's own: ink at 42 % on a phone, so the seat the card
-  /// is about stays legible behind it while the card is the thing lit.
+  /// Null paints the theme's ground at 64 %, which pales the seats the way the
+  /// web picker does while a card asks and keeps the tapped seat legible.
   final Color? scrimColor;
 
   /// This set with [other]'s set slots on top.

@@ -22,7 +22,8 @@ OutlinedBorder? _shapeOf(WidgetTester tester, Finder button) {
 }
 
 void main() {
-  testWidgets('the peek Continue is not a pill by default', (tester) async {
+  testWidgets('the peek Continue is a pill the host can still reshape',
+      (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -43,15 +44,15 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
-    // Material 3 would round this to a stadium; the picker's own button radius
-    // is what it carries instead, both in the style it resolves and in the
-    // Material it actually paints.
+    // The web picker draws this one fully rounded, and the phone is 1:1 with
+    // it. It is still a rounded rectangle rather than a stadium, so the radius
+    // is a value a host style can override rather than a shape class.
     final button = find.byType(FilledButton);
     expect(button, findsOneWidget);
     expect(_shapeOf(tester, button), isA<RoundedRectangleBorder>());
     expect(
       (_shapeOf(tester, button)! as RoundedRectangleBorder).borderRadius,
-      BorderRadius.circular(SeatLayerRadiusTokens.button),
+      BorderRadius.circular(SeatLayerRadiusTokens.pill),
     );
     final painted = tester
         .widget<Material>(
@@ -59,6 +60,33 @@ void main() {
         )
         .shape;
     expect(painted, isA<RoundedRectangleBorder>());
+
+    // And the pill is the picker's default, not a shape the picker insists
+    // on: a host that names its own shape still gets it.
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: SeatLayerCartSheet(
+            expanded: false,
+            onExpandedChanged: (_) {},
+            onCheckout: (_) async {},
+          ),
+        ),
+        theme: SeatLayerPickerThemeData(
+          styles: SeatLayerPickerStyles(continueButtonStyle: _squareFilled()),
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    expect(
+      (_shapeOf(tester, find.byType(FilledButton))! as RoundedRectangleBorder)
+          .borderRadius,
+      BorderRadius.zero,
+    );
   });
 
   testWidgets('a continue slot reaches the rendered peek button',

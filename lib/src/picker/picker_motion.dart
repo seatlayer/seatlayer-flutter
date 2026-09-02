@@ -41,6 +41,17 @@ abstract final class SeatLayerPickerMotion {
   static const Duration stagger =
       Duration(milliseconds: SeatLayerMotionTokens.stagger);
 
+  /// The collapsed cart's count swelling once as it changes.
+  ///
+  /// The only feedback a buyer gets that a tap on the map reached the cart
+  /// while the sheet is shut.
+  static const Duration bump =
+      Duration(milliseconds: SeatLayerMotionTokens.bump);
+
+  /// The cart sheet's chevron turning over.
+  static const Duration chevron =
+      Duration(milliseconds: SeatLayerMotionTokens.chevron);
+
   /// Swapping text in place — the dock name as the map pans under it.
   static const Duration crossfade =
       Duration(milliseconds: SeatLayerMotionTokens.crossfade);
@@ -65,6 +76,14 @@ abstract final class SeatLayerPickerMotion {
     milliseconds: SeatLayerMotionTokens.cardEnter,
   );
 
+  /// How long a newly arrived card is left alone before it points at itself.
+  ///
+  /// The buyer is still reading the seat they just tapped; a highlight that
+  /// starts in the same frame as the card is part of the arrival rather than
+  /// an invitation to answer.
+  static const Duration inviteDelay =
+      Duration(milliseconds: SeatLayerMotionTokens.inviteDelay);
+
   /// The one highlight that crosses a newly arrived primary action.
   ///
   /// Longer than anything in [catalog] on purpose: this is not the interface
@@ -73,9 +92,22 @@ abstract final class SeatLayerPickerMotion {
   static const Duration inviteSweep =
       Duration(milliseconds: SeatLayerMotionTokens.inviteSweep);
 
+  /// How long after the card lands the breath starts.
+  static const Duration inviteBreatheDelay =
+      Duration(milliseconds: SeatLayerMotionTokens.inviteBreatheDelay);
+
   /// One breath of the same action while it waits to be pressed.
   static const Duration inviteBreathe =
       Duration(milliseconds: SeatLayerMotionTokens.inviteBreathe);
+
+  /// The seat chip's flight from the confirm card to the peek summary.
+  ///
+  /// Deliberately outside [catalog]'s budget: nothing waits on it. The cart,
+  /// the totals and the peek line have all already changed by the time it
+  /// starts, so the buyer is watching a receipt travel rather than waiting
+  /// for the interface to catch up.
+  static const Duration confirmFlight =
+      Duration(milliseconds: SeatLayerMotionTokens.confirmFlight);
 
   /// How long an undo stays offered after a ticket is removed.
   ///
@@ -94,6 +126,8 @@ abstract final class SeatLayerPickerMotion {
     'fly': fly,
     'pop': pop,
     'stagger': stagger,
+    'bump': bump,
+    'chevron': chevron,
     'crossfade': crossfade,
     'toast': toast,
     'immersive': immersive,
@@ -103,13 +137,17 @@ abstract final class SeatLayerPickerMotion {
 
   /// The one overshoot in the system, reserved for a buyer's own action
   /// landing: a card arriving from the seat, a sheet springing open.
-  static const Curve spring = Curves.easeOutBack;
+  ///
+  /// The three curves are the web picker's own `--sl-ease-*` cubic-beziers
+  /// rather than Flutter's nearest named equivalents, so a surface that opens
+  /// on both platforms opens along the same path.
+  static const Curve spring = Cubic(.34, 1.56, .64, 1);
 
   /// Everything else arriving.
-  static const Curve easeEnter = Curves.easeOutCubic;
+  static const Curve easeEnter = Cubic(.2, .8, .2, 1);
 
   /// Everything leaving.
-  static const Curve easeExit = Curves.easeInCubic;
+  static const Curve easeExit = Cubic(.4, 0, 1, 1);
 
   /// [token], or [Duration.zero] when this viewer has asked for less movement.
   static Duration of(BuildContext context, Duration token) =>

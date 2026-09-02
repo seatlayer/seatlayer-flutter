@@ -13,7 +13,9 @@ import 'picker_builders.dart';
 import 'picker_cart_list.dart';
 import 'seat_layer_picker.dart';
 import 'picker_seat_confirmation.dart';
+import 'picker_states.dart';
 import 'picker_status_views.dart';
+import 'picker_toast.dart';
 import 'picker_best_seats.dart';
 import 'picker_cart_sheet.dart';
 import 'picker_confirm_card.dart';
@@ -28,6 +30,7 @@ import 'picker_layout.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_options.dart';
+import 'picker_tokens.g.dart';
 import 'seat_layer_picker_controller.dart';
 import 'picker_accessibility.dart';
 import 'picker_attribution.dart';
@@ -137,8 +140,7 @@ class _SeatLayerPickerAdaptiveLayoutState
     final body = LayoutBuilder(
       builder: (context, constraints) {
         final requested = SeatLayerPickerScope.optionsOf(context).layout;
-        final wide =
-            requested == SeatLayerPickerLayoutMode.wide ||
+        final wide = requested == SeatLayerPickerLayoutMode.wide ||
             (requested == SeatLayerPickerLayoutMode.adaptive &&
                 constraints.maxWidth >= 840);
         final options = SeatLayerPickerScope.optionsOf(context);
@@ -196,8 +198,7 @@ class _SeatLayerPickerAdaptiveLayoutState
               );
         // Nothing is drawn on a venue with one floor, so nothing is reserved
         // either: the band is reported only when the strip is really there.
-        final floorStripUp =
-            !panoramaUp &&
+        final floorStripUp = !panoramaUp &&
             chrome.showFloorStrip &&
             (state.snapshot?.map.floors.length ?? 0) > 1;
         final floorStripHeight = SeatLayerFloorStrip.heightFor(compact: !wide);
@@ -284,9 +285,8 @@ class _SeatLayerPickerAdaptiveLayoutState
                 chrome.showMapControls
                     ? SeatLayerPickerMapControls(
                         compact: !wide,
-                        bottomInset: !wide && dockUp
-                            ? resolved.layout.dockBarHeight
-                            : 0,
+                        bottomInset:
+                            !wide && dockUp ? resolved.layout.dockBarHeight : 0,
                         // On a phone the top rail below owns the Map/3D control.
                         includeViewModeControl: wide,
                       )
@@ -346,12 +346,12 @@ class _SeatLayerPickerAdaptiveLayoutState
           final capabilities = state.snapshot?.capabilities ?? const <String>{};
           final onViewFromSeat =
               options.enableSeatView && capabilities.contains('seatView')
-              ? (SelectedSeat seat) =>
-                    _inspectSeat(() => controller.openSeatView(seat))
-              : null;
+                  ? (SelectedSeat seat) =>
+                      _inspectSeat(() => controller.openSeatView(seat))
+                  : null;
           final onShow3D = options.enable3D && capabilities.contains('venue3d')
               ? (SelectedSeat seat) =>
-                    _inspectSeat(() => controller.showSeatIn3D(seat))
+                  _inspectSeat(() => controller.showSeatIn3D(seat))
               : null;
           // The phone gets the one-line card; the wide layout keeps the
           // identity grid, which has the room for it.
@@ -407,26 +407,27 @@ class _SeatLayerPickerAdaptiveLayoutState
             !_framingGraceLapsed;
         final Widget? statusOverlay =
             state.phase == SeatLayerPickerPhase.initializing || framing
-            ? ColoredBox(
-                color: pickerAlpha(resolved.background, .84),
-                child: _part(
-                  context,
-                  widget.builders.loading,
-                  const SeatLayerPickerLoadingView(),
-                ),
-              )
-            : switch (state.phase) {
-                SeatLayerPickerPhase.failed ||
-                SeatLayerPickerPhase.unavailable => ColoredBox(
-                  color: pickerAlpha(resolved.background, .94),
-                  child: _part(
-                    context,
-                    widget.builders.error,
-                    const SeatLayerPickerErrorView(),
-                  ),
-                ),
-                _ => null,
-              };
+                ? ColoredBox(
+                    color: pickerAlpha(resolved.background, .84),
+                    child: _part(
+                      context,
+                      widget.builders.loading,
+                      const SeatLayerPickerLoadingView(),
+                    ),
+                  )
+                : switch (state.phase) {
+                    SeatLayerPickerPhase.failed ||
+                    SeatLayerPickerPhase.unavailable =>
+                      ColoredBox(
+                        color: pickerAlpha(resolved.background, .94),
+                        child: _part(
+                          context,
+                          widget.builders.error,
+                          const SeatLayerPickerErrorView(),
+                        ),
+                      ),
+                    _ => null,
+                  };
         final mapSurface = IgnorePointer(
           // Platform views participate in iOS gesture recognition before the
           // Flutter overlay's onPressed callback runs. Explicitly remove the
@@ -485,6 +486,14 @@ class _SeatLayerPickerAdaptiveLayoutState
                                 child: buyerPrompt,
                               ),
                             ),
+                          // --- toasts and buyer-facing states (P4) ---
+                          const Positioned.fill(
+                            child: SeatLayerPickerToastLayer(),
+                          ),
+                          const Positioned.fill(
+                            child: SeatLayerPickerStateLayer(),
+                          ),
+                          // --- end toasts and buyer-facing states ---
                           Positioned.fill(
                             child: _PickerStatusOverlay(overlay: statusOverlay),
                           ),
@@ -549,8 +558,7 @@ class _SeatLayerPickerAdaptiveLayoutState
         final dockLift = dockUp ? resolved.layout.dockBarHeight : 0.0;
         // `‹ Back to venue` is drawn only once the scene is aimed at a seat,
         // so only then does anything stand in the badge's corner.
-        final backPillUp =
-            venue3DUp &&
+        final backPillUp = venue3DUp &&
             chrome.showVenue3DChrome &&
             state.snapshot?.map.view3DTargetSeatId != null;
         // One chrome row, not map chrome: the prices and the Map/3D control
@@ -658,10 +666,12 @@ class _SeatLayerPickerAdaptiveLayoutState
                         'seatlayer-picker-prompt-transition',
                       ),
                       child: _PickerPromptTransition(
-                        // Ink, not ground: a pale wash left the map as loud
-                        // as the card; a dark one makes the card the thing lit.
+                        // The map pales to the ground while a card asks — the
+                        // web picker's own treatment — so the seat stays
+                        // legible and the card is the thing lit. An ink wash
+                        // was tried and turned the seat into colour.
                         scrimColor: resolved.styles.scrimColor ??
-                            pickerAlpha(resolved.text, .42),
+                            pickerAlpha(resolved.background, .64),
                         // The phone's seat card is the product's one moment:
                         // the map goes soft behind it, it arrives from the
                         // seat's direction and points back at it, and the map
@@ -676,13 +686,32 @@ class _SeatLayerPickerAdaptiveLayoutState
                         child: buyerPrompt,
                       ),
                     ),
+                  // --- toasts and buyer-facing states (P4) ---
+                  // Above the card, never over it: the message is the reply to
+                  // the tap that opened the card, and a reply printed across
+                  // Cancel / Add seat is a reply the buyer has to move to read.
+                  Positioned.fill(
+                    child: SeatLayerPickerToastLayer(
+                      bottomInset: bottomBand,
+                      lifted: seatCardUp,
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: SeatLayerPickerStateLayer(bottomInset: bottomBand),
+                  ),
+                  // --- end toasts and buyer-facing states ---
                   Positioned.fill(
                     child: _PickerStatusOverlay(overlay: statusOverlay),
                   ),
                 ],
               ),
             ),
-            if (chrome.showTicketPanel) sheet,
+            if (chrome.showTicketPanel)
+              _PausedWhileConfirming(
+                key: const ValueKey<String>('seatlayer-picker-sheet-pause'),
+                confirming: seatCardUp,
+                child: sheet,
+              ),
           ],
         );
       },
@@ -729,8 +758,9 @@ class _SeatLayerPickerAdaptiveLayoutState
     if (panorama) return 0;
     // The Map/3D control shares the map's top line with the badge, so the
     // band is whichever of the two reaches lower.
-    final control =
-        viewModeControl ? _railTop + SeatLayerPickerViewModeControl.height : 0.0;
+    final control = viewModeControl
+        ? _railTop + SeatLayerPickerViewModeControl.height
+        : 0.0;
     final above = _aboveBadgeBand(
       venue3D: venue3D,
       backPill: backPill,
@@ -774,7 +804,8 @@ class _SeatLayerPickerAdaptiveLayoutState
       return backPill ? backPillInset + SeatLayerVenue3D.backPillHeight : 0;
     }
     if (floorStrip) {
-      return _floorStripTop(viewModeControl: viewModeControl) + floorStripHeight;
+      return _floorStripTop(viewModeControl: viewModeControl) +
+          floorStripHeight;
     }
     return 0;
   }
@@ -1080,7 +1111,6 @@ class _PickerPromptTransition extends StatelessWidget {
   /// wide layout's dialog and the GA/table prompts keep the flat scrim.
   final bool seatCard;
 
-
   /// Where on the map the seat was drawn, if the runtime said.
   final Offset? anchor;
 
@@ -1130,26 +1160,19 @@ class _PickerPromptTransition extends StatelessWidget {
             // Points, not a fraction of the card's own height — the distance
             // is a property of the gesture, not of how tall the card is.
             final dy = _arrivesFromBelow(area) ? _cardTravel : -_cardTravel;
-            // The overshoot drives geometry only. Opacity stays on the eased
-            // animation: a spring past 1 is a card that is briefly more than
-            // opaque, which is not a thing, and the framework says so.
-            final sprung = CurvedAnimation(
-              parent: animation,
-              curve: SeatLayerPickerMotion.spring,
-              reverseCurve: SeatLayerPickerMotion.easeExit,
-            );
             return FadeTransition(
               opacity: eased,
               child: AnimatedBuilder(
-                animation: sprung,
+                animation: eased,
                 builder: (context, inner) => Transform.translate(
-                  offset: Offset(0, dy * (1 - sprung.value)),
+                  offset: Offset(0, dy * (1 - eased.value)),
                   child: inner,
                 ),
                 // Leaving is a shrink towards the peek bar the ticket just
                 // went to, so the card exits smaller than it entered.
                 child: ScaleTransition(
-                  scale: Tween<double>(begin: .96, end: 1).animate(sprung),
+                  scale: Tween<double>(begin: _cardArrivalScale, end: 1)
+                      .animate(eased),
                   child: current,
                 ),
               ),
@@ -1210,7 +1233,16 @@ class _PickerPromptTransition extends StatelessWidget {
 }
 
 /// How far the seat card travels on arrival, in logical points.
-const double _cardTravel = 16;
+const double _cardTravel = 10;
+
+/// How small it starts, so it grows into place rather than sliding into it.
+const double _cardArrivalScale = .97;
+
+/// How much of the cart sheet is left while the card is asking its question.
+///
+/// The sheet is still readable — the buyer can see what is already in the cart
+/// — but it is plainly not the surface being answered.
+const double _confirmingDim = .58;
 
 /// The map behind a prompt: blurred and tinted for the seat card, flat for
 /// everything else, and a way out either way.
@@ -1227,7 +1259,6 @@ class _PromptBackdrop extends StatelessWidget {
   });
 
   final Color scrimColor;
-
 
   final VoidCallback? onDismiss;
   final Widget child;
@@ -1254,6 +1285,39 @@ class _PromptBackdrop extends StatelessWidget {
   }
 }
 
+/// The cart sheet while the seat card is up: dimmed, and out of reach.
+///
+/// A confirm card asks one question, and every other surface on the screen
+/// has to stop offering answers to it while it does. The map's own chrome is
+/// already behind the card's backdrop; the sheet is a sibling below the map,
+/// so it is paused here instead — faded rather than hidden, because what is
+/// already in the cart is context for the seat being decided on.
+class _PausedWhileConfirming extends StatelessWidget {
+  const _PausedWhileConfirming({
+    super.key,
+    required this.confirming,
+    required this.child,
+  });
+
+  /// Whether a seat card is up.
+  final bool confirming;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+        ignoring: confirming,
+        child: AnimatedOpacity(
+          opacity: confirming ? _confirmingDim : 1,
+          duration: SeatLayerPickerMotion.of(
+            context,
+            SeatLayerPickerMotion.exit,
+          ),
+          curve: SeatLayerPickerMotion.easeEnter,
+          child: child,
+        ),
+      );
+}
 
 /// Puts the seat card where the seat is, and points it back at the seat.
 ///
@@ -1301,6 +1365,7 @@ class _SeatCardFrameState extends State<_SeatCardFrame> {
         : _notch ?? SeatLayerConfirmCardNotch.none;
     final theme = seatLayerPickerThemeOf(context);
     final layout = theme.layout;
+    const radius = SeatLayerRadiusTokens.confirmCard;
     return LayoutBuilder(
       builder: (context, constraints) => CustomSingleChildLayout(
         delegate: _SeatCardLayout(
@@ -1315,7 +1380,7 @@ class _SeatCardFrameState extends State<_SeatCardFrame> {
             _pointer(
               constraints.maxWidth,
               layout,
-              theme.radius + 4,
+              radius,
               up: true,
               drawn: notch == SeatLayerConfirmCardNotch.top,
             ),
@@ -1323,7 +1388,7 @@ class _SeatCardFrameState extends State<_SeatCardFrame> {
             _pointer(
               constraints.maxWidth,
               layout,
-              theme.radius + 4,
+              radius,
               up: false,
               drawn: notch == SeatLayerConfirmCardNotch.bottom,
             ),
