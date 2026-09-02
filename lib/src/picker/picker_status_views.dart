@@ -14,7 +14,6 @@ import 'picker_cart_sheet.dart';
 import 'picker_checkout_cta.dart';
 import 'seat_layer_picker_scope.dart';
 import 'picker_tokens.g.dart';
-import 'picker_styles.dart';
 import 'seat_layer_picker_theme.dart';
 
 class SeatLayerPickerTestModeIndicator extends StatelessWidget {
@@ -451,28 +450,71 @@ class SeatLayerPickerErrorView extends StatelessWidget {
     final error = controller?.state.error;
     final text = message ??
         (error is SeatLayerError ? error.message : words.errorMessage);
+    // Title, sentence, way out — the same three lines the web picker draws in
+    // place of its boot skeleton. No icon: a picture of a broken cloud says
+    // less than the sentence under it and takes the room the sentence needs.
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(28),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Icon(Icons.cloud_off_rounded, size: 40, color: palette.mutedText),
-            const SizedBox(height: 14),
+            Text(
+              words.mapDidNotLoad,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: palette.text,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                fontFamily: palette.fontFamily,
+              ),
+            ),
+            const SizedBox(height: 10),
             Text(
               text,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: palette.text,
+                color: palette.mutedText,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                fontFamily: palette.fontFamily,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              words.checkConnection,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: palette.mutedText,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
                 fontFamily: palette.fontFamily,
               ),
             ),
             const SizedBox(height: 16),
-            FilledButton.tonal(
-              style: seatLayerButtonShape(palette.buttonRadius),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: palette.accent,
+                foregroundColor: palette.onAccent,
+                minimumSize: const Size(
+                  0,
+                  SeatLayerSizeTokens.minimumHitTarget,
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(palette.buttonRadius),
+                ),
+              ),
               onPressed:
                   onRetry ?? () => ignorePickerAction(controller!.retry()),
-              child: Text(words.retry),
+              child: Text(
+                words.retry,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  fontFamily: palette.fontFamily,
+                ),
+              ),
             ),
           ],
         ),
@@ -481,14 +523,28 @@ class SeatLayerPickerErrorView extends StatelessWidget {
   }
 }
 
+/// What the picker shows when the chart has nothing to offer.
 class SeatLayerPickerEmptyView extends StatelessWidget {
+  /// Creates the empty view.
   const SeatLayerPickerEmptyView({super.key});
 
   @override
-  Widget build(BuildContext context) => const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24),
-          child: Text('No selectable seats are currently available.'),
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          SeatLayerPickerScope.stringsOf(context).noSelectableSeats,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: theme.mutedText,
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            fontFamily: theme.fontFamily,
+          ),
         ),
-      );
+      ),
+    );
+  }
 }

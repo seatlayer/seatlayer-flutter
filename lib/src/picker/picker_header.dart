@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
+import 'picker_motion.dart';
 import 'picker_styles.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_scope.dart';
@@ -71,8 +72,15 @@ class SeatLayerPickerHeader extends StatelessWidget {
                       ? _EventTitle(compact: compact)
                       : const SizedBox.shrink(),
                 ),
+                // Sales that have ended are a fact about the event, so they
+                // are stated beside its name — and never in the accent, which
+                // in this header means "your seats".
+                if (state.event?.salesClosed == true) ...[
+                  SeatLayerPickerSalesClosedPill(compact: compact),
+                  const SizedBox(width: 4),
+                ],
                 if (showHoldPill && state.hold != null) ...[
-                  const SeatLayerPickerHoldCountdown(),
+                  SeatLayerPickerHoldCountdown(compact: compact),
                   const SizedBox(width: 4),
                 ],
                 if (onClose != null)
@@ -211,12 +219,27 @@ class _PickerBrandMark extends StatelessWidget {
       );
 }
 
+/// The instant every hold-derived surface reads its clock from.
+///
+/// One clock for the pill, the extend prompt and anything else counting the
+/// same hold down: two clocks read a fraction of a second apart show the buyer
+/// two different numbers for one fact. Pinned by `flutter_test_config` so a
+/// golden of a countdown is the same picture every run.
+DateTime seatLayerPickerNow() => SeatLayerPickerHoldCountdown.debugClock();
+
 /// How long the buyer's seats stay held, counting down once a second.
 ///
 /// Renders nothing until there is a hold, so it can be placed unconditionally.
 class SeatLayerPickerHoldCountdown extends StatefulWidget {
   /// Creates the hold countdown pill.
-  const SeatLayerPickerHoldCountdown({super.key});
+  const SeatLayerPickerHoldCountdown({super.key, this.compact = false});
+
+  /// Whether to render the phone's smaller pill.
+  final bool compact;
+
+  /// Below this much time left the pill stops being a fact and starts being a
+  /// warning: it fills with the accent and its dot breathes.
+  static const Duration expiring = Duration(minutes: 1);
 
   /// The wall clock this pill counts down against.
   ///
@@ -256,36 +279,186 @@ class _SeatLayerPickerHoldCountdownState
     if (state.hold == null) return const SizedBox.shrink();
     final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
-    final remaining =
-        state.holdRemaining(SeatLayerPickerHoldCountdown.debugClock());
+    final remaining = state.holdRemaining(seatLayerPickerNow());
     final minutes =
         remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds =
         remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final expiring = remaining <= SeatLayerPickerHoldCountdown.expiring;
+    // Two states, one pill: a tinted plate while there is time, and the whole
+    // accent once there is not. A countdown that only changes its number is a
+    // countdown a buyer reads once and then stops looking at.
+    final ink = expiring ? theme.onAccent : seatLayerAccentText(theme);
+    final compact = widget.compact;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: pickerAlpha(theme.accent, .12),
+        color: expiring
+            ? theme.accent
+            : Color.alphaBlend(pickerAlpha(theme.accent, .14), theme.surface),
         borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 9 : 12,
+          vertical: compact ? 4 : 6,
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.timer_outlined, size: 13, color: theme.accent),
-            const SizedBox(width: 5),
+            _HoldDot(color: ink, pulsing: expiring),
+            SizedBox(width: compact ? 5 : 6),
             Text(
               strings.heldFor('$minutes:$seconds'),
               semanticsLabel:
                   '${remaining.inMinutes} minutes $seconds seconds remaining',
               style: TextStyle(
-                color: theme.text,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
+                color: ink,
+                fontSize: compact ? 11 : 12,
+                fontWeight: FontWeight.w700,
                 fontFamily: theme.fontFamily,
                 fontFeatures: const <FontFeature>[
                   FontFeature.tabularFigures(),
                 ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The accent, darkened toward the text colour until it can be read as text.
+///
+/// A brand accent is chosen to be seen as a filled button, not to be legible
+/// as 11 pt type on a pale plate. This walks it toward the picker's own ink
+/// until the pair clears the 4.5:1 contrast a small label needs, and stops as
+/// soon as it does, so a brand that was already legible keeps its own colour.
+Color seatLayerAccentText(SeatLayerResolvedPickerTheme theme) {
+  Color candidate = theme.accent;
+  for (var step = 0; step < 10; step += 1) {
+    if (_contrast(candidate, theme.surface) >= 4.5 &&
+        _contrast(candidate, theme.background) >= 4.5) {
+      return candidate;
+    }
+    candidate = Color.lerp(theme.accent, theme.text, (step + 1) * .1)!;
+  }
+  return theme.text;
+}
+
+double _contrast(Color a, Color b) {
+  final first = a.computeLuminance();
+  final second = b.computeLuminance();
+  final lighter = first > second ? first : second;
+  final darker = first > second ? second : first;
+  return (lighter + .05) / (darker + .05);
+}
+
+/// The hold pill's status light, breathing once the hold is nearly out.
+class _HoldDot extends StatefulWidget {
+  const _HoldDot({required this.color, required this.pulsing});
+
+  final Color color;
+  final bool pulsing;
+
+  @override
+  State<_HoldDot> createState() => _HoldDotState();
+}
+
+class _HoldDotState extends State<_HoldDot>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  );
+
+  @override
+  void didUpdateWidget(_HoldDot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _sync();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _sync();
+  }
+
+  void _sync() {
+    if (widget.pulsing && !SeatLayerPickerMotion.reduced(context)) {
+      if (!_pulse.isAnimating) _pulse.repeat();
+    } else {
+      _pulse
+        ..stop()
+        ..value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+        animation: _pulse,
+        builder: (context, _) => DecoratedBox(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: pickerAlpha(widget.color, .78),
+            boxShadow: _pulse.value == 0
+                ? null
+                : <BoxShadow>[
+                    BoxShadow(
+                      color: pickerAlpha(
+                        widget.color,
+                        .9 * (1 - _pulse.value),
+                      ),
+                      spreadRadius: 7 * _pulse.value,
+                    ),
+                  ],
+          ),
+          child: const SizedBox.square(dimension: 7),
+        ),
+      );
+}
+
+/// "Sales are closed", stated in the header beside the event's name.
+class SeatLayerPickerSalesClosedPill extends StatelessWidget {
+  /// Creates the sales-closed pill.
+  const SeatLayerPickerSalesClosedPill({super.key, this.compact = false});
+
+  /// Whether to render the phone's smaller pill.
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerMapChromeThemeOf(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Color.alphaBlend(pickerAlpha(theme.text, .12), theme.surface),
+        borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 9 : 12,
+          vertical: compact ? 4 : 6,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(Icons.lock_outline_rounded, size: 13, color: theme.text),
+            const SizedBox(width: 6),
+            Text(
+              strings.salesClosed,
+              maxLines: 1,
+              style: TextStyle(
+                color: theme.text,
+                fontSize: compact ? 11 : 12,
+                fontWeight: FontWeight.w700,
+                fontFamily: theme.fontFamily,
               ),
             ),
           ],

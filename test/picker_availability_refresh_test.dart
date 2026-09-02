@@ -436,12 +436,18 @@ void main() {
       );
       map.emit(heldRowSnapshot());
       await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.timer_outlined), findsOneWidget);
+      // The pill is a status dot and a live `m:ss` — the clock is the thing
+      // that must not outlive the hold, so it is what is looked for.
+      final clock = find.descendant(
+        of: find.byType(SeatLayerPickerHoldCountdown),
+        matching: find.textContaining(RegExp(r'\d\d:\d\d')),
+      );
+      expect(clock, findsOneWidget);
 
       await controller.refreshAvailability();
       await tester.pumpAndSettle();
 
-      expect(find.byIcon(Icons.timer_outlined), findsNothing);
+      expect(clock, findsNothing);
       expect(find.byType(SeatLayerPickerHoldCountdown), findsNothing,
           reason: 'the header hangs the pill off state.hold, which is now gone');
     });

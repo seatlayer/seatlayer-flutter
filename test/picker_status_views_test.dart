@@ -72,9 +72,34 @@ void main() {
     await tester.pump();
 
     expect(tester.takeException(), isNull);
+    // Title, what went wrong, and what to do about it — the failure card says
+    // three things, and the host's own sentence is the middle one.
+    expect(find.text("The seat map didn't load"), findsOneWidget);
     expect(find.text('Your session could not be started.'), findsOneWidget);
+    expect(find.text('Check your connection and try again.'), findsOneWidget);
     await tester.tap(find.text('Try again'));
     expect(retried, 1);
+  });
+
+  testWidgets('the empty view is a host wording too', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SeatLayerPickerEmptyView(),
+        options: const SeatLayerPickerOptions(
+          strings: SeatLayerPickerStrings(
+            noSelectableSeats: 'Aucun siège disponible.',
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Aucun siège disponible.'), findsOneWidget);
   });
 
   testWidgets('a host wording reaches the loading and failure views',

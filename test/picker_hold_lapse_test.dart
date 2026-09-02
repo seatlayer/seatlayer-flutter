@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_toast.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/seat_layer_configuration.dart';
@@ -107,19 +108,24 @@ void main() {
     expect(find.text('Select them again'), findsNothing);
   });
 
-  testWidgets('the toast carries the same sentence, on the picker\'s surface',
+  testWidgets('the toast carries the lapse telling for a full recovery',
       (tester) async {
     final map = _lapsingMap(const <String>['A-1', 'A-2', 'A-3']);
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
-    await _lapse(tester, map);
+    final controller = await _lapse(tester, map);
 
-    final bar = tester.widget<SnackBar>(find.byType(SnackBar));
+    // The toast and the tray line are two surfaces for one fact, so the
+    // sentence is raised on the picker's own queue rather than on Material's
+    // snack bar, which paints a white slab across a dark picker.
+    final toast = seatLayerPickerToasts(controller).current;
     expect(
-      (bar.content as Text).data,
-      'Your seats were released. They were held for 15 minutes.',
-    );
+        toast!.message,
+        'Your hold ended while you were away. '
+        'Those seats are still free.');
+    expect(toast.tone, SeatLayerPickerToastTone.warning);
+    expect(toast.actionLabel, 'Select them again');
   });
 
   testWidgets('a partial recovery says how many are gone', (tester) async {
@@ -181,7 +187,7 @@ void main() {
     final controller = await _lapse(tester, map);
 
     expect(find.text('Your seats were released.'), findsNothing);
-    expect(find.byType(SnackBar), findsNothing);
+    expect(seatLayerPickerToasts(controller).current, isNull);
     expect(controller.state.hold, isNotNull);
     expect(controller.state.selection, hasLength(3));
   });
@@ -201,7 +207,7 @@ void main() {
     );
 
     expect(find.text('Your seats were released.'), findsNothing);
-    expect(find.byType(SnackBar), findsNothing);
+    expect(seatLayerPickerToasts(controller).current, isNull);
     expect(controller.holdLapse, isNotNull);
   });
 
