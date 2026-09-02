@@ -84,8 +84,8 @@ statement in the tray; the hold and closed pills in the header.
 
 **Runtime pin**
 
-The hosted runtime moves to `seatlayer-js@0.74.0`. Views load
-`https://cdn.seatlayer.io/seatlayer-js@0.74.0/mobile.html`.
+The hosted runtime moves to `seatlayer-js@0.75.1`. Views load
+`https://cdn.seatlayer.io/seatlayer-js@0.75.1/mobile.html`.
 
 ## 0.3.4
 
