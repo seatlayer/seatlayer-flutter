@@ -24,6 +24,10 @@ class BuyerAccessRefreshReason {
   static const reconnect = BuyerAccessRefreshReason('reconnect');
   static const manual = BuyerAccessRefreshReason('manual');
 
+  /// A private-event image is being fetched for the buyer's own chrome —
+  /// today the seat-view thumbnail on the confirm card.
+  static const asset = BuyerAccessRefreshReason('asset');
+
   factory BuyerAccessRefreshReason.fromRaw(String raw) => switch (raw) {
         'initial' => initial,
         'expiring' => expiring,
@@ -31,6 +35,7 @@ class BuyerAccessRefreshReason {
         'unauthorized' => unauthorized,
         'reconnect' => reconnect,
         'manual' => manual,
+        'asset' => asset,
         _ => BuyerAccessRefreshReason(raw),
       };
 
@@ -183,6 +188,104 @@ class SeatCommercialAttributes {
   }
 }
 
+/// Where the runtime keeps a real photograph of the view from a seat.
+///
+/// [reference] is an EVENT-SCOPED API path, not a fetchable URL: a private
+/// event answers it only for a buyer bearer, so the bytes come through
+/// `SeatLayerBuyerAssetLoader` rather than through `Image.network`.
+class SeatViewThumb {
+  /// Creates a reference to one authored seat-view image.
+  const SeatViewThumb({required this.reference, required this.kind});
+
+  /// `/pub/events/<eventKey>/assets/<asset>`, as the runtime wrote it.
+  final String reference;
+
+  /// `real` for an uploaded photograph. Decoded as an OPEN string: a value
+  /// this package has never heard of is not a reason to drop the photo, and
+  /// nothing here may be used to justify drawing a generated stand-in.
+  final String kind;
+
+  static SeatViewThumb? fromJson(Object? v) {
+    final reference = jStr(jGet(v, 'reference'));
+    // A thumbnail with no reference is not half a photograph, it is none:
+    // showing the strip for it would promise an image that cannot arrive.
+    if (reference == null || reference.isEmpty) return null;
+    return SeatViewThumb(
+      reference: reference,
+      kind: jStr(jGet(v, 'kind')) ?? 'real',
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeatViewThumb &&
+      other.reference == reference &&
+      other.kind == kind;
+
+  @override
+  int get hashCode => Object.hash(reference, kind);
+}
+
+/// What the runtime is willing to say about how a seat's view was produced.
+///
+/// Present only where the seat carries confidence evidence. Every field is
+/// buyer-safe copy the runtime already resolved; nothing here is computed or
+/// upgraded on this side.
+class SeatConfidenceDisclosure {
+  /// Creates one resolved passport summary.
+  const SeatConfidenceDisclosure({
+    required this.headline,
+    required this.model,
+    required this.reality,
+    required this.coverage,
+    required this.provenance,
+    required this.freshness,
+    required this.limitations,
+    this.modeledTarget,
+  });
+
+  /// The one line the teaser shows.
+  final String headline;
+
+  /// How the view was modelled.
+  final String model;
+
+  /// How the model relates to the real venue.
+  final String reality;
+
+  /// How much of the venue the evidence covers.
+  final String coverage;
+
+  /// Where the evidence came from.
+  final String provenance;
+
+  /// How current the evidence is.
+  final String freshness;
+
+  /// What the model does not claim.
+  final List<String> limitations;
+
+  /// What was modelled, when the runtime names it. Optional.
+  final String? modeledTarget;
+
+  static SeatConfidenceDisclosure? fromJson(Object? v) {
+    final headline = jStr(jGet(v, 'headline'));
+    if (headline == null) return null;
+    return SeatConfidenceDisclosure(
+      headline: headline,
+      model: jStr(jGet(v, 'model')) ?? '',
+      reality: jStr(jGet(v, 'reality')) ?? '',
+      coverage: jStr(jGet(v, 'coverage')) ?? '',
+      provenance: jStr(jGet(v, 'provenance')) ?? '',
+      freshness: jStr(jGet(v, 'freshness')) ?? '',
+      limitations: jGet(v, 'limitations') == null
+          ? const <String>[]
+          : jListOf(jGet(v, 'limitations'), (item) => jStr(item)),
+      modeledTarget: jStr(jGet(v, 'modeledTarget')),
+    );
+  }
+}
+
 /// One selected seat.
 class SelectedSeat {
   const SelectedSeat({
@@ -210,8 +313,11 @@ class SelectedSeat {
     this.accessibility,
     this.wheelchairSpaceType,
     this.screenPoint,
-    this.seatViewKind,
-  });
+    this.seatViewThumb,
+    this.sightlineMetres,
+    this.seatViewConfidence,
+    String? seatViewKind,
+  }) : _seatViewKind = seatViewKind;
 
   final String id;
   final String label;
@@ -267,7 +373,24 @@ class SelectedSeat {
   /// Sent by a runtime that advertises `seat-view-thumbnail-v1`. A picker
   /// offers `View from here` only for a real photograph; a generated view is
   /// never offered from the card, though the 3D and 360° paths are unchanged.
-  final String? seatViewKind;
+  ///
+  /// No shipped runtime emits a top-level `seatViewKind`: the field was a
+  /// guess, and the wire carries the kind inside [seatViewThumb] instead. It
+  /// is kept for source compatibility and now falls back to that.
+  String? get seatViewKind => _seatViewKind ?? seatViewThumb?.kind;
+  final String? _seatViewKind;
+
+  /// The authored photograph of the view from this seat, when the runtime has
+  /// one AND its own predicate accepted the reference. Absent means there is
+  /// no photograph to show — never a licence to draw a stand-in.
+  final SeatViewThumb? seatViewThumb;
+
+  /// How far the seat is from the stage, already rounded the way the web
+  /// picker prints it. Only charts with a stage report it.
+  final double? sightlineMetres;
+
+  /// What the runtime will say about how this seat's view was produced.
+  final SeatConfidenceDisclosure? seatViewConfidence;
 
   /// What to show the buyer. Booking still uses [label].
   String get buyerFacingLabel => displayLabel ?? label;
@@ -304,6 +427,10 @@ class SelectedSeat {
           : jListOf(jGet(v, 'accessibility'), (item) => jStr(item)),
       wheelchairSpaceType: jStr(jGet(v, 'wheelchairSpaceType')),
       screenPoint: _screenPoint(jGet(v, 'screenPoint')),
+      seatViewThumb: SeatViewThumb.fromJson(jGet(v, 'seatViewThumb')),
+      sightlineMetres: jDouble(jGet(v, 'sightlineMetres')),
+      seatViewConfidence:
+          SeatConfidenceDisclosure.fromJson(jGet(v, 'seatViewConfidence')),
       seatViewKind: jStr(jGet(v, 'seatViewKind')),
     );
   }
@@ -754,6 +881,11 @@ const String seatLayerFloorStackCapability = 'floor-stack-v1';
 
 /// Advertised by a runtime that hands its own chart-load beacon to the host.
 const String seatLayerChartLoadTraceCapability = 'chart-load-trace-v1';
+
+/// Advertised by a runtime that reports the authored seat-view photograph,
+/// the distance to the stage and the seat's confidence disclosure on each
+/// `selection[]` entry.
+const String seatLayerSeatViewThumbnailCapability = 'seat-view-thumbnail-v1';
 
 /// What the bundle advertises in `hello`.
 class BundleInfo {

@@ -382,21 +382,93 @@ class _CardSurface extends StatelessWidget {
 
 /// The seat photograph, with both ways into it riding its bottom corners.
 ///
-/// The snapshot carries no seat-view image URL, so the strip renders a neutral
-/// gradient wherever `View from here` is offered. It is full-bleed inside the
-/// card's own radius — a photograph inset from the card's edge reads as an
-/// illustration in an article rather than as the view being sold.
-class _PhotoStrip extends StatelessWidget {
-  const _PhotoStrip({required this.onViewFromSeat, required this.onShow3D});
+/// The photograph is authored: the runtime names it as an event-scoped API
+/// path on the seat, and the bytes come back through
+/// [SeatLayerBuyerAssetLoader] because a private event answers that path only
+/// for the buyer's own bearer. Until they land the strip is the neutral
+/// gradient it has always been; if they never land the strip animates itself
+/// away and the no-photo rail takes over, exactly as the web's
+/// `.sl-confirm-thumb-out` does.
+///
+/// It is full-bleed inside the card's own radius — a photograph inset from the
+/// card's edge reads as an illustration in an article rather than as the view
+/// being sold.
+class _PhotoStrip extends StatefulWidget {
+  const _PhotoStrip({
+    required this.onViewFromSeat,
+    required this.onShow3D,
+    this.thumb,
+    this.sightlineMetres,
+    this.onMissed,
+  });
 
   final VoidCallback? onViewFromSeat;
   final VoidCallback? onShow3D;
+
+  /// Told once when the photograph is known not to be coming.
+  final VoidCallback? onMissed;
+
+  /// Where the photograph lives, or null when the runtime named none.
+  final SeatViewThumb? thumb;
+
+  /// Distance to the stage, when the chart has one.
+  final double? sightlineMetres;
+
+  @override
+  State<_PhotoStrip> createState() => _PhotoStripState();
+}
+
+class _PhotoStripState extends State<_PhotoStrip> {
+  Uint8List? _bytes;
+  String? _requested;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetch();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PhotoStrip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.thumb?.reference != widget.thumb?.reference) _fetch();
+  }
+
+  /// Ask for this seat's photograph, once per reference.
+  ///
+  /// Started when the card opens rather than when it settles: the runtime
+  /// resolves the seat after the card is already mounted, and a buyer looking
+  /// at a card should not wait for an animation to end before the picture
+  /// starts arriving. Nothing is cancelled on dismissal — the loader's cache
+  /// is what makes reopening the same seat instant.
+  void _fetch() {
+    final reference = widget.thumb?.reference;
+    if (reference == null || reference == _requested) return;
+    _requested = reference;
+    _bytes = null;
+    final loader = SeatLayerPickerScope.controllerOf(context).assetLoader;
+    unawaited(
+      loader.load(reference).then((bytes) {
+        if (!mounted || _requested != reference) return;
+        // A miss is evicted so the next open of the same seat tries again:
+        // the usual reason for one is a bearer that had just expired.
+        if (bytes == null) {
+          loader.evict(reference);
+          widget.onMissed?.call();
+          return;
+        }
+        setState(() => _bytes = bytes);
+      }),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final layout = theme.layout;
+    final reduced = SeatLayerPickerMotion.reduced(context);
+    final bytes = _bytes;
     return SizedBox(
       height: layout.confirmPhotoHeight,
       child: Stack(
@@ -421,6 +493,30 @@ class _PhotoStrip extends StatelessWidget {
               ),
             ),
           ),
+          if (bytes != null)
+            Positioned.fill(
+              child: AnimatedOpacity(
+                opacity: 1,
+                duration:
+                    reduced ? Duration.zero : SeatLayerPickerMotion.crossfade,
+                // The picture is what the pills open, and the pills say what
+                // they open: a second name for the same thing would be read
+                // out twice.
+                child: ExcludeSemantics(
+                  child: Image.memory(
+                    bytes,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
+                  ),
+                ),
+              ),
+            ),
+          if (widget.sightlineMetres != null)
+            Positioned(
+              right: 6,
+              top: 6,
+              child: _SightlinePill(metres: widget.sightlineMetres!),
+            ),
           Positioned(
             left: 6,
             bottom: 6,
@@ -429,10 +525,10 @@ class _PhotoStrip extends StatelessWidget {
               label: strings.viewFromHere,
               semanticsLabel: strings.viewFromHere,
               onPlate: true,
-              onPressed: onViewFromSeat,
+              onPressed: widget.onViewFromSeat,
             ),
           ),
-          if (onShow3D != null)
+          if (widget.onShow3D != null)
             Positioned(
               right: 6,
               bottom: 6,
@@ -442,7 +538,7 @@ class _PhotoStrip extends StatelessWidget {
                 // The pill says "3D"; a screen reader hears the sentence.
                 semanticsLabel: strings.seeItIn3D,
                 onPlate: true,
-                onPressed: onShow3D,
+                onPressed: widget.onShow3D,
               ),
             ),
         ],
@@ -450,6 +546,160 @@ class _PhotoStrip extends StatelessWidget {
     );
   }
 }
+
+/// The photo strip and the rail it collapses into, as one animated slot.
+///
+/// The web animates height and opacity for 160 ms when the image never
+/// arrives, and the strip is replaced in place by the rail. Doing the same
+/// here keeps the card from jumping under a thumb already reaching for
+/// `Add seat`.
+class _PhotoSlot extends StatefulWidget {
+  const _PhotoSlot({
+    required this.thumb,
+    required this.sightlineMetres,
+    required this.onViewFromSeat,
+    required this.onShow3D,
+  });
+
+  final SeatViewThumb thumb;
+  final double? sightlineMetres;
+  final VoidCallback? onViewFromSeat;
+  final VoidCallback? onShow3D;
+
+  @override
+  State<_PhotoSlot> createState() => _PhotoSlotState();
+}
+
+class _PhotoSlotState extends State<_PhotoSlot> {
+  bool _missed = false;
+
+  @override
+  void didUpdateWidget(covariant _PhotoSlot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A different seat is a different photograph: the last one's absence says
+    // nothing about this one.
+    if (oldWidget.thumb.reference != widget.thumb.reference) _missed = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reduced = SeatLayerPickerMotion.reduced(context);
+    return AnimatedSize(
+      duration: reduced ? Duration.zero : SeatLayerPickerMotion.thumbOut,
+      alignment: Alignment.topCenter,
+      child: _missed
+          ? _NoPhotoRail(
+              sightlineMetres: widget.sightlineMetres,
+              onShow3D: widget.onShow3D,
+            )
+          : _PhotoStrip(
+              thumb: widget.thumb,
+              sightlineMetres: widget.sightlineMetres,
+              onViewFromSeat: widget.onViewFromSeat,
+              onShow3D: widget.onShow3D,
+              onMissed: () {
+                if (mounted) setState(() => _missed = true);
+              },
+            ),
+    );
+  }
+}
+
+/// The rail, with the sight line printed above it when there is one.
+///
+/// With no photograph the web keeps only the sight line, in its desktop form:
+/// a small muted line rather than a pill, because there is no photograph for a
+/// plate to survive. `View from here` is not offered — there is nothing to
+/// open.
+class _NoPhotoRail extends StatelessWidget {
+  const _NoPhotoRail({required this.sightlineMetres, required this.onShow3D});
+
+  final double? sightlineMetres;
+  final VoidCallback? onShow3D;
+
+  @override
+  Widget build(BuildContext context) {
+    final metres = sightlineMetres;
+    final rail = onShow3D == null
+        ? const SizedBox.shrink()
+        : _ActionRail(onShow3D: onShow3D);
+    if (metres == null) return rail;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [_SightlineCaption(metres: metres), rail],
+    );
+  }
+}
+
+/// "≈ 7 m to stage" as a caption, off the photograph.
+class _SightlineCaption extends StatelessWidget {
+  const _SightlineCaption({required this.metres});
+
+  final double metres;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 6, 10, 0),
+      child: Text(
+        strings.sightline(_sightlineFigure(metres)),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: theme.mutedText,
+          fontSize: 11,
+          fontWeight: seatLayerBoldWeight(context, FontWeight.w500),
+          fontFamily: theme.fontFamily,
+        ),
+      ),
+    );
+  }
+}
+
+/// The same sentence on the photograph, where it takes the photo plate.
+class _SightlinePill extends StatelessWidget {
+  const _SightlinePill({required this.metres});
+
+  final double metres;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: _plate,
+        borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SeatLayerSizeTokens.confirmSightPadX,
+          vertical: SeatLayerSizeTokens.confirmSightPadY,
+        ),
+        child: Text(
+          strings.sightline(_sightlineFigure(metres)),
+          softWrap: false,
+          style: TextStyle(
+            color: _plateInk,
+            fontSize: SeatLayerSizeTokens.confirmSightFont,
+            fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
+            fontFamily: theme.fontFamily,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The metre figure as the runtime rounded it.
+///
+/// The number arrives already rounded, so this only decides whether to print
+/// a decimal point at all: `7` rather than `7.0`, `7.4` unchanged.
+String _sightlineFigure(double metres) =>
+    metres == metres.roundToDouble() ? '${metres.round()}' : '$metres';
 
 /// The strip with no picture in it: a plain rail carrying the same pills.
 ///
@@ -552,6 +802,119 @@ class _InspectionRow extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// What the runtime is willing to say about how this seat's view was made.
+///
+/// 3D only, as on the web: outside the scene there is no model on screen to be
+/// honest about. It is the teaser, not the passport — the passport itself is
+/// the runtime's own surface and the bridge exposes no command to open it — so
+/// this is a BUTTON only where a host has taken
+/// [SeatLayerPickerCallbacks.onSeatConfidence] and can show something. With no
+/// callback it stays an information row: a control that opens nothing is worse
+/// than a line of text.
+class _ConfidenceTeaser extends StatelessWidget {
+  const _ConfidenceTeaser({required this.disclosure, required this.onOpen});
+
+  final SeatConfidenceDisclosure disclosure;
+  final VoidCallback? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    final detail = disclosure.modeledTarget ?? disclosure.reality;
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SeatLayerSizeTokens.confidenceTeaserPadX,
+        vertical: SeatLayerSizeTokens.confidenceTeaserPadY,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  disclosure.headline,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: theme.text,
+                    fontSize: SeatLayerSizeTokens.confidenceTeaserHeadFont,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
+                    fontFamily: theme.fontFamily,
+                  ),
+                ),
+                if (detail.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      detail,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: theme.mutedText,
+                        fontSize:
+                            SeatLayerSizeTokens.confidenceTeaserDetailFont,
+                        fontFamily: theme.fontFamily,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            strings.passport,
+            softWrap: false,
+            style: TextStyle(
+              color: theme.accentText,
+              fontSize: SeatLayerSizeTokens.confidenceTeaserBadgeFont,
+              fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
+              fontFamily: theme.fontFamily,
+            ),
+          ),
+        ],
+      ),
+    );
+    final open = onOpen;
+    return Padding(
+      padding: const EdgeInsets.only(
+        top: SeatLayerSizeTokens.confidenceTeaserTop,
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: SeatLayerSizeTokens.confidenceTeaserMinHeight,
+        ),
+        child: Material(
+          color:
+              Color.alphaBlend(pickerAlpha(theme.accent, .07), theme.surface),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(
+              SeatLayerSizeTokens.confidenceTeaserRadius,
+            ),
+            side: BorderSide(
+              color: Color.alphaBlend(
+                pickerAlpha(theme.accent, .35),
+                theme.divider,
+              ),
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: open == null
+              // Not focusable, not a button, and not announced as one: there
+              // is nothing behind it to press.
+              ? row
+              : Semantics(
+                  button: true,
+                  child: InkWell(onTap: open, child: row),
+                ),
         ),
       ),
     );

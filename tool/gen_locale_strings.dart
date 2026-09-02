@@ -56,6 +56,7 @@ const Map<String, ({String parameter, String type, String placeholder})>
   'seatsLeft': (parameter: 'count', type: 'int', placeholder: '{count}'),
   'moreCount': (parameter: 'count', type: 'int', placeholder: '{count}'),
   'fromPrice': (parameter: 'money', type: 'String', placeholder: '{price}'),
+  'sightline': (parameter: 'metres', type: 'String', placeholder: '{m}'),
 };
 
 /// Strings with a singular and a plural form.
@@ -239,12 +240,33 @@ String _header(String subject) => '''
 // chrome around it say the same things in the same words.
 ''';
 
+/// Characters that would be read as part of an interpolated name.
+final RegExp _identifierPart = RegExp(r'[A-Za-z0-9_]');
+
 /// [value] as a Dart string with [placeholder] replaced by [parameter].
 String _template(String value, String placeholder, String parameter) {
   final escaped = _escape(value);
   // `_escape` turns a literal `$` into `\$`, so the only `$` this can
-  // introduce is the interpolation being asked for.
-  return "'${escaped.replaceAll(placeholder, '\$$parameter')}'";
+  // introduce is the interpolation being asked for. Braces go on only where
+  // the next character would otherwise join the name: Japanese writes the
+  // unit straight after the figure ("約{m}m"), where a bare `$metres` parses
+  // as an identifier called `metresm`. Bracing everything instead would be
+  // simpler and would trip `unnecessary_brace_in_string_interps` on the other
+  // thirty-six locales.
+  final buffer = StringBuffer();
+  var rest = escaped;
+  while (true) {
+    final at = rest.indexOf(placeholder);
+    if (at < 0) break;
+    final after = at + placeholder.length;
+    final joins = after < rest.length && _identifierPart.hasMatch(rest[after]);
+    buffer
+      ..write(rest.substring(0, at))
+      ..write(joins ? '\${$parameter}' : '\$$parameter');
+    rest = rest.substring(after);
+  }
+  buffer.write(rest);
+  return "'$buffer'";
 }
 
 String _escape(String value) => value

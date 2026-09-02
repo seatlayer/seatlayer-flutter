@@ -14,6 +14,8 @@ String _moreCountFi(int count) => '+$count lisää';
 
 String _fromPriceFi(String money) => 'Alkaen $money';
 
+String _sightlineFi(String metres) => '≈ $metres m lavalle';
+
 String _ticketCountFi(int count) =>
     count == 1 ? '$count lippu' : '$count lippua';
 
@@ -57,6 +59,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   seatsLeft: _seatsLeftFi,
   moreCount: _moreCountFi,
   fromPrice: _fromPriceFi,
+  sightline: _sightlineFi,
   ticketCount: _ticketCountFi,
   findBestSeats: _findBestSeatsFi,
   reselectSeats: _reselectSeatsFi,

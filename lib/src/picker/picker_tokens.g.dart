@@ -234,6 +234,15 @@ abstract final class SeatLayerSizeTokens {
   /// `28`
   static const double confirmPillHeight = 28;
 
+  /// `10`
+  static const double confirmSightFont = 10;
+
+  /// `8`
+  static const double confirmSightPadX = 8;
+
+  /// `3`
+  static const double confirmSightPadY = 3;
+
   /// `38`
   static const double confirmTierHeight = 38;
 
@@ -272,6 +281,30 @@ abstract final class SeatLayerSizeTokens {
 
   /// `7`
   static const double confirmImmersiveActionGap = 7;
+
+  /// `44`
+  static const double confidenceTeaserMinHeight = 44;
+
+  /// `8`
+  static const double confidenceTeaserTop = 8;
+
+  /// `10`
+  static const double confidenceTeaserPadX = 10;
+
+  /// `8`
+  static const double confidenceTeaserPadY = 8;
+
+  /// `9`
+  static const double confidenceTeaserRadius = 9;
+
+  /// `11`
+  static const double confidenceTeaserHeadFont = 11;
+
+  /// `9.5`
+  static const double confidenceTeaserDetailFont = 9.5;
+
+  /// `11`
+  static const double confidenceTeaserBadgeFont = 11;
 
   /// `44`
   static const double selectorHeight = 44;
@@ -574,6 +607,9 @@ abstract final class SeatLayerMotionTokens {
   /// `240` ms
   static const int cardEnter = 240;
 
+  /// `160` ms
+  static const int thumbOut = 160;
+
   /// `4000` ms — deliberately outside the budget.
   static const int undoWindow = 4000;
 
@@ -707,6 +743,12 @@ abstract final class SeatLayerStringTokens {
 
   /// View from here
   static const String viewFromHere = 'View from here';
+
+  /// ≈ {m} m to stage
+  static const String sightline = '≈ {m} m to stage';
+
+  /// Passport
+  static const String passport = 'Passport';
 
   /// 3D
   static const String venue3D = '3D';

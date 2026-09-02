@@ -199,9 +199,11 @@ override** `style:`
 override** `style:`
 
 - **Inputs** the newest unconfirmed `SelectedSeat`, `capabilities`
-  (`seatView`, `venue3d`), the event's seat-view photo.
-- **States** with a photo, without one (a rail instead), 3D-only, with tiers,
-  with notices; resting or hugging the seat; committing.
+  (`seatView`, `venue3d`), and — on `seat-view-thumbnail-v1` — the seat's
+  `seatViewThumb`, `sightlineMetres` and `seatViewConfidence`.
+- **States** with a photo (loading, arrived, never arrived), without one (a
+  rail instead), 3D-only, with a sight line, with tiers, with notices; the
+  confidence teaser inside 3D; resting or hugging the seat; committing.
 - **Anatomy** `size.confirmCardMaxWidth`, capped at the map width less
   `2 × size.confirmCardGutter`, radius `radius.confirmCard`, elevation
   `elevation.confirmCard`.
@@ -209,9 +211,17 @@ override** `style:`
      three labelled cells (`type.confirmIdentity`), hairline-divided.
   2. Category band, `size.confirmBandHeight`: a tint of the category colour
      with a rail on its leading edge, the category name, `N left` and the price.
-  3. Photo strip, `size.confirmPhotoHeight`, only where a view-from-seat photo
-     exists, carrying the `View from here` and `3D` pills; otherwise a rail of
-     `size.confirmRailHeight` with the same pills in theme tokens.
+  3. Photo strip, `size.confirmPhotoHeight`, only where the seat names an
+     authored photograph, carrying the `View from here` and `3D` pills and, in
+     its trailing top corner, the sight line (`strings.sightline`,
+     `size.confirmSightFont` / `confirmSightPadX` / `confirmSightPadY`);
+     otherwise a rail of `size.confirmRailHeight` with the same pills in theme
+     tokens, with the sight line printed above it as a muted caption. A
+     photograph that never arrives collapses the strip into the rail over
+     `motion.duration.thumbOut`.
+  3a. Confidence teaser, 3D card only and only where the seat carries one:
+     `size.confidenceTeaser*`, headline over `modeledTarget ?? reality`, with
+     `strings.passport` in the readable accent at the trailing edge.
   4. Tiers (`size.confirmTierHeight`) and notices, where the seat has them.
   5. Actions, `size.confirmActionHeight`: `Cancel` at about a third and
      `✓ Add seat` at the rest, each in its own box at `radius.button` inside the
@@ -224,7 +234,8 @@ override** `style:`
   `motion.duration.cardEnter`. `Add seat` invites once, breathes until touched,
   and on the press sweeps, ticks and says `Added`. The seat counts on the press;
   only the card's departure waits.
-- **Callbacks** `onConfirm`, `onCancel`, `onViewFromSeat`, `onShow3D`.
+- **Callbacks** `onConfirm`, `onCancel`, `onViewFromSeat`, `onShow3D`,
+  `onSeatConfidence` (the teaser is a button only where a host takes it).
 - **Commands** `picker.openSeatView`, `picker.showSeatIn3D`,
   `picker.deselect` on cancel.
 

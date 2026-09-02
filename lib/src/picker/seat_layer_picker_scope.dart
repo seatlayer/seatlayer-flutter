@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../seat_layer_configuration.dart';
+import 'picker_buyer_asset_loader.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
 import 'picker_strings.dart';
@@ -202,6 +203,11 @@ class _SeatLayerPickerScopeState extends State<SeatLayerPickerScope> {
   void _adopt(SeatLayerPickerController? supplied) {
     _controller = supplied ?? SeatLayerPickerController();
     _ownsController = supplied == null;
+    // The buyer-scoped image transport is built HERE rather than inside the
+    // controller: `apiBase` and the bearer are the scope's configuration, and
+    // the controller keeps only the event key. An existing loader for the same
+    // event — a host's own, or a test's — is left alone.
+    _controller.bindAssetLoader(widget.configuration);
     _controller.attach(
       configuration: widget.configuration,
       options: widget.options,
@@ -238,6 +244,9 @@ class _SeatLayerPickerScopeState extends State<SeatLayerPickerScope> {
   @override
   void dispose() {
     _controller.detach();
+    // The cached photographs and the cached bearer end with the session, not
+    // with the garbage collector.
+    _controller.clearAssetLoader();
     if (_ownsController) _controller.dispose();
     super.dispose();
   }

@@ -597,18 +597,21 @@ is a correct state, not a degraded one.
    arrived**. `strings.onlyLeft` is available as a scarcity telling for a host
    that wants one.
 3. **Photo strip**, height `size.confirmPhotoHeight`, full-bleed inside the
-   card's corner, drawn **only where the seat has a real uploaded photograph**
-   (`seatViewKind == 'real'`, capability `seat-view-thumbnail-v1`); a generated
-   stand-in is never offered from the card, though 3D and 360° are unchanged. Over it, in
+   card's corner, drawn **only where the seat names an authored photograph**
+   (`selection[].seatViewThumb`, capability `seat-view-thumbnail-v1`); a
+   generated stand-in is never offered from the card, though 3D and 360° are
+   unchanged. Over it, in
    the trailing bottom corner, a group of pills of `size.confirmPillHeight` at
    `radius.pill` on a dark plate with white ink in **both** themes: `View from
    here` (`strings.viewFromHere`) and `3D` (`strings.venue3D`, accessible name
-   `strings.seeItIn3D`). A sightline caption may sit in the trailing top corner
-   on the same plate. If the image never arrives the strip animates away.
+   `strings.seeItIn3D`). The sight line sits in the trailing top corner on the
+   same plate. If the image never arrives the strip animates away. §3.8.7 has
+   the whole of it.
 4. **No-photo rail**, height `size.confirmRailHeight`, when there is no photo
    but 3D is on offer: a plain divider-tinted strip carrying the same pills, but
    flipped to theme tokens — surface ground, text ink, no plate. A 3D-only card
-   never draws an empty photo frame.
+   never draws an empty photo frame. The sight line, when there is one, is
+   printed above it as a muted caption.
 5. **Tier picker**, only where the seat has more than one tier. Legend
    `strings.ticketType`; rows of `size.confirmTierHeight` at `radius.button`,
    name, note and price; the selected row takes an accent hairline, an accent
@@ -684,10 +687,79 @@ platform's back gesture both give the seat back. The card's type is clamped at
 rather than clipping the word the card exists to offer. §4.10 has the whole
 picture, of which this is one surface.
 
+#### 3.8.7 The photograph, the sight line and the confidence teaser
+
+Mirrors the web phone card's §7.6 and its confidence teaser
+(`seatConfidenceConfirmHtml`). Everything here needs the capability
+`seat-view-thumbnail-v1`; without it the card is exactly the card described
+above, and the fields are not read even when they are present.
+
+**The wire.** Each `selection[]` entry may carry:
+
+| Field | Meaning |
+| --- | --- |
+| `seatViewThumb` | `{reference, kind}` — an EVENT-SCOPED API path `/pub/events/{key}/assets/{asset}`, and what kind of image it is (`real` today, decoded as an open string) |
+| `sightlineMetres` | metres to the stage, already rounded the way the web prints it; only on charts with a stage |
+| `seatViewConfidence` | `{headline, model, reality, coverage, provenance, freshness, limitations[], modeledTarget?}` — buyer-safe copy the runtime resolved |
+
+All three are present-only. `seatViewThumb` is absent unless the runtime's own
+predicate accepted the reference, and **absent means there is no photograph**,
+never a licence to draw a stand-in. The older top-level `seatViewKind` is
+emitted by no runtime; ports that carry it should fall back to
+`seatViewThumb.kind`.
+
+**Fetching it.** The reference is not an image URL a view can load on its own:
+a private event answers that path only for the buyer's bearer. Every port
+fetches the bytes itself — `GET {apiBase}{reference}` with
+`Authorization: Bearer …`, no cookies — validating first that the path matches
+`^/pub/events/([^/]+)/assets/([a-zA-Z0-9._-]+)$` **and** that the event segment
+is the event the picker is showing; anything else is refused without a request.
+A small LRU (12 references) holds the bytes for the session, concurrent readers
+of one reference share one request, and the bearer is cached until thirty
+seconds before its stated expiry, re-minted through the host's provider with
+the refresh reason `asset`. Every failure — a bad reference, 403, 404, no
+bearer, a dead network — is "no photograph"; nothing throws into the card and
+nothing about the bearer is ever logged.
+
+**Drawing it.** While the bytes are in flight the strip is the neutral gradient.
+On arrival the image fills it (cover) over `motion.duration.crossfade`. On a
+miss the strip collapses into the no-photo rail over `motion.duration.thumbOut`
+(160 ms, height and opacity), and the reference is evicted so reopening the
+seat tries again. Under reduced motion both transitions are instant. The pills
+do not move.
+
+**Sight line.** Copy `strings.sightline` ("≈ {m} m to stage"), with the metre
+figure printed as the runtime rounded it. On the photograph it is a pill in the
+trailing TOP corner, inset 6, on the photo plate and ink, `size.confirmSightFont`
+at w700, radius `radius.pill`, padding `size.confirmSightPadY` ×
+`size.confirmSightPadX`. With no photograph it is a one-line muted caption at 11
+/ w500 in `color.*.mutedText` directly above the rail — the web's desktop form,
+because off a photograph there is nothing for a plate to survive. It is shown
+whenever `sightlineMetres` exists, and nothing is shown when it does not.
+
+**Confidence teaser.** 3D card only, exactly as on the web: outside the scene
+there is no model on screen to be honest about. Full width, minimum height
+`size.confidenceTeaserMinHeight`, top margin `size.confidenceTeaserTop`,
+padding `size.confidenceTeaserPadY` × `size.confidenceTeaserPadX`, radius
+`size.confidenceTeaserRadius`, a hairline of the accent at 35 % over the
+divider, ground the accent at 7 % over the surface. Leading column: `headline`
+at `size.confidenceTeaserHeadFont` w700, one line, ellipsis; under it
+`modeledTarget ?? reality` at `size.confidenceTeaserDetailFont` in
+`color.*.mutedText`, one line, ellipsis. Trailing: `strings.passport` at
+`size.confidenceTeaserBadgeFont` w700 in the **readable accent** — the accent
+itself where it clears 4.5:1 on both the surface and the ground, otherwise
+blended toward the text ink until it does (the web's `--sl-accent-text`).
+
+**Accessibility.** The image is decorative and carries no label: the pill says
+what it opens. The sight line is plain text. The teaser is a button ONLY where
+the host can act on it (§4.9); otherwise it is a static row with no button
+semantics and no focus stop.
+
 **Snapshot.** the newest unconfirmed `selection[]` entry (`label`,
 `sectionLabel`, `rowLabel`, `seatNumber`, `price`, `currency`, `objectType`,
-`tiers`, `screenPoint`), the matching `categories[]` entry, `capabilities`
-(`seatView`, `venue3d`), the event's seat-view photo.
+`tiers`, `screenPoint`, and on `seat-view-thumbnail-v1` also `seatViewThumb`,
+`sightlineMetres`, `seatViewConfidence`), the matching `categories[]` entry,
+`capabilities` (`seatView`, `venue3d`).
 **Commands** `picker.openSeatView`, `picker.showSeatIn3D`, `picker.deselect`.
 
 ### 3.9 Peek bar (collapsed cart)
@@ -1265,9 +1337,17 @@ not fake them, and do not design around their absence as if it were permanent.
 - **3D section stops.** The immersive scene's caption can name a stop, but the
   list of stops a venue offers is not in the snapshot, so the deck cannot offer
   section-to-section travel.
-- **Confidence and comparison data on the 3D seat card.** The web card has a
-  compare action and a confidence teaser in 3D. Neither has a snapshot field
-  yet, so the native 3D card carries the 2D card's content.
+- **Opening the confidence passport.** The teaser itself is built (§3.8.7), but
+  the passport it names is a modal the RUNTIME owns and the bridge exposes no
+  command to open it. Until one exists the teaser is a button only where a host
+  has taken `onSeatConfidence` and can present the disclosure itself; with no
+  host it is a static information row. A control that opens nothing is worse
+  than a line of text.
+- **Save to compare on the 3D seat card.** The web card's compare action reads
+  and writes comparison state the runtime keeps for itself; the snapshot
+  reports neither the saved set nor a command to change it, so the native card
+  does not draw the action. It is not a styling gap: a compare button that
+  cannot say what is already saved would be lying.
 - **Per-seat accessibility nodes on the map.** The venue is drawn on a canvas
   inside a web view, and a canvas exposes nothing to VoiceOver or TalkBack. The
   map is therefore ONE named region with a hint that says where the controls
@@ -1392,6 +1472,7 @@ from the wrong one.
 | `floor-stack-v1` | the floor list and the active floor for the floor rail |
 | `venue-3d-v1`, `venue-3d-controls-v1` | the immersive scene and its deck |
 | `seat-view-v1` | the 2D view-from-seat panorama |
+| `seat-view-thumbnail-v1` | the seat's authored photograph, its distance to the stage and its confidence disclosure (§3.8.7) |
 | `table-quantity-v1` | the table guest-count prompt |
 | `hold-ownership-v1`, `hold-selection-v1` | who owns a hold, and holding a named selection |
 | `checkout-handoff-v1`, `checkout-handoff-reject-v1` | the hold crossing to the host, and giving it back |

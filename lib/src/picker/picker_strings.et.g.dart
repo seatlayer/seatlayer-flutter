@@ -14,6 +14,8 @@ String _moreCountEt(int count) => '+$count veel';
 
 String _fromPriceEt(String money) => 'Alates $money';
 
+String _sightlineEt(String metres) => '≈ $metres m laval';
+
 String _ticketCountEt(int count) =>
     count == 1 ? '$count pilet' : '$count piletit';
 
@@ -57,6 +59,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   seatsLeft: _seatsLeftEt,
   moreCount: _moreCountEt,
   fromPrice: _fromPriceEt,
+  sightline: _sightlineEt,
   ticketCount: _ticketCountEt,
   findBestSeats: _findBestSeatsEt,
   reselectSeats: _reselectSeatsEt,

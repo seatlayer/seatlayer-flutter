@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+The seat card can show the seat's own photograph. A runtime advertising
+`seat-view-thumbnail-v1` names an authored view image on each selected seat,
+how far the seat is from the stage, and what it is willing to say about how
+that view was produced; the card draws all three. The photograph is fetched by
+the SDK rather than by an image widget, because on a private event the image
+answers only to the buyer's bearer — `SeatLayerBuyerAssetLoader` mirrors the
+web transport, validates the reference against the event before making any
+request, caches the bytes for the session, and treats every failure as "no
+photograph" rather than as an error the buyer has to see. A photograph that
+never arrives collapses the strip into the plain rail the card already had. The
+distance to the stage rides the photograph as a pill, or sits above the rail as
+a muted caption where there is none. Inside the 3D venue, a seat carrying
+confidence evidence gets the web's passport teaser; because the passport itself
+is a runtime surface the bridge cannot open, the teaser is a button only where
+a host takes the new `SeatLayerPickerCallbacks.onSeatConfidence`, and is a
+static information row otherwise. `SelectedSeat` gains `seatViewThumb`,
+`sightlineMetres` and `seatViewConfidence`; the older `seatViewKind`, which no
+runtime ever sent, now falls back to the kind on the thumbnail. Runtimes
+without the capability are unchanged in every respect.
+
 ## 0.4.0
 
 The "You're all set" screen now waits for the sale. It used to appear the

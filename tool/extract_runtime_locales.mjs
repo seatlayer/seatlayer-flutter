@@ -23,6 +23,7 @@ const KEYS = {
   cancel: 'common.cancel',
   select: 'picker.select',
   viewFromHere: 'picker.viewFromHere',
+  sightline: 'picker.sightline',
   openVenue360: 'picker.openAuthored360',
   recentre: 'picker.recentreOnStage',
   viewFromYourSeat: 'picker.viewFromYourSeat',

@@ -14,6 +14,8 @@ String _moreCountJa(int count) => '他 $count 件';
 
 String _fromPriceJa(String money) => '$money〜';
 
+String _sightlineJa(String metres) => 'ステージまで約${metres}m';
+
 String _ticketCountJa(int count) => count == 1 ? '$count枚' : '$count枚';
 
 String _findBestSeatsJa(int count) =>
@@ -54,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   seatsLeft: _seatsLeftJa,
   moreCount: _moreCountJa,
   fromPrice: _fromPriceJa,
+  sightline: _sightlineJa,
   ticketCount: _ticketCountJa,
   findBestSeats: _findBestSeatsJa,
   reselectSeats: _reselectSeatsJa,

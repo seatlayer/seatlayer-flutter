@@ -173,7 +173,7 @@ void main() {
     for (final brightness in Brightness.values) {
       testWidgets('brand scheme — confirm card — ${brightness.name}',
           (tester) async {
-        final map = FakePickerMap();
+        final map = FakePickerMap(bundle: thumbnailBundle());
         addTearDown(map.dispose);
         usePhoneSurface(tester);
 
@@ -183,6 +183,9 @@ void main() {
             goldenSubject(const SeatLayerConfirmCard()),
             theme: _branded(brightness),
             platformBrightness: brightness,
+            // The strip on its neutral gradient: this golden is about the
+            // brand's colours, not about a photograph.
+            assetLoader: pendingAssetLoader(),
           ),
         );
         map.emit(pickerSnapshot());

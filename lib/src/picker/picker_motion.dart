@@ -68,6 +68,11 @@ abstract final class SeatLayerPickerMotion {
   static const Duration pressSweep =
       Duration(milliseconds: SeatLayerMotionTokens.pressSweep);
 
+  /// The photo strip collapsing to the no-photo rail when the seat's
+  /// photograph never arrives.
+  static const Duration thumbOut =
+      Duration(milliseconds: SeatLayerMotionTokens.thumbOut);
+
   /// The phone's seat card springing in from the seat's direction.
   ///
   /// Longer than [enter] because it is the one arrival with an overshoot in
@@ -133,6 +138,7 @@ abstract final class SeatLayerPickerMotion {
     'immersive': immersive,
     'pressSweep': pressSweep,
     'cardEnter': cardEnter,
+    'thumbOut': thumbOut,
   };
 
   /// The one overshoot in the system, reserved for a buyer's own action

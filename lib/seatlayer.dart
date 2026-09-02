@@ -47,6 +47,11 @@ export 'src/picker/picker_builders.dart'
         SeatLayerPickerBuilders,
         SeatLayerPickerPartBuilder,
         SeatLayerPickerPartContext;
+export 'src/picker/picker_buyer_asset_loader.dart'
+    show
+        SeatLayerAssetFetch,
+        SeatLayerBuyerAssetLoader,
+        SeatLayerPickerAssetLoader;
 export 'src/picker/picker_cart_list.dart' show SeatLayerCartList;
 export 'src/picker/picker_cart_sheet.dart'
     show SeatLayerBookButton, SeatLayerCartSheet;

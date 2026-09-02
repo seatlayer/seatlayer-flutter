@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/bridge/bridge_client.dart';
 import 'package:seatlayer/src/bridge/bridge_protocol.dart';
 import 'package:seatlayer/src/payloads.dart';
+import 'package:seatlayer/src/picker/picker_buyer_asset_loader.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_scope.dart';
@@ -57,6 +60,18 @@ BundleInfo refreshingBundle({bool holdSelection = true}) => nativeChromeBundle(
         'picker.setViewportInsets',
         'picker.refreshAvailability',
         if (holdSelection) 'picker.holdSelection',
+      ],
+    );
+
+/// A runtime that also reports authored seat-view thumbnails.
+///
+/// The seat-view fields on `selection[]` are gated on this capability, so a
+/// fixture that carries them still shows nothing without it.
+BundleInfo thumbnailBundle() => nativeChromeBundle(
+      capabilities: <String>[
+        'native-chrome-contract-v1',
+        'viewport-insets-v1',
+        'seat-view-thumbnail-v1',
       ],
     );
 
@@ -166,8 +181,12 @@ Widget pickerHarness(
   SeatLayerPickerCallbacks callbacks = const SeatLayerPickerCallbacks(),
   Brightness platformBrightness = Brightness.light,
   SeatLayerPickerController? controller,
+  SeatLayerBuyerAssetLoader? assetLoader,
 }) {
   final picker = controller ?? SeatLayerPickerController(mapController: map);
+  // Installed before the scope attaches, which leaves an already-bound loader
+  // for the same event alone.
+  if (assetLoader != null) picker.assetLoader = assetLoader;
   return MaterialApp(
     debugShowCheckedModeBanner: false,
     // The harness models the ordinary case: an application that follows the
@@ -196,6 +215,52 @@ Widget pickerHarness(
       ),
     ),
   );
+}
+
+/// A loader whose fetch never answers: the photo strip stays on its neutral
+/// gradient, which is what the card looked like before photographs arrived.
+SeatLayerBuyerAssetLoader pendingAssetLoader() => SeatLayerBuyerAssetLoader(
+      eventKey: 'ev_test',
+      token: const BuyerAccessToken(token: 'test-bearer'),
+      fetch: (uri, headers) => Completer<Uint8List>().future,
+    );
+
+/// A loader that answers every reference with [bytes], and counts the asks.
+SeatLayerBuyerAssetLoader photoAssetLoader(
+  Uint8List bytes, {
+  List<Uri>? requested,
+}) =>
+    SeatLayerBuyerAssetLoader(
+      eventKey: 'ev_test',
+      token: const BuyerAccessToken(token: 'test-bearer'),
+      fetch: (uri, headers) async {
+        requested?.add(uri);
+        return bytes;
+      },
+    );
+
+/// A loader that answers every reference with nothing, as a 403 would.
+SeatLayerBuyerAssetLoader missingAssetLoader() => SeatLayerBuyerAssetLoader(
+      eventKey: 'ev_test',
+      token: const BuyerAccessToken(token: 'test-bearer'),
+      fetch: (uri, headers) => throw StateError('403'),
+    );
+
+/// A [size]-square PNG, painted here so no photograph is checked in.
+Future<Uint8List> tinyPng(
+    {int size = 4, Color color = const Color(0xFF3366CC)}) async {
+  final recorder = ui.PictureRecorder();
+  Canvas(recorder).drawRect(
+    Rect.fromLTWH(0, 0, size.toDouble(), size.toDouble()),
+    Paint()..color = color,
+  );
+  final image = await recorder.endRecording().toImage(size, size);
+  try {
+    final data = await image.toByteData(format: ui.ImageByteFormat.png);
+    return data!.buffer.asUint8List();
+  } finally {
+    image.dispose();
+  }
 }
 
 /// Size the test surface to one phone screen at device pixel ratio 1.

@@ -14,6 +14,8 @@ String _moreCountUk(int count) => '+$count ще';
 
 String _fromPriceUk(String money) => 'Від $money';
 
+String _sightlineUk(String metres) => '≈ $metres м до сцени';
+
 String _ticketCountUk(int count) =>
     count == 1 ? '$count квиток' : '$count квитка';
 
@@ -58,6 +60,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   seatsLeft: _seatsLeftUk,
   moreCount: _moreCountUk,
   fromPrice: _fromPriceUk,
+  sightline: _sightlineUk,
   ticketCount: _ticketCountUk,
   findBestSeats: _findBestSeatsUk,
   reselectSeats: _reselectSeatsUk,

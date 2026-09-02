@@ -32,6 +32,8 @@ class SeatLayerPickerStrings {
     this.seatWord = SeatLayerStringTokens.seatWord,
     this.placeWord = SeatLayerStringTokens.placeWord,
     this.viewFromHere = SeatLayerStringTokens.viewFromHere,
+    this.sightline = _defaultSightline,
+    this.passport = SeatLayerStringTokens.passport,
     this.venue3D = SeatLayerStringTokens.venue3D,
     this.seeItIn3D = SeatLayerStringTokens.seeItIn3D,
     this.viewFromThisSeat = SeatLayerStringTokens.viewFromThisSeat,
@@ -269,6 +271,15 @@ class SeatLayerPickerStrings {
 
   /// Confirm-card pill opening the seat-view photo.
   final String viewFromHere;
+
+  /// "≈ 7 m to stage" — how far the seat is from the stage, on the photo
+  /// strip. The figure arrives already rounded from the runtime.
+  final String Function(String metres) sightline;
+
+  /// The word on the 3D card's confidence teaser, naming what pressing it
+  /// opens. The web hard-codes this one; there is no runtime dictionary key
+  /// for it, so it is an English default here until the runtime adds one.
+  final String passport;
 
   /// Short 3D label, on surfaces with no room for a sentence.
   final String venue3D;
@@ -965,6 +976,9 @@ class SeatLayerPickerStrings {
   static String _defaultHeldFor(String clock) => clock;
 
   static String _defaultSeatIdentity(List<String> parts) => parts.join(' · ');
+
+  static String _defaultSightline(String metres) =>
+      SeatLayerStringTokens.sightline.replaceAll('{m}', metres);
 
   static String _defaultHoldLapsedStillFree(int count) => count == 1
       ? SeatLayerStringTokens.holdLapsedStillFreeOne

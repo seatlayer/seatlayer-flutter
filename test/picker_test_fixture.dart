@@ -33,6 +33,12 @@ Map<String, Object?> pickerSnapshot({
   double? cartTotal,
   bool testEvent = true,
   List<Object?>? accessNeeds,
+  Map<String, Object?>? seatViewThumb = const <String, Object?>{
+    'reference': '/pub/events/ev_test/assets/seat-a-1.jpg',
+    'kind': 'real',
+  },
+  double? sightlineMetres,
+  Map<String, Object?>? seatViewConfidence,
 }) {
   final lines = withSelection
       ? <Object?>[
@@ -163,6 +169,10 @@ Map<String, Object?> pickerSnapshot({
                   },
                 ],
                 'tierId': 'adult',
+                if (seatViewThumb != null) 'seatViewThumb': seatViewThumb,
+                if (sightlineMetres != null) 'sightlineMetres': sightlineMetres,
+                if (seatViewConfidence != null)
+                  'seatViewConfidence': seatViewConfidence,
               },
             ]
           : <Object?>[],

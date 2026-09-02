@@ -495,6 +495,17 @@ class SeatLayerResolvedPickerTheme {
   /// Ground of the drawn map, when one is configured.
   final Color? mapBackground;
 
+  /// The accent as INK on [surface] and [background].
+  ///
+  /// A brand accent is chosen to be filled, not to be read: a mid-yellow makes
+  /// a fine button and an illegible word. This is the web's `--sl-accent-text`
+  /// rule — keep the accent when it already clears 4.5:1 on both grounds, and
+  /// otherwise walk it toward [text] in twentieths until it does, falling back
+  /// to [text] itself. Derived rather than a token pair, because the value
+  /// depends on the accent the HOST supplied and no palette file can know it.
+  Color get accentText =>
+      seatLayerAccentTextFor(accent, background, surface, text);
+
   /// The dark-scene palette used by immersive 3D chrome.
   ///
   /// White chrome over a dark venue scene reads as a mistake, so the 3D
@@ -562,6 +573,37 @@ Color seatLayerOnAccentFor(Color accent) {
   return onWhite >= _onAccentContrastFloor
       ? const Color(0xFFFFFFFF)
       : const Color(0xFF000000);
+}
+
+/// The contrast an accent used as ordinary-size ink has to clear.
+const double _accentTextContrastFloor = 4.5;
+
+/// [accent] if it can be read on both grounds, else a blend toward [text].
+///
+/// Mirrors `readableAccentText` in the web runtime, step for step, so the word
+/// the two pickers print in the accent is the same colour.
+Color seatLayerAccentTextFor(
+  Color accent,
+  Color background,
+  Color surface,
+  Color text,
+) {
+  bool readable(Color candidate) =>
+      _contrast(candidate, background) >= _accentTextContrastFloor &&
+      _contrast(candidate, surface) >= _accentTextContrastFloor;
+  if (readable(accent)) return accent;
+  for (var textWeight = 0.15; textWeight <= 1.0; textWeight += 0.05) {
+    final candidate = Color.lerp(accent, text, textWeight)!;
+    if (readable(candidate)) return candidate;
+  }
+  return text;
+}
+
+/// WCAG relative contrast between two opaque colours.
+double _contrast(Color a, Color b) {
+  final first = a.computeLuminance() + 0.05;
+  final second = b.computeLuminance() + 0.05;
+  return first > second ? first / second : second / first;
 }
 
 /// Turn [mode] into a real side, following the host for

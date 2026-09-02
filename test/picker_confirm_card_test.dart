@@ -1,9 +1,11 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_confirm_card.dart';
 import 'package:seatlayer/src/picker/picker_haptics.dart';
+import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
@@ -52,9 +54,31 @@ Map<String, Object?> _only3D() {
 /// to the tapped seat; before that the scene is still travelling.
 Map<String, Object?> _inVenue3D({bool targeted = true, int revision = 1}) {
   final snapshot = pickerSnapshot(revision: revision);
-  final map = Map<String, Object?>.from(snapshot['map']! as Map<String, Object?>)
-    ..['buyerView'] = 'venue3d'
-    ..['view3dTargetSeatId'] = targeted ? 'seat-a-1' : null;
+  final map =
+      Map<String, Object?>.from(snapshot['map']! as Map<String, Object?>)
+        ..['buyerView'] = 'venue3d'
+        ..['view3dTargetSeatId'] = targeted ? 'seat-a-1' : null;
+  return <String, Object?>{...snapshot, 'map': map};
+}
+
+/// The 3D card for a seat the runtime is willing to explain.
+Map<String, Object?> _inVenue3DWithConfidence({int revision = 1}) {
+  final snapshot = pickerSnapshot(
+    revision: revision,
+    seatViewConfidence: const <String, Object?>{
+      'headline': 'Modelled from a survey',
+      'model': 'Photogrammetry',
+      'reality': 'Matched to the room',
+      'coverage': 'Whole bowl',
+      'provenance': 'Venue survey',
+      'freshness': 'This season',
+      'limitations': <Object?>['Lighting differs'],
+    },
+  );
+  final map =
+      Map<String, Object?>.from(snapshot['map']! as Map<String, Object?>)
+        ..['buyerView'] = 'venue3d'
+        ..['view3dTargetSeatId'] = 'seat-a-1';
   return <String, Object?>{...snapshot, 'map': map};
 }
 
@@ -113,7 +137,15 @@ Widget _reducedMotion(Widget child) => Builder(
 Finder _button(String label) =>
     find.ancestor(of: find.text(label), matching: find.byType(Material)).first;
 
+/// The photograph the fake loader answers with.
+///
+/// Painted once, OUTSIDE a widget test: `toImage` needs the real event loop,
+/// and inside `testWidgets` the fake clock never advances to its completion.
+late final Uint8List photoBytes;
+
 void main() {
+  setUpAll(() async => photoBytes = await tinyPng());
+
   testWidgets('the identity grid labels the section, the row and the seat',
       (tester) async {
     final map = FakePickerMap();
@@ -161,11 +193,17 @@ void main() {
   });
 
   testWidgets('an uncatalogued category leaves the band out', (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: thumbnailBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
-    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SeatLayerConfirmCard(),
+        assetLoader: pendingAssetLoader(),
+      ),
+    );
     map.emit(_withoutCategory());
     await pumpToRest(tester);
 
@@ -212,11 +250,17 @@ void main() {
   });
 
   testWidgets('the identity cells carry the narrow numbers', (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: thumbnailBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
-    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SeatLayerConfirmCard(),
+        assetLoader: pendingAssetLoader(),
+      ),
+    );
     map.emit(pickerSnapshot());
     await pumpToRest(tester);
 
@@ -271,7 +315,8 @@ void main() {
     expect(tester.widget<Text>(find.text('1')).style!.fontSize, 14);
   });
 
-  testWidgets('the card comes up on the tap in the scene, and stands down in the '
+  testWidgets(
+      'the card comes up on the tap in the scene, and stands down in the '
       'panorama', (tester) async {
     final map = FakePickerMap(
       bundle: nativeChromeBundle(
@@ -360,11 +405,17 @@ void main() {
 
   testWidgets('the strip carries the photo pill and 3D its own action',
       (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: thumbnailBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
-    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SeatLayerConfirmCard(),
+        assetLoader: pendingAssetLoader(),
+      ),
+    );
     map.emit(pickerSnapshot());
     await pumpToRest(tester);
 
@@ -403,11 +454,17 @@ void main() {
   }, semanticsEnabled: true);
 
   testWidgets('the photo strip is full-bleed inside the card', (tester) async {
-    final map = FakePickerMap();
+    final map = FakePickerMap(bundle: thumbnailBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
-    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SeatLayerConfirmCard(),
+        assetLoader: pendingAssetLoader(),
+      ),
+    );
     map.emit(pickerSnapshot());
     await pumpToRest(tester);
 
@@ -415,10 +472,12 @@ void main() {
       find.byKey(const ValueKey<String>('seatlayer.confirm-card.surface')),
     );
     final strip = tester.getRect(
-      find.ancestor(
-        of: find.text('View from here'),
-        matching: find.byType(Stack),
-      ).first,
+      find
+          .ancestor(
+            of: find.text('View from here'),
+            matching: find.byType(Stack),
+          )
+          .first,
     );
     // Nothing between it and the card's own edge on either side.
     expect(strip.left - card.left, closeTo(0, .01));
@@ -1072,11 +1131,203 @@ void main() {
     });
   });
 
+  group('seat-view thumbnail', () {
+    testWidgets('a runtime that does not advertise it changes nothing',
+        (tester) async {
+      // Every field present, and no capability: the card is the card it was
+      // before this existed.
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      final asked = <Uri>[];
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const SeatLayerConfirmCard(),
+          assetLoader: photoAssetLoader(
+            photoBytes,
+            requested: asked,
+          ),
+        ),
+      );
+      map.emit(pickerSnapshot(sightlineMetres: 7));
+      await pumpToRest(tester);
+
+      expect(find.text('View from here'), findsNothing);
+      expect(find.textContaining('to stage'), findsNothing);
+      expect(asked, isEmpty);
+      // The 3D pill is still offered, on the plain rail.
+      expect(find.text('3D'), findsOneWidget);
+    });
+
+    testWidgets('the photograph is fetched once and drawn', (tester) async {
+      final map = FakePickerMap(bundle: thumbnailBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      final asked = <Uri>[];
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const SeatLayerConfirmCard(),
+          assetLoader: photoAssetLoader(photoBytes, requested: asked),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await pumpToRest(tester);
+
+      expect(asked, hasLength(1));
+      expect(
+        asked.single.path,
+        '/pub/events/ev_test/assets/seat-a-1.jpg',
+      );
+      expect(find.byType(Image), findsOneWidget);
+      expect(find.text('View from here'), findsOneWidget);
+    });
+
+    testWidgets('a photograph that never arrives leaves the rail',
+        (tester) async {
+      final map = FakePickerMap(bundle: thumbnailBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const SeatLayerConfirmCard(),
+          assetLoader: missingAssetLoader(),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await pumpToRest(tester);
+
+      expect(find.byType(Image), findsNothing);
+      expect(find.text('View from here'), findsNothing);
+      expect(find.text('3D'), findsOneWidget);
+    });
+
+    testWidgets('the sight line rides the photograph as a pill',
+        (tester) async {
+      final map = FakePickerMap(bundle: thumbnailBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const SeatLayerConfirmCard(),
+          assetLoader: pendingAssetLoader(),
+        ),
+      );
+      map.emit(pickerSnapshot(sightlineMetres: 7));
+      await pumpToRest(tester);
+
+      expect(find.text('≈ 7 m to stage'), findsOneWidget);
+      final caption = tester.widget<Text>(find.text('≈ 7 m to stage'));
+      expect(caption.style!.fontSize, 10);
+      expect(caption.style!.color, const Color(0xFFFFFFFF));
+      // Top-right of the strip, above the pills.
+      final pill = tester.getRect(find.text('≈ 7 m to stage'));
+      final view = tester.getRect(find.text('View from here'));
+      expect(pill.top, lessThan(view.top));
+      expect(pill.left, greaterThan(view.left));
+    });
+
+    testWidgets('with no photograph the sight line is a muted caption',
+        (tester) async {
+      final map = FakePickerMap(bundle: thumbnailBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerConfirmCard()),
+      );
+      map.emit(
+        pickerSnapshot(seatViewThumb: null, sightlineMetres: 7.4),
+      );
+      await pumpToRest(tester);
+
+      expect(find.text('≈ 7.4 m to stage'), findsOneWidget);
+      final caption = tester.widget<Text>(find.text('≈ 7.4 m to stage'));
+      expect(caption.style!.fontSize, 11);
+      // Muted ink off the photo plate, and no view to offer.
+      expect(caption.style!.color, isNot(const Color(0xFFFFFFFF)));
+      expect(find.text('View from here'), findsNothing);
+      expect(find.text('3D'), findsOneWidget);
+    });
+
+    testWidgets('the confidence teaser is 3D only, and static without a host',
+        (tester) async {
+      final map = FakePickerMap(bundle: thumbnailBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerConfirmCard()),
+      );
+      // On the map there is no model on screen to be honest about.
+      map.emit(
+        pickerSnapshot(
+          seatViewConfidence: const <String, Object?>{
+            'headline': 'Modelled from a survey',
+            'reality': 'Matched to the room',
+          },
+        ),
+      );
+      await pumpToRest(tester);
+      expect(find.text('Passport'), findsNothing);
+
+      map.emit(_inVenue3DWithConfidence(revision: 2));
+      await pumpToRest(tester);
+      expect(find.text('Passport'), findsOneWidget);
+      expect(find.text('Modelled from a survey'), findsOneWidget);
+      expect(find.text('Matched to the room'), findsOneWidget);
+      // Nothing behind it, so it is not a button.
+      expect(
+        find.ancestor(
+          of: find.text('Passport'),
+          matching: find.byType(InkWell),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('a host that can open the passport gets a button',
+        (tester) async {
+      final map = FakePickerMap(bundle: thumbnailBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      SelectedSeat? seat;
+      SeatConfidenceDisclosure? disclosure;
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const SeatLayerConfirmCard(),
+          callbacks: SeatLayerPickerCallbacks(
+            onSeatConfidence: (value, shown) {
+              seat = value;
+              disclosure = shown;
+            },
+          ),
+        ),
+      );
+      map.emit(_inVenue3DWithConfidence());
+      await pumpToRest(tester);
+
+      await tester.tap(find.text('Passport'));
+      await pumpToRest(tester);
+      expect(seat!.label, 'A-1');
+      expect(disclosure!.headline, 'Modelled from a survey');
+    });
+  });
+
   group('goldens', () {
     for (final brightness in Brightness.values) {
       testWidgets('confirm card golden with strip — ${brightness.name}',
           (tester) async {
-        final map = FakePickerMap();
+        final map = FakePickerMap(bundle: thumbnailBundle());
         addTearDown(map.dispose);
         usePhoneSurface(tester);
 
@@ -1085,6 +1336,7 @@ void main() {
             map,
             goldenSubject(const SeatLayerConfirmCard()),
             platformBrightness: brightness,
+            assetLoader: pendingAssetLoader(),
           ),
         );
         map.emit(pickerSnapshot());
@@ -1148,6 +1400,38 @@ void main() {
         await pumpToRest(tester);
 
         await expectGolden(tester, 'confirm_card_plain_${brightness.name}');
+      }, tags: goldenTag);
+
+      testWidgets('confirm card golden with a photograph — ${brightness.name}',
+          (tester) async {
+        final map = FakePickerMap(bundle: thumbnailBundle());
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
+
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            goldenSubject(const SeatLayerConfirmCard()),
+            platformBrightness: brightness,
+            // Painted in the test rather than checked in: a repository is not
+            // a photograph archive.
+            assetLoader: photoAssetLoader(photoBytes),
+          ),
+        );
+        map.emit(pickerSnapshot(sightlineMetres: 7));
+        await pumpToRest(tester);
+        // Decoding is real work on a real event loop. Without this the first
+        // golden of a run captures the gradient and the second captures the
+        // photograph, because the second one hits the image cache.
+        await tester.runAsync(
+          () => precacheImage(
+            MemoryImage(photoBytes),
+            tester.element(find.byType(SeatLayerConfirmCard)),
+          ),
+        );
+        await tester.pump();
+
+        await expectGolden(tester, 'confirm_card_photo_${brightness.name}');
       }, tags: goldenTag);
     }
   }, skip: goldenSkip);

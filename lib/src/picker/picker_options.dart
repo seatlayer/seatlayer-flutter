@@ -349,6 +349,7 @@ class SeatLayerPickerCallbacks {
     this.onSeatSelected,
     this.onSeatRemoved,
     this.onSeatViewOpened,
+    this.onSeatConfidence,
     this.onContinue,
   });
 
@@ -411,6 +412,19 @@ class SeatLayerPickerCallbacks {
 
   /// The buyer opened the seat view or the 3D scene for a seat.
   final ValueChanged<SelectedSeat>? onSeatViewOpened;
+
+  /// The buyer asked how a seat's view was produced, from the confidence
+  /// teaser on the 3D seat card.
+  ///
+  /// The runtime owns the passport itself and the bridge exposes no command
+  /// to open it, so the teaser is a BUTTON only where a host has taken this
+  /// callback; without one it is a static information row. Whatever a host
+  /// shows has to be built from the [SeatConfidenceDisclosure] handed over —
+  /// nothing here may be embellished.
+  final void Function(
+    SelectedSeat seat,
+    SeatConfidenceDisclosure disclosure,
+  )? onSeatConfidence;
 
   /// The buyer pressed the checkout call to action.
   final ValueChanged<SeatLayerCheckoutHandoff>? onContinue;

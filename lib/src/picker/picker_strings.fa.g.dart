@@ -14,6 +14,8 @@ String _moreCountFa(int count) => '+$count بیشتر';
 
 String _fromPriceFa(String money) => 'از $money';
 
+String _sightlineFa(String metres) => '‏≈ $metres متر تا صحنه';
+
 String _ticketCountFa(int count) => count == 1 ? '$count بلیت' : '$count بلیت';
 
 String _findBestSeatsFa(int count) => count == 1
@@ -57,6 +59,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   seatsLeft: _seatsLeftFa,
   moreCount: _moreCountFa,
   fromPrice: _fromPriceFa,
+  sightline: _sightlineFa,
   ticketCount: _ticketCountFa,
   findBestSeats: _findBestSeatsFa,
   reselectSeats: _reselectSeatsFa,

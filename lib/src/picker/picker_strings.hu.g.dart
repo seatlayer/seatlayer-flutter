@@ -14,6 +14,8 @@ String _moreCountHu(int count) => '+$count további';
 
 String _fromPriceHu(String money) => '$money-tól';
 
+String _sightlineHu(String metres) => '≈ $metres m a színpadig';
+
 String _ticketCountHu(int count) => count == 1 ? '$count jegy' : '$count jegy';
 
 String _findBestSeatsHu(int count) => count == 1
@@ -57,6 +59,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   seatsLeft: _seatsLeftHu,
   moreCount: _moreCountHu,
   fromPrice: _fromPriceHu,
+  sightline: _sightlineHu,
   ticketCount: _ticketCountHu,
   findBestSeats: _findBestSeatsHu,
   reselectSeats: _reselectSeatsHu,

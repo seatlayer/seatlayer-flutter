@@ -14,6 +14,8 @@ String _moreCountZhHans(int count) => '其余 $count 项';
 
 String _fromPriceZhHans(String money) => '$money 起';
 
+String _sightlineZhHans(String metres) => '距舞台约 $metres 米';
+
 String _ticketCountZhHans(int count) => count == 1 ? '$count 张票' : '$count 张票';
 
 String _findBestSeatsZhHans(int count) =>
@@ -55,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       seatsLeft: _seatsLeftZhHans,
       moreCount: _moreCountZhHans,
       fromPrice: _fromPriceZhHans,
+      sightline: _sightlineZhHans,
       ticketCount: _ticketCountZhHans,
       findBestSeats: _findBestSeatsZhHans,
       reselectSeats: _reselectSeatsZhHans,

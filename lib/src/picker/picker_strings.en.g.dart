@@ -14,6 +14,8 @@ String _moreCountEn(int count) => '+$count more';
 
 String _fromPriceEn(String money) => 'From $money';
 
+String _sightlineEn(String metres) => '≈ $metres m to stage';
+
 String _ticketCountEn(int count) =>
     count == 1 ? '$count ticket' : '$count tickets';
 
@@ -51,12 +53,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   fitVenue: 'Fit to screen',
   loading: 'Loading seat map…',
   errorMessage: 'The seat map didn’t load',
-  retry: 'Try again',
+  retry: 'Reload seat map',
   hideLimitedView: 'Hide limited-view seats',
   colorblindSafe: 'Colourblind-friendly colours',
   seatsLeft: _seatsLeftEn,
   moreCount: _moreCountEn,
   fromPrice: _fromPriceEn,
+  sightline: _sightlineEn,
   ticketCount: _ticketCountEn,
   findBestSeats: _findBestSeatsEn,
   reselectSeats: _reselectSeatsEn,

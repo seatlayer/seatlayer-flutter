@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/semantics.dart';
 import '../open_enums.dart';
 import '../payloads.dart';
 import 'picker_a11y.dart';
+import 'picker_buyer_asset_loader.dart';
 import 'picker_haptics.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
@@ -178,10 +180,21 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
             capabilities.contains('seatView')
         ? widget.onViewFromSeat ?? controller.openSeatView
         : null;
-    // The photograph is offered only where there is one: a real upload, not
-    // the stand-in the runtime can draw for any seat. The 3D and 360° paths
-    // do not depend on it.
-    final realPhoto = seatView != null && seat.seatViewKind == 'real';
+    // The photograph is offered only where there IS one: an authored upload
+    // the runtime named on this seat, on a runtime that says it reports them.
+    // A stand-in it could draw for any seat is never offered, and an older
+    // runtime that reports nothing is a card with no strip, not a card with an
+    // empty frame. The 3D and 360° paths do not depend on any of it.
+    final thumbnails = controller.supportsSeatViewThumbnails;
+    final thumb = thumbnails ? seat.seatViewThumb : null;
+    final realPhoto = seatView != null && thumb != null;
+    // The sight line is the runtime's own figure, and it is printed wherever
+    // it exists — on the photograph as a pill, and above the rail as a caption
+    // when there is no photograph to put it on.
+    final sightlineMetres = thumbnails ? seat.sightlineMetres : null;
+    final confidence = thumbnails ? seat.seatViewConfidence : null;
+    final onConfidence =
+        SeatLayerPickerScope.callbacksOf(context).onSeatConfidence;
     final venue3D =
         widget.show3D && options.enable3D && capabilities.contains('venue3d')
             ? widget.onShow3D ?? controller.showSeatIn3D
@@ -338,7 +351,9 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                               // is no picture to stand in for, so the pills sit on a
                               // plain rail instead of in an empty frame.
                               if (!immersive && realPhoto)
-                                _PhotoStrip(
+                                _PhotoSlot(
+                                  thumb: thumb,
+                                  sightlineMetres: sightlineMetres,
                                   onViewFromSeat: controller.state.isBusy
                                       ? null
                                       : () => _inspect(seat, seatView),
@@ -347,11 +362,14 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                                           ? null
                                           : () => _inspect(seat, venue3D),
                                 )
-                              else if (!immersive && venue3D != null)
-                                _ActionRail(
-                                  onShow3D: controller.state.isBusy
-                                      ? null
-                                      : () => _inspect(seat, venue3D),
+                              else if (!immersive &&
+                                  (venue3D != null || sightlineMetres != null))
+                                _NoPhotoRail(
+                                  sightlineMetres: sightlineMetres,
+                                  onShow3D:
+                                      venue3D == null || controller.state.isBusy
+                                          ? null
+                                          : () => _inspect(seat, venue3D),
                                 ),
                               if (bodyContent)
                                 Flexible(
@@ -384,6 +402,18 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                                           ),
                                       ],
                                     ),
+                                  ),
+                                ),
+                              if (immersive && confidence != null)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                  ),
+                                  child: _ConfidenceTeaser(
+                                    disclosure: confidence,
+                                    onOpen: onConfidence == null
+                                        ? null
+                                        : () => onConfidence(seat, confidence),
                                   ),
                                 ),
                               if (inspectUp)
