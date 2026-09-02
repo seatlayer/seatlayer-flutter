@@ -119,6 +119,7 @@ class SeatLayerPickerStyles {
     this.sheetStyle,
     this.headerStyle,
     this.pillStyle,
+    this.scrimColor,
   });
 
   /// Filled actions: `Select`, `Hold seats & checkout`, `Find N best seats`.
@@ -162,6 +163,12 @@ class SeatLayerPickerStyles {
   /// The hold countdown pill and the confirm card's photo/3D pills.
   final SeatLayerSurfaceStyle? pillStyle;
 
+  /// The wash over the map while a seat card or prompt is asking.
+  ///
+  /// Null paints the theme's own: ink at 42 % on a phone, so the seat the card
+  /// is about stays legible behind it while the card is the thing lit.
+  final Color? scrimColor;
+
   /// This set with [other]'s set slots on top.
   SeatLayerPickerStyles merge(SeatLayerPickerStyles? other) => other == null
       ? this
@@ -202,6 +209,7 @@ class SeatLayerPickerStyles {
           pillStyle: pillStyle == null
               ? other.pillStyle
               : pillStyle!.merge(other.pillStyle),
+          scrimColor: other.scrimColor ?? scrimColor,
         );
 
   /// The style the peek bar's `Continue` actually uses.
@@ -223,7 +231,8 @@ class SeatLayerPickerStyles {
       other.confirmCardStyle == confirmCardStyle &&
       other.sheetStyle == sheetStyle &&
       other.headerStyle == headerStyle &&
-      other.pillStyle == pillStyle;
+      other.pillStyle == pillStyle &&
+      other.scrimColor == scrimColor;
 
   @override
   int get hashCode => Object.hash(
@@ -240,5 +249,6 @@ class SeatLayerPickerStyles {
         sheetStyle,
         headerStyle,
         pillStyle,
+        scrimColor,
       );
 }

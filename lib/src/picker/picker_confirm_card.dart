@@ -300,36 +300,44 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                             ),
                           ),
                         ),
-                      SizedBox(
-                        height: layout.confirmActionHeight,
-                        child: Row(
-                          children: [
-                            // One third to leave, two thirds to accept: the
-                            // two answers are not equally likely, and the
-                            // card should not pretend that they are.
-                            Expanded(
-                              child: _CancelButton(
-                                label: strings.cancel,
-                                style: theme.styles.secondaryButtonStyle,
-                                onPressed: controller.state.isBusy
-                                    ? null
-                                    : () => _cancel(controller, seat),
+                      // The two answers are boxes of their own inside the
+                      // card's gutter, not a bar fused to its bottom edge: a
+                      // corner-to-corner fill reads as the card's frame, not
+                      // as a thing to press.
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                        child: SizedBox(
+                          height: layout.confirmActionHeight,
+                          child: Row(
+                            children: [
+                              // One third to leave, two thirds to accept: the
+                              // two answers are not equally likely, and the
+                              // card should not pretend that they are.
+                              Expanded(
+                                child: _CancelButton(
+                                  label: strings.cancel,
+                                  style: theme.styles.secondaryButtonStyle,
+                                  onPressed: controller.state.isBusy
+                                      ? null
+                                      : () => _cancel(controller, seat),
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 1),
-                            Expanded(
-                              flex: 2,
-                              child: _AddSeatButton(
-                                label: _added ? strings.added : strings.addSeat,
-                                added: _added,
-                                invite: invite,
-                                style: theme.styles.primaryButtonStyle,
-                                onPressed: controller.state.isBusy
-                                    ? null
-                                    : () => _confirm(controller, seat),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: _AddSeatButton(
+                                  label:
+                                      _added ? strings.added : strings.addSeat,
+                                  added: _added,
+                                  invite: invite,
+                                  style: theme.styles.primaryButtonStyle,
+                                  onPressed: controller.state.isBusy
+                                      ? null
+                                      : () => _confirm(controller, seat),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -904,8 +912,13 @@ class _CancelButton extends StatelessWidget {
     final styledInk =
         seatLayerStyleRole(style?.foregroundColor, disabled: disabled);
     return Material(
-      color: styledGround ?? const Color(0x00000000),
-      shape: seatLayerStyleRole(style?.shape),
+      color: styledGround ??
+          Color.alphaBlend(pickerAlpha(theme.text, .04), theme.surface),
+      shape: seatLayerStyleRole(style?.shape) ??
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(theme.buttonRadius),
+            side: BorderSide(color: pickerAlpha(theme.text, .14)),
+          ),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onPressed,
@@ -1032,7 +1045,10 @@ class _AddSeatButtonState extends State<_AddSeatButton>
         (disabled ? pickerAlpha(theme.mutedText, .58) : theme.onAccent);
     return Material(
       color: ground,
-      shape: seatLayerStyleRole(widget.style?.shape),
+      shape: seatLayerStyleRole(widget.style?.shape) ??
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(theme.buttonRadius),
+          ),
       clipBehavior: Clip.antiAlias,
       child: AnimatedBuilder(
         animation: Listenable.merge(<Listenable>[_sweep, _breathe, _press]),

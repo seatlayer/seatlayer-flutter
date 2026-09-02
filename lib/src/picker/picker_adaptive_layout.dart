@@ -658,7 +658,10 @@ class _SeatLayerPickerAdaptiveLayoutState
                         'seatlayer-picker-prompt-transition',
                       ),
                       child: _PickerPromptTransition(
-                        scrimColor: pickerAlpha(resolved.background, .64),
+                        // Ink, not ground: a pale wash left the map as loud
+                        // as the card; a dark one makes the card the thing lit.
+                        scrimColor: resolved.styles.scrimColor ??
+                            pickerAlpha(resolved.text, .42),
                         // The phone's seat card is the product's one moment:
                         // the map goes soft behind it, it arrives from the
                         // seat's direction and points back at it, and the map

@@ -125,7 +125,7 @@ void main() {
     expect(find.text('42 left'), findsNothing);
     expect(find.text('Gallery'), findsOneWidget);
     // 56 identity + 10 + 64 photo + 10 + 44 3D + 10 + 44 decision row.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 238);
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 248);
   });
 
   testWidgets('Add seat takes two thirds of the row and Cancel one',
@@ -191,7 +191,7 @@ void main() {
     expect(find.text('View from here'), findsOneWidget);
     expect(find.text('See it in 3D'), findsOneWidget);
     // 56 identity + 34 band + 10 + 64 photo + 10 + 44 3D + 10 + 44 decision.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 272);
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 282);
   });
 
   testWidgets('3D alone gets a plain action row, not an empty picture',
@@ -221,7 +221,7 @@ void main() {
       isEmpty,
     );
     // 56 identity + 34 band + 10 + 44 3D + 10 + 44 decision row.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 198);
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 208);
   });
 
   testWidgets('an event with neither drops the strip entirely', (tester) async {
@@ -236,7 +236,7 @@ void main() {
     expect(find.text('View from here'), findsNothing);
     expect(find.text('See it in 3D'), findsNothing);
     // 56 identity + 34 band + 5 + 44 decision row.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 139);
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 149);
   });
 
   testWidgets('the card is the screen less a gutter, capped at 360',
