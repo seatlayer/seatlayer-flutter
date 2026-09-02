@@ -20,11 +20,28 @@ an empty frame; the collapsed cart says `3 tickets` and leaves the total to
 `Continue · €285` rather than stating it twice. New strings: `allPrices`,
 `testModeLong`.
 
-On a phone the price legend and the Map/3D control are a row of their own
-between the header and the map rather than chrome floating on the map's top
-edge, so the last chip is never clipped under the control and no seat number
-reads through the gaps; the runtime no longer frames around them. The band
-takes the map chrome's palette and darkens with the 3D scene. The test-event
+On a phone the price legend is a row of its own between the header and the
+map, leading with `All prices`, and the Map/3D control keeps the map's
+top-right corner on the line below — so the last chip is never clipped under
+the control and no seat number reads through the gaps. The band takes the map
+chrome's palette and darkens with the 3D scene.
+
+The seat card is rebuilt around the question it asks: section, row and seat
+as three labelled cells; the category in a tinted band with its name, how
+many are left and the price; `See it in 3D` as a full-width action; `Cancel`
+a third of the row and `✓ Add seat` two thirds. `Add seat` invites once and
+breathes until the buyer touches the card, and on the press sweeps, ticks
+and says `Added` — the seat counts on the press. Nothing moves under reduced
+motion. New strings: `addSeat`, `added`, `seeItIn3D`, the eyebrow words, and
+`findSeats`; new layout tokens `confirmBandHeight`, `topRailHeight`.
+
+The bottom cart grows full-size targets: a 56 pt peek bar with a 44 pt
+`Continue`; an empty bar offers `✦ Find seats`, which opens the sheet on the
+best-seats form and is withheld where the form would be refused. Held rows
+wear a lock and a hairline; a row is named by its section, else its ticket
+type. The best-seats form is one track — stepper and ticket type, a zone row
+only where the venue has zones, a full-width button. Price chips, remove
+buttons and run rows all reach 44 pt. The test-event
 badge sits in the map's top-left corner in both views, stepping down only
 while the scene's `Back to venue` pill is drawn. New layout token:
 `topRailHeight`. The `Powered by SeatLayer` credit is centred at the foot of
