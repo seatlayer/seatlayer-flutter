@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
 import '../payloads.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
+import 'picker_haptics.dart';
 import 'picker_motion.dart';
+import 'picker_sheet_drag.dart';
 import 'picker_tokens.g.dart';
 import 'picker_tray_dense.dart';
 import 'seat_layer_picker_controller.dart';
@@ -145,6 +148,9 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
       return;
     }
     callbacks.onSeatRemoved?.call(label);
+    // Felt, not just seen: the row is gone from under the finger, and the undo
+    // bar that follows is at the other end of the phone.
+    controller.emitHaptic(PickerHapticCue.ticketRemoved);
     messenger?.hideCurrentSnackBar();
     messenger?.showSnackBar(
       SnackBar(
@@ -376,117 +382,296 @@ class _DenseLine extends StatelessWidget {
       container: true,
       label: '$spokenType${strings.seatIdentity(identity)}, '
           '${pickerMoney(context, total, line.item.currency)}',
-      child: Container(
-        height: theme.layout.denseLineHeight,
-        decoration: BoxDecoration(
-          // A held row is inventory the server has already set aside. A wash
-          // of the accent and a bar down its leading edge say so without
-          // spending a column on a word.
-          color: line.held
-              ? pickerAlpha(theme.accent, .07)
-              : member
-                  ? pickerAlpha(theme.divider, .16)
-                  : null,
-          border: Border(
-            top: first
-                ? BorderSide.none
-                : BorderSide(color: pickerAlpha(theme.divider, .7)),
+      child: _SwipeToRemove(
+        // A run's head stands for every seat under it, and a swipe that took
+        // six tickets away on one flick is a gesture nobody would trust. Open
+        // the run and swipe a seat, or press the ×, which still asks the same
+        // question of the whole run as it always did.
+        enabled: removable && !line.held && run == null,
+        onRemove: onRemove,
+        child: Container(
+          height: theme.layout.denseLineHeight,
+          decoration: BoxDecoration(
+            // A held row is inventory the server has already set aside. A wash
+            // of the accent and a bar down its leading edge say so without
+            // spending a column on a word.
+            color: line.held
+                ? pickerAlpha(theme.accent, .07)
+                : member
+                    ? pickerAlpha(theme.divider, .16)
+                    : null,
+            border: Border(
+              top: first
+                  ? BorderSide.none
+                  : BorderSide(color: pickerAlpha(theme.divider, .7)),
+            ),
           ),
-        ),
-        child: Stack(
-          children: [
-            if (line.held)
-              PositionedDirectional(
-                start: 0,
-                top: 0,
-                bottom: 0,
-                child: ColoredBox(
-                  color: pickerAlpha(theme.accent, .72),
-                  child: const SizedBox(width: 3),
+          child: Stack(
+            children: [
+              if (line.held)
+                PositionedDirectional(
+                  start: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: ColoredBox(
+                    color: pickerAlpha(theme.accent, .72),
+                    child: const SizedBox(width: 3),
+                  ),
                 ),
-              ),
-            InkWell(
-              onTap: onToggle,
-              child: Padding(
-                padding: EdgeInsetsDirectional.only(
-                  start: member ? 26 : 9,
-                  end: 4,
-                ),
-                child: Row(
-                  children: [
-                    _LineMark(line: line, run: group, open: open),
-                    const SizedBox(width: 7),
-                    Expanded(
-                      child: Text.rich(
-                        TextSpan(
-                          children: <InlineSpan>[
-                            TextSpan(
-                              text: line.section,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.w700),
-                            ),
-                            for (final part in identity.skip(1)) ...<InlineSpan>[
+              InkWell(
+                onTap: onToggle,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.only(
+                    start: member ? 26 : 9,
+                    end: 4,
+                  ),
+                  child: Row(
+                    children: [
+                      _LineMark(line: line, run: group, open: open),
+                      const SizedBox(width: 7),
+                      Expanded(
+                        child: Text.rich(
+                          TextSpan(
+                            children: <InlineSpan>[
                               TextSpan(
-                                text: ' · ',
-                                style: TextStyle(color: theme.mutedText),
+                                text: line.section,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700),
                               ),
-                              TextSpan(text: part),
+                              for (final part
+                                  in identity.skip(1)) ...<InlineSpan>[
+                                TextSpan(
+                                  text: ' · ',
+                                  style: TextStyle(color: theme.mutedText),
+                                ),
+                                TextSpan(text: part),
+                              ],
                             ],
-                          ],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: theme.text,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: theme.fontFamily,
+                            fontFeatures: const <FontFeature>[
+                              FontFeature.tabularFigures(),
+                            ],
+                          ),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (size > 1) ...[
+                        const SizedBox(width: 7),
+                        Text(
+                          '$size × ${line.amountText}',
+                          style: TextStyle(
+                            color: theme.mutedText,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: theme.fontFamily,
+                            fontFeatures: const <FontFeature>[
+                              FontFeature.tabularFigures(),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(width: 7),
+                      Text(
+                        pickerMoney(context, total, line.item.currency),
+                        softWrap: false,
                         style: TextStyle(
                           color: theme.text,
                           fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           fontFamily: theme.fontFamily,
                           fontFeatures: const <FontFeature>[
                             FontFeature.tabularFigures(),
                           ],
                         ),
                       ),
-                    ),
-                    if (size > 1) ...[
-                      const SizedBox(width: 7),
-                      Text(
-                        '$size × ${line.amountText}',
-                        style: TextStyle(
-                          color: theme.mutedText,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: theme.fontFamily,
-                          fontFeatures: const <FontFeature>[
-                            FontFeature.tabularFigures(),
-                          ],
-                        ),
-                      ),
+                      if (removable)
+                        _RemoveButton(line: line, onPressed: onRemove)
+                      else
+                        const SizedBox(width: 7),
                     ],
-                    const SizedBox(width: 7),
-                    Text(
-                      pickerMoney(context, total, line.item.currency),
-                      softWrap: false,
-                      style: TextStyle(
-                        color: theme.text,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: theme.fontFamily,
-                        fontFeatures: const <FontFeature>[
-                          FontFeature.tabularFigures(),
-                        ],
-                      ),
-                    ),
-                    if (removable)
-                      _RemoveButton(line: line, onPressed: onRemove)
-                    else
-                      const SizedBox(width: 7),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// A ticket the buyer can push out of the list.
+///
+/// The native way out, beside the × rather than instead of it: the row follows
+/// the finger toward the leading edge, uncovers a red plate as it goes, and
+/// leaves once it has travelled far enough — or once it has been thrown, which
+/// is the same instruction given faster. Everything the × does afterwards, a
+/// swipe does too, undo bar included.
+///
+/// It is deliberately not a [Dismissible]: that widget owns the removal, animates
+/// the gap closed itself, and needs a key per row; here the cart is the source of
+/// truth and the row disappears because the snapshot no longer has it.
+class _SwipeToRemove extends StatefulWidget {
+  const _SwipeToRemove({
+    required this.enabled,
+    required this.onRemove,
+    required this.child,
+  });
+
+  /// Whether this row may be swiped at all. A held row never is: those seats
+  /// belong to a hold the host owns, and the row says so with a lock.
+  final bool enabled;
+
+  /// Called once the swipe has committed — the same callback the × uses.
+  final VoidCallback onRemove;
+
+  final Widget child;
+
+  @override
+  State<_SwipeToRemove> createState() => _SwipeToRemoveState();
+}
+
+class _SwipeToRemoveState extends State<_SwipeToRemove>
+    with SingleTickerProviderStateMixin {
+  /// How far the row has travelled toward the remove edge, in points. Always
+  /// positive; which way that is on screen is [Directionality]'s business.
+  late final AnimationController _slide;
+
+  double _raw = 0;
+  double _width = 0;
+  bool _committed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Eagerly, not lazily: a row that is never swiped is still disposed, and a
+    // ticker created during dispose looks up an ancestor that is already gone.
+    _slide = AnimationController.unbounded(vsync: this)
+      ..addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _slide.dispose();
+    super.dispose();
+  }
+
+  bool get _reversed => Directionality.of(context) == TextDirection.rtl;
+
+  void _onStart(DragStartDetails details) {
+    _slide.stop();
+    _raw = _slide.value;
+  }
+
+  void _onUpdate(DragUpdateDetails details) {
+    _raw += _reversed ? details.delta.dx : -details.delta.dx;
+    _slide.value = pickerRubberBand(_raw, 0, _width);
+  }
+
+  void _onEnd(DragEndDetails details) {
+    final velocity = _reversed
+        ? details.velocity.pixelsPerSecond.dx
+        : -details.velocity.pixelsPerSecond.dx;
+    final committed =
+        _slide.value >= _width * SeatLayerPhysicsTokens.swipeCommitFraction ||
+            velocity >= SeatLayerPhysicsTokens.swipeFlingVelocity;
+    if (!committed) {
+      _returnHome(velocity);
+      return;
+    }
+    _commit(velocity);
+  }
+
+  void _returnHome(double velocity) {
+    _raw = 0;
+    if (SeatLayerPickerMotion.reduced(context)) {
+      _slide.value = 0;
+      return;
+    }
+    _slide.animateWith(
+      SpringSimulation(pickerSheetSpring, _slide.value, 0, velocity),
+    );
+  }
+
+  void _commit(double velocity) {
+    if (_committed) return;
+    _committed = true;
+    if (SeatLayerPickerMotion.reduced(context)) {
+      _finish();
+      return;
+    }
+    // Out of the plate first, then gone: a row that vanishes under the finger
+    // leaves the buyer unsure which ticket they removed.
+    _slide
+        .animateWith(
+          SpringSimulation(pickerSheetSpring, _slide.value, _width, velocity),
+        )
+        .whenComplete(_finish);
+  }
+
+  void _finish() {
+    if (!mounted) return;
+    _committed = false;
+    _raw = 0;
+    _slide.value = 0;
+    widget.onRemove();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.enabled) return widget.child;
+    final theme = seatLayerPickerThemeOf(context);
+    final travelled = _slide.value;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        _width = constraints.maxWidth;
+        return GestureDetector(
+          behavior: HitTestBehavior.deferToChild,
+          excludeFromSemantics: true,
+          onHorizontalDragStart: _onStart,
+          onHorizontalDragUpdate: _onUpdate,
+          onHorizontalDragEnd: _onEnd,
+          child: Stack(
+            children: [
+              // The plate is only drawn while there is something to see, so a
+              // list at rest is the same list it has always been.
+              if (travelled > 0)
+                Positioned.fill(
+                  child: ColoredBox(
+                    // The one place in the picker that is never the accent: a
+                    // brand colour that happens to be red would make every
+                    // other swipe look like a warning, and a brand colour that
+                    // happens to be green would make this one look safe.
+                    color: theme.error,
+                    child: const Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.only(end: 14),
+                        child: Icon(
+                          Icons.delete_outline_rounded,
+                          size: 16,
+                          // The same ink the inline error bar puts on this
+                          // same red.
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              Transform.translate(
+                offset: Offset(_reversed ? travelled : -travelled, 0),
+                child: widget.child,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

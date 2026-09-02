@@ -26,7 +26,8 @@ class SeatLayerPickerLayout {
     this.sheetToggleSize = SeatLayerSizeTokens.sheetToggleSize,
     this.sheetToggleOpenSize = SeatLayerSizeTokens.sheetToggleOpenSize,
     this.sheetMaxHeight = SeatLayerSizeTokens.sheetMaxHeight,
-    this.emptyTrayMaxHeightFraction = SeatLayerSizeTokens.emptyTrayMaxHeightFraction,
+    this.emptyTrayMaxHeightFraction =
+        SeatLayerSizeTokens.emptyTrayMaxHeightFraction,
     this.findPillHeight = SeatLayerSizeTokens.findPillHeight,
     this.denseCollapseFrom = SeatLayerSizeTokens.denseCollapseFrom,
     this.denseRemoveSize = SeatLayerSizeTokens.denseRemoveSize,
@@ -37,6 +38,7 @@ class SeatLayerPickerLayout {
     this.bestSeatsStepperWidth = SeatLayerSizeTokens.bestSeatsStepperWidth,
     this.sheetMaxHeightFraction = SeatLayerSizeTokens.sheetMaxHeightFraction,
     this.emptyTrayMaxHeight = SeatLayerSizeTokens.emptyTrayMaxHeight,
+    this.sheetFullHeightFraction = SeatLayerSizeTokens.sheetFullHeightFraction,
     this.denseLineHeight = SeatLayerSizeTokens.denseLineHeight,
     this.denseVisibleLines = SeatLayerSizeTokens.denseVisibleLines,
     this.confirmCardGutter = SeatLayerSizeTokens.confirmCardGutter,
@@ -135,6 +137,14 @@ class SeatLayerPickerLayout {
   /// Ceiling for the expanded cart sheet body while the cart is empty.
   final double emptyTrayMaxHeight;
 
+  /// Ceiling for the sheet's native-only full detent, as a fraction of the
+  /// screen height.
+  ///
+  /// Only reachable by dragging, and only offered when the cart is taller than
+  /// [sheetMaxHeight] allows: it is the buyer asking to see the rest of a long
+  /// order, not a resting height the picker ever chooses for them.
+  final double sheetFullHeightFraction;
+
   /// Height of one line in the dense ticket list.
   final double denseLineHeight;
 
@@ -227,6 +237,7 @@ class SeatLayerPickerLayout {
     double? bestSeatsStepperWidth,
     double? sheetMaxHeightFraction,
     double? emptyTrayMaxHeight,
+    double? sheetFullHeightFraction,
     double? denseLineHeight,
     int? denseVisibleLines,
     double? confirmCardGutter,
@@ -263,18 +274,23 @@ class SeatLayerPickerLayout {
         sheetToggleSize: sheetToggleSize ?? this.sheetToggleSize,
         sheetToggleOpenSize: sheetToggleOpenSize ?? this.sheetToggleOpenSize,
         sheetMaxHeight: sheetMaxHeight ?? this.sheetMaxHeight,
-        emptyTrayMaxHeightFraction: emptyTrayMaxHeightFraction ?? this.emptyTrayMaxHeightFraction,
+        emptyTrayMaxHeightFraction:
+            emptyTrayMaxHeightFraction ?? this.emptyTrayMaxHeightFraction,
         findPillHeight: findPillHeight ?? this.findPillHeight,
         denseCollapseFrom: denseCollapseFrom ?? this.denseCollapseFrom,
         denseRemoveSize: denseRemoveSize ?? this.denseRemoveSize,
         denseRunToggleWidth: denseRunToggleWidth ?? this.denseRunToggleWidth,
         denseMoreRowHeight: denseMoreRowHeight ?? this.denseMoreRowHeight,
         checkoutButtonHeight: checkoutButtonHeight ?? this.checkoutButtonHeight,
-        bestSeatsSelectHeight: bestSeatsSelectHeight ?? this.bestSeatsSelectHeight,
-        bestSeatsStepperWidth: bestSeatsStepperWidth ?? this.bestSeatsStepperWidth,
+        bestSeatsSelectHeight:
+            bestSeatsSelectHeight ?? this.bestSeatsSelectHeight,
+        bestSeatsStepperWidth:
+            bestSeatsStepperWidth ?? this.bestSeatsStepperWidth,
         sheetMaxHeightFraction:
             sheetMaxHeightFraction ?? this.sheetMaxHeightFraction,
         emptyTrayMaxHeight: emptyTrayMaxHeight ?? this.emptyTrayMaxHeight,
+        sheetFullHeightFraction:
+            sheetFullHeightFraction ?? this.sheetFullHeightFraction,
         denseLineHeight: denseLineHeight ?? this.denseLineHeight,
         denseVisibleLines: denseVisibleLines ?? this.denseVisibleLines,
         confirmCardGutter: confirmCardGutter ?? this.confirmCardGutter,
@@ -327,6 +343,7 @@ class SeatLayerPickerLayout {
       other.bestSeatsStepperWidth == bestSeatsStepperWidth &&
       other.sheetMaxHeightFraction == sheetMaxHeightFraction &&
       other.emptyTrayMaxHeight == emptyTrayMaxHeight &&
+      other.sheetFullHeightFraction == sheetFullHeightFraction &&
       other.denseLineHeight == denseLineHeight &&
       other.denseVisibleLines == denseVisibleLines &&
       other.confirmCardGutter == confirmCardGutter &&
@@ -375,6 +392,7 @@ class SeatLayerPickerLayout {
         bestSeatsStepperWidth,
         sheetMaxHeightFraction,
         emptyTrayMaxHeight,
+        sheetFullHeightFraction,
         denseLineHeight,
         denseVisibleLines,
         confirmCardGutter,

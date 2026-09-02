@@ -171,6 +171,9 @@ abstract final class SeatLayerSizeTokens {
   /// `380`
   static const double emptyTrayMaxHeight = 380;
 
+  /// `0.92`
+  static const double sheetFullHeightFraction = 0.92;
+
   /// `36`
   static const double findPillHeight = 36;
 
@@ -233,6 +236,39 @@ abstract final class SeatLayerSizeTokens {
 
   /// `44`
   static const double confirmActionHeight = 44;
+
+  /// `342`
+  static const double confirmCardImmersiveMaxWidth = 342;
+
+  /// `10`
+  static const double confirmCardImmersiveRestInset = 10;
+
+  /// `8`
+  static const double confirmImmersiveCellTop = 8;
+
+  /// `9`
+  static const double confirmImmersiveCellSide = 9;
+
+  /// `7`
+  static const double confirmImmersiveCellBottom = 7;
+
+  /// `14`
+  static const double confirmImmersiveValueFontSize = 14;
+
+  /// `12`
+  static const double confirmImmersiveSectionFontSize = 12;
+
+  /// `8`
+  static const double confirmImmersiveBodyTop = 8;
+
+  /// `9`
+  static const double confirmImmersiveBodyBottom = 9;
+
+  /// `9`
+  static const double confirmImmersiveInspectGap = 9;
+
+  /// `7`
+  static const double confirmImmersiveActionGap = 7;
 
   /// `44`
   static const double selectorHeight = 44;
@@ -538,13 +574,45 @@ abstract final class SeatLayerMotionTokens {
   static const int shellSweep = 650;
 }
 
+/// What a finger on glass is answered with.
+///
+/// Native-only: the web picker has no simulation to feed.
+abstract final class SeatLayerPhysicsTokens {
+  /// `1`
+  static const double sheetSpringMass = 1;
+
+  /// `420`
+  static const double sheetSpringStiffness = 420;
+
+  /// `34`
+  static const double sheetSpringDamping = 34;
+
+  /// `320`
+  static const double sheetFlingVelocity = 320;
+
+  /// `0.35`
+  static const double rubberBand = 0.35;
+
+  /// `0.4`
+  static const double swipeCommitFraction = 0.4;
+
+  /// `700`
+  static const double swipeFlingVelocity = 700;
+}
+
 /// Which platform haptic each cue fires.
 abstract final class SeatLayerHapticTokens {
   /// `selection`
   static const String selectionAdded = 'selection';
 
+  /// `selection`
+  static const String sectionFocused = 'selection';
+
   /// `light`
-  static const String sectionFocused = 'light';
+  static const String ticketRemoved = 'light';
+
+  /// `warning`
+  static const String holdEnding = 'warning';
 
   /// `medium`
   static const String holdCreated = 'medium';
@@ -617,6 +685,9 @@ abstract final class SeatLayerStringTokens {
 
   /// See it in 3D
   static const String seeItIn3D = 'See it in 3D';
+
+  /// View from this seat
+  static const String viewFromThisSeat = 'View from this seat';
 
   /// Open venue 360°
   static const String openVenue360 = 'Open venue 360°';

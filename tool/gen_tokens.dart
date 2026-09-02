@@ -91,6 +91,7 @@ String _render(Map<String, Object?> tokens) {
   final motion = _map(tokens['motion']);
   final durations = _map(motion['duration']);
   final outside = _map(motion['durationOutsideBudget']);
+  final physics = _map(motion['physics']);
   final haptics = _map(tokens['haptics']);
   final strings = _map(tokens['strings']);
 
@@ -176,6 +177,18 @@ String _render(Map<String, Object?> tokens) {
   outside.forEach((key, value) {
     buffer.writeln('  /// `$value` ms — deliberately outside the budget.');
     buffer.writeln('  static const int $key = ${_num(value).toInt()};');
+  });
+  buffer
+    ..writeln('}')
+    ..writeln()
+    ..writeln('/// What a finger on glass is answered with.')
+    ..writeln('///')
+    ..writeln('/// Native-only: the web picker has no simulation to feed.')
+    ..writeln('abstract final class SeatLayerPhysicsTokens {');
+  physics.forEach((key, value) {
+    if (key == 'note') return;
+    buffer.writeln('  /// `$value`');
+    buffer.writeln('  static const double $key = ${_double(value)};');
   });
   buffer
     ..writeln('}')

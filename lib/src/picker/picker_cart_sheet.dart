@@ -1,5 +1,7 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
 import 'picker_best_seats.dart';
 import 'picker_cart_list.dart';
@@ -9,7 +11,9 @@ import 'picker_hold_lapse.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
+import 'picker_haptics.dart';
 import 'picker_options.dart';
+import 'picker_sheet_drag.dart';
 import 'picker_states.dart';
 import 'picker_styles.dart';
 import 'picker_tokens.g.dart';
@@ -30,7 +34,14 @@ import 'seat_layer_picker_theme.dart';
 ///
 /// It never opens itself. A sheet that springs up when a seat is picked covers
 /// the map the buyer is still choosing from.
-class SeatLayerCartSheet extends StatelessWidget {
+///
+/// It is a real sheet, not a panel that toggles. The head and the body follow
+/// the finger point for point, the ends give rather than stop, and letting go
+/// hands the sheet to a spring that carries the finger's own speed into the
+/// nearest detent — [SeatLayerSheetDetent]. The tap and the short drag still
+/// work exactly as they did, because a sheet whose only way to open is a
+/// gesture is a sheet some buyers cannot open.
+class SeatLayerCartSheet extends StatefulWidget {
   /// Creates a cart sheet.
   const SeatLayerCartSheet({
     super.key,
@@ -81,6 +92,171 @@ class SeatLayerCartSheet extends StatelessWidget {
   final bool reserveBottomInset;
 
   @override
+  State<SeatLayerCartSheet> createState() => _SeatLayerCartSheetState();
+}
+
+class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
+    with SingleTickerProviderStateMixin {
+  /// The height of the sheet's BODY — everything below the head — in logical
+  /// points. Unbounded because a drag is allowed past both ends: the value
+  /// leaves `[0, top]` only while a finger is holding it there.
+  late final AnimationController _extent =
+      AnimationController.unbounded(vsync: this)..addListener(_onExtent);
+
+  /// Where the finger has put the sheet, before the rubber band is applied.
+  double _raw = 0;
+
+  /// How far the current drag has travelled, so a short deliberate drag still
+  /// answers even when the physics would have settled it back.
+  double _travel = 0;
+  bool _dragging = false;
+
+  /// The spring's destination while one is in flight, so a cancelled spring
+  /// cannot snap the sheet to a target that has since been replaced.
+  double? _springingTo;
+
+  /// What the body measured at, and the detents that follow from it.
+  double _natural = 0;
+  PickerSheetDetents _detents = const PickerSheetDetents(content: 0, full: 0);
+
+  SeatLayerSheetDetent _detent = SeatLayerSheetDetent.peek;
+
+  /// How far a drag has to travel before it counts as opening or closing.
+  ///
+  /// The accessible floor under the physics: a buyer who moves the head by a
+  /// deliberate but small amount has asked for the sheet to change, even
+  /// though the nearest detent is still the one they started at.
+  static const double _dragThreshold = 18;
+
+  @override
+  void initState() {
+    super.initState();
+    _detent = widget.expanded
+        ? SeatLayerSheetDetent.content
+        : SeatLayerSheetDetent.peek;
+  }
+
+  @override
+  void didUpdateWidget(SeatLayerCartSheet old) {
+    super.didUpdateWidget(old);
+    if (widget.expanded == old.expanded) return;
+    // Already there. The host is usually only echoing back the sheet's own
+    // last answer, and restarting the spring on the echo would make every
+    // opening tap stutter halfway.
+    if (widget.expanded == (_detent != SeatLayerSheetDetent.peek)) return;
+    // The host — or the map, which collapses the sheet when the buyer taps it
+    // — has moved the sheet. Full is never entered this way: it is a place the
+    // buyer's own finger reaches.
+    _settle(
+      widget.expanded
+          ? SeatLayerSheetDetent.content
+          : SeatLayerSheetDetent.peek,
+      velocity: 0,
+      publish: false,
+    );
+  }
+
+  @override
+  void dispose() {
+    _extent.dispose();
+    super.dispose();
+  }
+
+  void _onExtent() => setState(() {});
+
+  /// The body's measured height. Reported after layout, so acting on it here
+  /// is safe.
+  void _onNatural(double height) {
+    if (!mounted || (height - _natural).abs() < PickerSheetDetents.epsilon) {
+      return;
+    }
+    setState(() => _natural = height);
+    // A cart that grew while the sheet was open moves the detent the sheet is
+    // resting at with it, rather than leaving the sheet at the height of an
+    // order it no longer holds.
+    if (!_dragging && _springingTo == null) _snapToDetent();
+  }
+
+  double _heightOf(SeatLayerSheetDetent detent) => _detents.heightOf(detent);
+
+  /// Put the sheet where its detent says, without a spring: this is a
+  /// correction, not a movement the buyer asked for.
+  void _snapToDetent() {
+    final target = _heightOf(_detent);
+    if ((_extent.value - target).abs() < PickerSheetDetents.epsilon) return;
+    _extent.value = target;
+    _raw = target;
+  }
+
+  /// Come to rest at [detent], carrying [velocity] into the spring.
+  void _settle(
+    SeatLayerSheetDetent detent, {
+    required double velocity,
+    bool publish = true,
+  }) {
+    _detent = detent;
+    final target = _heightOf(detent);
+    _raw = target;
+    if (publish) _publish(detent);
+    if (SeatLayerPickerMotion.reduced(context)) {
+      _springingTo = null;
+      _extent.value = target;
+      return;
+    }
+    _springingTo = target;
+    _extent
+        .animateWith(
+      SpringSimulation(pickerSheetSpring, _extent.value, target, velocity),
+    )
+        .whenComplete(() {
+      if (!mounted || _springingTo != target) return;
+      _springingTo = null;
+      // The simulation stops within a tolerance of its target, and a sheet
+      // that came to rest a third of a point short of its detent would make
+      // every measurement of it a different number.
+      _extent.value = target;
+    });
+  }
+
+  /// Tell the controller — and the host — where the sheet came to rest.
+  void _publish(SeatLayerSheetDetent detent) {
+    SeatLayerPickerScope.controllerOf(context).setCartSheetDetent(detent);
+    final expanded = detent != SeatLayerSheetDetent.peek;
+    if (expanded != widget.expanded) widget.onExpandedChanged(expanded);
+  }
+
+  void _onDragStart(DragStartDetails details) {
+    _extent.stop();
+    _springingTo = null;
+    _dragging = true;
+    _travel = 0;
+    _raw = _extent.value;
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    // Up grows the sheet: the finger and the top edge move together.
+    final delta = -details.delta.dy;
+    _raw += delta;
+    _travel += delta;
+    _extent.value = pickerRubberBand(_raw, 0, _detents.top);
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    _dragging = false;
+    final velocity = -details.velocity.pixelsPerSecond.dy;
+    var detent = _detents.settle(height: _extent.value, velocity: velocity);
+    // The accessible floor: a deliberate short drag answers, even where the
+    // spring would have carried the sheet back to where it started.
+    if (detent == _detent && _travel.abs() >= _dragThreshold) {
+      final order = _detents.offered;
+      final at = order.indexOf(_detent);
+      final next = _travel > 0 ? at + 1 : at - 1;
+      if (next >= 0 && next < order.length) detent = order[next];
+    }
+    _settle(detent, velocity: velocity);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     // The sheet caps the same surface the header and the legend do, so it
@@ -89,7 +265,7 @@ class SeatLayerCartSheet extends StatelessWidget {
     final theme = seatLayerMapChromeThemeOf(context);
     final layout = theme.layout;
     final bottomInset =
-        reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0;
+        widget.reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0;
     final hasTickets = controller.confirmedCartLines.isNotEmpty;
     final salesClosed = controller.state.event?.salesClosed == true;
     // Two ceilings, both a fraction of the screen capped at a fixed height:
@@ -97,90 +273,168 @@ class SeatLayerCartSheet extends StatelessWidget {
     // short one must not be told that seventy-two per cent is enough.
     final screenHeight = MediaQuery.sizeOf(context).height;
     final maxSheet = hasTickets
-        ? _atMost(screenHeight * layout.sheetMaxHeightFraction,
-            layout.sheetMaxHeight)
+        ? _atMost(
+            screenHeight * layout.sheetMaxHeightFraction, layout.sheetMaxHeight)
         : _atMost(screenHeight * layout.emptyTrayMaxHeightFraction,
             layout.emptyTrayMaxHeight);
     final maxBody =
         (maxSheet - layout.sheetOpenHeadHeight).clamp(0.0, maxSheet);
+    // The one height the web has no equivalent for: how far a FINGER may pull
+    // the sheet past the ceiling the picker itself would stop at. Offered only
+    // when the cart is taller than the ceiling — see [PickerSheetDetents].
+    final fullBody = (screenHeight * layout.sheetFullHeightFraction -
+            layout.sheetOpenHeadHeight -
+            bottomInset)
+        .clamp(maxBody, screenHeight);
+    _detents = PickerSheetDetents(
+      content: _natural < maxBody ? _natural : maxBody,
+      full: _natural,
+    );
+    _keepRestingHeight();
 
-    final surface =
-        (theme.styles.sheetStyle ?? const SeatLayerSurfaceStyle()).merge(style);
-    return Material(
-      color: surface.color ?? theme.surface,
-      elevation: surface.elevation ?? 12,
-      shape: surface.shape,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: expanded ? bottomInset : 0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Above the peek row, so it is read whether the sheet is open or
-            // shut: a buyer coming back from checkout is looking at a compact
-            // strip, and news about their seats cannot live inside a
-            // panel they would have to open first.
-            const SeatLayerHoldLapseNotice(),
-            _PeekRow(
-              expanded: expanded,
-              onExpandedChanged: onExpandedChanged,
-              onCheckout: onCheckout,
-              continueStyle: continueButtonStyle,
-            ),
-            AnimatedSize(
-              duration: SeatLayerPickerMotion.of(
-                context,
-                SeatLayerPickerMotion.sheet,
-              ),
-              curve: SeatLayerPickerMotion.easeEnter,
-              alignment: Alignment.topCenter,
-              child: !expanded
-                  ? const SizedBox(width: double.infinity)
-                  : ConstrainedBox(
-                      constraints: BoxConstraints(maxHeight: maxBody),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // An event that has stopped selling is a state the
-                          // tray states in its own words, not a set of
-                          // controls that quietly go grey. It stands above the
-                          // body either way: a cart the buyer can no longer
-                          // check out with needs the sentence as much as an
-                          // empty one does.
-                          if (salesClosed)
-                            const Padding(
-                              padding: EdgeInsets.fromLTRB(10, 8, 10, 0),
-                              child: SeatLayerPickerSalesClosedStatement(),
-                            ),
-                          Flexible(
-                            child: hasTickets
-                                ? _FilledBody(
-                                    cartList: cartList,
-                                    checkoutBar: checkoutBar,
-                                    actionError: actionError,
-                                    attribution: attribution,
-                                    onCheckout: onCheckout,
-                                  )
-                                : _EmptyBody(
-                                    bestSeats: bestSeats,
-                                    actionError: actionError,
-                                    attribution: attribution,
-                                  ),
+    final extent = _extent.value;
+    // Below the peek bar the sheet has nowhere to grow, so an overdrag moves
+    // the whole surface off the bottom edge instead — the finger keeps hold of
+    // it, and the spring puts it back.
+    final belowPeek = extent < 0 ? -extent : 0.0;
+    final body = extent > 0 ? extent : 0.0;
+    final open = body > 0;
+
+    final surface = (theme.styles.sheetStyle ?? const SeatLayerSurfaceStyle())
+        .merge(widget.style);
+    return Transform.translate(
+      offset: Offset(0, belowPeek),
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        // The sheet's own semantics are its buttons; a drag handle announced
+        // over the whole surface would be one more thing to swipe past.
+        excludeFromSemantics: true,
+        onVerticalDragStart: _onDragStart,
+        onVerticalDragUpdate: _onDragUpdate,
+        onVerticalDragEnd: _onDragEnd,
+        child: Material(
+          color: surface.color ?? theme.surface,
+          elevation: surface.elevation ?? 12,
+          shape: surface.shape,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: open ? bottomInset : 0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Above the peek row, so it is read whether the sheet is open
+                // or shut: a buyer coming back from checkout is looking at a
+                // compact strip, and news about their seats cannot live inside
+                // a panel they would have to open first.
+                const SeatLayerHoldLapseNotice(),
+                const SeatLayerHoldEndingCue(),
+                _PeekRow(
+                  // The head answers to the FINGER, not to the last answer the
+                  // host gave: a sheet being dragged open is open, whatever the
+                  // controller has been told so far.
+                  expanded: open,
+                  // Fifty points shut, thirty-six open, and every height
+                  // between while the sheet is on its way: the head compresses
+                  // into its open form as the body appears from under it, so
+                  // the content the buyer is pulling on tracks their finger
+                  // exactly and the sheet's own edge never jumps.
+                  height: layout.peekHeight -
+                      _atMost(
+                        body,
+                        layout.peekHeight - layout.sheetOpenHeadHeight,
+                      ),
+                  onExpandedChanged: _ask,
+                  onCheckout: widget.onCheckout,
+                  continueStyle: widget.continueButtonStyle,
+                ),
+                // A window onto the body, never a resize of it. The body is
+                // laid out once at the height its content wants — up to the
+                // full detent, where its own list takes over the scrolling —
+                // and the sheet reveals it from under the head. Resizing it
+                // per frame instead would reflow a ticket list sixty times a
+                // second, and the buyer would watch their own order rewrap
+                // while they dragged.
+                ClipRect(
+                  child: SizedBox(
+                    height: body,
+                    width: double.infinity,
+                    child: OverflowBox(
+                      alignment: Alignment.bottomCenter,
+                      minHeight: 0,
+                      maxHeight: fullBody,
+                      // Offstage rather than absent while the sheet is shut: it
+                      // is still laid out, so the sheet always knows how tall
+                      // its cart is and opens straight to it, but it is not
+                      // painted, not touchable and not read out.
+                      child: Offstage(
+                        offstage: !open,
+                        child: PickerMeasuredHeight(
+                          onHeight: _onNatural,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // An event that has stopped selling is a state
+                              // the tray states in its own words, not a set of
+                              // controls that quietly go grey. It stands above
+                              // the body either way: a cart the buyer can no
+                              // longer check out with needs the sentence as
+                              // much as an empty one does.
+                              if (salesClosed)
+                                const Padding(
+                                  padding: EdgeInsets.fromLTRB(10, 8, 10, 0),
+                                  child: SeatLayerPickerSalesClosedStatement(),
+                                ),
+                              Flexible(
+                                child: hasTickets
+                                    ? _FilledBody(
+                                        cartList: widget.cartList,
+                                        checkoutBar: widget.checkoutBar,
+                                        actionError: widget.actionError,
+                                        attribution: widget.attribution,
+                                        onCheckout: widget.onCheckout,
+                                      )
+                                    : _EmptyBody(
+                                        bestSeats: widget.bestSeats,
+                                        actionError: widget.actionError,
+                                        attribution: widget.attribution,
+                                      ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
+                  ),
+                ),
+                if (!open && bottomInset > 0)
+                  SizedBox(
+                    height: bottomInset,
+                    child: _TrailingAttribution(child: widget.attribution),
+                  ),
+              ],
             ),
-            if (!expanded && bottomInset > 0)
-              SizedBox(
-                height: bottomInset,
-                child: _TrailingAttribution(child: attribution),
-              ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  /// The tap and the chevron still speak in open/shut; the detent follows.
+  void _ask(bool expanded) => _settle(
+        expanded ? SeatLayerSheetDetent.content : SeatLayerSheetDetent.peek,
+        velocity: 0,
+      );
+
+  /// Keep the sheet standing on its own detent when the detent itself moves —
+  /// a rotated phone, a cart that grew, a keyboard that took the screen.
+  void _keepRestingHeight() {
+    if (_dragging || _springingTo != null) return;
+    final resting = _detents.heightOf(_detent);
+    if ((_extent.value - resting).abs() < PickerSheetDetents.epsilon) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_dragging && _springingTo == null) _snapToDetent();
+    });
   }
 }
 
@@ -197,18 +451,17 @@ class SeatLayerCartSheet extends StatelessWidget {
 class _PeekRow extends StatelessWidget {
   const _PeekRow({
     required this.expanded,
+    required this.height,
     required this.onExpandedChanged,
     required this.onCheckout,
     required this.continueStyle,
   });
 
   final bool expanded;
+  final double height;
   final ValueChanged<bool> onExpandedChanged;
   final SeatLayerCheckoutCallback onCheckout;
   final ButtonStyle? continueStyle;
-
-  /// How far a drag has to travel before it counts as opening or closing.
-  static const double _dragThreshold = 18;
 
   @override
   Widget build(BuildContext context) {
@@ -246,11 +499,11 @@ class _PeekRow extends StatelessWidget {
       onPressed: () => checkoutThroughHost(controller, onCheckout),
       builder: (context, cta, onPressed) => _PeekHead(
         expanded: expanded,
+        height: height,
         cta: cta,
         onExpandedChanged: onExpandedChanged,
         onContinue: onPressed,
         continueStyle: continueStyle,
-        dragThreshold: _dragThreshold,
       ),
     );
   }
@@ -269,31 +522,25 @@ class _PeekRow extends StatelessWidget {
 class _PeekHead extends StatefulWidget {
   const _PeekHead({
     required this.expanded,
+    required this.height,
     required this.cta,
     required this.onExpandedChanged,
     required this.onContinue,
     required this.continueStyle,
-    required this.dragThreshold,
   });
 
   final bool expanded;
+  final double height;
   final SeatLayerCheckoutCtaState cta;
   final ValueChanged<bool> onExpandedChanged;
   final VoidCallback? onContinue;
   final ButtonStyle? continueStyle;
-  final double dragThreshold;
 
   @override
   State<_PeekHead> createState() => _PeekHeadState();
 }
 
 class _PeekHeadState extends State<_PeekHead> {
-  /// How far the current drag has travelled, and whether it has already
-  /// spent itself. A drag answers once: a buyer who keeps moving after the
-  /// sheet has opened is not asking for it to close again.
-  double _dragged = 0;
-  bool _dragSpent = false;
-
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerMapChromeThemeOf(context);
@@ -302,26 +549,15 @@ class _PeekHeadState extends State<_PeekHead> {
     final line = widget.cta.peekLine;
     final expanded = widget.expanded;
 
+    // The head is the grab handle, but the DRAG belongs to the sheet: the
+    // whole surface follows the finger, so a gesture that starts on the head
+    // is the same gesture as one that starts on the list. What stays here is
+    // the tap, which is the way the sheet opens without a gesture at all.
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
-      onVerticalDragStart: (_) {
-        _dragged = 0;
-        _dragSpent = false;
-      },
-      onVerticalDragUpdate: (details) {
-        if (_dragSpent) return;
-        _dragged += details.delta.dy;
-        if (_dragged <= -widget.dragThreshold) {
-          _dragSpent = true;
-          if (!expanded) widget.onExpandedChanged(true);
-        } else if (_dragged >= widget.dragThreshold) {
-          _dragSpent = true;
-          if (expanded) widget.onExpandedChanged(false);
-        }
-      },
       onTap: () => widget.onExpandedChanged(!expanded),
       child: SizedBox(
-        height: expanded ? layout.sheetOpenHeadHeight : layout.peekHeight,
+        height: widget.height,
         child: Stack(
           children: [
             // Not a row of its own: the grabber overlaps into the same head,
@@ -386,9 +622,8 @@ class _PeekHeadState extends State<_PeekHead> {
                     const SizedBox(width: 10),
                     _SheetToggle(
                       expanded: expanded,
-                      label: expanded
-                          ? strings.collapseCart
-                          : strings.expandCart,
+                      label:
+                          expanded ? strings.collapseCart : strings.expandCart,
                       onPressed: () => widget.onExpandedChanged(!expanded),
                     ),
                   ],
@@ -594,7 +829,8 @@ class _PeekClockState extends State<_PeekClock> {
     final now = SeatLayerPickerHoldCountdown.debugClock();
     final remaining = state.holdRemaining(now);
     final minutes = remaining.inMinutes.remainder(60).toString();
-    final seconds = remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final seconds =
+        remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
     return Opacity(
       opacity: .72,
       child: Text(
@@ -899,3 +1135,59 @@ Future<void> checkoutThroughHost(
 /// from handing most of itself to a cart.
 double _atMost(double value, double ceiling) =>
     value < ceiling ? value : ceiling;
+
+/// The one cue that is not an answer to a touch: the hold has a minute left.
+///
+/// Draws nothing. It lives in the sheet because the sheet is the one piece of
+/// phone chrome that is always mounted, and it fires on the same instant the
+/// header's countdown turns from a fact into a warning — one event, felt and
+/// seen at once.
+///
+/// A hold that is ALREADY inside its last minute the first time the picker
+/// sees it — a resumed session, a buyer coming back from checkout — never
+/// fires: nothing just happened, and a buzz on open teaches a buyer that the
+/// buzz means nothing.
+class SeatLayerHoldEndingCue extends StatefulWidget {
+  /// Creates the hold-ending cue.
+  const SeatLayerHoldEndingCue({super.key});
+
+  @override
+  State<SeatLayerHoldEndingCue> createState() => _SeatLayerHoldEndingCueState();
+}
+
+class _SeatLayerHoldEndingCueState extends State<SeatLayerHoldEndingCue> {
+  Timer? _timer;
+
+  /// The expiry the armed timer belongs to, so an extended hold rearms and an
+  /// unchanged one does not.
+  double? _armedFor;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _arm(SeatLayerPickerState state) {
+    final expiry = state.hold?.expiresAt;
+    if (expiry == _armedFor) return;
+    _armedFor = expiry;
+    _timer?.cancel();
+    _timer = null;
+    if (expiry == null) return;
+    final lead = state.holdRemaining(seatLayerPickerNow()) -
+        SeatLayerPickerHoldCountdown.expiring;
+    if (lead <= Duration.zero) return;
+    _timer = Timer(lead, () {
+      if (!mounted) return;
+      SeatLayerPickerScope.controllerOf(context)
+          .emitHaptic(PickerHapticCue.holdEnding);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _arm(SeatLayerPickerScope.stateOf(context));
+    return const SizedBox.shrink();
+  }
+}

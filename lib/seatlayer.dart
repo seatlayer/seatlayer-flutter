@@ -72,6 +72,7 @@ export 'src/picker/picker_header.dart'
         seatLayerPickerNow;
 export 'src/picker/picker_hold_lapse.dart' show SeatLayerHoldLapseNotice;
 export 'src/picker/picker_layout.dart' show SeatLayerPickerLayout;
+export 'src/picker/picker_sheet_drag.dart' show SeatLayerSheetDetent;
 export 'src/picker/picker_legend.dart'
     show SeatLayerPickerPriceRail, SeatLayerPriceLegend;
 export 'src/picker/picker_map_controls.dart'

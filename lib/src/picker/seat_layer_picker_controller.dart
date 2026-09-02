@@ -15,6 +15,8 @@ import 'picker_chart_load.dart';
 import 'picker_haptics.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
+import 'picker_revision_waiters.dart';
+import 'picker_sheet_drag.dart';
 import 'picker_viewport_report.dart';
 import 'seat_layer_picker_theme.dart';
 
@@ -118,12 +120,14 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   int _reloadGeneration = 0;
   late final PickerViewportReport _viewportReport =
       PickerViewportReport(send: _sendViewportInsets);
-  bool _cartSheetExpanded = false;
+  SeatLayerSheetDetent _cartSheetDetent = SeatLayerSheetDetent.peek;
   bool _cartSheetInitialized = false;
   final Set<String> _confirmedLabels = <String>{};
   SelectedSeat? _confirmCardSeat;
-  final Map<int, List<Completer<void>>> _revisionWaiters =
-      <int, List<Completer<void>>>{};
+  late final PickerRevisionWaiters _revisionWaiters = PickerRevisionWaiters(
+    revisionNow: () => value.revision,
+    resync: _resyncSnapshot,
+  );
   Future<SeatLayerAvailabilityRefresh>? _refreshInFlight;
   SeatLayerHoldLapse? _holdLapse;
   bool _holdExpiryReported = false;
@@ -234,18 +238,37 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   /// the layout a fresh [State], and an expanded sheet that snaps shut takes
   /// the buyer's place in their own cart with it. The controller outlives all
   /// of that, and a composed layout reads the same value the drop-in does.
-  bool get cartSheetExpanded => _cartSheetExpanded;
+  bool get cartSheetExpanded => _cartSheetDetent != SeatLayerSheetDetent.peek;
+
+  /// WHERE the buyer has it, not merely whether it is open.
+  ///
+  /// A phone sheet the finger can drag has three places to stop, and a host
+  /// that reads only [cartSheetExpanded] still sees the truthful answer to the
+  /// question it asked.
+  SeatLayerSheetDetent get cartSheetDetent => _cartSheetDetent;
+
+  /// Rest the cart sheet at [detent].
+  ///
+  /// The sheet itself calls this as a drag settles; hosts and the layout's own
+  /// map-tap collapse go through [setCartSheetExpanded].
+  void setCartSheetDetent(SeatLayerSheetDetent detent) {
+    if (_disposed || _cartSheetDetent == detent) return;
+    _cartSheetDetent = detent;
+    _cartSheetInitialized = true;
+    notifyListeners();
+  }
 
   /// Open or collapse the cart sheet.
   ///
   /// Notifies listeners without touching [value]: the sheet is chrome, not
   /// picker state, and nothing about it belongs in a snapshot.
-  void setCartSheetExpanded(bool expanded) {
-    if (_disposed || _cartSheetExpanded == expanded) return;
-    _cartSheetExpanded = expanded;
-    _cartSheetInitialized = true;
-    notifyListeners();
-  }
+  void setCartSheetExpanded(bool expanded) => setCartSheetDetent(
+        expanded
+            // Content, never full: the sheet opens to the height of what is in
+            // it. Full is a place the buyer's own finger reaches.
+            ? SeatLayerSheetDetent.content
+            : SeatLayerSheetDetent.peek,
+      );
 
   @internal
   int get reloadGeneration => _reloadGeneration;
@@ -339,7 +362,9 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     if (!_mountClock.isRunning && _tapToReadyMs == null) _mountClock.start();
     if (!_cartSheetInitialized) {
       _cartSheetInitialized = true;
-      _cartSheetExpanded = !options.panelInitiallyCollapsed;
+      _cartSheetDetent = options.panelInitiallyCollapsed
+          ? SeatLayerSheetDetent.peek
+          : SeatLayerSheetDetent.content;
     }
     _closing = false;
     if (value.phase == SeatLayerPickerPhase.closed ||
@@ -487,14 +512,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       emitHaptic(cue);
     }
 
-    final completed = _revisionWaiters.keys
-        .where((target) => target <= snapshot.revision)
-        .toList(growable: false);
-    for (final target in completed) {
-      for (final waiter in _revisionWaiters.remove(target)!) {
-        if (!waiter.isCompleted) waiter.complete();
-      }
-    }
+    _revisionWaiters.releaseThrough(snapshot.revision);
   }
 
   Future<void> synchronize() => _serialize(() async {
@@ -1427,27 +1445,13 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     if (snapshot != null) _applySnapshot(snapshot);
   }
 
-  Future<void> _awaitRevision(int target) async {
-    if (value.revision >= target) return;
-    final waiter = Completer<void>();
-    (_revisionWaiters[target] ??= <Completer<void>>[]).add(waiter);
-    try {
-      await waiter.future.timeout(const Duration(seconds: 2));
-    } on TimeoutException {
-      final result = await mapController.runBridgeCommand('picker.getSnapshot');
-      _applySnapshotFromResult(result);
-      if (value.revision < target) {
-        throw SeatLayerError.decoding(
-          'picker state stopped at revision ${value.revision}; expected $target',
-        );
-      }
-    } finally {
-      _revisionWaiters[target]?.remove(waiter);
-      if (_revisionWaiters[target]?.isEmpty ?? false) {
-        _revisionWaiters.remove(target);
-      }
-    }
-  }
+  /// Ask the runtime for the snapshot it has right now, and apply it.
+  Future<void> _resyncSnapshot() async => _applySnapshotFromResult(
+        await mapController.runBridgeCommand('picker.getSnapshot'),
+      );
+
+  Future<void> _awaitRevision(int target) =>
+      _revisionWaiters.awaitRevision(target);
 
   Future<T> _serialize<T>(Future<T> Function() action) {
     if (_disposed) return Future<T>.error(const SeatLayerError.destroyed());
@@ -1470,14 +1474,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   void dispose() {
     if (_disposed) return;
     _disposed = true;
-    for (final waiters in _revisionWaiters.values) {
-      for (final waiter in waiters) {
-        if (!waiter.isCompleted) {
-          waiter.completeError(const SeatLayerError.destroyed());
-        }
-      }
-    }
-    _revisionWaiters.clear();
+    _revisionWaiters.failAll();
     unawaited(_bridgeSubscription.cancel());
     unawaited(_readySubscription.cancel());
     unawaited(_accessExpiredSubscription.cancel());

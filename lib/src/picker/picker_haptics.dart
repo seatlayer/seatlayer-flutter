@@ -12,8 +12,22 @@ enum PickerHapticCue {
   selectionAdded,
 
   /// The map moved into a different section — a change of place, not of
-  /// inventory.
+  /// inventory. A selection tick, the same cue a picker wheel gives as it
+  /// passes a stop: arriving somewhere is navigation, and navigation that
+  /// thumps is navigation a buyer stops doing.
   sectionFocused,
+
+  /// A ticket left the cart — the × or a swipe. Light: something the buyer
+  /// did on purpose and can undo from the bar that follows it.
+  ticketRemoved,
+
+  /// The hold has a minute left.
+  ///
+  /// The one warning in the set, and the only cue that is not an answer to a
+  /// touch: it has to be recognisable through a pocket, so it is a buzz rather
+  /// than an impact, and it fires the moment the countdown turns from a fact
+  /// into a warning.
+  holdEnding,
 
   /// Seats are now actually held. The one moment in the flow where something
   /// irreversible-feeling happened, so it gets a firm cue.
@@ -145,6 +159,8 @@ void playPickerHaptic(PickerHapticCue cue) {
 String pickerHapticStrength(PickerHapticCue cue) => switch (cue) {
       PickerHapticCue.selectionAdded => SeatLayerHapticTokens.selectionAdded,
       PickerHapticCue.sectionFocused => SeatLayerHapticTokens.sectionFocused,
+      PickerHapticCue.ticketRemoved => SeatLayerHapticTokens.ticketRemoved,
+      PickerHapticCue.holdEnding => SeatLayerHapticTokens.holdEnding,
       PickerHapticCue.holdCreated => SeatLayerHapticTokens.holdCreated,
       PickerHapticCue.holdExpired => SeatLayerHapticTokens.holdExpired,
       PickerHapticCue.cardArrived => SeatLayerHapticTokens.cardArrived,
@@ -157,5 +173,9 @@ Future<void> _fire(String strength) => switch (strength) {
       'light' => HapticFeedback.lightImpact(),
       'medium' => HapticFeedback.mediumImpact(),
       'heavy' => HapticFeedback.heavyImpact(),
+      // Not an impact at all: a warning has to be told apart from the taps the
+      // buyer has been feeling all along, and duration is the only dimension
+      // an impact does not use.
+      'warning' => HapticFeedback.vibrate(),
       _ => HapticFeedback.selectionClick(),
     };
