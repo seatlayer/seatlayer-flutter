@@ -143,6 +143,7 @@ Map<String, Object?> pickerSnapshot({
           ? <Object?>[
               <String, Object?>{
                 'id': 'seat-a-1',
+      'seatViewKind': 'real',
                 'label': 'A-1',
                 'displayLabel': 'Row A, Seat 1',
                 'displayType': 'Row',

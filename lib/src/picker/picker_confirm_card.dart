@@ -178,6 +178,10 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
             capabilities.contains('seatView')
         ? widget.onViewFromSeat ?? controller.openSeatView
         : null;
+    // The photograph is offered only where there is one: a real upload, not
+    // the stand-in the runtime can draw for any seat. The 3D and 360° paths
+    // do not depend on it.
+    final realPhoto = seatView != null && seat.seatViewKind == 'real';
     final venue3D =
         widget.show3D && options.enable3D && capabilities.contains('venue3d')
             ? widget.onShow3D ?? controller.showSeatIn3D
@@ -333,7 +337,7 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                               // exists; 3D rides its far corner. With 3D alone there
                               // is no picture to stand in for, so the pills sit on a
                               // plain rail instead of in an empty frame.
-                              if (!immersive && seatView != null)
+                              if (!immersive && realPhoto)
                                 _PhotoStrip(
                                   onViewFromSeat: controller.state.isBusy
                                       ? null

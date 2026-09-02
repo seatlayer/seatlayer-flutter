@@ -210,6 +210,7 @@ class SelectedSeat {
     this.accessibility,
     this.wheelchairSpaceType,
     this.screenPoint,
+    this.seatViewKind,
   });
 
   final String id;
@@ -259,6 +260,15 @@ class SelectedSeat {
   /// that reads this has to be correct with null.
   final Offset? screenPoint;
 
+  /// What a view from this seat would show: `real` for an uploaded
+  /// photograph, `generated` for a stand-in the runtime drew, or null when
+  /// the runtime has not said.
+  ///
+  /// Sent by a runtime that advertises `seat-view-thumbnail-v1`. A picker
+  /// offers `View from here` only for a real photograph; a generated view is
+  /// never offered from the card, though the 3D and 360° paths are unchanged.
+  final String? seatViewKind;
+
   /// What to show the buyer. Booking still uses [label].
   String get buyerFacingLabel => displayLabel ?? label;
 
@@ -294,6 +304,7 @@ class SelectedSeat {
           : jListOf(jGet(v, 'accessibility'), (item) => jStr(item)),
       wheelchairSpaceType: jStr(jGet(v, 'wheelchairSpaceType')),
       screenPoint: _screenPoint(jGet(v, 'screenPoint')),
+      seatViewKind: jStr(jGet(v, 'seatViewKind')),
     );
   }
 

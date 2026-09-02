@@ -382,6 +382,26 @@ void main() {
     expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 203);
   }, semanticsEnabled: true);
 
+  testWidgets('a seat without a real photograph is not offered a view from it',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    final snapshot = pickerSnapshot();
+    final seat = (snapshot['selection']! as Map<String, Object?>)['seats'];
+    ((seat! as List<Object?>).first as Map<String, Object?>)['seatViewKind'] =
+        'generated';
+    map.emit(snapshot);
+    await pumpToRest(tester);
+
+    // The stand-in the runtime can draw for any seat is never offered from
+    // the card; only the 3D pill stays, on the plain rail.
+    expect(find.text('View from here'), findsNothing);
+    expect(find.text('3D'), findsOneWidget);
+  }, semanticsEnabled: true);
+
   testWidgets('the photo strip is full-bleed inside the card', (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);

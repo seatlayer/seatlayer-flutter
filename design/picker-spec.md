@@ -591,7 +591,9 @@ is a correct state, not a degraded one.
    arrived**. `strings.onlyLeft` is available as a scarcity telling for a host
    that wants one.
 3. **Photo strip**, height `size.confirmPhotoHeight`, full-bleed inside the
-   card's corner, drawn **only where a view-from-seat photo exists**. Over it, in
+   card's corner, drawn **only where the seat has a real uploaded photograph**
+   (`seatViewKind == 'real'`, capability `seat-view-thumbnail-v1`); a generated
+   stand-in is never offered from the card, though 3D and 360° are unchanged. Over it, in
    the trailing bottom corner, a group of pills of `size.confirmPillHeight` at
    `radius.pill` on a dark plate with white ink in **both** themes: `View from
    here` (`strings.viewFromHere`) and `3D` (`strings.venue3D`, accessible name
