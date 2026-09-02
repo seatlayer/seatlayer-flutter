@@ -740,6 +740,21 @@ class ReadyInfo {
 /// reads it to decide whether to draw.
 const String seatLayerSeatViewChromeCapability = 'native-seat-view-chrome-v1';
 
+/// Advertised by a runtime that speaks the native-chrome contract, including
+/// `picker.setThemeMode`'s optional map ground.
+const String seatLayerNativeChromeContractCapability =
+    'native-chrome-contract-v1';
+
+/// Advertised by a runtime that frames against host-reported viewport insets.
+const String seatLayerViewportInsetsCapability = 'viewport-insets-v1';
+
+/// Advertised by a runtime that stacks a multi-floor venue and accepts the
+/// `'all'` sentinel on `picker.setFloor`.
+const String seatLayerFloorStackCapability = 'floor-stack-v1';
+
+/// Advertised by a runtime that hands its own chart-load beacon to the host.
+const String seatLayerChartLoadTraceCapability = 'chart-load-trace-v1';
+
 /// What the bundle advertises in `hello`.
 class BundleInfo {
   const BundleInfo({

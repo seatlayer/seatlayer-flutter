@@ -218,7 +218,11 @@ void main() {
 
       // Deliberately not derived from the snapshot: a hold going inactive
       // looks identical whether it lapsed or the buyer let it go on purpose.
-      map.expiries.add(null);
+      // The picker reads the expiry off the bridge itself, ahead of the
+      // snapshot that follows it.
+      map.events.add(
+        const EventSignal(name: 'hold.expired', payload: null, sequence: 1),
+      );
       await pumpEventQueue();
       expect(fired, <PickerHapticCue>[PickerHapticCue.holdExpired]);
     });

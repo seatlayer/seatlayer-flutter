@@ -284,6 +284,12 @@ void main() {
 
       await controller.checkout();
       await tester.pumpAndSettle();
+      // The hand-off is a buyer on the way to pay, not a sale.
+      expect(find.text("You're all set"), findsNothing);
+
+      // The hold vanishes with no expiry announced: the seats sold.
+      map.emit(pickerSnapshot(revision: 3));
+      await tester.pumpAndSettle();
 
       expect(find.text("You're all set"), findsOneWidget);
       expect(
@@ -301,6 +307,48 @@ void main() {
         reason: 'the map is the way out, and the hold is unaffected',
       );
       expect(controller.state.checkoutHandoff, isNotNull);
+    });
+
+    testWidgets('a hold that ran out behind checkout is not a sale',
+        (tester) async {
+      final map = FakePickerMap(
+        bundle: nativeChromeBundle(),
+        handler: (command, payload) async => <String, Object?>{
+          'revision': 2,
+          'snapshot': pickerSnapshot(revision: 2, holdOwner: 'host'),
+          'handoff': <String, Object?>{
+            'holdId': 'hold-1',
+            'expiresAt': 1999999999000.0,
+            'currency': 'EUR',
+            'total': 25.0,
+            'lineItems': <Object?>[],
+          },
+        },
+      );
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      final controller = SeatLayerPickerController(mapController: map);
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const _Fill(SeatLayerPickerBookedOverlay()),
+          controller: controller,
+        ),
+      );
+      map.emit(pickerSnapshot(holdOwner: 'host'));
+      await tester.pumpAndSettle();
+      await controller.checkout();
+      await tester.pumpAndSettle();
+
+      // The runtime announces the expiry before the snapshot that shows the
+      // hold gone, as it does on the wire.
+      map.emitEvent('hold.expired', null);
+      await tester.pumpAndSettle();
+      map.emit(pickerSnapshot(revision: 3));
+      await tester.pumpAndSettle();
+
+      expect(find.text("You're all set"), findsNothing);
     });
   });
 

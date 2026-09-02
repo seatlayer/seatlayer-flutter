@@ -11,6 +11,7 @@ import '../seat_layer_configuration.dart';
 import '../seat_layer_controller.dart';
 import '../seat_layer_error.dart';
 import 'picker_availability.dart';
+import 'picker_booked_tracker.dart';
 import 'picker_chart_load.dart';
 import 'picker_haptics.dart';
 import 'picker_models.dart';
@@ -19,20 +20,6 @@ import 'picker_revision_waiters.dart';
 import 'picker_sheet_drag.dart';
 import 'picker_viewport_report.dart';
 import 'seat_layer_picker_theme.dart';
-
-/// Advertised by a runtime that speaks the native-chrome contract, including
-/// `picker.setThemeMode`'s optional map ground.
-const String _nativeChromeContractCapability = 'native-chrome-contract-v1';
-
-/// Advertised by a runtime that frames against host-reported viewport insets.
-const String _viewportInsetsCapability = 'viewport-insets-v1';
-
-/// Advertised by a runtime that stacks a multi-floor venue and accepts the
-/// `'all'` sentinel on `picker.setFloor`.
-const String _floorStackCapability = 'floor-stack-v1';
-
-/// Advertised by a runtime that hands its own chart-load beacon to the host.
-const String _chartLoadTraceCapability = 'chart-load-trace-v1';
 
 /// State and actions for one high-level picker session.
 ///
@@ -67,8 +54,6 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         .mapController
         .onSelectedObjectsUnavailable
         .listen((event) => _callbacks.onSelectedObjectUnavailable?.call(event));
-    _holdExpiredSubscription =
-        this.mapController.onHoldExpired.listen((_) => _reportHoldExpired());
     _generalAdmissionSubscription = this.mapController.onGAClick.listen((area) {
       if (!_options.readOnly) {
         value = value.withGeneralAdmissionCandidate(area);
@@ -95,7 +80,6 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       _accessUnavailableSubscription;
   late final StreamSubscription<SelectedObjectUnavailableEvent>
       _selectionUnavailableSubscription;
-  late final StreamSubscription<void> _holdExpiredSubscription;
   late final StreamSubscription<GAArea> _generalAdmissionSubscription;
   late final StreamSubscription<SeatLayerError> _errorSubscription;
 
@@ -131,8 +115,12 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   Future<SeatLayerAvailabilityRefresh>? _refreshInFlight;
   SeatLayerHoldLapse? _holdLapse;
   bool _holdExpiryReported = false;
+  final PickerBookedTracker _booked = PickerBookedTracker();
 
   SeatLayerPickerState get state => value;
+
+  /// The handoff whose seats settled to booked, or null.
+  SeatLayerCheckoutHandoff? get bookedHandoff => _booked.booked;
   SeatLayerPickerOptions get options => _options;
 
   /// Whether the buyer may hand this cart to checkout.
@@ -400,6 +388,13 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       _onSeatViewChanged(event.payload);
       return;
     }
+    if (event.name == 'hold.expired') {
+      // Read off the bridge itself, on the same hop as the snapshot that
+      // follows it, so the expiry is known before a vanished hold could be
+      // taken for a sale.
+      _reportHoldExpired();
+      return;
+    }
     if (event.name != 'picker.snapshot' && event.name != 'sys.ready') return;
     final raw = jGet(event.payload, 'snapshot') ??
         (event.name == 'picker.snapshot' ? event.payload : null);
@@ -449,7 +444,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     // Capability-gated consumption: a runtime that has not said it speaks this
     // is not read for it, whatever happens to be on the wire.
     if (bundle == null ||
-        !bundle.supportsCapability(_chartLoadTraceCapability)) {
+        !bundle.supportsCapability(seatLayerChartLoadTraceCapability)) {
       return;
     }
     final trace = SeatLayerChartLoadTrace.fromJson(jGet(payload, 'trace'));
@@ -491,6 +486,13 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       _callbacks.onSelectionValidityChanged?.call(snapshot.selectionValidity!);
     }
     final nextHold = snapshot.hold.active ? snapshot.hold : null;
+    final booked = _booked.observe(
+      handoff: value.checkoutHandoff,
+      previous: previousHold,
+      next: nextHold,
+      expiryReported: _holdExpiryReported,
+    );
+    if (booked != null) _callbacks.onBooked?.call(booked);
     if (previousHold?.active != nextHold?.active ||
         previousHold?.owner != nextHold?.owner ||
         previousHold?.expiresAt != nextHold?.expiresAt) {
@@ -908,7 +910,8 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   /// to a runtime with no such floor would be a command with nowhere to land.
   bool get supportsFloorStack {
     final bundle = mapController.bundleInfo;
-    return bundle != null && bundle.supportsCapability(_floorStackCapability);
+    return bundle != null &&
+        bundle.supportsCapability(seatLayerFloorStackCapability);
   }
 
   /// Draw every floor of the venue at once.
@@ -949,7 +952,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     }
     final carriesGround = mapTheme != null &&
         bundle != null &&
-        bundle.supportsCapability(_nativeChromeContractCapability);
+        bundle.supportsCapability(seatLayerNativeChromeContractCapability);
     // Deliberately NOT a _mutation. Repainting changes no inventory and moves
     // no geometry, so parking the picker on `changingView` only greys the
     // chrome the buyer is looking at — and folding the reply's snapshot in
@@ -1001,7 +1004,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   bool get supportsViewportInsets {
     final bundle = mapController.bundleInfo;
     return bundle != null &&
-        bundle.supportsCapability(_viewportInsetsCapability) &&
+        bundle.supportsCapability(seatLayerViewportInsetsCapability) &&
         bundle.supportsCommand('picker.setViewportInsets');
   }
 
@@ -1279,6 +1282,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       SeatLayerPickerBusyAction.releasingHold,
     );
     if (value.checkoutHandoff?.holdId == handoff.holdId) {
+      _booked.reset();
       value = value.withoutHandoff();
     }
   }
@@ -1480,7 +1484,6 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     unawaited(_accessExpiredSubscription.cancel());
     unawaited(_accessUnavailableSubscription.cancel());
     unawaited(_selectionUnavailableSubscription.cancel());
-    unawaited(_holdExpiredSubscription.cancel());
     unawaited(_generalAdmissionSubscription.cancel());
     unawaited(_errorSubscription.cancel());
     unawaited(_chartLoads.close());

@@ -435,6 +435,9 @@ void main() {
         ),
       );
       map.emit(heldRowSnapshot());
+      // At peek the collapsed cart's pill carries the clock and the header
+      // stands down; open the sheet so the header's is the one on screen.
+      controller.setCartSheetExpanded(true);
       await tester.pumpAndSettle();
       // The pill is a status dot and a live `m:ss` — the clock is the thing
       // that must not outlive the hold, so it is what is looked for.

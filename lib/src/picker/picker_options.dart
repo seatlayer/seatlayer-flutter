@@ -338,6 +338,7 @@ class SeatLayerPickerCallbacks {
     this.onSelectionValidityChanged,
     this.onHoldChanged,
     this.onHoldExpired,
+    this.onBooked,
     this.onAccessExpired,
     this.onAccessUnavailable,
     this.onSelectedObjectUnavailable,
@@ -375,6 +376,10 @@ class SeatLayerPickerCallbacks {
 
   /// The hold ran out.
   final VoidCallback? onHoldExpired;
+
+  /// The held seats settled to booked while the picker was still up: the
+  /// hold passed to the host, then vanished with no expiry announced.
+  final ValueChanged<SeatLayerCheckoutHandoff>? onBooked;
 
   /// The buyer's access token expired.
   final ValueChanged<BuyerAccessExpiredEvent>? onAccessExpired;

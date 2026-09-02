@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+The "You're all set" screen now waits for the sale. It used to appear the
+moment the hold was handed to the host's checkout, so a buyer who came back
+from checkout without paying was congratulated over a hold that was still
+running. It now appears only when the handed-off hold settles to booked — the
+hold vanishes with no expiry announced — which is the web picker's rule; and a
+new `SeatLayerPickerCallbacks.onBooked` fires once at the same moment, with the
+handoff, for hosts that want to act on the sale themselves.
+
 The picker loads once. A prewarmed runtime page is now adopted only after the
 picker has been laid out, so the chart's first paint is at its final size
 instead of a smaller one that re-fits in front of the buyer; and the loading

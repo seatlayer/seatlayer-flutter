@@ -577,10 +577,11 @@ class _SeatLayerPickerExtendHoldPromptState
 
 /// The moment the tickets are the buyer's.
 ///
-/// Shown only while this picker is still the screen and the hold has passed to
-/// the host: a host that pops the picker route on a successful handoff has
-/// already told the buyer, and a second telling behind a dead route would be a
-/// screen nobody asked for. `Back to map` takes the overlay away without
+/// Shown only once the handed-off hold has settled to booked — never on the
+/// hand-off itself, which is a buyer on their way to pay, not a buyer who has
+/// paid. A host that pops the picker route on a sale has already told the
+/// buyer, and a second telling behind a dead route would be a screen nobody
+/// asked for. `Back to map` takes the overlay away without
 /// touching the hold, because the seats are booked either way.
 class SeatLayerPickerBookedOverlay extends StatefulWidget {
   /// Creates the booked overlay.
@@ -598,11 +599,8 @@ class _SeatLayerPickerBookedOverlayState
 
   @override
   Widget build(BuildContext context) {
-    final state = SeatLayerPickerScope.stateOf(context);
-    final handoff = state.checkoutHandoff;
-    if (handoff == null || !state.hasHostOwnedHold) {
-      return const SizedBox.shrink();
-    }
+    final handoff = SeatLayerPickerScope.controllerOf(context).bookedHandoff;
+    if (handoff == null) return const SizedBox.shrink();
     if (_dismissed == handoff.holdId) return const SizedBox.shrink();
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
