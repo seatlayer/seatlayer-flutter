@@ -780,11 +780,15 @@ class _SeatLayerPickerAdaptiveLayoutState
                         ),
                         child: PickerPromptTransition(
                           readingOrder: SeatLayerPickerReadingOrder.prompt,
-                          // The map pales while a card asks; the scene is dark.
+                          // No wash by default: the runtime itself pales the
+                          // venue outside the focused seat's section while a
+                          // card asks, and the neighbours keep their ink and
+                          // numbers, as on the web. A host that wants a wash
+                          // over the whole map sets the slot.
                           scrimColor: seatCard3D
                               ? const Color(0x00000000)
                               : resolved.styles.scrimColor ??
-                                  pickerAlpha(resolved.background, .64),
+                                  const Color(0x00000000),
                           // The card arrives from the seat's direction and points
                           // back at it. In the scene the seat IS the picture, so
                           // nothing points at it and the card rests over it.

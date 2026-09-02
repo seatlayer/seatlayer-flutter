@@ -530,10 +530,14 @@ Width `size.confirmCardMaxWidth`, capped at the map width less
 `elevation.confirmCard`, ground `color.*.surface`, hairline a mix of the divider
 toward the text so the card has an edge on both themes.
 
-Behind it, the map is **dimmed, never blurred** — a blurred map turns the seat
-the card is asking about into colour. The wash is ink at partial opacity, and it
-is a style slot (`scrimColor`); the default pales the seats and keeps the tapped
-one legible. While the card is up, the rest of the chrome is *paused*: the
+Behind it, the map is **never blurred** — a blurred map turns the seat the
+card is asking about into colour — and, since runtime 0.76, **not washed by the
+native chrome either**: the runtime itself pales the venue outside the focused
+seat's section (opacity .16, and a six-seat-pitch disc on a section-less
+chart) while the neighbours keep full ink and their numbers, exactly as the web
+card shows them. `scrimColor` stays a style slot for a host that wants a wash
+over the whole map; its default is transparent. (Until 0.76 the default was
+the ground at .64, which on 0.76 washed the neighbours twice.) While the card is up, the rest of the chrome is *paused*: the
 anchors dim and stop receiving presses, and the cart sheet dims and goes inert.
 The **bottom-centre** region is the exception — it comes forward at full opacity
 above the card, because it carries the toast that is the *reply* to the tap, and
