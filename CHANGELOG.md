@@ -64,6 +64,24 @@ while the scene's `Back to venue` pill is drawn. New layout token:
 the sheet, where a phone's rounded corner cannot clip it, and keeps its ink on
 the dark scene sheet.
 
+Every phone surface now carries the web picker's own numbers, extracted from
+its stylesheets: the 38 pt header on the picker's ground with a letter logo
+and a 26 pt close ring; the 44 pt price rail with 24 pt chips, `All prices`
+pinned first, ringed dots on the light theme and the `{min}+` rule; the
+Map | 3D control; the test chip as one recipe in both themes; the seat card's
+box, grid, band, strip, pills, tiers and every animation timing; the 50 pt
+peek head with its grabber, pill, Find seats and chevron, the sheet's
+ceilings and drag gestures, the peek's own lines for holding, checkout and
+closed sales; dense 44 pt cart rows on one plate with the held wash and the
+`+N more` row; the 52 pt dock with the outlined `Venue` pill; 12 pt map
+corners; the 3D chrome on one dark glass; the accessibility sheet as switch
+rows with free counts. The light ground is white and the surfaces the grey,
+as the web's are. Every buyer-facing state the web shows exists natively:
+toasts for a seat taken, a hold expired or lapsed and closed sales; the
+sold-out overlay; the access panel with its own retry; the hold-extend
+prompt; the booked overlay with the seat list and a way back; the closed
+statement in the tray; the hold and closed pills in the header.
+
 **Runtime pin**
 
 The hosted runtime moves to `seatlayer-js@0.74.0`. Views load
