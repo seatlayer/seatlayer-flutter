@@ -5,7 +5,7 @@ import 'package:seatlayer/src/seat_layer_configuration.dart';
 
 void main() {
   test('hosted and fixture runtime versions remain explicitly pinned', () {
-    expect(seatLayerHostedWebVersion, '0.71.5');
+    expect(seatLayerHostedWebVersion, '0.74.0');
     expect(seatLayerLegacyFixtureWebVersion, '0.68.0');
     expect(
       seatLayerMobilePageUrl,
