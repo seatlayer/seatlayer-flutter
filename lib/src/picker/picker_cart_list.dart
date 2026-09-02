@@ -4,12 +4,13 @@ import '../payloads.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
+import 'picker_tokens.g.dart';
 import 'picker_tray_dense.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
-/// The buyer's tickets, one 40-point line each.
+/// The buyer's tickets, one full-target line each.
 ///
 /// Consecutive seats that differ only by number fold into a run —
 /// `Gallery · A · 1–6   6 × €25   €150` — which a tap opens in place, so a
@@ -185,6 +186,11 @@ SeatLayerTicketLine _resolveLine(
   // never tapped — a Best Available result, a resumed hold — is in no renderer
   // selection at all, so the join finds nothing and only the line knows where
   // the seat is.
+  //
+  // Where the chart has no sections the ticket type names the line instead:
+  // `Row D · Seat 1` on its own names nothing a buyer can find in a venue. The
+  // type is never *added* to a section for the same reason it is not drawn
+  // beside one — `Gallery · Gallery · A · 1` is a stutter, not an address.
   final section = _first(item.sectionLabel, seat?.sectionLabel);
   final row = _first(item.rowLabel, seat?.rowLabel);
   final number = _first(item.seatNumber, seat?.seatNumber);
@@ -284,18 +290,38 @@ class _DenseLine extends StatelessWidget {
       if (seats.isNotEmpty && line.section.isNotEmpty) seats,
     ];
 
+    // The type is read out only when it is not already the name of the line;
+    // on a chart with no sections the two are the same string, and hearing
+    // "Standard, Standard · Row D · 1" is the spoken form of the stutter the
+    // drawn line avoids.
+    final spokenType =
+        line.categoryLabel.toLowerCase() == line.section.toLowerCase()
+            ? ''
+            : '${line.categoryLabel}, ';
+
     return Semantics(
       container: true,
-      label: '${line.categoryLabel}, ${strings.seatIdentity(identity)}, '
+      label: '$spokenType${strings.seatIdentity(identity)}, '
           '${pickerMoney(context, total, line.item.currency)}',
-      child: SizedBox(
+      child: Container(
         height: theme.layout.denseLineHeight,
+        // A held row is inventory the server has already set aside. The
+        // hairline and the lock say so without spending a column on a word.
+        decoration: line.held
+            ? BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: pickerAlpha(theme.accent, .4)),
+              )
+            : null,
         child: InkWell(
           onTap: onToggle,
           child: Padding(
             padding: EdgeInsets.only(left: group == null ? 22 : 0, right: 2),
             child: Row(
               children: [
+                // The chevron is a marker, not the target: the whole line
+                // opens the run, and the line clears the touch floor in both
+                // directions on its own.
                 if (onToggle != null)
                   AnimatedRotation(
                     duration: SeatLayerPickerMotion.of(
@@ -311,6 +337,8 @@ class _DenseLine extends StatelessWidget {
                   )
                 else if (group != null)
                   const SizedBox(width: 18)
+                else if (line.held)
+                  Icon(Icons.lock_rounded, size: 12, color: theme.accent)
                 else
                   DecoratedBox(
                     decoration: BoxDecoration(
@@ -368,10 +396,12 @@ class _DenseLine extends StatelessWidget {
                   IconButton(
                     tooltip: 'Remove ${line.section} ${line.seatLabel}',
                     onPressed: onRemove,
-                    visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
-                    constraints:
-                        const BoxConstraints.tightFor(width: 34, height: 34),
+                    // The glyph stays small; the target around it does not.
+                    constraints: const BoxConstraints.tightFor(
+                      width: SeatLayerSizeTokens.minimumHitTarget,
+                      height: SeatLayerSizeTokens.minimumHitTarget,
+                    ),
                     color: theme.mutedText,
                     icon: const Icon(Icons.close_rounded, size: 16),
                   )

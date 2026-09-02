@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
 import 'picker_styles.dart';
+import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
@@ -132,7 +133,9 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
     );
 
     return SizedBox(
-      height: compact ? 30 : 40,
+      // The band, not the chip: the drawn chip stays thirty points on a phone,
+      // and the extra height around it is the part a thumb lands on.
+      height: compact ? SeatLayerSizeTokens.minimumHitTarget : 40,
       child: NotificationListener<ScrollMetricsNotification>(
         onNotification: (notification) {
           _readEdges(notification.metrics);
@@ -224,11 +227,25 @@ class _LegendChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final chipStyle = style;
+    // The ink is the chip; the target is the whole band it sits in. The outer
+    // gesture answers the strip above and below the pill, the inner ink well
+    // answers the pill itself and keeps the ripple inside it, and only one of
+    // the two ever wins a tap.
     return Semantics(
       button: true,
       selected: selected,
       label: semanticsLabel,
-      child: Material(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onPressed,
+        child: Center(child: _ink(chipStyle)),
+      ),
+    );
+  }
+
+  Widget _ink(SeatLayerSurfaceStyle chipStyle) => SizedBox(
+        height: compact ? 30 : 40,
+        child: Material(
         color: selected
             ? theme.accent
             : chipStyle.color ??
@@ -275,5 +292,4 @@ class _LegendChip extends StatelessWidget {
         ),
       ),
     );
-  }
 }

@@ -114,7 +114,45 @@ void main() {
 
       expect(find.text('€25'), findsOneWidget);
       expect(find.text('Standard · €25'), findsNothing);
-      expect(tester.getSize(find.byType(SeatLayerPriceLegend)).height, 30);
+      // The rail is a full-size band; the ink inside it stays chip-sized.
+      expect(tester.getSize(find.byType(SeatLayerPriceLegend)).height, 44);
+      expect(
+        tester
+            .getSize(
+              find
+                  .ancestor(
+                    of: find.text('€25'),
+                    matching: find.byType(Material),
+                  )
+                  .first,
+            )
+            .height,
+        30,
+      );
+    });
+
+    testWidgets('a chip answers the whole band, not only its ink',
+        (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerPriceLegend(compact: true)),
+      );
+      map.emit(bestAvailableSnapshot(categoryFilter: <Object?>[]));
+      await tester.pumpAndSettle();
+
+      // Four points above the pill: inside the target, outside the ink.
+      final ink = tester.getRect(
+        find
+            .ancestor(of: find.text('€25'), matching: find.byType(Material))
+            .first,
+      );
+      await tester.tapAt(Offset(ink.center.dx, ink.top - 4));
+      await tester.pump();
+
+      expect(map.callsTo('picker.setCategoryFilter'), hasLength(1));
     });
 
     testWidgets('a chip filters the map to its category and frames it',

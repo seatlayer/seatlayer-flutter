@@ -18,11 +18,20 @@ import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
 
 /// The Material surface the pushed bottom sheet is painted on.
+///
+/// Anchored on the form's own call to action rather than on the form box: the
+/// form is a track of rows with gaps between them, and a hit test at the box's
+/// exact centre can land in a gap.
 Color _modalSheetColor(WidgetTester tester) {
   final sheet = tester.widget<Material>(
     find
         .ancestor(
-          of: find.byType(SeatLayerBestSeatsForm).hitTestable(),
+          of: find
+              .descendant(
+                of: find.byType(SeatLayerBestSeatsForm),
+                matching: find.byType(FilledButton),
+              )
+              .hitTestable(),
           matching: find.byType(Material),
         )
         .last,

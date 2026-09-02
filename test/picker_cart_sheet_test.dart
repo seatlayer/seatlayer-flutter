@@ -49,7 +49,7 @@ void main() {
     expect(find.text('Continue · €25'), findsOneWidget);
     // The tray form is the only way into best seats.
     expect(find.text('Best seats'), findsNothing);
-    expect(_sheetHeight(tester), 44);
+    expect(_sheetHeight(tester), 56);
   });
 
   testWidgets('an empty peek offers the cheapest ticket, not a button', (
@@ -73,6 +73,161 @@ void main() {
 
     expect(find.text('From €25'), findsOneWidget);
     expect(find.textContaining('Continue'), findsNothing);
+    // A price with nothing to do about it is not an offer; the pill is.
+    expect(find.text('Find seats'), findsOneWidget);
+  });
+
+  testWidgets('the empty peek offers a full-size way into the finder', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    var expanded = false;
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: SeatLayerCartSheet(
+            expanded: false,
+            onExpandedChanged: (value) => expanded = value,
+            onCheckout: _noopCheckout,
+          ),
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot(withSelection: false));
+    await tester.pumpAndSettle();
+
+    final pill = find.ancestor(
+      of: find.text('Find seats'),
+      matching: find.byType(InkWell),
+    );
+    expect(tester.getSize(pill.first).height, 44);
+
+    await tester.tap(find.text('Find seats'));
+    await tester.pump();
+    expect(expanded, isTrue);
+  });
+
+  testWidgets('the finder pill is withheld where the form would be refused', (
+    tester,
+  ) async {
+    Future<void> expectNoPill(
+      WidgetTester tester,
+      Map<String, Object?> snapshot, {
+      SeatLayerPickerOptions options = const SeatLayerPickerOptions(),
+    }) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: _sheet(expanded: false),
+          ),
+          options: options,
+        ),
+      );
+      map.emit(snapshot);
+      await tester.pumpAndSettle();
+      expect(find.text('Find seats'), findsNothing);
+    }
+
+    final closed = pickerSnapshot(withSelection: false);
+    (closed['event']! as Map<String, Object?>)['salesClosed'] = true;
+    await expectNoPill(tester, closed);
+
+    await expectNoPill(
+      tester,
+      pickerSnapshot(withSelection: false),
+      options: const SeatLayerPickerOptions(enableBestAvailable: false),
+    );
+    await expectNoPill(
+      tester,
+      pickerSnapshot(withSelection: false),
+      options: const SeatLayerPickerOptions(readOnly: true),
+    );
+    // Seats already reserved: the finder would take them away again.
+    await expectNoPill(
+      tester,
+      pickerSnapshot(withSelection: false, holdOwner: 'picker'),
+    );
+  });
+
+  testWidgets('the collapsed way on is a full-size target', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: _sheet(expanded: false),
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getSize(find.widgetWithText(FilledButton, 'Continue · €25')).height,
+      greaterThanOrEqualTo(44),
+    );
+  });
+
+  testWidgets('a held row wears a lock and its own hairline', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
+    );
+    map.emit(pickerSnapshot(holdOwner: 'host'));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.lock_rounded), findsOneWidget);
+    final row = tester.widget<Container>(
+      find
+          .ancestor(
+            of: find.byIcon(Icons.lock_rounded),
+            matching: find.byType(Container),
+          )
+          .first,
+    );
+    expect((row.decoration! as BoxDecoration).border, isNotNull);
+  });
+
+  testWidgets('the remove control clears the touch floor', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    final remove = tester.getSize(
+      find.widgetWithIcon(IconButton, Icons.close_rounded),
+    );
+    expect(remove.width, greaterThanOrEqualTo(44));
+    expect(remove.height, greaterThanOrEqualTo(44));
   });
 
   testWidgets('the collapsed safe area carries required attribution only', (
@@ -98,7 +253,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
-    expect(_sheetHeight(tester), 78);
+    expect(_sheetHeight(tester), 90);
     final attributionRect = tester.getRect(find.text('Powered by SeatLayer'));
     final sheetRect = tester.getRect(find.byType(SeatLayerCartSheet));
     // Centred: a phone's rounded corner clips whatever hugs the trailing edge.
@@ -113,7 +268,7 @@ void main() {
     map.emit(hidden);
     await tester.pumpAndSettle();
     expect(find.text('Powered by SeatLayer'), findsNothing);
-    expect(_sheetHeight(tester), 78);
+    expect(_sheetHeight(tester), 90);
   });
 
   testWidgets('the expanded header states the count once', (tester) async {
@@ -181,7 +336,7 @@ void main() {
     map.emit(bestAvailableSnapshot());
     await tester.pumpAndSettle();
 
-    expect(_sheetHeight(tester), lessThanOrEqualTo(200));
+    expect(_sheetHeight(tester), lessThanOrEqualTo(240));
     expect(
       find.text(
         'Tap a seat on the map, or let us pick the best available '
@@ -191,7 +346,7 @@ void main() {
     );
     expect(find.text('Find the best seats together'), findsNothing);
     expect(find.byType(SeatLayerBestSeatsForm), findsOneWidget);
-    expect(find.text('Find 2 best seats'), findsOneWidget);
+    expect(find.text('Find 2 seats together'), findsOneWidget);
   });
 
   testWidgets('the footer carries one full-width call to action', (
@@ -380,6 +535,43 @@ Map<String, Object?> _tenDistinctRows({int revision = 10}) {
 }
 
 void _identityJoinTests() {
+  testWidgets('a sectionless seat is named by its ticket type, once', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
+    );
+    // A chart with no sections: neither the line nor the seat behind it can
+    // say where the seat is, so the ticket type has to.
+    final snapshot = pickerSnapshot();
+    final seats = (snapshot['selection']! as Map<String, Object?>)['seats']!
+        as List<Object?>;
+    for (final seat in seats.cast<Map<String, Object?>>()) {
+      seat['sectionLabel'] = null;
+    }
+    map.emit(snapshot);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Standard'), findsOneWidget);
+    // And said once: the type that named the line is not read out again in
+    // front of it.
+    expect(
+      tester
+          .getSemantics(find.textContaining('Standard'))
+          .label
+          .contains('Standard, Standard'),
+      isFalse,
+    );
+  });
+
+
   testWidgets('a line whose label differs still finds its seat', (
     tester,
   ) async {

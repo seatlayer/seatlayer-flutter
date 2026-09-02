@@ -8,6 +8,7 @@ import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_options.dart';
 import 'picker_styles.dart';
+import 'picker_tokens.g.dart';
 import 'picker_attribution.dart';
 import 'picker_errors.dart';
 import 'seat_layer_picker_controller.dart';
@@ -16,7 +17,9 @@ import 'seat_layer_picker_theme.dart';
 
 /// The buyer's cart, docked at the bottom of the phone.
 ///
-/// Collapsed it is one 50-point line: what is in the cart, and the way on.
+/// Collapsed it is one short bar: what is in the cart, and the way on. The bar
+/// is tall enough to carry a full-size touch target, because the way on is the
+/// control the whole picker exists to reach.
 /// Expanded it grows to the height of its own content and stops at three fifths
 /// of the screen — never a fixed fraction, so one ticket does not open four
 /// hundred points of empty white.
@@ -206,6 +209,20 @@ class _PeekRow extends StatelessWidget {
         ? strings.chooseTickets
         : strings.fromPrice(pickerCompactMoney(cheapest, currency));
 
+    // The empty bar's own way in. `From €42` states a price and offers nothing
+    // to do about it, and the form that would is behind a sheet the buyer has
+    // no reason to suspect. The pill is withheld wherever the form would be
+    // refused anyway — closed sales, best-available turned off, a read-only
+    // session — and once a hold exists, because seats are already reserved.
+    final options = SeatLayerPickerScope.optionsOf(context);
+    final offerFindSeats =
+        !expanded &&
+        !hasTickets &&
+        options.enableBestAvailable &&
+        !options.readOnly &&
+        state.event?.salesClosed != true &&
+        state.hold == null;
+
     return InkWell(
       onTap: () => onExpandedChanged(!expanded),
       child: SizedBox(
@@ -228,7 +245,7 @@ class _PeekRow extends StatelessWidget {
             ),
             Positioned.fill(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(14, 6, 4, 0),
+                padding: const EdgeInsets.fromLTRB(18, 6, 6, 0),
                 child: Row(
                   children: [
                     Expanded(
@@ -261,13 +278,19 @@ class _PeekRow extends StatelessWidget {
                             FilledButton.styleFrom(
                                   backgroundColor: theme.accent,
                                   foregroundColor: theme.onAccent,
-                                  minimumSize: const Size(0, 34),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
+                                  // A full-size target: this is the one
+                                  // control the buyer came for, and it was
+                                  // reaching thirty-four points inside a bar
+                                  // the thumb reads as a button of its own.
+                                  minimumSize: const Size(
+                                    0,
+                                    SeatLayerSizeTokens.minimumHitTarget,
                                   ),
-                                  visualDensity: VisualDensity.compact,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 18,
+                                  ),
                                   textStyle: TextStyle(
-                                    fontSize: 13,
+                                    fontSize: 15,
                                     fontWeight: FontWeight.w800,
                                     fontFamily: theme.fontFamily,
                                   ),
@@ -290,7 +313,11 @@ class _PeekRow extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 8),
+                    ],
+                    if (offerFindSeats) ...[
+                      _FindSeatsPill(onPressed: () => onExpandedChanged(true)),
+                      const SizedBox(width: 8),
                     ],
                     AnimatedRotation(
                       duration: SeatLayerPickerMotion.of(
@@ -349,6 +376,68 @@ class _PeekRow extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: theme.surface,
       builder: (_) => body,
+    );
+  }
+}
+
+/// The empty peek bar's shortcut into the best-seats form.
+///
+/// Smaller than `Continue`, because it is an offer rather than the way on: the
+/// ink is thirty-six points and the target around it is a full forty-four, so
+/// the bar reads as one line and still answers a thumb.
+class _FindSeatsPill extends StatelessWidget {
+  const _FindSeatsPill({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  /// Height of the drawn pill, inside its larger target.
+  static const double inkHeight = 36;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerMapChromeThemeOf(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
+    return Semantics(
+      button: true,
+      label: strings.findSeats,
+      child: SizedBox(
+        height: SeatLayerSizeTokens.minimumHitTarget,
+        child: InkWell(
+          onTap: onPressed,
+          child: Center(
+            child: Container(
+              height: inkHeight,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: ShapeDecoration(
+                color: theme.accent,
+                shape: const StadiumBorder(),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.auto_awesome_rounded,
+                    size: 14,
+                    color: theme.onAccent,
+                  ),
+                  const SizedBox(width: 6),
+                  ExcludeSemantics(
+                    child: Text(
+                      strings.findSeats,
+                      style: TextStyle(
+                        color: theme.onAccent,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        fontFamily: theme.fontFamily,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

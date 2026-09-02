@@ -6,7 +6,7 @@ import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
-/// "Find me somewhere good", in one row of controls.
+/// "Find me somewhere good", in one short track of controls.
 ///
 /// The empty cart is the only place this form appears; once the buyer has
 /// tickets the same feature is one icon in the sheet header. Two entry points
@@ -51,6 +51,7 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
     final categories = snapshot.categories
         .where((category) => !category.notForSale)
         .toList(growable: false);
+    final zones = snapshot.bestAvailableZones;
     final maximum = snapshot.maxSelection;
     final quantity = (_quantity ?? widget.initialQuantity).clamp(1, maximum);
     final enabled = controller.state.isReady &&
@@ -63,8 +64,19 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // One track, read top to bottom: how many, of what, where, then go.
+        // The quantity and the ticket type share a line because the stepper is
+        // narrow and fixed; the zone is a line of its own because its values
+        // are venue names, which are the long ones.
         Row(
           children: [
+            _Stepper(
+              quantity: quantity,
+              maximum: maximum,
+              enabled: enabled,
+              onChanged: (value) => setState(() => _quantity = value),
+            ),
+            const SizedBox(width: 8),
             Expanded(
               child: _CompactSelect(
                 label: strings.ticketType,
@@ -78,58 +90,50 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
                 onChanged: (value) => setState(() => _categoryKey = value),
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: _CompactSelect(
-                label: strings.venueZone,
-                placeholder: strings.anyVenueZone,
-                value: _zoneId,
-                entries: <(String, String)>[
-                  for (final zone in snapshot.bestAvailableZones)
-                    (zone.id, zone.label),
-                ],
-                enabled: enabled,
-                onChanged: (value) => setState(() => _zoneId = value),
-              ),
-            ),
           ],
         ),
+        // A venue with no zones has nothing to choose between, so the row is
+        // absent rather than offering a select whose only answer is "anywhere".
+        if (zones.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          _CompactSelect(
+            label: strings.venueZone,
+            placeholder: strings.anyVenueZone,
+            value: _zoneId,
+            entries: <(String, String)>[
+              for (final zone in zones) (zone.id, zone.label),
+            ],
+            enabled: enabled,
+            onChanged: (value) => setState(() => _zoneId = value),
+          ),
+        ],
         const SizedBox(height: 8),
-        Row(
-          children: [
-            _Stepper(
-              quantity: quantity,
-              maximum: maximum,
-              enabled: enabled,
-              onChanged: (value) => setState(() => _quantity = value),
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: theme.accent,
+            foregroundColor: theme.onAccent,
+            minimumSize: const Size.fromHeight(46),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(theme.buttonRadius),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: theme.accent,
-                  foregroundColor: theme.onAccent,
-                  minimumSize: Size(0, theme.layout.selectorHeight),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(theme.buttonRadius),
-                  ),
-                  textStyle: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    fontFamily: theme.fontFamily,
-                  ),
-                ),
-                onPressed: enabled ? () => _submit(controller, quantity) : null,
-                icon: _submitting
-                    ? const SizedBox.square(
-                        dimension: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.auto_awesome_rounded, size: 15),
-                label: Text(strings.findBestSeats(quantity)),
-              ),
+            textStyle: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              fontFamily: theme.fontFamily,
             ),
-          ],
+          ),
+          onPressed: enabled ? () => _submit(controller, quantity) : null,
+          icon: _submitting
+              ? const SizedBox.square(
+                  dimension: 14,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.auto_awesome_rounded, size: 16),
+          label: Text(
+            strings.findBestSeats(quantity),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ],
     );
@@ -261,11 +265,17 @@ class _Stepper extends StatelessWidget {
   final bool enabled;
   final ValueChanged<int> onChanged;
 
+  /// The stepper's fixed width: two full-size targets and the count between.
+  static const double width = 112;
+
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     return Container(
+      // Fixed, so the ticket-type select beside it keeps one width whether the
+      // buyer is asking for two seats or twelve.
+      width: width,
       height: theme.layout.selectorHeight,
       decoration: BoxDecoration(
         color: Color.alphaBlend(pickerAlpha(theme.text, .03), theme.surface),
@@ -273,7 +283,6 @@ class _Stepper extends StatelessWidget {
         border: Border.all(color: theme.divider),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
           _StepIcon(
             icon: Icons.remove_rounded,
@@ -281,11 +290,10 @@ class _Stepper extends StatelessWidget {
             onPressed:
                 enabled && quantity > 1 ? () => onChanged(quantity - 1) : null,
           ),
-          Semantics(
-            liveRegion: true,
-            label: strings.ticketCount(quantity),
-            child: SizedBox(
-              width: 24,
+          Expanded(
+            child: Semantics(
+              liveRegion: true,
+              label: strings.ticketCount(quantity),
               child: Text(
                 '$quantity',
                 textAlign: TextAlign.center,
@@ -327,9 +335,8 @@ class _StepIcon extends StatelessWidget {
     return IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
-      visualDensity: VisualDensity.compact,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 32, height: 38),
+      constraints: const BoxConstraints.tightFor(width: 40, height: 44),
       color: theme.text,
       disabledColor: pickerAlpha(theme.mutedText, .4),
       icon: Icon(icon, size: 16),
