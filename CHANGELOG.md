@@ -82,6 +82,19 @@ sold-out overlay; the access panel with its own retry; the hold-extend
 prompt; the booked overlay with the seat list and a way back; the closed
 statement in the tray; the hold and closed pills in the header.
 
+Above the web's floor, what only a native picker can do: the cart sheet is a
+real bottom sheet with peek, content and full detents that tracks the finger,
+rubber-bands and settles on a spring; a cart row swipes to remove; the seat
+card comes up in the 3D venue too, with `View from this seat`; haptic cues for
+section focus, a removed ticket, a secured hold and a hold's last minute, all
+behind the host's haptics switch; one screen-reader reading order with live
+regions where a change is news, the card as a dialog with custom actions,
+text that scales with the buyer's setting, bold text honoured, and keyboard
+focus that lands on `Add seat` and returns to the map. On runtime 0.75.1 the
+card sits above the tapped seat with a pointer and the band prints the live
+free count. `design/picker-spec.md` records every component for the other
+SDKs to port from.
+
 **Runtime pin**
 
 The hosted runtime moves to `seatlayer-js@0.75.1`. Views load
