@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.4.0
 
 The "You're all set" screen now waits for the sale. It used to appear the
 moment the hold was handed to the host's checkout, so a buyer who came back

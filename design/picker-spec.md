@@ -954,7 +954,7 @@ the bridge on the same hop as the snapshot that follows it, so the order on the
 wire (expiry, then snapshot) is the order the decision sees. A host hears the
 same moment once through `onBooked(handoff)`. Port note: RN / iOS / Android
 must gate their success screen the same way; showing it on hand-off was the
-bug DesiPass hit when a buyer backed out of checkout without paying.
+bug a pilot host hit when a buyer backed out of checkout without paying.
 
 Every state below is a **designed state**, not a set of disabled controls.
 
