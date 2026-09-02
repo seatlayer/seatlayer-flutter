@@ -328,7 +328,7 @@ void main() {
     expect(find.byType(SeatLayerConfirmCardPointer), findsNothing);
   });
 
-  testWidgets('the scene gets the card once it has dived to the seat',
+  testWidgets('the scene gets the card on the tap, before and after the dive',
       (tester) async {
     final map = FakePickerMap(bundle: _venue3DBundle());
     addTearDown(map.dispose);
@@ -341,7 +341,7 @@ void main() {
     // Still travelling: nothing to ask about yet.
     map.emit(_inVenue3D(targeted: false));
     await tester.pumpAndSettle();
-    expect(find.byType(SeatLayerConfirmCard), findsNothing);
+    expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
 
     map.emit(_inVenue3D(revision: 3));
     await tester.pumpAndSettle();

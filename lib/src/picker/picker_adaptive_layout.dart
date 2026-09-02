@@ -349,7 +349,6 @@ class _SeatLayerPickerAdaptiveLayoutState
             ),
           );
         } else if (!panoramaUp &&
-            (!venue3DUp || targeted) &&
             pendingSeat != null &&
             chrome.showConfirmCard) {
           final capabilities = state.snapshot?.capabilities ?? const <String>{};

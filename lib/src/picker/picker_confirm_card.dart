@@ -133,16 +133,11 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     // The panorama is the seat's own view: it answers the same question this
     // card asks, so the card stands down for it. The 3D venue does not — the
     // buyer is still looking at a seat from outside it — so the card comes
-    // back there, in its own dimensions, but only once the scene has actually
-    // dived to the seat. A card over a camera still travelling asks about a
-    // seat the buyer cannot see yet.
+    // back there, in its own dimensions, as soon as the seat is tapped — the
+    // scene is already moving toward it, and the web card does not wait.
     final panoramaUp = controller.seatView?.hasContent == true;
     final immersive = !panoramaUp && (map?.isVenue3D ?? false);
-    if (seat == null ||
-        panoramaUp ||
-        (immersive && map?.view3DTargetSeatId == null)) {
-      return const SizedBox.shrink();
-    }
+    if (seat == null || panoramaUp) return const SizedBox.shrink();
     final seatKey = '${seat.id}\u0000${seat.label}';
     if (_seatKey != seatKey) {
       _seatKey = seatKey;

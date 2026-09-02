@@ -251,7 +251,7 @@ void main() {
     expect(tester.widget<Text>(find.text('1')).style!.fontSize, 14);
   });
 
-  testWidgets('the card waits for the scene to dive, and stands down in the '
+  testWidgets('the card comes up on the tap in the scene, and stands down in the '
       'panorama', (tester) async {
     final map = FakePickerMap(
       bundle: nativeChromeBundle(
@@ -269,7 +269,7 @@ void main() {
     // cannot see yet.
     map.emit(_inVenue3D(targeted: false));
     await tester.pumpAndSettle();
-    expect(find.text('Add seat'), findsNothing);
+    expect(find.text('Add seat'), findsOneWidget);
 
     map.emit(_inVenue3D(revision: 3));
     await tester.pumpAndSettle();
