@@ -40,11 +40,31 @@ Offset _mapOrigin(WidgetTester tester) => tester.getTopLeft(
       find.byKey(const ValueKey<String>('seatlayer-picker-prompt-transition')),
     );
 
+/// The wrapper that pauses the cart sheet while a seat card is up.
+final Finder _sheetPause =
+    find.byKey(const ValueKey<String>('seatlayer-picker-sheet-pause'));
+
+AnimatedOpacity _pausedSheet(WidgetTester tester) => tester.widget<AnimatedOpacity>(
+      find.descendant(of: _sheetPause, matching: find.byType(AnimatedOpacity)).first,
+    );
+
 /// The peek bar's Continue button, or null when it is not offered at all.
+///
+/// The pill draws its label and its money as two spans — `Continue` beside a
+/// tabular `€25` — so it is found by its own word and then read for the total
+/// standing next to it.
 FilledButton? _continueButton(WidgetTester tester) {
-  final found = find.widgetWithText(FilledButton, 'Continue · €25');
+  final found = find.ancestor(
+    of: find.text('Continue'),
+    matching: find.byType(FilledButton),
+  );
   if (found.evaluate().isEmpty) return null;
-  return tester.widget<FilledButton>(found);
+  expect(
+    find.descendant(of: found.first, matching: find.text('€25')),
+    findsOneWidget,
+    reason: 'the pill carries the cart total beside its label',
+  );
+  return tester.widget<FilledButton>(found.first);
 }
 
 void main() {
@@ -203,7 +223,7 @@ void main() {
     );
   });
 
-  testWidgets('a seat too high for the card gets it below, pointing up', (
+  testWidgets('a seat high on the map leaves the card resting', (
     tester,
   ) async {
     final map = FakePickerMap(bundle: nativeChromeBundle());
@@ -217,9 +237,46 @@ void main() {
     map.emit(_seatDrawnAt(195, 40));
     await tester.pumpAndSettle();
 
-    final pointer = find.byType(SeatLayerConfirmCardPointer);
-    expect(pointer, findsOneWidget);
-    expect(tester.widget<SeatLayerConfirmCardPointer>(pointer).up, isTrue);
+    // The card only leaves its resting place to get off a seat it would have
+    // covered. A seat this high was never in its way, so it stays where the
+    // thumb is and points at nothing.
+    expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
+    expect(find.byType(SeatLayerConfirmCardPointer), findsNothing);
+  });
+
+  testWidgets('the cart sheet is paused while the card is asking', (
+    tester,
+  ) async {
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
+    map.emit(pickerSnapshot(sections: pickerSections()));
+    await tester.pumpAndSettle();
+
+    // Faded rather than hidden — what is already in the cart is context for
+    // the seat being decided on — and out of reach, so nothing under the card
+    // can answer the question the card is asking.
+    expect(_pausedSheet(tester).opacity, .58);
+    expect(
+      tester
+          .widget<IgnorePointer>(
+            find
+                .descendant(of: _sheetPause, matching: find.byType(IgnorePointer))
+                .first,
+          )
+          .ignoring,
+      isTrue,
+    );
+
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+
+    expect(_pausedSheet(tester).opacity, 1);
   });
 
   testWidgets('a runtime that never says where the seat is points at nothing', (

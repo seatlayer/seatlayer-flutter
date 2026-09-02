@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_tokens.g.dart';
+import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
 CategoryTier? seatLayerPickerSelectedTier(
@@ -23,7 +25,13 @@ String seatLayerPickerSelectedCurrency(SelectedSeat seat, String? tierId) =>
     seat.currency ??
     'USD';
 
+/// One ticket type, as a row the buyer presses rather than a menu entry.
+///
+/// The selected row is marked three ways at once — an accent border, an accent
+/// wash, and a rail on its leading edge — because on a phone the difference
+/// between two rows a few points apart has to survive a glance.
 class SeatLayerPickerSeatTierChoice extends StatelessWidget {
+  /// Creates one ticket-type row.
   const SeatLayerPickerSeatTierChoice({
     super.key,
     required this.tier,
@@ -31,26 +39,42 @@ class SeatLayerPickerSeatTierChoice extends StatelessWidget {
     required this.selected,
     required this.enabled,
     required this.onTap,
+    this.compact = false,
   });
 
+  /// The ticket type this row offers.
   final CategoryTier tier;
+
+  /// The currency to price it in when the tier does not name its own.
   final String currency;
+
+  /// Whether this is the type the seat is currently being bought as.
   final bool selected;
+
+  /// Whether the row may be pressed.
   final bool enabled;
+
+  /// Called when the buyer chooses this type.
   final VoidCallback onTap;
+
+  /// Whether this row is on the phone's confirm card rather than the wide one.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
     final guidance = tier.buyerMessage ??
         (tier.restriction == 'companion'
-            ? 'Requires the adjacent wheelchair place.'
+            ? strings.tierCompanionGuidance
             : null);
     final price = pickerMoney(
       context,
       tier.price,
       tier.currency ?? currency,
     );
+    final radius =
+        BorderRadius.circular(SeatLayerRadiusTokens.button);
     return Semantics(
       label: <String>[
         tier.name,
@@ -61,61 +85,96 @@ class SeatLayerPickerSeatTierChoice extends StatelessWidget {
       inMutuallyExclusiveGroup: true,
       enabled: enabled,
       child: Material(
-        color: selected ? pickerAlpha(theme.accent, .10) : Colors.transparent,
+        color: selected
+            ? Color.alphaBlend(pickerAlpha(theme.accent, .13), theme.surface)
+            // A shade off the surface, so the rows read as choices sitting on
+            // the card rather than as lines ruled across it.
+            : Color.alphaBlend(
+                pickerAlpha(theme.background, .72),
+                theme.surface,
+              ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(theme.radius),
-          side: BorderSide(
-            color: selected ? theme.accent : theme.divider,
-            width: selected ? 1.5 : 1,
-          ),
+          borderRadius: radius,
+          side: BorderSide(color: selected ? theme.accent : theme.divider),
         ),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
-          borderRadius: BorderRadius.circular(theme.radius),
           onTap: enabled ? onTap : null,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-            child: Row(
-              children: [
-                Icon(
-                  selected
-                      ? Icons.radio_button_checked_rounded
-                      : Icons.radio_button_unchecked_rounded,
-                  color: selected ? theme.accent : theme.mutedText,
-                  size: 20,
+          child: Stack(
+            children: [
+              if (selected)
+                Positioned(
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  child: SizedBox(
+                    width: 3,
+                    child: ColoredBox(color: theme.accent),
+                  ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: compact
+                      ? theme.layout.confirmTierHeight
+                      : theme.layout.confirmActionHeight,
+                ),
+                child: Padding(
+                  padding: compact
+                      ? const EdgeInsets.fromLTRB(9, 7, 9, 7)
+                      : const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                  child: Row(
                     children: [
-                      Text(
-                        tier.name,
-                        style: TextStyle(
-                          color: theme.text,
-                          fontWeight: FontWeight.w800,
+                      Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              tier.name,
+                              style: TextStyle(
+                                color: theme.text,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w800,
+                                fontFamily: theme.fontFamily,
+                              ),
+                            ),
+                            if (guidance != null)
+                              Text(
+                                guidance,
+                                style: TextStyle(
+                                  // The note is the reason the row exists once
+                                  // it is chosen, so it takes the full ink.
+                                  color: selected
+                                      ? theme.text
+                                      : theme.mutedText,
+                                  fontSize: 10.5,
+                                  height: 1.3,
+                                  fontFamily: theme.fontFamily,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                      if (guidance != null)
-                        Text(
-                          guidance,
-                          style: TextStyle(
-                            color: theme.mutedText,
-                            fontSize: 11,
-                          ),
+                      const SizedBox(width: 9),
+                      Text(
+                        price,
+                        softWrap: false,
+                        style: TextStyle(
+                          color: theme.text,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          fontFamily: theme.fontFamily,
+                          fontFeatures: const <FontFeature>[
+                            FontFeature.tabularFigures(),
+                          ],
                         ),
+                      ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  price,
-                  style: TextStyle(
-                    color: theme.text,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

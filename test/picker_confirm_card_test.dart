@@ -44,6 +44,22 @@ Map<String, Object?> _only3D() {
   };
 }
 
+/// A selection that is a booth rather than a seat.
+Map<String, Object?> _booth() {
+  final snapshot = pickerSnapshot();
+  final selection = Map<String, Object?>.from(
+    snapshot['selection']! as Map<String, Object?>,
+  );
+  final seats = (selection['seats']! as List<Object?>)
+      .map((item) => Map<String, Object?>.from(item! as Map<String, Object?>))
+      .toList();
+  for (final seat in seats) {
+    seat['objectType'] = 'booth';
+  }
+  selection['seats'] = seats;
+  return <String, Object?>{...snapshot, 'selection': selection};
+}
+
 /// A snapshot whose catalogue never mentions the selected seat's category.
 Map<String, Object?> _withoutCategory() {
   final snapshot = pickerSnapshot();
@@ -124,11 +140,11 @@ void main() {
     expect(find.text('Standard'), findsNothing);
     expect(find.text('42 left'), findsNothing);
     expect(find.text('Gallery'), findsOneWidget);
-    // 56 identity + 10 + 64 photo + 10 + 44 3D + 10 + 44 decision row.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 248);
+    // 42 identity + 64 photo strip + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 168);
   });
 
-  testWidgets('Add seat takes two thirds of the row and Cancel one',
+  testWidgets('Cancel takes 34% of the decision row and Add seat the rest',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -140,11 +156,52 @@ void main() {
 
     final cancel = tester.getSize(_button('Cancel'));
     final add = tester.getSize(_button('Add seat'));
-    expect(add.width, closeTo(cancel.width * 2, 1));
-    // Every control on the card clears the phone's touch floor.
+    // 310 wide, less the body's 10 pt gutters. The hairline is painted on
+    // the card's edge rather than taken out of its width.
+    const row = 310 - 20;
+    expect(cancel.width, closeTo(row * .34, .5));
+    expect(add.width, closeTo(row - 8 - (row * .34), .5));
+    // Both answers clear the phone's touch floor.
     expect(cancel.height, 44);
     expect(add.height, 44);
-    expect(tester.getSize(_button('See it in 3D')).height, 44);
+  });
+
+  testWidgets('a booth is selected, never "added" as a seat', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    map.emit(_booth());
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsNothing);
+  });
+
+  testWidgets('the identity cells carry the narrow numbers', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    final eyebrow = tester.widget<Text>(find.text('SECTION')).style!;
+    expect(eyebrow.fontSize, 8.5);
+    expect(eyebrow.fontWeight, FontWeight.w800);
+    expect(eyebrow.letterSpacing, closeTo(8.5 * .1, .001));
+    // A section name is the one value worth a second line; a seat number
+    // never needs one.
+    final section = tester.widget<Text>(find.text('Gallery'));
+    expect(section.style!.fontSize, 12.5);
+    expect(section.maxLines, 2);
+    final seat = tester.widget<Text>(find.text('1'));
+    expect(seat.style!.fontSize, 15);
+    expect(seat.maxLines, 1);
+    // 42 identity + 35 band + 64 photo strip + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 203);
   });
 
   testWidgets('the phone card selects a tier and updates its headline price',
@@ -188,10 +245,42 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
+    // Both ways into the seat ride the photograph itself, one per corner.
     expect(find.text('View from here'), findsOneWidget);
-    expect(find.text('See it in 3D'), findsOneWidget);
-    // 56 identity + 34 band + 10 + 64 photo + 10 + 44 3D + 10 + 44 decision.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 282);
+    expect(find.text('3D'), findsOneWidget);
+    // The full-width "See it in 3D" is the wide card's, not the phone's.
+    expect(find.text('See it in 3D'), findsNothing);
+    final photo = tester.getRect(find.text('View from here'));
+    final venue = tester.getRect(find.text('3D'));
+    expect(photo.left, lessThan(venue.left));
+    // A screen reader still hears the sentence the pill has no room for.
+    expect(find.bySemanticsLabel('See it in 3D'), findsOneWidget);
+    // 42 identity + 35 band + 64 photo strip + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 203);
+  }, semanticsEnabled: true);
+
+  testWidgets('the photo strip is full-bleed inside the card', (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    final card = tester.getRect(
+      find.byKey(const ValueKey<String>('seatlayer.confirm-card.surface')),
+    );
+    final strip = tester.getRect(
+      find.ancestor(
+        of: find.text('View from here'),
+        matching: find.byType(Stack),
+      ).first,
+    );
+    // Nothing between it and the card's own edge on either side.
+    expect(strip.left - card.left, closeTo(0, .01));
+    expect(card.right - strip.right, closeTo(0, .01));
+    expect(strip.height, 64);
   });
 
   testWidgets('3D alone gets a plain action row, not an empty picture',
@@ -205,13 +294,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('View from here'), findsNothing);
-    expect(find.text('See it in 3D'), findsOneWidget);
+    expect(find.text('3D'), findsOneWidget);
     // The gradient stands in for a photograph nothing is going to open.
     expect(
       tester
           .widgetList<DecoratedBox>(
             find.ancestor(
-              of: find.text('See it in 3D'),
+              of: find.text('3D'),
               matching: find.byType(DecoratedBox),
             ),
           )
@@ -220,8 +309,8 @@ void main() {
           ),
       isEmpty,
     );
-    // 56 identity + 34 band + 10 + 44 3D + 10 + 44 decision row.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 208);
+    // 42 identity + 35 band + 44 rail + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 183);
   });
 
   testWidgets('an event with neither drops the strip entirely', (tester) async {
@@ -234,12 +323,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('View from here'), findsNothing);
-    expect(find.text('See it in 3D'), findsNothing);
-    // 56 identity + 34 band + 5 + 44 decision row.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 149);
+    expect(find.text('3D'), findsNothing);
+    // 42 identity + 35 band + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 139);
   });
 
-  testWidgets('the card is the screen less a gutter, capped at 360',
+  testWidgets('the card is the screen less a gutter, capped at 310',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -257,7 +346,7 @@ void main() {
             ),
           )
           .width,
-      358,
+      310,
     );
   });
 
@@ -377,9 +466,7 @@ void main() {
     expect(find.text('Add seat'), findsNothing);
   });
 
-  testWidgets('a nearly sold-out category says so, in the warning ink', (
-    tester,
-  ) async {
+  testWidgets('the count is a fact, at every size of it', (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -388,13 +475,18 @@ void main() {
     map.emit(_almostSoldOut(8));
     await tester.pumpAndSettle();
 
-    expect(find.text('Only 8 left'), findsOneWidget);
-    expect(find.text('8 left'), findsNothing);
-    final ink = tester.widget<Text>(find.text('Only 8 left')).style!.color;
-    expect(ink, const SeatLayerPickerThemeData.light().warning);
+    // The band states what is left and nothing more. A count that changes its
+    // wording and its ink below some threshold is selling, not informing, and
+    // the buyer can see the same seats on the map either way.
+    expect(find.text('8 left'), findsOneWidget);
+    expect(find.text('Only 8 left'), findsNothing);
+    final left = tester.widget<Text>(find.text('8 left')).style!;
+    expect(left.color, const SeatLayerPickerThemeData.light().mutedText);
+    expect(left.fontSize, 11);
+    expect(left.fontWeight, FontWeight.w700);
   });
 
-  testWidgets('a category with room left states the count plainly', (
+  testWidgets('a count that has not arrived is not guessed at', (
     tester,
   ) async {
     final map = FakePickerMap();
@@ -402,12 +494,13 @@ void main() {
     usePhoneSurface(tester);
 
     await tester.pumpWidget(pickerHarness(map, const SeatLayerConfirmCard()));
-    // One more than the threshold: scarcity has to be a line, not a slope.
-    map.emit(_almostSoldOut(13));
+    map.emit(_almostSoldOut(0));
     await tester.pumpAndSettle();
 
-    expect(find.text('13 left'), findsOneWidget);
-    expect(find.text('Only 13 left'), findsNothing);
+    // A count the buyer cannot trust is worse than no count at all.
+    expect(find.text('0 left'), findsNothing);
+    expect(find.textContaining('left'), findsNothing);
+    expect(find.text('Standard'), findsOneWidget);
   });
 
   testWidgets('pushing the card down gives the seat back, once', (
@@ -551,27 +644,28 @@ void main() {
 
   group('placement', () {
     const area = Size(390, 600);
-    const card = Size(358, 140);
+    const card = Size(310, 140);
 
-    test('a seat with room above it gets the card above it', () {
+    test('a seat the resting card would not cover leaves it resting', () {
       final placement = seatLayerConfirmCardPlacement(
-        seat: const Offset(195, 400),
+        seat: const Offset(155, 400),
         card: card,
         area: area,
       );
-      expect(placement.top, 400 - 12 - 140);
-      expect(placement.notch, SeatLayerConfirmCardNotch.bottom);
+      // 600 less the 14 pt rest inset less the card.
+      expect(placement.top, 446);
+      expect(placement.notch, SeatLayerConfirmCardNotch.none);
     });
 
-    test('a seat too high for the card gets it below, pointing up', () {
+    test('a seat the resting card would cover makes it hug the seat', () {
       final placement = seatLayerConfirmCardPlacement(
-        seat: const Offset(195, 100),
+        seat: const Offset(155, 500),
         card: card,
         area: area,
-        topInset: 40,
       );
-      expect(placement.top, 100 + 12);
-      expect(placement.notch, SeatLayerConfirmCardNotch.top);
+      // 12 pt of daylight above the seat, and the card points down at it.
+      expect(placement.top, 500 - 12 - 140);
+      expect(placement.notch, SeatLayerConfirmCardNotch.bottom);
     });
 
     test('a runtime that does not say rests the card at the foot of the map',
@@ -582,53 +676,56 @@ void main() {
         area: area,
         bottomInset: 52,
       );
-      expect(placement.top, 600 - 52 - 140);
+      expect(placement.top, 600 - 52 - 14 - 140);
       expect(placement.notch, SeatLayerConfirmCardNotch.none);
     });
 
     test('a resting card is still kept off the chrome under it', () {
       final placement = seatLayerConfirmCardPlacement(
         seat: null,
-        card: const Size(358, 400),
+        card: const Size(310, 400),
         area: area,
         bottomInset: 140,
       );
-      expect(placement.top, 600 - 140 - 400);
+      expect(placement.top, 600 - 140 - 14 - 400);
       expect(placement.notch, SeatLayerConfirmCardNotch.none);
     });
 
-    test('the card never slides behind the chrome below it', () {
+    test('a hugging card never slides behind the chrome below it', () {
       final placement = seatLayerConfirmCardPlacement(
-        seat: const Offset(195, 590),
+        seat: const Offset(155, 470),
         card: card,
         area: area,
         bottomInset: 120,
       );
-      expect(placement.top, 600 - 120 - 140);
+      expect(placement.top, 470 - 12 - 140);
       expect(placement.notch, SeatLayerConfirmCardNotch.bottom);
     });
 
-    test('the card never slides under the chrome above it', () {
+    test('a seat high on the map never pushes the card up to it', () {
       final placement = seatLayerConfirmCardPlacement(
-        seat: const Offset(195, 20),
+        seat: const Offset(155, 20),
         card: card,
         area: area,
         topInset: 60,
       );
-      expect(placement.top, 60);
-      expect(placement.notch, SeatLayerConfirmCardNotch.top);
+      // Nothing to get out of the way of, so the card stays where the thumb
+      // is rather than chasing a seat it was never going to cover.
+      expect(placement.top, 446);
+      expect(placement.notch, SeatLayerConfirmCardNotch.none);
     });
 
     test('a card taller than the band it lives in keeps its top edge', () {
       final placement = seatLayerConfirmCardPlacement(
-        seat: const Offset(195, 300),
-        card: const Size(358, 700),
+        seat: const Offset(155, 300),
+        card: const Size(310, 700),
         area: area,
         topInset: 40,
         bottomInset: 80,
       );
-      expect(placement.top, 40);
-      expect(placement.notch, SeatLayerConfirmCardNotch.top);
+      // 40 of chrome plus the 12 pt the card keeps clear of the map's top.
+      expect(placement.top, 52);
+      expect(placement.notch, SeatLayerConfirmCardNotch.bottom);
     });
   });
 
