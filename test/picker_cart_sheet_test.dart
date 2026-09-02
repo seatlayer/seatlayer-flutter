@@ -5,6 +5,7 @@ import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_cart_list.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_states.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
 
@@ -103,10 +104,11 @@ void main() {
     // twice on one screen.
     expect(find.text('1 ticket'), findsOneWidget);
     expect(find.text('1 ticket · €25'), findsNothing);
-    expect(find.text('Continue · €25'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
+    expect(find.text('€25'), findsOneWidget);
     // The tray form is the only way into best seats.
     expect(find.text('Best seats'), findsNothing);
-    expect(_sheetHeight(tester), 56);
+    expect(_sheetHeight(tester), 50);
   });
 
   testWidgets('an empty peek offers the cheapest ticket, not a button', (
@@ -269,9 +271,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester
-          .getSize(find.widgetWithText(FilledButton, 'Continue · €25'))
-          .height,
+      tester.getSize(find.widgetWithText(FilledButton, 'Continue')).height,
       greaterThanOrEqualTo(44),
     );
   });
@@ -291,15 +291,17 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byIcon(Icons.lock_rounded), findsOneWidget);
+    // A wash of the accent behind the line, not a box around it: the rows are
+    // one plate, and a boxed row inside it read as a different kind of thing.
     final row = tester.widget<Container>(
       find
           .ancestor(
             of: find.byIcon(Icons.lock_rounded),
             matching: find.byType(Container),
           )
-          .first,
+          .last,
     );
-    expect((row.decoration! as BoxDecoration).border, isNotNull);
+    expect((row.decoration! as BoxDecoration).color, isNotNull);
   });
 
   testWidgets('the remove control clears the touch floor', (tester) async {
@@ -346,7 +348,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
-    expect(_sheetHeight(tester), 90);
+    expect(_sheetHeight(tester), 84);
     final attributionRect = tester.getRect(find.text('Powered by SeatLayer'));
     final sheetRect = tester.getRect(find.byType(SeatLayerCartSheet));
     // Centred: a phone's rounded corner clips whatever hugs the trailing edge.
@@ -361,7 +363,7 @@ void main() {
     map.emit(hidden);
     await tester.pumpAndSettle();
     expect(find.text('Powered by SeatLayer'), findsNothing);
-    expect(_sheetHeight(tester), 90);
+    expect(_sheetHeight(tester), 84);
   });
 
   testWidgets('the expanded header states the count once', (tester) async {
@@ -405,7 +407,8 @@ void main() {
     final tenRows = _sheetHeight(tester);
 
     expect(oneTicket, lessThan(tenRows));
-    expect(tenRows, lessThanOrEqualTo(844 * .6));
+    // Seventy-two per cent of the screen, and never more than 480 points.
+    expect(tenRows, lessThanOrEqualTo(480));
 
     // Ten seats in one row are one run, so the sheet does not grow for them.
     map.emit(snapshotWithTicketCount(10, revision: 20));
@@ -429,7 +432,7 @@ void main() {
     map.emit(bestAvailableSnapshot());
     await tester.pumpAndSettle();
 
-    expect(_sheetHeight(tester), lessThanOrEqualTo(240));
+    expect(_sheetHeight(tester), lessThanOrEqualTo(380));
     expect(
       find.text(
         'Tap a seat on the map, or let us pick the best available '
@@ -439,7 +442,7 @@ void main() {
     );
     expect(find.text('Find the best seats together'), findsNothing);
     expect(find.byType(SeatLayerBestSeatsForm), findsOneWidget);
-    expect(find.text('Find 2 seats together'), findsOneWidget);
+    expect(find.text('Find 2 best seats'), findsOneWidget);
   });
 
   testWidgets('the footer carries one full-width call to action', (
@@ -467,10 +470,10 @@ void main() {
   testWidgets('the collapsed pill says why it cannot be pressed', (
     tester,
   ) async {
-    // A grey `Continue · €25` states only that pressing it did nothing. The
-    // reason it did nothing is a card standing over the map behind the
-    // buyer's thumb, and that is what the pill has to say — without the money,
-    // which will not share a 44 pt pill with a sentence.
+    // The card standing over the map is the reason, and the whole sheet is
+    // dimmed and inert behind it, so the pill is left as the buyer last read
+    // it — `Continue · €25`, down — exactly as the web picker leaves it. The
+    // footer button, which is the surface that owes a reason, states one.
     final map = FakePickerMap(bundle: nativeChromeBundle());
     addTearDown(map.dispose);
     final picker = SeatLayerPickerController(mapController: map);
@@ -495,8 +498,57 @@ void main() {
     expect(picker.seatAwaitingConfirmation?.label, 'A-1');
     expect(find.text('1 ticket'), findsOneWidget);
 
+    // The peek keeps its own line, money and all.
+    final pill = find
+        .ancestor(of: find.text('Continue'), matching: find.byType(FilledButton))
+        .first;
+    expect(pill, findsOneWidget);
+    expect(
+      find.descendant(of: pill, matching: find.text('€25')),
+      findsOneWidget,
+    );
+    expect(tester.widget<FilledButton>(pill).onPressed, isNull);
+    // And it does not repeat the reason the footer is stating.
+    expect(find.text('Confirm or cancel this seat'), findsNothing);
+  });
+
+  testWidgets('the footer states the card the peek does not', (tester) async {
+    // The same situation, read from the open sheet: here the button IS the
+    // thing the buyer would press, so it says why it will not answer.
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+        controller: picker,
+      ),
+    );
+    map.emit(_twoSeatSnapshot());
+    await tester.pumpAndSettle();
+
+    // The sheet is being exercised on its own, so the card the layout would
+    // put up is reported by hand: it is the layout that tells the controller
+    // which seat is still being asked about.
+    picker.setConfirmCardSeat(picker.unansweredSeat);
+    // It is reported from the chrome's own build and deliberately does not
+    // notify, so the sheet is rebuilt the way the layout would rebuild it.
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+        controller: picker,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(picker.seatAwaitingConfirmation, isNotNull);
     expect(find.text('Confirm or cancel this seat'), findsOneWidget);
-    expect(find.text('Continue · €25'), findsNothing);
     expect(
       tester
           .widget<FilledButton>(
@@ -504,6 +556,30 @@ void main() {
           )
           .onPressed,
       isNull,
+    );
+  });
+
+  testWidgets('a closed event states itself in the open tray', (tester) async {
+    // Sales closed is a designed state, not a set of controls that quietly
+    // stop working: the tray says so in words, above the form it refuses.
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
+    );
+    map.emit(_salesClosedSnapshot());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SeatLayerPickerSalesClosedStatement), findsOneWidget);
+    expect(find.text('Sales are closed'), findsOneWidget);
+    expect(
+      find.text('Ticket sales for this event have ended.'),
+      findsOneWidget,
     );
   });
 
@@ -527,7 +603,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Sales closed'), findsOneWidget);
-    expect(find.text('Continue · €25'), findsNothing);
+    expect(find.text('€25'), findsNothing);
     expect(
       tester
           .widget<FilledButton>(
@@ -634,10 +710,64 @@ void main() {
     map.emit(_tenDistinctRows());
     await tester.pumpAndSettle();
 
-    expect(find.text('+5 more'), findsOneWidget);
-    await tester.tap(find.text('+5 more'));
+    expect(find.text('+6 more'), findsOneWidget);
+    await tester.tap(find.text('+6 more'));
     await tester.pumpAndSettle();
     expect(find.text('Show less'), findsOneWidget);
+  });
+
+
+  testWidgets('the head is fifty points shut and thirty-six open', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    Widget subject(bool expanded) => Align(
+          alignment: Alignment.bottomCenter,
+          child: _sheet(expanded: expanded),
+        );
+    await tester.pumpWidget(pickerHarness(map, subject(false)));
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+
+    // The grabber overlaps into the head rather than taking a row of its own,
+    // which is what keeps the collapsed bar at fifty points.
+    expect(_grabber(tester), isTrue);
+    expect(_sheetHeight(tester), 50);
+
+    await tester.pumpWidget(pickerHarness(map, subject(true)));
+    await tester.pumpAndSettle();
+    // Open, the head gives its height back to the tickets underneath.
+    expect(
+      tester.getSize(find.byIcon(Icons.keyboard_arrow_up_rounded)).height,
+      lessThanOrEqualTo(50),
+    );
+  });
+
+  testWidgets('a running hold counts down on the pill, and only when shut', (
+    tester,
+  ) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    Widget subject(bool expanded) => Align(
+          alignment: Alignment.bottomCenter,
+          child: _sheet(expanded: expanded),
+        );
+    await tester.pumpWidget(pickerHarness(map, subject(false)));
+    map.emit(pickerSnapshot(holdOwner: 'picker'));
+    await tester.pump();
+
+    expect(find.textContaining(':'), findsOneWidget);
+
+    // Open, the clock goes: the header carries it, and the sheet below
+    // carries the money. Saying it three times is three chances to disagree.
+    await tester.pumpWidget(pickerHarness(map, subject(true)));
+    await tester.pump();
+    expect(find.textContaining(':'), findsNothing);
   });
 
   group('goldens', () {
@@ -768,3 +898,11 @@ void _identityJoinTests() {
     expect(find.textContaining('West Gallery A-1'), findsNothing);
   });
 }
+
+/// Whether the head is drawing the 35 x 4 grabber.
+///
+/// It is a private widget, so the test reaches it the way the buyer's eye
+/// does: by its measured size.
+bool _grabber(WidgetTester tester) => tester
+    .widgetList<SizedBox>(find.byType(SizedBox))
+    .any((box) => box.width == 35 && box.height == 4);

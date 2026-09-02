@@ -49,8 +49,12 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
       return const SizedBox.shrink();
     }
 
+    // Two numbers, not one: a list only collapses once it is long enough to
+    // be a scroll, and when it does it keeps fewer lines than that. Four
+    // visible out of six is a tail worth hiding; four out of five is not.
     final visibleLimit = theme.layout.denseVisibleLines;
-    final collapsed = !_showAll && runs.length > visibleLimit;
+    final collapsible = runs.length >= theme.layout.denseCollapseFrom;
+    final collapsed = !_showAll && collapsible;
     final shown = collapsed ? runs.take(visibleLimit).toList() : runs;
     final arrivals = <String>[
       for (final run in runs)
@@ -64,53 +68,58 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
     final removable = !SeatLayerPickerScope.optionsOf(context).readOnly &&
         state.holdOwner != SeatLayerHoldOwner.host;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // The eyebrow is read out, never drawn: a visible SECTION · ROW · SEAT
-        // strip spends a whole row explaining lines that already read as
-        // ticket stubs.
-        Semantics(
-          label: 'Section, row, seat',
-          child: const SizedBox.shrink(),
+    // One plate, hairlines inside it. The lines are stubs of one ticket,
+    // and a stack of separately bordered cards read as a stack of unrelated
+    // things rather than as one order.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.surface,
+        border: Border.all(color: theme.divider),
+        borderRadius: BorderRadius.circular(
+          theme.radius * SeatLayerRadiusTokens.smallRatio,
         ),
-        for (var index = 0; index < shown.length; index++)
-          _RunBlock(
-            run: shown[index],
-            open: _openRuns.contains(index),
-            removable: removable,
-            arrivalIndex:
-                arrivals.indexOf(shown[index].members.first.item.lineKey),
-            onToggle: () => setState(
-              () => _openRuns.contains(index)
-                  ? _openRuns.remove(index)
-                  : _openRuns.add(index),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(
+          theme.radius * SeatLayerRadiusTokens.smallRatio,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // The eyebrow is read out, never drawn: a visible
+            // SECTION · ROW · SEAT strip spends a whole row explaining lines
+            // that already read as ticket stubs.
+            Semantics(
+              label: 'Section, row, seat',
+              child: const SizedBox.shrink(),
             ),
-            onRemove: (line) => _remove(controller, line),
-          ),
-        if (runs.length > visibleLimit)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: () => setState(() => _showAll = !_showAll),
-              style: TextButton.styleFrom(
-                foregroundColor: theme.accent,
-                visualDensity: VisualDensity.compact,
-                textStyle: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  fontFamily: theme.fontFamily,
+            for (var index = 0; index < shown.length; index++)
+              _RunBlock(
+                run: shown[index],
+                first: index == 0,
+                open: _openRuns.contains(index),
+                removable: removable,
+                arrivalIndex:
+                    arrivals.indexOf(shown[index].members.first.item.lineKey),
+                onToggle: () => setState(
+                  () => _openRuns.contains(index)
+                      ? _openRuns.remove(index)
+                      : _openRuns.add(index),
                 ),
+                onRemove: (line) => _remove(controller, line),
               ),
-              child: Text(
-                collapsed
+            if (collapsible)
+              _MoreRow(
+                collapsed: collapsed,
+                label: collapsed
                     ? strings.moreCount(runs.length - visibleLimit)
                     : strings.showLess,
+                onPressed: () => setState(() => _showAll = !_showAll),
               ),
-            ),
-          ),
-      ],
+          ],
+        ),
+      ),
     );
   }
 
@@ -216,6 +225,7 @@ SeatLayerTicketLine _resolveLine(
 class _RunBlock extends StatelessWidget {
   const _RunBlock({
     required this.run,
+    required this.first,
     required this.open,
     required this.removable,
     required this.arrivalIndex,
@@ -224,6 +234,7 @@ class _RunBlock extends StatelessWidget {
   });
 
   final SeatLayerTicketRun run;
+  final bool first;
   final bool open;
   final bool removable;
   final int arrivalIndex;
@@ -239,6 +250,8 @@ class _RunBlock extends StatelessWidget {
             child: _DenseLine(
               line: run.members.first,
               run: run.isGroup ? run : null,
+              first: first,
+              member: false,
               open: open,
               removable: removable,
               onToggle: run.isGroup ? onToggle : null,
@@ -250,6 +263,8 @@ class _RunBlock extends StatelessWidget {
               _DenseLine(
                 line: member,
                 run: null,
+                first: false,
+                member: true,
                 open: false,
                 removable: removable,
                 onToggle: null,
@@ -259,10 +274,66 @@ class _RunBlock extends StatelessWidget {
       );
 }
 
+/// The list's tail, and the one control that unfolds it.
+class _MoreRow extends StatelessWidget {
+  const _MoreRow({
+    required this.collapsed,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final bool collapsed;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    return InkWell(
+      onTap: onPressed,
+      child: Container(
+        height: theme.layout.denseMoreRowHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: theme.divider)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: theme.mutedText,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                fontFamily: theme.fontFamily,
+              ),
+            ),
+            AnimatedRotation(
+              duration: SeatLayerPickerMotion.of(
+                context,
+                SeatLayerPickerMotion.pop,
+              ),
+              turns: collapsed ? 0 : .5,
+              child: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 13,
+                color: theme.mutedText,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _DenseLine extends StatelessWidget {
   const _DenseLine({
     required this.line,
     required this.run,
+    required this.first,
+    required this.member,
     required this.open,
     required this.removable,
     required this.onToggle,
@@ -271,6 +342,8 @@ class _DenseLine extends StatelessWidget {
 
   final SeatLayerTicketLine line;
   final SeatLayerTicketRun? run;
+  final bool first;
+  final bool member;
   final bool open;
   final bool removable;
   final VoidCallback? onToggle;
@@ -305,113 +378,206 @@ class _DenseLine extends StatelessWidget {
           '${pickerMoney(context, total, line.item.currency)}',
       child: Container(
         height: theme.layout.denseLineHeight,
-        // A held row is inventory the server has already set aside. The
-        // hairline and the lock say so without spending a column on a word.
-        decoration: line.held
-            ? BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: pickerAlpha(theme.accent, .4)),
-              )
-            : null,
-        child: InkWell(
-          onTap: onToggle,
-          child: Padding(
-            padding: EdgeInsets.only(left: group == null ? 22 : 0, right: 2),
-            child: Row(
-              children: [
-                // The chevron is a marker, not the target: the whole line
-                // opens the run, and the line clears the touch floor in both
-                // directions on its own.
-                if (onToggle != null)
-                  AnimatedRotation(
-                    duration: SeatLayerPickerMotion.of(
-                      context,
-                      SeatLayerPickerMotion.pop,
-                    ),
-                    turns: open ? .25 : 0,
-                    child: Icon(
-                      Icons.chevron_right_rounded,
-                      size: 18,
-                      color: theme.mutedText,
-                    ),
-                  )
-                else if (group != null)
-                  const SizedBox(width: 18)
-                else if (line.held)
-                  Icon(Icons.lock_rounded, size: 12, color: theme.accent)
-                else
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: line.categoryColor,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const SizedBox.square(dimension: 8),
-                  ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      children: <InlineSpan>[
-                        TextSpan(
-                          text: line.section,
-                          style: const TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                        for (final part in identity.skip(1))
-                          TextSpan(text: ' · $part'),
-                      ],
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: theme.text,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: theme.fontFamily,
-                    ),
-                  ),
-                ),
-                if (size > 1) ...[
-                  Text(
-                    '$size × ${line.amountText}',
-                    style: TextStyle(
-                      color: theme.mutedText,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: theme.fontFamily,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                ],
-                Text(
-                  pickerMoney(context, total, line.item.currency),
-                  softWrap: false,
-                  style: TextStyle(
-                    color: theme.text,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    fontFamily: theme.fontFamily,
-                  ),
-                ),
-                if (removable)
-                  IconButton(
-                    tooltip: 'Remove ${line.section} ${line.seatLabel}',
-                    onPressed: onRemove,
-                    padding: EdgeInsets.zero,
-                    // The glyph stays small; the target around it does not.
-                    constraints: const BoxConstraints.tightFor(
-                      width: SeatLayerSizeTokens.minimumHitTarget,
-                      height: SeatLayerSizeTokens.minimumHitTarget,
-                    ),
-                    color: theme.mutedText,
-                    icon: const Icon(Icons.close_rounded, size: 16),
-                  )
-                else
-                  const SizedBox(width: 8),
-              ],
-            ),
+        decoration: BoxDecoration(
+          // A held row is inventory the server has already set aside. A wash
+          // of the accent and a bar down its leading edge say so without
+          // spending a column on a word.
+          color: line.held
+              ? pickerAlpha(theme.accent, .07)
+              : member
+                  ? pickerAlpha(theme.divider, .16)
+                  : null,
+          border: Border(
+            top: first
+                ? BorderSide.none
+                : BorderSide(color: pickerAlpha(theme.divider, .7)),
           ),
         ),
+        child: Stack(
+          children: [
+            if (line.held)
+              PositionedDirectional(
+                start: 0,
+                top: 0,
+                bottom: 0,
+                child: ColoredBox(
+                  color: pickerAlpha(theme.accent, .72),
+                  child: const SizedBox(width: 3),
+                ),
+              ),
+            InkWell(
+              onTap: onToggle,
+              child: Padding(
+                padding: EdgeInsetsDirectional.only(
+                  start: member ? 26 : 9,
+                  end: 4,
+                ),
+                child: Row(
+                  children: [
+                    _LineMark(line: line, run: group, open: open),
+                    const SizedBox(width: 7),
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          children: <InlineSpan>[
+                            TextSpan(
+                              text: line.section,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                            for (final part in identity.skip(1)) ...<InlineSpan>[
+                              TextSpan(
+                                text: ' · ',
+                                style: TextStyle(color: theme.mutedText),
+                              ),
+                              TextSpan(text: part),
+                            ],
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: theme.text,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: theme.fontFamily,
+                          fontFeatures: const <FontFeature>[
+                            FontFeature.tabularFigures(),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (size > 1) ...[
+                      const SizedBox(width: 7),
+                      Text(
+                        '$size × ${line.amountText}',
+                        style: TextStyle(
+                          color: theme.mutedText,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: theme.fontFamily,
+                          fontFeatures: const <FontFeature>[
+                            FontFeature.tabularFigures(),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(width: 7),
+                    Text(
+                      pickerMoney(context, total, line.item.currency),
+                      softWrap: false,
+                      style: TextStyle(
+                        color: theme.text,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        fontFamily: theme.fontFamily,
+                        fontFeatures: const <FontFeature>[
+                          FontFeature.tabularFigures(),
+                        ],
+                      ),
+                    ),
+                    if (removable)
+                      _RemoveButton(line: line, onPressed: onRemove)
+                    else
+                      const SizedBox(width: 7),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+/// What stands at the head of a line: a run's fold control, a category
+/// colour, or the lock of a seat the server has already set aside.
+///
+/// A lock is not a colour: a held seat gets a mark that survives being read
+/// in greyscale, because it is the one state with consequences.
+class _LineMark extends StatelessWidget {
+  const _LineMark({required this.line, required this.run, required this.open});
+
+  final SeatLayerTicketLine line;
+  final SeatLayerTicketRun? run;
+  final bool open;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    final group = run;
+    if (group != null) {
+      // The chevron is a marker, not the target: the whole line opens the
+      // run, and the line clears the touch floor in both directions on its
+      // own.
+      return SizedBox(
+        width: theme.layout.denseRunToggleWidth,
+        child: AnimatedRotation(
+          duration: SeatLayerPickerMotion.of(
+            context,
+            SeatLayerPickerMotion.pop,
+          ),
+          turns: open ? .25 : 0,
+          child: Icon(
+            Icons.chevron_right_rounded,
+            size: 13,
+            color: theme.mutedText,
+          ),
+        ),
+      );
+    }
+    if (line.held) {
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: Color.alphaBlend(
+            pickerAlpha(theme.accent, .18),
+            theme.surface,
+          ),
+          shape: BoxShape.circle,
+        ),
+        child: SizedBox.square(
+          dimension: 14,
+          child: Icon(Icons.lock_rounded, size: 9, color: theme.accent),
+        ),
+      );
+    }
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: line.categoryColor,
+        shape: BoxShape.circle,
+      ),
+      child: const SizedBox.square(dimension: 9),
+    );
+  }
+}
+
+/// One ticket's way out.
+///
+/// The glyph stays small; the target around it does not.
+class _RemoveButton extends StatelessWidget {
+  const _RemoveButton({required this.line, required this.onPressed});
+
+  final SeatLayerTicketLine line;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    return IconButton(
+      tooltip: 'Remove ${line.section} ${line.seatLabel}',
+      onPressed: onPressed,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints.tightFor(
+        width: SeatLayerSizeTokens.minimumHitTarget,
+        height: SeatLayerSizeTokens.minimumHitTarget,
+      ),
+      color: theme.mutedText,
+      style: IconButton.styleFrom(
+        minimumSize: Size.square(theme.layout.denseRemoveSize),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      icon: const Icon(Icons.close_rounded, size: 12),
     );
   }
 }

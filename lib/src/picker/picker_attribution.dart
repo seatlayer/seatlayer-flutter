@@ -32,26 +32,27 @@ class SeatLayerPickerAttribution extends StatelessWidget {
     return Semantics(
       label: 'Powered by SeatLayer',
       child: Opacity(
-        opacity: compact ? .64 : .72,
+        opacity: .72,
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: compact ? 6 : 12,
-            vertical: compact ? 1 : 4,
+            horizontal: compact ? 8 : 12,
+            vertical: compact ? 2 : 4,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _SeatLayerPoweredMark(compact: compact),
-              SizedBox(width: compact ? 4 : 5),
+              const _SeatLayerPoweredMark(),
+              const SizedBox(width: 5),
               Text(
                 'Powered by SeatLayer',
                 style: TextStyle(
                   color: theme.text,
-                  fontSize: compact ? 10 : 12,
+                  fontSize: compact ? 11 : 12,
                   fontWeight: FontWeight.w600,
                   fontFamily: theme.fontFamily,
-                  letterSpacing: compact ? .1 : .2,
+                  // `.02em` of the line's own size, as the web sets it.
+                  letterSpacing: compact ? .22 : .24,
                 ),
               ),
             ],
@@ -62,38 +63,38 @@ class SeatLayerPickerAttribution extends StatelessWidget {
   }
 }
 
+/// The SeatLayer mark: three stacked rows of seats, one plate.
+///
+/// Sixteen points square on every surface — the credit reads as one thing
+/// wherever it is drawn, and a mark that shrinks with its line reads as a
+/// smudge rather than as a logo.
 class _SeatLayerPoweredMark extends StatelessWidget {
-  const _SeatLayerPoweredMark({required this.compact});
+  const _SeatLayerPoweredMark();
 
-  final bool compact;
+  /// Edge length of the plate.
+  static const double size = 16;
 
   @override
-  Widget build(BuildContext context) {
-    final dimension = compact ? 12.0 : 16.0;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: const Color(0xFF0C1220),
-        borderRadius: BorderRadius.circular(compact ? 3 : 4),
-      ),
-      child: SizedBox.square(
-        dimension: dimension,
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 2 : 3,
-            vertical: compact ? 2.5 : 3.5,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _SeatLayerMarkRow(width: compact ? 8 : 10),
-              _SeatLayerMarkRow(width: compact ? 5.5 : 7),
-              _SeatLayerMarkRow(width: compact ? 3 : 4),
-            ],
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0C1220),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const SizedBox.square(
+          dimension: size,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 3, vertical: 3.5),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                _SeatLayerMarkRow(width: 10),
+                _SeatLayerMarkRow(width: 7),
+                _SeatLayerMarkRow(width: 4),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class _SeatLayerMarkRow extends StatelessWidget {

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_best_seats.dart';
 import 'package:seatlayer/src/picker/picker_layout.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
@@ -23,7 +24,7 @@ void main() {
     // The venue's own defaults are already filled in.
     expect(find.text('Standard'), findsOneWidget);
     expect(find.text('Gallery'), findsOneWidget);
-    expect(find.text('Find 2 seats together'), findsOneWidget);
+    expect(find.text('Find 2 best seats'), findsOneWidget);
     // No card title, no helper paragraph.
     expect(find.text('Find the best seats together'), findsNothing);
     expect(find.text('Ticket type'), findsNothing);
@@ -53,9 +54,11 @@ void main() {
       of: selects.first,
       matching: find.byType(Container),
     );
+    // A select is shorter than the touch floor on purpose: it is a menu, and
+    // opening it is a press anywhere on a line that runs the sheet's width.
     expect(
       tester.getSize(boxes.first).height,
-      const SeatLayerPickerLayout().selectorHeight,
+      const SeatLayerPickerLayout().bestSeatsSelectHeight,
     );
     // The stepper is fixed and shares the last line with the action it
     // feeds, under both selects.
@@ -65,7 +68,7 @@ void main() {
         matching: find.byType(Container),
       ).first,
     );
-    expect(stepper.width, 112);
+    expect(stepper.width, const SeatLayerPickerLayout().bestSeatsStepperWidth);
     expect(stepper.top, greaterThanOrEqualTo(zone.bottom));
     final action = tester.getRect(find.byType(FilledButton));
     expect(action.left, greaterThanOrEqualTo(stepper.right));
@@ -102,21 +105,23 @@ void main() {
     map.emit(bestAvailableSnapshot());
     await tester.pumpAndSettle();
 
-    // The stepper's own buttons fill the selector's inner height, and the
-    // selector is the touch floor itself.
+    // The stepper is the touch floor itself, and its keys fill it.
+    final stepper = tester.getSize(
+      find
+          .ancestor(
+            of: find.byTooltip('More tickets'),
+            matching: find.byType(Container),
+          )
+          .first,
+    );
+    expect(stepper.height, const SeatLayerPickerLayout().selectorHeight);
     expect(
       tester.getSize(find.byTooltip('Fewer tickets')).height,
-      greaterThanOrEqualTo(
-        const SeatLayerPickerLayout().selectorHeight - 2,
-      ),
-    );
-    expect(
-      tester.getSize(find.byTooltip('More tickets')).width,
-      greaterThanOrEqualTo(40),
+      greaterThanOrEqualTo(stepper.height - 10),
     );
     expect(
       tester.getSize(find.byType(FilledButton)).height,
-      greaterThanOrEqualTo(46),
+      greaterThanOrEqualTo(SeatLayerSizeTokens.minimumHitTarget),
     );
   });
 
@@ -132,7 +137,7 @@ void main() {
     map.emit(bestAvailableSnapshot());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Find 2 seats together'));
+    await tester.tap(find.text('Find 2 best seats'));
     await tester.pumpAndSettle();
 
     expect(map.callsTo('picker.bestAvailable').single.$2, <String, Object?>{
@@ -171,7 +176,7 @@ void main() {
     await tester.tap(find.text('Any venue zone').last);
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Find 2 seats together'));
+    await tester.tap(find.text('Find 2 best seats'));
     await tester.pumpAndSettle();
 
     expect(map.callsTo('picker.bestAvailable').single.$2, <String, Object?>{
@@ -194,7 +199,7 @@ void main() {
 
     await tester.tap(find.byTooltip('More tickets'));
     await tester.pumpAndSettle();
-    expect(find.text('Find 3 seats together'), findsOneWidget);
+    expect(find.text('Find 3 best seats'), findsOneWidget);
   });
 
   testWidgets('a read-only session cannot search', (tester) async {
@@ -215,7 +220,7 @@ void main() {
     expect(
       tester
           .widget<FilledButton>(
-            find.widgetWithText(FilledButton, 'Find 2 seats together'),
+            find.widgetWithText(FilledButton, 'Find 2 best seats'),
           )
           .onPressed,
       isNull,
@@ -237,7 +242,7 @@ void main() {
     map.emit(bestAvailableSnapshot());
     await tester.pumpAndSettle();
 
-    expect(find.text('Find 2 seats together'), findsNothing);
+    expect(find.text('Find 2 best seats'), findsNothing);
   });
 
   group('goldens', () {

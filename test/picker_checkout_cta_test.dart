@@ -25,8 +25,9 @@ SeatLayerPickerState _state({
   Map<String, Object?>? validity,
   SeatLayerPickerBusyAction busy = SeatLayerPickerBusyAction.none,
   GAArea? generalAdmissionCandidate,
+  bool holdActive = false,
 }) {
-  final raw = pickerSnapshot();
+  final raw = pickerSnapshot(holdOwner: holdActive ? 'picker' : null);
   final event = Map<String, Object?>.from(raw['event']! as Map<String, Object?>)
     ..['salesClosed'] = salesClosed;
   final selection = Map<String, Object?>.from(
@@ -273,6 +274,117 @@ void main() {
       );
       expect(cta.statesReason, isFalse);
       expect(cta.enabled, isTrue);
+    });
+  });
+
+  group('the peek line', () {
+    // The collapsed bar and the footer button are two readings of one
+    // situation. These pin the readings that differ — a bar fifty points tall
+    // cannot carry a disabled button AND a sentence, so wherever the footer
+    // states a reason the bar states the whole line instead.
+    SeatLayerPeekLine peek(
+      SeatLayerPickerState state, {
+      int ticketCount = 1,
+      String? totalText = '€25',
+      String? fromPriceText,
+      bool canOfferFind = false,
+      bool handoffInFlight = false,
+      bool showPrices = true,
+    }) =>
+        seatLayerCheckoutCtaState(
+          state: state,
+          strings: _strings,
+          label: 'Continue',
+          canCheckout: true,
+          seatCardOpen: false,
+          handoffInFlight: handoffInFlight,
+          ticketCount: ticketCount,
+          totalText: totalText,
+          fromPriceText: fromPriceText,
+          showPrices: showPrices,
+          canOfferFind: canOfferFind,
+        ).peekLine;
+
+    test('a cart states its count, and the money rides the pill', () {
+      final line = peek(_state());
+      expect(line.summary, '1 ticket');
+      expect(line.pillLabel, 'Continue');
+      expect(line.total, '€25');
+      expect(line.sentence, isNull);
+    });
+
+    test('an empty bar quotes the cheapest ticket and offers the finder', () {
+      final line = peek(
+        _state(),
+        ticketCount: 0,
+        fromPriceText: '€25',
+        canOfferFind: true,
+      );
+      expect(line.summary, 'From €25');
+      expect(line.pillLabel, isNull);
+      expect(line.offerFind, isTrue);
+    });
+
+    test('an empty bar with no price still names the one thing to do', () {
+      final line = peek(_state(), ticketCount: 0);
+      expect(line.summary, 'Pick your seats');
+      expect(line.offerFind, isFalse);
+    });
+
+    test('closed sales take the whole line, and there is no pill', () {
+      final line = peek(_state(salesClosed: true), ticketCount: 0);
+      expect(line.sentence, 'Sales are closed');
+      expect(line.summary, isNull);
+      expect(line.pillLabel, isNull);
+    });
+
+    test('a hold being created replaces the pill with the news', () {
+      final line = peek(_state(busy: SeatLayerPickerBusyAction.creatingHold));
+      expect(line.sentence, 'Securing your seats…');
+      expect(line.pillLabel, isNull);
+    });
+
+    test('a secured cart says the money is safe before checkout appears', () {
+      final line = peek(_state(), handoffInFlight: true);
+      expect(
+        line.sentence,
+        "✓ 1 secured · €25 — you won't be charged yet",
+      );
+    });
+
+    test('a session that hides prices says it without one', () {
+      final line = peek(_state(), handoffInFlight: true, showPrices: false);
+      expect(line.sentence, 'Seats secured. Opening checkout…');
+    });
+
+    test('the footer says what a hold changes about the button', () {
+      // Not the peek line, but resolved by the same call: once a hold exists
+      // the footer is offering the till rather than offering to hold again.
+      final held = seatLayerCheckoutCtaState(
+        state: _state(holdActive: true),
+        strings: _strings,
+        label: 'Hold seats & checkout',
+        canCheckout: true,
+        seatCardOpen: false,
+        ticketCount: 1,
+      );
+      expect(held.label, 'Continue to checkout');
+      expect(held.enabled, isTrue);
+      expect(held.peekLine.showClock, isTrue);
+    });
+
+    test('an empty cart is the one thing left to do, and cannot be pressed',
+        () {
+      final empty = seatLayerCheckoutCtaState(
+        state: _state(),
+        strings: _strings,
+        label: 'Hold seats & checkout',
+        canCheckout: false,
+        seatCardOpen: false,
+        ticketCount: 0,
+      );
+      expect(empty.label, 'Select seats');
+      expect(empty.enabled, isFalse);
     });
   });
 }

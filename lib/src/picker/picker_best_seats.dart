@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
+import 'picker_tokens.g.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -60,81 +61,131 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
         controller.state.canMutateInventory &&
         !_submitting;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // One track, read top to bottom: of what, where, then how many and go.
-        // The ticket type and the zone each take a full line because their
-        // values are names, which are the long ones; the stepper is narrow and
-        // fixed, so it shares the last line with the action it feeds.
-        _CompactSelect(
-          label: strings.ticketType,
-          placeholder: strings.anyTicketType,
-          value: _categoryKey,
-          entries: <(String, String)>[
-            for (final category in categories) (category.key, category.label),
-          ],
-          enabled: enabled,
-          onChanged: (value) => setState(() => _categoryKey = value),
+    // One card, one track, read top to bottom: of what, where, then how many
+    // and go. The ticket type and the zone each take a full line because
+    // their values are names, which are the long ones; the stepper is narrow
+    // and fixed, so it shares the last line with the action it feeds.
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(11),
+        border: Border.all(
+          color: Color.alphaBlend(
+            pickerAlpha(theme.accent, .34),
+            theme.divider,
+          ),
         ),
-        // A venue with no zones has nothing to choose between, so the row is
-        // absent rather than offering a select whose only answer is "anywhere".
-        if (zones.isNotEmpty) ...[
-          const SizedBox(height: 8),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: <Color>[
+            Color.alphaBlend(pickerAlpha(theme.accent, .05), theme.surface),
+            Color.alphaBlend(pickerAlpha(theme.accent, .11), theme.surface),
+          ],
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
           _CompactSelect(
-            label: strings.venueZone,
-            placeholder: strings.anyVenueZone,
-            value: _zoneId,
+            label: strings.ticketType,
+            placeholder: strings.anyTicketType,
+            value: _categoryKey,
             entries: <(String, String)>[
-              for (final zone in zones) (zone.id, zone.label),
+              for (final category in categories) (category.key, category.label),
             ],
             enabled: enabled,
-            onChanged: (value) => setState(() => _zoneId = value),
+            onChanged: (value) => setState(() => _categoryKey = value),
           ),
-        ],
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            _Stepper(
-              quantity: quantity,
-              maximum: maximum,
+          // A venue with no zones has nothing to choose between, so the row is
+          // absent rather than offering a select whose only answer is
+          // "anywhere".
+          if (zones.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            _CompactSelect(
+              label: strings.venueZone,
+              placeholder: strings.anyVenueZone,
+              value: _zoneId,
+              entries: <(String, String)>[
+                for (final zone in zones) (zone.id, zone.label),
+              ],
               enabled: enabled,
-              onChanged: (value) => setState(() => _quantity = value),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: theme.accent,
-                  foregroundColor: theme.onAccent,
-                  minimumSize: const Size(0, 46),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(theme.buttonRadius),
-                  ),
-                  textStyle: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                    fontFamily: theme.fontFamily,
-                  ),
-                ),
-                onPressed: enabled ? () => _submit(controller, quantity) : null,
-                icon: _submitting
-                    ? const SizedBox.square(
-                        dimension: 14,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.auto_awesome_rounded, size: 16),
-                label: Text(
-                  strings.findBestSeats(quantity),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+              onChanged: (value) => setState(() => _zoneId = value),
             ),
           ],
-        ),
-      ],
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              _Stepper(
+                quantity: quantity,
+                maximum: maximum,
+                enabled: enabled,
+                onChanged: (value) => setState(() => _quantity = value),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: theme.accent,
+                    foregroundColor: theme.onAccent,
+                    disabledBackgroundColor: theme.surface,
+                    disabledForegroundColor: theme.mutedText,
+                    minimumSize: Size(0, theme.layout.selectorHeight),
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        SeatLayerRadiusTokens.control,
+                      ),
+                    ),
+                    textStyle: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w800,
+                      fontFamily: theme.fontFamily,
+                    ),
+                  ),
+                  onPressed:
+                      enabled ? () => _submit(controller, quantity) : null,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_submitting)
+                        SizedBox.square(
+                          dimension: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: theme.onAccent,
+                          ),
+                        )
+                      else
+                        // The one flourish on the card, and the same mark the
+                        // collapsed bar offers the finder under.
+                        Text(
+                          '✦',
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1,
+                            color: theme.onAccent,
+                          ),
+                        ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          _submitting
+                              ? strings.findingBestSeats
+                              : strings.findBestSeats(quantity),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -207,18 +258,14 @@ class _CompactSelect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
-    final height = theme.layout.selectorHeight;
     return Semantics(
       label: label,
       child: Container(
-        height: height,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        height: theme.layout.bestSeatsSelectHeight,
+        padding: const EdgeInsetsDirectional.only(start: 9, end: 10),
         decoration: BoxDecoration(
-          color: Color.alphaBlend(
-            pickerAlpha(theme.text, .03),
-            theme.surface,
-          ),
-          borderRadius: BorderRadius.circular(theme.radius - 4),
+          color: theme.surface,
+          borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.control),
           border: Border.all(color: theme.divider),
         ),
         child: DropdownButtonHideUnderline(
@@ -227,11 +274,18 @@ class _CompactSelect extends StatelessWidget {
             isExpanded: true,
             isDense: true,
             focusColor: const Color(0x00000000),
-            iconEnabledColor: theme.mutedText,
+            // The widget's own chevron, sized down to the mark the web draws
+            // rather than Material's full-size arrow: the control is only
+            // thirty-four points tall, and the stock icon owns a third of it.
+            icon: Icon(
+              Icons.keyboard_arrow_down_rounded,
+              size: 16,
+              color: theme.mutedText,
+            ),
             dropdownColor: theme.surface,
             style: TextStyle(
               color: theme.text,
-              fontSize: 13,
+              fontSize: 12.5,
               fontWeight: FontWeight.w700,
               fontFamily: theme.fontFamily,
             ),
@@ -264,27 +318,26 @@ class _Stepper extends StatelessWidget {
   final bool enabled;
   final ValueChanged<int> onChanged;
 
-  /// The stepper's fixed width: two full-size targets and the count between.
-  static const double width = 112;
-
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     return Container(
-      // Fixed, so the ticket-type select beside it keeps one width whether the
-      // buyer is asking for two seats or twelve.
-      width: width,
+      // Fixed, so the action beside it keeps one width whether the buyer is
+      // asking for two seats or twelve.
+      width: theme.layout.bestSeatsStepperWidth,
       height: theme.layout.selectorHeight,
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: Color.alphaBlend(pickerAlpha(theme.text, .03), theme.surface),
-        borderRadius: BorderRadius.circular(theme.radius - 4),
+        color: theme.surface,
+        borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.control),
         border: Border.all(color: theme.divider),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _StepIcon(
-            icon: Icons.remove_rounded,
+            glyph: '−',
             tooltip: strings.fewerTickets,
             onPressed:
                 enabled && quantity > 1 ? () => onChanged(quantity - 1) : null,
@@ -300,12 +353,15 @@ class _Stepper extends StatelessWidget {
                   color: theme.text,
                   fontWeight: FontWeight.w800,
                   fontFamily: theme.fontFamily,
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
                 ),
               ),
             ),
           ),
           _StepIcon(
-            icon: Icons.add_rounded,
+            glyph: '+',
             tooltip: strings.moreTickets,
             onPressed: enabled && quantity < maximum
                 ? () => onChanged(quantity + 1)
@@ -317,28 +373,59 @@ class _Stepper extends StatelessWidget {
   }
 }
 
+/// One end of the stepper: a filled square the thumb can find without
+/// looking, over a target that reaches past the control's own edge.
 class _StepIcon extends StatelessWidget {
   const _StepIcon({
-    required this.icon,
+    required this.glyph,
     required this.tooltip,
     required this.onPressed,
   });
 
-  final IconData icon;
+  final String glyph;
   final String tooltip;
   final VoidCallback? onPressed;
+
+  /// Edge length of the drawn key.
+  static const double size = 34;
 
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
-    return IconButton(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(width: 40, height: 44),
-      color: theme.text,
-      disabledColor: pickerAlpha(theme.mutedText, .4),
-      icon: Icon(icon, size: 16),
+    final disabled = onPressed == null;
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        button: true,
+        enabled: !disabled,
+        label: tooltip,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(7),
+          child: Container(
+            width: size,
+            height: size,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: pickerAlpha(theme.divider, .35),
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: ExcludeSemantics(
+              child: Text(
+                glyph,
+                style: TextStyle(
+                  color: disabled
+                      ? pickerAlpha(theme.mutedText, .4)
+                      : theme.text,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: theme.fontFamily,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

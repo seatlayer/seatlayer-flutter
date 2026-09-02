@@ -65,7 +65,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(SeatLayerPickerHoldCountdown), findsOneWidget);
-      expect(find.byIcon(Icons.timer_outlined), findsOneWidget);
+      // A status light and a clock, not a clock glyph: the dot is what turns
+      // the pill from a label into something that is running.
+      expect(find.byIcon(Icons.timer_outlined), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(SeatLayerPickerHoldCountdown),
+          matching: find.byType(Text),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('no hold means no pill', (tester) async {
@@ -281,7 +290,8 @@ void main() {
           tester.getRect(find.byType(SeatLayerPickerViewModeControl));
       final access =
           tester.getRect(find.byType(SeatLayerPickerAccessibilityFilters));
-      final stepOut = tester.getRect(find.byType(SeatLayerPickerOverviewButton));
+      final stepOut =
+          tester.getRect(find.byType(SeatLayerPickerOverviewButton));
 
       expect(segmented.right, closeTo(screen.right - 10, .5));
       expect(segmented.top, closeTo(screen.top + 10, .5));
@@ -352,7 +362,8 @@ void main() {
       await tester.pumpAndSettle();
 
       final screen = tester.getRect(find.byType(SeatLayerPickerMapControls));
-      final stepOut = tester.getRect(find.byType(SeatLayerPickerOverviewButton));
+      final stepOut =
+          tester.getRect(find.byType(SeatLayerPickerOverviewButton));
       expect(stepOut.bottom, closeTo(screen.bottom - 62, .5));
     });
 
