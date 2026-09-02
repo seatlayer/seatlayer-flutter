@@ -144,6 +144,7 @@ class SeatLayerPickerCategory {
     required this.available,
     required this.notForSale,
     required this.tiers,
+    this.free,
   });
 
   final String key;
@@ -154,6 +155,15 @@ class SeatLayerPickerCategory {
   final int available;
   final bool notForSale;
   final List<CategoryTier> tiers;
+
+  /// Seats still free in this category on live inventory, or null when the
+  /// runtime has not said.
+  ///
+  /// Sent by a runtime that advertises `category-availability-v1`, and
+  /// refreshed on every availability push. Unlike [available], which reads
+  /// zero before counts arrive, an absent value here means unknown and a
+  /// zero means sold out — so this is the number to print.
+  final int? free;
 
   static SeatLayerPickerCategory? fromJson(Object? value) {
     final key = jStr(jGet(value, 'key'));
@@ -182,6 +192,7 @@ class SeatLayerPickerCategory {
       available: jInt(jGet(value, 'available')) ?? 0,
       notForSale: jBool(jGet(value, 'notForSale')) ?? false,
       tiers: tiers,
+      free: jInt(jGet(value, 'free')),
     );
   }
 }
@@ -927,9 +938,8 @@ class SeatLayerPickerState {
       snapshot?.selection ?? const <SelectedSeat>[];
   List<SeatLayerCheckoutLineItem> get cartLines =>
       snapshot?.cartLines ?? const <SeatLayerCheckoutLineItem>[];
-  SeatLayerPickerHold? get hold => !holdLapsed && snapshot?.hold.active == true
-      ? snapshot!.hold
-      : null;
+  SeatLayerPickerHold? get hold =>
+      !holdLapsed && snapshot?.hold.active == true ? snapshot!.hold : null;
   SeatLayerHoldOwner? get holdOwner => snapshot?.holdOwner;
   bool get isReady => phase == SeatLayerPickerPhase.ready;
   bool get isBusy => busyAction != SeatLayerPickerBusyAction.none;
