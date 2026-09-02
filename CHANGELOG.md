@@ -20,6 +20,17 @@ an empty frame; the collapsed cart says `3 tickets` and leaves the total to
 `Continue · €285` rather than stating it twice. New strings: `allPrices`,
 `testModeLong`.
 
+On a phone the price legend and the Map/3D control are a row of their own
+between the header and the map rather than chrome floating on the map's top
+edge, so the last chip is never clipped under the control and no seat number
+reads through the gaps; the runtime no longer frames around them. The band
+takes the map chrome's palette and darkens with the 3D scene. The test-event
+badge sits in the map's top-left corner in both views, stepping down only
+while the scene's `Back to venue` pill is drawn. New layout token:
+`topRailHeight`. The `Powered by SeatLayer` credit is centred at the foot of
+the sheet, where a phone's rounded corner cannot clip it, and keeps its ink on
+the dark scene sheet.
+
 **Runtime pin**
 
 The hosted runtime moves to `seatlayer-js@0.74.0`. Views load
