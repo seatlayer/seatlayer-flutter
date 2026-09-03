@@ -25,6 +25,13 @@ enum SeatLayerPickerBusyAction {
   releasingHold,
   refreshingAccess,
   changingView,
+
+  /// One line on its way out of the cart.
+  ///
+  /// Its own action rather than [updatingSelection] because it is the one
+  /// inventory mutation that does NOT stand between the buyer and checkout:
+  /// see [SeatLayerPickerState.blocksCheckout].
+  removingCartLine,
 }
 
 enum SeatLayerPickerCloseReason {
@@ -1042,9 +1049,23 @@ class SeatLayerPickerState {
   bool get hasHostOwnedHold =>
       hold != null && holdOwner == SeatLayerHoldOwner.host;
   bool get canMutateInventory => !hasHostOwnedHold;
+
+  /// Whether the work in flight stands between the cart and the checkout.
+  ///
+  /// Every busy action does, with one exception. `picker.removeCartLine`
+  /// re-holds the seats that are left before the server answers, which takes
+  /// close to two seconds on a real event; greying the one button the buyer
+  /// came for through all of it — over a line they have already been told is
+  /// gone, and already offered back — reads as a sheet that has stopped
+  /// working. It is safe because the controller serialises inventory
+  /// mutations: a Continue pressed during a removal is sent after it, against
+  /// the cart the buyer can see.
+  bool get blocksCheckout =>
+      isBusy && busyAction != SeatLayerPickerBusyAction.removingCartLine;
+
   bool get canCheckout =>
       isReady &&
-      !isBusy &&
+      !blocksCheckout &&
       event?.salesClosed != true &&
       (snapshot?.ticketCount ?? 0) > 0 &&
       (snapshot?.selectionValidity?.isValid ?? true);

@@ -605,6 +605,15 @@ abstract final class SeatLayerElevationTokens {
   static const double pill = 0;
 }
 
+/// Opacities that carry a meaning of their own.
+///
+/// Not decoration: each one is a state the buyer is being
+/// told about, and it is the same number on every platform.
+abstract final class SeatLayerOpacityTokens {
+  /// `0.45`
+  static const double removing = 0.45;
+}
+
 /// Motion durations, in milliseconds.
 abstract final class SeatLayerMotionTokens {
   /// Nothing in [durations] may exceed this.

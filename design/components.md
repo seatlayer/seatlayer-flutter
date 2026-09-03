@@ -310,8 +310,16 @@ override** `style:`
 - **Rules** a range is only drawn when the seat numbers really are consecutive;
   anything else lists up to three labels and then `+N`. A ticket that carries
   its own control (a table's guest count, a tier choice) never folds.
-- **Commands** `picker.deselect { label }`, offered back for
-  `motion.durationOutsideBudget.undoWindow` as an undo.
+- **States** a line the buyer has asked to remove is drawn at
+  `opacity.removing` with its × inert and its swipe disabled, from the press
+  until the snapshot that drops it (or the failure that puts it back). Any
+  cell whose words change between snapshots cross-fades over
+  `motion.duration.crossfade`; the rest of the line does not move. See
+  `picker-spec.md` §3.13.
+- **Commands** `picker.removeCartLine { label }`, offered back for
+  `motion.durationOutsideBudget.undoWindow` as an undo. It carries its own busy
+  action (`removingCartLine`) because it is the one inventory mutation that
+  does not put the checkout call to action down.
 
 ## BookButton
 

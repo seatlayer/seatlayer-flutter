@@ -1,5 +1,29 @@
 # Changelog
 
+## Unreleased
+
+Removing a ticket now answers the press rather than the server. The line fades
+and its × goes inert in the same frame, the `Ticket removed` / `Undo` bar is
+offered straight away, and the row comes back if the removal fails.
+
+The sheet stays usable while that runs. `picker.removeCartLine` re-holds the
+rest of the cart on the server, which takes seconds on a real event; the
+checkout call to action no longer greys through it. Pressing it during a
+removal is safe — inventory mutations are serialised, so the handoff is sent
+after the removal, against the cart the buyer can see.
+
+When a line's own words change — a run's range shortening, its `2 × €25` going,
+the sheet's `2 tickets` becoming `1 ticket` — only that cell cross-fades, and
+nothing does under reduced motion.
+
+A busy checkout button no longer overflows its own width: `Opening secure
+checkout…` beside the spinner overran the sheet's book button while the host
+was answering.
+
+New design token `opacity.removing`, and a new
+`SeatLayerPickerBusyAction.removingCartLine` — the one busy action that does
+not block checkout.
+
 ## 0.7.1
 
 `SeatLayerPickerOptions.showBookedOverlay` lets a host whose checkout ends on

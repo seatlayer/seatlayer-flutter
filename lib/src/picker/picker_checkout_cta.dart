@@ -448,16 +448,24 @@ class SeatLayerCheckoutCtaLabel extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
     );
     if (!cta.busy) return text;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        SizedBox.square(
-          dimension: 16,
-          child: CircularProgressIndicator(strokeWidth: 2, color: color),
-        ),
-        const SizedBox(width: 8),
-        text,
-      ],
+    // A row lays its non-flexible children out with an unbounded main axis, so
+    // the ellipsis above never fires inside one: `Opening secure checkout…`
+    // beside a spinner overran the sheet's own book button by 46 points for as
+    // long as the host took to answer. The label is made flexible exactly where
+    // there is a width to be flexible within — a flex child cannot be measured
+    // at all in the two callers that lay this out unbounded.
+    return LayoutBuilder(
+      builder: (context, constraints) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          SizedBox.square(
+            dimension: 16,
+            child: CircularProgressIndicator(strokeWidth: 2, color: color),
+          ),
+          const SizedBox(width: 8),
+          if (constraints.hasBoundedWidth) Flexible(child: text) else text,
+        ],
+      ),
     );
   }
 }

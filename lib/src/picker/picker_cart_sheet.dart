@@ -756,7 +756,11 @@ class _PeekSummaryState extends State<_PeekSummary>
       container: true,
       label: widget.text,
       child: ExcludeSemantics(
-        child: _bumped(text),
+        // `2 tickets` → `1 ticket` is the same sentence restated, and it can
+        // be restated by work the buyer is still watching land — a cart line
+        // being removed takes seconds on the server. The swell says a number
+        // changed; the cross-fade is what stops it changing in one frame.
+        child: _bumped(SeatLayerCrossFade(token: widget.text, child: text)),
       ),
     );
   }

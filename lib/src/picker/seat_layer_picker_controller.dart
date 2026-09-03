@@ -778,7 +778,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         <String, Object?>{
           'label': line?.label ?? objectId,
         },
-        SeatLayerPickerBusyAction.updatingSelection);
+        SeatLayerPickerBusyAction.removingCartLine);
   }
 
   Future<void> setSeatTier(String seatId, String? tierId) => _inventoryMutation(

@@ -1176,12 +1176,40 @@ true = web) — a host with its own confirmation screen sets it false; the sale
 is still known (`bookedHandoff`, `onBooked`), only the telling is the host's.
 Ports: same option, same default.
 
-**Removing a line from a held cart is slow by nature.** `picker.removeCartLine`
-re-holds on the server; on the pilot the sheet sat busy (CTA greyed, row
-unchanged) for ~1.7 s before the line re-rendered. Candidate native lane
-(N-CART-4): render the removal optimistically — fade the row at once, keep
-the CTA enabled, let the serialised mutation queue hold Continue if pressed —
-and animate the line text change. Not built yet; measure server latency first.
+**Removing a line from a held cart is slow by nature, and the sheet no longer
+waits with the buyer.** `picker.removeCartLine` re-holds the rest of the cart on
+the server; on the pilot the sheet sat busy (CTA greyed, row unchanged) for
+~1.7 s and then swapped `103 · A · 9–10` to `103 · A · 10` in one frame. The
+latency is the server's. Everything else was ours, and is now built:
+
+- **The press is answered by the row.** In the same frame as the × (or a
+  committed swipe), the line is marked *removing*: it fades to
+  `opacity.removing` over `motion.duration.crossfade`, its × goes inert, and
+  it can no longer be swiped. The mark is dropped by the first snapshot that
+  no longer carries the line; a mutation that fails restores the row and the
+  failure is stated by the inline action error as before.
+- **The undo bar is offered against the press, not the reply.** The
+  `Ticket removed` + `Undo` toast and the `haptics.ticketRemoved` cue both
+  fire before the command is sent, so the buyer's four seconds
+  (`motion.durationOutsideBudget.undoWindow`) do not start whenever the server
+  finishes. A removal that then *fails* takes that toast back down (unless
+  something newer has taken the band) along with restoring the row.
+- **The removal does not grey the sheet.** `busyAction` for this one command is
+  `removingCartLine`, and it is the only busy action that does not block
+  checkout: the call to action stays live and says what it always says.
+  Pressing it during a removal is safe because inventory mutations are
+  serialised — `picker.continue` is sent *after* `picker.removeCartLine`,
+  against the cart the buyer can see. Every other control that goes down on a
+  busy state still does.
+- **Changed cells cross-fade, the list does not.** When a line's own words
+  change between snapshots — `9–10` → `10`, `2 × €25` → nothing, `€50` → `€25`
+  — only the cell that changed swaps, over `motion.duration.crossfade`, keyed
+  on the words themselves. The sheet's count (`2 tickets` → `1 ticket`) swaps
+  the same way, alongside the swell it already had. Under reduced motion there
+  is no cross-fade at all: the new words are simply there.
+
+Ports: same four rules. `opacity.removing` and the `removingCartLine` busy
+action are token and contract, not Dart.
 
 **Card after a hold.** A hold present when the picker starts, or created by
 a best-available pick, adopts its seats as answered on arrival; a card that is

@@ -87,6 +87,7 @@ String _render(Map<String, Object?> tokens) {
   final typeScaleClamp = _map(_map(tokens['type'])['scaleClamp']);
   final radius = _map(tokens['radius']);
   final elevation = _map(tokens['elevation']);
+  final opacity = _map(tokens['opacity']);
   final motion = _map(tokens['motion']);
   final durations = _map(motion['duration']);
   final outside = _map(motion['durationOutsideBudget']);
@@ -173,6 +174,18 @@ String _render(Map<String, Object?> tokens) {
     ..writeln('/// Material elevations.')
     ..writeln('abstract final class SeatLayerElevationTokens {');
   elevation.forEach((key, value) {
+    buffer.writeln('  /// `$value`');
+    buffer.writeln('  static const double $key = ${_double(value)};');
+  });
+  buffer
+    ..writeln('}')
+    ..writeln()
+    ..writeln('/// Opacities that carry a meaning of their own.')
+    ..writeln('///')
+    ..writeln('/// Not decoration: each one is a state the buyer is being')
+    ..writeln('/// told about, and it is the same number on every platform.')
+    ..writeln('abstract final class SeatLayerOpacityTokens {');
+  opacity.forEach((key, value) {
     buffer.writeln('  /// `$value`');
     buffer.writeln('  static const double $key = ${_double(value)};');
   });

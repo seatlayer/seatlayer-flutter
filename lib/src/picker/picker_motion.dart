@@ -166,3 +166,58 @@ abstract final class SeatLayerPickerMotion {
   static bool reduced(BuildContext context) =>
       MediaQuery.disableAnimationsOf(context);
 }
+
+/// One cell whose words changed, swapped in place over
+/// [SeatLayerPickerMotion.crossfade].
+///
+/// For the small facts that are rewritten by something the buyer just did
+/// rather than replaced by something new: a cart line's range shortening from
+/// `9–10` to `10`, its `2 × €180` going, the sheet's count falling from
+/// `2 tickets` to `1 ticket`. Those are the same fact restated, and a value
+/// that snaps to a different string in one frame reads as a redraw — which is
+/// exactly how the slow removal read on the pilot.
+///
+/// [token] is what "changed" means here: the swap happens when it differs, so
+/// a caller passes the words themselves rather than relying on a widget that
+/// compares equal for a different reason.
+///
+/// Under reduced motion there is no switcher at all. A zero-length cross-fade
+/// would still build both children for a frame, and this is a swap the viewer
+/// has asked to simply see happen.
+class SeatLayerCrossFade extends StatelessWidget {
+  /// Creates a cell that cross-fades when [token] changes.
+  const SeatLayerCrossFade({
+    super.key,
+    required this.token,
+    required this.child,
+  });
+
+  /// The words this cell is currently stating.
+  final String token;
+
+  /// The cell as it is drawn.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (SeatLayerPickerMotion.reduced(context)) return child;
+    return AnimatedSwitcher(
+      duration: SeatLayerPickerMotion.crossfade,
+      // The outgoing words leave no faster than the incoming ones arrive: a
+      // cell that empties first flickers at the width of the shorter string.
+      switchInCurve: SeatLayerPickerMotion.easeEnter,
+      switchOutCurve: SeatLayerPickerMotion.easeEnter,
+      // The default layout centres its children, and these cells are stretched
+      // by the rows they sit in: centring moved a cart line's address into the
+      // middle of the line. The words stay on the edge they are read from.
+      layoutBuilder: (current, previous) => Stack(
+        alignment: AlignmentDirectional.centerStart,
+        children: <Widget>[
+          ...previous,
+          if (current != null) current,
+        ],
+      ),
+      child: KeyedSubtree(key: ValueKey<String>(token), child: child),
+    );
+  }
+}

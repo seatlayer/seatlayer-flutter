@@ -140,12 +140,40 @@ final class FakePickerMap extends SeatLayerController {
   /// The snapshot this fake currently reports.
   Map<String, Object?> current = pickerSnapshot();
 
+  /// The revision [current] is at, so a test can move the snapshot on without
+  /// stepping behind the controller.
+  int get revision => current['revision']! as int;
+
+  final Map<String, Completer<void>> _gates = <String, Completer<void>>{};
+
+  /// Commands that answer with a failure rather than a snapshot.
+  ///
+  /// A removal that the server refuses is the ordinary race — the seat was
+  /// taken between the pick and the press — and the chrome owes the row back.
+  final Set<String> failing = <String>{};
+
+  /// Hold [command] open until [gate] completes.
+  ///
+  /// The slow commands are the interesting ones: `picker.removeCartLine`
+  /// re-holds the rest of the cart on the server before it answers, and the
+  /// chrome that covers that window can only be tested from inside it. A fake
+  /// that replies on the next microtask has already left it.
+  ///
+  /// A test that means to answer with a *changed* cart sets [current] to the
+  /// snapshot it wants before releasing the gate.
+  void gate(String command, Completer<void> gate) => _gates[command] = gate;
+
   @override
   Stream<EventSignal> get onBridgeEvent => _events.stream;
 
   @override
   Future<Object?> runBridgeCommand(String command, [Object? payload]) async {
     calls.add((command, payload));
+    final held = _gates[command];
+    if (held != null) await held.future;
+    if (failing.contains(command)) {
+      throw StateError('$command was refused');
+    }
     if (handler != null) return handler!(command, payload);
     current = <String, Object?>{
       ...current,
