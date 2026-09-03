@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.2
 
 Removing a ticket now answers the press rather than the server. The line fades
 and its × goes inert in the same frame, the `Ticket removed` / `Undo` bar is
