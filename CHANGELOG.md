@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.1
 
 `SeatLayerPickerOptions.showBookedOverlay` lets a host whose checkout ends on
 a confirmation of its own keep the picker's "You're all set" screen down, so
