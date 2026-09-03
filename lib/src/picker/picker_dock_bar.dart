@@ -530,7 +530,18 @@ String? _accessibleSuffix(
     ...?controller.state.snapshot?.map.accessibilityFilter,
   };
   if (active.isEmpty) return null;
-  final free = seatLayerSectionAccessibleFree(section, active);
+  // The counts ride the catalog's section entries; the map's own focused
+  // summary is a lighter record that never carries them, so the catalog entry
+  // with the same id is the one to read.
+  final catalog = controller.state.snapshot?.sections ?? const [];
+  var counted = section;
+  for (final entry in catalog) {
+    if (entry.id == section.id) {
+      counted = entry;
+      break;
+    }
+  }
+  final free = seatLayerSectionAccessibleFree(counted, active);
   if (free == null || free <= 0) return null;
   return ' · ♿ $free';
 }

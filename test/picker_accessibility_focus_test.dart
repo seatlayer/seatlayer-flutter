@@ -130,10 +130,11 @@ void main() {
         types: <String>{'wheelchair'},
       );
 
-      expect(map.callsTo('picker.focusNextAccessibleSection').single.$2, <String,
-          Object?>{
-        'types': <String>['wheelchair'],
-      });
+      expect(
+          map.callsTo('picker.focusNextAccessibleSection').single.$2,
+          <String, Object?>{
+            'types': <String>['wheelchair'],
+          });
       expect(
         step,
         const SeatLayerAccessibleStep(
@@ -180,9 +181,11 @@ void main() {
     });
 
     test('both capabilities are read independently', () {
-      final flying = _walkingMap(steps: <Map<String, Object?>?>[], counts: false);
+      final flying =
+          _walkingMap(steps: <Map<String, Object?>?>[], counts: false);
       addTearDown(flying.dispose);
-      final counting = _walkingMap(steps: <Map<String, Object?>?>[], focus: false);
+      final counting =
+          _walkingMap(steps: <Map<String, Object?>?>[], focus: false);
       addTearDown(counting.dispose);
 
       expect(_attached(flying).supportsAccessibilityFocus, isTrue);
@@ -430,6 +433,34 @@ void main() {
           accessibilityFilter: const <String>['wheelchair'],
         ),
       );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('· ♿ 2'), findsOneWidget);
+    });
+
+    testWidgets(
+        'reads the count off the catalog when the focused summary lacks it',
+        (tester) async {
+      final map = _walkingMap(steps: <Map<String, Object?>?>[]);
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(pickerHarness(map, const SeatLayerDockBar()));
+      // On the wire the map's own focused summary is a lighter record without
+      // counts; only the catalog entry carries `accessibleFree`.
+      final snapshot = pickerSnapshot(
+        sections: pickerSections(accessibleFree: _counts()),
+        accessibilityFilter: const <String>['wheelchair'],
+      );
+      final mapState = Map<String, Object?>.from(
+        snapshot['map']! as Map<String, Object?>,
+      );
+      final catalog = snapshot['catalog']! as Map<String, Object?>;
+      final focused = Map<String, Object?>.from(
+        (catalog['sections']! as List<Object?>).first! as Map<String, Object?>,
+      )..remove('accessibleFree');
+      mapState['focusedSection'] = focused;
+      map.emit(<String, Object?>{...snapshot, 'map': mapState});
       await tester.pumpAndSettle();
 
       expect(find.textContaining('· ♿ 2'), findsOneWidget);
