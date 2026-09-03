@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.2
 
 Every seat the buyer taps is asked about. Once a hold existed — after the
 first Add seat, or after a best-available pick — the confirm card stopped
