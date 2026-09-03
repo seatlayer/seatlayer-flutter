@@ -128,11 +128,13 @@ String _render(Map<String, Object?> tokens) {
     ..writeln('/// The measured sizes the phone chrome is built from.')
     ..writeln('abstract final class SeatLayerSizeTokens {');
   size.forEach((key, value) {
-    // Two of the size tokens are counts of things rather than measurements,
-    // and a count that arrives as `4.0` cannot index a list.
+    // A few of the size tokens are counts of things rather than measurements,
+    // and a count that arrives as `4.0` cannot index a list or compare against
+    // a string length.
     const Set<String> counts = <String>{
       'denseVisibleLines',
       'denseCollapseFrom',
+      'confirmSectionShortMax',
     };
     final isCount = counts.contains(key);
     buffer.writeln('  /// `$value`');

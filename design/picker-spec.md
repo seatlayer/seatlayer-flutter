@@ -579,27 +579,39 @@ is a correct state, not a degraded one.
 
 #### 3.8.3 Anatomy, 2D
 
-1. **Identity grid**, height `size.confirmIdentityHeight`. Three labelled cells
-   — section, row, seat — divided by hairlines, with a hairline under the grid.
-   The section cell is widest and may wrap to two lines; the row and seat cells
-   never wrap. Eyebrows are small, letter-spaced, uppercase, in
-   `color.*.mutedText`; values are `type.confirmIdentity`. Where there is no
-   section the grid becomes two equal centred cells. A missing value prints an
-   em dash. Copy: `strings.sectionWord`, `strings.rowWord`, `strings.seatWord`,
-   `strings.placeWord` — the row eyebrow follows the object's own word (Row,
-   Table, Booth). **Print the row with its section prefix stripped**, or the card
-   reads `Stalls D · Row Stalls D C`.
+1. **Identity grid**, minimum height `size.confirmIdentityHeight`. Three
+   labelled cells — section, row, seat — of **equal width**, all centred,
+   divided by hairlines, with a hairline under the grid. Eyebrows are
+   `size.confirmIdentityKeyFontSize` at w800, letter-spaced a tenth of their
+   own size, uppercase, in `color.*.mutedText`; values are
+   `size.confirmIdentityValueFontSize` at w800 (the web's 850, rounded to the
+   nearest weight a platform can name) in `color.*.text`, one line, ellipsized.
+   **Only a section longer than `size.confirmSectionShortMax` characters**
+   drops to `size.confirmIdentityLongSectionFontSize` and may wrap to two
+   lines: a numbered section such as `209` reads as one line of equals with the
+   row and the seat, while a venue phrase such as `Upper Grand Circle` needs
+   the room. Where there is no section the grid becomes two equal centred
+   cells. A missing value prints an em dash. Copy: `strings.sectionWord`,
+   `strings.rowWord`, `strings.seatWord`, `strings.placeWord` — the row eyebrow
+   follows the object's own word (Row, Table, Booth). **Print the row with its
+   section prefix stripped**, or the card reads `Stalls D · Row Stalls D C`.
 2. **Category band**, minimum height `size.confirmBandHeight`. Ground is the
-   category colour at 11 % over the surface — a *tint*, not a fill, so the ink
-   stays the theme's own and no category needs a manufactured ink. A 3 pt rail
-   of the full category colour runs down the leading edge, drawn under the
-   padding. (11 % and 3 pt are fixed recipe constants.) Contents: a 9 pt dot in
-   the category colour with a hairline ring; the category name; the seats-left
-   count (`strings.seatsLeft`), which is the cell that gives way, because a
-   truncated category name is a seat the buyer cannot identify; the price at the
-   trailing edge in tabular figures. The count is **absent when it has not
-   arrived**. `strings.onlyLeft` is available as a scarcity telling for a host
-   that wants one.
+   **category colour itself, full bleed** — no dot, no tint, no leading rail:
+   a nine-point disc beside an eleven-per-cent wash said the colour twice and
+   loudly enough neither time, and this is the colour the legend and the map
+   already speak. Because the ground is authored, the ink is **chosen per
+   colour**: white wherever white clears a 3:1 contrast ratio against the
+   category colour, and `#0B0F19` otherwise, so a pale yellow or a light grey
+   category keeps its name. Those two candidates are fixed; the band never
+   manufactures a colour of its own. Contents, all in that ink: the category
+   name at `size.confirmBandNameFontSize` w800; the seats-left count
+   (`strings.seatsLeft`) at `size.confirmBandLeftFontSize` w700 at **78 %
+   opacity** — the theme's muted token says nothing about a green — which is
+   the cell that gives way, because a truncated category name is a seat the
+   buyer cannot identify; the price at the trailing edge at
+   `size.confirmBandPriceFontSize` w800 in tabular figures. The count is
+   **absent when it has not arrived**. `strings.onlyLeft` is available as a
+   scarcity telling for a host that wants one.
 3. **Photo strip**, height `size.confirmPhotoHeight`, full-bleed inside the
    card's corner, drawn **only where the seat names an authored photograph**
    (`selection[].seatViewThumb`, capability `seat-view-thumbnail-v1`); a
@@ -609,13 +621,14 @@ is a correct state, not a degraded one.
    `radius.pill` on a dark plate with white ink in **both** themes: `View from
    here` (`strings.viewFromHere`) and `3D` (`strings.venue3D`, accessible name
    `strings.seeItIn3D`). The sight line sits in the trailing top corner on the
-   same plate. If the image never arrives the strip animates away. §3.8.7 has
-   the whole of it.
-4. **No-photo rail**, height `size.confirmRailHeight`, when there is no photo
-   but 3D is on offer: a plain divider-tinted strip carrying the same pills, but
-   flipped to theme tokens — surface ground, text ink, no plate. A 3D-only card
-   never draws an empty photo frame. The sight line, when there is one, is
-   printed above it as a muted caption.
+   same plate. If the image never arrives the strip animates away and takes the
+   slot with it. §3.8.7 has the whole of it.
+4. **No photo, no strip.** Where the seat names no authored photograph the
+   phone card draws **nothing** in this slot — no rail, no frame, no caption.
+   A 44 pt bar holding one control was dead height on a card that already
+   covers a third of the phone, and the 3D way in moves into the decision row
+   instead (item 7). The sight line rides the photograph or is not printed:
+   off a photograph there is no plate for it to survive on.
 5. **Tier picker**, only where the seat has more than one tier. Legend
    `strings.ticketType`; rows of `size.confirmTierHeight` at `radius.button`,
    name, note and price; the selected row takes an accent hairline, an accent
@@ -627,15 +640,22 @@ is a correct state, not a degraded one.
    wins) — as their own small blocks above the actions.
 7. **Actions**, height `size.confirmActionHeight`, each in its own rounded box
    at `radius.button` inside the card's gutter — not a bar fused to the card's
-   bottom edge, which read as the frame rather than as things to press. Cancel
-   takes about a third of the row and carries a hairline and muted ink; Add seat
-   takes the rest, filled with the accent. Neither may wrap.
+   bottom edge, which read as the frame rather than as things to press. Where
+   there is **no photograph and 3D is on offer**, the row opens with a 44 × 44
+   square before Cancel: a ghost button on the accent at 12 % over the surface
+   with a divider hairline, a cube glyph over `strings.venue3D` at
+   `size.confirm3dSquareFontSize` w800, accessible name `strings.seeItIn3D`.
+   It is absent with a photograph (the strip's pill wins) and inside the 3D
+   scene. Cancel then takes **34 % of the whole row** — the square and its gap
+   come out of what Add seat had — and carries a hairline and muted ink; Add
+   seat takes the rest, filled with the accent. Nothing in the row may wrap.
    Copy: `strings.cancel`; `strings.addSeat` for a seat and `strings.select` for
    a booth, table or general-admission unit. **No price on the button** — the
    price is already in the band above.
 
 `See it in 3D` as a **full-width action** at `radius.button` is the wide
-composition's form; the phone uses the strip pill.
+composition's form; the phone uses the strip pill, or the decision-row square
+where there is no strip.
 
 #### 3.8.4 Motion
 
@@ -727,22 +747,29 @@ nothing about the bearer is ever logged.
 
 **Drawing it.** While the bytes are in flight the strip is the neutral gradient.
 On arrival the image fills it (cover) over `motion.duration.crossfade`. On a
-miss the strip collapses into the no-photo rail over `motion.duration.thumbOut`
-(160 ms, height and opacity), and the reference is evicted so reopening the
-seat tries again. Under reduced motion both transitions are instant. The pills
-do not move.
+miss the strip collapses away entirely over `motion.duration.thumbOut`
+(160 ms, height and opacity) and the 3D square appears in the decision row, so
+the way into the scene is still one tap away and the card is a row shorter. The
+reference is evicted so reopening the seat tries again. Under reduced motion
+both transitions are instant.
 
 **Sight line.** Copy `strings.sightline` ("≈ {m} m to stage"), with the metre
 figure printed as the runtime rounded it. On the photograph it is a pill in the
 trailing TOP corner, inset 6, on the photo plate and ink, `size.confirmSightFont`
 at w700, radius `radius.pill`, padding `size.confirmSightPadY` ×
-`size.confirmSightPadX`. With no photograph it is a one-line muted caption at 11
-/ w500 in `color.*.mutedText` directly above the rail — the web's desktop form,
-because off a photograph there is nothing for a plate to survive. It is shown
-whenever `sightlineMetres` exists, and nothing is shown when it does not.
+`size.confirmSightPadX`. **With no photograph it is not printed at all** on the
+phone: the strip it rides leaves the card, and a lone measured line is not
+worth a row of its own. It is shown whenever `sightlineMetres` exists AND there
+is a photograph to put it on.
 
 **Confidence teaser.** 3D card only, exactly as on the web: outside the scene
-there is no model on screen to be honest about. Full width, minimum height
+there is no model on screen to be honest about. It takes **one of two forms**.
+Where the host can open the passport (`onSeatConfidence`, §4.9) it is a chip on
+the inspection row — an accent dot and `strings.passport`, nothing else. Where
+nothing can be opened it stays the static teaser described here, because the
+headline and the detail ARE the information and a chip saying only `Passport`
+beside a dead target would say nothing and do nothing. Full width, minimum
+height
 `size.confidenceTeaserMinHeight`, top margin `size.confidenceTeaserTop`,
 padding `size.confidenceTeaserPadY` × `size.confidenceTeaserPadX`, radius
 `size.confidenceTeaserRadius`, a hairline of the accent at 35 % over the
@@ -766,6 +793,38 @@ semantics and no focus stop.
 `capabilities` (`seatView`, `venue3d`).
 **Commands** `picker.openSeatView`, `picker.showSeatIn3D`, `picker.deselect`.
 
+#### 3.8.8 The card inside the 3D scene
+
+Inside the venue scene the card asks the same question, in its own dimensions.
+Width `size.confirmCardImmersiveMaxWidth`, resting inset
+`size.confirmCardImmersiveRestInset`, cells padded
+`size.confirmImmersiveCellTop` / `…CellSide` / `…CellBottom`, values at
+`size.confirmImmersiveValueFontSize` and a long section at
+`size.confirmImmersiveSectionFontSize`.
+
+**There is no photo strip.** The venue is already the picture, so the one view
+the buyer has not had is the one from the seat, and that — with the passport
+where a host can open it — is the card's **inspection row**: ONE line of
+compact chips of `size.confirmInspectChipHeight`, gap 6, at `radius.button`,
+ground the accent at 12 % over the surface with a divider hairline, labels at
+`size.confirmInspectChipFontSize` w800 in `color.*.text`, each chip sharing the
+row's width equally.
+
+| Chip | Visible | Spoken | Mark |
+| --- | --- | --- | --- |
+| passport | `strings.passport` | `strings.passport` | a 7 pt accent dot before the word |
+| view from the seat | `strings.viewFromHere` | `strings.viewFromThisSeat` | none — the seat is named twice directly above it |
+
+The row is followed by the same Cancel / Add seat row as the 2D card, and the
+3D square (§3.8.3 item 7) is **never** drawn here. This is what makes the
+scene's card roughly a hundred points shorter than the stack of full-width
+44 pt bars it replaced, which used to cover the section the buyer had just
+flown into.
+
+**The web's `Save to compare` chip has no port.** Nothing in
+`seatlayer.picker.snapshot/1` carries a compare set, and a control that cannot
+say anything true is worse than an absent one.
+
 ### 3.9 Peek bar (collapsed cart)
 
 **Name** `SeatLayerCartSheet` (peek head) · **slots** `sheetStyle`,
@@ -780,21 +839,34 @@ taking a row of its own. Trailing, a chevron of `size.sheetToggleSize` pointing
 **up** while collapsed and rotating over `motion.duration.chevron` on
 `motion.curve.easeEnter` when the sheet opens.
 
-The summary line is `type.peekSummary`, one line, ellipsized, with its
-secondary half in `color.*.mutedText`.
+The summary line is `type.peekSummary`, one line, ellipsized, in
+`color.*.mutedText` while collapsed.
 
-**The Continue pill** is a true pill (`radius.pill`), height
+**On the empty bar the price is the loud part.** The line stays the locale's
+own sentence — `strings.fromPrice`, in whatever order the language puts it —
+and only the **amount inside it** is lifted: `type.peekFromPrice` in
+`color.*.text`, tabular figures, with the word around it left at
+`type.peekSummary` in `color.*.mutedText`. One string per locale, two weights.
+Ports substitute the money into the sentence and then style that substring;
+where the amount cannot be found in the resolved sentence, the whole line is
+printed at the caption weight rather than guessed at.
+
+**The Continue button** is a rounded rectangle at `radius.peekButton`, height
 `size.minimumHitTarget`, accent ground, `color.*.onAccent` ink,
 `type.peekPill`, tabular total. It is a real button and runs the **same**
-checkout action the sheet's footer button runs: from the collapsed bar the pill
-*is* the way to pay. It is hidden entirely while the sheet is open, where the
-footer says the same thing.
+checkout action the sheet's footer button runs: from the collapsed bar it *is*
+the way to pay. It is hidden entirely while the sheet is open, where the footer
+says the same thing.
 
-**Find seats** is the empty bar's one door: height `size.findPillHeight` of ink
-inside a `size.minimumHitTarget` reach, `radius.pill`, accent-filled, a sparkle
-glyph and `strings.findSeats`. Pressing it opens the sheet on the best-seats
-form and moves focus to that form's action. It is withheld where the form would
-be refused — a performance group, closed sales, or an existing hold.
+**Find seats** is the empty bar's one door: a rounded rectangle at
+`radius.peekButton`, height `size.findPillHeight`, 18 pt of horizontal padding,
+accent-filled, a sparkle glyph and `strings.findSeats` at `type.findPill`. It
+is the bar's primary action and is drawn as one — the small lozenge it replaced
+read as an aside. The word stays **`Find seats`**, never `Book now`: nothing is
+selected yet and the tap opens the best-available form, so the button says what
+the tap does. Pressing it opens the sheet on the best-seats form and moves
+focus to that form's action. It is withheld where the form would be refused —
+a performance group, closed sales, or an existing hold.
 
 **Every line the peek can say**, in resolution order (one resolver drives the
 collapsed pill, the sheet's button and the wide bar, so they can never

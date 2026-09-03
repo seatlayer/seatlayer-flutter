@@ -8,7 +8,6 @@ import 'package:seatlayer/src/picker/picker_haptics.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
-import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
@@ -210,8 +209,8 @@ void main() {
     expect(find.text('Standard'), findsNothing);
     expect(find.text('42 left'), findsNothing);
     expect(find.text('Gallery'), findsOneWidget);
-    // 42 identity + 64 photo strip + 8 + 44 decision row + 10.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 168);
+    // 48 identity + 64 photo strip + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 174);
   });
 
   testWidgets('Cancel takes 34% of the decision row and Add seat the rest',
@@ -230,7 +229,9 @@ void main() {
     // the card's edge rather than taken out of its width.
     const row = 310 - 20;
     expect(cancel.width, closeTo(row * .34, .5));
-    expect(add.width, closeTo(row - 8 - (row * .34), .5));
+    // Cancel keeps its third of the WHOLE row; the 44 pt 3D square and its
+    // gap come out of what `Add seat` had.
+    expect(add.width, closeTo(row - 8 - (row * .34) - 44 - 8, .5));
     // Both answers clear the phone's touch floor.
     expect(cancel.height, 44);
     expect(add.height, 44);
@@ -265,19 +266,19 @@ void main() {
     await pumpToRest(tester);
 
     final eyebrow = tester.widget<Text>(find.text('SECTION')).style!;
-    expect(eyebrow.fontSize, 8.5);
+    expect(eyebrow.fontSize, 9);
     expect(eyebrow.fontWeight, FontWeight.w800);
-    expect(eyebrow.letterSpacing, closeTo(8.5 * .1, .001));
-    // A section name is the one value worth a second line; a seat number
-    // never needs one.
+    expect(eyebrow.letterSpacing, closeTo(9 * .1, .001));
+    // `Gallery` is eight characters, so it is the one value that drops to the
+    // small wrapping type; the seat number keeps the big centred size.
     final section = tester.widget<Text>(find.text('Gallery'));
     expect(section.style!.fontSize, 12.5);
     expect(section.maxLines, 2);
     final seat = tester.widget<Text>(find.text('1'));
-    expect(seat.style!.fontSize, 15);
+    expect(seat.style!.fontSize, 18);
     expect(seat.maxLines, 1);
-    // 42 identity + 35 band + 64 photo strip + 8 + 44 decision row + 10.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 203);
+    // 48 identity + 39 band + 64 photo strip + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 213);
   });
 
   testWidgets('the card asks the same question inside the 3D venue',
@@ -299,10 +300,14 @@ void main() {
     expect(find.text('Cancel'), findsOneWidget);
     expect(find.text('Add seat'), findsOneWidget);
     // The scene is already the picture, so the photo strip and its pills are
-    // replaced by the one view the buyer has not had.
-    expect(find.text('View from here'), findsNothing);
+    // replaced by the one view the buyer has not had — as a compact chip
+    // whose visible word is the short one and whose spoken name is not.
     expect(find.text('3D'), findsNothing);
-    expect(find.text('View from this seat'), findsOneWidget);
+    expect(find.text('View from here'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text('View from here')).semanticsLabel,
+      'View from this seat',
+    );
     // Nothing is claimed about a seat the snapshot says nothing about: the
     // web card's compare button and confidence teaser have no data behind
     // them in `seatlayer.picker.snapshot/1`.
@@ -312,8 +317,8 @@ void main() {
     // take the immersive numbers.
     expect(tester.getSize(_surface).width, 342);
     expect(tester.widget<Text>(find.text('Gallery')).style!.fontSize, 12);
-    expect(tester.widget<Text>(find.text('1')).style!.fontSize, 14);
-  });
+    expect(tester.widget<Text>(find.text('1')).style!.fontSize, 17);
+  }, semanticsEnabled: true);
 
   testWidgets(
       'the card comes up on the tap in the scene, and stands down in the '
@@ -362,7 +367,7 @@ void main() {
     map.emit(_inVenue3D());
     await pumpToRest(tester);
 
-    await tester.tap(find.text('View from this seat'));
+    await tester.tap(find.text('View from here'));
     await pumpToRest(tester);
 
     expect(map.callsTo('picker.openSeatView').single.$2, <String, Object?>{
@@ -429,8 +434,8 @@ void main() {
     expect(photo.left, lessThan(venue.left));
     // A screen reader still hears the sentence the pill has no room for.
     expect(find.bySemanticsLabel('See it in 3D'), findsOneWidget);
-    // 42 identity + 35 band + 64 photo strip + 8 + 44 decision row + 10.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 203);
+    // 48 identity + 39 band + 64 photo strip + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 213);
   }, semanticsEnabled: true);
 
   testWidgets('a seat without a real photograph is not offered a view from it',
@@ -485,7 +490,7 @@ void main() {
     expect(strip.height, 64);
   });
 
-  testWidgets('3D alone gets a plain action row, not an empty picture',
+  testWidgets('3D alone takes the decision row, not a rail of its own',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -497,22 +502,19 @@ void main() {
 
     expect(find.text('View from here'), findsNothing);
     expect(find.text('3D'), findsOneWidget);
-    // The gradient stands in for a photograph nothing is going to open.
-    expect(
-      tester
-          .widgetList<DecoratedBox>(
-            find.ancestor(
-              of: find.text('3D'),
-              matching: find.byType(DecoratedBox),
-            ),
-          )
-          .where(
-            (box) => (box.decoration as BoxDecoration).gradient != null,
-          ),
-      isEmpty,
+    // No rail: the square sits in the decision row, in front of Cancel, and
+    // the card spends no height on a bar holding one control.
+    final square = tester.getRect(
+      find.ancestor(of: find.text('3D'), matching: find.byType(SizedBox)).first,
     );
-    // 42 identity + 35 band + 44 rail + 8 + 44 decision row + 10.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 183);
+    final cancel = tester.getRect(_button('Cancel'));
+    expect(square.center.dy, closeTo(cancel.center.dy, .5));
+    expect(square.left, lessThan(cancel.left));
+    expect(square.width, 44);
+    expect(square.height, 44);
+    // 48 identity + 39 band + 8 + 44 decision row + 10 — the same card as one
+    // with no 3D at all, because the action costs it no row.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 149);
   });
 
   testWidgets('an event with neither drops the strip entirely', (tester) async {
@@ -526,8 +528,8 @@ void main() {
 
     expect(find.text('View from here'), findsNothing);
     expect(find.text('3D'), findsNothing);
-    // 42 identity + 35 band + 8 + 44 decision row + 10.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 139);
+    // 48 identity + 39 band + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 149);
   });
 
   testWidgets('the card is the screen less a gutter, capped at 310',
@@ -683,7 +685,9 @@ void main() {
     expect(find.text('8 left'), findsOneWidget);
     expect(find.text('Only 8 left'), findsNothing);
     final left = tester.widget<Text>(find.text('8 left')).style!;
-    expect(left.color, const SeatLayerPickerThemeData.light().mutedText);
+    // The band's own ink held back, not the theme's muted token — the muted
+    // grey says nothing about a saturated category colour.
+    expect(left.color!.a, closeTo(.78, .01));
     expect(left.fontSize, 11);
     expect(left.fontWeight, FontWeight.w700);
   });
@@ -1186,7 +1190,7 @@ void main() {
       expect(find.text('View from here'), findsOneWidget);
     });
 
-    testWidgets('a photograph that never arrives leaves the rail',
+    testWidgets('a photograph that never arrives takes the strip with it',
         (tester) async {
       final map = FakePickerMap(bundle: thumbnailBundle());
       addTearDown(map.dispose);
@@ -1204,7 +1208,16 @@ void main() {
 
       expect(find.byType(Image), findsNothing);
       expect(find.text('View from here'), findsNothing);
+      // The strip collapses and the 3D action lands in the decision row, one
+      // row further down, without the card jumping under a reaching thumb.
       expect(find.text('3D'), findsOneWidget);
+      final square = tester.getRect(
+        find
+            .ancestor(of: find.text('3D'), matching: find.byType(SizedBox))
+            .first,
+      );
+      expect(square.center.dy,
+          closeTo(tester.getRect(_button('Cancel')).center.dy, .5));
     });
 
     testWidgets('the sight line rides the photograph as a pill',
@@ -1234,7 +1247,7 @@ void main() {
       expect(pill.left, greaterThan(view.left));
     });
 
-    testWidgets('with no photograph the sight line is a muted caption',
+    testWidgets('with no photograph the sight line has no strip to ride',
         (tester) async {
       final map = FakePickerMap(bundle: thumbnailBundle());
       addTearDown(map.dispose);
@@ -1248,12 +1261,11 @@ void main() {
       );
       await pumpToRest(tester);
 
-      expect(find.text('≈ 7.4 m to stage'), findsOneWidget);
-      final caption = tester.widget<Text>(find.text('≈ 7.4 m to stage'));
-      expect(caption.style!.fontSize, 11);
-      // Muted ink off the photo plate, and no view to offer.
-      expect(caption.style!.color, isNot(const Color(0xFFFFFFFF)));
+      // The figure rides the photograph, and with no photograph the whole
+      // strip leaves the phone card rather than becoming a bar of its own.
+      expect(find.text('≈ 7.4 m to stage'), findsNothing);
       expect(find.text('View from here'), findsNothing);
+      // The way into 3D is still one tap away, in the decision row.
       expect(find.text('3D'), findsOneWidget);
     });
 
@@ -1280,6 +1292,9 @@ void main() {
 
       map.emit(_inVenue3DWithConfidence(revision: 2));
       await pumpToRest(tester);
+      // With nowhere to open, the disclosure stays the teaser it has always
+      // been: the headline and the detail ARE the information, and a chip
+      // saying only `Passport` would say nothing and do nothing.
       expect(find.text('Passport'), findsOneWidget);
       expect(find.text('Modelled from a survey'), findsOneWidget);
       expect(find.text('Matched to the room'), findsOneWidget);
@@ -1315,6 +1330,14 @@ void main() {
       );
       map.emit(_inVenue3DWithConfidence());
       await pumpToRest(tester);
+
+      // A host that can open it gets the chip, on one row with the view from
+      // the seat rather than a full-width bar of its own above it.
+      expect(find.text('Modelled from a survey'), findsNothing);
+      final passport = tester.getRect(find.text('Passport'));
+      final view = tester.getRect(find.text('View from here'));
+      expect(passport.center.dy, closeTo(view.center.dy, 2));
+      expect(passport.left, lessThan(view.left));
 
       await tester.tap(find.text('Passport'));
       await pumpToRest(tester);

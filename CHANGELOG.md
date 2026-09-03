@@ -1,5 +1,28 @@
 # Changelog
 
+## Unreleased
+
+The seat card is louder and shorter on phones, matching the web buyer picker.
+
+Section, row and seat sit in three equal centred cells at one size; only a
+section name longer than six characters drops to the small wrapping type, so a
+numbered section like `209` reads as one line of equals with the row and the
+seat. The category band is the category colour itself, full bleed, with its ink
+chosen per colour — white where white clears 3:1 against the band, near-black
+otherwise — so a pale category keeps its name; the dot and the leading rail are
+gone. With no seat photograph the card drops the empty strip entirely and the
+3D action becomes a 44 pt square at the head of the decision row, which also
+means the sight line is now printed only on a photograph. Inside the 3D scene
+the passport and the view from the seat share one row of compact chips instead
+of stacking two full-width bars over the section the buyer just flew into.
+
+On the collapsed cart bar the from-price prints the amount large and its word
+as a small muted caption, and both `Find seats` and `Continue` become 44 pt
+rounded rectangles at `radius.peekButton` with larger labels.
+
+`SeatLayerPickerLayout.confirmRailHeight` is now inert on the SDK's own card;
+it is kept as public API for hosts composing their own.
+
 ## 0.5.0
 
 The hosted runtime moves to 0.76.0, the first release that reports seat-view

@@ -347,7 +347,15 @@ void main() {
     await pumpToRest(tester);
     expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
     // Its own action, and no pointer: in the scene the seat is the picture.
-    expect(find.text('View from this seat'), findsOneWidget);
+    // The chip prints the short word; the sentence is what is spoken. The
+    // scene's own deck carries the same words, so this looks on the card.
+    expect(
+      find.descendant(
+        of: find.byType(SeatLayerConfirmCard),
+        matching: find.text('View from here'),
+      ),
+      findsOneWidget,
+    );
     expect(find.byType(SeatLayerConfirmCardPointer), findsNothing);
 
     // The way between seats stays clear of the card.

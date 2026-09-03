@@ -22,7 +22,7 @@ OutlinedBorder? _shapeOf(WidgetTester tester, Finder button) {
 }
 
 void main() {
-  testWidgets('the peek Continue is a pill the host can still reshape',
+  testWidgets('the peek Continue is a rounded box the host can still reshape',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -44,15 +44,15 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
-    // The web picker draws this one fully rounded, and the phone is 1:1 with
-    // it. It is still a rounded rectangle rather than a stadium, so the radius
-    // is a value a host style can override rather than a shape class.
+    // The web picker draws this one as a rounded rectangle at the same 11 pt
+    // radius, and the phone is 1:1 with it. It is a radius rather than a
+    // shape class, so a host style can still override it.
     final button = find.byType(FilledButton);
     expect(button, findsOneWidget);
     expect(_shapeOf(tester, button), isA<RoundedRectangleBorder>());
     expect(
       (_shapeOf(tester, button)! as RoundedRectangleBorder).borderRadius,
-      BorderRadius.circular(SeatLayerRadiusTokens.pill),
+      BorderRadius.circular(SeatLayerRadiusTokens.peekButton),
     );
     final painted = tester
         .widget<Material>(

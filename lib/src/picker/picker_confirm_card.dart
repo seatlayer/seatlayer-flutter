@@ -117,6 +117,18 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
   /// to say the same thing, and a fling can land in the same frame as a tap.
   bool _answering = false;
 
+  /// Whether this seat's photograph was named but never arrived.
+  ///
+  /// Held here rather than inside the strip because the card's DECISION ROW
+  /// depends on it: a photograph that fails takes the strip with it and the 3D
+  /// square has to appear in its place, one row further down.
+  bool _photoMissed = false;
+
+  /// The photograph is not coming; collapse the strip and hand 3D the row.
+  void _dropPhoto() {
+    if (mounted && !_photoMissed) setState(() => _photoMissed = true);
+  }
+
   @override
   void didUpdateWidget(covariant SeatLayerConfirmCard oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -128,6 +140,7 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       _added = false;
       _drag = 0;
       _answering = false;
+      _photoMissed = false;
     }
   }
 
@@ -157,6 +170,7 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       _added = false;
       _drag = 0;
       _answering = false;
+      _photoMissed = false;
       _announceArrival(controller);
     }
     if (seat.label == _dismissedLabel) return const SizedBox.shrink();
@@ -240,6 +254,15 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     // nothing left to stand in for: the one place the buyer has not looked
     // from is the seat itself, and that becomes the card's inspection row.
     final inspectUp = immersive && seatView != null;
+    // The passport is a CHIP only where a host can open something; see the
+    // teaser below.
+    final passportUp = immersive && confidence != null && onConfidence != null;
+    final inspectRow = inspectUp || passportUp;
+    // No photograph, no strip — so the 3D action takes its place in the
+    // decision row. Inside the scene it is hidden: the venue is already on
+    // screen and the inspect row carries the view from the seat.
+    final show3dSquare =
+        !immersive && venue3D != null && !(realPhoto && !_photoMissed);
 
     // Everything the card is about, as one sentence. A screen reader that
     // walked the drawn card would hear six unlabelled cells — a name, two
@@ -345,27 +368,22 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                                   price: selectedPrice,
                                   currency: selectedCurrency,
                                 ),
-                              // The picture is what `View from here` opens, so the
-                              // strip is drawn full-bleed only where that action
-                              // exists; 3D rides its far corner. With 3D alone there
-                              // is no picture to stand in for, so the pills sit on a
-                              // plain rail instead of in an empty frame.
+                              // The picture is what `View from here` opens, so
+                              // the strip is drawn full-bleed only where that
+                              // action AND a real photograph exist; 3D rides
+                              // its far corner. With no photograph there is
+                              // nothing for a strip to stand in for, so the
+                              // card spends no height on one at all and the 3D
+                              // way in moves into the decision row below.
                               if (!immersive && realPhoto)
                                 _PhotoSlot(
                                   thumb: thumb,
+                                  missed: _photoMissed,
                                   sightlineMetres: sightlineMetres,
+                                  onMissed: _dropPhoto,
                                   onViewFromSeat: controller.state.isBusy
                                       ? null
                                       : () => _inspect(seat, seatView),
-                                  onShow3D:
-                                      venue3D == null || controller.state.isBusy
-                                          ? null
-                                          : () => _inspect(seat, venue3D),
-                                )
-                              else if (!immersive &&
-                                  (venue3D != null || sightlineMetres != null))
-                                _NoPhotoRail(
-                                  sightlineMetres: sightlineMetres,
                                   onShow3D:
                                       venue3D == null || controller.state.isBusy
                                           ? null
@@ -404,19 +422,29 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                                     ),
                                   ),
                                 ),
-                              if (immersive && confidence != null)
+                              // A disclosure with nowhere to open stays the
+                              // teaser it has always been: the headline and
+                              // the detail ARE the information, and a chip
+                              // saying only `Passport` beside a dead target
+                              // would say nothing and do nothing.
+                              if (immersive &&
+                                  confidence != null &&
+                                  onConfidence == null)
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 10,
                                   ),
                                   child: _ConfidenceTeaser(
                                     disclosure: confidence,
-                                    onOpen: onConfidence == null
-                                        ? null
-                                        : () => onConfidence(seat, confidence),
+                                    onOpen: null,
                                   ),
                                 ),
-                              if (inspectUp)
+                              // ONE inspection row. The passport and the view
+                              // from the seat used to be two 44 pt rows above
+                              // the two answers, over the very section the
+                              // buyer had just flown into. They are compact
+                              // chips on one 40 pt line now.
+                              if (inspectRow)
                                 Padding(
                                   padding: EdgeInsets.fromLTRB(
                                     10,
@@ -431,9 +459,13 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                                     0,
                                   ),
                                   child: _InspectionRow(
-                                    onViewFromSeat: controller.state.isBusy
-                                        ? null
-                                        : () => _inspect(seat, seatView),
+                                    onPassport: passportUp
+                                        ? () => onConfidence(seat, confidence)
+                                        : null,
+                                    onViewFromSeat:
+                                        !inspectUp || controller.state.isBusy
+                                            ? null
+                                            : () => _inspect(seat, seatView),
                                   ),
                                 ),
                               // The two answers are boxes of their own inside the
@@ -473,6 +505,24 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                                   child: LayoutBuilder(
                                     builder: (context, constraints) => Row(
                                       children: [
+                                        // With no photograph to ride, the 3D
+                                        // way in is a square in front of the
+                                        // two answers: still one tap away, and
+                                        // it costs the card no row of its own.
+                                        if (show3dSquare) ...[
+                                          FocusTraversalOrder(
+                                            order: const NumericFocusOrder(3),
+                                            child: _See3dSquare(
+                                              onPressed: controller.state.isBusy
+                                                  ? null
+                                                  : () => _inspect(
+                                                        seat,
+                                                        venue3D,
+                                                      ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                        ],
                                         // Just over a third to leave, the rest to
                                         // accept: the two answers are not equally
                                         // likely, and the card should not pretend

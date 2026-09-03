@@ -177,8 +177,8 @@ abstract final class SeatLayerSizeTokens {
   /// `0.92`
   static const double sheetFullHeightFraction = 0.92;
 
-  /// `36`
-  static const double findPillHeight = 36;
+  /// `44`
+  static const double findPillHeight = 44;
 
   /// `44`
   static const double denseLineHeight = 44;
@@ -222,8 +222,29 @@ abstract final class SeatLayerSizeTokens {
   /// `42`
   static const double confirmIdentityHeight = 42;
 
+  /// `9`
+  static const double confirmIdentityKeyFontSize = 9;
+
+  /// `18`
+  static const double confirmIdentityValueFontSize = 18;
+
+  /// `12.5`
+  static const double confirmIdentityLongSectionFontSize = 12.5;
+
+  /// `6`
+  static const int confirmSectionShortMax = 6;
+
   /// `30`
   static const double confirmBandHeight = 30;
+
+  /// `13.5`
+  static const double confirmBandNameFontSize = 13.5;
+
+  /// `11`
+  static const double confirmBandLeftFontSize = 11;
+
+  /// `16`
+  static const double confirmBandPriceFontSize = 16;
 
   /// `64`
   static const double confirmPhotoHeight = 64;
@@ -249,6 +270,15 @@ abstract final class SeatLayerSizeTokens {
   /// `44`
   static const double confirmActionHeight = 44;
 
+  /// `9.5`
+  static const double confirm3dSquareFontSize = 9.5;
+
+  /// `40`
+  static const double confirmInspectChipHeight = 40;
+
+  /// `11.5`
+  static const double confirmInspectChipFontSize = 11.5;
+
   /// `342`
   static const double confirmCardImmersiveMaxWidth = 342;
 
@@ -264,8 +294,8 @@ abstract final class SeatLayerSizeTokens {
   /// `7`
   static const double confirmImmersiveCellBottom = 7;
 
-  /// `14`
-  static const double confirmImmersiveValueFontSize = 14;
+  /// `17`
+  static const double confirmImmersiveValueFontSize = 17;
 
   /// `12`
   static const double confirmImmersiveSectionFontSize = 12;
@@ -531,6 +561,9 @@ abstract final class SeatLayerRadiusTokens {
 
   /// `15`
   static const double confirmCard = 15;
+
+  /// `11`
+  static const double peekButton = 11;
 
   /// `999`
   static const double chip = 999;

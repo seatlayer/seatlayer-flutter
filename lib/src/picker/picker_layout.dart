@@ -184,6 +184,11 @@ class SeatLayerPickerLayout {
   final double confirmPhotoHeight;
 
   /// Height of the strip's stand-in rail when there is no photo to show.
+  ///
+  /// The phone card no longer draws that rail — with no photograph the strip
+  /// leaves the card and the 3D action moves into the decision row — so this
+  /// knob is inert on the SDK's own card. It is kept because it is public
+  /// API and a host composing its own card may still want the measure.
   final double confirmRailHeight;
 
   /// Height of one pill riding the photo strip.

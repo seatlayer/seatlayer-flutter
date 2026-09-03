@@ -34,7 +34,6 @@ the best-seats selects and stepper.
 - the test-mode chip
 - the floor rail's track and its floor chips
 - the dock's `‹ ›` steps and its `‹ Venue` way out
-- the peek bar's `Continue · total`, and the empty bar's `✦ Find seats`
 - the seat card's photo-strip pills — `View from here` and `3D` — and the
   flight chip that leaves the card
 - every piece of 3D chrome: the back pill, the deck's nav chips, the caption
@@ -43,9 +42,14 @@ the best-seats selects and stepper.
   list and `Back to map`
 
 **`radius.button`:**  the seat card's `Cancel` and `✓ Add seat`, its
-`See it in 3D` action and its tier rows; the sheet's `Hold seats & checkout`;
-the accessibility sheet's rows and `Apply filters`; `Try again`; the prompts'
+`See it in 3D` action and its decision-row `3D` square, its 3D inspection
+chips and its tier rows; the sheet's `Hold seats & checkout`; the
+accessibility sheet's rows and `Apply filters`; `Try again`; the prompts'
 action pairs.
+
+**`radius.peekButton` (11):** the collapsed bar's two doors — `Continue ·
+total` and `✦ Find seats`. They were true pills; a rounded rectangle at the
+full `size.minimumHitTarget` reads as the primary action each of them is.
 
 **`radius.control`:** the best-seats selects, its stepper and its action.
 
@@ -201,31 +205,47 @@ override** `style:`
 - **Inputs** the newest unconfirmed `SelectedSeat`, `capabilities`
   (`seatView`, `venue3d`), and — on `seat-view-thumbnail-v1` — the seat's
   `seatViewThumb`, `sightlineMetres` and `seatViewConfidence`.
-- **States** with a photo (loading, arrived, never arrived), without one (a
-  rail instead), 3D-only, with a sight line, with tiers, with notices; the
-  confidence teaser inside 3D; resting or hugging the seat; committing.
+- **States** with a photo (loading, arrived, never arrived), without one (no
+  strip at all, and the 3D square in the decision row), 3D-only, with a sight
+  line, with tiers, with notices; the confidence teaser or its passport chip
+  inside 3D; resting or hugging the seat; committing.
 - **Anatomy** `size.confirmCardMaxWidth`, capped at the map width less
   `2 × size.confirmCardGutter`, radius `radius.confirmCard`, elevation
   `elevation.confirmCard`.
   1. Identity grid, `size.confirmIdentityHeight`: section, row and seat as
-     three labelled cells (`type.confirmIdentity`), hairline-divided.
-  2. Category band, `size.confirmBandHeight`: a tint of the category colour
-     with a rail on its leading edge, the category name, `N left` and the price.
+     three EQUAL centred cells, hairline-divided, keys at
+     `size.confirmIdentityKeyFontSize` and values at
+     `size.confirmIdentityValueFontSize`. Only a section longer than
+     `size.confirmSectionShortMax` drops to
+     `size.confirmIdentityLongSectionFontSize` and wraps to two lines.
+  2. Category band, `size.confirmBandHeight`: the category colour itself, full
+     bleed, no dot and no rail, with its ink chosen per colour (white where
+     white clears 3:1, otherwise `#0B0F19`). The name at
+     `size.confirmBandNameFontSize`, `N left` at
+     `size.confirmBandLeftFontSize` in that ink at 78 %, the price at
+     `size.confirmBandPriceFontSize`.
   3. Photo strip, `size.confirmPhotoHeight`, only where the seat names an
      authored photograph, carrying the `View from here` and `3D` pills and, in
      its trailing top corner, the sight line (`strings.sightline`,
-     `size.confirmSightFont` / `confirmSightPadX` / `confirmSightPadY`);
-     otherwise a rail of `size.confirmRailHeight` with the same pills in theme
-     tokens, with the sight line printed above it as a muted caption. A
-     photograph that never arrives collapses the strip into the rail over
+     `size.confirmSightFont` / `confirmSightPadX` / `confirmSightPadY`). With
+     no photograph the slot is not drawn at all — no rail, no caption — and a
+     photograph that never arrives collapses it away over
      `motion.duration.thumbOut`.
   3a. Confidence teaser, 3D card only and only where the seat carries one:
      `size.confidenceTeaser*`, headline over `modeledTarget ?? reality`, with
-     `strings.passport` in the readable accent at the trailing edge.
+     `strings.passport` in the readable accent at the trailing edge. Where a
+     host can open the passport it is instead a chip on the inspection row.
+  3b. Inspection row, 3D card only: one line of
+     `size.confirmInspectChipHeight` chips —
+     `strings.passport` (with an accent dot) and `strings.viewFromHere`
+     (spoken as `strings.viewFromThisSeat`) — at
+     `size.confirmInspectChipFontSize`.
   4. Tiers (`size.confirmTierHeight`) and notices, where the seat has them.
-  5. Actions, `size.confirmActionHeight`: `Cancel` at about a third and
-     `✓ Add seat` at the rest, each in its own box at `radius.button` inside the
-     card's gutter.
+  5. Actions, `size.confirmActionHeight`: with no photo strip a 44 × 44 ghost
+     square carrying a cube and `strings.venue3D` at
+     `size.confirm3dSquareFontSize` opens the row, then `Cancel` at 34 % of the
+     whole row and `✓ Add seat` at the rest, each in its own box at
+     `radius.button` inside the card's gutter.
 - **Placement** rests `size.confirmCardRestInset` above the map's foot; hugs
   the seat at `size.confirmCardSeatGap` when it would otherwise cover it. Full
   rule and constants: `picker-spec.md` §3.8.2.
@@ -250,10 +270,14 @@ override** `style:`
   form), expanded with tickets.
 - **Anatomy** radius `radius.sheet`, elevation `elevation.sheet`.
   - **Peek** `size.peekHeight`: a grabber, then left `N tickets`, or
-    `From <min>` when empty (`type.peekSummary`); right the filled
-    `Continue · total` pill at `size.minimumHitTarget` and the chevron. With an
-    empty cart the pill is `✦ Find seats`, which opens the sheet on the
-    best-seats form — withheld where that form would be refused. The peek also
+    `From <min>` when empty — the sentence at `type.peekSummary` in
+    `color.*.mutedText` with the AMOUNT inside it lifted to
+    `type.peekFromPrice` in `color.*.text`; right the filled `Continue · total`
+    button at `size.minimumHitTarget` and `radius.peekButton` and the chevron.
+    With an empty cart the button is `✦ Find seats` at
+    `size.findPillHeight` / `radius.peekButton` / `type.findPill`, which opens
+    the sheet on the best-seats form — withheld where that form would be
+    refused. The peek also
     carries the securing, checkout and closed-sales lines; see
     `picker-spec.md` §3.9.
   - **Expanded** content height, capped at

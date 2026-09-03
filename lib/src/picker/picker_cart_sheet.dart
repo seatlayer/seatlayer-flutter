@@ -624,6 +624,7 @@ class _PeekHeadState extends State<_PeekHead> {
                     Expanded(
                       child: _PeekSummary(
                         text: line.sentence ?? line.summary ?? '',
+                        amount: line.sentence == null ? line.fromAmount : null,
                         expanded: expanded,
                       ),
                     ),
@@ -676,9 +677,18 @@ class _PeekHeadState extends State<_PeekHead> {
 /// buyer gets that a tap on the map reached the cart, so it swells once
 /// rather than simply becoming a different number.
 class _PeekSummary extends StatefulWidget {
-  const _PeekSummary({required this.text, required this.expanded});
+  const _PeekSummary({
+    required this.text,
+    required this.amount,
+    required this.expanded,
+  });
 
   final String text;
+
+  /// The money inside [text] on the empty bar, printed large; null on every
+  /// other reading, where the line is one weight throughout.
+  final String? amount;
+
   final bool expanded;
 
   @override
@@ -711,17 +721,31 @@ class _PeekSummaryState extends State<_PeekSummary>
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerMapChromeThemeOf(context);
-    final text = Text(
-      widget.text,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        color: theme.text,
-        fontSize: widget.expanded ? 14 : 12.5,
-        fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
-        fontFamily: theme.fontFamily,
-      ),
+    // THE PRICE IS THE LOUD PART. On the empty bar the amount is the fact and
+    // the word around it is the caption, so `From` stays small and muted and
+    // the money is printed at the size the buyer actually reads the bar for.
+    // Every other reading of the line — a ticket count, a whole sentence —
+    // is one weight throughout.
+    final amount = widget.expanded ? null : widget.amount;
+    final base = TextStyle(
+      color: amount == null ? theme.text : theme.mutedText,
+      // design/tokens.json › type.peekSummary / type.peekSummaryOpen.
+      fontSize: widget.expanded ? 14 : 12,
+      fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
+      fontFamily: theme.fontFamily,
     );
+    final text = amount == null || !widget.text.contains(amount)
+        ? Text(
+            widget.text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: base,
+          )
+        : Text.rich(
+            _withAmount(context, widget.text, amount, theme, base),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          );
     return Semantics(
       // The one line that says what the cart holds, and the only feedback a
       // buyer gets when a tap on the map reaches a shut sheet. It is announced
@@ -752,6 +776,35 @@ class _PeekSummaryState extends State<_PeekSummary>
         ),
       ),
       child: text,
+    );
+  }
+
+  /// [line] with [amount] lifted out of it, in the order the locale wrote it.
+  static InlineSpan _withAmount(
+    BuildContext context,
+    String line,
+    String amount,
+    SeatLayerResolvedPickerTheme theme,
+    TextStyle base,
+  ) {
+    final at = line.indexOf(amount);
+    return TextSpan(
+      style: base,
+      children: <InlineSpan>[
+        if (at > 0) TextSpan(text: line.substring(0, at)),
+        TextSpan(
+          text: amount,
+          style: TextStyle(
+            color: theme.text,
+            // design/tokens.json › type.peekFromPrice.
+            fontSize: 19,
+            fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
+            fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+          ),
+        ),
+        if (at + amount.length < line.length)
+          TextSpan(text: line.substring(at + amount.length)),
+      ],
     );
   }
 
@@ -798,15 +851,18 @@ class _ContinuePill extends StatelessWidget {
         // it was reaching thirty-four points inside a bar the thumb reads as
         // a button of its own.
         minimumSize: const Size(0, SeatLayerSizeTokens.minimumHitTarget),
-        padding: const EdgeInsets.symmetric(horizontal: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        // A ROUNDED RECTANGLE, not a lozenge (design/tokens.json ›
+        // type.peekPill, radius.peekButton). The one door out of the bar
+        // should look like the primary action it is.
         textStyle: TextStyle(
-          fontSize: 12.5,
+          fontSize: 14,
           fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
           fontFamily: theme.fontFamily,
         ),
       )
           .merge(style ?? theme.styles.resolvedContinueButtonStyle)
-          .merge(seatLayerButtonShape(SeatLayerRadiusTokens.pill)),
+          .merge(seatLayerButtonShape(SeatLayerRadiusTokens.peekButton)),
       onPressed: onPressed,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -983,28 +1039,37 @@ class _FindSeatsPill extends StatelessWidget {
                 theme.layout.findPillHeight,
                 max: SeatLayerTypeScaleTokens.peek,
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              // A ROUNDED RECTANGLE at the full 44 (design/tokens.json ›
+              // size.findPillHeight, radius.peekButton, type.findPill). The
+              // small lozenge read as an aside; on an empty bar this is the
+              // one thing there is to press. The word stays `Find seats` —
+              // nothing is selected yet and the tap opens the best-available
+              // form, so the button says what the tap does.
               decoration: ShapeDecoration(
                 color: theme.accent,
-                shape: const StadiumBorder(),
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.circular(SeatLayerRadiusTokens.peekButton),
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.auto_awesome_rounded,
-                    size: 12,
+                    size: 14,
                     color: theme.onAccent,
                   ),
-                  const SizedBox(width: 5),
+                  const SizedBox(width: 6),
                   ExcludeSemantics(
                     child: Text(
                       strings.findSeats,
                       style: TextStyle(
                         color: theme.onAccent,
-                        fontSize: 12.5,
+                        fontSize: 14,
                         fontWeight:
-                            seatLayerBoldWeight(context, FontWeight.w700),
+                            seatLayerBoldWeight(context, FontWeight.w800),
                         fontFamily: theme.fontFamily,
                       ),
                     ),

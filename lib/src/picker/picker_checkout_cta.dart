@@ -39,6 +39,7 @@ class SeatLayerPeekLine {
     this.sentence,
     this.pillLabel,
     this.total,
+    this.fromAmount,
     this.showClock = false,
     this.offerFind = false,
   });
@@ -50,6 +51,15 @@ class SeatLayerPeekLine {
   /// A whole-line statement that replaces the pill: seats being secured,
   /// seats secured, sales closed.
   final String? sentence;
+
+  /// The money inside [summary] on the empty bar, or null on every other
+  /// reading.
+  ///
+  /// The sentence stays the locale's own — `From {price}`, in whatever order
+  /// the language puts it — and this is the substring of it that carries the
+  /// amount, so the bar can print the fact large and the word small without a
+  /// second string per locale.
+  final String? fromAmount;
 
   /// The words on the pill — `Continue`, `Secure more` — or null for no pill.
   final String? pillLabel;
@@ -303,6 +313,7 @@ SeatLayerPeekLine _peekLine({
     summary: fromPriceText == null
         ? strings.pickYourSeats
         : strings.fromPrice(fromPriceText),
+    fromAmount: fromPriceText,
     offerFind: canOfferFind,
   );
 }

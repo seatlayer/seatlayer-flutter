@@ -193,3 +193,35 @@ Color pickerSectionColor(
   }
   return pickerColor(section.color) ?? fallback;
 }
+
+/// The ink a solid category band prints its words in.
+///
+/// The band is the category's own colour, so the words on it cannot be the
+/// theme's text token: a white category and a navy one need opposite inks.
+/// White first — it is the treatment a saturated red or green expects — and
+/// the near-black only where white fails the 3:1 floor those 11–17 pt bold
+/// sizes are read at, which is what a pale yellow or a light grey does.
+///
+/// The two candidates are fixed, so the band never manufactures a colour of
+/// its own and a host reading [SeatLayerPickerCategory.color] can predict what
+/// the band will look like.
+Color pickerBandInk(Color band) =>
+    pickerContrastRatio(const Color(0xFFFFFFFF), band) >= 3
+        ? const Color(0xFFFFFFFF)
+        : _bandDarkInk;
+
+/// The band's dark ink: the widget's near-black, not pure black.
+const Color _bandDarkInk = Color(0xFF0B0F19);
+
+/// The WCAG contrast ratio between two opaque colours, 1 to 21.
+///
+/// `Color.computeLuminance` is already the WCAG relative luminance, so this is
+/// only the ratio around it. Kept here rather than inlined so the same figure
+/// backs any other per-colour ink decision the picker has to make.
+double pickerContrastRatio(Color a, Color b) {
+  final first = a.computeLuminance();
+  final second = b.computeLuminance();
+  final lighter = first > second ? first : second;
+  final darker = first > second ? second : first;
+  return (lighter + .05) / (darker + .05);
+}

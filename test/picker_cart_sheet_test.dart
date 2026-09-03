@@ -134,8 +134,29 @@ void main() {
 
     expect(find.text('From €25'), findsOneWidget);
     expect(find.textContaining('Continue'), findsNothing);
-    // A price with nothing to do about it is not an offer; the pill is.
+    // A price with nothing to do about it is not an offer; the button is.
     expect(find.text('Find seats'), findsOneWidget);
+
+    // The AMOUNT is the fact and the word around it is the caption, so the
+    // money is printed large in the text ink and `From` small and muted.
+    final line = tester.widget<Text>(find.text('From €25')).textSpan!;
+    final sizes = <String, double?>{};
+    final colours = <String, Color?>{};
+    line.visitChildren((span) {
+      if (span is TextSpan && span.text != null) {
+        sizes[span.text!] = span.style?.fontSize;
+        colours[span.text!] = span.style?.color;
+      }
+      return true;
+    });
+    expect(sizes['€25'], 19);
+    expect(sizes['From '], isNull, reason: 'the caption keeps the base style');
+    expect(line.style!.fontSize, 12);
+    expect(
+      line.style!.color,
+      const SeatLayerPickerThemeData.light().mutedText,
+    );
+    expect(colours['€25'], const SeatLayerPickerThemeData.light().text);
   });
 
   testWidgets('the empty peek offers a full-size way into the finder', (
