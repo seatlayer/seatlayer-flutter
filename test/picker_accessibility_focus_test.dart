@@ -140,7 +140,7 @@ void main() {
           id: 'section-a',
           label: 'Gallery',
           free: 4,
-          index: 1,
+          index: 0,
           total: 6,
         ),
       );
