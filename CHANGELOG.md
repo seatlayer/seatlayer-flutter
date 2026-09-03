@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.3
+
+The toast band's action pill keeps a fixed 44-point hit box. Offered loose
+height it centred itself in all of it, so with the cart sheet open the
+"seat removed" toast filled the map.
+
 ## 0.6.2
 
 Every seat the buyer taps is asked about. Once a hold existed — after the
