@@ -680,15 +680,27 @@ is a correct state, not a degraded one.
    colour**: white wherever white clears a 3:1 contrast ratio against the
    category colour, and `#0B0F19` otherwise, so a pale yellow or a light grey
    category keeps its name. Those two candidates are fixed; the band never
-   manufactures a colour of its own. Contents, all in that ink: the category
-   name at `size.confirmBandNameFontSize` w800; the seats-left count
-   (`strings.seatsLeft`) at `size.confirmBandLeftFontSize` w700 at **78 %
-   opacity** — the theme's muted token says nothing about a green — which is
-   the cell that gives way, because a truncated category name is a seat the
-   buyer cannot identify; the price at the trailing edge at
-   `size.confirmBandPriceFontSize` w800 in tabular figures. The count is
-   **absent when it has not arrived**. `strings.onlyLeft` is available as a
-   scarcity telling for a host that wants one.
+   manufactures a colour of its own.
+
+   It prints **two things and nothing else**, both in that ink: the category
+   name at `size.confirmBandNameFontSize` w800, which takes the room and is
+   the one that ellipsises; and the price at the trailing edge at
+   `size.confirmBandPriceFontSize` w800 in tabular figures, which never
+   truncates. Padding is `size.confirmBandPadTop` /
+   `…PadTrailing` / `…PadBottom` / `…PadLeading` (12 / 16 / 12 / 14 on a wide
+   card, 11 / 16 / 11 / 14 on a phone), so **the price keeps at least
+   `size.confirmBandPadTrailing` from the card's own trailing edge** — it was
+   sitting on it. Inside the 3D scene the band gives a few points back
+   (`size.confirmImmersiveBandPadY` × `…PadX`) and the price steps down to
+   `size.confirmImmersiveBandPriceFontSize`.
+
+   **There is no remaining count on the band.** "6,600 left" beside the name
+   said nothing a buyer choosing one seat could act on, and it pushed the
+   price into the card's edge. The **legend** carries the count, where a buyer
+   comparing categories is actually looking, and the dock carries the focused
+   section's. `strings.seatsLeft` therefore has no confirm-card caller;
+   `strings.onlyLeft` remains available to a host that wants a scarcity
+   telling of its own somewhere else.
 3. **Photo strip**, height `size.confirmPhotoHeight`, full-bleed inside the
    card's corner, drawn **only where the seat names an authored photograph**
    (`selection[].seatViewThumb`, capability `seat-view-thumbnail-v1`); a
@@ -907,7 +919,8 @@ say anything true is worse than an absent one.
 **Name** `SeatLayerCartSheet` (peek head) · **slots** `sheetStyle`,
 `continueButtonStyle` · **file** `lib/src/picker/picker_cart_sheet.dart`
 
-**Anatomy.** Height `size.peekHeight` plus the bottom safe inset, ground
+**Anatomy.** Height `size.peekHeight` plus the lift below plus the bottom safe
+inset, ground
 `color.*.surface`, corner `radius.sheet`, elevation `elevation.sheet`, hairline
 on its top edge. A grabber of `size.sheetGrabberWidth` ×
 `size.sheetGrabberHeight` at `radius.pill` sits `size.sheetGrabberInset` from
@@ -919,6 +932,20 @@ taking a row of its own. Trailing, a chevron of `size.sheetToggleSize` pointing
 The summary line is `type.peekSummary`, one line, ellipsized, in
 `color.*.mutedText` while collapsed.
 
+**THE BAR IS EXACTLY ITS HEAD.** There is one number for the collapsed
+surface: `size.peekHeight` + the lift + the safe inset. A port that clips the
+sheet to a *different* height than the head it contains cuts the bottom off the
+head's own buttons — the web shipped a 50 px clip under a 58 px head and lost
+the lower edge of every 44 px button on it. Derive the clip from the head, or
+do not clip at all.
+
+**The chevron leaves the collapsed bar** (it stays on the open sheet, where it
+is the way back down). The whole head is already the tap and the swipe, and the
+arrow only took width from the one button the bar exists for. **The head then
+carries the toggle's accessibility itself** — button role, expanded state,
+`strings.expandCart`, and its own tap action on the same node — or a
+screen-reader buyer loses the only named way into the cart.
+
 **On the empty bar the price is the loud part.** The line stays the locale's
 own sentence — `strings.fromPrice`, in whatever order the language puts it —
 and only the **amount inside it** is lifted: `type.peekFromPrice` in
@@ -929,14 +956,14 @@ where the amount cannot be found in the resolved sentence, the whole line is
 printed at the caption weight rather than guessed at.
 
 **The Continue button** is a rounded rectangle at `radius.peekButton`, height
-`size.minimumHitTarget`, accent ground, `color.*.onAccent` ink,
-`type.peekPill`, tabular total. It is a real button and runs the **same**
+`size.peekButtonHeight`, 18 pt of horizontal padding, accent ground,
+`color.*.onAccent` ink, `type.peekPill`, tabular total. It is a real button and runs the **same**
 checkout action the sheet's footer button runs: from the collapsed bar it *is*
 the way to pay. It is hidden entirely while the sheet is open, where the footer
 says the same thing.
 
 **Find seats** is the empty bar's one door: a rounded rectangle at
-`radius.peekButton`, height `size.findPillHeight`, 18 pt of horizontal padding,
+`radius.peekButton`, height `size.findPillHeight`, 20 pt of horizontal padding,
 accent-filled, a sparkle glyph and `strings.findSeats` at `type.findPill`. It
 is the bar's primary action and is drawn as one — the small lozenge it replaced
 read as an aside. The word stays **`Find seats`**, never `Book now`: nothing is
@@ -959,6 +986,10 @@ disagree — `lib/src/picker/picker_checkout_cta.dart`):
 | empty, a price is known | `strings.fromPrice` + Find seats |
 | empty, no price | `strings.pickYourSeats` + Find seats |
 
+Both buttons sit against the head's own trailing inset of 12 pt — the same
+inset the summary starts at on the leading side — so the bar reads as one row
+with a margin rather than a button hanging off its edge.
+
 The peek pill is **never rendered disabled**: the states that would disable it
 render a different line instead. The footer button carries the disabled
 language.
@@ -979,9 +1010,11 @@ Springs, not tweens: `motion.physics.sheetSpringMass`,
 threshold at which a flick decides on its own and `motion.physics.rubberBand`
 for over-drag.
 
-**Accessibility.** The head is one button with an expanded state, named
-`strings.expandCart` / `strings.collapseCart`. The summary is a live region that
-updates politely.
+**Accessibility.** There is exactly ONE named toggle for the sheet in either
+state, with an expanded state and its own tap action: while collapsed it is the
+head itself (`strings.expandCart`), and while open it is the chevron
+(`strings.collapseCart`). Never both — two controls over one action read as two
+different things to press. The summary is a live region that updates politely.
 
 **Snapshot.** `cart.ticketCount`, `cart.cartTotal`, `cart.lines[]`, `hold`,
 `event.currency`, `event.salesClosed`, `capabilities.bestAvailable`.

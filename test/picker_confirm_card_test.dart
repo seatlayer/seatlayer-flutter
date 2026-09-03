@@ -166,7 +166,7 @@ void main() {
     expect(find.bySemanticsLabel('Gallery · Row A · Seat 1'), findsOneWidget);
   }, semanticsEnabled: true);
 
-  testWidgets('the category band carries the name, what is left, and the price',
+  testWidgets('the category band carries the name and the price, and no count',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -177,8 +177,11 @@ void main() {
     await pumpToRest(tester);
 
     expect(find.text('Standard'), findsOneWidget);
-    expect(find.text('42 left'), findsOneWidget);
     expect(find.text('€25'), findsOneWidget);
+    // NO REMAINING COUNT. It said nothing a buyer choosing one seat could act
+    // on and it pushed the price into the card's edge; the legend keeps it.
+    expect(find.text('42 left'), findsNothing);
+    expect(find.textContaining('left'), findsNothing);
     // The money lives above the actions, never on them: the cart is about to
     // say the same number, and one screen says a total once.
     expect(
@@ -189,6 +192,12 @@ void main() {
       find.descendant(of: _button('Add seat'), matching: find.text('€25')),
       findsNothing,
     );
+    // Name 15, price 18, and the price kept off the card's trailing edge.
+    expect(tester.widget<Text>(find.text('Standard')).style!.fontSize, 15);
+    expect(tester.widget<Text>(find.text('€25')).style!.fontSize, 18);
+    final card = tester.getRect(_surface);
+    final money = tester.getRect(find.text('€25'));
+    expect(card.right - money.right, greaterThanOrEqualTo(16));
   });
 
   testWidgets('an uncatalogued category leaves the band out', (tester) async {
@@ -277,8 +286,8 @@ void main() {
     final seat = tester.widget<Text>(find.text('1'));
     expect(seat.style!.fontSize, 18);
     expect(seat.maxLines, 1);
-    // 48 identity + 39 band + 64 photo strip + 8 + 44 decision row + 10.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 213);
+    // 48 identity + 48 band + 64 photo strip + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 222);
   });
 
   testWidgets('the card asks the same question inside the 3D venue',
@@ -295,7 +304,6 @@ void main() {
     // is behind it.
     expect(find.text('Gallery'), findsOneWidget);
     expect(find.text('Standard'), findsOneWidget);
-    expect(find.text('42 left'), findsOneWidget);
     expect(find.text('€25'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
     expect(find.text('Add seat'), findsOneWidget);
@@ -434,8 +442,8 @@ void main() {
     expect(photo.left, lessThan(venue.left));
     // A screen reader still hears the sentence the pill has no room for.
     expect(find.bySemanticsLabel('See it in 3D'), findsOneWidget);
-    // 48 identity + 39 band + 64 photo strip + 8 + 44 decision row + 10.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 213);
+    // 48 identity + 48 band + 64 photo strip + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 222);
   }, semanticsEnabled: true);
 
   testWidgets('a seat without a real photograph is not offered a view from it',
@@ -512,9 +520,9 @@ void main() {
     expect(square.left, lessThan(cancel.left));
     expect(square.width, 44);
     expect(square.height, 44);
-    // 48 identity + 39 band + 8 + 44 decision row + 10 — the same card as one
+    // 48 identity + 48 band + 8 + 44 decision row + 10 — the same card as one
     // with no 3D at all, because the action costs it no row.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 149);
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 158);
   });
 
   testWidgets('an event with neither drops the strip entirely', (tester) async {
@@ -528,8 +536,8 @@ void main() {
 
     expect(find.text('View from here'), findsNothing);
     expect(find.text('3D'), findsNothing);
-    // 48 identity + 39 band + 8 + 44 decision row + 10.
-    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 149);
+    // 48 identity + 48 band + 8 + 44 decision row + 10.
+    expect(tester.getSize(find.byType(SeatLayerConfirmCard)).height, 158);
   });
 
   testWidgets('the card is the screen less a gutter, capped at 310',
@@ -670,7 +678,7 @@ void main() {
     expect(find.text('Add seat'), findsNothing);
   });
 
-  testWidgets('the count is a fact, at every size of it', (tester) async {
+  testWidgets('the band never prints a remaining count', (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -679,20 +687,16 @@ void main() {
     map.emit(_almostSoldOut(8));
     await pumpToRest(tester);
 
-    // The band states what is left and nothing more. A count that changes its
-    // wording and its ink below some threshold is selling, not informing, and
-    // the buyer can see the same seats on the map either way.
-    expect(find.text('8 left'), findsOneWidget);
+    // The band never counts, however few are left. A scarcity line on the
+    // one card a buyer reads to confirm one seat is selling, not informing —
+    // and the number belongs to the legend, where categories are compared.
+    expect(find.text('8 left'), findsNothing);
     expect(find.text('Only 8 left'), findsNothing);
-    final left = tester.widget<Text>(find.text('8 left')).style!;
-    // The band's own ink held back, not the theme's muted token — the muted
-    // grey says nothing about a saturated category colour.
-    expect(left.color!.a, closeTo(.78, .01));
-    expect(left.fontSize, 11);
-    expect(left.fontWeight, FontWeight.w700);
+    expect(find.textContaining('left'), findsNothing);
+    expect(find.text('Standard'), findsOneWidget);
   });
 
-  testWidgets('a count that has not arrived is not guessed at', (
+  testWidgets('a count that has not arrived is not guessed at either', (
     tester,
   ) async {
     final map = FakePickerMap();
@@ -703,7 +707,8 @@ void main() {
     map.emit(_almostSoldOut(0));
     await pumpToRest(tester);
 
-    // A count the buyer cannot trust is worse than no count at all.
+    // Nor when the runtime has not said yet — the band has nowhere to print
+    // a count at all now, which is the same answer for every arrival order.
     expect(find.text('0 left'), findsNothing);
     expect(find.textContaining('left'), findsNothing);
     expect(find.text('Standard'), findsOneWidget);

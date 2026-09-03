@@ -589,84 +589,133 @@ class _PeekHeadState extends State<_PeekHead> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () => widget.onExpandedChanged(!expanded),
-      child: SizedBox(
-        height: widget.height,
-        child: Stack(
-          children: [
-            // Not a row of its own: the grabber overlaps into the same head,
-            // which is what keeps the collapsed bar at fifty points.
-            Positioned(
-              top: layout.sheetGrabberInset,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Opacity(
-                  opacity: .5,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: theme.mutedText,
-                      borderRadius:
-                          BorderRadius.circular(SeatLayerRadiusTokens.pill),
-                    ),
-                    child: SizedBox(
-                      width: layout.sheetGrabberWidth,
-                      height: layout.sheetGrabberHeight,
+      // WHILE COLLAPSED THE HEAD IS THE TOGGLE, in the accessibility tree as
+      // well as under a thumb. The chevron used to be the only node carrying
+      // the name and the expanded state, so hiding it would have left a
+      // screen-reader buyer with no way to open the cart at all. The head
+      // already answers the tap; this is the same affordance, named.
+      child: _maybeToggleSemantics(
+        context,
+        expanded: expanded,
+        child: SizedBox(
+          height: widget.height,
+          child: Stack(
+            children: [
+              // Not a row of its own: the grabber overlaps into the same head,
+              // which is what keeps the collapsed bar at fifty points.
+              Positioned(
+                top: layout.sheetGrabberInset,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Opacity(
+                    opacity: .5,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: theme.mutedText,
+                        borderRadius:
+                            BorderRadius.circular(SeatLayerRadiusTokens.pill),
+                      ),
+                      child: SizedBox(
+                        width: layout.sheetGrabberWidth,
+                        height: layout.sheetGrabberHeight,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            Positioned.fill(
-              child: Padding(
-                padding: EdgeInsets.only(left: 12, right: 6, top: widget.lift),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _PeekSummary(
-                        text: line.sentence ?? line.summary ?? '',
-                        amount: line.sentence == null ? line.fromAmount : null,
-                        expanded: expanded,
-                      ),
-                    ),
-                    // Every reading that owes the buyer a sentence has already
-                    // taken the whole line; a bar this short cannot carry a
-                    // sentence and a button at once.
-                    if (!expanded && line.pillLabel != null) ...[
-                      const SizedBox(width: 10),
-                      // A reason is several times the width of
-                      // `Continue €285`, and this row also carries the ticket
-                      // count and the sheet's chevron. Capping the pill — and
-                      // not letting it stretch to the cap — leaves the count
-                      // its own space on every phone width.
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 240),
-                        child: _ContinuePill(
-                          cta: widget.cta,
-                          onPressed: widget.onContinue,
-                          style: widget.continueStyle,
+              Positioned.fill(
+                child: Padding(
+                  // Twelve points on both edges: the collapsed bar's button is
+                  // right-aligned against the same inset the summary starts at,
+                  // and the chevron that used to take the trailing six is gone.
+                  padding: EdgeInsetsDirectional.only(
+                    start: 12,
+                    end: 12,
+                    top: widget.lift,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _PeekSummary(
+                          text: line.sentence ?? line.summary ?? '',
+                          amount:
+                              line.sentence == null ? line.fromAmount : null,
+                          expanded: expanded,
                         ),
                       ),
+                      // Every reading that owes the buyer a sentence has already
+                      // taken the whole line; a bar this short cannot carry a
+                      // sentence and a button at once.
+                      if (!expanded && line.pillLabel != null) ...[
+                        const SizedBox(width: 10),
+                        // A reason is several times the width of
+                        // `Continue €285`, and this row also carries the ticket
+                        // count and the sheet's chevron. Capping the pill — and
+                        // not letting it stretch to the cap — leaves the count
+                        // its own space on every phone width.
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 240),
+                          child: _ContinuePill(
+                            cta: widget.cta,
+                            onPressed: widget.onContinue,
+                            style: widget.continueStyle,
+                          ),
+                        ),
+                      ],
+                      if (!expanded && line.offerFind) ...[
+                        const SizedBox(width: 10),
+                        _FindSeatsPill(
+                          onPressed: () => widget.onExpandedChanged(true),
+                        ),
+                      ],
+                      // NO CHEVRON WHILE COLLAPSED. The whole head is already
+                      // the tap and the swipe, and the arrow only took width
+                      // from the one button the bar exists for. The open sheet
+                      // keeps it: there it is the way back down, and the head
+                      // is no longer the only thing on screen. The head takes
+                      // over the button semantics while it is gone — see the
+                      // Semantics around this Stack.
+                      if (expanded) ...[
+                        const SizedBox(width: 10),
+                        _SheetToggle(
+                          expanded: expanded,
+                          label: strings.collapseCart,
+                          onPressed: () => widget.onExpandedChanged(false),
+                        ),
+                      ],
                     ],
-                    if (!expanded && line.offerFind) ...[
-                      const SizedBox(width: 10),
-                      _FindSeatsPill(
-                        onPressed: () => widget.onExpandedChanged(true),
-                      ),
-                    ],
-                    const SizedBox(width: 10),
-                    _SheetToggle(
-                      expanded: expanded,
-                      label:
-                          expanded ? strings.collapseCart : strings.expandCart,
-                      onPressed: () => widget.onExpandedChanged(!expanded),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  /// The head, named as the cart's toggle while nothing else is.
+  ///
+  /// Open, the chevron is drawn and carries the name and the state, so the
+  /// head stays silent rather than announcing a second control over the same
+  /// action.
+  Widget _maybeToggleSemantics(
+    BuildContext context, {
+    required bool expanded,
+    required Widget child,
+  }) {
+    if (expanded) return child;
+    return Semantics(
+      container: true,
+      button: true,
+      expanded: false,
+      label: SeatLayerPickerScope.stringsOf(context).expandCart,
+      // The action rides the SAME node as the name. The head's own tap
+      // handler sits on the node above this one, so without this a rotor
+      // could read the button and then have nothing to activate.
+      onTap: () => widget.onExpandedChanged(true),
+      child: child,
     );
   }
 }
@@ -854,13 +903,15 @@ class _ContinuePill extends StatelessWidget {
         // A full-size target: this is the one control the buyer came for, and
         // it was reaching thirty-four points inside a bar the thumb reads as
         // a button of its own.
-        minimumSize: const Size(0, SeatLayerSizeTokens.minimumHitTarget),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        // A ROUNDED RECTANGLE, not a lozenge (design/tokens.json ›
-        // type.peekPill, radius.peekButton). The one door out of the bar
-        // should look like the primary action it is.
+        minimumSize: const Size(0, SeatLayerSizeTokens.peekButtonHeight),
+        padding: const EdgeInsets.symmetric(horizontal: 18),
+        // A ROUNDED RECTANGLE, not a lozenge, and the full
+        // `size.peekButtonHeight` of it (design/tokens.json › type.peekPill,
+        // radius.peekButton). The one door out of the bar should look like
+        // the primary action it is, and the bar is tall enough to show all
+        // of it now that the head and its clip are one number.
         textStyle: TextStyle(
-          fontSize: 14,
+          fontSize: 16,
           fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
           fontFamily: theme.fontFamily,
         ),
@@ -1033,7 +1084,7 @@ class _FindSeatsPill extends StatelessWidget {
       button: true,
       label: strings.findSeats,
       child: SizedBox(
-        height: SeatLayerSizeTokens.minimumHitTarget,
+        height: SeatLayerSizeTokens.peekButtonHeight,
         child: InkWell(
           onTap: onPressed,
           child: Center(
@@ -1043,9 +1094,9 @@ class _FindSeatsPill extends StatelessWidget {
                 theme.layout.findPillHeight,
                 max: SeatLayerTypeScaleTokens.peek,
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              // A ROUNDED RECTANGLE at the full 44 (design/tokens.json ›
-              // size.findPillHeight, radius.peekButton, type.findPill). The
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              // A ROUNDED RECTANGLE at the full `size.findPillHeight`
+              // (design/tokens.json › radius.peekButton, type.findPill). The
               // small lozenge read as an aside; on an empty bar this is the
               // one thing there is to press. The word stays `Find seats` —
               // nothing is selected yet and the tap opens the best-available
@@ -1062,7 +1113,7 @@ class _FindSeatsPill extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.auto_awesome_rounded,
-                    size: 14,
+                    size: 16,
                     color: theme.onAccent,
                   ),
                   const SizedBox(width: 6),
@@ -1071,7 +1122,7 @@ class _FindSeatsPill extends StatelessWidget {
                       strings.findSeats,
                       style: TextStyle(
                         color: theme.onAccent,
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight:
                             seatLayerBoldWeight(context, FontWeight.w800),
                         fontFamily: theme.fontFamily,

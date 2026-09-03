@@ -60,6 +60,11 @@ Offset _head(WidgetTester tester) {
 /// points of a drag are spent compressing it.
 const double _headGive = 50 - 36;
 
+/// The collapsed bar at rest: its head plus the lift that keeps the way on
+/// clear of the grab handle.
+const double _peekRest =
+    SeatLayerSizeTokens.peekHeight + SeatLayerSizeTokens.peekClockLift;
+
 void main() {
   group('the sheet drags', () {
     testWidgets('the surface follows the finger, point for point',
@@ -75,7 +80,7 @@ void main() {
       );
       map.emit(pickerSnapshot());
       await tester.pumpAndSettle();
-      expect(_height(tester), 50 + SeatLayerSizeTokens.peekClockLift);
+      expect(_height(tester), _peekRest);
 
       final drag = await tester.startGesture(_head(tester));
       await _prime(tester, drag);
@@ -260,13 +265,13 @@ void main() {
       map.emit(pickerSnapshot());
       picker.setCartSheetExpanded(true);
       await tester.pumpAndSettle();
-      expect(_height(tester), greaterThan(50));
+      expect(_height(tester), greaterThan(_peekRest));
 
       // What a tap on the map does to the sheet.
       picker.setCartSheetExpanded(false);
       await tester.pumpAndSettle();
       expect(picker.cartSheetDetent, SeatLayerSheetDetent.peek);
-      expect(_height(tester), 50 + SeatLayerSizeTokens.peekClockLift);
+      expect(_height(tester), _peekRest);
     });
 
     testWidgets('reduced motion arrives without a spring', (tester) async {

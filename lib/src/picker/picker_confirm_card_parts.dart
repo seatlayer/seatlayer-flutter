@@ -216,12 +216,18 @@ const double _dismissVelocity = 700;
 /// neither time. The words take [pickerBandInk], chosen per colour, so a pale
 /// yellow category keeps its name. The price lives here rather than on the
 /// button, where it would be the same number the cart is about to say.
+///
+/// It prints the name and the price and NOTHING else. A remaining count beside
+/// them — "6,600 left" — said nothing a buyer choosing one seat could act on,
+/// and it pushed the price into the card's edge. The legend still carries the
+/// count, where a buyer comparing categories is actually looking.
 class _CategoryBand extends StatelessWidget {
   const _CategoryBand({
     required this.category,
     required this.color,
     required this.price,
     required this.currency,
+    this.immersive = false,
   });
 
   final SeatLayerPickerCategory category;
@@ -229,64 +235,50 @@ class _CategoryBand extends StatelessWidget {
   final double? price;
   final String currency;
 
+  /// Whether the card is being read over the 3D venue, where the band gives
+  /// back a few points and the price steps down one size: the scene behind
+  /// the card is the loud thing there, not the card.
+  final bool immersive;
+
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
-    final strings = SeatLayerPickerScope.stringsOf(context);
     final layout = theme.layout;
-    // A count the buyer cannot trust is worse than no count. A runtime that
-    // reports live free seats is believed even at zero; an older one's
-    // availability reads zero before counts arrive, so only a positive
-    // number from it is printed, and otherwise the band says nothing.
-    final count =
-        category.free ?? (category.available > 0 ? category.available : null);
-    final known = count != null;
     final ink = pickerBandInk(color);
-    final name = Text(
-      category.label,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: TextStyle(
-        color: ink,
-        fontSize: SeatLayerSizeTokens.confirmBandNameFontSize,
-        fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
-        fontFamily: theme.fontFamily,
-      ),
-    );
     return DecoratedBox(
       // The colour the legend and the map speak, undiluted.
       decoration: BoxDecoration(color: color),
       child: ConstrainedBox(
         constraints: BoxConstraints(minHeight: layout.confirmBandHeight),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          padding: immersive
+              ? const EdgeInsetsDirectional.symmetric(
+                  vertical: SeatLayerSizeTokens.confirmImmersiveBandPadY,
+                  horizontal: SeatLayerSizeTokens.confirmImmersiveBandPadX,
+                )
+              : const EdgeInsetsDirectional.fromSTEB(
+                  SeatLayerSizeTokens.confirmBandPadLeading,
+                  SeatLayerSizeTokens.confirmBandPadTop,
+                  SeatLayerSizeTokens.confirmBandPadTrailing,
+                  SeatLayerSizeTokens.confirmBandPadBottom,
+                ),
           child: Row(
             children: [
-              // The name keeps its width first; the count is the cell
-              // that gives way, because a truncated category name is a
-              // seat the buyer cannot identify.
-              if (known) name else Expanded(child: name),
-              if (known) ...[
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    strings.seatsLeft(count),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      // The band's own ink, held back — the theme's muted
-                      // token says nothing about a green.
-                      color: pickerAlpha(ink, .78),
-                      fontSize: SeatLayerSizeTokens.confirmBandLeftFontSize,
-                      fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
-                      fontFamily: theme.fontFamily,
-                      fontFeatures: const <FontFeature>[
-                        FontFeature.tabularFigures(),
-                      ],
-                    ),
+              // The name takes the room and gives way first; the price is the
+              // fact the buyer came for and never truncates.
+              Expanded(
+                child: Text(
+                  category.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: ink,
+                    fontSize: SeatLayerSizeTokens.confirmBandNameFontSize,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
+                    fontFamily: theme.fontFamily,
                   ),
                 ),
-              ],
+              ),
               if (price != null) ...[
                 const SizedBox(width: 8),
                 Text(
@@ -294,7 +286,10 @@ class _CategoryBand extends StatelessWidget {
                   softWrap: false,
                   style: TextStyle(
                     color: ink,
-                    fontSize: SeatLayerSizeTokens.confirmBandPriceFontSize,
+                    fontSize: immersive
+                        ? SeatLayerSizeTokens
+                            .confirmImmersiveBandPriceFontSize
+                        : SeatLayerSizeTokens.confirmBandPriceFontSize,
                     fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                     fontFamily: theme.fontFamily,
                     fontFeatures: const <FontFeature>[

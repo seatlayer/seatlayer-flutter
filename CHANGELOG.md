@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.7.3
+
+The seat card's category band prints the category and the price, and nothing
+else. The remaining count is gone from it: beside the name it said nothing a
+buyer choosing one seat could act on, and on a big category it pushed the price
+into the card's edge. The count still belongs to the price legend, where
+categories are compared, and to the section dock. The band is a little taller
+for it — name 15, price 18 — with the price kept a full
+`size.confirmBandPadTrailing` clear of the card's trailing edge.
+
+The collapsed ticket bar shows the whole of its button. Its height is now
+derived from the head it holds — one number, so nothing can clip the surface
+shorter than the row inside it and cut the bottom off the button the bar exists
+for. The chevron leaves the collapsed bar: the whole head has always been the
+tap and the swipe, and the arrow only took width from that button. It stays on
+the open sheet, where it is the way back down, and while it is gone the head
+itself carries the toggle's name, expanded state and tap action, so a
+screen-reader buyer still has exactly one named way into the cart. `Find seats`
+and `Continue` are 48 pt at `radius.peekButton` with a 16 pt label, set against
+the same 12 pt inset the summary starts at.
+
+`size.confirmBandLeftFontSize` and `SeatLayerSizeTokens.confirmBandLeftFontSize`
+are removed — they measured a line the card no longer draws. `strings.seatsLeft`
+stays; the dock still prints it.
+
+The hosted runtime moves to `seatlayer-js@0.77.2`. Views load
+`https://cdn.seatlayer.io/seatlayer-js@0.77.2/mobile.html`. One buyer-visible
+change arrives with it and needs nothing from this SDK: on the overview, the
+badge marking a section the buyer holds seats in now sits over those seats
+rather than over the section's name. A name is placed to clear its neighbours,
+so on a large stand it could end up a block away from a front-row pick and the
+mark appeared to point at the wrong section.
+
 ## 0.7.2
 
 Removing a ticket now answers the press rather than the server. The line fades

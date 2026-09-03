@@ -356,17 +356,18 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               _IdentityGrid(seat: seat, immersive: immersive),
-                              // The band is the category speaking for itself: its
-                              // colour, its name, how much of it is left, and what it
-                              // costs. Without a category there is nothing for it to
-                              // say, and a price with no name beside it belongs
-                              // nowhere on this card.
+                              // The band is the category speaking for itself:
+                              // its colour, its name and what it costs — and
+                              // nothing else. Without a category there is
+                              // nothing for it to say, and a price with no
+                              // name beside it belongs nowhere on this card.
                               if (category != null)
                                 _CategoryBand(
                                   category: category,
                                   color: categoryColor,
                                   price: selectedPrice,
                                   currency: selectedCurrency,
+                                  immersive: immersive,
                                 ),
                               // The picture is what `View from here` opens, so
                               // the strip is drawn full-bleed only where that

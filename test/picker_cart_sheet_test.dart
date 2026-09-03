@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_best_seats.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
@@ -80,6 +81,9 @@ Map<String, Object?> _salesClosedSnapshot() {
   return <String, Object?>{...snapshot, 'event': event};
 }
 
+/// The bottom safe inset the collapsed-bar tests emulate.
+const double _safeBottom = 34;
+
 void main() {
   _identityJoinTests();
   _clockTests();
@@ -111,7 +115,10 @@ void main() {
     expect(find.text('€25'), findsOneWidget);
     // The tray form is the only way into best seats.
     expect(find.text('Best seats'), findsNothing);
-    expect(_sheetHeight(tester), 50 + SeatLayerSizeTokens.peekClockLift);
+    expect(
+      _sheetHeight(tester),
+      SeatLayerSizeTokens.peekHeight + SeatLayerSizeTokens.peekClockLift,
+    );
   });
 
   testWidgets('an empty peek offers the cheapest ticket, not a button', (
@@ -188,7 +195,10 @@ void main() {
       of: find.text('Find seats'),
       matching: find.byType(InkWell),
     );
-    expect(tester.getSize(pill.first).height, 44);
+    expect(
+      tester.getSize(pill.first).height,
+      SeatLayerSizeTokens.peekButtonHeight,
+    );
 
     await tester.tap(find.text('Find seats'));
     await tester.pump();
@@ -360,7 +370,7 @@ void main() {
           builder: (context) => MediaQuery(
             data: MediaQuery.of(
               context,
-            ).copyWith(padding: const EdgeInsets.only(bottom: 34)),
+            ).copyWith(padding: const EdgeInsets.only(bottom: _safeBottom)),
             child: Align(
               alignment: Alignment.bottomCenter,
               child: _sheet(expanded: false),
@@ -372,7 +382,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
-    expect(_sheetHeight(tester), 84 + SeatLayerSizeTokens.peekClockLift);
+    expect(
+      _sheetHeight(tester),
+      SeatLayerSizeTokens.peekHeight +
+          SeatLayerSizeTokens.peekClockLift +
+          _safeBottom,
+    );
     final attributionRect = tester.getRect(find.text('Powered by SeatLayer'));
     final sheetRect = tester.getRect(find.byType(SeatLayerCartSheet));
     // Centred: a phone's rounded corner clips whatever hugs the trailing edge.
@@ -387,7 +402,13 @@ void main() {
     map.emit(hidden);
     await tester.pumpAndSettle();
     expect(find.text('Powered by SeatLayer'), findsNothing);
-    expect(_sheetHeight(tester), 84 + SeatLayerSizeTokens.peekClockLift);
+    // The safe area stays reserved; only the words in it go.
+    expect(
+      _sheetHeight(tester),
+      SeatLayerSizeTokens.peekHeight +
+          SeatLayerSizeTokens.peekClockLift +
+          _safeBottom,
+    );
   });
 
   testWidgets('the expanded header states the count once', (tester) async {
@@ -761,9 +782,12 @@ void main() {
     await tester.pumpAndSettle();
 
     // The grabber overlaps into the head rather than taking a row of its own,
-    // which is what keeps the collapsed bar at fifty points.
+    // which is what keeps the collapsed bar to one row of chrome.
     expect(_grabber(tester), isTrue);
-    expect(_sheetHeight(tester), 50 + SeatLayerSizeTokens.peekClockLift);
+    expect(
+      _sheetHeight(tester),
+      SeatLayerSizeTokens.peekHeight + SeatLayerSizeTokens.peekClockLift,
+    );
 
     await tester.pumpWidget(pickerHarness(map, subject(true)));
     await tester.pumpAndSettle();
@@ -952,10 +976,111 @@ void _clockTests() {
     map.emit(pickerSnapshot(holdOwner: 'picker'));
     await pumpToRest(tester);
 
-    // Fifty points, plus the lift that keeps the way on off the way up.
-    expect(_sheetHeight(tester), 50 + SeatLayerSizeTokens.peekClockLift);
+    // The head's own height, plus the lift that keeps the way on off the
+    // way up.
+    expect(
+      _sheetHeight(tester),
+      SeatLayerSizeTokens.peekHeight + SeatLayerSizeTokens.peekClockLift,
+    );
     final pill = tester.getRect(find.widgetWithText(FilledButton, 'Continue'));
     final sheet = tester.getRect(find.byType(SeatLayerCartSheet));
     expect(pill.top - sheet.top, greaterThanOrEqualTo(8));
+    // AND ITS WHOLE HEIGHT IS INSIDE THE BAR. The web shipped a bar whose
+    // clip was shorter than its head, which cut the bottom off the very
+    // button the bar exists for. Here the head IS the collapsed height, so
+    // there is one number and nothing to disagree with — this pins it.
+    expect(pill.height, SeatLayerSizeTokens.peekButtonHeight);
+    expect(pill.bottom, lessThanOrEqualTo(sheet.bottom + .01));
   });
+
+  testWidgets('the collapsed bar is exactly its head plus the safe area',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              padding: const EdgeInsets.only(bottom: _safeBottom),
+            ),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: _sheet(expanded: false),
+            ),
+          ),
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await pumpToRest(tester);
+
+    // One number: the head's own height plus the lift, plus whatever the
+    // platform reserves at the bottom. Nothing clips it to something shorter.
+    final sheet = tester.getRect(find.byType(SeatLayerCartSheet));
+    expect(
+      sheet.height,
+      SeatLayerSizeTokens.peekHeight +
+          SeatLayerSizeTokens.peekClockLift +
+          _safeBottom,
+    );
+    // And the way on is wholly inside it, top and bottom.
+    final pill = tester.getRect(find.widgetWithText(FilledButton, 'Continue'));
+    expect(pill.top, greaterThanOrEqualTo(sheet.top));
+    expect(pill.bottom, lessThanOrEqualTo(sheet.bottom + .01));
+  });
+
+  testWidgets('the collapsed bar drops the chevron and answers as the toggle',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    var expanded = false;
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        StatefulBuilder(
+          builder: (context, setState) {
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: SeatLayerCartSheet(
+                expanded: expanded,
+                onExpandedChanged: (value) =>
+                    setState(() => expanded = value),
+                onCheckout: _noopCheckout,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await pumpToRest(tester);
+
+    // The arrow only took width from the one button the bar exists for.
+    expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsNothing);
+    // The head still answers, and a screen reader still finds it: hiding the
+    // chevron would otherwise have taken the cart's only named toggle with it.
+    expect(find.bySemanticsLabel(SeatLayerStringTokens.expandCart), findsOneWidget);
+    // Through the semantics ACTION, not a pixel: the head's own centre is
+    // over the Continue button, and a rotor activates the node it just read.
+    tester.semantics.performAction(
+      find.semantics.byLabel(SeatLayerStringTokens.expandCart),
+      SemanticsAction.tap,
+    );
+    await pumpToRest(tester);
+    expect(expanded, isTrue);
+
+    // Open, the chevron is back and it is the one that carries the name.
+    expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsOneWidget);
+    expect(find.bySemanticsLabel(SeatLayerStringTokens.collapseCart), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(SeatLayerStringTokens.expandCart),
+      findsNothing,
+    );
+  }, semanticsEnabled: true);
 }

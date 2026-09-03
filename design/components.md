@@ -47,9 +47,9 @@ chips and its tier rows; the sheet's `Hold seats & checkout`; the
 accessibility sheet's rows and `Apply filters`; `Try again`; the prompts'
 action pairs.
 
-**`radius.peekButton` (11):** the collapsed bar's two doors — `Continue ·
+**`radius.peekButton` (12):** the collapsed bar's two doors — `Continue ·
 total` and `✦ Find seats`. They were true pills; a rounded rectangle at the
-full `size.minimumHitTarget` reads as the primary action each of them is.
+full `size.peekButtonHeight` reads as the primary action each of them is.
 
 **`radius.control`:** the best-seats selects, its stepper and its action.
 
@@ -225,9 +225,12 @@ override** `style:`
   2. Category band, `size.confirmBandHeight`: the category colour itself, full
      bleed, no dot and no rail, with its ink chosen per colour (white where
      white clears 3:1, otherwise `#0B0F19`). The name at
-     `size.confirmBandNameFontSize`, `N left` at
-     `size.confirmBandLeftFontSize` in that ink at 78 %, the price at
-     `size.confirmBandPriceFontSize`.
+     `size.confirmBandNameFontSize` and the price at
+     `size.confirmBandPriceFontSize` — **and no remaining count**; the legend
+     keeps that. Padding `size.confirmBandPadTop` / `…PadTrailing` /
+     `…PadBottom` / `…PadLeading`, which is what keeps the price off the
+     card's edge. In 3D, `size.confirmImmersiveBandPadY` / `…PadX` and
+     `size.confirmImmersiveBandPriceFontSize`.
   3. Photo strip, `size.confirmPhotoHeight`, only where the seat names an
      authored photograph, carrying the `View from here` and `3D` pills and, in
      its trailing top corner, the sight line (`strings.sightline`,
@@ -273,12 +276,15 @@ override** `style:`
 - **States** peek empty, peek with tickets, expanded empty (the best-seats
   form), expanded with tickets.
 - **Anatomy** radius `radius.sheet`, elevation `elevation.sheet`.
-  - **Peek** `size.peekHeight`: a grabber, then left `N tickets`, or
-    `From <min>` when empty — the sentence at `type.peekSummary` in
-    `color.*.mutedText` with the AMOUNT inside it lifted to
-    `type.peekFromPrice` in `color.*.text`; right the filled `Continue · total`
-    button at `size.minimumHitTarget` and `radius.peekButton` and the chevron.
-    With an empty cart the button is `✦ Find seats` at
+  - **Peek** `size.peekHeight` plus the lift and the safe inset — and the
+    surface is clipped to exactly that, never to something shorter than the
+    head it holds. A grabber, then left `N tickets`, or `From <min>` when
+    empty — the sentence at `type.peekSummary` in `color.*.mutedText` with the
+    AMOUNT inside it lifted to `type.peekFromPrice` in `color.*.text`; right
+    the filled `Continue · total` button at `size.peekButtonHeight` and
+    `radius.peekButton`, against a 12 pt trailing inset. **No chevron while
+    collapsed** — the head is the toggle and carries its accessibility. With
+    an empty cart the button is `✦ Find seats` at
     `size.findPillHeight` / `radius.peekButton` / `type.findPill`, which opens
     the sheet on the best-seats form — withheld where that form would be
     refused. The peek also

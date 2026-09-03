@@ -138,8 +138,8 @@ abstract final class SeatLayerSizeTokens {
   /// `52`
   static const double dockBarHeight = 52;
 
-  /// `50`
-  static const double peekHeight = 50;
+  /// `58`
+  static const double peekHeight = 58;
 
   /// `8`
   static const double peekClockLift = 8;
@@ -177,8 +177,11 @@ abstract final class SeatLayerSizeTokens {
   /// `0.92`
   static const double sheetFullHeightFraction = 0.92;
 
-  /// `44`
-  static const double findPillHeight = 44;
+  /// `48`
+  static const double findPillHeight = 48;
+
+  /// `48`
+  static const double peekButtonHeight = 48;
 
   /// `44`
   static const double denseLineHeight = 44;
@@ -237,14 +240,23 @@ abstract final class SeatLayerSizeTokens {
   /// `30`
   static const double confirmBandHeight = 30;
 
-  /// `13.5`
-  static const double confirmBandNameFontSize = 13.5;
+  /// `15`
+  static const double confirmBandNameFontSize = 15;
+
+  /// `18`
+  static const double confirmBandPriceFontSize = 18;
 
   /// `11`
-  static const double confirmBandLeftFontSize = 11;
+  static const double confirmBandPadTop = 11;
+
+  /// `11`
+  static const double confirmBandPadBottom = 11;
+
+  /// `14`
+  static const double confirmBandPadLeading = 14;
 
   /// `16`
-  static const double confirmBandPriceFontSize = 16;
+  static const double confirmBandPadTrailing = 16;
 
   /// `64`
   static const double confirmPhotoHeight = 64;
@@ -296,6 +308,15 @@ abstract final class SeatLayerSizeTokens {
 
   /// `17`
   static const double confirmImmersiveValueFontSize = 17;
+
+  /// `7`
+  static const double confirmImmersiveBandPadY = 7;
+
+  /// `10`
+  static const double confirmImmersiveBandPadX = 10;
+
+  /// `17`
+  static const double confirmImmersiveBandPriceFontSize = 17;
 
   /// `12`
   static const double confirmImmersiveSectionFontSize = 12;
@@ -574,8 +595,8 @@ abstract final class SeatLayerRadiusTokens {
   /// `15`
   static const double confirmCard = 15;
 
-  /// `11`
-  static const double peekButton = 11;
+  /// `12`
+  static const double peekButton = 12;
 
   /// `999`
   static const double chip = 999;
