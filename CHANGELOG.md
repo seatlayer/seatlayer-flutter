@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0
 
 The hosted runtime moves to `seatlayer-js@0.77.1`, which brings the camera
 behaviour the picker had been standing in for. Views load
