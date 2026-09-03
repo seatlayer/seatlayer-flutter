@@ -154,20 +154,9 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   @internal
   SelectedSeat? get unansweredSeat {
     if (_options.readOnly || !_options.confirmSelection) return null;
-    if (value.hold != null) {
-      // A hold present at startup is authoritative and needs no new question.
-      // If the runtime starts its picker hold while a card is already open,
-      // retain only that exact unanswered seat: inspecting it did not press
-      // Select, and it must remain excluded from cart/checkout totals.
-      final retained = _confirmCardSeat;
-      if (retained == null || _confirmedLabels.contains(retained.label)) {
-        return null;
-      }
-      for (final seat in value.selection.reversed) {
-        if (seat.id == retained.id && seat.label == retained.label) return seat;
-      }
-      return null;
-    }
+    // A live hold does not silence the question: the seats a hold arrived
+    // with were adopted as answered when it appeared (see _applySnapshot), so
+    // what is left unanswered here is what the buyer tapped since.
     for (final seat in value.selection.reversed) {
       if (!_confirmedLabels.contains(seat.label)) return seat;
     }
@@ -497,6 +486,17 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         previousHold?.owner != nextHold?.owner ||
         previousHold?.expiresAt != nextHold?.expiresAt) {
       _callbacks.onHoldChanged?.call(nextHold, value.checkoutHandoff);
+    }
+    if (previousHold == null && nextHold != null) {
+      // The seats a hold ARRIVES with were not asked about here: a session
+      // resumed with its hold, or a best-available pick the runtime held
+      // itself. Adopt them as answered, so the card asks only about what the
+      // buyer taps from now on. A card already open keeps its question.
+      for (final seat in snapshot.selection) {
+        if (seat.label != _confirmCardSeat?.label) {
+          _confirmedLabels.add(seat.label);
+        }
+      }
     }
     if (nextHold != null) {
       // A live hold ends the previous one's story: the expiry may be announced
