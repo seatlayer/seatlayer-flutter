@@ -29,7 +29,14 @@ export 'src/bridge/envelope.dart'
 export 'src/open_enums.dart';
 export 'src/payloads.dart';
 export 'src/picker/picker_accessibility.dart'
-    show SeatLayerPickerAccessibilityFilters;
+    show SeatLayerPickerAccessibilityFilters, SeatLayerPickerAccessibleStepper;
+export 'src/picker/picker_accessibility_focus.dart'
+    show
+        SeatLayerAccessibleTour,
+        SeatLayerPickerAccessibilityFocus,
+        seatLayerAccessibleSectionCount,
+        seatLayerAccessibleTourOf,
+        seatLayerSectionAccessibleFree;
 export 'src/picker/picker_adaptive_layout.dart'
     show SeatLayerPickerAdaptiveLayout;
 export 'src/picker/picker_attribution.dart' show SeatLayerPickerAttribution;

@@ -1,22 +1,37 @@
 /// Three sections in snapshot order, for dock-bar stepping.
-List<Object?> pickerSections() => <Object?>[
+///
+/// [accessibleFree] attaches `sections[].accessibleFree` by section id, as a
+/// runtime advertising `section-access-counts-v1` reports it. A section left
+/// out of the map carries no counts at all, which is the "not counted" case —
+/// deliberately different from a section reporting zero.
+List<Object?> pickerSections({
+  Map<String, Map<String, Object?>> accessibleFree =
+      const <String, Map<String, Object?>>{},
+}) =>
+    <Object?>[
       <String, Object?>{
         'id': 'section-a',
         'label': 'Gallery',
         'color': '#635BFF',
         'seatsLeft': 74,
+        if (accessibleFree['section-a'] != null)
+          'accessibleFree': accessibleFree['section-a'],
       },
       <String, Object?>{
         'id': 'section-b',
         'label': 'Terrace',
         'color': '#22A06B',
         'seatsLeft': 12,
+        if (accessibleFree['section-b'] != null)
+          'accessibleFree': accessibleFree['section-b'],
       },
       <String, Object?>{
         'id': 'section-c',
         'label': 'Orchestra',
         'color': '#E5A100',
         'seatsLeft': null,
+        if (accessibleFree['section-c'] != null)
+          'accessibleFree': accessibleFree['section-c'],
       },
     ];
 
@@ -33,6 +48,7 @@ Map<String, Object?> pickerSnapshot({
   double? cartTotal,
   bool testEvent = true,
   List<Object?>? accessNeeds,
+  List<String> accessibilityFilter = const <String>[],
   Map<String, Object?>? seatViewThumb = const <String, Object?>{
     'reference': '/pub/events/ev_test/assets/seat-a-1.jpg',
     'kind': 'real',
@@ -127,6 +143,8 @@ Map<String, Object?> pickerSnapshot({
         <String, Object?>{'id': 'ground', 'name': 'Ground floor'},
       ],
       if (accessNeeds != null) 'accessNeeds': accessNeeds,
+      if (accessibilityFilter.isNotEmpty)
+        'accessibilityFilter': accessibilityFilter,
       'colorblindSafe': false,
       'hideLimitedView': false,
       'canZoomIn': true,

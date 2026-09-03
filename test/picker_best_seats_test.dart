@@ -4,8 +4,6 @@ import 'package:seatlayer/src/picker/picker_best_seats.dart';
 import 'package:seatlayer/src/picker/picker_layout.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
-import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
-import 'package:seatlayer/src/seat_layer_configuration.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
@@ -273,30 +271,4 @@ void main() {
       }, tags: goldenTag);
     }
   }, skip: goldenSkip);
-
-  group('landing on the seats found', () {
-    test('names the section of the seats a pick added', () async {
-      final map = FakePickerMap(bundle: nativeChromeBundle());
-      addTearDown(map.dispose);
-      final controller = SeatLayerPickerController(mapController: map);
-      addTearDown(controller.dispose);
-      controller.attach(
-        configuration: SeatLayerConfiguration(event: 'ev_test'),
-        options: const SeatLayerPickerOptions(),
-      );
-      map.emit(pickerSnapshot(sections: pickerSections()));
-      await Future<void>.delayed(Duration.zero);
-
-      expect(
-        pickerBestSeatsSectionId(controller.state, const <String>{}),
-        'section-a',
-        reason: 'the fixture seat sits in Gallery, which is section-a',
-      );
-      expect(
-        pickerBestSeatsSectionId(controller.state, const <String>{'A-1'}),
-        isNull,
-        reason: 'a seat that was already selected is not a landing',
-      );
-    });
-  });
 }

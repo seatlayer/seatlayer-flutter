@@ -391,8 +391,28 @@ at `radius.pill` with a knob of `size.accessSwitchKnob`; off is the muted colour
 at low opacity, on is the accent. Disabled rows dim and stop responding.
 
 Filters combine as a **union**. Turning one on moves the camera to the matching
-seats. The choice survives the session where the host allows it, and is restored
-only for provisions that are still free.
+seats — the runtime's own flight since 0.77.1, see 3.13. The choice survives the
+session where the host allows it, and is restored only for provisions that are
+still free.
+
+**The count as a jump.** Where the runtime advertises `accessibility-focus-v1`
+and a provision has a positive count, its trailing `strings.accessFreeCount`
+becomes a **button**: a stadium chip at `radius.pill` of height
+`size.accessStepHeight` with `size.accessStepPaddingX` of side padding, the
+accent at 12 % on the row's own ground with the divider hairline, drawn inside a
+`size.minimumHitTarget` target so the number does not have to be aimed at. The
+number itself does not move or change size when it becomes pressable. Pressing
+it turns that provision's switch on if it was off, applies the filter, **closes
+the sheet**, and takes the first step of the accessible-section tour
+(3.4.1). Name: `label, strings.accessFreeCount(n),
+strings.accessJumpFirstSection`. The row's own toggle stays a separate node —
+the two do different things. Where the count is not pressable it is the static
+muted figure it has always been.
+
+This is where the web and the phone diverge on purpose. The web's menu is a
+popover over the map, so its `12 free` button steps the camera with the menu
+still open; a modal bottom sheet covers the map, so the phone hands the walk to
+a control that lives where the map is visible.
 
 Opening staggers the rows on `motion.duration.stagger`; **closing is immediate**
 and deliberately has no exit animation.
@@ -402,6 +422,49 @@ an older runtime gets the full static list from `strings.access*`. The
 colourblind row additionally requires the runtime to advertise its own
 colourblind-safe support. Commands `picker.setAccessibilityFilters`,
 `picker.setColorblindSafe`. File: `lib/src/picker/picker_accessibility.dart`.
+
+##### 3.4.1 Accessible-section stepper (beside the control)
+
+**Name** `SeatLayerPickerAccessibleStepper` · **file**
+`lib/src/picker/picker_accessibility.dart` · state in
+`lib/src/picker/picker_accessibility_focus.dart`
+
+`♿ 2 of 6 ›` — a stadium pill sitting **beside** the accessibility control in
+the same bottom-left region, `size.accessStepGap` from it. Height
+`size.accessStepHeight` drawn inside a `size.minimumHitTarget` target, side
+padding `size.accessStepPaddingX`, ground `color.*.surface`, hairline
+`color.*.divider`, glyph in the accent, chevron in the muted ink, figure at
+`type.accessStep` (`size.accessStepFontSize`, weight 800, tabular).
+
+Drawn only while an accessibility filter is active **and** the runtime
+advertises `accessibility-focus-v1`. Pressing it sends
+`picker.focusNextAccessibleSection { types }` with the active provisions and
+redraws from the returned `step`:
+
+- a step → `strings.accessibleStep(index, total)`;
+- before the first step → `strings.accessibleSections(count)` counted from the
+  sections whose `accessibleFree` holds a positive entry for an active
+  provision, where `section-access-counts-v1` is advertised. Where it is not,
+  the pill draws the glyph and chevron with no figure until the first step
+  answers — a runtime that flies but does not count still has a tour;
+- a `null` step → the pill **goes**. Nothing matches, and that is an answer,
+  not a failure;
+- where the counts ARE reported and none is positive, the pill is never drawn.
+
+A filter the buyer changes abandons the walk; the pill returns to its first
+appearance. Name: `strings.accessibleStep(...)` (or nothing) followed by
+`strings.accessJumpNextSection`.
+
+**Motion.** The runtime owns the camera and already does the right thing under
+reduced motion. The pill itself only ever cross-fades one figure into the next,
+on `motion.duration.crossfade`.
+
+**Haptics.** None of its own: the walk changes the focused section, so the
+dock's existing `haptics.sectionFocused` fires from the snapshot that follows.
+
+`strings.accessibleStep` and `strings.accessibleSections` are **native-only** —
+the web has no such sentence, because its popover never leaves the map — as are
+`strings.accessJumpFirstSection` and `strings.accessJumpNextSection`.
 
 #### Zoom column (bottom-right)
 
@@ -465,6 +528,16 @@ Contents, leading to trailing:
 stays in the bar's accessible name. Where `sections[].seatsLeft` is unknown, no
 count is drawn.
 
+**Matching spaces.** While an accessibility filter is on and the runtime
+advertises `section-access-counts-v1`, the focused section's matching free
+spaces are appended to the count as ` · ♿ N`, in the same style — summed over
+the active provisions from `sections[].accessibleFree`. The suffix rides on
+both rungs of the ladder, so it is measured with the count rather than
+discovered after layout, and it joins the accessible name too. A section with
+**no entry** for any active provision was not counted and says nothing: absent
+is not zero, and a bar that drew `♿ 0` would tell a buyer the section is full
+when the truth is that nobody counted it.
+
 **States.** Hidden at the venue rung; visible when a section is focused; hidden
 while a seat card owns the bottom edge; hidden in the immersive scene.
 
@@ -482,7 +555,8 @@ the full seats-left sentence whatever the visible ladder chose. The steps are
 buttons named `strings.previousSection` / `strings.nextSection`.
 
 **Snapshot.** `sections[]` (`id`, `label`, `displayLabel`, `color`,
-`dominantCategoryKey`, `seatsLeft`), `map.rung`, `map.focusedSectionId`.
+`dominantCategoryKey`, `seatsLeft`, `accessibleFree`), `map.rung`,
+`map.focusedSectionId`, `map.accessibilityFilter`.
 Prefer `dominantCategoryKey` over a copied colour when painting the dot: the key
 survives a colourblind-safe palette and a category recolour.
 **Commands** `picker.focusSection { id }`, `picker.overview`.
@@ -1103,23 +1177,34 @@ already open keeps its question. Every seat tapped after that is asked about
 — a live hold never silences the card (it did until 0.6.2, which turned every
 second tap into a silent add). Ports: adopt-on-arrival + ask-every-tap.
 
-**Best-available landing (interim).** The web's `bestSeatsArrival` frames the
-found seats; the bridge's `picker.bestAvailable` only makes the hold. Until
-the runtime routes the command through the arrival, the sheet frames the
-section of the newly added seats (`pickerBestSeatsSectionId`, matched by
-section label) after the hold lands. Drop it when the bridge arrives itself.
+**Best-available landing.** Since runtime 0.77.1 `picker.bestAvailable` lands
+the camera itself: once the hold is made the map frames the found seats with
+their neighbours, falling back to the section centroid, and it does so under
+reduced motion too. **Native calls nothing after the command.** The interim
+that framed the section of the newly added seats is gone; the web's own pops
+and chip flights stay web-only.
 
 **Seat removed + Undo.** Shown on the picker's own toast band
 (`SeatLayerPickerToast` with `actionLabel`), never on the host's Material
 messenger; dwell = `motion.toastDwell`.
 
-**Accessibility filter, interim flight.** The web menu calls
-`focusSeatsForFilter()` after applying a filter and flies to the matching
-seats; the bridge's `picker.setAccessibilityFilter` does not (runtime lane
-asked to route it the same way). Until then Flutter follows a non-empty
-filter with `picker.overview`, so the buyer sees the sections the runtime
-lit with `♿ N` badges instead of a dimmed corner of the section they were
-in. Ports: do the same, and drop it the moment the bridge flies itself.
+**Accessibility filter flight.** Since runtime 0.77.1
+`picker.setAccessibilityFilter` takes the web menu's own focus path: turning a
+filter ON flies to the matching spaces, or holds the sections rung with the
+spread hint where they span the venue; turning it OFF keeps the camera.
+Price-chip counts and the minimap follow whichever door the filter came
+through. **Native calls nothing after the command** — the interim
+`picker.overview` is gone. `picker.focusAccessibilityFilter` re-runs the same
+flight without toggling, for a buyer who has panned away from it.
+
+The same is true of the other camera moves under a filter, engine-side and
+with nothing to call: a section tap, `picker.focusSection` and the dock's own
+arrows frame a section's matching spaces at pickable depth when it holds any,
+and frame it as before when it does not.
+
+Capability `accessibility-focus-v1` gates all three. An older runtime applies
+the filter and leaves the camera where it was, so every control below is
+withheld from it rather than degraded.
 
 **Booked ("You're all set").** Never shown on the hand-off: a buyer on the way
 to pay has not paid. It appears only when the handed-off hold settles to
@@ -1569,6 +1654,8 @@ from the wrong one.
 | `seat-screen-point-v1` | the seat's screen point, so the seat card can hug the seat instead of resting |
 | `category-availability-v1` | live per-category free counts behind the rail's strike-through, the card's `N left` and the sold-out predicate |
 | `access-needs-v1` | the chart's own access needs, in the runtime's order, with live free counts |
+| `accessibility-focus-v1` | the filter's own camera flight, `picker.focusAccessibilityFilter`, and the accessible-section tour behind the sheet's count chip and the map's stepper |
+| `section-access-counts-v1` | `sections[].accessibleFree`, behind the stepper's "N sections" and the dock's `· ♿ N` |
 | `availability-refresh-v1` | a re-read of live availability on resume, and the outcome that explains a lapsed hold |
 | `chart-load-trace-v1` | what the load cost, handed to the host's analytics |
 | `native-seat-view-chrome-v1` | the runtime suppresses its seat-view words; native draws the caption strip |

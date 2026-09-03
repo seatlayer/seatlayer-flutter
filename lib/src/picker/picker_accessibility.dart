@@ -5,12 +5,14 @@ library;
 import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 
+import 'picker_accessibility_focus.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_tokens.g.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
+import 'picker_strings.dart';
 import 'picker_styles.dart';
 import 'seat_layer_picker_theme.dart';
 import 'picker_a11y.dart';
@@ -129,6 +131,8 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     // Missing inventory truth fails closed. The static twelve-key vocabulary
     // is not evidence that this event has any of those seats.
     final offered = snapshot.map.accessNeeds;
+    // The count only becomes a button where the runtime answers the tour.
+    final canJump = controller.supportsAccessibilityFocus;
     // The companion note is only true of a chart that authors companion
     // places, so it is drawn from the same inventory the rows are.
     final hasCompanionPlaces =
@@ -183,6 +187,29 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                                 : need.count! > 0
                                     ? strings.accessFreeCount(need.count!)
                                     : strings.accessNoneLeft,
+                            // The web menu's own "12 free" button, which steps
+                            // the camera through the sections that hold them.
+                            // Only where the runtime can fly and there is
+                            // something to fly to; otherwise the number stays
+                            // the static fact it has always been.
+                            countLabel: canJump && (need.count ?? 0) > 0
+                                ? '${need.label}, '
+                                    '${strings.accessFreeCount(need.count!)}, '
+                                    '${strings.accessJumpFirstSection}'
+                                : null,
+                            onCountPressed: canJump && (need.count ?? 0) > 0
+                                ? () => Navigator.of(context).pop(
+                                      (
+                                        types: <String>{
+                                          ...selected,
+                                          need.key,
+                                        },
+                                        hideLimited: hideLimited,
+                                        colorblind: colorblind,
+                                        jumpTo: need.key,
+                                      ),
+                                    )
+                                : null,
                             value: on,
                             onChanged: enabled
                                 ? () => setSheetState(() {
@@ -221,6 +248,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                       types: selected,
                       hideLimited: hideLimited,
                       colorblind: colorblind,
+                      jumpTo: null,
                     ),
                   ),
                   child: Text(strings.applyFilters),
@@ -236,6 +264,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
           Set<String> types,
           bool hideLimited,
           bool colorblind,
+          String? jumpTo,
         })>(
       context: context,
       isScrollControlled: true,
@@ -246,17 +275,22 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     if (result == null) return;
     final live = _availability(controller, controller.state.snapshot);
     if (live.accessibility && !setEquals(result.types, initial)) {
+      // Since runtime 0.77.1 the command carries the web menu's own flight:
+      // turning a filter ON flies to the matching spaces, or holds the venue
+      // rung with the spread hint where they span it. Nothing to follow it
+      // with — the interim `picker.overview` this used to send is gone.
       await controller.setAccessibilityFilter(result.types);
-      // The runtime lights the sections that still hold matching spaces and
-      // steps the rest back, but the bridge command does not fly to them the
-      // way the web's own menu does. Until it does, a filter that names a
-      // need is followed by the venue overview, so the buyer sees WHERE the
-      // lit sections are rather than a dimmed corner of the one they were in.
-      if (result.types.isNotEmpty &&
-          controller.mapController.bundleInfo
-                  ?.supportsCommand('picker.overview') ==
-              true) {
-        await controller.overview();
+    }
+    // A filter the buyer has changed invalidates whatever walk was under way;
+    // one they pressed a count on starts a new walk on that provision alone.
+    if (controller.supportsAccessibilityFocus) {
+      final tour = seatLayerAccessibleTourOf(controller);
+      final jumpTo = result.jumpTo;
+      if (jumpTo != null) {
+        tour.begin(<String>{jumpTo});
+        await tour.next(controller);
+      } else if (!setEquals(result.types, initial)) {
+        tour.reset();
       }
     }
     if (live.limited && result.hideLimited != initialHideLimited) {
@@ -351,12 +385,22 @@ class _AccessOptionRow extends StatelessWidget {
     required this.onChanged,
     this.note,
     this.count,
+    this.countLabel,
+    this.onCountPressed,
   });
 
   final IconData icon;
   final String label;
   final String? note;
   final String? count;
+
+  /// What a screen reader calls the count when it is pressable.
+  final String? countLabel;
+
+  /// Start the accessible-section tour on this provision, or null to leave the
+  /// count the static fact it is on a runtime that cannot fly.
+  final VoidCallback? onCountPressed;
+
   final bool value;
   final VoidCallback? onChanged;
 
@@ -368,6 +412,10 @@ class _AccessOptionRow extends StatelessWidget {
       toggled: value,
       enabled: enabled,
       label: label,
+      // Explicit, so the pressable count inside stays its own button rather
+      // than being folded into the row's toggle: the two do different things
+      // and a buyer who only hears "Wheelchair, on" cannot find the jump.
+      explicitChildNodes: onCountPressed != null,
       child: Opacity(
         opacity: enabled ? 1 : _disabledRowOpacity,
         child: Material(
@@ -428,18 +476,11 @@ class _AccessOptionRow extends StatelessWidget {
                     ),
                     if (count != null) ...<Widget>[
                       const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
-                      Text(
-                        count!,
-                        style: TextStyle(
-                          color: theme.mutedText,
-                          fontSize: SeatLayerSizeTokens.accessRowNoteFontSize,
-                          fontWeight:
-                              seatLayerBoldWeight(context, FontWeight.w800),
-                          fontFeatures: const <FontFeature>[
-                            FontFeature.tabularFigures(),
-                          ],
-                          fontFamily: theme.fontFamily,
-                        ),
+                      _AccessCount(
+                        count: count!,
+                        label: countLabel,
+                        onPressed: enabled ? onCountPressed : null,
+                        theme: theme,
                       ),
                     ],
                     const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
@@ -454,6 +495,266 @@ class _AccessOptionRow extends StatelessWidget {
     );
   }
 }
+
+/// The "12 free" at the end of a row — a fact, or the button that starts the
+/// accessible-section tour.
+///
+/// One widget for both because the number must not move when it becomes
+/// pressable: the pill is drawn around the same text at the same size, so a
+/// runtime that gains the capability does not also reflow the sheet.
+class _AccessCount extends StatelessWidget {
+  const _AccessCount({
+    required this.count,
+    required this.label,
+    required this.onPressed,
+    required this.theme,
+  });
+
+  final String count;
+  final String? label;
+  final VoidCallback? onPressed;
+  final SeatLayerResolvedPickerTheme theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Text(
+      count,
+      style: TextStyle(
+        color: onPressed == null ? theme.mutedText : theme.accent,
+        fontSize: SeatLayerSizeTokens.accessRowNoteFontSize,
+        fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
+        fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+        fontFamily: theme.fontFamily,
+      ),
+    );
+    if (onPressed == null) return text;
+    return Semantics(
+      button: true,
+      label: label,
+      child: ExcludeSemantics(
+        child: ConstrainedBox(
+          // Drawn as a pill around the number, but claiming the full hit
+          // target: the count is small type at the end of a row and a buyer
+          // reaching for it with a thumb must not have to aim.
+          constraints: const BoxConstraints(
+            minWidth: SeatLayerSizeTokens.minimumHitTarget,
+            minHeight: SeatLayerSizeTokens.minimumHitTarget,
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: onPressed,
+              borderRadius:
+                  BorderRadius.circular(SeatLayerRadiusTokens.pill),
+              child: Center(
+                widthFactor: 1,
+                child: Container(
+                  height: SeatLayerSizeTokens.accessStepHeight,
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SeatLayerSizeTokens.accessStepPaddingX,
+                  ),
+                  decoration: ShapeDecoration(
+                    color: pickerAlpha(theme.accent, .12),
+                    shape: StadiumBorder(
+                      side: BorderSide(color: theme.divider),
+                    ),
+                  ),
+                  child: text,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// `♿ 2 of 6 ›` — where the accessible-section tour has got to, and the way to
+/// its next stop.
+///
+/// The web draws no such control: its menu is a popover over the map, so the
+/// count it steps from is still on screen while the camera moves. The phone's
+/// sheet covers the map and has to close, so the walk needs somewhere visible
+/// to continue from, and this is it.
+class SeatLayerPickerAccessibleStepper extends StatelessWidget {
+  /// Creates the accessible-section stepper.
+  const SeatLayerPickerAccessibleStepper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = SeatLayerPickerScope.controllerOf(context);
+    final state = SeatLayerPickerScope.stateOf(context);
+    final snapshot = state.snapshot;
+    final active = <String>{...?snapshot?.map.accessibilityFilter};
+    // No filter, or a runtime that cannot fly: there is no walk to narrate.
+    if (active.isEmpty || !controller.supportsAccessibilityFocus) {
+      return const SizedBox.shrink();
+    }
+    final tour = seatLayerAccessibleTourOf(controller);
+    return AnimatedBuilder(
+      animation: tour,
+      builder: (context, _) => _build(context, controller, snapshot, active,
+          tour, SeatLayerPickerScope.stringsOf(context)),
+    );
+  }
+
+  Widget _build(
+    BuildContext context,
+    SeatLayerPickerController controller,
+    SeatLayerPickerSnapshot? snapshot,
+    Set<String> active,
+    SeatLayerAccessibleTour tour,
+    SeatLayerPickerStrings strings,
+  ) {
+    // A walk over provisions the buyer has since turned off is not this
+    // filter's walk. It is read as "not started" rather than reset here,
+    // because a notifier must not fire from inside a build.
+    final current = tour.types.isNotEmpty &&
+        tour.types.every((type) => active.contains(type));
+    final step = current ? tour.step : null;
+    // The runtime answered that nothing matches: the pill goes, rather than
+    // standing there offering a step that cannot be taken.
+    if (current && tour.exhausted) return const SizedBox.shrink();
+
+    final counted = controller.supportsSectionAccessCounts;
+    final sections = counted
+        ? seatLayerAccessibleSectionCount(snapshot, current ? tour.types : active)
+        : 0;
+    // Where the counts ARE reported and none of them is positive, there is
+    // nothing to walk. Where they are not reported at all, the pill is drawn
+    // with no figure until the first step answers — a runtime that can fly
+    // but does not count still has a tour worth offering.
+    if (counted && step == null && sections == 0) {
+      return const SizedBox.shrink();
+    }
+    final label = step != null
+        ? strings.accessibleStep(step.index + 1, step.total)
+        : counted
+            ? strings.accessibleSections(sections)
+            : null;
+
+    final theme = seatLayerPickerThemeOf(context);
+    final busy = tour.walking || controller.state.isBusy;
+    return Semantics(
+      button: true,
+      enabled: !busy,
+      label: label == null
+          ? strings.accessJumpNextSection
+          : '$label, ${strings.accessJumpNextSection}',
+      child: ExcludeSemantics(
+        child: AnimatedSwitcher(
+          // The runtime owns the camera, and does the right thing under
+          // reduced motion; the pill itself only ever fades.
+          duration: SeatLayerPickerMotion.of(
+            context,
+            SeatLayerPickerMotion.crossfade,
+          ),
+          child: _StepperPill(
+            key: ValueKey<String>(label ?? ''),
+            label: label,
+            theme: theme,
+            onPressed: busy
+                ? null
+                : () => ignorePickerAction(_step(controller, tour, active)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _step(
+    SeatLayerPickerController controller,
+    SeatLayerAccessibleTour tour,
+    Set<String> active,
+  ) async {
+    final current = tour.types.isNotEmpty &&
+        tour.types.every((type) => active.contains(type));
+    if (!current) tour.begin(active);
+    await tour.next(controller);
+  }
+}
+
+/// The drawn pill. Separated so the switcher can cross-fade one label into the
+/// next without rebuilding the gesture around it.
+class _StepperPill extends StatelessWidget {
+  const _StepperPill({
+    super.key,
+    required this.label,
+    required this.theme,
+    required this.onPressed,
+  });
+
+  final String? label;
+  final SeatLayerResolvedPickerTheme theme;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(
+      color: theme.text,
+      fontSize: SeatLayerSizeTokens.accessStepFontSize,
+      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
+      fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+      fontFamily: theme.fontFamily,
+      height: 1,
+    );
+    return ConstrainedBox(
+      // Thirty points drawn inside a forty-four point target, so the pill sits
+      // beside the round control without out-weighing it and is still thumbable.
+      constraints: const BoxConstraints(
+        minHeight: SeatLayerSizeTokens.minimumHitTarget,
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
+          child: Center(
+            widthFactor: 1,
+            child: Container(
+              height: SeatLayerSizeTokens.accessStepHeight,
+              padding: const EdgeInsets.symmetric(
+                horizontal: SeatLayerSizeTokens.accessStepPaddingX,
+              ),
+              decoration: ShapeDecoration(
+                color: theme.surface,
+                shape: StadiumBorder(side: BorderSide(color: theme.divider)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(
+                    Icons.accessible_rounded,
+                    size: _stepperGlyphSize,
+                    color: theme.accent,
+                  ),
+                  if (label != null) ...<Widget>[
+                    const SizedBox(width: SeatLayerSizeTokens.accessStepGap),
+                    Text(label!, style: style),
+                  ],
+                  const SizedBox(width: SeatLayerSizeTokens.accessStepGap),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: _stepperChevronSize,
+                    color: theme.mutedText,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The wheelchair mark on the stepper, sized to its eleven-point type.
+const double _stepperGlyphSize = 14;
+
+/// The stepper's chevron, one step larger so the direction reads at a glance.
+const double _stepperChevronSize = 16;
 
 /// A row that cannot be turned on is dimmed rather than removed.
 const double _disabledRowOpacity = .58;

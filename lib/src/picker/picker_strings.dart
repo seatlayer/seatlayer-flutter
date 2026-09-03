@@ -90,6 +90,10 @@ class SeatLayerPickerStrings {
     this.accessNoneLeft = SeatLayerStringTokens.accessNoneLeft,
     this.companionSeatsNote = SeatLayerStringTokens.companionSeatsNote,
     this.accessFreeCount = _defaultAccessFreeCount,
+    this.accessibleStep = _defaultAccessibleStep,
+    this.accessibleSections = _defaultAccessibleSections,
+    this.accessJumpFirstSection = SeatLayerStringTokens.accessJumpFirstSection,
+    this.accessJumpNextSection = SeatLayerStringTokens.accessJumpNextSection,
     this.fitVenue = SeatLayerStringTokens.fitVenue,
     this.zoomIn = SeatLayerStringTokens.zoomIn,
     this.zoomOut = SeatLayerStringTokens.zoomOut,
@@ -541,6 +545,30 @@ class SeatLayerPickerStrings {
   /// its English wording in every locale until one exists.
   final String Function(int count) accessFreeCount;
 
+  /// "2 of 6" — where the accessible-section tour has got to.
+  ///
+  /// Native-only. The web menu's popover sits over the map and steps the
+  /// camera with the menu still open, so it never has to say which stop it is
+  /// on; a phone closes the sheet to reveal the map and does, which is why
+  /// this sentence exists here and in no runtime dictionary.
+  final String Function(int index, int total) accessibleStep;
+
+  /// "6 sections" — how many sections hold a matching free space, said before
+  /// the buyer has taken the first step of the tour.
+  ///
+  /// Native-only, for the same reason as [accessibleStep].
+  final String Function(int count) accessibleSections;
+
+  /// The accessible name of the sheet's count chip, which starts the tour.
+  ///
+  /// Native-only, for the same reason as [accessibleStep].
+  final String accessJumpFirstSection;
+
+  /// The accessible name of the map's stepper pill, which continues the tour.
+  ///
+  /// Native-only, for the same reason as [accessibleStep].
+  final String accessJumpNextSection;
+
   /// Tooltip on the fit-to-screen map control.
   final String fitVenue;
 
@@ -913,6 +941,14 @@ class SeatLayerPickerStrings {
   /// here.
   static String _defaultAccessFreeCount(int count) =>
       SeatLayerStringTokens.accessFreeCount.replaceAll('{count}', '$count');
+
+  static String _defaultAccessibleStep(int index, int total) =>
+      SeatLayerStringTokens.accessibleStep
+          .replaceAll('{index}', '$index')
+          .replaceAll('{total}', '$total');
+
+  static String _defaultAccessibleSections(int count) =>
+      SeatLayerStringTokens.accessibleSections.replaceAll('{count}', '$count');
 
   static String _defaultAccessNeedWithCount(String need, int count) =>
       SeatLayerStringTokens.accessNeedWithCount

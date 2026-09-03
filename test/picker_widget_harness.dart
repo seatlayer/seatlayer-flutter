@@ -75,6 +75,36 @@ BundleInfo thumbnailBundle() => nativeChromeBundle(
       ],
     );
 
+/// A runtime that flies for an accessibility filter and counts per section.
+///
+/// The two capabilities are separate on the wire and are separable here: a
+/// runtime can answer the tour without reporting counts, and chrome that
+/// assumed the pair would draw a `0` for a section nobody counted.
+BundleInfo accessibilityFocusBundle({
+  bool focus = true,
+  bool counts = true,
+}) =>
+    nativeChromeBundle(
+      capabilities: <String>[
+        'native-chrome-contract-v1',
+        'viewport-insets-v1',
+        'access-needs-v1',
+        'colorblind-safe',
+        if (focus) 'accessibility-focus-v1',
+        if (counts) 'section-access-counts-v1',
+      ],
+      commands: <String>[
+        'picker.setThemeMode',
+        'picker.setViewportInsets',
+        'picker.setAccessibilityFilter',
+        'picker.setColorblindSafe',
+        if (focus) ...<String>[
+          'picker.focusAccessibilityFilter',
+          'picker.focusNextAccessibleSection',
+        ],
+      ],
+    );
+
 /// A map controller that answers every bridge command from a local snapshot.
 final class FakePickerMap extends SeatLayerController {
   /// Creates a fake runtime, optionally with a custom command [handler].

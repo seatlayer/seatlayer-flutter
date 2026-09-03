@@ -507,6 +507,18 @@ abstract final class SeatLayerSizeTokens {
   /// `16`
   static const double accessSwitchKnob = 16;
 
+  /// `30`
+  static const double accessStepHeight = 30;
+
+  /// `9`
+  static const double accessStepPaddingX = 9;
+
+  /// `5`
+  static const double accessStepGap = 5;
+
+  /// `11`
+  static const double accessStepFontSize = 11;
+
   /// `232`
   static const double toastCardLift = 232;
 
@@ -930,6 +942,18 @@ abstract final class SeatLayerStringTokens {
 
   /// None left
   static const String accessNoneLeft = 'None left';
+
+  /// {index} of {total}
+  static const String accessibleStep = '{index} of {total}';
+
+  /// {count} sections
+  static const String accessibleSections = '{count} sections';
+
+  /// Jump to the first section
+  static const String accessJumpFirstSection = 'Jump to the first section';
+
+  /// Jump to the next section
+  static const String accessJumpNextSection = 'Jump to the next section';
 
   /// Companion places beside them stay selectable
   static const String companionSeatsNote =

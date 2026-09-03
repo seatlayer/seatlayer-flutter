@@ -1312,7 +1312,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   /// it still has to ask.
   Future<SeatLayerAvailabilityRefresh> setLifecycle(String state) async {
     final foreground = state == 'resumed' || state == 'foreground';
-    final result = await _mutationResult(
+    final result = await runPickerMutation(
       'picker.lifecycle',
       <String, Object?>{'state': foreground ? 'foreground' : 'background'},
       SeatLayerPickerBusyAction.synchronizing,
@@ -1389,11 +1389,11 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     Object? payload,
     SeatLayerPickerBusyAction busy,
   ) =>
-      _mutationResult(command, payload, busy);
+      runPickerMutation(command, payload, busy);
 
-  /// [_mutation], handing back the reply for the commands that carry more than
-  /// a snapshot in it.
-  Future<Object?> _mutationResult(
+  /// [_mutation], for commands that carry more than a snapshot in the reply.
+  @internal
+  Future<Object?> runPickerMutation(
     String command,
     Object? payload,
     SeatLayerPickerBusyAction busy,

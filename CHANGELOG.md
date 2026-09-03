@@ -1,5 +1,34 @@
 # Changelog
 
+## Unreleased
+
+The hosted runtime moves to `seatlayer-js@0.77.1`, which brings the camera
+behaviour the picker had been standing in for. Views load
+`https://cdn.seatlayer.io/seatlayer-js@0.77.1/mobile.html`.
+
+Turning an accessibility filter on now flies to the matching spaces, and best
+available lands on the seats it found — both inside the runtime, under reduced
+motion too. The two interim moves this package made after those commands are
+gone: no `picker.overview` after a filter, no section landing after a hold.
+
+The count on the accessibility sheet becomes a jump. Where a provision has
+free spaces, its "15 free" is a button: it turns that provision on, applies the
+filter, closes the sheet and frames the first section holding one. A stepper
+pill then sits beside the accessibility control on the map — `♿ 2 of 6 ›` —
+and walks the rest, so the tour continues where the map is visible rather than
+under a sheet that covers it. Both are withheld from a runtime that does not
+advertise `accessibility-focus-v1`.
+
+The section dock says how many of the seats left where the buyer is standing
+match their filter (`· ♿ 2`), from the new `sections[].accessibleFree`. A
+section the runtime did not count says nothing rather than zero.
+
+New on `SeatLayerPickerSectionSummary`: `accessibleFree`. New public types:
+`SeatLayerAccessibleStep`, `SeatLayerAccessibleTour`,
+`SeatLayerPickerAccessibleStepper`, and the controller's
+`focusNextAccessibleSection`, `focusAccessibilityFilter`,
+`supportsAccessibilityFocus` and `supportsSectionAccessCounts`.
+
 ## 0.6.3
 
 The toast band's action pill keeps a fixed 44-point hit box. Offered loose

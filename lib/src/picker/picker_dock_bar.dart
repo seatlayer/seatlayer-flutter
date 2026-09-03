@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../payloads.dart';
 import 'picker_a11y.dart';
+import 'picker_accessibility_focus.dart';
 import 'picker_internal.dart';
 import 'picker_styles.dart';
 import 'picker_models.dart';
@@ -150,6 +151,11 @@ class _DockContents extends StatelessWidget {
     final busy = controller.state.isBusy;
     final name = section.displayLabel ?? section.label;
     final count = _seatsLeftForBuyer(section, controller.state.selection);
+    // `· ♿ 2` — of the seats left here, how many carry a provision the buyer
+    // is filtering on. Only where the runtime counts them AND a filter is on:
+    // the figure answers "does the section I am standing in have what I
+    // need", which is not a question anyone is asking without a filter.
+    final accessSuffix = _accessibleSuffix(controller, section);
     final onOverviewPressed = busy
         ? null
         : onOverview ?? () => ignorePickerAction(controller.overview());
@@ -178,22 +184,29 @@ class _DockContents extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        // The suffix rides on both rungs of the fit ladder, so the width it
+        // needs is measured rather than discovered after layout.
+        final countLong = count == null
+            ? null
+            : '${strings.seatsLeftInSection(count)}${accessSuffix ?? ''}';
+        final countShort = count == null
+            ? null
+            : '${strings.seatsLeft(count)}${accessSuffix ?? ''}';
         final plan = _planDock(
           context,
           width: constraints.maxWidth,
           name: name,
           nameStyle: nameStyle,
           count: count,
-          countLong: count == null ? null : strings.seatsLeftInSection(count),
-          countShort: count == null ? null : strings.seatsLeft(count),
+          countLong: countLong,
+          countShort: countShort,
           countStyle: countStyle,
           venueLabel: strings.overview,
           venueStyle: venueStyle,
         );
         final shownCount = switch (plan.count) {
-          _DockCount.long =>
-            count == null ? null : strings.seatsLeftInSection(count),
-          _DockCount.short => count == null ? null : strings.seatsLeft(count),
+          _DockCount.long => countLong,
+          _DockCount.short => countShort,
           _DockCount.hidden => null,
         };
 
@@ -235,7 +248,8 @@ class _DockContents extends StatelessWidget {
                 container: true,
                 label: count == null
                     ? name
-                    : '$name, ${strings.seatsLeftInSection(count)}',
+                    : '$name, ${strings.seatsLeftInSection(count)}'
+                        '${accessSuffix ?? ''}',
                 child: ExcludeSemantics(
                   child: Row(
                     children: [
@@ -501,6 +515,26 @@ double _textWidth(
 ///
 /// Only seats that name this section can be attributed to it; a selection with
 /// no section on it leaves the count alone rather than guessing.
+/// ` · ♿ 2` for the focused section, or null where there is nothing to say.
+///
+/// Three things have to be true: the runtime advertises the counts, the buyer
+/// has a filter on, and this section was actually counted for one of the
+/// provisions in it. A section with no entry was NOT COUNTED — a different
+/// fact from zero — and stays silent rather than claiming to be full.
+String? _accessibleSuffix(
+  SeatLayerPickerController controller,
+  SeatLayerPickerSectionSummary section,
+) {
+  if (!controller.supportsSectionAccessCounts) return null;
+  final active = <String>{
+    ...?controller.state.snapshot?.map.accessibilityFilter,
+  };
+  if (active.isEmpty) return null;
+  final free = seatLayerSectionAccessibleFree(section, active);
+  if (free == null || free <= 0) return null;
+  return ' · ♿ $free';
+}
+
 int? _seatsLeftForBuyer(
   SeatLayerPickerSectionSummary section,
   List<SelectedSeat> selection,

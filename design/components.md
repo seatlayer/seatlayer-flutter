@@ -172,7 +172,8 @@ override** `style:`
 - **Anatomy** round controls `size.mapControlSize`, except the accessibility
   control at `size.accessibilityControlSize` (`size.minimumHitTarget`).
   Bottom-left accessibility, bottom-right fit; both lift by
-  `size.dockBarHeight` while the dock is up.
+  `size.dockBarHeight` while the dock is up. The accessible-section stepper
+  sits beside the accessibility control, `size.accessStepGap` from it.
 - **Commands** `picker.zoomToFit`, `picker.setAccessibilityFilters`,
   `picker.setColorblindSafe`, `picker.setBuyerView`.
 - **Note** `SeatLayerPickerViewModeControl` (the Map/3D segmented control) is a
@@ -183,13 +184,16 @@ override** `style:`
 **Name** `SeatLayerDockBar` · **Style slot** `dockBarStyle` · **Instance
 override** `style:`
 
-- **Inputs** `sections[]`, `map.focusedSectionId`, `map.rung`.
+- **Inputs** `sections[]` (with `accessibleFree`), `map.focusedSectionId`,
+  `map.rung`, `map.accessibilityFilter`.
 - **States** hidden at rung `venue`; visible at rung `seats`; step controls
   disabled at the ends of `sections[]` (never wrapping around).
 - **Anatomy** edge-to-edge, `size.dockBarHeight` plus the bottom safe area,
   elevation `elevation.dockBar`. Left: a 10 pt dot in the section's colour, the
   section name (`type.dockSection`, ellipsizes) and `N left`
-  (`type.dockCount`, never ellipsizes; omitted when `seatsLeft` is unknown).
+  (`type.dockCount`, never ellipsizes; omitted when `seatsLeft` is unknown),
+  followed by ` · ♿ N` under an active filter on `section-access-counts-v1`
+  where this section was counted — absent counts stay silent, never `♿ 0`.
   Right: `‹ ›` section steps, then `‹ Venue`.
 - **Motion** slides in over `motion.duration.dock`; the name cross-fades over
   `motion.duration.crossfade` when the focus changes.
@@ -387,6 +391,7 @@ specification. Names, slots and files:
 | `SeatLayerPickerBookedOverlay` | — | §3.13.10 |
 | `SeatLayerPickerGeneralAdmissionPrompt` / `…TablePrompt` | — | §3.13.11–12 |
 | `SeatLayerPickerAccessibilityFilters` | — | §3.5 |
+| `SeatLayerPickerAccessibleStepper` | — | §3.4.1 |
 | `SeatLayerSeatViewChrome` | `seatViewChromeStyle` | §3.15 |
 | `SeatLayerPickerAttribution` | — | §3.10.3 |
 | `SeatLayerCheckoutCta` (the one label resolver) | — | §3.9, §3.10.3 |

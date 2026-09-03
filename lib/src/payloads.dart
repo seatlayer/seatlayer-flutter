@@ -887,6 +887,25 @@ const String seatLayerChartLoadTraceCapability = 'chart-load-trace-v1';
 /// `selection[]` entry.
 const String seatLayerSeatViewThumbnailCapability = 'seat-view-thumbnail-v1';
 
+/// Advertised by a runtime whose accessibility filter moves the camera the way
+/// the web menu does, and that answers `picker.focusAccessibilityFilter` and
+/// `picker.focusNextAccessibleSection`.
+///
+/// Without it the three commands are simply absent: an older runtime applies a
+/// filter and leaves the camera where it was, so native chrome that offered a
+/// "jump to the next section" control would be offering a command with nowhere
+/// to land.
+const String seatLayerAccessibilityFocusCapability = 'accessibility-focus-v1';
+
+/// Advertised by a runtime that reports `sections[].accessibleFree` — how many
+/// free spaces each section holds per provision key.
+///
+/// Present-only: a key that is absent was NOT COUNTED, which is a different
+/// fact from zero, so chrome reads a missing entry as "say nothing" rather
+/// than as "none left".
+const String seatLayerSectionAccessCountsCapability =
+    'section-access-counts-v1';
+
 /// What the bundle advertises in `hello`.
 class BundleInfo {
   const BundleInfo({

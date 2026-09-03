@@ -170,8 +170,20 @@ class _CornerControls extends StatelessWidget {
     final bottomLeftColumn = <Widget>[
       if (onMap && chrome.colorblindControlFor(phone: true))
         const SeatLayerPickerColorblindButton(),
+      // The round control, and — while a filter is on and the runtime answers
+      // the tour — the stepper that walks the sections holding matching
+      // spaces. Beside it rather than above it: they are one subject, and the
+      // corner already stacks the colourblind control above both.
       if (onMap && chrome.showAccessibilityControl)
-        const SeatLayerPickerAccessibilityFilters(compact: true),
+        const Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SeatLayerPickerAccessibilityFilters(compact: true),
+            SizedBox(width: SeatLayerSizeTokens.accessStepGap),
+            SeatLayerPickerAccessibleStepper(),
+          ],
+        ),
     ];
     return Stack(
       children: <Widget>[

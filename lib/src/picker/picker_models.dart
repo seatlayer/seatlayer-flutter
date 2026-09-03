@@ -211,6 +211,7 @@ class SeatLayerPickerSectionSummary {
     this.seatsLeft,
     this.priceMin,
     this.priceMax,
+    this.accessibleFree = const <String, int>{},
   });
 
   final String id;
@@ -233,6 +234,16 @@ class SeatLayerPickerSectionSummary {
   final double? priceMin;
   final double? priceMax;
 
+  /// How many free spaces this section holds per access provision — e.g.
+  /// `{'wheelchair': 2}`.
+  ///
+  /// Present-only, and empty on a runtime that does not advertise
+  /// [seatLayerSectionAccessCountsCapability]. A provision key that is ABSENT
+  /// was not counted, which is a different fact from zero: chrome reading this
+  /// says nothing about a missing key rather than drawing a `0`. The counts
+  /// describe the floor the renderer currently holds, not the whole venue.
+  final Map<String, int> accessibleFree;
+
   static SeatLayerPickerSectionSummary? fromJson(Object? value) {
     final id = jStr(jGet(value, 'id'));
     if (id == null) return null;
@@ -248,8 +259,90 @@ class SeatLayerPickerSectionSummary {
       seatsLeft: jInt(jGet(value, 'seatsLeft')),
       priceMin: jDouble(jGet(value, 'priceMin')),
       priceMax: jDouble(jGet(value, 'priceMax')),
+      accessibleFree: _accessibleFree(jGet(value, 'accessibleFree')),
     );
   }
+
+  /// `{ wheelchair: 2 }` as a typed map, dropping anything that is not a count.
+  ///
+  /// A junk value is dropped rather than coerced: a provision whose count the
+  /// runtime could not state is one this side must stay silent about, and a
+  /// `0` invented from a `"two"` would be a claim the wire never made.
+  static Map<String, int> _accessibleFree(Object? value) {
+    final raw = jObj(value);
+    if (raw == null || raw.isEmpty) return const <String, int>{};
+    final counts = <String, int>{};
+    for (final entry in raw.entries) {
+      final count = jInt(entry.value);
+      if (count != null) counts[entry.key] = count;
+    }
+    return counts.isEmpty ? const <String, int>{} : Map.unmodifiable(counts);
+  }
+}
+
+/// One stop on the accessible-section tour.
+///
+/// `picker.focusNextAccessibleSection` answers with the section it just framed
+/// and where that section sits in the walk, so native chrome can say
+/// "2 of 6" without keeping a list of its own. A `null` step — nothing matches
+/// the active filter — is not an error and is modelled as a null result rather
+/// than as a step with a zero total.
+@immutable
+class SeatLayerAccessibleStep {
+  /// Creates one stop on the tour.
+  const SeatLayerAccessibleStep({
+    required this.id,
+    required this.label,
+    required this.free,
+    required this.index,
+    required this.total,
+  });
+
+  /// The section the runtime framed.
+  final String id;
+
+  /// What that section is called, already buyer-facing.
+  final String label;
+
+  /// How many matching free spaces it holds.
+  final int free;
+
+  /// Which stop this is, one-based as the runtime counts it.
+  /// Zero-based position of this section in the tour; the chrome prints it
+  /// one-based, as a buyer counts.
+  final int index;
+
+  /// How many stops the walk has.
+  final int total;
+
+  /// The step in [value], or `null` when the runtime answered with none.
+  static SeatLayerAccessibleStep? fromJson(Object? value) {
+    final id = jStr(jGet(value, 'id'));
+    if (id == null) return null;
+    return SeatLayerAccessibleStep(
+      id: id,
+      label: jStr(jGet(value, 'label')) ?? id,
+      free: jInt(jGet(value, 'free')) ?? 0,
+      index: jInt(jGet(value, 'index')) ?? 0,
+      total: jInt(jGet(value, 'total')) ?? 0,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeatLayerAccessibleStep &&
+      other.id == id &&
+      other.label == label &&
+      other.free == free &&
+      other.index == index &&
+      other.total == total;
+
+  @override
+  int get hashCode => Object.hash(id, label, free, index, total);
+
+  @override
+  String toString() =>
+      'SeatLayerAccessibleStep($id, $index/$total, $free free)';
 }
 
 @immutable
