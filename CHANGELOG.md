@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.1
 
 The collapsed cart bar sits below its grabber. Since the bar's buttons grew to
 44 points inside a 50-point head, the grabber painted in the head's top four
