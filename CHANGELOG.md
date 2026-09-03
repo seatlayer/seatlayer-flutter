@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+`SeatLayerPickerOptions.showBookedOverlay` lets a host whose checkout ends on
+a confirmation of its own keep the picker's "You're all set" screen down, so
+the buyer is told once. It defaults to true, which is the web picker's
+behaviour; `onBooked` fires either way.
+
 ## 0.7.0
 
 The hosted runtime moves to `seatlayer-js@0.77.1`, which brings the camera

@@ -186,6 +186,7 @@ class SeatLayerPickerOptions {
     this.persistColorblindPreference = true,
     this.refreshOnResume = true,
     this.announceHoldLapse = true,
+    this.showBookedOverlay = true,
     this.chrome = const SeatLayerPickerChromeOptions(),
     this.languages = const <Locale>[],
     this.pricing,
@@ -283,6 +284,14 @@ class SeatLayerPickerOptions {
   /// either way, so a host that would rather own the moment turns this off and
   /// keeps the notification.
   final bool announceHoldLapse;
+
+  /// Whether the picker draws its own "You're all set" screen once a
+  /// handed-off hold settles to booked.
+  ///
+  /// True mirrors the web picker. A host whose checkout ends on a confirmation
+  /// of its own sets this false, so the buyer is told once; `onBooked` still
+  /// fires either way.
+  final bool showBookedOverlay;
 
   /// Which parts of the native chrome render.
   final SeatLayerPickerChromeOptions chrome;

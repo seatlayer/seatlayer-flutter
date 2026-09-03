@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
+import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_states.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
@@ -307,6 +308,46 @@ void main() {
         reason: 'the map is the way out, and the hold is unaffected',
       );
       expect(controller.state.checkoutHandoff, isNotNull);
+    });
+
+    testWidgets('a host that tells the buyer itself can keep the overlay down',
+        (tester) async {
+      final map = FakePickerMap(
+        bundle: nativeChromeBundle(),
+        handler: (command, payload) async => <String, Object?>{
+          'revision': 2,
+          'snapshot': pickerSnapshot(revision: 2, holdOwner: 'host'),
+          'handoff': <String, Object?>{
+            'holdId': 'hold-1',
+            'expiresAt': 1999999999000.0,
+            'currency': 'EUR',
+            'total': 25.0,
+            'lineItems': <Object?>[],
+          },
+        },
+      );
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      final controller = SeatLayerPickerController(mapController: map);
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const _Fill(SeatLayerPickerBookedOverlay()),
+          controller: controller,
+          options: const SeatLayerPickerOptions(showBookedOverlay: false),
+        ),
+      );
+      map.emit(pickerSnapshot(holdOwner: 'host'));
+      await tester.pumpAndSettle();
+      await controller.checkout();
+      await tester.pumpAndSettle();
+      map.emit(pickerSnapshot(revision: 3));
+      await tester.pumpAndSettle();
+
+      expect(find.text("You're all set"), findsNothing);
+      expect(controller.bookedHandoff, isNotNull,
+          reason: 'the sale is still known; only the telling is the host\'s');
     });
 
     testWidgets('a hold that ran out behind checkout is not a sale',

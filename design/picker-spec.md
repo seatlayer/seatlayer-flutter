@@ -1171,6 +1171,18 @@ form (see 3.13.7).
 
 ### 3.13 Buyer-facing states
 
+**Booked overlay is a host option.** `options.showBookedOverlay` (default
+true = web) — a host with its own confirmation screen sets it false; the sale
+is still known (`bookedHandoff`, `onBooked`), only the telling is the host's.
+Ports: same option, same default.
+
+**Removing a line from a held cart is slow by nature.** `picker.removeCartLine`
+re-holds on the server; on the pilot the sheet sat busy (CTA greyed, row
+unchanged) for ~1.7 s before the line re-rendered. Candidate native lane
+(N-CART-4): render the removal optimistically — fade the row at once, keep
+the CTA enabled, let the serialised mutation queue hold Continue if pressed —
+and animate the line text change. Not built yet; measure server latency first.
+
 **Card after a hold.** A hold present when the picker starts, or created by
 a best-available pick, adopts its seats as answered on arrival; a card that is
 already open keeps its question. Every seat tapped after that is asked about

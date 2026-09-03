@@ -599,6 +599,9 @@ class _SeatLayerPickerBookedOverlayState
 
   @override
   Widget build(BuildContext context) {
+    if (!SeatLayerPickerScope.optionsOf(context).showBookedOverlay) {
+      return const SizedBox.shrink();
+    }
     final handoff = SeatLayerPickerScope.controllerOf(context).bookedHandoff;
     if (handoff == null) return const SizedBox.shrink();
     if (_dismissed == handoff.holdId) return const SizedBox.shrink();
