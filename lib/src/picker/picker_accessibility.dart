@@ -247,6 +247,17 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     final live = _availability(controller, controller.state.snapshot);
     if (live.accessibility && !setEquals(result.types, initial)) {
       await controller.setAccessibilityFilter(result.types);
+      // The runtime lights the sections that still hold matching spaces and
+      // steps the rest back, but the bridge command does not fly to them the
+      // way the web's own menu does. Until it does, a filter that names a
+      // need is followed by the venue overview, so the buyer sees WHERE the
+      // lit sections are rather than a dimmed corner of the one they were in.
+      if (result.types.isNotEmpty &&
+          controller.mapController.bundleInfo
+                  ?.supportsCommand('picker.overview') ==
+              true) {
+        await controller.overview();
+      }
     }
     if (live.limited && result.hideLimited != initialHideLimited) {
       await controller.setLimitedViewHidden(result.hideLimited);

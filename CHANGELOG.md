@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+The collapsed cart bar sits below its grabber. Since the bar's buttons grew to
+44 points inside a 50-point head, the grabber painted in the head's top four
+points ran under the button; the head now lifts its row by `size.peekClockLift`
+whenever it is collapsed, not only while the pill carries the clock, so the
+bar is 58 points at rest.
+
+Applying an accessibility filter now shows where the spaces are. The runtime
+lights the sections that still hold matching spaces and steps the rest back,
+but its bridge command does not fly to them the way the web's own menu does,
+so a filter that names a need is followed by the venue overview. This is an
+interim until the runtime carries the flight over the bridge.
+
 ## 0.6.0
 
 The seat card is louder and shorter on phones, matching the web buyer picker.
