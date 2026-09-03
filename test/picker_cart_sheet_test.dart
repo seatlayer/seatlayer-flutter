@@ -110,7 +110,7 @@ void main() {
     expect(find.text('€25'), findsOneWidget);
     // The tray form is the only way into best seats.
     expect(find.text('Best seats'), findsNothing);
-    expect(_sheetHeight(tester), 50);
+    expect(_sheetHeight(tester), 50 + SeatLayerSizeTokens.peekClockLift);
   });
 
   testWidgets('an empty peek offers the cheapest ticket, not a button', (
@@ -371,7 +371,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
-    expect(_sheetHeight(tester), 84);
+    expect(_sheetHeight(tester), 84 + SeatLayerSizeTokens.peekClockLift);
     final attributionRect = tester.getRect(find.text('Powered by SeatLayer'));
     final sheetRect = tester.getRect(find.byType(SeatLayerCartSheet));
     // Centred: a phone's rounded corner clips whatever hugs the trailing edge.
@@ -386,7 +386,7 @@ void main() {
     map.emit(hidden);
     await tester.pumpAndSettle();
     expect(find.text('Powered by SeatLayer'), findsNothing);
-    expect(_sheetHeight(tester), 84);
+    expect(_sheetHeight(tester), 84 + SeatLayerSizeTokens.peekClockLift);
   });
 
   testWidgets('the expanded header states the count once', (tester) async {
@@ -742,7 +742,7 @@ void main() {
   });
 
 
-  testWidgets('the head is fifty points shut and thirty-six open', (
+  testWidgets('the head is fifty-eight points shut and thirty-six open', (
     tester,
   ) async {
     final map = FakePickerMap();
@@ -760,7 +760,7 @@ void main() {
     // The grabber overlaps into the head rather than taking a row of its own,
     // which is what keeps the collapsed bar at fifty points.
     expect(_grabber(tester), isTrue);
-    expect(_sheetHeight(tester), 50);
+    expect(_sheetHeight(tester), 50 + SeatLayerSizeTokens.peekClockLift);
 
     await tester.pumpWidget(pickerHarness(map, subject(true)));
     await tester.pumpAndSettle();

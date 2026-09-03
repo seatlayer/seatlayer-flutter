@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_haptics.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
@@ -73,7 +74,7 @@ void main() {
       );
       map.emit(pickerSnapshot());
       await tester.pumpAndSettle();
-      expect(_height(tester), 50);
+      expect(_height(tester), 50 + SeatLayerSizeTokens.peekClockLift);
 
       final drag = await tester.startGesture(_head(tester));
       await _prime(tester, drag);
@@ -264,7 +265,7 @@ void main() {
       picker.setCartSheetExpanded(false);
       await tester.pumpAndSettle();
       expect(picker.cartSheetDetent, SeatLayerSheetDetent.peek);
-      expect(_height(tester), 50);
+      expect(_height(tester), 50 + SeatLayerSizeTokens.peekClockLift);
     });
 
     testWidgets('reduced motion arrives without a spring', (tester) async {

@@ -275,14 +275,14 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
       context,
       max: SeatLayerTypeScaleTokens.peek,
     );
-    // The pill grows a clock while seats are held, and a pill that wide
-    // reaches the grabber's own column; the head gives it the room rather
-    // than letting the way on cover the way up.
-    final clockRides = !controller.cartSheetExpanded &&
-        controller.confirmedCartLines.isNotEmpty &&
-        controller.state.hold != null;
-    final peekLift =
-        clockRides ? SeatLayerSizeTokens.peekClockLift * peekScale : 0.0;
+    // The bar's buttons are 44 points tall in a 50-point head, and the
+    // grabber is painted in that head's top four points, so at rest the way
+    // on would cover the way up. While collapsed the head lifts its row by
+    // `peekClockLift`, whatever the button carries — it was first added for
+    // the pill that grows a clock, and the taller buttons need it just as much.
+    final peekLift = controller.cartSheetExpanded
+        ? 0.0
+        : SeatLayerSizeTokens.peekClockLift * peekScale;
     final peekHeight = layout.peekHeight * peekScale + peekLift;
     final openHeadHeight = layout.sheetOpenHeadHeight * peekScale;
     final hasTickets = controller.confirmedCartLines.isNotEmpty;

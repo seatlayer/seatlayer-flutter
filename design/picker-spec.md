@@ -170,9 +170,12 @@ gate them, and the reference file.
 
 While the collapsed cart's pill carries the hold clock, the header's hold pill
 is not drawn (the web's `data-peek-clock` rule); it returns for the last
-minute, when the countdown is the point. A pill carrying the clock reaches the
-grabber's column, so the collapsed head grows by `size.peekClockLift` and the
-bar sits below the grabber.
+minute, when the countdown is the point. The collapsed head always grows by
+`size.peekClockLift` (8) so its row sits below the grabber: the bar's buttons
+are 44 pt in a 50 pt head and the grabber is painted in the head's top 4 pt,
+so without the lift the button covers the grabber (the web's narrow head,
+`min-height:50px` with a 44 pt `.go`, has the same overlap — reported to the
+runtime lane; the Flutter head is 58 pt at rest).
 
 **Name** `SeatLayerPickerHeader` · **slot** `headerStyle` · **file**
 `lib/src/picker/picker_header.dart`
@@ -1093,6 +1096,14 @@ consequence is stated — anything that outlives 4 seconds also has a persistent
 form (see 3.13.7).
 
 ### 3.13 Buyer-facing states
+
+**Accessibility filter, interim flight.** The web menu calls
+`focusSeatsForFilter()` after applying a filter and flies to the matching
+seats; the bridge's `picker.setAccessibilityFilter` does not (runtime lane
+asked to route it the same way). Until then Flutter follows a non-empty
+filter with `picker.overview`, so the buyer sees the sections the runtime
+lit with `♿ N` badges instead of a dimmed corner of the section they were
+in. Ports: do the same, and drop it the moment the bridge flies itself.
 
 **Booked ("You're all set").** Never shown on the hand-off: a buyer on the way
 to pay has not paid. It appears only when the handed-off hold settles to
