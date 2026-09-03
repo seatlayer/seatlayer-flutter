@@ -250,12 +250,12 @@ class _ToastAction extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => ConstrainedBox(
+  Widget build(BuildContext context) => SizedBox(
         // A 44 pt hit box around a 30 pt pill: the pill is the drawn size the
-        // web picker uses, and a thumb needs the rest of it.
-        constraints: const BoxConstraints(
-          minHeight: SeatLayerSizeTokens.minimumHitTarget,
-        ),
+        // web picker uses, and a thumb needs the rest of it. A fixed box, not
+        // a minimum with a centred child: a centre takes every point of loose
+        // height it is offered, and in the toast band that was the whole map.
+        height: SeatLayerSizeTokens.minimumHitTarget,
         child: Center(
           child: FilledButton(
             style: FilledButton.styleFrom(
