@@ -5,6 +5,7 @@ import '../payloads.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'picker_haptics.dart';
+import 'picker_toast.dart';
 import 'picker_motion.dart';
 import 'picker_sheet_drag.dart';
 import 'picker_tokens.g.dart';
@@ -135,12 +136,7 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
     SeatLayerPickerController controller,
     SeatLayerTicketLine line,
   ) async {
-    final messenger = ScaffoldMessenger.maybeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
-    // The undo bar is the picker's own chrome, so it takes the picker's
-    // palette. Left to Material it inherits the app's, which paints a white
-    // bar across a dark picker.
-    final theme = seatLayerPickerThemeOf(context);
     final callbacks = SeatLayerPickerScope.callbacksOf(context);
     final label = line.item.label;
     try {
@@ -152,21 +148,16 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
     // Felt, not just seen: the row is gone from under the finger, and the undo
     // bar that follows is at the other end of the phone.
     controller.emitHaptic(PickerHapticCue.ticketRemoved);
-    messenger?.hideCurrentSnackBar();
-    messenger?.showSnackBar(
-      SnackBar(
-        backgroundColor: theme.surface,
-        content: Text(
-          strings.seatRemoved,
-          style: TextStyle(color: theme.text, fontFamily: theme.fontFamily),
-        ),
-        duration: SeatLayerPickerMotion.undoWindow,
-        action: SnackBarAction(
-          label: strings.undo,
-          textColor: theme.accent,
-          onPressed: () =>
-              ignorePickerAction(controller.selectObjects(<String>[label])),
-        ),
+    // The picker's own toast, not the host's Material messenger: the same
+    // band that carries every other sentence over the map, dismissing on the
+    // picker's own dwell. A host's messenger is not the picker's to run — one
+    // host's never took the bar down at all.
+    seatLayerPickerToasts(controller).show(
+      SeatLayerPickerToast(
+        strings.seatRemoved,
+        actionLabel: strings.undo,
+        onAction: () =>
+            ignorePickerAction(controller.selectObjects(<String>[label])),
       ),
     );
   }

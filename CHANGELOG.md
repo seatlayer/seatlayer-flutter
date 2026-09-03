@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+Every seat the buyer taps is asked about. Once a hold existed — after the
+first Add seat, or after a best-available pick — the confirm card stopped
+appearing and later taps went straight into the cart. The seats a hold
+arrives with (a resumed session, a best-available pick) are adopted as
+answered when it appears; everything tapped after that gets the card, as on
+the web.
+
+Best available lands the map on the seats it found. The runtime's own arrival
+does not yet cross the bridge, so the picker frames the section of the new
+seats after the hold lands; the runtime will carry the full arrival in a
+coming patch.
+
+The "seat removed" bar with Undo is the picker's own toast rather than the
+host app's Material messenger, so it dismisses on the picker's dwell on every
+host.
+
 ## 0.6.1
 
 The collapsed cart bar sits below its grabber. Since the bar's buttons grew to

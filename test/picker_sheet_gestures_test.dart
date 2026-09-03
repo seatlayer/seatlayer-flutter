@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/picker/picker_toast.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_haptics.dart';
@@ -308,7 +309,16 @@ void main() {
       usePhoneSurface(tester);
 
       await tester.pumpWidget(
-        pickerHarness(map, _wired(picker), controller: picker),
+        pickerHarness(
+          map,
+          Stack(
+            children: <Widget>[
+              _wired(picker),
+              const Positioned.fill(child: SeatLayerPickerToastLayer()),
+            ],
+          ),
+          controller: picker,
+        ),
       );
       map.emit(pickerSnapshot());
       picker.setCartSheetExpanded(true);

@@ -5,6 +5,7 @@ import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_cart_list.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_toast.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_states.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
@@ -525,7 +526,8 @@ void main() {
 
     // The peek keeps its own line, money and all.
     final pill = find
-        .ancestor(of: find.text('Continue'), matching: find.byType(FilledButton))
+        .ancestor(
+            of: find.text('Continue'), matching: find.byType(FilledButton))
         .first;
     expect(pill, findsOneWidget);
     expect(
@@ -666,7 +668,13 @@ void main() {
     await tester.pumpWidget(
       pickerHarness(
         map,
-        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+        Stack(
+          children: <Widget>[
+            Align(alignment: Alignment.bottomCenter, child: _sheet()),
+            // The undo bar rides the picker's own toast band.
+            const Positioned.fill(child: SeatLayerPickerToastLayer()),
+          ],
+        ),
       ),
     );
     map.emit(pickerSnapshot());
@@ -678,16 +686,12 @@ void main() {
 
     expect(map.callsTo('picker.removeCartLine'), hasLength(1));
     expect(find.text('Undo'), findsOneWidget);
+    // The picker's toast, never the host's Material messenger.
+    expect(find.byType(SnackBar), findsNothing);
+    expect(find.byType(SeatLayerPickerToastCard), findsOneWidget);
 
-    // The undo bar is the picker's chrome, not the app's, so it paints the
-    // picker's surface rather than Material's own inverse.
-    expect(
-      tester.widget<SnackBar>(find.byType(SnackBar)).backgroundColor,
-      const SeatLayerPickerThemeData.light().surface,
-    );
-
-    // Let the bar finish rising; it is off-screen until it has.
-    await tester.pumpAndSettle();
+    // Let the card finish arriving before pressing it.
+    await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.text('Undo'));
     await tester.pump();
     expect(map.callsTo('picker.selectObjects'), hasLength(1));
@@ -740,7 +744,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Show less'), findsOneWidget);
   });
-
 
   testWidgets('the head is fifty-eight points shut and thirty-six open', (
     tester,
@@ -942,7 +945,8 @@ void _clockTests() {
     await tester.pumpWidget(
       pickerHarness(
         map,
-        Align(alignment: Alignment.bottomCenter, child: _sheet(expanded: false)),
+        Align(
+            alignment: Alignment.bottomCenter, child: _sheet(expanded: false)),
       ),
     );
     map.emit(pickerSnapshot(holdOwner: 'picker'));

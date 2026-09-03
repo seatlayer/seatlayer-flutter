@@ -1097,6 +1097,22 @@ form (see 3.13.7).
 
 ### 3.13 Buyer-facing states
 
+**Card after a hold.** A hold present when the picker starts, or created by
+a best-available pick, adopts its seats as answered on arrival; a card that is
+already open keeps its question. Every seat tapped after that is asked about
+— a live hold never silences the card (it did until 0.6.2, which turned every
+second tap into a silent add). Ports: adopt-on-arrival + ask-every-tap.
+
+**Best-available landing (interim).** The web's `bestSeatsArrival` frames the
+found seats; the bridge's `picker.bestAvailable` only makes the hold. Until
+the runtime routes the command through the arrival, the sheet frames the
+section of the newly added seats (`pickerBestSeatsSectionId`, matched by
+section label) after the hold lands. Drop it when the bridge arrives itself.
+
+**Seat removed + Undo.** Shown on the picker's own toast band
+(`SeatLayerPickerToast` with `actionLabel`), never on the host's Material
+messenger; dwell = `motion.toastDwell`.
+
 **Accessibility filter, interim flight.** The web menu calls
 `focusSeatsForFilter()` after applying a filter and flies to the matching
 seats; the bridge's `picker.setAccessibilityFilter` does not (runtime lane
