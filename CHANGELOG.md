@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.6.0
 
 The seat card is louder and shorter on phones, matching the web buyer picker.
 
@@ -22,6 +22,43 @@ rounded rectangles at `radius.peekButton` with larger labels.
 
 `SeatLayerPickerLayout.confirmRailHeight` is now inert on the SDK's own card;
 it is kept as public API for hosts composing their own.
+
+The hosted runtime moves to `seatlayer-js@0.77.0`. Views load
+`https://cdn.seatlayer.io/seatlayer-js@0.77.0/mobile.html`. Nothing in this SDK
+has to change for what it brings:
+
+- **Tapping a seat in the 3D venue steps the camera in** before the card
+  arrives, from farther out than about twelve metres, so the buyer sees where
+  the seat is rather than being handed a card about a seat off in the distance.
+  Seat labels inside a section print the number alone and row labels drop the
+  section they are already under, both on a dark plate that stays readable
+  against any part of the room.
+- **The accessibility filter now shows where the spaces are.** Sections that
+  still hold matching spaces keep their colour and carry a `♿ N` badge; the
+  rest step back, so the venue itself answers "where" instead of only "which
+  seats". This applies to all twelve provisions the filter can ask for. Three
+  parts of the same runtime change reach the web picker only: the camera move
+  onto the matching seats, the hint for a venue whose spaces are spread too
+  wide to fly to, and the count-as-jump control all live on the web's own
+  accessibility menu, which a native shell replaces. The SDK's accessibility
+  sheet is unchanged.
+- **A best-available pick frames the seats it found**, with a few rows of
+  neighbours around them, instead of framing the whole stand the first seat
+  happened to sit in — and it moves the camera under reduced motion too, where
+  it used to stay put. Reduced motion still turns off the seat pops and the
+  chip flights. A framing the engine decides on its own stops at the scale
+  where the seat labels are legible rather than filling the screen with a
+  handful of seats.
+- **Fewer requests on load**: an unchanged event now boots on one chart read
+  and one live availability read. Hosts that count requests in their own load
+  telemetry should expect the lower numbers.
+- The runtime's load beacon no longer carries the API's per-stage server
+  timings — their names described how a chart read is built rather than
+  anything a page can act on. `SeatLayerChartLoadTrace.chartBytes` and
+  `.chartCache` are unchanged, but `.server`, `.r2Head`, `.cacheLookup`,
+  `.r2Get` and `.transform` are now always null on this runtime. They stay on
+  the type: they are nullable already, a host reading them was always meant to
+  handle their absence, and an older pinned runtime still reports them.
 
 ## 0.5.0
 
