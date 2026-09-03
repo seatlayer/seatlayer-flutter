@@ -208,12 +208,24 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
   ) async {
     setState(() => _submitting = true);
     try {
+      final before = controller.state.selection.map((s) => s.label).toSet();
       await controller.bestAvailable(
         quantity: quantity,
         zoneId: _zoneId,
         categoryKey: _categoryKey,
       );
       widget.onFound?.call(quantity);
+      // The web lands the camera on the seats it found; the bridge command
+      // only makes the hold. Until the runtime carries the arrival over the
+      // bridge, frame the section the new seats are in, so the buyer is not
+      // left hunting for a cart line on a stand they were not looking at.
+      final landing = pickerBestSeatsSectionId(controller.state, before);
+      if (landing != null &&
+          controller.mapController.bundleInfo
+                  ?.supportsCommand('picker.focusSection') ==
+              true) {
+        await controller.focusSection(landing);
+      }
     } catch (_) {
       // The controller already published the typed failure for native UI.
     } finally {
@@ -437,3 +449,27 @@ class _StepIcon extends StatelessWidget {
     );
   }
 }
+
+/// The section holding the seats a best-available pick just added, or null.
+///
+/// Seats name their section by label, sections carry the id the focus
+/// command needs; the first new seat whose label matches a section decides.
+String? pickerBestSeatsSectionId(
+  SeatLayerPickerState state,
+  Set<String> previousLabels,
+) {
+  final snapshot = state.snapshot;
+  if (snapshot == null) return null;
+  for (final seat in state.selection) {
+    if (previousLabels.contains(seat.label)) continue;
+    final label = seat.sectionLabel;
+    if (label == null) continue;
+    for (final section in snapshot.sections) {
+      if (section.label == label || section.displayLabel == label) {
+        return section.id;
+      }
+    }
+  }
+  return null;
+}
+
