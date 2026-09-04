@@ -8,6 +8,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -179,6 +180,11 @@ class PickerPromptTransition extends StatelessWidget {
                         prompt.key ?? prompt.runtimeType,
                       )),
                       scrimColor: scrimColor,
+                      // Glass only for a seat card with a seat to spotlight.
+                      // A prompt about no one seat has nothing to cut a hole
+                      // around, and in the immersive scene the seat IS the
+                      // picture.
+                      spotlight: seatCard ? anchor : null,
                       onDismiss: onDismiss,
                       // Each prompt owns its own insets: the phone confirm card is
                       // specified as the screen less one 16pt gutter, and a shared
@@ -242,7 +248,7 @@ const double _cardArrivalScale = .97;
 /// — but it is plainly not the surface being answered.
 const double _confirmingDim = .58;
 
-/// The map behind a prompt: a flat dim, and a way out through it.
+/// The map behind a prompt: glass, and a way out through it.
 ///
 /// The map is never unmounted for this, so the venue stays present behind the
 /// decision. Over the 3D scene the dim is transparent as well.
@@ -252,17 +258,26 @@ class _PromptBackdrop extends StatelessWidget {
     required this.scrimColor,
     required this.onDismiss,
     required this.child,
+    this.spotlight,
   });
 
   final Color scrimColor;
+
+  /// Where the seat under discussion is, in this backdrop's own coordinates.
+  ///
+  /// When given, the glass has a hole in it there: the buyer is being asked
+  /// about ONE seat and can still see it. Absent — the immersive scene, or a
+  /// prompt about no seat in particular — the backdrop is flat.
+  final Offset? spotlight;
 
   final VoidCallback? onDismiss;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    // Flat, never a blur: the seat being asked about stays legible behind it.
-    final backdrop = ColoredBox(color: scrimColor);
+    final backdrop = spotlight == null
+        ? ColoredBox(color: scrimColor)
+        : _SpotlightGlass(at: spotlight!);
     return Stack(
       children: [
         // The dismissing tap belongs to the backdrop, not to the whole area:
@@ -480,4 +495,66 @@ class _SeatCardLayout extends SingleChildLayoutDelegate {
       oldDelegate.anchor != anchor ||
       oldDelegate.topInset != topInset ||
       oldDelegate.bottomInset != bottomInset;
+}
+
+/// The map put behind glass while a seat card asks about one seat.
+///
+/// The phone card rests over a map that is otherwise fully legible, so the
+/// moment of decision competed with several thousand other seats. Per-seat
+/// dimming already recedes the candidate's neighbours; nothing quieted the
+/// MAP. A translucent fill with a small blur does, and a hole cut around the
+/// tapped seat is what makes it a spotlight rather than a curtain.
+///
+/// Never takes a pointer event of its own — the press has to reach the
+/// dismissing detector underneath, exactly as a press on bare map does.
+class _SpotlightGlass extends StatelessWidget {
+  const _SpotlightGlass({required this.at});
+
+  /// The centre of the clear hole.
+  final Offset at;
+
+  @override
+  Widget build(BuildContext context) {
+    // Reduced transparency is a legibility setting, not a taste. Flutter has
+    // no direct reading of it, so high contrast stands in: drop the blur and
+    // deepen the fill, and the map still recedes without being smeared.
+    final flat = MediaQuery.highContrastOf(context);
+    final veil = Color.fromRGBO(
+      0,
+      0,
+      0,
+      flat
+          ? SeatLayerOpacityTokens.confirmScrimFlat
+          : SeatLayerOpacityTokens.confirmScrim,
+    );
+    // The feather runs from the clear radius out to the full-strength one, so
+    // the hole has no hard edge to read as a drawn circle.
+    final Widget glass = ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback: (bounds) => RadialGradient(
+        center: Alignment(
+          (at.dx / bounds.width) * 2 - 1,
+          (at.dy / bounds.height) * 2 - 1,
+        ),
+        radius: SeatLayerSizeTokens.confirmScrimFeatherRadius /
+            (bounds.shortestSide / 2),
+        colors: const <Color>[Color(0x00000000), Color(0xFF000000)],
+        stops: const <double>[
+          SeatLayerSizeTokens.confirmScrimClearRadius /
+              SeatLayerSizeTokens.confirmScrimFeatherRadius,
+          1,
+        ],
+      ).createShader(bounds),
+      child: flat
+          ? ColoredBox(color: veil)
+          : BackdropFilter(
+              filter: ImageFilter.blur(
+                sigmaX: SeatLayerSizeTokens.confirmScrimBlur,
+                sigmaY: SeatLayerSizeTokens.confirmScrimBlur,
+              ),
+              child: ColoredBox(color: veil),
+            ),
+    );
+    return IgnorePointer(child: glass);
+  }
 }

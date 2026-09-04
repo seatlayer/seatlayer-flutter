@@ -227,6 +227,36 @@ void main() {
     expect(find.byType(SeatLayerConfirmCard), findsNothing);
   });
 
+  testWidgets('the map goes behind glass, with the seat left in the clear', (
+    tester,
+  ) async {
+    // The card rests over a map that is otherwise fully legible, so the moment
+    // of decision competed with several thousand other seats. The glass
+    // quiets the map; the hole is what keeps this a spotlight rather than a
+    // curtain — the buyer is being asked about one seat and can still see it.
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
+    map.emit(_seatDrawnAt(195, 300));
+    await pumpToRest(tester);
+
+    expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
+    expect(find.byType(BackdropFilter), findsWidgets);
+    // The hole is a mask over the veil, not a second painted circle.
+    expect(find.byType(ShaderMask), findsWidgets);
+
+    // And it must not eat the way out: a press over the glass still reaches
+    // the map underneath, exactly as a press on bare map does.
+    await tester.tapAt(Offset(6, _mapOrigin(tester).dy + 200));
+    await pumpToRest(tester);
+    expect(find.byType(SeatLayerConfirmCard), findsNothing);
+  });
+
   testWidgets('a seat low on the map gets the card above it, pointing down', (
     tester,
   ) async {

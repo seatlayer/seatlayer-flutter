@@ -688,14 +688,34 @@ Width `size.confirmCardMaxWidth`, capped at the map width less
 `elevation.confirmCard`, ground `color.*.surface`, hairline a mix of the divider
 toward the text so the card has an edge on both themes.
 
-Behind it, the map is **never blurred** — a blurred map turns the seat the
-card is asking about into colour — and, since runtime 0.76, **not washed by the
-native chrome either**: the runtime itself pales the venue outside the focused
-seat's section (opacity .16, and a six-seat-pitch disc on a section-less
-chart) while the neighbours keep full ink and their numbers, exactly as the web
-card shows them. `scrimColor` stays a style slot for a host that wants a wash
-over the whole map; its default is transparent. (Until 0.76 the default was
-the ground at .64, which on 0.76 washed the neighbours twice.) While the card is up, the rest of the chrome is *paused*: the
+Behind it, the map goes **behind glass with a hole in it**. The card rests over
+a map that is otherwise fully legible, so the moment of decision competed with
+several thousand other seats: the runtime's per-seat paling already recedes the
+candidate's neighbours (opacity .16 outside the focused section, a six-seat-pitch
+disc on a section-less chart, neighbours keeping full ink and numbers), but
+nothing quieted the MAP.
+
+So while a seat card is up the map takes a black veil at
+`opacity.confirmScrim` behind a `size.confirmScrimBlur` blur, masked by a
+radial gradient that is fully clear to `size.confirmScrimClearRadius` around
+the tapped seat and reaches full strength at
+`size.confirmScrimFeatherRadius`. The hole is what makes this a spotlight
+rather than a curtain — the buyer is being asked about one seat and can still
+see it. The feather is what stops the hole reading as a drawn circle.
+
+Three rules bind it:
+
+- **Only with a seat to spotlight.** No anchor — a prompt about no one seat, or
+  the immersive scene, where the seat IS the picture — means no glass.
+- **It never takes a pointer event.** A press over the glass reaches the map
+  underneath and cancels the card, exactly as a press on bare map does.
+- **Reduced transparency drops the blur** and deepens the veil to
+  `opacity.confirmScrimFlat`, so the map still recedes without being smeared.
+  Legibility is a setting, not a taste. Flutter has no direct reading of it, so
+  high contrast stands in.
+
+`scrimColor` stays a style slot for a host that wants a flat wash over the
+whole map instead; its default is transparent. While the card is up, the rest of the chrome is *paused*: the
 anchors dim and stop receiving presses, and the cart sheet dims and goes inert.
 The **bottom-centre** region is the exception — it comes forward at full opacity
 above the card, because it carries the toast that is the *reply* to the tap, and

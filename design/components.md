@@ -224,6 +224,13 @@ override** `style:`
   strip at all, and the 3D square in the decision row), 3D-only, with a sight
   line, with tiers, with notices; the confidence teaser or its passport chip
   inside 3D; resting or hugging the seat; committing.
+- **Backdrop** the map goes behind glass: a black veil at
+  `opacity.confirmScrim` under a `size.confirmScrimBlur` blur, masked clear to
+  `size.confirmScrimClearRadius` around the tapped seat and reaching full
+  strength at `size.confirmScrimFeatherRadius`. A spotlight, not a curtain.
+  Only drawn when there is a seat point to centre on, never takes a pointer
+  event, and under reduced transparency drops the blur for
+  `opacity.confirmScrimFlat`.
 - **Anatomy** `size.confirmCardMaxWidth`, capped at the map width less
   `2 × size.confirmCardGutter`, radius `radius.confirmCard`, elevation
   `elevation.confirmCard`.

@@ -555,6 +555,15 @@ abstract final class SeatLayerSizeTokens {
   /// `232`
   static const double toastCardLift = 232;
 
+  /// `56`
+  static const double confirmScrimClearRadius = 56;
+
+  /// `88`
+  static const double confirmScrimFeatherRadius = 88;
+
+  /// `4`
+  static const double confirmScrimBlur = 4;
+
   /// `44`
   static const double minimumHitTarget = 44;
 }
@@ -648,6 +657,12 @@ abstract final class SeatLayerOpacityTokens {
 
   /// `0.18`
   static const double warnPillWash = 0.18;
+
+  /// `0.38`
+  static const double confirmScrim = 0.38;
+
+  /// `0.5`
+  static const double confirmScrimFlat = 0.5;
 }
 
 /// Motion durations, in milliseconds.
