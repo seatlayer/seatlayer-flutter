@@ -59,6 +59,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   retry: 'Bandyti dar kartą',
   hideLimitedView: 'Slėpti vietas su ribotu matomumu',
   colorblindSafe: 'Daltonikams pritaikytos spalvos',
+  continueWord: 'Tęsti',
   seatsLeft: _seatsLeftLt,
   moreCount: _moreCountLt,
   addMinutes: _addMinutesLt,

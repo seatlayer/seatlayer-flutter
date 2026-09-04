@@ -58,6 +58,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   retry: 'Mēģināt vēlreiz',
   hideLimitedView: 'Paslēpt vietas ar ierobežotu skatu',
   colorblindSafe: 'Daltoniķiem draudzīgas krāsas',
+  continueWord: 'Turpināt',
   seatsLeft: _seatsLeftLv,
   moreCount: _moreCountLv,
   addMinutes: _addMinutesLv,

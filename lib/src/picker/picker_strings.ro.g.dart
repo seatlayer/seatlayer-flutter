@@ -59,6 +59,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   retry: 'Încearcă din nou',
   hideLimitedView: 'Ascunde locurile cu vizibilitate limitată',
   colorblindSafe: 'Culori potrivite pentru daltonism',
+  continueWord: 'Continuă',
   seatsLeft: _seatsLeftRo,
   moreCount: _moreCountRo,
   addMinutes: _addMinutesRo,

@@ -59,6 +59,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   retry: 'Δοκιμάστε ξανά',
   hideLimitedView: 'Απόκρυψη θέσεων με περιορισμένη θέα',
   colorblindSafe: 'Χρώματα φιλικά προς την αχρωματοψία',
+  continueWord: 'Συνέχεια',
   seatsLeft: _seatsLeftEl,
   moreCount: _moreCountEl,
   addMinutes: _addMinutesEl,

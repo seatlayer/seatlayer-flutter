@@ -59,6 +59,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   retry: 'Poskusi znova',
   hideLimitedView: 'Skrij sedeže z omejenim pogledom',
   colorblindSafe: 'Barve, prijazne barvni slepoti',
+  continueWord: 'Nadaljuj',
   seatsLeft: _seatsLeftSl,
   moreCount: _moreCountSl,
   addMinutes: _addMinutesSl,

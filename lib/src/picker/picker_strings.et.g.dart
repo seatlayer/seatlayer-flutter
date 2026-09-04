@@ -58,6 +58,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   retry: 'Proovi uuesti',
   hideLimitedView: 'Peida piiratud vaatega kohad',
   colorblindSafe: 'Värvipimedasõbralikud värvid',
+  continueWord: 'Jätka',
   seatsLeft: _seatsLeftEt,
   moreCount: _moreCountEt,
   addMinutes: _addMinutesEt,

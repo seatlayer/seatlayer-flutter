@@ -28,6 +28,33 @@ void main() {
     );
   });
 
+  test('every extracted key actually reaches the generated locales', () {
+    // The extractor and the generator are two lists, and a key can be in the
+    // first without being in the second. A string that takes a placeholder
+    // has to be declared as a formatter to be emitted at all, and one that
+    // was not simply vanished: every locale kept the English default while
+    // `design/locale_strings.json` said otherwise, and the staleness check
+    // still passed because the generated files did match the generator.
+    //
+    // German is the probe. Any locale would do; what matters is that a key
+    // present in the table is not silently dropped on the way to Dart.
+    final german = _table()['de']! as Map<String, Object?>;
+    final generated = File(
+      'lib/src/picker/picker_strings.de.g.dart',
+    ).readAsStringSync();
+    final missing = german.keys
+        .where((key) => !generated.contains(key.split('.').first))
+        .toList(growable: false)
+      ..sort();
+    expect(
+      missing,
+      isEmpty,
+      reason: 'extracted but never generated: ${missing.join(', ')}\n'
+          'A placeholder string must also be declared in the generator\'s '
+          'formatter table.',
+    );
+  });
+
   test('a language code resolves to its own wording', () {
     expect(SeatLayerPickerStrings.forLocale(const Locale('de')).overview,
         'Spielstätte');

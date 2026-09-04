@@ -55,6 +55,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   retry: '再試行',
   hideLimitedView: '視界制限のある座席を隠す',
   colorblindSafe: '色覚に配慮した配色',
+  continueWord: '次へ',
   seatsLeft: _seatsLeftJa,
   moreCount: _moreCountJa,
   addMinutes: _addMinutesJa,

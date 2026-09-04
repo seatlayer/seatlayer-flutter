@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       retry: '重試',
       hideLimitedView: '隱藏視野受限的座位',
       colorblindSafe: '色盲友善配色',
+      continueWord: '繼續',
       seatsLeft: _seatsLeftZhHant,
       moreCount: _moreCountZhHant,
       addMinutes: _addMinutesZhHant,

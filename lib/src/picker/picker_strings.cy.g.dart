@@ -59,6 +59,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   retry: 'Rho gynnig arall arni',
   hideLimitedView: 'Cuddio seddi â golygfa gyfyngedig',
   colorblindSafe: 'Lliwiau sy\'n gyfeillgar i ddallineb lliw',
+  continueWord: 'Parhau',
   seatsLeft: _seatsLeftCy,
   moreCount: _moreCountCy,
   addMinutes: _addMinutesCy,

@@ -58,6 +58,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   retry: 'Dîsa biceribîne',
   hideLimitedView: 'Cihên bi dîmena sînordar veşêre',
   colorblindSafe: 'Rengên guncav ji bo kortiya rengan',
+  continueWord: 'Berdewam bike',
   seatsLeft: _seatsLeftKu,
   moreCount: _moreCountKu,
   addMinutes: _addMinutesKu,

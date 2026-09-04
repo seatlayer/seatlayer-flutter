@@ -58,6 +58,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   retry: 'Zkusit znovu',
   hideLimitedView: 'Skrýt místa s omezeným výhledem',
   colorblindSafe: 'Barvy vhodné pro barvoslepé',
+  continueWord: 'Pokračovat',
   seatsLeft: _seatsLeftCs,
   moreCount: _moreCountCs,
   addMinutes: _addMinutesCs,

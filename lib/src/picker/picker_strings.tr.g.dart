@@ -58,6 +58,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   retry: 'Tekrar dene',
   hideLimitedView: 'Kısıtlı manzaralı koltukları gizle',
   colorblindSafe: 'Renk körlüğüne uygun renkler',
+  continueWord: 'Devam',
   seatsLeft: _seatsLeftTr,
   moreCount: _moreCountTr,
   addMinutes: _addMinutesTr,

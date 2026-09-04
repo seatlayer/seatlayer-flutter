@@ -59,6 +59,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsIt = SeatLayerPickerStrings(
   retry: 'Riprova',
   hideLimitedView: 'Nascondi i posti con visuale limitata',
   colorblindSafe: 'Colori adatti al daltonismo',
+  continueWord: 'Continua',
   seatsLeft: _seatsLeftIt,
   moreCount: _moreCountIt,
   addMinutes: _addMinutesIt,

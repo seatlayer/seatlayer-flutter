@@ -58,6 +58,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   retry: 'دوباره تلاش کنید',
   hideLimitedView: 'پنهان کردن صندلی‌های با دید محدود',
   colorblindSafe: 'رنگ‌های مناسب کوررنگی',
+  continueWord: 'ادامه',
   seatsLeft: _seatsLeftFa,
   moreCount: _moreCountFa,
   addMinutes: _addMinutesFa,

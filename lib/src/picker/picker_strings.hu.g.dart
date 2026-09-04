@@ -58,6 +58,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   retry: 'Újrapróbálom',
   hideLimitedView: 'Korlátozott kilátású helyek elrejtése',
   colorblindSafe: 'Színvakbarát színek',
+  continueWord: 'Tovább',
   seatsLeft: _seatsLeftHu,
   moreCount: _moreCountHu,
   addMinutes: _addMinutesHu,

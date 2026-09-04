@@ -46,6 +46,11 @@ const List<String> _plainFields = <String>[
   'retry',
   'hideLimitedView',
   'colorblindSafe',
+  // Also composed into `continueWithTotal` below. It is a standalone button
+  // label in its own right — the cart sheet, the checkout action and the
+  // access panel all print it alone — so it has to be emitted here too, or
+  // every locale but English says "Continue" under a translated map.
+  'continueWord',
 ];
 
 /// Strings the runtime writes with one placeholder, and the Dart parameter

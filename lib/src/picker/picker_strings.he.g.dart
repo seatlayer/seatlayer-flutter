@@ -58,6 +58,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   retry: 'נסו שוב',
   hideLimitedView: 'הסתרת מושבים עם נוף מוגבל',
   colorblindSafe: 'צבעים ידידותיים לעיוורי צבעים',
+  continueWord: 'המשך',
   seatsLeft: _seatsLeftHe,
   moreCount: _moreCountHe,
   addMinutes: _addMinutesHe,
