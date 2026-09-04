@@ -50,11 +50,12 @@ Widget seatLayerImmersiveGlass({
 /// The controls that sit on the map itself.
 ///
 /// On a phone they go to the map's anchor regions — accessibility bottom-left,
-/// Map/3D top-right, and the camera column bottom-right. That column is
-/// fit-to-venue at the overview, and gains a zoom-out above it once the map is
-/// deep enough to have somewhere to come back from. Zoom-in is absent by
-/// default: pinch already handles continuous zoom without drawing a toolbar
-/// over the venue.
+/// Map/3D top-right, and one back-out control bottom-right. That control walks
+/// the ladder a step at a time and dims once the whole venue is on screen,
+/// rather than coming and going under the buyer's thumb. Fit-to-venue and
+/// zoom-in are absent by default: fit made the same journey in one jump with
+/// nothing to tell the two round buttons apart, and pinch already handles
+/// continuous zoom without drawing a toolbar over the venue.
 ///
 /// The wide layout keeps the vertical rail, where there is room for it.
 class SeatLayerPickerMapControls extends StatelessWidget {
