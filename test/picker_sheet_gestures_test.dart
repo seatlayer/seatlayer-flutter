@@ -303,7 +303,7 @@ void main() {
   });
 
   group('a swipe removes a ticket', () {
-    testWidgets('past the commit point, with the undo the × offers',
+    testWidgets('past the commit point, as silently as the ×',
         (tester) async {
       final map = FakePickerMap();
       addTearDown(map.dispose);
@@ -335,7 +335,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(map.callsTo('picker.removeCartLine'), hasLength(1));
-      expect(find.text('Undo'), findsOneWidget);
+      // A swipe says the same nothing the ✕ says: the row is gone and the
+      // total has moved, and the haptic is what confirms the gesture landed.
+      expect(find.text('Undo'), findsNothing);
       expect(felt, contains(PickerHapticCue.ticketRemoved));
       expect(pickerHapticStrength(PickerHapticCue.ticketRemoved), 'light');
     });

@@ -681,7 +681,7 @@ void main() {
     expect(find.text('€150'), findsOneWidget);
   });
 
-  testWidgets('removing a ticket is immediate and undoable', (tester) async {
+  testWidgets('removing a ticket is immediate and silent', (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -706,16 +706,15 @@ void main() {
     await tester.pump();
 
     expect(map.callsTo('picker.removeCartLine'), hasLength(1));
-    expect(find.text('Undo'), findsOneWidget);
-    // The picker's toast, never the host's Material messenger.
-    expect(find.byType(SnackBar), findsNothing);
-    expect(find.byType(SeatLayerPickerToastCard), findsOneWidget);
-
-    // Let the card finish arriving before pressing it.
+    // NOTHING IS SAID. The line is gone from the tray, the total has moved
+    // and the checkout action has recounted; announcing it as well is telling
+    // the buyer what they just did. The Undo it used to carry made a one-tap
+    // action into a two-tap one and put a timer on the second tap.
     await tester.pump(const Duration(milliseconds: 400));
-    await tester.tap(find.text('Undo'));
-    await tester.pump();
-    expect(map.callsTo('picker.selectObjects'), hasLength(1));
+    expect(find.text('Undo'), findsNothing);
+    expect(find.byType(SeatLayerPickerToastCard), findsNothing);
+    // And never the host's Material messenger either.
+    expect(find.byType(SnackBar), findsNothing);
   });
 
   testWidgets('a read-only cart offers no removals', (tester) async {

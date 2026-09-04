@@ -333,10 +333,10 @@ override** `style:`
   cell whose words change between snapshots cross-fades over
   `motion.duration.crossfade`; the rest of the line does not move. See
   `picker-spec.md` §3.13.
-- **Commands** `picker.removeCartLine { label }`, offered back for
-  `motion.durationOutsideBudget.undoWindow` as an undo. It carries its own busy
-  action (`removingCartLine`) because it is the one inventory mutation that
-  does not put the checkout call to action down.
+- **Commands** `picker.removeCartLine { label }`, sent silently — no toast and
+  no undo, because the row leaving and the total moving are the whole answer.
+  It carries its own busy action (`removingCartLine`) because it is the one
+  inventory mutation that does not put the checkout call to action down.
 
 ## BookButton
 

@@ -1165,9 +1165,13 @@ its width or above `motion.physics.swipeFlingVelocity`.
 
 **Haptics.** `haptics.ticketRemoved`.
 
-**Undo.** A removal is offered back for
-`motion.durationOutsideBudget.undoWindow` as a toast action
-(`strings.undo`, `strings.seatRemoved`).
+**Nothing is said.** A removal is silent: no toast, and no Undo. The line has
+gone from the tray, the total has moved and the checkout action has recounted,
+so a sentence naming what the buyer just did adds nothing. The Undo it used to
+carry made a one-tap action into a two-tap one and put a timer on the second
+tap — and re-picking the seat is the same gesture that chose it in the first
+place. A removal that *fails* still speaks, through the inline action error:
+that is the one case the tray cannot show by itself.
 
 **Commands.** `picker.deselect { label }`, and the runtime's
 `cart-line-remove-v1` for a line the selection cannot name.
@@ -1302,12 +1306,11 @@ latency is the server's. Everything else was ours, and is now built:
   it can no longer be swiped. The mark is dropped by the first snapshot that
   no longer carries the line; a mutation that fails restores the row and the
   failure is stated by the inline action error as before.
-- **The undo bar is offered against the press, not the reply.** The
-  `Ticket removed` + `Undo` toast and the `haptics.ticketRemoved` cue both
-  fire before the command is sent, so the buyer's four seconds
-  (`motion.durationOutsideBudget.undoWindow`) do not start whenever the server
-  finishes. A removal that then *fails* takes that toast back down (unless
-  something newer has taken the band) along with restoring the row.
+- **The answer is the row, not a sentence.** `haptics.ticketRemoved` fires
+  before the command is sent, so the gesture is confirmed under the finger
+  rather than whenever the server finishes. Nothing else is said; a removal
+  that then *fails* restores the row and states itself through the inline
+  action error.
 - **The removal does not grey the sheet.** `busyAction` for this one command is
   `removingCartLine`, and it is the only busy action that does not block
   checkout: the call to action stays live and says what it always says.
@@ -1338,9 +1341,7 @@ reduced motion too. **Native calls nothing after the command.** The interim
 that framed the section of the newly added seats is gone; the web's own pops
 and chip flights stay web-only.
 
-**Seat removed + Undo.** Shown on the picker's own toast band
-(`SeatLayerPickerToast` with `actionLabel`), never on the host's Material
-messenger; dwell = `motion.toastDwell`.
+**Seat removed.** No toast. See §3.11's removal rules: the tray is the answer.
 
 **Accessibility filter flight.** Since runtime 0.77.1
 `picker.setAccessibilityFilter` takes the web menu's own focus path: turning a

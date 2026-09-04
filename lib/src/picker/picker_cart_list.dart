@@ -6,7 +6,6 @@ import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'picker_cart_removal.dart';
 import 'picker_haptics.dart';
-import 'picker_toast.dart';
 import 'picker_motion.dart';
 import 'picker_sheet_drag.dart';
 import 'picker_tokens.g.dart';
@@ -186,41 +185,29 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
     SeatLayerPickerController controller,
     SeatLayerTicketLine line,
   ) async {
-    final strings = SeatLayerPickerScope.stringsOf(context);
     final callbacks = SeatLayerPickerScope.callbacksOf(context);
     final removals = seatLayerCartRemovalsOf(controller);
-    final toasts = seatLayerPickerToasts(controller);
     final label = line.item.label;
     removals.mark(label);
     // Felt, not just seen: the row is on its way out from under the finger,
-    // and the undo bar that follows is at the other end of the phone.
+    // and nothing else will say so.
     controller.emitHaptic(PickerHapticCue.ticketRemoved);
-    // The picker's own toast, not the host's Material messenger: the same
-    // band that carries every other sentence over the map, dismissing on the
-    // picker's own dwell. A host's messenger is not the picker's to run — one
-    // host's never took the bar down at all.
+    // NOTHING IS SAID. The buyer pressed ✕ on a specific line and that line is
+    // now gone from the tray, the total has moved and the checkout action has
+    // recounted — announcing it as well is telling someone what they just
+    // did. The toast also carried an Undo, which made a one-tap action into a
+    // two-tap one and put a timer on the second tap; re-picking the seat is
+    // the same gesture that chose it in the first place.
     //
-    // Offered against the press rather than against the reply. The buyer's
-    // four seconds to change their mind should not start whenever the server
-    // finishes re-holding the rest of the cart.
-    final toast = SeatLayerPickerToast(
-      strings.seatRemoved,
-      actionLabel: strings.undo,
-      onAction: () =>
-          ignorePickerAction(controller.selectObjects(<String>[label])),
-    );
-    toasts.show(toast);
+    // The FAILURE path below keeps its telling: a removal that did not happen
+    // is the one case the tray cannot show by itself.
     try {
       await controller.removeObject(label);
     } catch (_) {
       // The controller has already published the typed failure, which the
-      // sheet's inline action error draws. What is owed here is everything
-      // this method said before the answer came back: the row returns, and
-      // the bar offering to undo a removal that never happened goes — unless
-      // something else has since taken the band, which is then the newer
-      // news.
+      // sheet's inline action error draws. What is owed here is the row: it
+      // was faded in the same frame as the press, and it comes back.
       removals.restore(label);
-      if (identical(toasts.current, toast)) toasts.dismiss();
       return;
     }
     // A reply that left the line standing is not a removal, however it was

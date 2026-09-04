@@ -145,11 +145,11 @@ void main() {
     expect(map.callsTo('picker.removeCartLine'), hasLength(1));
     expect(_rowOpacity(tester), SeatLayerOpacityTokens.removing);
     expect(_removeEnabled(tester), isFalse);
-    expect(
-      seatLayerPickerToasts(controller).current?.message,
-      'Ticket removed',
-    );
-    expect(seatLayerPickerToasts(controller).current?.actionLabel, 'Undo');
+    // The row IS the answer. Nothing is said on top of it: the line has gone
+    // faded and inert under the finger, and a sentence naming what the buyer
+    // just did — with an Undo that turns one tap into two against a timer —
+    // was the old shape.
+    expect(seatLayerPickerToasts(controller).current, isNull);
     expect(seatLayerCartRemovalsOf(controller).isRemoving('A-1'), isTrue);
 
     gate.complete();
