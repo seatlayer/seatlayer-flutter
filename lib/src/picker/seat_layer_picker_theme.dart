@@ -332,6 +332,16 @@ class SeatLayerPickerThemeData
   final Color? warning;
 
   /// Typeface for every native picker surface.
+  ///
+  /// An app-bundled font works here: this styles Flutter widgets, so it is
+  /// resolved the way any other `TextStyle.fontFamily` is.
+  ///
+  /// **It does not restyle the drawn map.** Section names, row labels and seat
+  /// numbers are painted by the runtime inside the map surface, which never
+  /// receives this value — only the theme mode and the map's colours cross
+  /// that boundary. So a bundled typeface changes the chrome around the venue
+  /// and not the text inside it, and the two are meant to differ rather than
+  /// to be forced together.
   final String? fontFamily;
 
   /// Corner radius for cards, sheets and other containers.
@@ -488,6 +498,16 @@ class SeatLayerResolvedPickerTheme {
   final SeatLayerPickerStyles styles;
 
   /// Typeface for every native picker surface.
+  ///
+  /// An app-bundled font works here: this styles Flutter widgets, so it is
+  /// resolved the way any other `TextStyle.fontFamily` is.
+  ///
+  /// **It does not restyle the drawn map.** Section names, row labels and seat
+  /// numbers are painted by the runtime inside the map surface, which never
+  /// receives this value — only the theme mode and the map's colours cross
+  /// that boundary. So a bundled typeface changes the chrome around the venue
+  /// and not the text inside it, and the two are meant to differ rather than
+  /// to be forced together.
   final String? fontFamily;
 
   /// Brand mark shown in the header.
