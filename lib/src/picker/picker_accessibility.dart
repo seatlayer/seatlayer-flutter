@@ -58,7 +58,10 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     final icon =
         provisions ? Icons.accessible_forward_rounded : Icons.palette_outlined;
     if (compact) {
-      final theme = seatLayerPickerThemeOf(context);
+      // Floating on the venue, so the MAP's palette and the disc's own ground
+      // — the panel surface vanishes into a dark map at 1.14:1.
+      final theme = seatLayerMapChromeThemeOf(context);
+      final disc = seatLayerMapChromeDisc(theme);
       final size = theme.layout.accessibilityControlSize;
       return DecoratedBox(
         decoration: const BoxDecoration(
@@ -82,9 +85,9 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
             padding: EdgeInsets.zero,
             constraints: BoxConstraints.tightFor(width: size, height: size),
             style: IconButton.styleFrom(
-              backgroundColor: theme.surface,
+              backgroundColor: disc.ground,
               foregroundColor: activeCount == 0 ? theme.text : theme.accent,
-              side: BorderSide(color: theme.divider),
+              side: BorderSide(color: disc.line),
             ),
             onPressed: onPressed,
             icon: Badge(

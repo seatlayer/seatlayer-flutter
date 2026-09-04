@@ -285,9 +285,11 @@ class SeatLayerPickerViewModeControl extends StatelessWidget {
       // stands exactly as tall as the layout reserves for it.
       child: Container(
         decoration: BoxDecoration(
-          color: theme.surface,
+          // The track floats on the venue like the corner discs, so it takes
+          // the same ground rather than the panel's.
+          color: seatLayerMapChromeDisc(theme).ground,
           borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
-          border: Border.all(color: theme.divider),
+          border: Border.all(color: seatLayerMapChromeDisc(theme).line),
           boxShadow: <BoxShadow>[
             BoxShadow(
               color: pickerAlpha(const Color(0xFF000000), .65),
@@ -575,8 +577,20 @@ class _ControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = seatLayerPickerThemeOf(context);
+    // The MAP's palette, not the panel's. These discs float on the venue, so
+    // they darken with the immersive scene like the rest of the map chrome.
+    final theme = seatLayerMapChromeThemeOf(context);
     final size = theme.layout.mapControlSize;
+    // A ground of the disc's own, because the panel surface is not one. On
+    // dark, a translucent panel surface over the venue measured 1.14:1 against
+    // the map — a dark blob on dark. The two sides need different halves of
+    // the fix, which is why this is two tokens and not a stronger opacity:
+    // dark separates by the FILL (2.96:1), light by the EDGE (3.72:1 against
+    // the disc, 3.17:1 against the map), since white is already as far from a
+    // light map as a colour can get and still only 1.17:1 from it.
+    final disc = seatLayerMapChromeDisc(theme);
+    final chrome = disc.ground;
+    final chromeLine = disc.line;
     return AnimatedContainer(
       duration: SeatLayerPickerMotion.of(context, SeatLayerPickerMotion.pop),
       curve: SeatLayerPickerMotion.easeEnter,
@@ -585,10 +599,10 @@ class _ControlButton extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: active
-            ? Color.alphaBlend(pickerAlpha(theme.accent, .13), theme.surface)
-            : pickerAlpha(theme.surface, .94),
+            ? Color.alphaBlend(pickerAlpha(theme.accent, .13), chrome)
+            : chrome,
         border: Border.all(
-          color: active ? pickerAlpha(theme.accent, .52) : theme.divider,
+          color: active ? pickerAlpha(theme.accent, .52) : chromeLine,
         ),
         boxShadow: const <BoxShadow>[
           BoxShadow(

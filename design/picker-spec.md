@@ -395,6 +395,27 @@ inset `size.mapAnchorInset` from the map's edges, with `size.mapAnchorGap`
 between members. Regions do not receive presses; their children do. Nothing
 free-floats.
 
+**Ground — a disc's own, never the panel's.** Every floating control takes
+`color.*.chrome` with a `color.*.chromeLine` hairline, resolved from the **map
+chrome's** side rather than the picker panel's, so the controls darken with the
+immersive scene. The panel's `surface`/`divider` are the colours of a plate the
+map is drawn *beside*; over the venue they disappear into it, and a translucent
+dark surface on a dark map measured 1.14:1 — a dark blob on dark.
+
+The two sides carry the boundary in different halves, which is why this is two
+tokens rather than a stronger opacity:
+
+| Side | What separates | Measured |
+|---|---|---|
+| Dark | the **fill** | 2.96:1 disc against the map |
+| Light | the **edge** | 3.72:1 against the disc, 3.17:1 against the map |
+
+White is already as far from a light map as a colour can get in that direction
+and is still only 1.17:1 from it, so on light the fill can never be the answer.
+
+This covers every floating control on the map, the accessibility control and
+the Map/3D track included — not only the corner discs.
+
 **Dock lift.** While the section dock is mounted and neither a seat card nor the
 immersive scene is up, the three bottom regions lift by the dock's height plus
 the bottom safe inset.

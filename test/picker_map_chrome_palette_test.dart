@@ -219,4 +219,42 @@ void main() {
     await tester.pumpAndSettle();
     expect(ink(), SeatLayerDarkTokens.text);
   });
+
+  test('a floating control separates from the map it sits on', () {
+    // The panel's surface is not a ground for chrome that floats on the
+    // venue: a translucent dark surface over a dark map measured 1.14:1 — a
+    // dark blob on dark. The two sides carry the boundary in different
+    // halves, so each is asserted on the half that does the work rather than
+    // on one number that only one theme can meet.
+    double contrast(Color a, Color b) {
+      final first = a.computeLuminance() + 0.05;
+      final second = b.computeLuminance() + 0.05;
+      return first > second ? first / second : second / first;
+    }
+
+    // Dark: the FILL separates.
+    expect(
+      contrast(SeatLayerDarkTokens.chrome, SeatLayerDarkTokens.mapBackground),
+      greaterThanOrEqualTo(2.5),
+      reason: 'a dark disc must stand off the dark map by its fill',
+    );
+
+    // Light: white is already as far from a light map as it can get and is
+    // still only ~1.17:1, so the EDGE carries it — against the disc it sits
+    // on and against the map behind it.
+    final lightEdge = Color.alphaBlend(
+      SeatLayerLightTokens.chromeLine,
+      SeatLayerLightTokens.chrome,
+    );
+    expect(
+      contrast(lightEdge, SeatLayerLightTokens.chrome),
+      greaterThanOrEqualTo(3.0),
+      reason: 'a light disc must be bounded by its edge',
+    );
+    expect(
+      contrast(lightEdge, SeatLayerLightTokens.mapBackground),
+      greaterThanOrEqualTo(3.0),
+      reason: "the edge must also read against the map, not only the disc",
+    );
+  });
 }

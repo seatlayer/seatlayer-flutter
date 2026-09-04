@@ -845,6 +845,32 @@ SeatLayerResolvedPickerTheme seatLayerMapChromeThemeOf(BuildContext context) {
   return venue3D ? base.immersive : base;
 }
 
+/// The ground and edge for chrome that floats ON the map.
+///
+/// The panel's `surface`/`divider` are not a ground for this: they are the
+/// colours of a plate the map is drawn *beside*, and over the venue they
+/// disappear into it — a translucent dark surface over a dark map measured
+/// 1.14:1, a dark blob on dark.
+///
+/// The two sides need different halves of the fix, which is why this is two
+/// colours and not a stronger opacity. Dark separates by the **fill**
+/// (2.96:1 against the map). Light cannot: white is already as far from a
+/// light map as a colour can get in that direction and is still only 1.17:1
+/// from it, so there the **edge** carries the boundary — 3.72:1 against the
+/// disc and 3.17:1 against the map.
+({Color ground, Color line}) seatLayerMapChromeDisc(
+  SeatLayerResolvedPickerTheme theme,
+) =>
+    theme.brightness == Brightness.light
+        ? (
+            ground: SeatLayerLightTokens.chrome,
+            line: SeatLayerLightTokens.chromeLine
+          )
+        : (
+            ground: SeatLayerDarkTokens.chrome,
+            line: SeatLayerDarkTokens.chromeLine
+          );
+
 /// Resolve the colours the drawn map is repainted with.
 ///
 /// A host that set [SeatLayerPickerThemeData.mapTheme] always wins. Otherwise

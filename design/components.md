@@ -176,6 +176,11 @@ override** `style:`
   Bottom-left accessibility, bottom-right fit; both lift by
   `size.dockBarHeight` while the dock is up. The accessible-section stepper
   sits beside the accessibility control, `size.accessStepGap` from it.
+- **Ground** `color.*.chrome` with a `color.*.chromeLine` hairline, from the
+  **map chrome's** side, never the panel's `surface`/`divider` — those vanish
+  into a dark map at 1.14:1. Dark separates by the fill (2.96:1 against the
+  map), light by the edge (3.72:1 against the disc). Applies to every floating
+  control, the accessibility disc and the Map/3D track included.
 - **Commands** `picker.zoomToFit`, `picker.setAccessibilityFilters`,
   `picker.setColorblindSafe`, `picker.setBuyerView`.
 - **Note** `SeatLayerPickerViewModeControl` (the Map/3D segmented control) is a
