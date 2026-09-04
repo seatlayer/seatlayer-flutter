@@ -6,6 +6,7 @@ import '../open_enums.dart';
 import '../payloads.dart';
 import 'picker_internal.dart';
 import 'picker_map_controls.dart';
+import 'picker_camera_actions.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'seat_layer_picker_controller.dart';

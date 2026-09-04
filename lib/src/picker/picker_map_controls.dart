@@ -3,6 +3,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 
 import '../open_enums.dart';
+import 'picker_camera_actions.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_accessibility.dart';

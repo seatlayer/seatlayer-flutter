@@ -28,6 +28,7 @@ export 'src/bridge/envelope.dart'
     show Envelope, EnvelopeKind, EnvelopeKindUnknown;
 export 'src/open_enums.dart';
 export 'src/payloads.dart';
+export 'src/picker/picker_camera_actions.dart' show SeatLayerPickerCamera;
 export 'src/picker/picker_accessibility.dart'
     show SeatLayerPickerAccessibilityFilters, SeatLayerPickerAccessibleStepper;
 export 'src/picker/picker_accessibility_focus.dart'

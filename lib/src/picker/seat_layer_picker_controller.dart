@@ -876,24 +876,6 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         SeatLayerPickerBusyAction.updatingSelection,
       );
 
-  Future<void> focusSection(String sectionId) => _mutation(
-        'picker.focusSection',
-        <String, Object?>{'sectionId': sectionId},
-        SeatLayerPickerBusyAction.updatingSelection,
-      );
-
-  Future<void> overview() => _mutation(
-        'picker.overview',
-        null,
-        SeatLayerPickerBusyAction.updatingSelection,
-      );
-
-  Future<void> setRung(String rung) => _mutation(
-        'picker.setRung',
-        <String, Object?>{'rung': rung},
-        SeatLayerPickerBusyAction.updatingSelection,
-      );
-
   /// Draw only the floor [floorId].
   Future<void> setFloor(String floorId) => _mutation(
         'picker.setFloor',
@@ -1094,24 +1076,6 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
         'picker.setVenue3DNavigationMode',
         <String, Object?>{'mode': mode.raw},
         SeatLayerPickerBusyAction.changingView,
-      );
-
-  Future<void> zoomIn() => _mutation(
-        'picker.zoomIn',
-        null,
-        SeatLayerPickerBusyAction.updatingSelection,
-      );
-
-  Future<void> zoomOut() => _mutation(
-        'picker.zoomOut',
-        null,
-        SeatLayerPickerBusyAction.updatingSelection,
-      );
-
-  Future<void> zoomToFit() => _mutation(
-        'picker.zoomToFit',
-        null,
-        SeatLayerPickerBusyAction.updatingSelection,
       );
 
   Future<void> bestAvailable({

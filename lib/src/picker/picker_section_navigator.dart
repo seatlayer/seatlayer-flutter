@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import 'picker_camera_actions.dart';
 import 'picker_internal.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';

@@ -5,6 +5,7 @@ import 'picker_a11y.dart';
 import 'picker_accessibility_focus.dart';
 import 'picker_internal.dart';
 import 'picker_styles.dart';
+import 'picker_camera_actions.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_tokens.g.dart';

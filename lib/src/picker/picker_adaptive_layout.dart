@@ -26,6 +26,7 @@ import 'picker_dock_bar.dart';
 import 'picker_floor_strip.dart';
 import 'picker_haptics.dart';
 import 'picker_layout.dart';
+import 'picker_camera_actions.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_options.dart';
