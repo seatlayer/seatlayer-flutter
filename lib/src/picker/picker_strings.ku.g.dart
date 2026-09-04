@@ -12,6 +12,8 @@ String _seatsLeftKu(int count) => '$count mayî';
 
 String _moreCountKu(int count) => '+$count zêdetir';
 
+String _addMinutesKu(int minutes) => '+$minutes deq';
+
 String _fromPriceKu(String money) => 'Ji $money ve';
 
 String _sightlineKu(String metres) => '≈ $metres m heta dikê';
@@ -58,6 +60,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   colorblindSafe: 'Rengên guncav ji bo kortiya rengan',
   seatsLeft: _seatsLeftKu,
   moreCount: _moreCountKu,
+  addMinutes: _addMinutesKu,
   fromPrice: _fromPriceKu,
   sightline: _sightlineKu,
   ticketCount: _ticketCountKu,

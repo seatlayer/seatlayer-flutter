@@ -12,6 +12,8 @@ String _seatsLeftZhHant(int count) => '剩餘 $count';
 
 String _moreCountZhHant(int count) => '其餘 $count 項';
 
+String _addMinutesZhHant(int minutes) => '+$minutes 分鐘';
+
 String _fromPriceZhHant(String money) => '$money 起';
 
 String _sightlineZhHant(String metres) => '距舞台約 $metres 公尺';
@@ -56,6 +58,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       colorblindSafe: '色盲友善配色',
       seatsLeft: _seatsLeftZhHant,
       moreCount: _moreCountZhHant,
+      addMinutes: _addMinutesZhHant,
       fromPrice: _fromPriceZhHant,
       sightline: _sightlineZhHant,
       ticketCount: _ticketCountZhHant,

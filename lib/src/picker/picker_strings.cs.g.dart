@@ -12,6 +12,8 @@ String _seatsLeftCs(int count) => 'Zbývá $count';
 
 String _moreCountCs(int count) => '+$count dalších';
 
+String _addMinutesCs(int minutes) => '+$minutes min';
+
 String _fromPriceCs(String money) => 'Od $money';
 
 String _sightlineCs(String metres) => '≈ $metres m k pódiu';
@@ -58,6 +60,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   colorblindSafe: 'Barvy vhodné pro barvoslepé',
   seatsLeft: _seatsLeftCs,
   moreCount: _moreCountCs,
+  addMinutes: _addMinutesCs,
   fromPrice: _fromPriceCs,
   sightline: _sightlineCs,
   ticketCount: _ticketCountCs,

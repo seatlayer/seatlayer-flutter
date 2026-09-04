@@ -12,6 +12,8 @@ String _seatsLeftFr(int count) => '$count libres';
 
 String _moreCountFr(int count) => '+$count de plus';
 
+String _addMinutesFr(int minutes) => '+$minutes min';
+
 String _fromPriceFr(String money) => 'Dès $money';
 
 String _sightlineFr(String metres) => '≈ $metres m de la scène';
@@ -59,6 +61,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFr = SeatLayerPickerStrings(
   colorblindSafe: 'Couleurs adaptées au daltonisme',
   seatsLeft: _seatsLeftFr,
   moreCount: _moreCountFr,
+  addMinutes: _addMinutesFr,
   fromPrice: _fromPriceFr,
   sightline: _sightlineFr,
   ticketCount: _ticketCountFr,

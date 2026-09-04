@@ -12,6 +12,8 @@ String _seatsLeftTr(int count) => '$count kaldı';
 
 String _moreCountTr(int count) => '+$count daha';
 
+String _addMinutesTr(int minutes) => '+$minutes dk';
+
 String _fromPriceTr(String money) => '$money den itibaren';
 
 String _sightlineTr(String metres) => 'Sahneye ≈ $metres m';
@@ -58,6 +60,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   colorblindSafe: 'Renk körlüğüne uygun renkler',
   seatsLeft: _seatsLeftTr,
   moreCount: _moreCountTr,
+  addMinutes: _addMinutesTr,
   fromPrice: _fromPriceTr,
   sightline: _sightlineTr,
   ticketCount: _ticketCountTr,

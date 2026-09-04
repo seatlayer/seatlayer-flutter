@@ -12,6 +12,8 @@ String _seatsLeftEl(int count) => 'Απομένουν $count';
 
 String _moreCountEl(int count) => '+$count ακόμη';
 
+String _addMinutesEl(int minutes) => '+$minutes λεπτά';
+
 String _fromPriceEl(String money) => 'Από $money';
 
 String _sightlineEl(String metres) => '≈ $metres m από τη σκηνή';
@@ -59,6 +61,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   colorblindSafe: 'Χρώματα φιλικά προς την αχρωματοψία',
   seatsLeft: _seatsLeftEl,
   moreCount: _moreCountEl,
+  addMinutes: _addMinutesEl,
   fromPrice: _fromPriceEl,
   sightline: _sightlineEl,
   ticketCount: _ticketCountEl,

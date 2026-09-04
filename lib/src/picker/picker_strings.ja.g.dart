@@ -12,6 +12,8 @@ String _seatsLeftJa(int count) => '残り$count';
 
 String _moreCountJa(int count) => '他 $count 件';
 
+String _addMinutesJa(int minutes) => '+$minutes分';
+
 String _fromPriceJa(String money) => '$money〜';
 
 String _sightlineJa(String metres) => 'ステージまで約${metres}m';
@@ -55,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   colorblindSafe: '色覚に配慮した配色',
   seatsLeft: _seatsLeftJa,
   moreCount: _moreCountJa,
+  addMinutes: _addMinutesJa,
   fromPrice: _fromPriceJa,
   sightline: _sightlineJa,
   ticketCount: _ticketCountJa,

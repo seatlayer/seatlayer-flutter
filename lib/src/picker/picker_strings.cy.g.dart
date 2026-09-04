@@ -12,6 +12,8 @@ String _seatsLeftCy(int count) => '$count ar ôl';
 
 String _moreCountCy(int count) => '+$count yn rhagor';
 
+String _addMinutesCy(int minutes) => '+$minutes mun';
+
 String _fromPriceCy(String money) => 'O $money';
 
 String _sightlineCy(String metres) => '≈ $metres m at y llwyfan';
@@ -59,6 +61,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   colorblindSafe: 'Lliwiau sy\'n gyfeillgar i ddallineb lliw',
   seatsLeft: _seatsLeftCy,
   moreCount: _moreCountCy,
+  addMinutes: _addMinutesCy,
   fromPrice: _fromPriceCy,
   sightline: _sightlineCy,
   ticketCount: _ticketCountCy,

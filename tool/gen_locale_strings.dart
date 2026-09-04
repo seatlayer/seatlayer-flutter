@@ -55,6 +55,7 @@ const Map<String, ({String parameter, String type, String placeholder})>
     <String, ({String parameter, String type, String placeholder})>{
   'seatsLeft': (parameter: 'count', type: 'int', placeholder: '{count}'),
   'moreCount': (parameter: 'count', type: 'int', placeholder: '{count}'),
+  'addMinutes': (parameter: 'minutes', type: 'int', placeholder: '{count}'),
   'fromPrice': (parameter: 'money', type: 'String', placeholder: '{price}'),
   'sightline': (parameter: 'metres', type: 'String', placeholder: '{m}'),
 };

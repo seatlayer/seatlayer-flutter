@@ -12,6 +12,8 @@ String _seatsLeftHr(int count) => 'Preostalo $count';
 
 String _moreCountHr(int count) => '+$count više';
 
+String _addMinutesHr(int minutes) => '+$minutes min';
+
 String _fromPriceHr(String money) => 'Od $money';
 
 String _sightlineHr(String metres) => '≈ $metres m do pozornice';
@@ -59,6 +61,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   colorblindSafe: 'Boje prilagođene daltonizmu',
   seatsLeft: _seatsLeftHr,
   moreCount: _moreCountHr,
+  addMinutes: _addMinutesHr,
   fromPrice: _fromPriceHr,
   sightline: _sightlineHr,
   ticketCount: _ticketCountHr,

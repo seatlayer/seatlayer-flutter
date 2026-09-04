@@ -12,6 +12,8 @@ String _seatsLeftFa(int count) => '$count باقی مانده';
 
 String _moreCountFa(int count) => '+$count بیشتر';
 
+String _addMinutesFa(int minutes) => '+$minutes دقیقه';
+
 String _fromPriceFa(String money) => 'از $money';
 
 String _sightlineFa(String metres) => '‏≈ $metres متر تا صحنه';
@@ -58,6 +60,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   colorblindSafe: 'رنگ‌های مناسب کوررنگی',
   seatsLeft: _seatsLeftFa,
   moreCount: _moreCountFa,
+  addMinutes: _addMinutesFa,
   fromPrice: _fromPriceFa,
   sightline: _sightlineFa,
   ticketCount: _ticketCountFa,

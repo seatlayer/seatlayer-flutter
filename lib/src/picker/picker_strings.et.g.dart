@@ -12,6 +12,8 @@ String _seatsLeftEt(int count) => 'Jäänud $count';
 
 String _moreCountEt(int count) => '+$count veel';
 
+String _addMinutesEt(int minutes) => '+$minutes min';
+
 String _fromPriceEt(String money) => 'Alates $money';
 
 String _sightlineEt(String metres) => '≈ $metres m laval';
@@ -58,6 +60,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   colorblindSafe: 'Värvipimedasõbralikud värvid',
   seatsLeft: _seatsLeftEt,
   moreCount: _moreCountEt,
+  addMinutes: _addMinutesEt,
   fromPrice: _fromPriceEt,
   sightline: _sightlineEt,
   ticketCount: _ticketCountEt,

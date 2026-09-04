@@ -12,6 +12,8 @@ String _seatsLeftHu(int count) => '$count maradt';
 
 String _moreCountHu(int count) => '+$count további';
 
+String _addMinutesHu(int minutes) => '+$minutes perc';
+
 String _fromPriceHu(String money) => '$money-tól';
 
 String _sightlineHu(String metres) => '≈ $metres m a színpadig';
@@ -58,6 +60,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   colorblindSafe: 'Színvakbarát színek',
   seatsLeft: _seatsLeftHu,
   moreCount: _moreCountHu,
+  addMinutes: _addMinutesHu,
   fromPrice: _fromPriceHu,
   sightline: _sightlineHu,
   ticketCount: _ticketCountHu,

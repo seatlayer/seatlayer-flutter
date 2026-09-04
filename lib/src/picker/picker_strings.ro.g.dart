@@ -12,6 +12,8 @@ String _seatsLeftRo(int count) => 'Au rămas $count';
 
 String _moreCountRo(int count) => '+$count în plus';
 
+String _addMinutesRo(int minutes) => '+$minutes min';
+
 String _fromPriceRo(String money) => 'De la $money';
 
 String _sightlineRo(String metres) => '≈ $metres m până la scenă';
@@ -59,6 +61,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   colorblindSafe: 'Culori potrivite pentru daltonism',
   seatsLeft: _seatsLeftRo,
   moreCount: _moreCountRo,
+  addMinutes: _addMinutesRo,
   fromPrice: _fromPriceRo,
   sightline: _sightlineRo,
   ticketCount: _ticketCountRo,

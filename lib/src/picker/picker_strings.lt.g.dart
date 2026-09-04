@@ -12,6 +12,8 @@ String _seatsLeftLt(int count) => 'Liko $count';
 
 String _moreCountLt(int count) => '+$count daugiau';
 
+String _addMinutesLt(int minutes) => '+$minutes min';
+
 String _fromPriceLt(String money) => 'Nuo $money';
 
 String _sightlineLt(String metres) => '≈ $metres m iki scenos';
@@ -59,6 +61,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   colorblindSafe: 'Daltonikams pritaikytos spalvos',
   seatsLeft: _seatsLeftLt,
   moreCount: _moreCountLt,
+  addMinutes: _addMinutesLt,
   fromPrice: _fromPriceLt,
   sightline: _sightlineLt,
   ticketCount: _ticketCountLt,

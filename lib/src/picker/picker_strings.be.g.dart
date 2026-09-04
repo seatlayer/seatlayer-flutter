@@ -12,6 +12,8 @@ String _seatsLeftBe(int count) => 'Засталося $count';
 
 String _moreCountBe(int count) => '+$count яшчэ';
 
+String _addMinutesBe(int minutes) => '+$minutes хв';
+
 String _fromPriceBe(String money) => 'Ад $money';
 
 String _sightlineBe(String metres) => '≈ $metres м да сцэны';
@@ -58,6 +60,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   colorblindSafe: 'Колеры для дальтонікаў',
   seatsLeft: _seatsLeftBe,
   moreCount: _moreCountBe,
+  addMinutes: _addMinutesBe,
   fromPrice: _fromPriceBe,
   sightline: _sightlineBe,
   ticketCount: _ticketCountBe,
