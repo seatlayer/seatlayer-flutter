@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   loading: 'Läser in platskartan…',
   errorMessage: 'Platskartan laddades inte',
   retry: 'Försök igen',
+  accessRefresh: 'Ladda om',
   hideLimitedView: 'Dölj platser med begränsad sikt',
   colorblindSafe: 'Färgblindvänliga färger',
   continueWord: 'Fortsätt',

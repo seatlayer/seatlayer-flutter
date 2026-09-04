@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsPt = SeatLayerPickerStrings(
   loading: 'A carregar o mapa de lugares…',
   errorMessage: 'O mapa de lugares não carregou',
   retry: 'Tentar de novo',
+  accessRefresh: 'Recarregar',
   hideLimitedView: 'Ocultar lugares com vista limitada',
   colorblindSafe: 'Cores adaptadas a daltonismo',
   continueWord: 'Continuar',

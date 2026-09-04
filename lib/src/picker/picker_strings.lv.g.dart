@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   loading: 'Ielādējam vietu plānu…',
   errorMessage: 'Vietu plāns neielādējās',
   retry: 'Mēģināt vēlreiz',
+  accessRefresh: 'Pārlādēt',
   hideLimitedView: 'Paslēpt vietas ar ierobežotu skatu',
   colorblindSafe: 'Daltoniķiem draudzīgas krāsas',
   continueWord: 'Turpināt',

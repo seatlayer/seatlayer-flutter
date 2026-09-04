@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   loading: 'Завантажуємо схему місць…',
   errorMessage: 'Схема місць не завантажилася',
   retry: 'Спробувати ще раз',
+  accessRefresh: 'Оновити',
   hideLimitedView: 'Сховати місця з обмеженим оглядом',
   colorblindSafe: 'Кольори для дальтоніків',
   continueWord: 'Продовжити',

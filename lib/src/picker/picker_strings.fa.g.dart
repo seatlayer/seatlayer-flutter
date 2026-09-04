@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   loading: 'در حال بارگذاری نقشهٔ صندلی‌ها…',
   errorMessage: 'نقشهٔ صندلی‌ها بارگذاری نشد',
   retry: 'دوباره تلاش کنید',
+  accessRefresh: 'تازه‌سازی',
   hideLimitedView: 'پنهان کردن صندلی‌های با دید محدود',
   colorblindSafe: 'رنگ‌های مناسب کوررنگی',
   continueWord: 'ادامه',

@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   loading: 'Зареждане на плана на местата…',
   errorMessage: 'Планът на местата не се зареди',
   retry: 'Опитай отново',
+  accessRefresh: 'Презареди',
   hideLimitedView: 'Скрий местата с ограничена видимост',
   colorblindSafe: 'Цветове за далтонисти',
   continueWord: 'Продължи',

@@ -1191,6 +1191,27 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   /// A refusal the server is entitled to make answers `false` rather than
   /// throwing: it is not a fault, the buyer asked and the answer is no. A
   /// transport failure still throws. See `design/picker-spec.md` 3.13.8.
+  /// Re-acquire the buyer access session, without taking the map away.
+  ///
+  /// IN PLACE FIRST, ALWAYS. This re-bootstraps the session and re-reads the
+  /// chart while the map stays mounted, so the buyer keeps their selection,
+  /// their camera and their place in the venue. [retry] is the last resort: it
+  /// destroys the runtime and mounts a fresh one, which throws all of that
+  /// away.
+  ///
+  /// Answers whether a fresh bearer is held. `false` is a real answer — an
+  /// access link that is still revoked refreshes to the same panel, which is
+  /// honest — so it is not raised as an error.
+  Future<bool> refreshAccess() async {
+    if (_disposed) return false;
+    // Through the picker's own command seam, so this behaves like every other
+    // picker action: one correlated command, one snapshot re-read after it.
+    final result = await mapController.runBridgeCommand('refreshAccess');
+    final refreshed = jBool(jGet(result, 'refreshed')) ?? false;
+    if (refreshed && !_disposed) await _resyncSnapshot();
+    return refreshed;
+  }
+
   Future<bool> extendHold({Duration? by}) async {
     final rejected = _rejectReadOnly<bool>('picker.extendHold');
     if (rejected != null) return rejected;

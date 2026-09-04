@@ -107,6 +107,7 @@ class SeatLayerPickerStrings {
     this.loading = SeatLayerStringTokens.loading,
     this.errorMessage = SeatLayerStringTokens.errorMessage,
     this.retry = SeatLayerStringTokens.retry,
+    this.accessRefresh = SeatLayerStringTokens.accessRefresh,
     this.accessibilityTitle = SeatLayerStringTokens.accessibilityTitle,
     this.hideLimitedView = SeatLayerStringTokens.hideLimitedView,
     this.colorblindSafe = SeatLayerStringTokens.colorblindSafe,
@@ -617,6 +618,12 @@ class SeatLayerPickerStrings {
 
   /// The action that tries a failed load again.
   final String retry;
+
+  /// "Refresh" — re-bootstrap the buyer session in place.
+  ///
+  /// Its own word, not [retry]: that one is the paused screen's "Try again",
+  /// and one string cannot carry two verbs.
+  final String accessRefresh;
 
   /// Title of the accessibility and view sheet.
   final String accessibilityTitle;

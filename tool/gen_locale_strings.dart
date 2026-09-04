@@ -44,6 +44,7 @@ const List<String> _plainFields = <String>[
   'loading',
   'errorMessage',
   'retry',
+  'accessRefresh',
   'hideLimitedView',
   'colorblindSafe',
   // Also composed into `continueWithTotal` below. It is a standalone button

@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   loading: 'Įkeliamas vietų planas…',
   errorMessage: 'Vietų planas neįsikėlė',
   retry: 'Bandyti dar kartą',
+  accessRefresh: 'Atnaujinti',
   hideLimitedView: 'Slėpti vietas su ribotu matomumu',
   colorblindSafe: 'Daltonikams pritaikytos spalvos',
   continueWord: 'Tęsti',

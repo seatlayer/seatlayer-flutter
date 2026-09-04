@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSk = SeatLayerPickerStrings(
   loading: 'Načítava sa plán miest…',
   errorMessage: 'Plán miest sa nenačítal',
   retry: 'Skúsiť znova',
+  accessRefresh: 'Obnoviť',
   hideLimitedView: 'Skryť miesta s obmedzeným výhľadom',
   colorblindSafe: 'Farby vhodné pre farboslepých',
   continueWord: 'Pokračovať',

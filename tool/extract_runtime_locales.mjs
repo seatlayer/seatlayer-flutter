@@ -42,6 +42,7 @@ const KEYS = {
   loading: 'picker.loadingSeatMap',
   errorMessage: 'picker.mapDidNotLoad',
   retry: 'picker.accessRetry',
+  accessRefresh: 'picker.accessRefresh',
   hideLimitedView: 'picker.hideLimitedView',
   colorblindSafe: 'picker.colorblindColors',
   continueWord: 'picker.continue',

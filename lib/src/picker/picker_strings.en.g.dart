@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   loading: 'Loading seat map…',
   errorMessage: 'The seat map didn’t load',
   retry: 'Try again',
+  accessRefresh: 'Refresh',
   hideLimitedView: 'Hide limited-view seats',
   colorblindSafe: 'Colourblind-friendly colours',
   continueWord: 'Continue',

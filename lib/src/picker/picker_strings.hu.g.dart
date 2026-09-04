@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   loading: 'Ülésterv betöltése…',
   errorMessage: 'Az ülésterv nem töltődött be',
   retry: 'Újrapróbálom',
+  accessRefresh: 'Frissítés',
   hideLimitedView: 'Korlátozott kilátású helyek elrejtése',
   colorblindSafe: 'Színvakbarát színek',
   continueWord: 'Tovább',

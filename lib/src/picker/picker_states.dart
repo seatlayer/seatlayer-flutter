@@ -226,18 +226,29 @@ SeatLayerAccessTelling seatLayerAccessTelling(
           body: strings.accessPausedCopy,
           action: strings.retry,
         ),
+      // EVERY REASON HAS EXACTLY ONE ACTION. Two of these used to have none,
+      // which left the buyer behind a panel with nothing to press and only
+      // the header's close to get out of it. A recovery that might not work
+      // is still a way forward; a dead end is not.
+      //
+      // Refresh is worth offering even to a revoked link: on the public-key
+      // path a fresh bootstrap IS the recovery, on a grant path it re-resolves
+      // the grant, and a link that is still revoked simply shows this panel
+      // again — which is the honest answer.
       'revoked' => SeatLayerAccessTelling(
           title: strings.accessRevokedTitle,
           body: strings.accessRevokedCopy,
+          action: strings.accessRefresh,
         ),
       'no_token' || 'provider_failed' => SeatLayerAccessTelling(
           title: strings.accessExpiredTitle,
           body: strings.accessExpiredCopy,
-          action: strings.reloadSeatMap,
+          action: strings.accessRefresh,
         ),
       _ => SeatLayerAccessTelling(
           title: strings.accessUnverifiedTitle,
           body: strings.accessUnverifiedCopy,
+          action: strings.accessRefresh,
         ),
     };
 
@@ -245,13 +256,35 @@ class _SeatLayerPickerAccessPanelState
     extends State<SeatLayerPickerAccessPanel> {
   bool _retrying = false;
 
-  Future<void> _retry(SeatLayerPickerController controller) async {
+  /// What the recovery screen's button actually does.
+  ///
+  /// IN PLACE FIRST, ALWAYS. Refreshing re-bootstraps the session and re-reads
+  /// the chart without the map ever going away, and it takes this screen down
+  /// itself the moment the fresh session is live. That is the happy path, and
+  /// it is the one the buyer should get: a reload throws away the map, the
+  /// camera and the seats they had already picked.
+  ///
+  /// A RELOAD IS THE LAST RESORT, AND ONLY WHEN NOBODY ELSE IS LISTENING. A
+  /// host that passed `onAccessUnavailable` has already been told and may be
+  /// running its own recovery — remounting the runtime under it would destroy
+  /// that. So the fallback fires only when there is genuinely nothing else
+  /// left to try. The paused screen keeps its own plain retry: nothing is
+  /// wrong with the session there, the organizer has simply stopped selling.
+  Future<void> _recover(
+    SeatLayerPickerController controller, {
+    required bool paused,
+    required bool hostListening,
+  }) async {
     if (_retrying) return;
     setState(() => _retrying = true);
     try {
-      await controller.retry();
+      if (paused) {
+        await controller.retry();
+      } else if (!await controller.refreshAccess() && !hostListening) {
+        await controller.retry();
+      }
     } catch (_) {
-      // The panel is what a failed retry lands back on, so there is nothing
+      // The panel is what a failed recovery lands back on, so there is nothing
       // to route the failure to: it is already the screen saying so.
     } finally {
       if (mounted) setState(() => _retrying = false);
@@ -267,10 +300,8 @@ class _SeatLayerPickerAccessPanelState
     }
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
-    final telling = seatLayerAccessTelling(
-      strings,
-      state.snapshot?.accessReason,
-    );
+    final reason = state.snapshot?.accessReason;
+    final telling = seatLayerAccessTelling(strings, reason);
     return Semantics(
       container: true,
       liveRegion: true,
@@ -345,8 +376,16 @@ class _SeatLayerPickerAccessPanelState
                                   const EdgeInsets.symmetric(horizontal: 18),
                               shape: const StadiumBorder(),
                             ),
-                            onPressed:
-                                _retrying ? null : () => _retry(controller),
+                            onPressed: _retrying
+                                ? null
+                                : () => _recover(
+                                      controller,
+                                      paused: reason == 'paused',
+                                      hostListening: SeatLayerPickerScope
+                                              .callbacksOf(context)
+                                              .onAccessUnavailable !=
+                                          null,
+                                    ),
                             child: Text(
                               telling.action!,
                               style: TextStyle(

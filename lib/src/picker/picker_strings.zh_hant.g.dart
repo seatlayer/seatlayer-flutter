@@ -54,6 +54,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       loading: '正在載入座位圖…',
       errorMessage: '座位圖未能載入',
       retry: '重試',
+      accessRefresh: '重新整理',
       hideLimitedView: '隱藏視野受限的座位',
       colorblindSafe: '色盲友善配色',
       continueWord: '繼續',

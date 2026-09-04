@@ -53,6 +53,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   loading: '座席図を読み込んでいます…',
   errorMessage: '座席図を読み込めませんでした',
   retry: '再試行',
+  accessRefresh: '再読み込み',
   hideLimitedView: '視界制限のある座席を隠す',
   colorblindSafe: '色覚に配慮した配色',
   continueWord: '次へ',

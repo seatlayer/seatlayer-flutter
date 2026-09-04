@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   loading: 'Nexşeya cihan tê barkirin…',
   errorMessage: 'Nexşeya cihan nehat barkirin',
   retry: 'Dîsa biceribîne',
+  accessRefresh: 'Nû bike',
   hideLimitedView: 'Cihên bi dîmena sînordar veşêre',
   colorblindSafe: 'Rengên guncav ji bo kortiya rengan',
   continueWord: 'Berdewam bike',

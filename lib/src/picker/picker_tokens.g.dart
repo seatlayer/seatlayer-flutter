@@ -1149,6 +1149,9 @@ abstract final class SeatLayerStringTokens {
   /// +{count} min
   static const String addMinutes = '+{count} min';
 
+  /// Refresh
+  static const String accessRefresh = 'Refresh';
+
   /// Select a ticket type
   static const String selectTicketTier = 'Select a ticket type';
 

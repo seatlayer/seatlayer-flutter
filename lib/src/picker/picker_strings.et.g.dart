@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   loading: 'Laadime istekohtade plaani…',
   errorMessage: 'Istekohtade plaan ei laadinud',
   retry: 'Proovi uuesti',
+  accessRefresh: 'Värskenda',
   hideLimitedView: 'Peida piiratud vaatega kohad',
   colorblindSafe: 'Värvipimedasõbralikud värvid',
   continueWord: 'Jätka',

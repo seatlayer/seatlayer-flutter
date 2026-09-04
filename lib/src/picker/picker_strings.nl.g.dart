@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   loading: 'Zaalplattegrond laden…',
   errorMessage: 'De zaalplattegrond is niet geladen',
   retry: 'Opnieuw proberen',
+  accessRefresh: 'Vernieuwen',
   hideLimitedView: 'Plaatsen met beperkt zicht verbergen',
   colorblindSafe: 'Kleurenblindvriendelijke kleuren',
   continueWord: 'Doorgaan',

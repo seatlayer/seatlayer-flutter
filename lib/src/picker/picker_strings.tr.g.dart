@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   loading: 'Koltuk planı yükleniyor…',
   errorMessage: 'Koltuk planı yüklenemedi',
   retry: 'Tekrar dene',
+  accessRefresh: 'Yenile',
   hideLimitedView: 'Kısıtlı manzaralı koltukları gizle',
   colorblindSafe: 'Renk körlüğüne uygun renkler',
   continueWord: 'Devam',

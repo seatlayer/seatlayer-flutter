@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsPl = SeatLayerPickerStrings(
   loading: 'Wczytywanie planu miejsc…',
   errorMessage: 'Plan miejsc się nie wczytał',
   retry: 'Spróbuj ponownie',
+  accessRefresh: 'Odśwież',
   hideLimitedView: 'Ukryj miejsca z ograniczoną widocznością',
   colorblindSafe: 'Kolory przyjazne daltonistom',
   continueWord: 'Dalej',

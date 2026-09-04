@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   loading: 'Ladataan paikkakarttaa…',
   errorMessage: 'Paikkakartta ei latautunut',
   retry: 'Yritä uudelleen',
+  accessRefresh: 'Lataa uudelleen',
   hideLimitedView: 'Piilota paikat, joissa on rajoitettu näkyvyys',
   colorblindSafe: 'Värisokeusystävälliset värit',
   continueWord: 'Jatka',

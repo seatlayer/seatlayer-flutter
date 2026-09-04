@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFr = SeatLayerPickerStrings(
   loading: 'Chargement du plan de salle…',
   errorMessage: 'Le plan de salle n’a pas pu se charger',
   retry: 'Réessayer',
+  accessRefresh: 'Actualiser',
   hideLimitedView: 'Masquer les places à visibilité réduite',
   colorblindSafe: 'Couleurs adaptées au daltonisme',
   continueWord: 'Continuer',

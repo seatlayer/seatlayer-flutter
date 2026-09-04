@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   loading: 'Laster setekartet…',
   errorMessage: 'Setekartet ble ikke lastet',
   retry: 'Prøv igjen',
+  accessRefresh: 'Last på nytt',
   hideLimitedView: 'Skjul plasser med begrenset sikt',
   colorblindSafe: 'Fargeblindvennlige farger',
   continueWord: 'Fortsett',

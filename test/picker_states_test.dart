@@ -138,21 +138,37 @@ void main() {
         'These seats are on hold right now',
       );
       expect(
-        seatLayerAccessTelling(strings, 'revoked').action,
-        isNull,
-        reason: 'a revoked link has nothing left to try',
-      );
-      expect(
-        seatLayerAccessTelling(strings, 'no_token').action,
-        'Reload seat map',
-      );
-      expect(
         seatLayerAccessTelling(strings, 'something-new').title,
         "We couldn't verify your access",
       );
+
+      // EVERY REASON HAS EXACTLY ONE ACTION. Two of these used to have none,
+      // which left the buyer behind a panel with nothing to press. A recovery
+      // that might not work is still a way forward; a dead end is not — and a
+      // revoked link that refreshes to the same panel is the honest answer.
+      for (final reason in <String?>[
+        'paused',
+        'revoked',
+        'no_token',
+        'provider_failed',
+        'something-new',
+        null,
+      ]) {
+        expect(
+          seatLayerAccessTelling(strings, reason).action,
+          isNotNull,
+          reason: 'the "$reason" panel must offer a way forward',
+        );
+      }
+      // Its own word, not the paused screen's "Try again": one string cannot
+      // carry two verbs.
+      expect(seatLayerAccessTelling(strings, 'paused').action, 'Try again');
+      expect(seatLayerAccessTelling(strings, 'revoked').action, 'Refresh');
+      expect(seatLayerAccessTelling(strings, 'no_token').action, 'Refresh');
     });
 
-    testWidgets('retries, and shows that it is working', (tester) async {
+    testWidgets('recovers in place, and shows that it is working',
+        (tester) async {
       final map = FakePickerMap();
       addTearDown(map.dispose);
       usePhoneSurface(tester);
@@ -170,13 +186,17 @@ void main() {
 
       expect(find.text('Your seat session has expired'), findsOneWidget);
 
-      await tester.tap(find.text('Reload seat map'));
+      await tester.tap(find.text('Refresh'));
       await tester.pumpAndSettle();
 
+      // IN PLACE FIRST: the session is re-bootstrapped through the live
+      // runtime, so the buyer keeps their map, their camera and their picks.
+      // Remounting is the last resort, and only when no host is listening.
+      expect(map.callsTo('refreshAccess'), hasLength(1));
       expect(
         controller.state.phase,
         isNot(SeatLayerPickerPhase.unavailable),
-        reason: 'the retry has to actually restart the runtime',
+        reason: 'the recovery has to actually clear the panel',
       );
       expect(find.text('Your seat session has expired'), findsNothing);
     });

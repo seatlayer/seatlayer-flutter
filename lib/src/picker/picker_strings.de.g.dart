@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
   loading: 'Sitzplan wird geladen…',
   errorMessage: 'Der Sitzplan konnte nicht geladen werden',
   retry: 'Erneut versuchen',
+  accessRefresh: 'Neu laden',
   hideLimitedView: 'Plätze mit eingeschränkter Sicht ausblenden',
   colorblindSafe: 'Farbenblindenfreundliche Farben',
   continueWord: 'Weiter',

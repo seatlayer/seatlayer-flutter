@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   loading: 'טוענים את מפת המושבים…',
   errorMessage: 'מפת המושבים לא נטענה',
   retry: 'נסו שוב',
+  accessRefresh: 'רענון',
   hideLimitedView: 'הסתרת מושבים עם נוף מוגבל',
   colorblindSafe: 'צבעים ידידותיים לעיוורי צבעים',
   continueWord: 'המשך',

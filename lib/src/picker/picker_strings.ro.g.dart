@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   loading: 'Se încarcă harta locurilor…',
   errorMessage: 'Harta locurilor nu s-a încărcat',
   retry: 'Încearcă din nou',
+  accessRefresh: 'Reîmprospătează',
   hideLimitedView: 'Ascunde locurile cu vizibilitate limitată',
   colorblindSafe: 'Culori potrivite pentru daltonism',
   continueWord: 'Continuă',

@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
   loading: 'Учитавање плана места…',
   errorMessage: 'План места се није учитао',
   retry: 'Покушај поново',
+  accessRefresh: 'Освежи',
   hideLimitedView: 'Сакриј места са ограниченим погледом',
   colorblindSafe: 'Боје прилагођене далтонизму',
   continueWord: 'Настави',

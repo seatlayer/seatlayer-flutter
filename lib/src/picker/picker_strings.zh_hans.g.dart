@@ -54,6 +54,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       loading: '正在加载座位图…',
       errorMessage: '座位图未能加载',
       retry: '重试',
+      accessRefresh: '刷新',
       hideLimitedView: '隐藏视野受限的座位',
       colorblindSafe: '色盲友好配色',
       continueWord: '继续',

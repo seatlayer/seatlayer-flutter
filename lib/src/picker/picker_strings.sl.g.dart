@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   loading: 'Nalagamo načrt sedežev…',
   errorMessage: 'Načrt sedežev se ni naložil',
   retry: 'Poskusi znova',
+  accessRefresh: 'Osveži',
   hideLimitedView: 'Skrij sedeže z omejenim pogledom',
   colorblindSafe: 'Barve, prijazne barvni slepoti',
   continueWord: 'Nadaljuj',

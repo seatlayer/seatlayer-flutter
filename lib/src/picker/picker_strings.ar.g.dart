@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   loading: 'جارٍ تحميل خريطة المقاعد…',
   errorMessage: 'لم تُحمَّل خريطة المقاعد',
   retry: 'حاول مرة أخرى',
+  accessRefresh: 'تحديث',
   hideLimitedView: 'إخفاء المقاعد ذات الرؤية المحدودة',
   colorblindSafe: 'ألوان ملائمة لعمى الألوان',
   continueWord: 'متابعة',

@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   loading: 'Φόρτωση χάρτη θέσεων…',
   errorMessage: 'Ο χάρτης θέσεων δεν φορτώθηκε',
   retry: 'Δοκιμάστε ξανά',
+  accessRefresh: 'Ανανέωση',
   hideLimitedView: 'Απόκρυψη θέσεων με περιορισμένη θέα',
   colorblindSafe: 'Χρώματα φιλικά προς την αχρωματοψία',
   continueWord: 'Συνέχεια',

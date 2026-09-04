@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   loading: 'Carregant el mapa de seients…',
   errorMessage: 'El mapa de seients no s\'ha carregat',
   retry: 'Torna-ho a provar',
+  accessRefresh: 'Actualitza',
   hideLimitedView: 'Amaga els seients amb visibilitat limitada',
   colorblindSafe: 'Colors adaptats al daltonisme',
   continueWord: 'Continua',

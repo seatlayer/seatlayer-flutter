@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEs = SeatLayerPickerStrings(
   loading: 'Cargando el mapa de asientos…',
   errorMessage: 'El mapa de asientos no se pudo cargar',
   retry: 'Intentar de nuevo',
+  accessRefresh: 'Recargar',
   hideLimitedView: 'Ocultar asientos con visibilidad limitada',
   colorblindSafe: 'Colores para daltónicos',
   continueWord: 'Continuar',

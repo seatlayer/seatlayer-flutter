@@ -56,6 +56,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   loading: 'Indlæser pladsoversigten…',
   errorMessage: 'Pladsoversigten blev ikke indlæst',
   retry: 'Prøv igen',
+  accessRefresh: 'Genindlæs',
   hideLimitedView: 'Skjul pladser med begrænset udsyn',
   colorblindSafe: 'Farveblindvenlige farver',
   continueWord: 'Fortsæt',

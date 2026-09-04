@@ -1428,17 +1428,38 @@ picker rather than patching a half-built one.
 `SeatLayerPickerAccessPanel` — `lib/src/picker/picker_states.dart`. A veiled
 overlay over the whole picker: the ground at high opacity over a blur, a centred
 card at `radius.base`-scale corner on `color.*.surface` with a hairline and a
-deep shadow, a circular icon badge in an accent tint, a title, a body and, where
-there is one, an action pill.
+deep shadow, a circular icon badge in an accent tint, a title, a body and an
+action pill.
 
-Four variants:
+**Every reason has exactly one action.** Two of these used to have none, which
+left the buyer behind a panel with nothing to press and only the header's close
+to get out of it. A recovery that might not work is still a way forward; a dead
+end is not.
 
 | Reason | Title | Body | Action |
 | --- | --- | --- | --- |
 | paused | `strings.accessPausedTitle` | `strings.accessPausedCopy` | `strings.retry` |
-| revoked | `strings.accessRevokedTitle` | `strings.accessRevokedCopy` | — |
-| expired (no token, provider failed) | `strings.accessExpiredTitle` | `strings.accessExpiredCopy` | `strings.reloadSeatMap` |
-| unverified (default) | `strings.accessUnverifiedTitle` | `strings.accessUnverifiedCopy` | — |
+| revoked | `strings.accessRevokedTitle` | `strings.accessRevokedCopy` | `strings.accessRefresh` |
+| expired (no token, provider failed) | `strings.accessExpiredTitle` | `strings.accessExpiredCopy` | `strings.accessRefresh` |
+| unverified (default) | `strings.accessUnverifiedTitle` | `strings.accessUnverifiedCopy` | `strings.accessRefresh` |
+
+`strings.accessRefresh` is its own word, not `strings.retry`: that one is the
+paused screen's "Try again", and one string cannot carry two verbs. Refresh is
+worth offering even to a revoked link — on the public-key path a fresh
+bootstrap IS the recovery, on a grant path it re-resolves the grant, and a link
+that is still revoked simply shows this panel again, which is the honest
+answer.
+
+**What the button does — in place first, always.** `refreshAccess()`
+re-bootstraps the session and re-reads the chart through the live runtime, so
+the map never goes away and the buyer keeps their camera and their picks. Only
+if that fails does the picker fall back to `retry()`, which destroys the
+runtime and mounts a fresh one — and **only when no host is listening**. A host
+that passed `onAccessUnavailable` has been told already and may be running its
+own recovery; remounting under it would destroy that.
+
+The paused screen keeps its plain `retry()`: nothing is wrong with the session
+there, the organizer has simply stopped selling.
 
 All four are set as plain text and never parsed as markup. While retrying, the
 icon spins and the action is disabled. Under reduced motion the card is simply

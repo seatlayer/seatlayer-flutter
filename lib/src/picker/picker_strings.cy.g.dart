@@ -57,6 +57,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   loading: 'Yn llwytho\'r map seddi…',
   errorMessage: 'Ni lwythodd y map seddi',
   retry: 'Rho gynnig arall arni',
+  accessRefresh: 'Ail-lwytho',
   hideLimitedView: 'Cuddio seddi â golygfa gyfyngedig',
   colorblindSafe: 'Lliwiau sy\'n gyfeillgar i ddallineb lliw',
   continueWord: 'Parhau',
