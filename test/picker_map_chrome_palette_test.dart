@@ -55,12 +55,39 @@ Color _sheetGround(WidgetTester tester) => tester
 
 void main() {
   /// The badge's recipe, resolved against [surface].
+  ///
+  /// Deliberately the production resolvers rather than a copy of their
+  /// arithmetic: a duplicated blend constant is what let the ink drift away
+  /// from its ground unnoticed. The ink is whatever clears the floor while
+  /// keeping the most amber, so the test asserts the floor, not a colour.
   ({Color ground, Color ink}) badgeRecipe(
           Color warning, Color surface, Color text) =>
       (
-        ground: Color.alphaBlend(warning.withAlpha(41), surface),
-        ink: Color.lerp(warning, text, .52)!,
+        ground: Color.alphaBlend(
+          warning.withAlpha(
+            (SeatLayerOpacityTokens.warnPillWash * 255).round(),
+          ),
+          surface,
+        ),
+        ink: seatLayerWarnPillInk(warning, text, surface),
       );
+
+  /// WCAG relative contrast, so the badge's promise can be asserted directly.
+  double contrast(Color a, Color b) {
+    final first = a.computeLuminance() + 0.05;
+    final second = b.computeLuminance() + 0.05;
+    return first > second ? first / second : second / first;
+  }
+
+  /// The badge is a safety notice, so its ink must be readable on its own
+  /// ground — the warning WASH over the surface, never the bare surface.
+  void expectBadgeReadable(WidgetTester tester) {
+    expect(
+      contrast(_badgeInk(tester), _badgeGround(tester)),
+      greaterThanOrEqualTo(4.5),
+      reason: 'the test-mode badge must clear 4.5:1 on its own wash',
+    );
+  }
 
   testWidgets('the test badge is a warning tint of the light map',
       (tester) async {
@@ -85,6 +112,7 @@ void main() {
     );
     expect(_badgeGround(tester), want.ground);
     expect(_badgeInk(tester), want.ink);
+    expectBadgeReadable(tester);
     // Never the solid amber lozenge: on a map it reads as a highlighter
     // stripe left on the screen.
     expect(_badgeGround(tester), isNot(SeatLayerLightTokens.warning));
@@ -112,6 +140,7 @@ void main() {
     );
     expect(_badgeGround(tester), want.ground);
     expect(_badgeInk(tester), want.ink);
+    expectBadgeReadable(tester);
   });
 
   testWidgets('the badge goes dark inside the scene, on a LIGHT picker',
@@ -137,6 +166,7 @@ void main() {
     );
     expect(_badgeGround(tester), want.ground);
     expect(_badgeInk(tester), want.ink);
+    expectBadgeReadable(tester);
   });
 
   testWidgets('the cart sheet takes the scene palette, like the header',

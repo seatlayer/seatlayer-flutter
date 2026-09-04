@@ -349,9 +349,30 @@ render.
 
 **Anatomy.** One recipe in both themes: height `size.testChipHeight`,
 `radius.pill`, label at `size.testChipFontSize` in warning ink, ground the
-warning colour mixed into the surface, hairline the warning colour at half
-strength, leading dot of `size.testChipDotSize` in `color.*.warning` with a soft
-halo. Amber, never the accent — an environment flag must not wear "buy" gold.
+warning colour at `opacity.warnPillWash` over the surface, hairline the warning
+colour at half strength, leading dot of `size.testChipDotSize` in
+`color.*.warning` with a soft halo. Amber, never the accent — an environment
+flag must not wear "buy" gold.
+
+**Ink — measured against the wash, not the surface.** The chip is not painted
+on the surface; it is painted on the wash *over* it, which is a different and
+always-warmer colour. Resolve the ink in three steps, in order of how much of
+the brand hue they keep:
+
+1. the warning hue itself, when it already clears **4.5:1** on its own wash;
+2. the hue walked toward `color.*.text` in 0.05 steps from 0.15 until it clears;
+3. a neutral ink chosen by contrast between `#172033` and `#EEF1F8`, when the
+   hue cannot get there at all.
+
+Step 3 is the one a fixed blend has no answer for: on a mid-tone ground no mix
+of a mid-tone gold and a mid-tone ink clears 4.5:1, and a walk with no fallback
+runs out and returns the ground's own ink. Giving up the hue is the right trade
+— the chip is a safety notice, and a legible neutral beats an illegible brand
+colour. A fixed blend measured against the bare surface produced a 2.3:1 chip
+on a mixed theme (a light host theme over a chart saved dark).
+
+The walk stops at the **first** candidate that clears, so the chip keeps as much
+amber as the floor allows rather than driving to maximum contrast.
 
 **Copy.** Sentence case `strings.testMode`; the accessible name keeps
 `strings.testModeLong`; the description is `strings.testModeExplained`.

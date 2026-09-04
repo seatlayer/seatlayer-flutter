@@ -50,6 +50,12 @@ abstract final class SeatLayerLightTokens {
 
   /// `#5B4B8A`
   static const Color mapSelection = Color(0xFF5B4B8A);
+
+  /// `#FFFFFF`
+  static const Color chrome = Color(0xFFFFFFFF);
+
+  /// `#8C172033`
+  static const Color chromeLine = Color(0x8C172033);
 }
 
 /// The dark palette.
@@ -110,6 +116,12 @@ abstract final class SeatLayerDarkTokens {
 
   /// `#EEF3FB`
   static const Color immersiveCaptionInk = Color(0xFFEEF3FB);
+
+  /// `#556278`
+  static const Color chrome = Color(0xFF556278);
+
+  /// `#8CE9EEF7`
+  static const Color chromeLine = Color(0x8CE9EEF7);
 }
 
 /// The measured sizes the phone chrome is built from.
@@ -633,6 +645,9 @@ abstract final class SeatLayerElevationTokens {
 abstract final class SeatLayerOpacityTokens {
   /// `0.45`
   static const double removing = 0.45;
+
+  /// `0.18`
+  static const double warnPillWash = 0.18;
 }
 
 /// Motion durations, in milliseconds.

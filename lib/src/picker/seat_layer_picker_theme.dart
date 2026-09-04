@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart' show CupertinoTheme;
 import 'package:flutter/material.dart';
 
+import 'picker_internal.dart';
 import 'picker_layout.dart';
 import 'picker_tokens.g.dart';
 import 'picker_styles.dart';
@@ -598,6 +599,54 @@ Color seatLayerAccentTextFor(
   }
   return text;
 }
+
+/// The better of the two picker inks on [background], by contrast.
+///
+/// Mirrors `highestContrastInk` in the web runtime, including its two
+/// candidates: neither is pure black or pure white, because the picker's own
+/// ink is what the rest of the sentence is set in.
+Color seatLayerHighestContrastInk(Color background) =>
+    _contrast(_inkDark, background) >= _contrast(_inkLight, background)
+        ? _inkDark
+        : _inkLight;
+
+const Color _inkDark = Color(0xFF172033);
+const Color _inkLight = Color(0xFFEEF1F8);
+
+/// Readable ink for the test-mode pill, measured against its REAL ground.
+///
+/// The pill is not painted on [surface]. It is painted on a
+/// [SeatLayerOpacityTokens.warnPillWash] wash of [warning] over it, which is a
+/// different and always-warmer colour — so [surface] is the ground to mix, not
+/// the ground to measure. Measuring against the surface is how a live buyer
+/// got a 2.3:1 pill: a host passing a LIGHT theme over a chart saved DARK gets
+/// a dark-olive answer, while the pill actually floats on the wash over a
+/// near-black map.
+///
+/// Three steps, in order of how much of the brand hue they keep:
+///
+///  1. the hue itself, when it already reads on its own wash;
+///  2. the hue walked toward [text] until it clears;
+///  3. a NEUTRAL ink chosen by contrast, when the hue cannot get there at all.
+///
+/// Step 3 is the one a fixed blend has no answer for. On a mid-tone ground no
+/// mix of a mid-tone gold and a mid-tone ink clears 4.5:1, and a walk with no
+/// fallback simply runs out. Giving up the hue is the right trade: the pill is
+/// a safety notice, and a legible neutral beats an illegible brand colour.
+Color seatLayerWarnPillInk(Color warning, Color text, Color surface) {
+  final ground = Color.alphaBlend(
+    pickerAlpha(warning, SeatLayerOpacityTokens.warnPillWash),
+    surface,
+  );
+  if (_contrast(warning, ground) >= _warnPillContrastFloor) return warning;
+  for (var textWeight = 0.15; textWeight <= 1.0; textWeight += 0.05) {
+    final candidate = Color.lerp(warning, text, textWeight)!;
+    if (_contrast(candidate, ground) >= _warnPillContrastFloor) return candidate;
+  }
+  return seatLayerHighestContrastInk(ground);
+}
+
+const double _warnPillContrastFloor = 4.5;
 
 /// WCAG relative contrast between two opaque colours.
 double _contrast(Color a, Color b) {

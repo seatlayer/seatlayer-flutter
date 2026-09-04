@@ -382,10 +382,14 @@ override** `style:`
 - **Rules** required chrome: it has no host switch, and exactly one may render.
   It steps below the immersive scene's own back control rather than under it.
 - **Anatomy** a pill of `size.testChipHeight` at `radius.pill`, one recipe in
-  both themes: warning ink on the warning colour mixed into the surface, a
-  leading dot of `size.testChipDotSize`. Copy `strings.testMode`; the accessible
-  name keeps `strings.testModeLong`. Amber, never the accent — an environment
-  flag must not wear "buy" gold.
+  both themes: warning ink on the warning colour at `opacity.warnPillWash` over
+  the surface, a leading dot of `size.testChipDotSize`. Copy `strings.testMode`;
+  the accessible name keeps `strings.testModeLong`. Amber, never the accent — an
+  environment flag must not wear "buy" gold.
+- **Contrast** the ink is measured against the **wash**, never the bare surface,
+  and must clear 4.5:1 on it: the hue if it already reads, else the hue walked
+  toward `color.*.text` until it clears, else a neutral chosen by contrast.
+  Never a fixed blend — one produced a 2.3:1 pill on a mixed theme.
 
 ---
 

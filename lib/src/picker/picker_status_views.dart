@@ -49,7 +49,10 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
     final ink = seatLayerWarningText(theme);
     final Widget pill = DecoratedBox(
       decoration: BoxDecoration(
-        color: Color.alphaBlend(pickerAlpha(theme.warning, .16), theme.surface),
+        color: Color.alphaBlend(
+          pickerAlpha(theme.warning, SeatLayerOpacityTokens.warnPillWash),
+          theme.surface,
+        ),
         borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
         border: Border.all(color: pickerAlpha(theme.warning, .5)),
       ),
@@ -116,8 +119,14 @@ class _TestModeDot extends StatelessWidget {
 ///
 /// Amber is chosen to be noticed as a light, not to be legible as 11 pt type;
 /// mixing it toward the surrounding text keeps the tone and buys the contrast.
+///
+/// The walk is measured against the pill's REAL ground — the warning wash over
+/// the surface, not the surface — and gives the hue up for a neutral when no
+/// mix of the two clears 4.5:1. A fixed blend cannot do either, and on a
+/// mixed theme (a light host theme over a chart saved dark) it produced a
+/// 2.3:1 pill. See [seatLayerWarnPillInk].
 Color seatLayerWarningText(SeatLayerResolvedPickerTheme theme) =>
-    Color.lerp(theme.warning, theme.text, .52)!;
+    seatLayerWarnPillInk(theme.warning, theme.text, theme.surface);
 
 class SeatLayerPickerFloorSelector extends StatelessWidget {
   const SeatLayerPickerFloorSelector({super.key});
