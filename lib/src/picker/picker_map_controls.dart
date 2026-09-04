@@ -113,7 +113,7 @@ class _RailControls extends StatelessWidget {
             const SeatLayerPickerZoomInButton(),
             const SeatLayerPickerZoomOutButton(),
           ],
-          if (chrome.showZoomToFitControl)
+          if (chrome.zoomToFitControlFor(phone: false))
             const SeatLayerPickerZoomToFitButton(),
           if (chrome.showViewModeControl &&
               options.enable3D &&
@@ -156,15 +156,21 @@ class _CornerControls extends StatelessWidget {
     // pan, and SeatLayerVenue3D owns that corner. Only the way back stays.
     final onMap = !(state.snapshot?.map.isVenue3D ?? false);
     final phoneZoomPair = chrome.zoomControlsFor(phone: true);
-    // Deep in the venue — a section framed, its seats out — the map has
-    // somewhere to come back from, and only then is there a `−` to draw.
-    // Pinch is what zooms in, so `+` is never here unless the host asks.
-    final deep = onMap && state.snapshot?.map.focusedSection != null;
+    // ONE control, one ladder. `−` walks back a step at a time — the section
+    // the buyer drilled into, then the whole venue — and fit-to-screen did
+    // the same journey in one jump, so the corner carried two round buttons
+    // with nothing on either saying which was which. The phone keeps the
+    // stepped one. Pinch is what zooms in, so `+` is never here unless the
+    // host asks.
+    //
+    // DIMMED, NOT GONE. It used to appear only once the buyer was deep enough
+    // to be lost, so the corner grew and shrank a button under their thumb. A
+    // control that stays put and plainly cannot be pressed says "you are
+    // already looking at everything" without moving the target.
     final zoomColumn = <Widget>[
       if (onMap && phoneZoomPair) const SeatLayerPickerZoomInButton(),
-      if (onMap && (phoneZoomPair || deep))
-        const SeatLayerPickerZoomOutButton(),
-      if (onMap && chrome.showZoomToFitControl)
+      if (onMap) const SeatLayerPickerZoomOutButton(),
+      if (onMap && chrome.zoomToFitControlFor(phone: true))
         const SeatLayerPickerZoomToFitButton(),
     ];
     final bottomLeftColumn = <Widget>[
@@ -213,7 +219,11 @@ class _CornerControls extends StatelessWidget {
               children: zoomColumn,
             ),
           ),
-        if (onMap && chrome.overviewControlFor(phone: true) && deep)
+        // The back-to-overview control is a different question from the zoom
+        // ladder: it only has an answer while a section is actually framed.
+        if (onMap &&
+            chrome.overviewControlFor(phone: true) &&
+            state.snapshot?.map.focusedSection != null)
           Positioned(
             left: inset,
             top: inset,

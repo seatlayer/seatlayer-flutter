@@ -392,7 +392,6 @@ void main() {
           tester.getRect(find.byType(SeatLayerPickerViewModeControl));
       final access =
           tester.getRect(find.byType(SeatLayerPickerAccessibilityFilters));
-      final fit = tester.getRect(find.byType(SeatLayerPickerZoomToFitButton));
       final stepOut =
           tester.getRect(find.byType(SeatLayerPickerZoomOutButton));
 
@@ -400,14 +399,12 @@ void main() {
       expect(segmented.top, closeTo(screen.top + inset, .5));
       expect(access.left, closeTo(screen.left + inset, .5));
       expect(access.bottom, closeTo(screen.bottom - inset, .5));
-      // The camera column: fit at the corner, and the way back out one gap
-      // above it, because the fixture is already inside a section.
-      expect(fit.right, closeTo(screen.right - inset, .5));
-      expect(fit.bottom, closeTo(screen.bottom - inset, .5));
-      expect(
-        fit.top - stepOut.bottom,
-        closeTo(SeatLayerSizeTokens.zoomColumnGap, .5),
-      );
+      // ONE way out of the venue, at the corner. Fit-to-screen went the same
+      // journey in one jump and sat in the same column, so the corner carried
+      // two round buttons with nothing on either saying which was which.
+      expect(stepOut.right, closeTo(screen.right - inset, .5));
+      expect(stepOut.bottom, closeTo(screen.bottom - inset, .5));
+      expect(find.byType(SeatLayerPickerZoomToFitButton), findsNothing);
 
       // Pinch already zooms in, and the colourblind palette lives in the
       // accessibility sheet.
@@ -416,6 +413,47 @@ void main() {
       // The dock's `‹ Venue` is the phone's way back to the whole venue; a
       // second one on the map would be the same door twice.
       expect(find.byType(SeatLayerPickerOverviewButton), findsNothing);
+    });
+
+    testWidgets('the way out of the venue stays put and dims',
+        (tester) async {
+      // It used to appear only once the buyer was deep enough to be lost, so
+      // the corner grew and shrank a button under their thumb. A control that
+      // stays put and plainly cannot be pressed says "you are already looking
+      // at everything" without moving the target.
+      //
+      // `canZoomOut` is the runtime's own answer to the same ladder question
+      // the web picker asks: a section is framed, or seats are the visible
+      // layer. The chrome only dresses it.
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerPickerMapControls(compact: true)),
+      );
+      map.emit(pickerSnapshot(withSelection: false));
+      await tester.pumpAndSettle();
+
+      final stepOut = find.descendant(
+        of: find.byType(SeatLayerPickerZoomOutButton),
+        matching: find.byType(IconButton),
+      );
+      expect(tester.widget<IconButton>(stepOut).onPressed, isNotNull);
+
+      // At the whole venue there is nowhere left to walk back to.
+      map.emit(
+        pickerSnapshot(
+          revision: 2,
+          withSelection: false,
+          rung: 'overview',
+          canZoomOut: false,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SeatLayerPickerZoomOutButton), findsOneWidget);
+      expect(tester.widget<IconButton>(stepOut).onPressed, isNull);
     });
 
     testWidgets('the accessibility control is a 44-point target',
@@ -496,9 +534,10 @@ void main() {
       await tester.pumpAndSettle();
 
       final screen = tester.getRect(find.byType(SeatLayerPickerMapControls));
-      final fit = tester.getRect(find.byType(SeatLayerPickerZoomToFitButton));
+      final stepOut =
+          tester.getRect(find.byType(SeatLayerPickerZoomOutButton));
       expect(
-        fit.bottom,
+        stepOut.bottom,
         closeTo(screen.bottom - 52 - SeatLayerSizeTokens.mapAnchorInset, .5),
       );
     });

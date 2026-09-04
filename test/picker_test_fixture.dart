@@ -41,6 +41,7 @@ Map<String, Object?> pickerSnapshot({
   String? holdOwner,
   bool withSelection = true,
   String rung = 'seats',
+  bool canZoomOut = true,
   String focusedSectionId = 'section-a',
   List<Object?>? sections,
   List<Object?>? cartItems,
@@ -148,7 +149,7 @@ Map<String, Object?> pickerSnapshot({
       'colorblindSafe': false,
       'hideLimitedView': false,
       'canZoomIn': true,
-      'canZoomOut': true,
+      'canZoomOut': canZoomOut,
       'categoryFilter': <Object?>['standard'],
       'focusedSectionId': rung == 'overview' ? null : focusedSectionId,
       'focusedSection': rung == 'overview'

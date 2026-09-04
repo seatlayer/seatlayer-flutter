@@ -395,6 +395,27 @@ inset `size.mapAnchorInset` from the map's edges, with `size.mapAnchorGap`
 between members. Regions do not receive presses; their children do. Nothing
 free-floats.
 
+**One way out, on the phone.** Narrow carries a single back-out control, `−`,
+in the bottom-right region. Fit-to-screen is **not drawn there**: both back the
+camera out, one a step at a time and one all at once, and nothing on either
+round button said which was which. Wide keeps `+`, `−` and fit as they were.
+
+The ladder is the runtime's: one tap returns to the section the buyer drilled
+into, the next leaves it for the whole venue. Short on purpose, because a
+buyer's model of a seat map is a venue, a section in it, seats in that section —
+from the seats it is two taps home.
+
+At home the control is **dimmed, not gone**. It used to appear only once the
+buyer was deep enough to be lost, so the corner grew and shrank a button under
+their thumb. A control that stays put and plainly cannot be pressed says "you
+are already looking at everything" without moving the target. The enabled state
+is `map.canZoomOut`, which the runtime computes as *a section is framed, or
+seats are the visible layer* — deliberately broader than the LOD rung, which
+flips at a scale where a phone still shows labelled section blocks.
+
+Back-to-overview is a different question and keeps its own condition: it renders
+only while a section is actually framed.
+
 **Ground — a disc's own, never the panel's.** Every floating control takes
 `color.*.chrome` with a `color.*.chromeLine` hairline, resolved from the **map
 chrome's** side rather than the picker panel's, so the controls darken with the

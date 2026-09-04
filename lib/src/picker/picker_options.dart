@@ -68,7 +68,7 @@ class SeatLayerPickerChromeOptions {
     this.showMapControls = true,
     this.showOverviewControl,
     this.showZoomControls,
-    this.showZoomToFitControl = true,
+    this.showZoomToFitControl,
     this.showViewModeControl = true,
     this.showColorblindControl,
     this.showAccessibilityControl = true,
@@ -105,8 +105,13 @@ class SeatLayerPickerChromeOptions {
   /// Whether the zoom in/out pair renders. Auto: wide only.
   final bool? showZoomControls;
 
-  /// Whether the fit-to-screen control renders.
-  final bool showZoomToFitControl;
+  /// Whether the fit-to-screen control renders. Auto: wide only.
+  ///
+  /// The phone used to stack two round controls in the same corner — `−` and
+  /// fit-to-screen — with nothing on either saying which was which. Both back
+  /// the camera out; one does it a step at a time and one does it all at once.
+  /// The phone keeps the stepped one.
+  final bool? showZoomToFitControl;
 
   /// Whether the Map/3D control renders on a 3D-capable event.
   final bool showViewModeControl;
@@ -160,6 +165,10 @@ class SeatLayerPickerChromeOptions {
 
   /// Resolve [showZoomControls] for a layout.
   bool zoomControlsFor({required bool phone}) => showZoomControls ?? !phone;
+
+  /// Resolve [showZoomToFitControl] for a layout.
+  bool zoomToFitControlFor({required bool phone}) =>
+      showZoomToFitControl ?? !phone;
 
   /// Resolve [showColorblindControl] for a layout.
   bool colorblindControlFor({required bool phone}) =>

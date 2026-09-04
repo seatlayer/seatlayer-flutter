@@ -173,9 +173,13 @@ override** `style:`
   the immersive scene is up.
 - **Anatomy** round controls `size.mapControlSize`, except the accessibility
   control at `size.accessibilityControlSize` (`size.minimumHitTarget`).
-  Bottom-left accessibility, bottom-right fit; both lift by
+  Bottom-left accessibility, bottom-right the single back-out `−`; both lift by
   `size.dockBarHeight` while the dock is up. The accessible-section stepper
   sits beside the accessibility control, `size.accessStepGap` from it.
+- **Phone ladder** one control, not two: `−` walks section → venue and then
+  **dims in place** (`map.canZoomOut`), rather than appearing and disappearing
+  under the thumb. Fit-to-screen is wide-only — it made the same journey in one
+  jump and neither round button said which was which.
 - **Ground** `color.*.chrome` with a `color.*.chromeLine` hairline, from the
   **map chrome's** side, never the panel's `surface`/`divider` — those vanish
   into a dark map at 1.14:1. Dark separates by the fill (2.96:1 against the
