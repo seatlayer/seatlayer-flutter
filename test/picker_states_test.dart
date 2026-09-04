@@ -208,12 +208,14 @@ void main() {
       map.emit(_expiringSnapshot(300, revision: 1));
       await tester.pumpAndSettle();
 
-      expect(find.text('Add time'), findsNothing);
+      expect(find.text('+5 min'), findsNothing);
 
       map.emit(_expiringSnapshot(48, revision: 2));
       await tester.pumpAndSettle();
 
-      expect(find.text('Add time'), findsOneWidget);
+      // The button names the amount one tap adds. "Add time" beside a
+      // countdown read like an invitation to choose one.
+      expect(find.text('+5 min'), findsOneWidget);
       expect(
         find.textContaining('Your seats are held for 0:48'),
         findsOneWidget,
@@ -231,10 +233,59 @@ void main() {
       map.emit(_expiringSnapshot(48));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Add time'));
+      await tester.tap(find.text('+5 min'));
       await tester.pumpAndSettle();
 
+      // One fixed step, not the host's whole configured hold window.
+      expect(
+        map.callsTo('picker.extendHold').single.$2,
+        <String, Object?>{'ttlMs': 5 * 60 * 1000},
+      );
+    });
+
+    testWidgets('offers its step once per hold', (tester) async {
+      // The server would allow more, but a buyer who can keep asking has been
+      // handed a way to sit on inventory by reflex rather than by decision,
+      // and a countdown that can always be pushed back is not a deadline.
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const _Fill(SeatLayerPickerExtendHoldPrompt())),
+      );
+      map.emit(_expiringSnapshot(48));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('+5 min'));
+      await tester.pumpAndSettle();
+
+      // Retired for this hold, even though the clock is still in the last
+      // minute and the offer would otherwise be due again on the next tick.
+      map.emit(_expiringSnapshot(40, revision: 9));
+      await tester.pumpAndSettle();
+      expect(find.text('+5 min'), findsNothing);
       expect(map.callsTo('picker.extendHold'), hasLength(1));
+    });
+
+    testWidgets('can be waved away without spending the step', (tester) async {
+      // Offered in the last minute over the map, an offer with no refusal is
+      // a thing in the way.
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const _Fill(SeatLayerPickerExtendHoldPrompt())),
+      );
+      map.emit(_expiringSnapshot(48));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text('+5 min'), findsNothing);
+      expect(map.callsTo('picker.extendHold'), isEmpty);
     });
   });
 

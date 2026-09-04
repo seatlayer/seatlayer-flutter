@@ -53,7 +53,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   fitVenue: 'Fit to screen',
   loading: 'Loading seat map…',
   errorMessage: 'The seat map didn’t load',
-  retry: 'Reload seat map',
+  retry: 'Try again',
   hideLimitedView: 'Hide limited-view seats',
   colorblindSafe: 'Colourblind-friendly colours',
   seatsLeft: _seatsLeftEn,

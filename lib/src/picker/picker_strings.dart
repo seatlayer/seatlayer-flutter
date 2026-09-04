@@ -136,6 +136,7 @@ class SeatLayerPickerStrings {
     this.soldOutCopy = SeatLayerStringTokens.soldOutCopy,
     this.holdExpired = SeatLayerStringTokens.holdExpired,
     this.addTime = SeatLayerStringTokens.addTime,
+    this.addMinutes = _defaultAddMinutes,
     this.addingEllipsis = SeatLayerStringTokens.addingEllipsis,
     this.moreTimeAdded = SeatLayerStringTokens.moreTimeAdded,
     this.couldNotAddMoreTime = SeatLayerStringTokens.couldNotAddMoreTime,
@@ -781,7 +782,13 @@ class SeatLayerPickerStrings {
   final String holdExpired;
 
   /// "Add time" — the button on the "Need more time?" prompt.
+  ///
+  /// Superseded by [addMinutes] on the prompt itself, which names the amount.
+  /// Kept because a host may still be passing it.
   final String addTime;
+
+  /// "+5 min" — what one tap of the extend control adds, named on the button.
+  final String Function(int minutes) addMinutes;
 
   /// "Adding…" — the same button while the extension is in flight.
   final String addingEllipsis;
@@ -999,6 +1006,9 @@ class SeatLayerPickerStrings {
       .replaceAll('{count}', '$count');
 
   static String _defaultMoreCount(int count) => '+$count more';
+
+  static String _defaultAddMinutes(int minutes) =>
+      SeatLayerStringTokens.addMinutes.replaceAll('{count}', '$minutes');
 
   static String _defaultSecureMoreAndCheckout(int count) =>
       SeatLayerStringTokens.secureMoreAndCheckout

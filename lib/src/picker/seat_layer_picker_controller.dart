@@ -1180,14 +1180,29 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     );
   }
 
-  Future<void> extendHold() => _inventoryMutation(
-        'picker.extendHold',
-        <String, Object?>{
-          if (_options.holdTtl != null)
-            'ttlMs': _options.holdTtl!.inMilliseconds,
-        },
-        SeatLayerPickerBusyAction.creatingHold,
-      );
+  /// Push an active hold's expiry out by one fixed step, and say whether it
+  /// moved.
+  ///
+  /// [by] defaults to [seatLayerHoldExtendStep] — deliberately not the host's
+  /// configured hold TTL, so the control can name the amount it adds. The
+  /// server keeps the last word: it may cap the step, it never shortens a
+  /// hold, and it limits how many extensions one hold may have.
+  ///
+  /// A refusal the server is entitled to make answers `false` rather than
+  /// throwing: it is not a fault, the buyer asked and the answer is no. A
+  /// transport failure still throws. See `design/picker-spec.md` 3.13.8.
+  Future<bool> extendHold({Duration? by}) async {
+    final rejected = _rejectReadOnly<bool>('picker.extendHold');
+    if (rejected != null) return rejected;
+    final result = await runPickerMutation(
+      'picker.extendHold',
+      <String, Object?>{
+        'ttlMs': (by ?? seatLayerHoldExtendStep).inMilliseconds,
+      },
+      SeatLayerPickerBusyAction.creatingHold,
+    );
+    return jBool(jGet(result, 'extended')) ?? false;
+  }
 
   Future<SeatLayerCheckoutHandoff> checkout() {
     final rejected =

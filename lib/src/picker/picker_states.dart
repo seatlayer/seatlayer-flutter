@@ -16,6 +16,7 @@ import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_strings.dart';
+import 'picker_toast.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -460,6 +461,20 @@ class _SeatLayerPickerExtendHoldPromptState
   Timer? _tick;
   bool _adding = false;
 
+  /// Has this hold's one extension been spent, or the offer waved away?
+  ///
+  /// ONE PER HOLD. The server would allow more, but a buyer who can keep
+  /// asking has been handed a way to sit on inventory by reflex rather than by
+  /// decision, and a countdown that can always be pushed back is not a
+  /// deadline.
+  ///
+  /// Cleared when there is no hold, which is the only honest boundary
+  /// available: snapshots deliberately never carry the hold id, so the gap
+  /// between one hold ending and the next beginning is what says "new hold".
+  /// A fresh selection after a lapse therefore gets its own extension rather
+  /// than inheriting the last one's spent state.
+  bool _spent = false;
+
   @override
   void initState() {
     super.initState();
@@ -477,11 +492,29 @@ class _SeatLayerPickerExtendHoldPromptState
   Future<void> _add(SeatLayerPickerController controller) async {
     if (_adding) return;
     setState(() => _adding = true);
+    final toasts = seatLayerPickerToasts(controller);
+    final strings = SeatLayerPickerScope.stringsOf(context);
     try {
-      await controller.extendHold();
+      final extended = await controller.extendHold();
+      // Either way the control retires for this hold: granted, the buyer has
+      // had their step; refused, the server will not give another. A refusal
+      // ends in SILENCE — a hold resumed from the host carries extensions this
+      // picker never offered, and that is not a fault the buyer needs a
+      // sentence about.
+      if (mounted) setState(() => _spent = true);
+      if (extended) {
+        toasts.show(SeatLayerPickerToast(
+          strings.moreTimeAdded,
+          tone: SeatLayerPickerToastTone.success,
+        ));
+      }
     } catch (_) {
-      // The controller has already put the failure on the state; the prompt
-      // only needs to stop claiming it is still working.
+      // A transport failure is the one outcome worth a sentence, and the one
+      // worth offering again: nothing was decided, so the control stays.
+      toasts.show(SeatLayerPickerToast(
+        strings.couldNotAddMoreTime,
+        tone: SeatLayerPickerToastTone.warning,
+      ));
     } finally {
       if (mounted) setState(() => _adding = false);
     }
@@ -492,8 +525,16 @@ class _SeatLayerPickerExtendHoldPromptState
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
     final remaining = state.holdRemaining(seatLayerPickerNow());
+    // No hold means the next one is a NEW hold, and a new hold gets its own
+    // extension. Assigned rather than setState-ed: it only ever relaxes a gate
+    // in the same frame that already has no control to draw, so it cannot miss
+    // a repaint, and setState during build would be an error.
+    if (state.hold == null) _spent = false;
     final due = state.hold != null &&
         state.checkoutHandoff == null &&
+        // Spent or waved away for THIS hold. A control that cannot work should
+        // not be visible, and its absence needs no announcement.
+        !_spent &&
         remaining > Duration.zero &&
         remaining <= seatLayerHoldExtendThreshold;
     if (!due) return const SizedBox.shrink();
@@ -557,13 +598,40 @@ class _SeatLayerPickerExtendHoldPromptState
                     shape: const StadiumBorder(),
                   ),
                   onPressed: _adding ? null : () => _add(controller),
+                  // The button says exactly what one tap does. "Add time"
+                  // beside a countdown reads like an invitation to choose an
+                  // amount, and there is nothing to choose.
                   child: Text(
-                    _adding ? strings.addingEllipsis : strings.addTime,
+                    _adding
+                        ? strings.addingEllipsis
+                        : strings.addMinutes(
+                            seatLayerHoldExtendStep.inMinutes,
+                          ),
                     style: TextStyle(
                       fontSize: 12.5,
                       fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
                       fontFamily: theme.fontFamily,
                     ),
+                  ),
+                ),
+                // A way to say no. Offered in the last minute over the map,
+                // an offer with no refusal is a thing in the way.
+                const SizedBox(width: 2),
+                IconButton(
+                  tooltip: strings.close,
+                  visualDensity: VisualDensity.compact,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints.tightFor(
+                    width: SeatLayerSizeTokens.minimumHitTarget,
+                    height: SeatLayerSizeTokens.minimumHitTarget,
+                  ),
+                  onPressed: _adding
+                      ? null
+                      : () => setState(() => _spent = true),
+                  icon: Icon(
+                    Icons.close_rounded,
+                    size: 18,
+                    color: theme.mutedText,
                   ),
                 ),
               ],

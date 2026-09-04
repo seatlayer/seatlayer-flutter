@@ -416,7 +416,7 @@ specification. Names, slots and files:
 | `SeatLayerPickerAccessPanel` | — | §3.13.3 |
 | `SeatLayerPickerSalesClosedStatement` / `…SalesClosedPill` | — | §3.13.4 |
 | `SeatLayerPickerSoldOutOverlay` | — | §3.13.5 |
-| `SeatLayerPickerExtendHoldPrompt` | — | §3.13.8 |
+| `SeatLayerPickerExtendHoldPrompt` | one named `+5 min` step, once per hold, dismissable | §3.13.8 |
 | `SeatLayerPickerBookedOverlay` | — | §3.13.10 |
 | `SeatLayerPickerGeneralAdmissionPrompt` / `…TablePrompt` | — | §3.13.11–12 |
 | `SeatLayerPickerAccessibilityFilters` | — | §3.5 |

@@ -1489,10 +1489,46 @@ their seats deliberately must not feel like a loss.
 #### 3.13.8 Need more time
 
 `SeatLayerPickerExtendHoldPrompt`. A card in the bottom-centre region above the
-toast: `strings.seatsHeldForNeedMoreTime` with a live `m:ss`, and a pill
-`strings.addTime` → `strings.addingEllipsis`. Shown while the hold has under a
-minute left and the booked overlay is not up. Success is
-`strings.moreTimeAdded`; failure is `strings.couldNotAddMoreTime`, warning tone.
+toast: `strings.seatsHeldForNeedMoreTime` with a live `m:ss`, a pill
+`strings.addMinutes(5)` → `strings.addingEllipsis`, and a `strings.close`
+dismiss at `size.minimumHitTarget`. Shown while the hold has under a minute
+left and the booked overlay is not up.
+
+**It stays a floating pill, on every layout.** Native is always narrow, and
+docking it beside the hold clock at 390 px collapses the header's own
+information from 198 px to 64 px against a venue name that needs 201 px. The
+pill is the only shape that fits.
+
+**One named step.** One tap asks for a fixed five minutes, and the button
+prints the number. The offer used to send the host's whole configured hold
+window behind a button reading only "Add time" — neither the copy nor the buyer
+knew the amount, and "Add time" beside a countdown reads like an invitation to
+choose one. The server keeps the last word: an organizer's configured TTL wins
+over a requested one, the new expiry is `max(current, now + ttl)` so an extend
+can never shorten a hold, and the server caps how many extensions one hold may
+have. What the buyer reads afterwards is the countdown, not this step.
+
+**One per hold, three endings.**
+
+| Outcome | What happens |
+|---|---|
+| Granted | `strings.moreTimeAdded`, success tone; the control retires |
+| Refused | **Silence**; the control retires |
+| Transport failure | `strings.couldNotAddMoreTime`, warning tone; the control stays |
+
+A buyer who can keep asking has been handed a way to sit on inventory by reflex
+rather than by decision, and a countdown that can always be pushed back is not
+a deadline — so the control does not come back for this hold. A refusal is not
+a fault: a hold resumed from the host carries extensions this picker never
+offered, and there is no sentence the buyer needs about it. A transport failure
+decided nothing, so it alone is offered again.
+
+Dismissing spends nothing. It retires the control for this hold the same way,
+because an offer with no refusal is a thing in the way.
+
+Retirement is cleared when there is no hold — the only honest boundary, since
+snapshots deliberately never carry the hold id. A fresh selection after a lapse
+therefore gets its own extension rather than inheriting the last one's.
 
 #### 3.13.9 Seat taken
 

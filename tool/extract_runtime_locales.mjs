@@ -48,6 +48,7 @@ const KEYS = {
   seatsLeft: 'picker.seatsLeftShort',
   fromPrice: 'picker.peekFromPrice',
   moreCount: 'picker.moreCount',
+  addMinutes: 'picker.addMinutes',
   'ticketCount.one': 'picker.ticketsCount.one',
   'ticketCount.other': 'picker.ticketsCount.other',
   'findBestSeats.one': 'picker.findBestSeatsCount.one',

@@ -549,6 +549,13 @@ class SeatLayerPickerHold {
   }
 }
 
+/// How much time ONE tap of the extend control adds.
+///
+/// Named, fixed, and printed on the button. Five minutes finishes a checkout;
+/// the server's own cap on how many extensions a hold may have still means a
+/// buyer cannot park inventory for long.
+const Duration seatLayerHoldExtendStep = Duration(minutes: 5);
+
 /// How much of the map surface the host's own chrome is covering.
 ///
 /// The runtime frames the venue — `zoomToFit`, a focused section, the glide
