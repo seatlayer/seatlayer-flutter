@@ -160,7 +160,9 @@ override** `style:`
   into the surface under a full-strength ring of it.
 - **Callbacks** none.
 - **Commands** `picker.setCategoryFilter { keys, focus }` — the first tap
-  filters and drills in, the second clears.
+  filters and frames that band; the second clears the filter and frames the
+  whole venue. **`focus` is sent on both**: the unframed path leaves the camera
+  inside the buyer's drill-in and the map returns washed out.
 
 ## MapControls
 

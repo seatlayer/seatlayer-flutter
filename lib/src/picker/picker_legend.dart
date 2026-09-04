@@ -111,10 +111,15 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
           theme: theme,
           semanticsLabel:
               amount == null ? category.label : '${category.label} — $amount',
+          // `focus` on BOTH directions. Turning a band on flies to its seats;
+          // turning it off is "show me everything" and must answer with the
+          // whole venue. Clearing without focus left the buyer inside the
+          // drill-in they were in, with the block melt running under seats
+          // drawn at full strength — the map came back washed out.
           onPressed: () => ignorePickerAction(
             controller.setCategoryFilter(
               selected ? const <String>{} : <String>{category.key},
-              focus: !selected,
+              focus: true,
             ),
           ),
         );
@@ -189,8 +194,11 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
                 compact: compact,
                 theme: theme,
                 semanticsLabel: strings.allPrices,
+                // "All prices" means show me everything: the venue, with every
+                // section on screen — not the pose a band took the buyer from,
+                // and not the section they had drilled into before that.
                 onPressed: () => ignorePickerAction(
-                  controller.setCategoryFilter(const <String>{}, focus: false),
+                  controller.setCategoryFilter(const <String>{}, focus: true),
                 ),
               ),
             ),

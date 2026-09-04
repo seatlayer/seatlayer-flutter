@@ -216,7 +216,8 @@ void main() {
       });
     });
 
-    testWidgets('tapping the active chip clears the filter', (tester) async {
+    testWidgets('tapping the active chip clears the filter and refits',
+        (tester) async {
       final map = FakePickerMap();
       addTearDown(map.dispose);
       usePhoneSurface(tester);
@@ -233,6 +234,7 @@ void main() {
       expect(
           map.callsTo('picker.setCategoryFilter').single.$2, <String, Object?>{
         'categoryKeys': null,
+        'focus': true,
       });
     });
 
@@ -262,7 +264,39 @@ void main() {
       expect(
           map.callsTo('picker.setCategoryFilter').single.$2, <String, Object?>{
         'categoryKeys': null,
+        'focus': true,
       });
+    });
+
+    testWidgets('every way out of a band asks the map to frame the venue',
+        (tester) async {
+      // Both exits — the "All prices" chip and re-tapping the lit chip — must
+      // carry `focus`. Without it the runtime applies the filter and leaves
+      // the camera where it was, so the buyer stays inside the section they
+      // drilled into, with the block melt running under seats drawn at full
+      // strength: the map comes back washed out. The runtime only clears the
+      // section focus and refits on the focused path
+      // (SeatingChart.setCategoryFilter gates focusCategoryFilter on `focus`).
+      for (final exit in <String>['All prices', '€25']) {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
+
+        await tester.pumpWidget(
+          pickerHarness(map, const SeatLayerPriceLegend(compact: true)),
+        );
+        map.emit(pickerSnapshot(withSelection: false));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text(exit));
+        await tester.pump();
+
+        expect(
+          map.callsTo('picker.setCategoryFilter').single.$2,
+          <String, Object?>{'categoryKeys': null, 'focus': true},
+          reason: 'the "$exit" exit must frame the venue',
+        );
+      }
     });
 
     testWidgets('an unfiltered rail leads with All prices, selected',

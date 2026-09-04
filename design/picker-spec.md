@@ -265,6 +265,24 @@ band filter and any pinned category. While the scroller has scrolled, the pinned
 chip carries a halo of the band ground so chips slide *under* it rather than
 through it; at rest the halo is off so the first price keeps its rounded end.
 
+**Framing — both directions carry it.** Turning a band **on** frames that
+band's seats. Turning a band **off** — by `All prices` or by re-pressing the lit
+chip — frames the **whole venue**: every section on screen, section focus
+released. Not the pose the band was entered from, and not the section the buyer
+had drilled into before that.
+
+Both exits must ask the runtime for the framed path
+(`setCategoryFilter(…, focus: true)`). The unframed path applies the filter and
+leaves the camera alone, which strands the buyer inside their drill-in while the
+block melt runs underneath seats drawn at full strength — the map returns washed
+out, its seats behind grey shells. Restoring only the camera, or camera plus
+section, were both tried and both read as a failure: the honest reading of "all
+prices" is the venue.
+
+One exception the runtime owns: while the accessibility filter is still on,
+clearing the band returns to *that* filter's framing rather than to the whole
+venue — the map must keep answering the filter that is still active.
+
 **Edge fade.** The scroller masks `size.legendRailEdgeFade` of its leading edge
 once scrolled, and of its trailing edge while more chips remain. Mirrored for
 right-to-left.
