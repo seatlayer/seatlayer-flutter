@@ -28,6 +28,9 @@ class PickerViewportReport {
   SeatLayerViewportInsets? _sent;
   bool _hasSent = false;
   bool _flushScheduled = false;
+  /// The send still waiting on the runtime, so a repeat of the value it
+  /// carries waits with it instead of reporting success on its behalf.
+  Future<void>? _inFlight;
 
   /// Report [insets], or null to frame against the whole surface again.
   ///
@@ -54,15 +57,25 @@ class PickerViewportReport {
   void forget() {
     _sent = null;
     _hasSent = false;
+    _inFlight = null;
   }
 
   Future<void> _flush() {
     if (!_hasPending) return Future<void>.value();
     final wanted = _pending;
     _hasPending = false;
-    if (_hasSent && _sent == wanted) return Future<void>.value();
+    // A REPEAT IS NOT AN ACKNOWLEDGEMENT. Dropping the duplicate command is
+    // right — the runtime already has these numbers — but the caller is asking
+    // "has the runtime been told", and answering yes while the first send is
+    // still unanswered is what let the map be revealed at a framing the
+    // runtime had not applied. The repeat waits on the send it duplicates.
+    if (_hasSent && _sent == wanted) return _inFlight ?? Future<void>.value();
     _sent = wanted;
     _hasSent = true;
-    return send(wanted);
+    final sending = send(wanted);
+    _inFlight = sending;
+    return sending.whenComplete(() {
+      if (identical(_inFlight, sending)) _inFlight = null;
+    });
   }
 }

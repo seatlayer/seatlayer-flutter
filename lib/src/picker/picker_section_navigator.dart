@@ -11,10 +11,11 @@ import 'seat_layer_picker_theme.dart';
 
 /// A chip per section, for the wide layout's side panel.
 ///
-/// The phone uses [SeatLayerDockBar] instead: a chip list of every section is
-/// a directory, and what a buyer standing inside one section needs is where
-/// they are, how much room is left, and the way out. This navigator hides
-/// itself once seats are revealed, which is exactly where the dock belongs.
+/// A phone gets no equivalent: a chip list of every section is a directory,
+/// and it is the wide layout's side panel that has room for one. The phone
+/// answers "where am I, and how do I get back" with the map itself — pinch
+/// out past the melt point, or the stepped `−` control in the bottom-right
+/// corner. This navigator hides itself once seats are revealed.
 class SeatLayerPickerSectionNavigator extends StatelessWidget {
   /// Creates the wide layout's section chip list.
   const SeatLayerPickerSectionNavigator({super.key});

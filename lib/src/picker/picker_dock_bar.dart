@@ -15,8 +15,18 @@ import 'seat_layer_picker_theme.dart';
 
 /// Where the buyer is, and the two ways out, docked under the map.
 ///
-/// The dock is the phone's answer to "which section am I in, how much room is
-/// left here, and how do I get back". It renders only at rung 2 — the map
+/// THE DROP-IN MOUNTS NO DOCK ON A PHONE (owner call, 2026-09-04). Pinch-out
+/// and the zoom-out stepper already walk a buyer back to the venue, so the
+/// prev/next arrows bought a two-tap version of a gesture the finger does
+/// better, and the bar's height plus the home-indicator inset pushed every
+/// bottom-corner control up the screen to make room for it. The per-section
+/// "N seats left" is no longer shown on phones. A host that wants this bar
+/// there anyway sets `showDockBar: true` on
+/// `SeatLayerPickerChromeOptions`; the wide composition and standalone hosts
+/// are unaffected.
+///
+/// Where it is drawn, the dock answers "which section am I in, how much room
+/// is left here, and how do I get back". It renders only at rung 2 — the map
 /// focused on one section with its seats revealed — and slides away when the
 /// map climbs one level at a time, matching the web picker.
 ///

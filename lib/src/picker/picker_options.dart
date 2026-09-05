@@ -54,9 +54,9 @@ class SeatLayerPickerPricing {
 /// corresponding control remains available as a standalone public widget for
 /// hosts that build their own layout.
 ///
-/// The four nullable controls default to *auto*: present in the wide layout,
-/// absent on the phone, where pinch-to-zoom, the accessibility sheet and the
-/// dock bar already carry them. Set one explicitly to override that.
+/// The five nullable controls default to *auto*: present in the wide layout,
+/// absent on the phone, where pinch-to-zoom and the accessibility sheet
+/// already carry them. Set one explicitly to override that.
 @immutable
 class SeatLayerPickerChromeOptions {
   /// Creates a chrome visibility set. Defaults are the approved phone UX.
@@ -73,7 +73,7 @@ class SeatLayerPickerChromeOptions {
     this.showColorblindControl,
     this.showAccessibilityControl = true,
     this.showTicketPanel = true,
-    this.showDockBar = true,
+    this.showDockBar,
     this.showConfirmCard = true,
     this.showVenue3DChrome = true,
     this.showSeatViewChrome = true,
@@ -126,8 +126,20 @@ class SeatLayerPickerChromeOptions {
   /// Whether the cart sheet renders.
   final bool showTicketPanel;
 
-  /// Whether the rung-2 dock bar renders on the phone.
-  final bool showDockBar;
+  /// Whether the rung-2 dock bar renders. Auto: wide only, so the drop-in
+  /// phone layout mounts none.
+  ///
+  /// Focusing a section on a phone used to dock a bar onto the map's bottom
+  /// edge — "406 · 302 seats left ‹ › ‹ Venue". Pinch-out and the zoom-out
+  /// stepper already walk a buyer back to the venue, so the prev/next arrows
+  /// bought "a two-tap version of a gesture the finger does better", and the
+  /// per-section "N seats left" is no longer shown on phones. The way back is
+  /// pinch-out past the melt point, or the single stepped `−` control in the
+  /// map's bottom-right corner.
+  ///
+  /// A host that wants the bar back on the phone sets this to `true`; the bar
+  /// also stays available as the standalone [SeatLayerDockBar] widget.
+  final bool? showDockBar;
 
   /// Whether tapping a seat opens the native confirm card.
   final bool showConfirmCard;
@@ -173,6 +185,9 @@ class SeatLayerPickerChromeOptions {
   /// Resolve [showColorblindControl] for a layout.
   bool colorblindControlFor({required bool phone}) =>
       showColorblindControl ?? !phone;
+
+  /// Resolve [showDockBar] for a layout.
+  bool dockBarFor({required bool phone}) => showDockBar ?? !phone;
 }
 
 /// Behaviour of one picker session and its native chrome.

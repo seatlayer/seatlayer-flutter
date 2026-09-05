@@ -49,7 +49,7 @@ Map<String, Object?> _inVenue3D({int revision = 3, String? seatedOn}) {
 }
 
 void main() {
-  testWidgets('the dock arriving changes what the runtime frames against',
+  testWidgets('a focused section stands on nothing the phone has to clear',
       (tester) async {
     final map = FakePickerMap(bundle: nativeChromeBundle());
     addTearDown(map.dispose);
@@ -71,11 +71,7 @@ void main() {
       reason: 'the price rail is a row above the map, so only the test badge '
           'stands on it',
     );
-    expect(
-      atOverview['bottom'],
-      0.0,
-      reason: 'no section is focused, so there is no dock',
-    );
+    expect(atOverview['bottom'], 0.0);
 
     map.emit(
       pickerSnapshot(
@@ -91,10 +87,50 @@ void main() {
     final focused = _insetPayloads(map).last! as Map<String, Object?>;
     expect(
       focused['bottom'],
+      0.0,
+      reason: 'the phone mounts no dock, so the map keeps its own bottom edge',
+    );
+    expect(focused['top'], _badgeBand);
+  });
+
+  testWidgets('a dock the host asked for is reported as covering the map',
+      (tester) async {
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    final controller = SeatLayerPickerController(mapController: map);
+    addTearDown(controller.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        _layout(),
+        controller: controller,
+        options: const SeatLayerPickerOptions(
+          chrome: SeatLayerPickerChromeOptions(showDockBar: true),
+        ),
+      ),
+    );
+    map.emit(pickerSnapshot(sections: pickerSections(), rung: 'overview'));
+    await pumpToRest(tester);
+    expect((_insetPayloads(map).last! as Map<String, Object?>)['bottom'], 0.0);
+
+    map.emit(
+      pickerSnapshot(
+        revision: controller.state.revision + 1,
+        sections: pickerSections(),
+        rung: 'seats',
+      ),
+    );
+    await pumpToRest(tester);
+
+    final focused = _insetPayloads(map).last! as Map<String, Object?>;
+    expect(
+      focused['bottom'],
       greaterThan(0),
       reason: 'the dock now stands on the bottom of the map',
     );
-    expect(focused['top'], _badgeBand);
   });
 
   testWidgets('a settled layout stops reporting', (tester) async {
