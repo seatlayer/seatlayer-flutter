@@ -142,7 +142,25 @@ double seatLayerSheetRestoreFraction({
 /// half way — the web card's rule.
 class PickerSeatLift {
   /// Creates a lift that pans through [frame].
-  PickerSeatLift({required this.frame});
+  PickerSeatLift({required this.frame, this.settle = defaultSettle});
+
+  /// When the lift is asked again after it first lands.
+  ///
+  /// The runtime re-fits the section on its own when its surface changes
+  /// size, and the web view finishes growing under a collapsing sheet a
+  /// frame or two AFTER the layout has settled — so a lift that landed can be
+  /// undone by a refit nobody on this side sees. Asking again, with the
+  /// gesture count as the guard, costs one `dy: 0` reply when the seat is
+  /// already in place and puts it back when it is not.
+  static const List<Duration> defaultSettle = <Duration>[
+    Duration(milliseconds: 350),
+    Duration(milliseconds: 800),
+  ];
+
+  /// See [defaultSettle].
+  final List<Duration> settle;
+
+  final List<Timer> _settleTimers = <Timer>[];
 
   /// The runtime's pan; see [SeatLayerPickerSeatFraming.frameSeat].
   final Future<SeatLayerSeatFrame?> Function(
@@ -218,6 +236,7 @@ class PickerSeatLift {
     _fraction = fraction;
     _band = band;
     _revision = revision;
+    _cancelSettle();
     final generation = ++_generation;
     // Off the build: the send publishes state, and a controller that notified
     // its listeners from inside a build would be rebuilding them mid-frame.
@@ -242,6 +261,23 @@ class PickerSeatLift {
     if (_gestures != null && answer.gestures != _gestures) return;
     _gestures = answer.gestures;
     _dy += answer.dy;
+    if (_settleTimers.isEmpty) {
+      for (final delay in settle) {
+        _settleTimers.add(
+          Timer(delay, () {
+            if (generation != _generation || _seatId != seatId) return;
+            unawaited(_lift(seatId, fraction, generation));
+          }),
+        );
+      }
+    }
+  }
+
+  void _cancelSettle() {
+    for (final timer in _settleTimers) {
+      timer.cancel();
+    }
+    _settleTimers.clear();
   }
 
   /// Put the map back, unless the buyer has moved it, and forget the lift.
@@ -265,6 +301,7 @@ class PickerSeatLift {
   /// Forget the lift without touching the map — the picker is going away.
   void forget() {
     _generation += 1;
+    _cancelSettle();
     _seenHeight = null;
     _pending = false;
     _seatId = null;

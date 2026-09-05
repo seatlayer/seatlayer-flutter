@@ -254,6 +254,37 @@ void main() {
     );
   });
 
+  test('a lift asks again after it lands, and stops when told to forget',
+      () async {
+    var calls = 0;
+    final lift = PickerSeatLift(
+      frame: (seatId, {required fraction, int? gestures}) async {
+        calls += 1;
+        return const SeatLayerSeatFrame(dy: -10, gestures: 1);
+      },
+      settle: const <Duration>[Duration(milliseconds: 5)],
+    );
+    for (var i = 0; i < 2; i += 1) {
+      lift.sync(
+        seatId: 's1',
+        mapHeight: 800,
+        top: 0,
+        bottom: 0,
+        sheet: 300,
+        revision: 1,
+      );
+    }
+    await Future<void>.delayed(Duration.zero);
+    expect(calls, 1);
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    // The runtime may have re-fitted under the lift: ask once more.
+    expect(calls, 2);
+    expect(lift.dy, -20);
+    lift.forget();
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    expect(calls, 2);
+  });
+
   testWidgets(
       'the card pans its seat into the clear band, and the sheet is not an inset',
       (tester) async {
