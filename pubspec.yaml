@@ -4,7 +4,7 @@ description: >-
   Android ticketing apps, with live availability, best available, seat holds,
   3D views and secure checkout.
 version: 0.8.0
-homepage: https://seatlayer.io/developers/
+homepage: https://docs.seatlayer.io/buyer-sdk/flutter/
 repository: https://github.com/seatlayer/seatlayer-flutter
 issue_tracker: https://github.com/seatlayer/seatlayer-flutter/issues
 documentation: https://docs.seatlayer.io/buyer-sdk/flutter/
