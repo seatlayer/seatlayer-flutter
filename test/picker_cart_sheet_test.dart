@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/seat_layer_error.dart';
+import 'package:seatlayer/src/bridge/bridge_protocol.dart';
 import 'package:seatlayer/src/picker/picker_best_seats.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_cart_list.dart';
@@ -336,6 +338,39 @@ void main() {
           .last,
     );
     expect((row.decoration! as BoxDecoration).color, isNotNull);
+  });
+
+  testWidgets(
+      'a host-owned hold keeps its ×, and the press is a state with a way out',
+      (tester) async {
+    final map = FakePickerMap(
+      handler: (command, payload) async {
+        if (command != 'picker.removeCartLine') return null;
+        throw const SeatLayerError.bridge(
+          BridgeErrorPayload(
+            code: 'hold_owned_by_host',
+            message: 'the active hold belongs to the host',
+          ),
+        );
+      },
+    );
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(alignment: Alignment.bottomCenter, child: _sheet()),
+      ),
+    );
+    map.emit(pickerSnapshot(holdOwner: 'host'));
+    await tester.pumpAndSettle();
+
+    final remove = find.byTooltip(RegExp('^Remove '));
+    expect(remove, findsOneWidget);
+    await tester.tap(remove);
+    await pumpToRest(tester);
+    expect(find.text('Your seats are already in checkout'), findsOneWidget);
   });
 
   testWidgets('the remove control clears the touch floor', (tester) async {

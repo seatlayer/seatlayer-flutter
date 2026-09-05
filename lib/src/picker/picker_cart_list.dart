@@ -75,8 +75,12 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
       ..clear()
       ..addAll(runs.map((run) => run.members.first.item.lineKey));
 
-    final removable = !SeatLayerPickerScope.optionsOf(context).readOnly &&
-        state.holdOwner != SeatLayerHoldOwner.host;
+    // The × stays on a line even while the host owns the hold (2026-09-05,
+    // TestFlight): hiding it left a buyer back from checkout with a washed
+    // row and no way to change anything. The runtime refuses the removal, and
+    // that refusal is drawn as a state with a way out — "Your seats are
+    // already in checkout", release and change seats — by the action bar.
+    final removable = !SeatLayerPickerScope.optionsOf(context).readOnly;
 
     // One plate, hairlines inside it. The lines are stubs of one ticket,
     // and a stack of separately bordered cards read as a stack of unrelated
