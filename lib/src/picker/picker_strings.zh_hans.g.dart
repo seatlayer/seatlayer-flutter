@@ -35,6 +35,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       backToVenue: '返回场馆',
       cancel: '取消',
       select: '选择',
+      removeSeat: '移除座位',
       viewFromHere: '此处的视野',
       openVenue360: '打开场馆 360°',
       recentre: '重新居中到舞台',

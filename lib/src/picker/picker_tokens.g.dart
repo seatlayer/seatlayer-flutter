@@ -1118,8 +1118,8 @@ abstract final class SeatLayerStringTokens {
   /// {n} could not be recovered
   static const String seatsNotRecovered = '{n} could not be recovered';
 
-  /// Remove ticket
-  static const String removeSeat = 'Remove ticket';
+  /// Remove seat
+  static const String removeSeat = 'Remove seat';
 
   /// Open ticket panel
   static const String expandCart = 'Open ticket panel';

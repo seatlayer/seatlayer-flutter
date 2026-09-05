@@ -37,6 +37,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   backToVenue: 'Yn ôl i\'r lleoliad',
   cancel: 'Canslo',
   select: 'Dewis',
+  removeSeat: 'Tynnu sedd',
   viewFromHere: 'Golygfa o\'r fan hon',
   openVenue360: 'Agor y lleoliad mewn 360°',
   recentre: 'Ailganoli ar y llwyfan',

@@ -26,6 +26,7 @@ class SeatLayerPickerStrings {
     this.cancel = SeatLayerStringTokens.cancel,
     this.select = SeatLayerStringTokens.select,
     this.addSeat = SeatLayerStringTokens.addSeat,
+    this.removeSeat = SeatLayerStringTokens.removeSeat,
     this.added = SeatLayerStringTokens.added,
     this.sectionWord = SeatLayerStringTokens.sectionWord,
     this.rowWord = SeatLayerStringTokens.rowWord,
@@ -255,6 +256,14 @@ class SeatLayerPickerStrings {
 
   /// Confirm-card acceptance: "Add seat".
   final String addSeat;
+
+  /// What [addSeat] becomes when the card is asking the opposite question.
+  ///
+  /// A second tap on a seat already in the cart raises the SAME card over it,
+  /// with this word where the acceptance was. It is the runtime's own
+  /// `picker.removeSeat`, so the two pickers say it the same way in every
+  /// locale the runtime translates.
+  final String removeSeat;
 
   /// What [addSeat] becomes for the moment after it is pressed.
   final String added;

@@ -37,6 +37,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   backToVenue: 'Επιστροφή στον χώρο',
   cancel: 'Ακύρωση',
   select: 'Επιλογή',
+  removeSeat: 'Αφαίρεση θέσης',
   viewFromHere: 'Θέα από εδώ',
   openVenue360: 'Άνοιγμα του χώρου σε 360°',
   recentre: 'Επανακεντράρισμα στη σκηνή',

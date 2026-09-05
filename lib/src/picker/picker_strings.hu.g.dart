@@ -36,6 +36,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   backToVenue: 'Vissza a helyszínhez',
   cancel: 'Mégse',
   select: 'Kiválasztás',
+  removeSeat: 'Hely eltávolítása',
   viewFromHere: 'Kilátás innen',
   openVenue360: 'Helyszín megnyitása 360°-ban',
   recentre: 'Középre a színpadra',

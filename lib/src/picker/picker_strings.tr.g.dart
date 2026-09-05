@@ -36,6 +36,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   backToVenue: 'Mekana dön',
   cancel: 'İptal',
   select: 'Seç',
+  removeSeat: 'Koltuğu kaldır',
   viewFromHere: 'Buradan manzara',
   openVenue360: 'Mekanı 360° aç',
   recentre: 'Sahneyi yeniden ortala',

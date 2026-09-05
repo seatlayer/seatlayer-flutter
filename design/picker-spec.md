@@ -918,6 +918,43 @@ While a card is up and a toast is showing, the whole bottom-centre region moves
 so the message sits **above** the card — unless that would push it within a
 short distance of the map's top, in which case it stays where it is.
 
+#### 3.8.4a Remove — the same card, asking the opposite question
+
+A second tap on a seat that is **already in the cart** used to drop it in
+silence: the ring went, the cart emptied and the total moved, with no card, no
+notice and nothing to undo it with. A buyer checking which seat they had picked
+lost it by looking at it.
+
+A runtime that speaks it now **keeps the seat selected** and reports the tap as
+the bridge event `seat.retap`, payload `{ seat: <one selection[] entry> }` — no
+`selection.changed` comes with it, and it is not coalesced. The chrome raises
+the SAME card over the seat in `SeatLayerConfirmCardMode.remove`: same box,
+same placement, same spotlight glass, same identity grid, band, photograph and
+inspection row. Only the primary answer changes.
+
+- **Primary** reads `strings.removeSeat` ("Remove seat", the runtime's own
+  `picker.removeSeat`, so both pickers say it the same way in every locale). It
+  is painted in `color.*.error` rather than the accent, and it carries a cross
+  where the add card draws its tick — a tick is the wrong promise on a remove.
+  Pressing it takes the seat back out down the **same path the cart's ✕ uses**
+  (`picker.removeCartLine`), and the seat is then answered for.
+- **Cancel keeps the seat.** So does the tap outside, the downward drag and the
+  platform's back gesture: they are ways out of the question, not answers to
+  it. A stray press on the map must never be the thing that empties a cart.
+- **The seat stays counted the whole time.** It is not a candidate — the buyer
+  already owns it — so unlike an unanswered add it keeps its ticket, its line
+  and its money in `confirmedCartLines`, `confirmedTicketCount` and
+  `confirmedCartTotal` until the question is actually answered.
+
+An unanswered ADD outranks a retap, and a retap of the seat an add card is
+already open about is ignored: that card is asking about this very seat, and
+turning its own question round under the buyer's finger is a worse surprise
+than the silence it replaces. A read-only picker never raises it at all.
+
+The controller reports the candidate as `seatAwaitingRemoval` and puts the
+question away with `dismissSeatRemoval()`; both live in
+`lib/src/picker/picker_seat_answers.dart` beside `seatAwaitingConfirmation`.
+
 #### 3.8.5 Gestures and haptics
 
 - Tap outside the card, on the dimmed map, gives the seat back.
@@ -926,7 +963,10 @@ short distance of the map's top, in which case it stays where it is.
   constants, not tokens; the rubber-band feel comes from
   `motion.physics.rubberBand`.)
 - `haptics.cardArrived` when the card lands, `haptics.seatConfirmed` on Add
-  seat, `haptics.cardCancelled` on any dismissal.
+  seat, `haptics.cardCancelled` on any dismissal, `haptics.ticketRemoved` on
+  Remove (§3.8.4a).
+- In the remove state the drag and the tap outside still dismiss the card, but
+  they leave the seat where it is.
 
 #### 3.8.6 Accessibility
 
@@ -939,7 +979,9 @@ say yes or no without hunting for the buttons.
 
 The first focusable is `Add seat`, not `Cancel`, though `Cancel` is drawn
 first: the focus lands on the answer the card exists to collect. Escape and the
-platform's back gesture both give the seat back. The card's type is clamped at
+platform's back gesture both give the seat back — except in the remove state
+(§3.8.4a), where they keep it. Both answers are custom actions under whichever
+word the primary is currently offering. The card's type is clamped at
 `type.scaleClamp.card`, and its action row's height grows with that scale
 rather than clipping the word the card exists to offer. §4.10 has the whole
 picture, of which this is one surface.

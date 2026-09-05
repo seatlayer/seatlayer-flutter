@@ -5,7 +5,7 @@ own, the Dart surface between them, and the rules that govern selection, holds
 and checkout. Written for an integrator who wants to know the shape of the
 thing before building on it.
 
-Last updated: 2026-08-28
+Last updated: 2026-09-05
 
 ## 1. Two supported levels
 
@@ -99,6 +99,18 @@ navigation (`focusSection`, `overview`, `setRung`, `setFloor`, `setViewMode`,
 `zoomIn`, `zoomOut`, `zoomToFit`, `setMapInteractionEnabled`) and inventory
 (`resumeHold`, `extendHold`, `checkout`, `rejectCheckoutHandoff`,
 `releasePickerOwnedHold`, `close`, `destroy`, `retry`, `synchronize`).
+
+Two questions about one seat are reported separately from the snapshot, because
+neither is a change to the selection: `seatAwaitingConfirmation` is a seat the
+buyer has tapped but not yet taken, and `seatAwaitingRemoval` is a seat already
+in the cart that they have tapped a SECOND time. The second arrives as the
+bridge event `seat.retap` (payload `{ seat }`, the seat still selected, no
+`selection.changed` with it) so the chrome can ask before the seat goes, rather
+than the seat disappearing under the finger. `dismissSeatRemoval()` puts that
+question away without answering it; `markSeatAnswered(label)` answers either.
+A seat being asked about for removal stays in `confirmedCartLines`,
+`confirmedTicketCount` and `confirmedCartTotal` — it is still in the cart until
+the buyer says otherwise.
 
 State arrives as whole replacements, never partial patches: the picker reads
 one snapshot at a time and drops stale ones. Actions that can change inventory

@@ -25,6 +25,7 @@ const List<String> _plainFields = <String>[
   'backToVenue',
   'cancel',
   'select',
+  'removeSeat',
   'viewFromHere',
   'openVenue360',
   'recentre',

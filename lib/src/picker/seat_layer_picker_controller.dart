@@ -21,12 +21,15 @@ import 'picker_sheet_drag.dart';
 import 'picker_viewport_report.dart';
 import 'seat_layer_picker_theme.dart';
 
+part 'picker_seat_answers.dart';
+
 /// State and actions for one high-level picker session.
 ///
 /// One controller binds to one event and one mounted runtime at a time. All
 /// inventory-changing operations are serialized, and concurrent checkout calls
 /// share one Future so a double tap cannot create two holds.
-class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
+class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
+    with _PickerSeatAnswers {
   SeatLayerPickerController({SeatLayerController? mapController})
       : mapController = mapController ?? SeatLayerController(),
         _ownsMapController = mapController == null,
@@ -92,10 +95,12 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
   ReadyInfo? _readyInfo;
   SeatLayerSeatView? _seatView;
 
+  @override
   SeatLayerPickerOptions _options = const SeatLayerPickerOptions();
   SeatLayerPickerCallbacks _callbacks = const SeatLayerPickerCallbacks();
   String? _eventKey;
   bool _runtimeAttached = false;
+  @override
   bool _disposed = false;
   bool _closing = false;
   Future<void> _actionTail = Future<void>.value();
@@ -106,8 +111,6 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       PickerViewportReport(send: _sendViewportInsets);
   SeatLayerSheetDetent _cartSheetDetent = SeatLayerSheetDetent.peek;
   bool _cartSheetInitialized = false;
-  final Set<String> _confirmedLabels = <String>{};
-  SelectedSeat? _confirmCardSeat;
   late final PickerRevisionWaiters _revisionWaiters = PickerRevisionWaiters(
     revisionNow: () => value.revision,
     resync: _resyncSnapshot,
@@ -132,81 +135,6 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       value.canCheckout &&
       !_options.readOnly &&
       seatAwaitingConfirmation == null;
-
-  /// The seat a confirm card is standing over, unanswered.
-  ///
-  /// The runtime has no notion of an unconfirmed selection: a tapped seat is
-  /// in `selection` — and therefore in the cart, the ticket count and the
-  /// total — from the moment it is tapped. The confirm card is native chrome
-  /// drawn over that, so without this the buyer sees `1 ticket · €40` and a
-  /// live Continue behind a card that is still asking whether they want the
-  /// seat at all.
-  ///
-  /// Reported by whichever chrome is actually asking, so it is null in a
-  /// composed layout that shows no card — a seat nobody is asking about is
-  /// simply in the cart.
-  SelectedSeat? get seatAwaitingConfirmation => _confirmCardSeat;
-
-  /// The seat the picker would ask about next, if it asks at all.
-  ///
-  /// Null for a read-only session, for `confirmSelection: false`, once a hold
-  /// exists, and when every selected seat has been answered for.
-  @internal
-  SelectedSeat? get unansweredSeat {
-    if (_options.readOnly || !_options.confirmSelection) return null;
-    // A live hold does not silence the question: the seats a hold arrived
-    // with were adopted as answered when it appeared (see _applySnapshot), so
-    // what is left unanswered here is what the buyer tapped since.
-    for (final seat in value.selection.reversed) {
-      if (!_confirmedLabels.contains(seat.label)) return seat;
-    }
-    return null;
-  }
-
-  /// Tell the controller which seat the open confirm card is showing.
-  ///
-  /// Called from the chrome's build, so it deliberately does not notify: the
-  /// widgets that read it are built after it in the same pass, and every one
-  /// of them rebuilds with the layout that reports it.
-  @internal
-  void setConfirmCardSeat(SelectedSeat? seat) => _confirmCardSeat = seat;
-
-  /// Record that the buyer answered for [label], and take its card down.
-  @internal
-  void markSeatAnswered(String label) {
-    if (_disposed || !_confirmedLabels.add(label)) return;
-    if (_confirmCardSeat?.label == label) _confirmCardSeat = null;
-    notifyListeners();
-  }
-
-  /// The cart the buyer has actually agreed to.
-  ///
-  /// [SeatLayerPickerState.cartLines] less the seat whose card is still open,
-  /// matched on the runtime's own seat id where it gave one and on the
-  /// inventory label otherwise. Use it — and [confirmedTicketCount] and
-  /// [confirmedCartTotal] — for anything the buyer reads as a commitment.
-  List<SeatLayerCheckoutLineItem> get confirmedCartLines {
-    final pending = seatAwaitingConfirmation;
-    if (pending == null) return value.cartLines;
-    return List<SeatLayerCheckoutLineItem>.unmodifiable(
-      value.cartLines.where(
-        (line) => line.seatId == null
-            ? line.label != pending.label
-            : line.seatId != pending.id,
-      ),
-    );
-  }
-
-  /// How many tickets the buyer has agreed to.
-  int get confirmedTicketCount => seatAwaitingConfirmation == null
-      ? (value.snapshot?.ticketCount ?? value.cartLines.length)
-      : confirmedCartLines.fold<int>(0, (sum, line) => sum + line.quantity);
-
-  /// What the buyer has agreed to, in the cart's currency.
-  double get confirmedCartTotal => seatAwaitingConfirmation == null
-      ? (value.snapshot?.cartTotal ??
-          value.cartLines.fold<double>(0, (sum, line) => sum + line.total))
-      : confirmedCartLines.fold<double>(0, (sum, line) => sum + line.total);
 
   /// Whether the buyer has the cart sheet open.
   ///
@@ -377,6 +305,13 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
       _onSeatViewChanged(event.payload);
       return;
     }
+    if (event.name == 'seat.retap') {
+      // A second tap on a seat already in the cart. The runtime has KEPT the
+      // seat — this is a question, not a change — so nothing here touches the
+      // selection; the chrome raises the card that asks it.
+      _applyRetap(event.payload);
+      return;
+    }
     if (event.name == 'hold.expired') {
       // Read off the bridge itself, on the same hop as the snapshot that
       // follows it, so the expiry is known before a vanished hold could be
@@ -459,13 +394,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState> {
     final previousValidity = current?.selectionValidity;
     final previousHold = value.hold;
     value = value.applying(snapshot);
-    // A seat that left the selection takes its answer with it, so re-picking
-    // it asks again rather than joining the cart silently.
-    final live = snapshot.selection.map((seat) => seat.label).toSet();
-    _confirmedLabels.removeWhere((label) => !live.contains(label));
-    if (_confirmCardSeat != null && !live.contains(_confirmCardSeat!.label)) {
-      _confirmCardSeat = null;
-    }
+    _syncSeatAnswers(snapshot.selection.map((seat) => seat.label).toSet());
 
     if (!pickerSameSelection(previousSelection, snapshot.selection)) {
       _callbacks.onSelectionChanged?.call(snapshot.selection);
