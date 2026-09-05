@@ -188,6 +188,44 @@ void main() {
     expect(_sent(map).last.length, bare.length);
   });
 
+  testWidgets('a modal over the page guards the whole map while it is up',
+      (tester) async {
+    final map = FakePickerMap(bundle: _bundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+    await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
+    map.emit(pickerSnapshot(sections: pickerSections(), withSelection: false));
+    await pumpToRest(tester);
+    final bare = _sent(map).last;
+
+    final scopeContext = tester.element(find.byType(SeatLayerPickerMap));
+    final done = Completer<void>();
+    unawaited(
+      SeatLayerBlockedRegionScope.coverWhile(scopeContext, () => done.future),
+    );
+    await pumpToRest(tester);
+    final mapSize = tester.getSize(find.byType(SeatLayerPickerMap));
+    expect(
+      _sent(map).last.any(
+            (r) =>
+                r.x == 0 &&
+                r.y == 0 &&
+                r.w == mapSize.width &&
+                r.h == mapSize.height,
+          ),
+      isTrue,
+    );
+
+    done.complete();
+    await tester.pump();
+    await tester.pump(SeatLayerBlockedRegionRegistry.defaultLinger);
+    await pumpToRest(tester);
+    expect(_sent(map).last.length, bare.length);
+  });
+
   // The card's rectangle lingers on a timer, and a timer fires between
   // frames. A report that only rode a post-frame callback would wait for a
   // frame an idle app never draws, and the runtime would keep guarding a

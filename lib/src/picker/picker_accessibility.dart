@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'picker_accessibility_focus.dart';
+import 'picker_blocked_regions.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_pending_seat.dart';
@@ -294,12 +295,15 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     // thing the sheet hands back is the provision a pressed count asked to
     // walk, if any. Drag-down and the scrim close it with nothing, which is
     // exactly right — there is nothing left to apply.
-    final jumpTo = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      backgroundColor: theme.surface,
-      builder: (_) => body,
+    final jumpTo = await SeatLayerBlockedRegionScope.coverWhile(
+      context,
+      () => showModalBottomSheet<String>(
+        context: context,
+        isScrollControlled: true,
+        showDragHandle: true,
+        backgroundColor: theme.surface,
+        builder: (_) => body,
+      ),
     );
     if (jumpTo == null) return;
     // A pressed count turns its own provision on, then starts a walk over that
@@ -558,8 +562,7 @@ class _AccessCount extends StatelessWidget {
             type: MaterialType.transparency,
             child: InkWell(
               onTap: onPressed,
-              borderRadius:
-                  BorderRadius.circular(SeatLayerRadiusTokens.pill),
+              borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
               child: Center(
                 widthFactor: 1,
                 child: Container(
@@ -634,7 +637,8 @@ class SeatLayerPickerAccessibleStepper extends StatelessWidget {
 
     final counted = controller.supportsSectionAccessCounts;
     final sections = counted
-        ? seatLayerAccessibleSectionCount(snapshot, current ? tour.types : active)
+        ? seatLayerAccessibleSectionCount(
+            snapshot, current ? tour.types : active)
         : 0;
     // Where the counts ARE reported and none of them is positive, there is
     // nothing to walk. Where they are not reported at all, the pill is drawn

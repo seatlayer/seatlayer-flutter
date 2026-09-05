@@ -249,6 +249,33 @@ class SeatLayerBlockedRegionScope extends InheritedWidget {
   static SeatLayerBlockedRegionScope? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<SeatLayerBlockedRegionScope>();
 
+  /// Guard the WHOLE map while [run] is in progress.
+  ///
+  /// For a surface that is not in the map's stack at all — a modal sheet or a
+  /// dialog pushed over the page. Its scrim covers the map, and on iOS the
+  /// tap that dismisses it reaches the web view too, so the accessibility
+  /// sheet used to close and step the camera out with one touch. The guard
+  /// lingers past the future, which is what catches that late touch.
+  static Future<T> coverWhile<T>(
+    BuildContext context,
+    Future<T> Function() run,
+  ) async {
+    final scope =
+        context.getInheritedWidgetOfExactType<SeatLayerBlockedRegionScope>();
+    final map = scope?.mapBox();
+    if (scope == null || map == null) return run();
+    final key = Object();
+    scope.registry.set(
+      key,
+      SeatLayerBlockedRegion.fromRect(Offset.zero & map.size),
+    );
+    try {
+      return await run();
+    } finally {
+      scope.registry.set(key, null);
+    }
+  }
+
   @override
   bool updateShouldNotify(SeatLayerBlockedRegionScope oldWidget) =>
       oldWidget.registry != registry;
