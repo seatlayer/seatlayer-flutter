@@ -21,7 +21,7 @@ secure booking to your trusted server.
 
 ![Seat map picker running in a Flutter app: venue overview, section dock, seat confirmation, ticket list and the 3D venue view](https://raw.githubusercontent.com/seatlayer/seatlayer-flutter/main/doc/media/picker-flow.gif)
 
-> **Production SDK:** `0.3.1` is the current Flutter release. Pin the documented
+> **Production SDK:** `0.7.2` is the current public Flutter release. Pin the documented
 > release and validate your event, checkout handoff, lifecycle, and supported
 > physical devices before rollout.
 
