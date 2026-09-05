@@ -63,6 +63,19 @@ BundleInfo refreshingBundle({bool holdSelection = true}) => nativeChromeBundle(
       ],
     );
 
+/// A runtime that paints the seat a confirm card is asking about.
+///
+/// Gated on the command alone — `picker.setSelectionFocus` reports nothing and
+/// changes no snapshot, so the command table is the whole contract — which is
+/// why this adds no capability string.
+BundleInfo selectionFocusBundle() => nativeChromeBundle(
+      commands: const <String>[
+        'picker.setThemeMode',
+        'picker.setViewportInsets',
+        'picker.setSelectionFocus',
+      ],
+    );
+
 /// A runtime that also reports authored seat-view thumbnails.
 ///
 /// The seat-view fields on `selection[]` are gated on this capability, so a

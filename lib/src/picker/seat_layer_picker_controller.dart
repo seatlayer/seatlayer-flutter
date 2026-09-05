@@ -17,6 +17,7 @@ import 'picker_haptics.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
 import 'picker_revision_waiters.dart';
+import 'picker_selection_focus.dart';
 import 'picker_sheet_drag.dart';
 import 'picker_viewport_report.dart';
 import 'seat_layer_picker_theme.dart';
@@ -102,6 +103,9 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   bool _runtimeAttached = false;
   @override
   bool _disposed = false;
+
+  @override
+  SeatLayerPickerController get _controller => this;
   bool _closing = false;
   Future<void> _actionTail = Future<void>.value();
   Future<SeatLayerCheckoutHandoff>? _checkoutInFlight;
@@ -1265,6 +1269,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   /// lifecycle owners that are replacing the embedded runtime.
   Future<void> destroy() => _serialize(() async {
         if (value.phase == SeatLayerPickerPhase.closed) return;
+        forgetSelectionFocus();
         value = value.withBusy(SeatLayerPickerBusyAction.releasingHold);
         try {
           await mapController.runBridgeCommand('picker.destroy');
@@ -1284,6 +1289,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
     final future = _serialize(() async {
       if (_closing || value.phase == SeatLayerPickerPhase.closed) return;
       _closing = true;
+      forgetSelectionFocus();
       try {
         if (value.hasPickerOwnedHold) {
           final result = await mapController.runBridgeCommand('picker.abort');

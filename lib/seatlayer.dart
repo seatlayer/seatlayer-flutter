@@ -111,6 +111,8 @@ export 'src/picker/picker_seat_confirmation.dart'
         SeatLayerPickerSeatConfirmation,
         SeatLayerPickerSeatViewButton;
 export 'src/picker/picker_seat_view_chrome.dart' show SeatLayerSeatViewChrome;
+export 'src/picker/picker_selection_focus.dart'
+    show SeatLayerPickerSelectionFocus;
 export 'src/picker/picker_section_navigator.dart'
     show SeatLayerPickerSectionNavigator;
 export 'src/picker/picker_states.dart'
