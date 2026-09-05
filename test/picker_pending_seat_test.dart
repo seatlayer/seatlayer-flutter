@@ -11,6 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_confirm_card.dart';
+import 'package:seatlayer/src/picker/picker_prompt_presentation.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
@@ -25,8 +26,8 @@ Widget _layout() => SeatLayerPickerAdaptiveLayout(onCheckout: (_) async {});
 ///
 /// `screenPoint` arrives with `seat-screen-point-v1`; every runtime before it
 /// omits the field, which is what [pickerSnapshot] itself still models.
-Map<String, Object?> _seatDrawnAt(double x, double y) {
-  final snapshot = pickerSnapshot(sections: pickerSections());
+Map<String, Object?> _seatDrawnAt(double x, double y, {int revision = 1}) {
+  final snapshot = pickerSnapshot(sections: pickerSections(), revision: revision);
   final selection = Map<String, Object?>.from(
     snapshot['selection']! as Map<String, Object?>,
   );
@@ -70,6 +71,25 @@ BundleInfo _venue3DBundle() => nativeChromeBundle(
 Offset _mapOrigin(WidgetTester tester) => tester.getTopLeft(
       find.byKey(const ValueKey<String>('seatlayer-picker-prompt-transition')),
     );
+
+/// The card's own top edge, in the map surface's coordinates.
+double _cardTop(WidgetTester tester) => tester
+    .getTopLeft(
+      find.byKey(const ValueKey<String>('seatlayer.confirm-card.surface')),
+    )
+    .dy;
+
+/// The bottom inset the runtime was last told about.
+double _reportedBottomInset(FakePickerMap map) {
+  final args =
+      map.callsTo('picker.setViewportInsets').last.$2! as Map<String, Object?>;
+  return (args['bottom']! as num).toDouble();
+}
+
+/// Where the glass behind the card leaves the map clear, if anywhere.
+Offset? _spotlight(WidgetTester tester) => tester
+    .widget<PickerPromptTransition>(find.byType(PickerPromptTransition))
+    .anchor;
 
 /// The wrapper that pauses the cart sheet while a seat card is up.
 final Finder _sheetPause =
@@ -257,7 +277,45 @@ void main() {
     expect(find.byType(SeatLayerConfirmCard), findsNothing);
   });
 
-  testWidgets('a seat low on the map gets the card above it, pointing down', (
+  testWidgets('the card rests in one place whatever seat is tapped', (
+    tester,
+  ) async {
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
+
+    // The invariant neither the sliding card nor the two homes could keep:
+    // Cancel and Add seat are under the same pixels for every seat on the
+    // map, high or low. The card does not move to the seat; the map moves out
+    // from under the card.
+    final tops = <double>{};
+    var revision = 0;
+    for (final y in <double>[40, 200, 300, 420, 520, 600]) {
+      map.emit(_seatDrawnAt(195, y, revision: ++revision));
+      await pumpToRest(tester);
+      tops.add(_cardTop(tester));
+    }
+    expect(tops, hasLength(1));
+
+    // And that one place is the resting sheet: 14 pt of daylight under it.
+    final area = tester.getRect(
+      find.byKey(const ValueKey<String>('seatlayer-picker-prompt-transition')),
+    );
+    final card = tester.getRect(
+      find.byKey(const ValueKey<String>('seatlayer.confirm-card.surface')),
+    );
+    expect(
+      card.bottom,
+      closeTo(area.bottom - SeatLayerSizeTokens.confirmCardRestInset, .01),
+    );
+  });
+
+  testWidgets('the sheet is part of the band the runtime frames above', (
     tester,
   ) async {
     final map = FakePickerMap(bundle: nativeChromeBundle());
@@ -271,22 +329,31 @@ void main() {
     map.emit(_seatDrawnAt(195, 520));
     await pumpToRest(tester);
 
-    final pointer = find.byType(SeatLayerConfirmCardPointer);
-    expect(pointer, findsOneWidget);
-    expect(tester.widget<SeatLayerConfirmCardPointer>(pointer).up, isFalse);
-    // The card clears the seat rather than covering it.
-    final card = find.byKey(
-      const ValueKey<String>('seatlayer.confirm-card.surface'),
+    // Everything from the foot of the map up to the daylight above the card,
+    // so a fit or a focus glide lands the seat in the band the buyer can read
+    // rather than behind the card asking about it.
+    final area = tester.getRect(
+      find.byKey(const ValueKey<String>('seatlayer-picker-prompt-transition')),
     );
+    final withCard = _reportedBottomInset(map);
     expect(
-      tester.getBottomLeft(card).dy - _mapOrigin(tester).dy,
-      lessThanOrEqualTo(520 - 12),
+      withCard,
+      closeTo(
+        area.bottom -
+            _cardTop(tester) +
+            SeatLayerSizeTokens.confirmCardSeatGap,
+        .01,
+      ),
     );
+
+    // And the band is given back the moment the question is answered.
+    await tester.tap(find.text('Cancel'));
+    await pumpToRest(tester);
+    expect(find.byType(SeatLayerConfirmCard), findsNothing);
+    expect(_reportedBottomInset(map), lessThan(withCard));
   });
 
-  testWidgets('a seat high on the map leaves the card resting', (
-    tester,
-  ) async {
+  testWidgets('the spotlight follows the seat the map moved', (tester) async {
     final map = FakePickerMap(bundle: nativeChromeBundle());
     addTearDown(map.dispose);
     final picker = SeatLayerPickerController(mapController: map);
@@ -295,14 +362,16 @@ void main() {
     usePhoneSurface(tester);
 
     await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
-    map.emit(_seatDrawnAt(195, 40));
+    map.emit(_seatDrawnAt(195, 520));
     await pumpToRest(tester);
+    expect(_spotlight(tester), const Offset(195, 520));
 
-    // The card only leaves its resting place to get off a seat it would have
-    // covered. A seat this high was never in its way, so it stays where the
-    // thumb is and points at nothing.
-    expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
-    expect(find.byType(SeatLayerConfirmCardPointer), findsNothing);
+    // Reporting the sheet's band re-frames the map underneath it, so the seat
+    // is drawn somewhere else and the next snapshot says where. The hole in
+    // the glass is cut in map coordinates, so it has to follow.
+    map.emit(_seatDrawnAt(195, 210, revision: 2));
+    await pumpToRest(tester);
+    expect(_spotlight(tester), const Offset(195, 210));
   });
 
   testWidgets('the cart sheet is paused while the card is asking', (
@@ -355,7 +424,7 @@ void main() {
     await pumpToRest(tester);
 
     expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
-    expect(find.byType(SeatLayerConfirmCardPointer), findsNothing);
+    expect(_spotlight(tester), isNull);
   });
 
   testWidgets('the scene gets the card on the tap, before and after the dive',
@@ -376,7 +445,7 @@ void main() {
     map.emit(_inVenue3D(revision: 3));
     await pumpToRest(tester);
     expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
-    // Its own action, and no pointer: in the scene the seat is the picture.
+    // Its own action, and no spotlight: in the scene the seat is the picture.
     // The chip prints the short word; the sentence is what is spoken. The
     // scene's own deck carries the same words, so this looks on the card.
     expect(
@@ -386,7 +455,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.byType(SeatLayerConfirmCardPointer), findsNothing);
+    expect(_spotlight(tester), isNull);
 
     // The way between seats stays clear of the card.
     final deck = tester.getRect(
