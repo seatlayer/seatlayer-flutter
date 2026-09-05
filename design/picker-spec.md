@@ -146,7 +146,45 @@ what was sent when a runtime goes away — a fresh runtime frames against its
 whole surface until it is told otherwise. Dart file:
 `lib/src/picker/picker_viewport_report.dart`.
 
-### 2.4 Safe areas
+### 2.4 Chrome over the map takes the whole touch
+
+Everything in 2.3's "reported" list stands *on* the map, and the map is a
+platform view on every mobile platform. One physical tap on a control drawn
+over it must reach the control and nothing else — never the control and a seat.
+
+The hazard is platform-level, not layout-level. On iOS the embedded web view
+lives in the engine's touch-intercepting view, which holds each touch until the
+gesture layer says who won it: given to the map it is released to the web view,
+given to someone else it is swallowed, and **given to nobody it is delivered to
+the web view anyway**. Hiding the map from hit testing is therefore the leak,
+not the fix — the map has to take part in the contest and lose it.
+
+Every port holds three rules:
+
+1. The map takes part in gesture resolution for **every** touch inside its
+   band, including touches that landed on chrome. It must never be excluded
+   from hit testing while chrome is up.
+2. The map claims eagerly — on press, before any movement, which is what its
+   pan and pinch feel is built on — **except** where the same press landed on
+   chrome, where it resigns and the platform view is told it lost.
+3. Chrome over the map must be a control that competes for the touch. A
+   passive observer that watches touches without claiming them leaves the map
+   as the only claimant, and the tap lands twice again.
+
+The controls this covers are every one in 2.3's reported list plus the corner
+discs (3.5), the Map | 3D control (3.3), the test chip (3.4), the floor rail
+(3.7), toast actions (3.12) and the buyer-facing state prompts (3.13) — that
+is, anything at all that is drawn inside the map's rectangle.
+
+Surfaces that take the whole map — the seat card, loading and error states —
+additionally tell the runtime to stop accepting input at all
+(`picker.setInteractionEnabled`), so the map is quiet as well as unclaimed
+while a decision is open.
+
+Dart files: `lib/src/seat_layer_map_chrome.dart` (the stack, the scope and the
+recognizer), `lib/src/picker/picker_adaptive_layout.dart` (which composes them).
+
+### 2.5 Safe areas
 
 The bottom safe inset is absorbed once, by whichever surface owns the bottom
 edge at that moment:
@@ -1840,9 +1878,16 @@ fail because a phone declined to buzz. Decide *which* cue in a pure policy
 object, separate from the code that fires one, and honour the seeding rule: the
 first snapshot of a session fires nothing.
 
-**4.6 Safe areas.** One surface owns the bottom inset at any moment (§2.4).
+**4.6 Safe areas.** One surface owns the bottom inset at any moment (§2.5).
 Height ceilings add the inset rather than eating into content. The top inset
 belongs to the header.
+
+**4.6a One touch, one surface.** The map is a platform view on every mobile
+platform, and the native chrome drawn over it is not. Hold §2.4's three rules on
+the port: the map takes part in gesture resolution for every touch inside its
+band, it claims eagerly except where the press landed on chrome, and chrome over
+the map is always a control that competes for the touch. Verify it on a device —
+a tap on a corner disc must step the camera and select nothing.
 
 **4.7 Prewarm, adopt-after-layout, reveal-after-framing.** Three separate
 things, in this order:

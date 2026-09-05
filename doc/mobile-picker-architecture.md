@@ -207,6 +207,41 @@ overview → dismiss rather than leaving on the buyer's first try out.
 nest the picker in a gesture-driven scroll view, do not wrap it in an app-level
 drag or scale recognizer, and do not forward raw touch coordinates to it.
 
+**One touch, one surface.** The map is a platform view: on iOS an embedded
+`WKWebView` inside the engine's touch-intercepting view, which holds each touch
+until Flutter's gesture arena says who won it. Awarded to the map, the touch is
+released to the web view; awarded elsewhere, it is swallowed. Resolved by
+nobody — which is what happens when the map's render object was never
+hit-tested — UIKit hands it to the web view anyway. That is why a native
+control drawn over the map used to fire in Flutter *and* pick a seat
+underneath, and why hiding the map with an `IgnorePointer` does not help: being
+absent from the hit test is exactly the leaking state.
+
+The rule this SDK holds to, and the rule any custom layout must hold to:
+
+- Native chrome standing on the map goes in `SeatLayerMapChromeStack`, whose
+  first child is the map. It hit-tests chrome first, as `Stack` does, and then
+  always gives the map its turn too, so the platform view is in the arena for
+  every touch inside the map band and always learns the verdict.
+- The map surface reads that stack's `SeatLayerMapChromeScope` and installs a
+  recognizer that stays eager — claiming on pointer down, which is what its
+  latency-free pan and pinch depend on — except where the same hit test landed
+  on chrome, where it resigns instead.
+- Chrome over the map must **compete** for the pointer: a button, an `InkWell`,
+  a `GestureDetector`. A bare `Listener` observes pointers without entering the
+  arena, so nothing would claim the sequence and the map would win it.
+- The runtime-side `picker.setInteractionEnabled` guard stays for the surfaces
+  that take the whole map — the seat card and the loading and error states —
+  and is still the right call around any native overlay a host mounts over a
+  `SeatLayerPickerMap` in its own composition.
+
+None of this depends on the `webview_flutter_wkwebview` version. The behaviour
+lives in the Flutter engine's `FlutterTouchInterceptingView` and in
+`RenderUiKitView`'s arena wiring, and the plugin only passes
+`gestureRecognizers` through to `UiKitView`. A host pinning
+`webview_flutter_wkwebview: 3.17.0` gets the same fix as one on the current
+release.
+
 ## 8. Theme, localization and accessibility
 
 `themeMode` resolves in one order: your `themeMode` → your app's theme → the
