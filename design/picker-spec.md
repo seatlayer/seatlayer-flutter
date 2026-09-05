@@ -2178,10 +2178,13 @@ mountable on its own, where there is no order to join. Dart file:
   (`strings.venueMapHint`) that says the seats are picked with the controls
   around it. See the runtime gap in §4.9: naming a region that cannot be
   explored is the honest form of a canvas, not the intended design.
-- *Live regions*, and only these three (the dock's is there only where a host
-  opted into a dock; the default phone has two): the peek summary, the section dock's
-  name and seats-left, and the hold countdown. Each changes without the buyer
-  touching it, and none says so any other way.
+- *Live regions*, and only these three among the surfaces that are always up
+  (the dock's is there only where a host opted into a dock; the default phone
+  has two): the peek summary, the section dock's name and seats-left, and the
+  hold countdown. Each changes without the buyer touching it, and none says so
+  any other way. A surface that ARRIVES unasked — a buyer-facing state, a hold
+  notice, a toast, the best-seats count — is live as well; a notice that is part
+  of a surface's own statement (the card's limited-view line) is not.
 - *The hold countdown is throttled.* `m:ss` read aloud is a time of day. The
   pill announces `strings.holdMinutesLeft` at each minute mark, and
   `strings.holdSecondsLeft` for every second of the last minute, where the
