@@ -2,14 +2,22 @@ part of 'seat_layer_picker_controller.dart';
 
 /// Which seat the buyer is being asked about, and what they have answered.
 ///
-/// A seat that has just been tapped is already in the runtime's `selection` —
-/// and therefore in the cart, the ticket count and the total — while the
-/// native confirm card is still asking whether the buyer wants it. So
-/// everything a buyer reads as a commitment is counted from
-/// [confirmedCartLines] rather than from the raw snapshot.
+/// Two questions share one card. The first is the original: a seat that has
+/// just been tapped is already in the runtime's `selection` — and therefore in
+/// the cart, the ticket count and the total — while the native card is still
+/// asking whether the buyer wants it, so everything a buyer reads as a
+/// commitment is counted from [confirmedCartLines] rather than from the raw
+/// snapshot.
 ///
-/// A mixin rather than a plain block of the controller so the question, the
-/// state behind it and the rules that clear it are readable in one place.
+/// The second is its mirror, and it exists because the answer used to be taken
+/// without asking: a second tap on a seat already in the cart dropped it in
+/// silence — the ring went, the cart emptied, and nothing said so or offered
+/// the seat back. A runtime speaking `seat.retap` keeps the seat selected and
+/// reports the tap instead, and [seatAwaitingRemoval] is what the chrome reads
+/// to raise the same card asking the opposite question.
+///
+/// A mixin rather than a plain block of the controller so the two questions,
+/// their state and the rules that clear them are readable in one place.
 mixin _PickerSeatAnswers on ValueNotifier<SeatLayerPickerState> {
   /// The session's options, owned by the controller this is mixed into.
   SeatLayerPickerOptions get _options;
@@ -20,8 +28,11 @@ mixin _PickerSeatAnswers on ValueNotifier<SeatLayerPickerState> {
   /// Labels the buyer has decided about, either way.
   final Set<String> _confirmedLabels = <String>{};
 
-  /// The seat an open confirm card is asking about.
+  /// The seat an open confirm card is asking to ADD.
   SelectedSeat? _confirmCardSeat;
+
+  /// The seat an open confirm card is asking to REMOVE.
+  SelectedSeat? _retapSeat;
 
   /// The seat a confirm card is standing over, unanswered.
   ///
@@ -62,10 +73,16 @@ mixin _PickerSeatAnswers on ValueNotifier<SeatLayerPickerState> {
   void setConfirmCardSeat(SelectedSeat? seat) => _confirmCardSeat = seat;
 
   /// Record that the buyer answered for [label], and take its card down.
+  ///
+  /// Either question: a seat that has just been added is answered for, and so
+  /// is one that has just been taken back out.
   @internal
   void markSeatAnswered(String label) {
-    if (_disposed || !_confirmedLabels.add(label)) return;
+    final answered = _confirmedLabels.add(label);
+    final retapped = _retapSeat?.label == label;
+    if (_disposed || !(answered || retapped)) return;
     if (_confirmCardSeat?.label == label) _confirmCardSeat = null;
+    if (retapped) _retapSeat = null;
     notifyListeners();
   }
 
@@ -97,14 +114,57 @@ mixin _PickerSeatAnswers on ValueNotifier<SeatLayerPickerState> {
       ? (value.snapshot?.cartTotal ??
           value.cartLines.fold<double>(0, (sum, line) => sum + line.total))
       : confirmedCartLines.fold<double>(0, (sum, line) => sum + line.total);
-  /// Keep the question honest against the selection the runtime reports.
+  /// The seat the buyer has tapped a second time, still in their cart.
+  ///
+  /// Set by a `seat.retap` bridge event, which a runtime sends INSTEAD of
+  /// dropping the seat: the seat is still selected when this arrives, and no
+  /// `selection.changed` comes with it. The chrome raises the confirm card in
+  /// its remove state over this seat; the seat stays in the cart, and stays
+  /// counted, until the buyer actually answers.
+  ///
+  /// Cleared when the seat leaves the selection, when the buyer answers for
+  /// it, and by a retap of a different seat — one card, one question.
+  SelectedSeat? get seatAwaitingRemoval => _retapSeat;
+
+  /// Take a `seat.retap` event off the bridge.
+  ///
+  /// A retap of the seat an ADD card is already open about is ignored: that
+  /// card is asking about this very seat, and turning its own question round
+  /// under the buyer's finger would be a worse surprise than the silence this
+  /// replaces.
+  void _applyRetap(Object? payload) {
+    if (_disposed || _options.readOnly) return;
+    final seat = SelectedSeat.fromJson(jGet(payload, 'seat'));
+    if (seat == null || seat.label == _confirmCardSeat?.label) return;
+    if (_retapSeat?.label == seat.label && _retapSeat == seat) return;
+    _retapSeat = seat;
+    notifyListeners();
+  }
+
+  /// Put the remove question away without answering it.
+  ///
+  /// Cancel and the tap outside both land here: neither is an instruction to
+  /// give the seat back, and a stray press on the map must never be the thing
+  /// that empties someone's cart.
+  @internal
+  void dismissSeatRemoval() {
+    if (_disposed || _retapSeat == null) return;
+    _retapSeat = null;
+    notifyListeners();
+  }
+
+  /// Keep both questions honest against the selection the runtime reports.
   ///
   /// A seat that left the selection takes its answer with it, so re-picking it
-  /// asks again rather than joining the cart silently.
+  /// asks again rather than joining the cart silently — and a seat that is no
+  /// longer there cannot be the one a remove card is asking about.
   void _syncSeatAnswers(Set<String> live) {
     _confirmedLabels.removeWhere((label) => !live.contains(label));
     if (_confirmCardSeat != null && !live.contains(_confirmCardSeat!.label)) {
       _confirmCardSeat = null;
+    }
+    if (_retapSeat != null && !live.contains(_retapSeat!.label)) {
+      _retapSeat = null;
     }
   }
 }

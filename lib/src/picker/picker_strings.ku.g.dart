@@ -36,6 +36,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   backToVenue: 'Vegere cihê',
   cancel: 'Betal bike',
   select: 'Hilbijêre',
+  removeSeat: 'Cih rake',
   viewFromHere: 'Dîmen ji vir',
   openVenue360: 'Cihê bi 360° veke',
   recentre: 'Dîsa li ser dikê navend bike',

@@ -331,11 +331,20 @@ class _SeatLayerPickerAdaptiveLayoutState
         // cart sheet and the checkout gate answer the same question this
         // layout does.
         final pendingSeat = controller.unansweredSeat;
+        // A seat the buyer has tapped a SECOND time. A runtime that speaks
+        // `seat.retap` keeps the seat selected and reports the tap instead of
+        // dropping it, so the card can ask before the seat goes — and the cart
+        // keeps counting it while the card is up, because it IS still in the
+        // cart until the buyer answers.
+        final removalSeat =
+            pendingSeat == null ? controller.seatAwaitingRemoval : null;
+        final cardSeat = pendingSeat ?? removalSeat;
+        final removing = removalSeat != null;
         // The sheet never opens itself: a sheet that springs up on every pick
         // covers the map the buyer is still choosing from. It does collapse
         // itself when a seat card opens over the map, which is the tap the
         // runtime does report to native chrome.
-        if (pendingSeat != null && _sheetExpanded) {
+        if (cardSeat != null && _sheetExpanded) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted && _sheetExpanded) _setSheetExpanded(false);
           });
@@ -363,9 +372,7 @@ class _SeatLayerPickerAdaptiveLayoutState
               onCancel: (seat) => _removeSeat(controller, seat.label),
             ),
           );
-        } else if (!panoramaUp &&
-            pendingSeat != null &&
-            chrome.showConfirmCard) {
+        } else if (!panoramaUp && cardSeat != null && chrome.showConfirmCard) {
           final capabilities = state.snapshot?.capabilities ?? const <String>{};
           final onViewFromSeat =
               options.enableSeatView && capabilities.contains('seatView')
@@ -379,15 +386,27 @@ class _SeatLayerPickerAdaptiveLayoutState
           // The phone gets the one-line card; the wide layout keeps the
           // identity grid, which has the room for it.
           seatCardUp = !wide;
-          buyerPrompt = wide
+          // The primary answer is whichever answer the card is asking for, and
+          // Cancel is always "leave it as it was": for an add that drops the
+          // candidate, for a remove that keeps the seat.
+          final onPrimary = removing
+              ? (SelectedSeat seat) => _removeSeat(controller, seat.label)
+              : _confirmSeat;
+          final onSecondary = removing
+              ? (SelectedSeat seat) => controller.dismissSeatRemoval()
+              : (SelectedSeat seat) => _removeSeat(controller, seat.label);
+          // The identity grid is the wide layout's way of asking, but only the
+          // card carries the second question, so a retap raises the card in
+          // either width.
+          buyerPrompt = wide && !removing
               ? _part(
                   context,
                   widget.builders.seatConfirmation,
                   SeatLayerPickerSeatConfirmation(
-                    key: ValueKey<String>(pendingSeat.label),
-                    seat: pendingSeat,
-                    onConfirm: _confirmSeat,
-                    onCancel: (seat) => _removeSeat(controller, seat.label),
+                    key: ValueKey<String>(cardSeat.label),
+                    seat: cardSeat,
+                    onConfirm: onPrimary,
+                    onCancel: onSecondary,
                     onViewFromSeat: onViewFromSeat,
                     onShow3D: onShow3D,
                   ),
@@ -397,10 +416,17 @@ class _SeatLayerPickerAdaptiveLayoutState
                   widget.builders.confirmCard ??
                       widget.builders.seatConfirmation,
                   SeatLayerConfirmCard(
-                    key: ValueKey<String>(pendingSeat.label),
-                    seat: pendingSeat,
-                    onConfirm: _confirmSeat,
-                    onCancel: (seat) => _removeSeat(controller, seat.label),
+                    // An add and a remove about the same seat are two
+                    // different questions, so they are two different cards.
+                    key: ValueKey<String>(
+                      '${removing ? 'remove' : 'add'}:${cardSeat.label}',
+                    ),
+                    seat: cardSeat,
+                    mode: removing
+                        ? SeatLayerConfirmCardMode.remove
+                        : SeatLayerConfirmCardMode.add,
+                    onConfirm: onPrimary,
+                    onCancel: onSecondary,
                     onViewFromSeat: onViewFromSeat,
                     onShow3D: onShow3D,
                   ),
@@ -794,14 +820,18 @@ class _SeatLayerPickerAdaptiveLayoutState
                           // back at it. In the scene the seat IS the picture, so
                           // nothing points at it and the card rests over it.
                           seatCard: seatCardUp,
-                          anchor: seatCard3D ? null : pendingSeat?.screenPoint,
+                          anchor: seatCard3D ? null : cardSeat?.screenPoint,
                           topInset: topBand,
                           // With no anchor in 3D this band only sets where the
                           // card rests, so the lift is spent here.
                           bottomInset:
                               bottomBand - (seatCard3D ? _cardLift3D : 0),
-                          onDismiss: seatCardUp && pendingSeat != null
-                              ? () => _dismissSeatCard(controller, pendingSeat)
+                          onDismiss: seatCardUp && cardSeat != null
+                              ? () => _dismissSeatCard(
+                                    controller,
+                                    cardSeat,
+                                    removing: removing,
+                                  )
                               : null,
                           child: buyerPrompt,
                         ),
@@ -1013,7 +1043,8 @@ class _SeatLayerPickerAdaptiveLayoutState
   bool _hasOpenPrompt(SeatLayerPickerState state) {
     if (SeatLayerPickerScope.optionsOf(context).readOnly) return false;
     if (state.generalAdmissionCandidate != null) return true;
-    return _picker?.seatAwaitingConfirmation != null;
+    return _picker?.seatAwaitingConfirmation != null ||
+        _picker?.seatAwaitingRemoval != null;
   }
 
   /// One rung down, in the order the buyer built them up.
@@ -1033,6 +1064,12 @@ class _SeatLayerPickerAdaptiveLayoutState
       }
       if (pending != null) {
         ignorePickerAction(_removeSeat(controller, pending.label));
+        return;
+      }
+      // Backing out of the remove question keeps the seat, exactly as Cancel
+      // does: Back is a way out of the card, not an answer to it.
+      if (controller.seatAwaitingRemoval != null) {
+        controller.dismissSeatRemoval();
         return;
       }
     }
@@ -1198,9 +1235,17 @@ class _SeatLayerPickerAdaptiveLayoutState
   /// way the button does, cue included.
   Future<void> _dismissSeatCard(
     SeatLayerPickerController controller,
-    SelectedSeat seat,
-  ) async {
+    SelectedSeat seat, {
+    bool removing = false,
+  }) async {
     controller.emitHaptic(PickerHapticCue.cardCancelled);
+    // Only where the seat was a candidate. Tapping around a REMOVE card is the
+    // buyer not answering it, and the seat they already have stays theirs — a
+    // stray press on the map must never be the thing that empties a cart.
+    if (removing) {
+      controller.dismissSeatRemoval();
+      return;
+    }
     await _removeSeat(controller, seat.label);
   }
 

@@ -37,6 +37,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   backToVenue: 'Nazaj na prizorišče',
   cancel: 'Prekliči',
   select: 'Izberi',
+  removeSeat: 'Odstrani sedež',
   viewFromHere: 'Pogled od tu',
   openVenue360: 'Odpri prizorišče v 360°',
   recentre: 'Znova centriraj na oder',

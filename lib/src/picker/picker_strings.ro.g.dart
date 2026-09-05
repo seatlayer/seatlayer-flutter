@@ -37,6 +37,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   backToVenue: 'Înapoi la locație',
   cancel: 'Anulează',
   select: 'Selectează',
+  removeSeat: 'Elimină loc',
   viewFromHere: 'Priveliștea de aici',
   openVenue360: 'Deschide locația în 360°',
   recentre: 'Recentrează pe scenă',

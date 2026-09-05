@@ -36,6 +36,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   backToVenue: 'Atpakaļ uz norises vietu',
   cancel: 'Atcelt',
   select: 'Izvēlēties',
+  removeSeat: 'Noņemt vietu',
   viewFromHere: 'Skats no šejienes',
   openVenue360: 'Atvērt norises vietu 360°',
   recentre: 'Atkal centrēt uz skatuvi',

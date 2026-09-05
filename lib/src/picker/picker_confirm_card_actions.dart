@@ -92,10 +92,19 @@ class _AddSeatButton extends StatefulWidget {
     required this.invite,
     required this.onPressed,
     required this.onInviteEnd,
+    this.destructive = false,
     this.style,
   });
 
   final String label;
+
+  /// Whether this press takes a seat back out of the cart.
+  ///
+  /// The same button, asking the opposite question: it carries the failure
+  /// colour and a cross rather than the accent and a tick. A TICK IS THE
+  /// WRONG PROMISE ON A REMOVE — it reads as "done, added" on the one press
+  /// that empties a line out of the cart.
+  final bool destructive;
 
   /// Whether the press has been committed and the button is now a receipt.
   final bool added;
@@ -228,9 +237,19 @@ class _AddSeatButtonState extends State<_AddSeatButton>
     final ground = styledGround ??
         (disabled
             ? Color.alphaBlend(pickerAlpha(theme.mutedText, .16), theme.surface)
-            : theme.accent);
+            : (widget.destructive ? theme.error : theme.accent));
+    // [SeatLayerPickerThemeData.onAccent] is authored against the accent and
+    // says nothing about the failure colour, so the destructive ink is read
+    // off the ground it actually sits on.
     final ink = styledInk ??
-        (disabled ? pickerAlpha(theme.mutedText, .58) : theme.onAccent);
+        (disabled
+            ? pickerAlpha(theme.mutedText, .58)
+            : (widget.destructive
+                ? (ThemeData.estimateBrightnessForColor(ground) ==
+                        Brightness.dark
+                    ? const Color(0xFFFFFFFF)
+                    : const Color(0xFF000000))
+                : theme.onAccent));
     final shape = seatLayerStyleRole(widget.style?.shape) ??
         RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.button),
@@ -283,6 +302,7 @@ class _AddSeatButtonState extends State<_AddSeatButton>
                                 painter: _TickPainter(
                                   color: ink,
                                   drawn: widget.added ? _press.value : 1,
+                                  cross: widget.destructive,
                                 ),
                               ),
                             ),
@@ -444,21 +464,34 @@ class _AddSeatFinish extends CustomPainter {
 
 /// The tick on `Add seat`, drawn stroke-first so the press can draw it again.
 class _TickPainter extends CustomPainter {
-  const _TickPainter({required this.color, required this.drawn});
+  const _TickPainter({
+    required this.color,
+    required this.drawn,
+    this.cross = false,
+  });
 
   final Color color;
 
   /// How much of the stroke is on the canvas, 0 to 1.
   final double drawn;
 
+  /// Draw a cross instead: the same glyph slot, the opposite answer.
+  final bool cross;
+
   @override
   void paint(Canvas canvas, Size size) {
     if (drawn <= 0) return;
     final scale = size.width / 24;
-    final path = Path()
-      ..moveTo(20 * scale, 6 * scale)
-      ..lineTo(9 * scale, 17 * scale)
-      ..lineTo(4 * scale, 12 * scale);
+    final path = cross
+        ? (Path()
+          ..moveTo(6 * scale, 6 * scale)
+          ..lineTo(18 * scale, 18 * scale)
+          ..moveTo(18 * scale, 6 * scale)
+          ..lineTo(6 * scale, 18 * scale))
+        : (Path()
+          ..moveTo(20 * scale, 6 * scale)
+          ..lineTo(9 * scale, 17 * scale)
+          ..lineTo(4 * scale, 12 * scale));
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
@@ -476,7 +509,9 @@ class _TickPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_TickPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.drawn != drawn;
+      oldDelegate.color != color ||
+      oldDelegate.drawn != drawn ||
+      oldDelegate.cross != cross;
 }
 
 /// The ticket itself, travelling from the card to the collapsed cart.

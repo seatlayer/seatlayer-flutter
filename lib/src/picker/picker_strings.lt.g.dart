@@ -37,6 +37,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   backToVenue: 'Atgal į vietą',
   cancel: 'Atšaukti',
   select: 'Pasirinkti',
+  removeSeat: 'Pašalinti vietą',
   viewFromHere: 'Vaizdas iš čia',
   openVenue360: 'Atverti vietą 360°',
   recentre: 'Vėl centruoti į sceną',

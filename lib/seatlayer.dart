@@ -71,7 +71,8 @@ export 'src/picker/picker_checkout_cta.dart'
         seatLayerCheckoutCtaState;
 export 'src/picker/picker_chart_load.dart'
     show SeatLayerChartLoad, SeatLayerChartLoadTrace;
-export 'src/picker/picker_confirm_card.dart' show SeatLayerConfirmCard;
+export 'src/picker/picker_confirm_card.dart'
+    show SeatLayerConfirmCard, SeatLayerConfirmCardMode;
 export 'src/picker/picker_dock_bar.dart' show SeatLayerDockBar;
 export 'src/picker/picker_errors.dart' show SeatLayerPickerActionError;
 export 'src/picker/picker_floor_strip.dart' show SeatLayerFloorStrip;

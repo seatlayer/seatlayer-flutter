@@ -34,6 +34,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   backToVenue: '会場に戻る',
   cancel: 'キャンセル',
   select: '選択',
+  removeSeat: '席を削除',
   viewFromHere: 'ここからの眺め',
   openVenue360: '会場の360°を開く',
   recentre: 'ステージを中央に戻す',

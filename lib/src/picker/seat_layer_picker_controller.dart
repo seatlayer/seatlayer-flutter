@@ -305,6 +305,13 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
       _onSeatViewChanged(event.payload);
       return;
     }
+    if (event.name == 'seat.retap') {
+      // A second tap on a seat already in the cart. The runtime has KEPT the
+      // seat — this is a question, not a change — so nothing here touches the
+      // selection; the chrome raises the card that asks it.
+      _applyRetap(event.payload);
+      return;
+    }
     if (event.name == 'hold.expired') {
       // Read off the bridge itself, on the same hop as the snapshot that
       // follows it, so the expiry is known before a vanished hold could be

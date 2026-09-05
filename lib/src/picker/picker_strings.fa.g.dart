@@ -36,6 +36,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   backToVenue: 'بازگشت به سالن',
   cancel: 'لغو',
   select: 'انتخاب',
+  removeSeat: 'حذف صندلی',
   viewFromHere: 'دید از اینجا',
   openVenue360: 'باز کردن سالن در ۳۶۰ درجه',
   recentre: 'بازگرداندن مرکز به صحنه',

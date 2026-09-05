@@ -21,6 +21,23 @@ screen-reader buyer still has exactly one named way into the cart. `Find seats`
 and `Continue` are 48 pt at `radius.peekButton` with a 16 pt label, set against
 the same 12 pt inset the summary starts at.
 
+Tapping a seat that is already in the cart asks before it takes it back out. It
+used to drop the seat in silence — the ring went, the cart emptied, the total
+moved, and there was no card, no notice and nothing to undo it with. On a
+runtime that reports the second tap, the seat stays selected and the same
+confirm card comes up over it with `Remove seat` where `Add seat` was, in the
+failure colour and carrying a cross rather than a tick. Cancel, the tap outside,
+the downward drag and the platform's back gesture all keep the seat; only the
+button takes it, down the same path the cart row's × uses. The seat keeps its
+ticket, its line and its money the whole time the card is asking, because it is
+still in the cart until the buyer answers.
+
+`SeatLayerConfirmCard` takes a `mode:` (`SeatLayerConfirmCardMode.add` or
+`.remove`) for hosts placing the card themselves, and the controller reports the
+candidate as `seatAwaitingRemoval` with `dismissSeatRemoval()` to put the
+question away. `strings.removeSeat` is new and is translated into all 37
+locales the runtime ships.
+
 `size.confirmBandLeftFontSize` and `SeatLayerSizeTokens.confirmBandLeftFontSize`
 are removed — they measured a line the card no longer draws. `strings.seatsLeft`
 stays; the dock still prints it.

@@ -37,6 +37,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsPt = SeatLayerPickerStrings(
   backToVenue: 'Voltar ao recinto',
   cancel: 'Cancelar',
   select: 'Selecionar',
+  removeSeat: 'Remover lugar',
   viewFromHere: 'Vista daqui',
   openVenue360: 'Abrir o recinto em 360°',
   recentre: 'Voltar a centrar no palco',

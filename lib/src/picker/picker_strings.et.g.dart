@@ -36,6 +36,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   backToVenue: 'Tagasi kohta',
   cancel: 'Tühista',
   select: 'Vali',
+  removeSeat: 'Eemalda koht',
   viewFromHere: 'Vaade siit',
   openVenue360: 'Ava koht 360° vaates',
   recentre: 'Keskenda uuesti lavale',

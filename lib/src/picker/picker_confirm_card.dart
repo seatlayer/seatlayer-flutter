@@ -39,6 +39,25 @@ part 'picker_confirm_card_placement.dart';
 /// category and the price share the band under it, tinted in the category's own
 /// colour, which is the same colour the seat is painted on the map.
 ///
+/// The two questions this one card asks.
+///
+/// [add] is the original: a seat the buyer has tapped but not yet taken.
+/// [remove] is the same card about a seat already in their cart, raised by a
+/// SECOND tap on it — which used to drop the seat in silence, with no card and
+/// nothing to undo it with. Same layout, same identity, same price; only the
+/// primary answer changes, and Cancel keeps the seat rather than dropping it.
+///
+/// Deliberately not a separate card. A buyer taps a seat and expects the thing
+/// that seat's tap always produces; two surfaces for one gesture is a second
+/// thing to learn for no gain.
+enum SeatLayerConfirmCardMode {
+  /// Asking whether to put the seat in the cart.
+  add,
+
+  /// Asking whether to take the seat back out of it.
+  remove,
+}
+
 /// Everything comes from the scope, so this works standalone inside a
 /// [SeatLayerPickerScope].
 class SeatLayerConfirmCard extends StatefulWidget {
@@ -52,6 +71,7 @@ class SeatLayerConfirmCard extends StatefulWidget {
     this.onShow3D,
     this.showSeatView = true,
     this.show3D = true,
+    this.mode = SeatLayerConfirmCardMode.add,
     this.style,
   });
 
@@ -75,6 +95,9 @@ class SeatLayerConfirmCard extends StatefulWidget {
 
   /// Whether the capability-gated 3D pill may be shown.
   final bool show3D;
+
+  /// Which of the card's two questions this one is asking.
+  final SeatLayerConfirmCardMode mode;
 
   /// Overrides [SeatLayerPickerStyles.confirmCardStyle] for this card.
   final SeatLayerSurfaceStyle? style;
@@ -132,7 +155,8 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
   @override
   void didUpdateWidget(covariant SeatLayerConfirmCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.seat?.label != widget.seat?.label) {
+    if (oldWidget.seat?.label != widget.seat?.label ||
+        oldWidget.mode != widget.mode) {
       _seatKey = null;
       _tierId = widget.seat?.tierId;
       _dismissedLabel = null;
@@ -244,12 +268,17 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
         viewNotice != null ||
         hasNote ||
         (loneTierNote?.isNotEmpty ?? false);
+    // Which question this card is asking. In `remove` the seat is already in
+    // the cart and stays there — counted, priced and part of the total — until
+    // the buyer answers, so nothing here takes it out of the reckoning.
+    final removing = widget.mode == SeatLayerConfirmCardMode.remove;
     // A booth, a table or a general-admission area is not a seat, and the
     // button must not call it one.
-    final addLabel =
-        seat.objectType == null || seat.objectType == ObjectType.seat
+    final primaryLabel = removing
+        ? strings.removeSeat
+        : (seat.objectType == null || seat.objectType == ObjectType.seat
             ? strings.addSeat
-            : strings.select;
+            : strings.select);
     // In the scene the venue is already the picture, so a photo strip has
     // nothing left to stand in for: the one place the buyer has not looked
     // from is the seat itself, and that becomes the card's inspection row.
@@ -295,8 +324,8 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       // action is how a screen-reader buyer says yes or no to a card they
       // have just been read.
       customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
-        CustomSemanticsAction(label: addLabel): () {
-          if (!busy) ignorePickerAction(_confirm(controller, seat));
+        CustomSemanticsAction(label: primaryLabel): () {
+          if (!busy) ignorePickerAction(_answer(controller, seat));
         },
         CustomSemanticsAction(label: strings.cancel): () {
           if (!busy) ignorePickerAction(_cancel(controller, seat));
@@ -551,15 +580,16 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                                             child: _AddSeatButton(
                                               label: _added
                                                   ? strings.added
-                                                  : addLabel,
+                                                  : primaryLabel,
                                               added: _added,
+                                              destructive: removing,
                                               invite: invite,
                                               onInviteEnd: _endInvite,
                                               style: theme
                                                   .styles.primaryButtonStyle,
                                               onPressed: controller.state.isBusy
                                                   ? null
-                                                  : () => _confirm(
+                                                  : () => _answer(
                                                       controller, seat),
                                             ),
                                           ),
@@ -621,6 +651,44 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       return;
     }
     setState(() => _drag = 0);
+  }
+
+  /// The card's primary answer, whichever question it is asking.
+  Future<void> _answer(
+    SeatLayerPickerController controller,
+    SelectedSeat seat,
+  ) =>
+      widget.mode == SeatLayerConfirmCardMode.remove
+          ? _remove(controller, seat)
+          : _confirm(controller, seat);
+
+  /// Take back a seat the buyer had already added.
+  ///
+  /// The mirror of [_confirm], and deliberately plainer: there is no sweep to
+  /// wait for and nothing to fly to the tray, so the state change and the
+  /// card's departure happen on the same press. The removal itself is the
+  /// SAME path the cart's own ✕ takes — this only puts a card in front of it.
+  Future<void> _remove(
+    SeatLayerPickerController controller,
+    SelectedSeat seat,
+  ) async {
+    if (_answering) return;
+    _answering = true;
+    controller.emitHaptic(PickerHapticCue.ticketRemoved);
+    try {
+      if (widget.onConfirm != null) {
+        await widget.onConfirm!(seat);
+      } else {
+        await controller.removeObject(seat.label);
+        controller.markSeatAnswered(seat.label);
+      }
+      _dismiss(seat);
+    } catch (_) {
+      // The controller keeps the typed failure in picker state for native UI.
+      // The card stays, so the answer must be offerable again.
+      _answering = false;
+      if (mounted) setState(() => _drag = 0);
+    }
   }
 
   Future<void> _confirm(
@@ -687,6 +755,13 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     try {
       if (widget.onCancel != null) {
         await widget.onCancel!(seat);
+      } else if (widget.mode == SeatLayerConfirmCardMode.remove) {
+        // CANCEL MEANS "LEAVE IT AS IT WAS", and what that is depends on which
+        // question was asked. Cancelling an add drops the candidate;
+        // cancelling a remove keeps the seat the buyer already has. The push
+        // down and the tap outside both land here, so every door out of this
+        // card agrees — a stray press must never empty someone's cart.
+        controller.dismissSeatRemoval();
       } else {
         await controller.removeObject(seat.label);
       }

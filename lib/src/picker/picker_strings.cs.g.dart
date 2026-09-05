@@ -36,6 +36,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   backToVenue: 'Zpět do areálu',
   cancel: 'Zrušit',
   select: 'Vybrat',
+  removeSeat: 'Odebrat místo',
   viewFromHere: 'Výhled odsud',
   openVenue360: 'Otevřít areál ve 360°',
   recentre: 'Vycentrovat zpět na pódium',

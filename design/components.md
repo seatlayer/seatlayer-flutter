@@ -219,11 +219,17 @@ override** `style:`
 
 - **Inputs** the newest unconfirmed `SelectedSeat`, `capabilities`
   (`seatView`, `venue3d`), and — on `seat-view-thumbnail-v1` — the seat's
-  `seatViewThumb`, `sightlineMetres` and `seatViewConfidence`.
+  `seatViewThumb`, `sightlineMetres` and `seatViewConfidence`. Plus `mode:`
+  (`SeatLayerConfirmCardMode.add` | `.remove`), which chooses the question.
 - **States** with a photo (loading, arrived, never arrived), without one (no
   strip at all, and the 3D square in the decision row), 3D-only, with a sight
   line, with tiers, with notices; the confidence teaser or its passport chip
-  inside 3D; at its resting home or its raised one; committing.
+  inside 3D; at its resting home or its raised one; committing; **removing** —
+  the same card over a seat already in the cart, raised by a second tap on it
+  (bridge event `seat.retap`, payload `{ seat }`, the seat still selected). The
+  primary reads `strings.removeSeat` in `color.*.error` with a cross rather
+  than a tick; Cancel, the drag, the tap outside and Back all KEEP the seat;
+  and the seat stays counted in the cart the whole time it is asked about.
 - **Backdrop** the map goes behind glass: a black veil at
   `opacity.confirmScrim` under a `size.confirmScrimBlur` blur, masked clear to
   `size.confirmScrimClearRadius` around the tapped seat and reaching full
@@ -284,7 +290,9 @@ override** `style:`
 - **Callbacks** `onConfirm`, `onCancel`, `onViewFromSeat`, `onShow3D`,
   `onSeatConfidence` (the teaser is a button only where a host takes it).
 - **Commands** `picker.openSeatView`, `picker.showSeatIn3D`,
-  `picker.deselect` on cancel.
+  `picker.deselect` on cancel. In `remove` mode: `picker.removeCartLine` on the
+  primary — the same path the cart row's ✕ takes — and NOTHING on any of the
+  ways out.
 
 ## HoverCard
 
