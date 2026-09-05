@@ -33,6 +33,24 @@ rather than over the section's name. A name is placed to clear its neighbours,
 so on a large stand it could end up a block away from a front-row pick and the
 mark appeared to point at the wrong section.
 
+The accessibility sheet's switches apply as they are flipped. `Apply filters`
+is gone: a switch is already the action, and staging the flips behind a button
+asked twice for one decision — a buyer who dragged the sheet away, the gesture
+that closes every other sheet, got a map that had ignored everything they had
+just done. The web menu has never had an apply step. The sheet stays open after
+a toggle, so a buyer with more than one need can flip more than one row; its
+drag handle and its scrim are the way out, and the count-as-jump still closes
+it to hand the walk to the map.
+
+Opening the sheet takes down an unanswered seat card. It used to come up over
+one, leaving a dimmed question behind it that the buyer could neither read nor
+answer while it still held the seat. The card is now cancelled first — the seat
+given back exactly as an outside tap gives it back — so one decision surface
+holds the screen at a time.
+
+`strings.applyFilters` and `SeatLayerStringTokens.applyFilters` are removed;
+nothing draws that label any more.
+
 ## 0.7.2
 
 Removing a ticket now answers the press rather than the server. The line fades

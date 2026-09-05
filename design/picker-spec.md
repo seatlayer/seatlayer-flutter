@@ -468,6 +468,24 @@ Its sheet opens upward from the button and contains switch rows:
 - `strings.hideLimitedView`, only where some seat is restricted or obstructed.
 - `strings.colorblindSafe`.
 
+**Every switch applies as it is flipped, and there is no apply step.** The
+command goes to the runtime out of the row's own handler, exactly as the web
+menu has always done it (`pickerAccessibilityMenu.wire()` calls
+`setColorblindSafe` / `setLimitedViewHidden` / `applyFilter()` straight from
+the click). A switch IS the action, so staging the flips behind an
+`Apply filters` button asked twice for one decision — and left a buyer who
+dragged the sheet away, the gesture that closes every other sheet, with a map
+that had ignored everything they just did. **The sheet stays open** after a
+toggle: a buyer with more than one need flips more than one row. Its drag
+handle and its scrim are the only ways out, plus the count-as-jump below.
+
+**Opening the sheet clears a pending seat card.** Only one decision surface may
+hold the screen; the web picker clears them all before another goes up
+(`SeatPicker.clearDecisionSurfaces`). An unanswered confirm card is cancelled
+first — the seat given back and marked answered, exactly as an outside tap on
+the card does it — so the sheet never comes up over a dimmed question the buyer
+can neither read nor answer.
+
 Row anatomy: height `size.minimumHitTarget`, padding
 `size.accessRowPaddingX` / `size.accessRowPaddingY`, corner `radius.button`,
 icon cell `size.accessRowIconCell`, gap `size.accessRowGap`, label at
@@ -476,7 +494,8 @@ The switch is a track of `size.accessSwitchWidth` × `size.accessSwitchHeight`
 at `radius.pill` with a knob of `size.accessSwitchKnob`; off is the muted colour
 at low opacity, on is the accent. Disabled rows dim and stop responding.
 
-Filters combine as a **union**. Turning one on moves the camera to the matching
+Filters combine as a **union**; the whole union is sent on every flip. Turning
+one on moves the camera to the matching
 seats — the runtime's own flight since 0.77.1, see 3.13. The choice survives the
 session where the host allows it, and is restored only for provisions that are
 still free.
@@ -489,7 +508,8 @@ accent at 12 % on the row's own ground with the divider hairline, drawn inside a
 `size.minimumHitTarget` target so the number does not have to be aimed at. The
 number itself does not move or change size when it becomes pressable. Pressing
 it turns that provision's switch on if it was off, applies the filter, **closes
-the sheet**, and takes the first step of the accessible-section tour
+the sheet** — the one control on it that does — and takes the first step of the
+accessible-section tour
 (3.4.1). Name: `label, strings.accessFreeCount(n),
 strings.accessJumpFirstSection`. The row's own toggle stays a separate node —
 the two do different things. Where the count is not pressable it is the static

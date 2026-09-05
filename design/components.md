@@ -44,7 +44,7 @@ the best-seats selects and stepper.
 **`radius.button`:**  the seat card's `Cancel` and `✓ Add seat`, its
 `See it in 3D` action and its decision-row `3D` square, its 3D inspection
 chips and its tier rows; the sheet's `Hold seats & checkout`; the
-accessibility sheet's rows and `Apply filters`; `Try again`; the prompts'
+accessibility sheet's rows; `Try again`; the prompts'
 action pairs.
 
 **`radius.peekButton` (12):** the collapsed bar's two doors — `Continue ·
@@ -513,7 +513,7 @@ specification. Names, slots and files:
 | `SeatLayerPickerExtendHoldPrompt` | one named `+5 min` step, once per hold, dismissable; **phone: off by default**, host opt-in via `SeatLayerPickerChromeOptions(showExtendHoldPrompt: true)`; wide keeps it | §3.13.8 |
 | `SeatLayerPickerBookedOverlay` | — | §3.13.10 |
 | `SeatLayerPickerGeneralAdmissionPrompt` / `…TablePrompt` | — | §3.13.11–12 |
-| `SeatLayerPickerAccessibilityFilters` | — | §3.5 |
+| `SeatLayerPickerAccessibilityFilters` | — | §3.5 — switches apply on change, no apply step, the sheet stays open; opening it clears a pending seat card |
 | `SeatLayerPickerAccessibleStepper` | — | §3.4.1 |
 | `SeatLayerSeatViewChrome` | `seatViewChromeStyle` | §3.15 |
 | `SeatLayerPickerAttribution` | — | §3.10.3 |

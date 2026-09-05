@@ -90,7 +90,6 @@ void main() {
     // And a single string the runtime has no equivalent for stays English even
     // inside a translated locale.
     final german = SeatLayerPickerStrings.forLocale(const Locale('de'));
-    expect(german.applyFilters, english.applyFilters);
     expect(german.overview, isNot(english.overview));
   });
 

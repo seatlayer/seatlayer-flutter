@@ -291,6 +291,99 @@ void main() {
     expect(find.byType(IconButton), findsNothing);
   });
 
+  testWidgets('a switch applies as it is flipped, with no apply step',
+      (tester) async {
+    // A switch IS the action. Staging the flips behind an "Apply filters"
+    // button made the sheet ask twice for one decision, and left a buyer who
+    // dragged the sheet away — the gesture that closes every other sheet —
+    // with a map that had ignored everything they just did. The web menu has
+    // never had an apply step: `pickerAccessibilityMenu.wire()` calls
+    // `setColorblindSafe` / `setLimitedViewHidden` / `applyFilter()` straight
+    // out of the row's own click handler.
+    final map = FakePickerMap(bundle: _accessBundle(limited: true));
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+    final snapshot = pickerSnapshot(
+      accessNeeds: <Object?>[accessNeed('wheelchair', 15)],
+    );
+    (snapshot['features']! as Map<String, Object?>)['limitedViewFilter'] = true;
+
+    await _openSheet(tester, map, snapshot);
+
+    expect(find.text('Apply filters'), findsNothing);
+    expect(map.callsTo('picker.setAccessibilityFilter'), isEmpty);
+
+    await tester.tap(find.text('Wheelchair'));
+    await tester.pumpAndSettle();
+
+    expect(
+      map.callsTo('picker.setAccessibilityFilter').single.$2,
+      <String, Object?>{
+        'types': <String>['wheelchair'],
+      },
+    );
+    // The buyer may well flip another; only the drag handle and the scrim
+    // take the sheet away.
+    expect(find.text('Wheelchair'), findsOneWidget);
+    expect(find.text('Colourblind-friendly colours'), findsOneWidget);
+
+    await tester.tap(find.text('Hide limited-view seats'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Colourblind-friendly colours'));
+    await tester.pumpAndSettle();
+
+    expect(
+      map.callsTo('picker.setLimitedViewFilter').single.$2,
+      <String, Object?>{'on': true},
+    );
+    expect(
+      map.callsTo('picker.setColorblindSafe').single.$2,
+      <String, Object?>{'on': true},
+    );
+    expect(find.text('Hide limited-view seats'), findsOneWidget);
+  });
+
+  testWidgets('flipping a switch back turns it off on the runtime too',
+      (tester) async {
+    final map = FakePickerMap(bundle: _accessBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await _openSheet(
+      tester,
+      map,
+      pickerSnapshot(
+        accessNeeds: <Object?>[
+          accessNeed('wheelchair', 15),
+          accessNeed('companion', 15),
+        ],
+      ),
+    );
+
+    await tester.tap(find.text('Wheelchair'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Companion'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Wheelchair'));
+    await tester.pumpAndSettle();
+
+    expect(
+      map.callsTo('picker.setAccessibilityFilter').map((call) => call.$2),
+      <Map<String, Object?>>[
+        <String, Object?>{
+          'types': <String>['wheelchair'],
+        },
+        <String, Object?>{
+          'types': <String>['wheelchair', 'companion'],
+        },
+        <String, Object?>{
+          'types': <String>['companion'],
+        },
+      ],
+      reason: 'the sheet holds the union it drew, and sends it whole each time',
+    );
+  });
+
   testWidgets('a host override still names the need', (tester) async {
     final map = FakePickerMap(bundle: _accessBundle());
     addTearDown(map.dispose);
