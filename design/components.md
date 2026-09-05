@@ -108,7 +108,7 @@ PriceLegend band                           size.topRailHeight
 │  corner controls: accessibility ◦ zoom column           │
 │  toast · extend prompt (bottom centre)                  │
 │  ConfirmCard / Venue3D chrome / status overlay          │
-│  DockBar                                size.dockBarHeight│
+│  (no DockBar — wide only; host opt-in on a phone)       │
 └─────────────────────────────────────────────────────────┘
 CartSheet peek                             size.peekHeight
 ```
@@ -173,8 +173,10 @@ override** `style:`
   the immersive scene is up.
 - **Anatomy** round controls `size.mapControlSize`, except the accessibility
   control at `size.accessibilityControlSize` (`size.minimumHitTarget`).
-  Bottom-left accessibility, bottom-right the single back-out `−`; both lift by
-  `size.dockBarHeight` while the dock is up. The accessible-section stepper
+  Bottom-left accessibility, bottom-right the single back-out `−`, both at
+  `size.mapAnchorInset` from the map's bottom edge. They lift by
+  `size.dockBarHeight` only where a host opted into a dock — a default phone
+  mounts none, so there is nothing to lift over. The accessible-section stepper
   sits beside the accessibility control, `size.accessStepGap` from it.
 - **Phone ladder** one control, not two: `−` walks section → venue and then
   **dims in place** (`map.canZoomOut`), rather than appearing and disappearing
@@ -195,9 +197,19 @@ override** `style:`
 **Name** `SeatLayerDockBar` · **Style slot** `dockBarStyle` · **Instance
 override** `style:`
 
+**No phone form.** The drop-in resolves this surface *wide only*, so a phone
+mounts nothing: pinch-out and the zoom-out stepper already walk a buyer back to
+the venue, the prev/next arrows bought a two-tap version of a gesture the finger
+does better, and the per-section "N seats left" is not shown on phones. The
+phone's way back is pinch-out past the melt point, or the stepped `−` in the
+bottom-right corner. A host that wants the bar on a phone sets `showDockBar`
+explicitly; the widget also mounts standalone. Everything below describes the
+bar where it IS drawn.
+
 - **Inputs** `sections[]` (with `accessibleFree`), `map.focusedSectionId`,
   `map.rung`, `map.accessibilityFilter`.
-- **States** hidden at rung `venue`; visible at rung `seats`; step controls
+- **States** not mounted on a phone unless the host asked; hidden at rung
+  `venue`; visible at rung `seats`; step controls
   disabled at the ends of `sections[]` (never wrapping around).
 - **Anatomy** edge-to-edge, `size.dockBarHeight` plus the bottom safe area,
   elevation `elevation.dockBar`. Left: a 10 pt dot in the section's colour, the

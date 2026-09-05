@@ -170,7 +170,15 @@ class _SeatLayerPickerAdaptiveLayoutState
         final immersiveUp = panoramaUp || venue3DUp;
         // Whether the scene has finished diving to a seat.
         final targeted = state.snapshot?.map.view3DTargetSeatId != null;
-        final dockUp = !panoramaUp && !venue3DUp && _dockVisible(state);
+        // NO DOCK ON THE PHONE by default (owner call, 2026-09-04). The bar
+        // is auto-resolved wide-only, and the drop-in mounts it only in the
+        // narrow branch, so by default nothing docks anywhere and a phone's
+        // bottom-corner controls sit at the map's own edge. A host that asks
+        // for it explicitly gets it back, on the phone, exactly as before.
+        final dockUp = !panoramaUp &&
+            !venue3DUp &&
+            chrome.dockBarFor(phone: !wide) &&
+            _dockVisible(state);
         // The Map/3D control keeps the map's top-right corner, on its own
         // line under the prices: two lines cost the map thirty points and
         // give back a rail that is never clipped under the control.
@@ -764,7 +772,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                         seatViewChrome,
                       ),
                     ),
-                    if (chrome.showDockBar && dockUp)
+                    if (dockUp)
                       Positioned(
                         left: 0,
                         right: 0,
@@ -982,10 +990,11 @@ class _SeatLayerPickerAdaptiveLayoutState
 
   /// How much of the map's bottom the phone's chrome is standing on.
   ///
-  /// The dock on the map, and in the scene the seat deck above it — which is
-  /// taller once the buyer is sitting somewhere, because it grows a caption.
-  /// The header and the cart sheet are rows of the same Column as the map, so
-  /// the map surface already ends where they begin and they are correctly not
+  /// The dock on the map — zero unless a host asked for one, since the phone
+  /// mounts none — and in the scene the seat deck above it, which is taller
+  /// once the buyer is sitting somewhere because it grows a caption. The
+  /// header and the cart sheet are rows of the same Column as the map, so the
+  /// map surface already ends where they begin and they are correctly not
   /// reported.
   static double _bottomBand({
     required SeatLayerPickerChromeOptions chrome,
@@ -993,7 +1002,8 @@ class _SeatLayerPickerAdaptiveLayoutState
     required double dockLift,
     required bool venue3D,
   }) {
-    final dock = chrome.showDockBar ? dockLift : 0.0;
+    // `dockLift` is already zero unless a dock is really drawn.
+    final dock = dockLift;
     if (!venue3D || !chrome.showVenue3DChrome) return dock;
     final deck =
         _mapInset + dockLift + SeatLayerVenue3D.seatDeckHeight(seated: seated);

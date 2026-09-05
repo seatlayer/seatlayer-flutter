@@ -109,7 +109,7 @@ Price rail band                            size.topRailHeight          (row)
 │  bottom-right       zoom column                                         │
 │  bottom-centre      toast · hold-extend prompt                          │
 │  seat card / prompts / status overlays                                  │
-│  Section dock                             size.dockBarHeight  + safe area│
+│  (no section dock on a phone — host opt-in only; see 3.6)               │
 └─────────────────────────────────────────────────────────────────────────┘
 Cart sheet (peek)                          size.peekHeight   + bottom safe area
 ```
@@ -130,7 +130,8 @@ Reported (they stand on the map):
 - the test chip, and the 3D back pill it steps below
 - the Map | 3D control
 - the floor rail
-- the section dock, plus its lift of the bottom anchors
+- the section dock **only where a host has opted in** — it has no phone form of
+  its own — plus the lift it then applies to the bottom anchors
 - the immersive scene's own top and bottom chrome
 
 Not reported (they are rows, and the map surface already ends at their edge):
@@ -155,8 +156,10 @@ edge at that moment:
 - peek — the **head** carries it, because the collapsed sheet's last
   `size.peekHeight` is where the system gesture bar lives and the Continue pill
   must clear it
-- section dock — the dock carries it, and the lift it applies to the bottom
-  anchors is `size.dockBarHeight` plus the same inset
+- section dock — where a host has opted into one, the dock carries it, and the
+  lift it applies to the bottom anchors is `size.dockBarHeight` plus the same
+  inset. With no dock — the default on a phone — the bottom anchors sit at
+  `size.mapAnchorInset` from the map's own bottom edge and nothing is reported
 
 ---
 
@@ -437,9 +440,11 @@ and is still only 1.17:1 from it, so on light the fill can never be the answer.
 This covers every floating control on the map, the accessibility control and
 the Map/3D track included — not only the corner discs.
 
-**Dock lift.** While the section dock is mounted and neither a seat card nor the
-immersive scene is up, the three bottom regions lift by the dock's height plus
-the bottom safe inset.
+**Dock lift.** Only where a host has opted into a section dock. While one is
+mounted and neither a seat card nor the immersive scene is up, the three bottom
+regions lift by the dock's height plus the bottom safe inset. By default a
+phone mounts no dock, the lift is zero, and the corner controls rest at
+`size.mapAnchorInset`.
 
 #### Accessibility control (bottom-left)
 
@@ -575,8 +580,26 @@ what the pinch had already done and covered most of it.
 **Name** `SeatLayerDockBar` · **slot** `dockBarStyle` · **file**
 `lib/src/picker/picker_dock_bar.dart`
 
-**Anatomy.** On a phone this is a **full-width bar pinned to the map's bottom
-edge**, never a floating pill: edge to edge, height `size.dockBarHeight` plus
+**THERE IS NO PHONE FORM** (owner call, 2026-09-04). Focusing a section on a
+phone used to dock a bar onto the map's bottom edge — "406 · 302 seats left
+‹ › ‹ Venue". "Pinch-out and the zoom-out stepper already walk a buyer back to
+the venue, so the prev/next arrows bought a two-tap version of a gesture the
+finger does better", and "the bar's 52px plus the home-indicator inset pushed
+every bottom-corner control up the screen to make room for it". The
+per-section "N seats left" is **no longer shown on phones** at all.
+
+The way back on the phone is now: **pinch out past the melt point** — the
+runtime releases the focus, F3 — or the **single `−` control** in the
+bottom-right region, which already steps section → venue → dims (3.5, "One way
+out, on the phone").
+
+The bar stays a **wide-layout surface and a host opt-in**: the switch
+(`showDockBar` in Dart) is auto-resolved *wide only*, and a host that sets it
+explicitly gets the bar back exactly as specified below. It also remains
+mountable standalone. Nothing below applies to a default phone picker.
+
+**Anatomy.** A **full-width bar pinned to the map's bottom edge**, never a
+floating pill: edge to edge, height `size.dockBarHeight` plus
 the bottom safe inset, square corners, a hairline on its top edge only, opaque
 `color.*.surface` (never translucent), elevation `elevation.dockBar`. On the
 light theme it additionally carries a real separating shadow above and below and
@@ -619,7 +642,8 @@ discovered after layout, and it joins the accessible name too. A section with
 is not zero, and a bar that drew `♿ 0` would tell a buyer the section is full
 when the truth is that nobody counted it.
 
-**States.** Hidden at the venue rung; visible when a section is focused; hidden
+**States.** Not mounted at all on a phone unless the host asked for it. Where it
+is mounted: hidden at the venue rung; visible when a section is focused; hidden
 while a seat card owns the bottom edge; hidden in the immersive scene.
 
 **Motion.** Slides up on `motion.duration.dock`. A pan onto a new section
@@ -1793,7 +1817,9 @@ them. Per-component notes stay with their component in §3.
 
 **One reading order.** Assistive technology walks the picker in the buyer's own
 order — header, price rail, map, the chrome standing on the map, the section
-dock, any prompt, notices, the cart — and never in paint order. The phone
+dock where a host opted into one, any prompt, notices, the cart — and never in
+paint order. On a default phone there is no dock, so that rung is simply empty
+and the map's chrome is read straight into the prompts and the cart. The phone
 composition is a column with a stack in the middle, and a stack's paint order
 puts the dock between two halves of the map's chrome and the seat card after
 the toast that answers it. Every surface therefore declares its place:
@@ -1804,7 +1830,7 @@ the toast that answers it. Every surface therefore declares its place:
 | 200 | price rail, and the Map/3D control that shares its band |
 | 300 | the map, and everything stacked on it |
 | 400 | map chrome: floor rail, test chip, corner controls, 3D and seat-view chrome |
-| 500 | section dock |
+| 500 | section dock (host opt-in; the default phone has none) |
 | 600 | seat card, general-admission and table prompts |
 | 700 | toasts, hold prompts, buyer-facing state overlays |
 | 800 | cart sheet |
@@ -1822,7 +1848,8 @@ mountable on its own, where there is no order to join. Dart file:
   (`strings.venueMapHint`) that says the seats are picked with the controls
   around it. See the runtime gap in §4.9: naming a region that cannot be
   explored is the honest form of a canvas, not the intended design.
-- *Live regions*, and only these three: the peek summary, the section dock's
+- *Live regions*, and only these three (the dock's is there only where a host
+  opted into a dock; the default phone has two): the peek summary, the section dock's
   name and seats-left, and the hold countdown. Each changes without the buyer
   touching it, and none says so any other way.
 - *The hold countdown is throttled.* `m:ss` read aloud is a time of day. The

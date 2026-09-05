@@ -13,6 +13,7 @@ import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_confirm_card.dart';
 import 'package:seatlayer/src/picker/picker_dock_bar.dart';
+import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 
@@ -97,7 +98,7 @@ void main() {
   const strings = SeatLayerPickerStrings();
 
   group('reading order', () {
-    testWidgets('the phone picker is read header, rail, map, dock, cart',
+    testWidgets('the phone picker is read header, rail, map, controls, cart',
         (tester) async {
       final handle = tester.ensureSemantics();
       final map = FakePickerMap();
@@ -109,18 +110,47 @@ void main() {
       await pumpToRest(tester);
 
       final dump = _traversal(tester);
-      // The event's name, the rail's way out of a filter, the map, the dock's
-      // way back to the venue, and the cart's own control — one of each, in
-      // the order the buyer meets them. The Stack in the middle paints the
-      // dock AFTER the map's own chrome and BEFORE the card, so nothing but an
-      // explicit order puts these five in this sequence.
+      // The event's name, the rail's way out of a filter, the map, the map's
+      // own corner controls, and the cart's control — one of each, in the
+      // order the buyer meets them. THERE IS NO DOCK HERE: the phone mounts
+      // none, so the way back off a section is the `−` control counted in
+      // `chrome`, not a bar of its own. The Stack in the middle paints these
+      // out of order, so nothing but an explicit order puts them in sequence.
       final header = _at(dump, 'Mobile Test Event');
       final rail = _at(dump, strings.allPrices);
       final venue = _at(dump, 'seat map');
-      final dock = _at(dump, strings.overview);
+      final chrome = _at(dump, strings.zoomOut);
       final cart = _at(dump, strings.expandCart);
       expect(header, lessThan(rail));
       expect(rail, lessThan(venue));
+      expect(venue, lessThan(chrome));
+      expect(chrome, lessThan(cart));
+      handle.dispose();
+    });
+
+    testWidgets('a dock the host asked back reads between the map and the cart',
+        (tester) async {
+      final handle = tester.ensureSemantics();
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          _layout(),
+          options: const SeatLayerPickerOptions(
+            chrome: SeatLayerPickerChromeOptions(showDockBar: true),
+          ),
+        ),
+      );
+      map.emit(_onTheMap());
+      await pumpToRest(tester);
+
+      final dump = _traversal(tester);
+      final venue = _at(dump, 'seat map');
+      final dock = _at(dump, strings.overview);
+      final cart = _at(dump, strings.expandCart);
       expect(venue, lessThan(dock));
       expect(dock, lessThan(cart));
       handle.dispose();
@@ -145,7 +175,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('the peek summary and the dock are the live regions',
+    testWidgets('the peek summary is the phone\'s live region',
         (tester) async {
       final handle = tester.ensureSemantics();
       final map = FakePickerMap();
@@ -157,12 +187,38 @@ void main() {
       await pumpToRest(tester);
 
       final live = _liveRegions(tester);
-      // Where the buyer is, and what they have. Both change without the buyer
-      // touching them, and neither says so any other way.
-      expect(live.any((label) => label.startsWith('Gallery')), isTrue,
-          reason: 'the dock says where the buyer is: $live');
+      // What the buyer has. It changes without them touching it, and it says
+      // so no other way. Where they ARE is no longer announced on a phone:
+      // there is no dock to carry it.
       expect(live.any((label) => label.startsWith('From')), isTrue,
           reason: 'the cart summary is a live region: $live');
+      expect(live.any((label) => label.startsWith('Gallery')), isFalse,
+          reason: 'no dock, so no section announcement: $live');
+      handle.dispose();
+    });
+
+    testWidgets('a dock the host asked back says where the buyer is',
+        (tester) async {
+      final handle = tester.ensureSemantics();
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          _layout(),
+          options: const SeatLayerPickerOptions(
+            chrome: SeatLayerPickerChromeOptions(showDockBar: true),
+          ),
+        ),
+      );
+      map.emit(_onTheMap());
+      await pumpToRest(tester);
+
+      final live = _liveRegions(tester);
+      expect(live.any((label) => label.startsWith('Gallery')), isTrue,
+          reason: 'the dock says where the buyer is: $live');
       handle.dispose();
     });
 
@@ -307,7 +363,7 @@ void main() {
         expect(tester.takeException(), isNull);
         // And every word the buyer needs is still on screen.
         expect(find.text(strings.allPrices), findsOneWidget);
-        expect(find.text(strings.overview), findsWidgets);
+        expect(find.text('Mobile Test Event'), findsOneWidget);
       });
 
       testWidgets('the open cart survives a text scale of $factor',
@@ -377,7 +433,13 @@ void main() {
       usePhoneSurface(tester);
 
       await tester.pumpWidget(
-        pickerHarness(map, _atTextScale(2.0, _layout())),
+        pickerHarness(
+          map,
+          _atTextScale(2.0, _layout()),
+          options: const SeatLayerPickerOptions(
+            chrome: SeatLayerPickerChromeOptions(showDockBar: true),
+          ),
+        ),
       );
       map.emit(_onTheMap());
       await pumpToRest(tester);
