@@ -1,4 +1,4 @@
-/// Coalescing for what the host tells the runtime its chrome is covering.
+/// Coalescing for what the host tells the runtime about its own chrome.
 library;
 
 import 'dart:async';
@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 
 import 'picker_models.dart';
 
-/// Sends viewport insets to the runtime at most once per frame, and never
-/// twice for the same numbers.
+/// Sends one kind of host report to the runtime at most once per frame, and
+/// never twice for the same value.
 ///
 /// Extracted from the controller because it is its own small state machine and
 /// shares nothing with the rest of the session. Native chrome settles over
@@ -16,28 +16,41 @@ import 'picker_models.dart';
 /// and each pass would otherwise mint its own command and its own map revision,
 /// so the picker went busy and the camera re-framed while the buyer was still
 /// dragging a sheet.
-class PickerViewportReport {
+///
+/// Generic over the value because two reports share the rule: the viewport
+/// insets, and the rectangles of chrome a tap must never fall through
+/// ([PickerViewportReport], [PickerBlockedRegionsReport]).
+class PickerCoalescedReport<T> {
   /// Creates a reporter that hands each settled value to [send].
-  PickerViewportReport({required this.send});
+  ///
+  /// [equals] decides what "the same value" means; the default is `==`, which
+  /// a list of regions has to replace with element-wise equality.
+  PickerCoalescedReport({required this.send, bool Function(T a, T b)? equals})
+      : _equals = equals ?? _defaultEquals;
 
   /// Delivers one report to the runtime.
-  final Future<void> Function(SeatLayerViewportInsets? insets) send;
+  final Future<void> Function(T value) send;
 
-  SeatLayerViewportInsets? _pending;
+  final bool Function(T a, T b) _equals;
+
+  static bool _defaultEquals<T>(T a, T b) => a == b;
+
+  T? _pending;
   bool _hasPending = false;
-  SeatLayerViewportInsets? _sent;
+  T? _sent;
   bool _hasSent = false;
   bool _flushScheduled = false;
+
   /// The send still waiting on the runtime, so a repeat of the value it
   /// carries waits with it instead of reporting success on its behalf.
   Future<void>? _inFlight;
 
-  /// Report [insets], or null to frame against the whole surface again.
+  /// Report [value].
   ///
   /// Safe to call from every layout pass: repeats are dropped and several
   /// calls inside one frame coalesce into the last.
-  Future<void> report(SeatLayerViewportInsets? insets) {
-    _pending = insets;
+  Future<void> report(T value) {
+    _pending = value;
     _hasPending = true;
     if (_flushScheduled) return Future<void>.value();
     _flushScheduled = true;
@@ -51,9 +64,8 @@ class PickerViewportReport {
 
   /// Forget what was reported to a runtime that is going away.
   ///
-  /// A fresh runtime frames against its whole surface until it is told
-  /// otherwise, so the next report has to be sent even when the numbers have
-  /// not moved.
+  /// A fresh runtime knows nothing until it is told, so the next report has
+  /// to be sent even when the value has not moved.
   void forget() {
     _sent = null;
     _hasSent = false;
@@ -62,14 +74,16 @@ class PickerViewportReport {
 
   Future<void> _flush() {
     if (!_hasPending) return Future<void>.value();
-    final wanted = _pending;
+    final wanted = _pending as T;
     _hasPending = false;
     // A REPEAT IS NOT AN ACKNOWLEDGEMENT. Dropping the duplicate command is
-    // right — the runtime already has these numbers — but the caller is asking
+    // right — the runtime already has this value — but the caller is asking
     // "has the runtime been told", and answering yes while the first send is
     // still unanswered is what let the map be revealed at a framing the
     // runtime had not applied. The repeat waits on the send it duplicates.
-    if (_hasSent && _sent == wanted) return _inFlight ?? Future<void>.value();
+    if (_hasSent && _equals(_sent as T, wanted)) {
+      return _inFlight ?? Future<void>.value();
+    }
     _sent = wanted;
     _hasSent = true;
     final sending = send(wanted);
@@ -79,3 +93,6 @@ class PickerViewportReport {
     });
   }
 }
+
+/// The viewport insets report: null frames against the whole surface again.
+typedef PickerViewportReport = PickerCoalescedReport<SeatLayerViewportInsets?>;
