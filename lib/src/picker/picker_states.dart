@@ -890,26 +890,38 @@ class _BookedSeatList extends StatelessWidget {
 /// composition rather than five conditionals.
 class SeatLayerPickerStateLayer extends StatelessWidget {
   /// Creates the state layer.
-  const SeatLayerPickerStateLayer({super.key, this.bottomInset = 0});
+  const SeatLayerPickerStateLayer({
+    super.key,
+    this.bottomInset = 0,
+    this.showExtendHoldPrompt = true,
+  });
 
   /// What the chrome standing on the bottom of the map already covers.
   final double bottomInset;
+
+  /// Whether the "Need more time?" card is one of the parts.
+  ///
+  /// The phone layout passes `false`: there the header's countdown is the one
+  /// timer the buyer is given. See `SeatLayerPickerChromeOptions
+  /// .showExtendHoldPrompt`.
+  final bool showExtendHoldPrompt;
 
   @override
   Widget build(BuildContext context) => Stack(
         children: <Widget>[
           const Positioned.fill(child: SeatLayerPickerSoldOutOverlay()),
-          Positioned(
-            left: 14,
-            right: 14,
-            // Above the toast band, which is where the answer to pressing
-            // `Add time` will arrive.
-            bottom: bottomInset + 14 + 56,
-            child: const Align(
-              alignment: Alignment.bottomCenter,
-              child: SeatLayerPickerExtendHoldPrompt(),
+          if (showExtendHoldPrompt)
+            Positioned(
+              left: 14,
+              right: 14,
+              // Above the toast band, which is where the answer to pressing
+              // `Add time` will arrive.
+              bottom: bottomInset + 14 + 56,
+              child: const Align(
+                alignment: Alignment.bottomCenter,
+                child: SeatLayerPickerExtendHoldPrompt(),
+              ),
             ),
-          ),
           const Positioned.fill(child: SeatLayerPickerAccessPanel()),
           const Positioned.fill(child: SeatLayerPickerBookedOverlay()),
         ],

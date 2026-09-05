@@ -28,6 +28,41 @@ BundleInfo _colorblindBundle() => nativeChromeBundle(
       ],
     );
 
+/// [pickerSnapshot] whose picker-owned hold runs out in [seconds].
+Map<String, Object?> _holdSnapshot(int seconds, {int revision = 1}) {
+  final snapshot = pickerSnapshot(holdOwner: 'picker', revision: revision);
+  return <String, Object?>{
+    ...snapshot,
+    'hold': <String, Object?>{
+      'active': true,
+      'expiresAt': seatLayerPickerNow()
+          .add(Duration(seconds: seconds))
+          .millisecondsSinceEpoch
+          .toDouble(),
+      'ownership': 'picker',
+    },
+  };
+}
+
+/// The colour of the hold pill's plate.
+Color? _holdPlate(WidgetTester tester) => (tester
+        .widget<DecoratedBox>(
+          find
+              .descendant(
+                of: find.byType(SeatLayerPickerHoldCountdown),
+                matching: find.byType(DecoratedBox),
+              )
+              .first,
+        )
+        .decoration as BoxDecoration)
+    .color;
+
+/// What a screen reader is given for the hold pill.
+String _holdSpoken(WidgetTester tester) => tester
+    .getSemantics(find.byType(SeatLayerPickerHoldCountdown))
+    .getSemanticsData()
+    .label;
+
 void main() {
   _headerClockTests();
   group('header', () {
@@ -103,6 +138,42 @@ void main() {
         ),
         findsOneWidget,
       );
+    });
+
+    testWidgets('the last minute turns the pill and counts it out loud',
+        (tester) async {
+      // The phone no longer offers the "Need more time?" card by default, so
+      // this pill is the ONLY signal a buyer gets that the hold is nearly out.
+      // It has to change, and it has to say so.
+      final handle = tester.ensureSemantics();
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerPickerHeader(compact: true)),
+      );
+      map.emit(_holdSnapshot(300));
+      await pumpToRest(tester);
+      SeatLayerPickerScope.controllerOf(
+        tester.element(find.byType(SeatLayerPickerHeader)),
+      ).setCartSheetExpanded(true);
+      await pumpToRest(tester);
+
+      final calm = _holdPlate(tester);
+      // Spoken as whole minutes while there is time: a live region fed the
+      // running clock would speak once a second for a quarter of an hour.
+      expect(_holdSpoken(tester), '5 minutes left');
+
+      map.emit(_holdSnapshot(48, revision: 2));
+      await pumpToRest(tester);
+
+      // The pill fills with the accent rather than merely changing its number.
+      expect(_holdPlate(tester), isNot(calm));
+      // And the last minute is counted second by second, where a buyer is
+      // owed the count.
+      expect(_holdSpoken(tester), '48 seconds left');
+      handle.dispose();
     });
 
     testWidgets('no hold means no pill', (tester) async {

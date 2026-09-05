@@ -55,8 +55,9 @@ class SeatLayerPickerPricing {
 /// hosts that build their own layout.
 ///
 /// The five nullable controls default to *auto*: present in the wide layout,
-/// absent on the phone, where pinch-to-zoom and the accessibility sheet
-/// already carry them. Set one explicitly to override that.
+/// absent on the phone, where pinch-to-zoom, the accessibility sheet and the
+/// header's own countdown already carry them. Set one explicitly to override
+/// that.
 @immutable
 class SeatLayerPickerChromeOptions {
   /// Creates a chrome visibility set. Defaults are the approved phone UX.
@@ -78,6 +79,7 @@ class SeatLayerPickerChromeOptions {
     this.showVenue3DChrome = true,
     this.showSeatViewChrome = true,
     this.showHoldPill = true,
+    this.showExtendHoldPrompt,
     this.manageSystemOverlays = true,
   });
 
@@ -157,6 +159,20 @@ class SeatLayerPickerChromeOptions {
   /// Whether the header shows the hold countdown pill.
   final bool showHoldPill;
 
+  /// Whether the "Need more time?" card is offered over the map in the last
+  /// minute of a hold. Auto: wide only.
+  ///
+  /// Decision of 2026-09-04. The phone shows ONE timer — the header's hold
+  /// countdown, which turns to the accent and counts the last minute out loud
+  /// on its own. A card that arrives over the map at that moment is a second
+  /// decision at the worst moment, and a countdown that can always be pushed
+  /// back is not a deadline. If the hold does lapse, the non-blocking lapse
+  /// notice offers the seats back.
+  ///
+  /// The wide layout keeps the card, where it sits beside the clock rather
+  /// than over the map. Set this to `true` to offer it on the phone too.
+  final bool? showExtendHoldPrompt;
+
   /// Whether the picker dresses the device's status and navigation bars.
   ///
   /// On by default, and it is what keeps the clock, the wifi glyph and the
@@ -188,6 +204,10 @@ class SeatLayerPickerChromeOptions {
 
   /// Resolve [showDockBar] for a layout.
   bool dockBarFor({required bool phone}) => showDockBar ?? !phone;
+
+  /// Resolve [showExtendHoldPrompt] for a layout.
+  bool extendHoldPromptFor({required bool phone}) =>
+      showExtendHoldPrompt ?? !phone;
 }
 
 /// Behaviour of one picker session and its native chrome.
