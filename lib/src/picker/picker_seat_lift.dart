@@ -158,12 +158,19 @@ class PickerSeatLift {
   int? _gestures;
   int _revision = -1;
   int _generation = 0;
+  double? _seenHeight;
+  bool _pending = false;
 
   /// The seat the map is lifted for, or null.
   String? get seatId => _seatId;
 
   /// The total pan standing, in screen px.
   double get dy => _dy;
+
+  /// Whether a lift is waiting for the map to hold still — the layout keeps
+  /// rebuilding while this is true, so the next [sync] can see a settled
+  /// height.
+  bool get pending => _pending;
 
   /// Keep the map lifted for [seatId], or put it back for null.
   ///
@@ -187,6 +194,17 @@ class PickerSeatLift {
     }
     final band = mapHeight - top - bottom;
     if (!(band > 0) || !(sheet > 0)) return;
+    // The map is a platform view that resizes as the cart sheet collapses
+    // under an opening card, and the runtime pans against ITS height at the
+    // moment the command lands. A fraction folded against a height caught
+    // mid-animation put the seat under the card (seen on device). So a lift
+    // is only sent once two consecutive syncs agree on the height.
+    if (_seenHeight != mapHeight) {
+      _seenHeight = mapHeight;
+      _pending = true;
+      return;
+    }
+    _pending = false;
     final fraction = seatLayerSheetLiftFraction(
       mapHeight: mapHeight,
       top: top,
@@ -247,6 +265,8 @@ class PickerSeatLift {
   /// Forget the lift without touching the map — the picker is going away.
   void forget() {
     _generation += 1;
+    _seenHeight = null;
+    _pending = false;
     _seatId = null;
     _fraction = 0;
     _band = 0;

@@ -51,6 +51,9 @@ Future<SeatLayerPickerController> _cardUp(
   await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
   map.emit(pickerSnapshot(sections: pickerSections()));
   await pumpToRest(tester);
+  // The lift waits for the map to hold still across two frames.
+  await tester.pump();
+  await pumpToRest(tester);
   return picker;
 }
 
@@ -183,13 +186,16 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(calls, isEmpty);
 
-      lift.sync(
-          seatId: 's1',
-          mapHeight: 844,
-          top: 60,
-          bottom: 0,
-          sheet: 300,
-          revision: 1);
+      // Two syncs at one height: the lift waits for the map to hold still.
+      for (var i = 0; i < 2; i += 1) {
+        lift.sync(
+            seatId: 's1',
+            mapHeight: 844,
+            top: 60,
+            bottom: 0,
+            sheet: 300,
+            revision: 1);
+      }
       await Future<void>.delayed(Duration.zero);
       expect(calls, hasLength(1));
       expect(lift.dy, 0);
@@ -204,6 +210,48 @@ void main() {
       // Nothing stood, so nothing is put back.
       expect(calls, hasLength(1));
     });
+  });
+
+  test('a lift waits for two syncs that agree on the map height', () async {
+    final heights = <double>[];
+    final lift = PickerSeatLift(
+      frame: (seatId, {required fraction, int? gestures}) async {
+        heights.add(fraction);
+        return const SeatLayerSeatFrame(dy: -50, gestures: 1);
+      },
+    );
+    void sync(double h) => lift.sync(
+          seatId: 's1',
+          mapHeight: h,
+          top: 0,
+          bottom: 0,
+          sheet: 200,
+          revision: 1,
+        );
+    // The sheet is collapsing: the map grows every frame.
+    sync(500);
+    sync(560);
+    sync(620);
+    await Future<void>.delayed(Duration.zero);
+    expect(heights, isEmpty);
+    expect(lift.pending, isTrue);
+    // Two frames agree: the lift goes, folded against the settled height.
+    sync(620);
+    await Future<void>.delayed(Duration.zero);
+    expect(heights, hasLength(1));
+    expect(lift.pending, isFalse);
+    expect(
+      heights.single,
+      closeTo(
+        seatLayerSheetLiftFraction(
+          mapHeight: 620,
+          top: 0,
+          bottom: 0,
+          sheet: 200,
+        ),
+        1e-9,
+      ),
+    );
   });
 
   testWidgets(

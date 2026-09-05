@@ -778,14 +778,26 @@ class _SeatLayerPickerAdaptiveLayoutState
           ),
         );
         if (liftsSeat) {
+          final mapHeight = _mapBox()?.size.height ?? 0;
           _seatLift.sync(
             seatId: sheetBand > 0 ? cardSeat?.id : null,
-            mapHeight: _mapBox()?.size.height ?? 0,
+            mapHeight: mapHeight,
             top: topBand,
             bottom: bottomBand,
             sheet: sheetBand,
             revision: state.revision,
           );
+          // Keep building while the map is still changing size under the
+          // card, or while the lift is waiting for it to hold still: the
+          // sheet collapsing to peek is an animation, and each frame of it
+          // changes the height the lift is folded against.
+          if (_seatLift.pending || (seatCardUp && !seatCard3D)) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              final now = _mapBox()?.size.height ?? 0;
+              if (now != mapHeight || _seatLift.pending) setState(() {});
+            });
+          }
         }
         // Chrome that moved without rebuilding — a column riding up as the
         // dock arrives — reports where it is now.
