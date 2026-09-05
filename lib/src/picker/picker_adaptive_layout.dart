@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../open_enums.dart';
 import '../payloads.dart';
+import '../seat_layer_map_chrome.dart';
 import 'picker_internal.dart';
 import 'picker_builders.dart';
 import 'picker_cart_list.dart';
@@ -107,6 +108,10 @@ class _SeatLayerPickerAdaptiveLayoutState
     debugLabel: 'seatlayer-picker-map-region',
     skipTraversal: true,
   );
+
+  /// Shared with the map surface so the platform view can resign the touches
+  /// the chrome standing on it has taken. See `seat_layer_map_chrome.dart`.
+  final SeatLayerMapChromeLatch _mapChromeLatch = SeatLayerMapChromeLatch();
   bool _mapInteractionEnabled = true;
   int _mapInteractionGeneration = 0;
   Timer? _mapUnlockTimer;
@@ -533,7 +538,8 @@ class _SeatLayerPickerAdaptiveLayoutState
                 child: Row(
                   children: [
                     Expanded(
-                      child: Stack(
+                      child: SeatLayerMapChromeStack(
+                        latch: _mapChromeLatch,
                         children: [
                           Positioned.fill(child: mapSurface),
                           Positioned(
@@ -720,7 +726,8 @@ class _SeatLayerPickerAdaptiveLayoutState
               // which is how the map came to be read before the prices.
               child: seatLayerReadingOrder(
                 SeatLayerPickerReadingOrder.map,
-                Stack(
+                SeatLayerMapChromeStack(
+                  latch: _mapChromeLatch,
                   children: [
                     Positioned.fill(
                       child: seatLayerReadingOrder(
@@ -917,7 +924,10 @@ class _SeatLayerPickerAdaptiveLayoutState
         if (didPop) return;
         _climbDown(controller, state);
       },
-      child: themed,
+      child: SeatLayerMapChromeScope(
+        latch: _mapChromeLatch,
+        child: themed,
+      ),
     );
   }
 

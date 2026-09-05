@@ -13,6 +13,7 @@ import 'payloads.dart';
 import 'seat_layer_configuration.dart';
 import 'seat_layer_controller.dart';
 import 'seat_layer_error.dart';
+import 'seat_layer_map_chrome.dart';
 import 'seat_layer_prewarm.dart';
 
 /// The JavaScript channel name the web bundle probes for
@@ -32,8 +33,9 @@ const String _channelName = seatLayerChannelName;
 /// scrolling container ([ListView], [SingleChildScrollView], …). The canvas
 /// consumes pan and pinch to drive its own zoom, so an enclosing scroll view and
 /// the map fight over every gesture and neither behaves. Give it a definite
-/// size and let the map own the space it occupies. An [EagerGestureRecognizer]
-/// is installed so the map — not Flutter — wins those gestures.
+/// size and let the map own the space it occupies. The map claims a touch on
+/// press, so it — not Flutter — wins those gestures; inside the turnkey picker
+/// it resigns the presses that landed on the native chrome standing over it.
 class SeatLayerView extends StatefulWidget {
   const SeatLayerView({
     super.key,
@@ -294,6 +296,10 @@ class _SeatLayerViewState extends State<SeatLayerView> {
 
   @override
   Widget build(BuildContext context) {
+    // A layout that stands native chrome on the map shares a hit-test latch, so
+    // the map can resign the touches that chrome took. Without one — a host
+    // composing its own layout — the map stays plainly eager.
+    final latch = SeatLayerMapChromeScope.maybeOf(context);
     final view = RepaintBoundary(
       // Native picker chrome can rebuild after a semantic state change without
       // invalidating the platform-view layer that owns the active gesture.
@@ -301,10 +307,19 @@ class _SeatLayerViewState extends State<SeatLayerView> {
         controller: _web,
         // Without an eager recognizer webview_flutter never receives the
         // pan/zoom gestures the canvas needs — it loses every drag to Flutter's
-        // arena.
-        gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{
-          Factory<OneSequenceGestureRecognizer>(EagerGestureRecognizer.new),
-        },
+        // arena. Both factories declare the same `Factory` type, which is what
+        // `RenderUiKitView.updateGestureRecognizers` compares, so the choice is
+        // made once when the platform view is created.
+        gestureRecognizers: latch == null
+            ? const <Factory<OneSequenceGestureRecognizer>>{
+                Factory<OneSequenceGestureRecognizer>(
+                    EagerGestureRecognizer.new),
+              }
+            : <Factory<OneSequenceGestureRecognizer>>{
+                Factory<OneSequenceGestureRecognizer>(
+                  () => SeatLayerMapSurfaceGestureRecognizer(latch),
+                ),
+              },
       ),
     );
     final bg = widget.backgroundColor;
