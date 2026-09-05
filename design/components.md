@@ -242,6 +242,12 @@ override** `style:`
   primary reads `strings.removeSeat` in `color.*.error` with a cross rather
   than a tick; Cancel, the drag, the tap outside and Back all KEEP the seat;
   and the seat stays counted in the cart the whole time it is asked about.
+- **Commands** `picker.openSeatView`, `picker.showSeatIn3D`,
+  `picker.deselect`, `picker.removeCartLine` (the remove answer), and —
+  where the bundle advertises it — `picker.setSelectionFocus` with
+  `{ seatId }` on open and `{ seatId: null }` on close, which is what makes the
+  runtime ring the seat the card is asking about and pale its neighbours. Paint
+  only: no busy state, safe read-only, and never raised as an error.
 - **Backdrop** the map goes behind glass: a black veil at
   `opacity.confirmScrim` under a `size.confirmScrimBlur` blur, masked clear to
   `size.confirmScrimClearRadius` around the tapped seat and reaching full

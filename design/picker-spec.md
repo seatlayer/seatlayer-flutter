@@ -803,6 +803,41 @@ The **bottom-centre** region is the exception — it comes forward at full opaci
 above the card, because it carries the toast that is the *reply* to the tap, and
 it stays press-through so it can never steal Cancel or Add seat.
 
+#### 3.8.1a Selection focus — the runtime paints the candidate
+
+The glass quiets the map; it does not tell the buyer which seat the question is
+about. A tapped seat is in `selection` from the moment it is tapped, and every
+selected seat is drawn alike, so on a busy chart the seat under the spotlight
+was a plain ring among the ones the buyer had already settled.
+
+So the card names its seat to the runtime. **On open** it sends
+`picker.setSelectionFocus` with `{ seatId }`; **on close** it sends the same
+command with `{ seatId: null }`. Both questions focus — an add card and a
+remove card each stand over one seat the buyer has to find — and only one card
+is ever up, so only one seat is ever the candidate.
+
+What the runtime paints for a focused seat: a 4 pt ring on the seat itself, a
+halo answering the canvas around it, and its neighbours paled. Nothing else. The
+command selects nothing, holds nothing and moves no camera, so it is safe on a
+read-only picker and carries **no busy action** — a buyer must not watch the
+chrome grey out because a card opened. It reports no state either: the reply is
+`{}`, and the runtime drops the focus itself when the seat leaves the selection,
+so the native side only ever mirrors what it last asked for.
+
+It is gated on the bundle advertising `picker.setSelectionFocus` in its own
+`hello` command table — the command table IS the whole contract, since nothing
+in the snapshot changes — and an older runtime is simply never asked. One that
+advertises it and still answers `unsupported_command` is swallowed rather than
+raised: the seat is painted the way it was before, and there is nothing there
+for a buyer to act on. Every other failure surfaces as usual.
+
+Flutter: `controller.setSelectionFocus(seatId)` in
+`lib/src/picker/picker_selection_focus.dart`, driven from
+`picker_seat_answers.dart` beside the two questions themselves. The send is
+coalesced — the card's seat is reported from the chrome's build, which runs on
+every frame — and deferred to a microtask, so a command never publishes state
+in the middle of a build.
+
 #### 3.8.2 Placement — a fixed sheet, and the map moves
 
 Three constants, all tokens:
@@ -1026,6 +1061,8 @@ than the silence it replaces. A read-only picker never raises it at all.
 The controller reports the candidate as `seatAwaitingRemoval` and puts the
 question away with `dismissSeatRemoval()`; both live in
 `lib/src/picker/picker_seat_answers.dart` beside `seatAwaitingConfirmation`.
+The remove card focuses its seat exactly as the add card does (§3.8.1a) — the
+buyer has to find the seat they are being asked to give back too.
 
 #### 3.8.5 Gestures and haptics
 

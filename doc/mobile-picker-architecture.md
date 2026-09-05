@@ -108,6 +108,12 @@ bridge event `seat.retap` (payload `{ seat }`, the seat still selected, no
 `selection.changed` with it) so the chrome can ask before the seat goes, rather
 than the seat disappearing under the finger. `dismissSeatRemoval()` puts that
 question away without answering it; `markSeatAnswered(label)` answers either.
+Whichever card is up also names its seat to the runtime with
+`setSelectionFocus(seatId)` — and clears it with `null` when the card goes — so
+the seat under the question is ringed and its neighbours paled instead of being
+drawn like every other selected seat. It is paint only: no busy action, no
+snapshot, safe on a read-only picker, sent only to a bundle advertising
+`picker.setSelectionFocus`, and an `unsupported_command` reply is swallowed.
 A seat being asked about for removal stays in `confirmedCartLines`,
 `confirmedTicketCount` and `confirmedCartTotal` — it is still in the cart until
 the buyer says otherwise.
