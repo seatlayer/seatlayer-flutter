@@ -6,13 +6,14 @@
 [![Dart](https://img.shields.io/badge/Dart-%E2%89%A53.4-0175C2.svg)](https://dart.dev/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](LICENSE)
 
-The official SeatLayer Flutter package for adding an interactive seating chart
-and seat picker to ticketing apps on iOS and Android. Render live seat
-availability, create temporary holds, find best-available seats, and hand
-secure booking to your trusted server.
+The official SeatLayer Flutter package adds an interactive seating chart and
+seat picker to iOS and Android ticketing apps. Use Dart APIs and customizable
+Flutter widgets for live availability, best-available seats, and temporary
+holds, then confirm bookings on your trusted backend.
 
 [SeatLayer Flutter package on pub.dev](https://pub.dev/packages/seatlayer) ·
 [Flutter seat-map documentation](https://docs.seatlayer.io/buyer-sdk/flutter/) ·
+[Customize the Flutter seat picker](https://docs.seatlayer.io/buyer-sdk/flutter/customise/) ·
 [SeatLayer SDK and API overview](https://seatlayer.io/developers/) ·
 [Buyer seat-map demo (web)](https://app.seatlayer.io/demo/play/grand-theatre) ·
 [SeatLayer Android seat map SDK](https://github.com/seatlayer/seatlayer-android) ·

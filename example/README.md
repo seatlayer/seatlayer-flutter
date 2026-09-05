@@ -2,7 +2,8 @@
 
 A runnable reserved-seating seat picker for the official
 [`seatlayer`](https://pub.dev/packages/seatlayer) Flutter package on iOS and
-Android.
+Android. See the [main Flutter SDK README](../README.md) for installation,
+customization, and the full seat-map API.
 
 ## Run the picker
 
