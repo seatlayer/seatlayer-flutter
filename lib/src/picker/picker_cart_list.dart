@@ -182,8 +182,7 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
   /// "Immediately" is the row, not the server. `picker.removeCartLine` re-holds
   /// the rest of the cart before it answers — close to two seconds on a real
   /// event — so the row is marked, faded and made inert in the same frame as
-  /// the press, and the undo bar is offered against a decision that has already
-  /// been taken. The mark is dropped by the snapshot that no longer carries the
+  /// the press, against a decision that has already been taken. The mark is dropped by the snapshot that no longer carries the
   /// line, or restored here if the mutation fails.
   Future<void> _remove(
     SeatLayerPickerController controller,
@@ -626,7 +625,7 @@ class _DenseLine extends StatelessWidget {
 /// the finger toward the leading edge, uncovers a red plate as it goes, and
 /// leaves once it has travelled far enough — or once it has been thrown, which
 /// is the same instruction given faster. Everything the × does afterwards, a
-/// swipe does too, undo bar included.
+/// swipe does too.
 ///
 /// It is deliberately not a [Dismissible]: that widget owns the removal, animates
 /// the gap closed itself, and needs a key per row; here the cart is the source of
