@@ -113,6 +113,11 @@ class SeatLayerPickerStrings {
     this.hideLimitedView = SeatLayerStringTokens.hideLimitedView,
     this.colorblindSafe = SeatLayerStringTokens.colorblindSafe,
     this.holdLapsedTitle = SeatLayerStringTokens.holdLapsedTitle,
+    this.holdInCheckoutTitle = SeatLayerStringTokens.holdInCheckoutTitle,
+    this.holdInCheckoutBody = SeatLayerStringTokens.holdInCheckoutBody,
+    this.releaseAndChangeSeats = SeatLayerStringTokens.releaseAndChangeSeats,
+    this.holdAlreadyHeldTitle = SeatLayerStringTokens.holdAlreadyHeldTitle,
+    this.holdAlreadyHeldBody = SeatLayerStringTokens.holdAlreadyHeldBody,
     this.accessNeeds = defaultAccessNeeds,
     this.accessNeedWithCount = _defaultAccessNeedWithCount,
     this.holdLapsedBody = _defaultHoldLapsedBody,
@@ -647,6 +652,26 @@ class SeatLayerPickerStrings {
   /// Stated as a fact rather than an apology or a warning: the seats are gone,
   /// and the next line says what can be done about it.
   final String holdLapsedTitle;
+
+  /// The buyer came back from checkout and tried to change their seats.
+  ///
+  /// The hold belongs to the host from the moment it is handed off, and the
+  /// runtime refuses to grow or shrink it from the picker
+  /// (`hold_owned_by_host`, `hold_selection_mismatch`). Said as a state with
+  /// a way out, never as the runtime's own words.
+  final String holdInCheckoutTitle;
+
+  /// What finishing means and what releasing costs, in one line.
+  final String holdInCheckoutBody;
+
+  /// The way out: give the held seats back and pick again.
+  final String releaseAndChangeSeats;
+
+  /// A hold the picker itself owns is already open (`hold_already_active`).
+  final String holdAlreadyHeldTitle;
+
+  /// Where to go from there.
+  final String holdAlreadyHeldBody;
 
   /// Names for the access needs the runtime can filter by, by wire key.
   ///

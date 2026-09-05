@@ -1115,6 +1115,24 @@ abstract final class SeatLayerStringTokens {
   /// {n} could not be recovered
   static const String seatsNotRecovered = '{n} could not be recovered';
 
+  /// Your seats are already in checkout
+  static const String holdInCheckoutTitle =
+      'Your seats are already in checkout';
+
+  /// Finish checkout to keep them. To pick different seats, release these first — they go back on sale.
+  static const String holdInCheckoutBody =
+      'Finish checkout to keep them. To pick different seats, release these first — they go back on sale.';
+
+  /// Release and change seats
+  static const String releaseAndChangeSeats = 'Release and change seats';
+
+  /// Your seats are already held
+  static const String holdAlreadyHeldTitle = 'Your seats are already held';
+
+  /// Continue to checkout to keep them.
+  static const String holdAlreadyHeldBody =
+      'Continue to checkout to keep them.';
+
   /// Remove seat
   static const String removeSeat = 'Remove seat';
 

@@ -1928,6 +1928,25 @@ stepper, a range caption `strings.chooseMinMaxGuests`, and the action pair
 `strings.fewerGuests` / `strings.moreGuests`. Accessible name for the whole
 sheet: `strings.chooseTableGuests`. Capability `table-quantity-v1`.
 
+#### 3.13.13 Seats already in checkout (N1, owner decision 2026-09-05: option B)
+
+The hold belongs to the host from the moment it is handed off, and the runtime
+refuses to grow or shrink it from the picker: `hold_owned_by_host` (a cart
+control), `hold_selection_mismatch` (Continue with a selection the hold does
+not cover), `hold_already_active` (a second hold). None of these is a failure
+the buyer can read as one, so the inline action bar says the STATE instead —
+`strings.holdInCheckoutTitle` / `strings.holdInCheckoutBody` with one action,
+`strings.releaseAndChangeSeats`, which rejects the handoff
+(`picker.rejectHandoff { holdId }`) so the seats go back on sale and the buyer
+picks again; the notice clears when the release lands. With no handoff to
+give back (`hold_already_active` on a picker-owned hold) the bar says
+`strings.holdAlreadyHeldTitle` / `strings.holdAlreadyHeldBody` and offers
+nothing but dismiss. The runtime's own sentence is never shown. Option A — the
+picker extending a host-owned hold — was not taken: it would change who owns
+the hold after handoff, which is checkout's contract, not the picker's.
+
+Dart file: `lib/src/picker/picker_errors.dart`.
+
 ### 3.14 3D chrome
 
 **Name** `SeatLayerVenue3D` · **slot** `pillStyle` · **file**

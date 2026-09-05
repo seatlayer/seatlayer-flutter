@@ -35,6 +35,11 @@ and change nothing on an older runtime.
   prices" from inside a section frames the whole venue, cart removal is
   silent, the session-refresh and hold-lapse states each carry an action,
   and the spotlight scrim behind the card.
+- A buyer back from checkout who tries to change their seats sees "Your
+  seats are already in checkout" with a "Release and change seats" action,
+  instead of the bridge's own `hold_owned_by_host` sentence; a second hold on
+  a picker-owned one says "Your seats are already held". Five new strings,
+  English until the runtime dictionaries carry them.
 - `PickerViewportReport` is now `PickerCoalescedReport<T>`; the old name
   remains as a typedef.
 

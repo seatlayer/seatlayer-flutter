@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/bridge/bridge_client.dart';
+import 'package:seatlayer/src/bridge/bridge_protocol.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
@@ -559,6 +560,106 @@ void main() {
         .toList();
     expect(interactionCalls, hasLength(2));
     expect(interactionCalls.last.$2, <String, Object?>{'enabled': true});
+  });
+
+  // N1 (owner decision 2026-09-05, option B): a buyer back from checkout who
+  // tries to change their seats meets a state with a way out, in their own
+  // words — not the bridge's `hold_owned_by_host` sentence.
+  testWidgets('a hold the host owns is a state with a way out, not an error',
+      (tester) async {
+    final map = _FakeMapController(
+      handler: (command, payload) async {
+        if (command == 'picker.continue') {
+          return <String, Object?>{
+            'revision': 2,
+            'snapshot': pickerSnapshot(revision: 2, holdOwner: 'host'),
+            'handoff': checkoutHandoff(),
+          };
+        }
+        if (command == 'picker.holdSelection') {
+          throw const SeatLayerError.bridge(
+            BridgeErrorPayload(
+              code: 'hold_owned_by_host',
+              message: 'the active hold belongs to the host and cannot be '
+                  'changed by picker cart controls',
+            ),
+          );
+        }
+        if (command == 'picker.rejectHandoff') {
+          return <String, Object?>{
+            'revision': 3,
+            'snapshot': pickerSnapshot(revision: 3),
+          };
+        }
+        fail('unexpected command $command');
+      },
+    );
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    await tester.pumpWidget(
+      _app(
+        map,
+        Column(
+          children: <Widget>[
+            SeatLayerPickerCheckoutBar(onCheckout: (_) async {}),
+            const SeatLayerPickerActionError(),
+          ],
+        ),
+        pickerController: picker,
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+    await tester.tap(find.text('Continue'));
+    await tester.pump();
+    await tester.pump();
+    expect(picker.state.checkoutHandoff?.holdId, 'hold-1');
+
+    // Back from checkout, the buyer asks for a hold the host already owns.
+    await expectLater(picker.holdSelection(), throwsA(isA<SeatLayerError>()));
+    await tester.pump();
+    expect(find.text('Your seats are already in checkout'), findsOneWidget);
+    expect(find.textContaining('belongs to the host'), findsNothing);
+    expect(find.text('Release and change seats'), findsOneWidget);
+
+    // The way out gives the held seats back and clears the notice.
+    await tester.tap(find.text('Release and change seats'));
+    await tester.pump();
+    await tester.pump();
+    expect(map.calls.last.$1, 'picker.rejectHandoff');
+    expect(map.calls.last.$2, <String, Object?>{'holdId': 'hold-1'});
+    expect(picker.state.error, isNull);
+    expect(picker.state.checkoutHandoff, isNull);
+    expect(find.text('Your seats are already in checkout'), findsNothing);
+  });
+
+  testWidgets('a hold the picker already has is said as such', (tester) async {
+    final map = _FakeMapController(
+      handler: (command, payload) async {
+        if (command == 'picker.holdSelection') {
+          throw const SeatLayerError.bridge(
+            BridgeErrorPayload(
+              code: 'hold_already_active',
+              message: 'a hold is already open for this picker',
+            ),
+          );
+        }
+        fail('unexpected command $command');
+      },
+    );
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    await tester.pumpWidget(
+      _app(map, const SeatLayerPickerActionError(), pickerController: picker),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+    await expectLater(picker.holdSelection(), throwsA(isA<SeatLayerError>()));
+    await tester.pump();
+    expect(find.text('Your seats are already held'), findsOneWidget);
+    expect(find.text('Release and change seats'), findsNothing);
   });
 
   testWidgets('turnkey checkout rejects a failed host handoff', (tester) async {
