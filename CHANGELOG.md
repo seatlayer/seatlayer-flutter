@@ -2,7 +2,7 @@
 
 ## 0.8.0
 
-Runtime pin 0.80.2. The phone picker now matches the web picker's phone
+Runtime pin 0.80.3. The phone picker now matches the web picker's phone
 layout item by item, and three of the differences needed the runtime to grow
 a command each; all three are gated on the runtime's `hello` command table
 and change nothing on an older runtime.
@@ -26,7 +26,11 @@ and change nothing on an older runtime.
   inside one, and a rectangle keeps guarding for a moment after its control
   has gone.
 - A second tap on a carted seat raises the card in its **Remove** state
-  instead of dropping the seat in silence (`seat.retap`, runtime 0.80.1+).
+  instead of dropping the seat in silence (`seat.retap`, runtime 0.80.1+) —
+  including a seat already under a hold, which used to be released without a
+  question (runtime 0.80.3+).
+- The phone's corner zoom disc reads `+` at the whole venue and `−` once a
+  section is framed, in the same slot; the dimmed `−` at home is gone.
 - The card's answer scales down before it truncates; "Remove seat" fits on
   a 390 pt phone.
 - Phone layout decisions carried over from the web round: no section dock,
