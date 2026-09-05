@@ -1,7 +1,7 @@
 // A second tap on a seat already in the cart asks before it takes it back.
 //
 // It used to drop the seat in silence: the ring went, the cart emptied, the
-// total moved, and nothing said so or offered the seat back (client report).
+// total moved, and nothing said so or offered the seat back.
 // A buyer checking which seat they had picked lost it by looking at it.
 //
 // The runtime now KEEPS the seat and reports the tap as `seat.retap` instead,
