@@ -183,7 +183,6 @@ void main() {
         options: const SeatLayerPickerOptions(
           strings: SeatLayerPickerStrings(
             accessibilityTitle: 'Barrierefreiheit',
-            applyFilters: 'Filter anwenden',
             hideLimitedView: 'Sicht eingeschränkt ausblenden',
             colorblindSafe: 'Farbenblind-freundlich',
             accessNeeds: <String, String>{'wheelchair': 'Rollstuhl'},
@@ -203,7 +202,6 @@ void main() {
     expect(find.text('Barrierefreiheit'), findsOneWidget);
     expect(find.text('Rollstuhl'), findsOneWidget);
     expect(find.text('1 free'), findsOneWidget);
-    expect(find.text('Filter anwenden'), findsOneWidget);
     expect(find.text('Sicht eingeschränkt ausblenden'), findsOneWidget);
     expect(find.text('Farbenblind-freundlich'), findsOneWidget);
     // The table the host supplied is the table, not a patch over the default.

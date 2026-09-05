@@ -9,6 +9,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
+import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_confirm_card.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
@@ -437,6 +438,62 @@ void main() {
 
     expect(find.byType(SeatLayerConfirmCard), findsNothing);
     expect(map.callsTo('picker.setViewportInsets').last.$2, withCard);
+  });
+
+  testWidgets('opening the accessibility sheet takes a pending card down',
+      (tester) async {
+    // Seen on a device: the sheet came up OVER an unanswered seat card, which
+    // sat behind it dimmed — a question the buyer could neither read nor
+    // answer, still holding the seat. Only one decision surface may have the
+    // screen: the web picker clears them all before another goes up
+    // (`SeatPicker.clearDecisionSurfaces`), and here the seat goes back the
+    // way the card's own Cancel gives it back.
+    //
+    // Composed rather than through the phone layout, because that layout puts
+    // its scrim over the map controls and the button cannot be reached there
+    // at all. The hook belongs to the sheet, and this is where it is asked.
+    final map = FakePickerMap(
+      bundle: accessibilityFocusBundle(focus: false, counts: false),
+    );
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const Align(
+          alignment: Alignment.bottomLeft,
+          child: SeatLayerPickerAccessibilityFilters(compact: true),
+        ),
+        controller: picker,
+      ),
+    );
+    map.emit(
+      pickerSnapshot(accessNeeds: <Object?>[accessNeed('wheelchair', 4)]),
+    );
+    await tester.pumpAndSettle();
+
+    // A card is up over the seat the buyer just tapped, as the chrome that
+    // draws one reports.
+    picker.setConfirmCardSeat(picker.state.selection.single);
+    expect(picker.seatAwaitingConfirmation?.label, 'A-1');
+
+    await tester.tap(find.byIcon(Icons.accessible_forward_rounded));
+    await tester.pumpAndSettle();
+
+    expect(
+      map.callsTo('picker.removeCartLine').single.$2,
+      <String, Object?>{'label': 'A-1'},
+      reason: 'the seat is given back, not left held under the sheet',
+    );
+    expect(
+      picker.seatAwaitingConfirmation,
+      isNull,
+      reason: 'the card is answered for, so no chrome draws it again',
+    );
+    expect(find.text('Accessibility and view'), findsOneWidget);
   });
 
   testWidgets('a composed layout that asks nothing keeps the seat counted',

@@ -2,12 +2,12 @@
 
 library;
 
-import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter/material.dart';
 
 import 'picker_accessibility_focus.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
+import 'picker_pending_seat.dart';
 import 'picker_tokens.g.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_controller.dart';
@@ -111,19 +111,28 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
 
   Future<void> _show(BuildContext context) async {
     final controller = SeatLayerPickerScope.controllerOf(context);
-    final snapshot = controller.state.snapshot;
-    final available = _availability(controller, snapshot);
+    var snapshot = controller.state.snapshot;
+    var available = _availability(controller, snapshot);
     if (!available.any || snapshot == null) return;
-    final initial = <String>{
+    // Only one decision surface may hold the screen. A seat card left standing
+    // behind this sheet is a question the buyer can neither read nor answer,
+    // so it comes down first — the same clearing the web picker does before
+    // any surface goes up (`SeatPicker.clearDecisionSurfaces`).
+    await controller.cancelPendingSeat();
+    if (!context.mounted) return;
+    // Giving the seat back moved the cart, so the sheet is built from what the
+    // runtime says now rather than from what it said before the card went.
+    snapshot = controller.state.snapshot;
+    available = _availability(controller, snapshot);
+    if (!available.any || snapshot == null) return;
+    // The switches draw from this and the runtime is told as each one moves;
+    // there is no staged copy waiting on a button, because a switch IS the
+    // action.
+    var selected = <String>{
       if (available.accessibility) ...snapshot.map.accessibilityFilter,
     };
-    final initialHideLimited =
-        available.limited && snapshot.map.hideLimitedView;
-    final initialColorblind =
-        available.colorblind && snapshot.map.colorblindSafe;
-    var selected = initial;
-    var hideLimited = initialHideLimited;
-    var colorblind = initialColorblind;
+    var hideLimited = available.limited && snapshot.map.hideLimitedView;
+    var colorblind = available.colorblind && snapshot.map.colorblindSafe;
     final theme = seatLayerPickerThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     // What this EVENT actually offers, in the runtime's own order, named from
@@ -152,6 +161,37 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                 : null,
           )
     ];
+    // Each switch goes straight to the runtime. Availability is re-read at the
+    // moment of the flip, not captured when the sheet opened: a snapshot that
+    // arrives while it is up can withdraw a capability under it.
+    Future<void> applyTypes(Set<String> next) async {
+      if (!_availability(controller, controller.state.snapshot).accessibility) {
+        return;
+      }
+      // Since runtime 0.77.1 the command carries the web menu's own flight:
+      // turning a filter ON flies to the matching spaces, or holds the venue
+      // rung with the spread hint where they span it. Nothing to follow it
+      // with — the interim `picker.overview` this used to send is gone.
+      await controller.setAccessibilityFilter(next);
+      // A filter the buyer has just changed invalidates whatever walk was
+      // under way over the old one.
+      if (controller.supportsAccessibilityFocus) {
+        seatLayerAccessibleTourOf(controller).reset();
+      }
+    }
+
+    Future<void> applyLimited(bool next) async {
+      if (!_availability(controller, controller.state.snapshot).limited) return;
+      await controller.setLimitedViewHidden(next);
+    }
+
+    Future<void> applyColorblind(bool next) async {
+      if (!_availability(controller, controller.state.snapshot).colorblind) {
+        return;
+      }
+      await controller.setColorblindSafe(next);
+    }
+
     // The sheet body is built INSIDE the scope and handed to the route, so the
     // route's builder — which runs under the Navigator overlay, above the
     // scope — still gets the picker's controller, strings and palette.
@@ -200,27 +240,22 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                                     '${strings.accessFreeCount(need.count!)}, '
                                     '${strings.accessJumpFirstSection}'
                                 : null,
+                            // The one control on the sheet that is not a
+                            // switch, and the one that closes it: the walk it
+                            // starts happens on the map this sheet covers.
                             onCountPressed: canJump && (need.count ?? 0) > 0
-                                ? () => Navigator.of(context).pop(
-                                      (
-                                        types: <String>{
-                                          ...selected,
-                                          need.key,
-                                        },
-                                        hideLimited: hideLimited,
-                                        colorblind: colorblind,
-                                        jumpTo: need.key,
-                                      ),
-                                    )
+                                ? () => Navigator.of(context).pop(need.key)
                                 : null,
                             value: on,
                             onChanged: enabled
-                                ? () => setSheetState(() {
-                                      selected = <String>{...selected};
-                                      on
-                                          ? selected.remove(need.key)
-                                          : selected.add(need.key);
-                                    })
+                                ? () {
+                                    final next = <String>{...selected};
+                                    on
+                                        ? next.remove(need.key)
+                                        : next.add(need.key);
+                                    setSheetState(() => selected = next);
+                                    ignorePickerAction(applyTypes(next));
+                                  }
                                 : null,
                           );
                         }).toList(growable: false),
@@ -232,75 +267,51 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                     icon: Icons.contrast_rounded,
                     label: strings.hideLimitedView,
                     value: hideLimited,
-                    onChanged: () =>
-                        setSheetState(() => hideLimited = !hideLimited),
+                    onChanged: () {
+                      final next = !hideLimited;
+                      setSheetState(() => hideLimited = next);
+                      ignorePickerAction(applyLimited(next));
+                    },
                   ),
                 if (available.colorblind)
                   _AccessOptionRow(
                     icon: Icons.contrast_rounded,
                     label: strings.colorblindSafe,
                     value: colorblind,
-                    onChanged: () =>
-                        setSheetState(() => colorblind = !colorblind),
+                    onChanged: () {
+                      final next = !colorblind;
+                      setSheetState(() => colorblind = next);
+                      ignorePickerAction(applyColorblind(next));
+                    },
                   ),
-                const SizedBox(height: 8),
-                FilledButton(
-                  style: seatLayerButtonShape(theme.buttonRadius),
-                  onPressed: () => Navigator.of(context).pop(
-                    (
-                      types: selected,
-                      hideLimited: hideLimited,
-                      colorblind: colorblind,
-                      jumpTo: null,
-                    ),
-                  ),
-                  child: Text(strings.applyFilters),
-                ),
               ],
             ),
           ),
         ),
       ),
     );
-    final result = await showModalBottomSheet<
-        ({
-          Set<String> types,
-          bool hideLimited,
-          bool colorblind,
-          String? jumpTo,
-        })>(
+    // Every switch has already been sent by the time this returns; the only
+    // thing the sheet hands back is the provision a pressed count asked to
+    // walk, if any. Drag-down and the scrim close it with nothing, which is
+    // exactly right — there is nothing left to apply.
+    final jumpTo = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
       backgroundColor: theme.surface,
       builder: (_) => body,
     );
-    if (result == null) return;
-    final live = _availability(controller, controller.state.snapshot);
-    if (live.accessibility && !setEquals(result.types, initial)) {
-      // Since runtime 0.77.1 the command carries the web menu's own flight:
-      // turning a filter ON flies to the matching spaces, or holds the venue
-      // rung with the spread hint where they span it. Nothing to follow it
-      // with — the interim `picker.overview` this used to send is gone.
-      await controller.setAccessibilityFilter(result.types);
+    if (jumpTo == null) return;
+    // A pressed count turns its own provision on, then starts a walk over that
+    // provision alone.
+    if (!selected.contains(jumpTo)) {
+      selected = <String>{...selected, jumpTo};
+      await applyTypes(selected);
     }
-    // A filter the buyer has changed invalidates whatever walk was under way;
-    // one they pressed a count on starts a new walk on that provision alone.
     if (controller.supportsAccessibilityFocus) {
       final tour = seatLayerAccessibleTourOf(controller);
-      final jumpTo = result.jumpTo;
-      if (jumpTo != null) {
-        tour.begin(<String>{jumpTo});
-        await tour.next(controller);
-      } else if (!setEquals(result.types, initial)) {
-        tour.reset();
-      }
-    }
-    if (live.limited && result.hideLimited != initialHideLimited) {
-      await controller.setLimitedViewHidden(result.hideLimited);
-    }
-    if (live.colorblind && result.colorblind != initialColorblind) {
-      await controller.setColorblindSafe(result.colorblind);
+      tour.begin(<String>{jumpTo});
+      await tour.next(controller);
     }
   }
 }

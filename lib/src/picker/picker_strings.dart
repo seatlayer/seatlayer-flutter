@@ -112,7 +112,6 @@ class SeatLayerPickerStrings {
     this.accessibilityTitle = SeatLayerStringTokens.accessibilityTitle,
     this.hideLimitedView = SeatLayerStringTokens.hideLimitedView,
     this.colorblindSafe = SeatLayerStringTokens.colorblindSafe,
-    this.applyFilters = SeatLayerStringTokens.applyFilters,
     this.holdLapsedTitle = SeatLayerStringTokens.holdLapsedTitle,
     this.accessNeeds = defaultAccessNeeds,
     this.accessNeedWithCount = _defaultAccessNeedWithCount,
@@ -642,9 +641,6 @@ class SeatLayerPickerStrings {
 
   /// The sheet's switch for a colourblind-safe palette.
   final String colorblindSafe;
-
-  /// The sheet's action applying the chosen filters.
-  final String applyFilters;
 
   /// Told to the buyer once, when their hold has lapsed server-side.
   ///

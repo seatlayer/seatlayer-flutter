@@ -1061,9 +1061,6 @@ abstract final class SeatLayerStringTokens {
   /// Colourblind-friendly colours
   static const String colorblindSafe = 'Colourblind-friendly colours';
 
-  /// Apply filters
-  static const String applyFilters = 'Apply filters';
-
   /// Wheelchair
   static const String accessWheelchair = 'Wheelchair';
 
