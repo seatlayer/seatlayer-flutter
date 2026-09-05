@@ -22,7 +22,8 @@
 //
 // `IgnorePointer` does not help: removing the map from the hit test is exactly
 // the state that leaks. The fix has to put the map INTO the arena and make it
-// lose there:
+// lose there, **before the finger lifts** — the rejection is only worth
+// anything while UIKit is still holding the touches:
 //
 // - [SeatLayerMapChromeStack] hit-tests chrome first, exactly as `Stack` does,
 //   and then always gives the map layer its turn as well, so the platform view
@@ -30,12 +31,29 @@
 // - [SeatLayerMapSurfaceGestureRecognizer] stays eager — it claims the gesture
 //   on pointer down, which is what buys the map its latency-free pan and pinch
 //   — **unless** the same hit test landed on chrome, in which case it resigns
-//   and the platform view is told it lost.
+//   AND resolves the platform view's team captain against the same pointer, so
+//   the engine is told the touch is not the map's while the touch is still in
+//   its hands. Leaving that to the arena is too late: the button that took the
+//   pointer only claims it on touch-up, by which point UIKit has released the
+//   held touches to the web view and picked a seat under the button.
 //
 // Chrome over the map must therefore compete for the pointer (a button, an
 // `InkWell`, a `GestureDetector` — anything that enters the arena). A bare
 // `Listener` observes pointers without competing, so nothing would claim the
 // sequence and the map would still win it.
+//
+// One limit, and it is not this layer's to lift. All of the above only decides
+// what Flutter tells the engine, and how early. Whether the embedded view then
+// actually stops seeing the touch is the engine's side of the contract, and on
+// current iOS it does not hold for a web view: measured on an iOS 26.5
+// simulator, the platform view is rejected while the finger is still down —
+// 134 ms before it lifts — and `WKWebView` receives the tap regardless, so a
+// control drawn over the map fires its own action AND picks the seat beneath
+// it. What does still hold is a block the web content applies to itself before
+// the touch arrives, which is what `SeatLayerPickerController
+// .setMapInteractionEnabled` asks the runtime for. It has to be standing
+// before the finger lands: sending it on pointer down is a race against the
+// bridge round trip (~180 ms against a 24 ms tap) and loses.
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -80,8 +98,27 @@ class SeatLayerMapChromeScope extends InheritedWidget {
 ///
 /// Claiming on pointer down is what lets the map start panning on the first
 /// moved pixel instead of after the arena resolves. When the same touch landed
-/// on native chrome the recognizer resigns instead, which is what carries the
-/// platform view a `rejectGesture` and stops the touch at the Flutter layer.
+/// on native chrome this recognizer resigns instead, and — this is the part
+/// that actually stops the touch — it walks the platform view's team captain
+/// out of the arena in the same breath.
+///
+/// Resigning alone is not enough. The engine's recognizer is a team captain,
+/// and the map surface is one member of its team. A member that resigns is
+/// only dropped from the combining member; the captain stays in it, so the
+/// team's arena entry survives and the captain hears nothing until some other
+/// recognizer wins the arena outright. For an ordinary button that is the tap
+/// recognizer, which does not declare victory until the finger lifts —
+/// measured on an iPhone simulator at 53 ms after the touch went down and
+/// 19 ms after it came up. By then UIKit has finished the sequence: the
+/// engine's delaying recognizer has already released the held touches to the
+/// embedded view, and blocking it is a no-op. The web view has seen the whole
+/// tap and picked a seat under the button.
+///
+/// So the captain has to lose while the finger is still down. Once the surface
+/// has resigned, the captain is the last member left, and resolving it too
+/// empties the combining member and rejects the team's entry — one
+/// `rejectGesture`, at pointer down, in time for the engine to swallow the
+/// touch.
 class SeatLayerMapSurfaceGestureRecognizer
     extends OneSequenceGestureRecognizer {
   /// Creates a recognizer that consults [latch] for every new pointer.
@@ -93,9 +130,26 @@ class SeatLayerMapSurfaceGestureRecognizer
   @override
   void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    resolve(
-      latch.claimed ? GestureDisposition.rejected : GestureDisposition.accepted,
-    );
+    if (!latch.claimed) {
+      resolvePointer(event.pointer, GestureDisposition.accepted);
+      return;
+    }
+    resolvePointer(event.pointer, GestureDisposition.rejected);
+    _resignCaptain(event.pointer);
+  }
+
+  /// Takes the platform view's team captain out of this pointer's arena.
+  ///
+  /// The captain is the engine's own recognizer, the one holding the embedded
+  /// view's touches. Nothing else can tell it that it lost early enough to
+  /// matter, and it exposes no public way to be told: `resolvePointer` is the
+  /// framework's own mechanism for exactly this, and reaching it here is
+  /// deliberate rather than a shortcut around an API that would otherwise do.
+  void _resignCaptain(int pointer) {
+    final GestureArenaMember? captain = team?.captain;
+    if (captain is! OneSequenceGestureRecognizer) return;
+    // ignore: invalid_use_of_protected_member
+    captain.resolvePointer(pointer, GestureDisposition.rejected);
   }
 
   @override

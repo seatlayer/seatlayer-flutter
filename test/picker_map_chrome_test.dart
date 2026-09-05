@@ -142,6 +142,37 @@ void main() {
     expect(map.callsTo('picker.selectObjects'), isEmpty);
   });
 
+  testWidgets('the map loses a chrome touch while the finger is still down',
+      (tester) async {
+    // Timing is the whole of it. The engine can only swallow a touch it is
+    // still holding, and the button that took the pointer does not claim it
+    // until the finger lifts — so a map that waits for the arena to hand down
+    // the verdict is told it lost after the web view has already been given
+    // the tap. The verdict has to be in before the press is over.
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+    final verdicts = <_Verdict>[];
+
+    await tester.pumpWidget(
+      pickerHarness(map, _picker(verdicts), options: _withZoomDiscs),
+    );
+    map.emit(pickerSnapshot(withSelection: false));
+    await tester.pumpAndSettle();
+
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byTooltip('Zoom out')),
+    );
+    expect(verdicts, <_Verdict>[_Verdict.rejected]);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+    // And exactly once: the arena resolving later must not send a second
+    // verdict for a sequence the engine has already been told about.
+    expect(verdicts, <_Verdict>[_Verdict.rejected]);
+    expect(map.callsTo('picker.zoomOut'), hasLength(1));
+  });
+
   testWidgets('the map still claims a touch that landed on the map',
       (tester) async {
     // The other half of the same rule: away from chrome the map keeps the
