@@ -250,13 +250,16 @@ runtime lane; the Flutter head is 58 pt at rest).
 **Name** `SeatLayerPickerHeader` · **slot** `headerStyle` · **file**
 `lib/src/picker/picker_header.dart`
 
-**Anatomy.** A row of `size.headerHeight`, on the picker's own ground
-(`color.*.background`), with a hairline of `color.*.divider` under it. Left: the
+**Anatomy.** A row of `size.headerHeight`, on the picker's own ground — the
+header's own style slot, which defaults to `color.*.surface` with `color.*.text`
+on it; a ground and its ink are always resolved as a pair, never from two
+independent tokens (a host that darkens `background` for the map must not
+lose the event name) — with a hairline of `color.*.divider` under it. Left: the
 brand mark, a square of `size.headerLogoSize` at `radius.headerLogo`, filled
 with the accent and carrying either the organizer's logo image (cover-fitted) or
 the first letter of the brand or event name in `color.*.onAccent`. Centre: the
-event name at `size.headerNameFontSize`, one line, ellipsized. Right, in order:
-the hold pill, the sales-closed pill, the close ring.
+event name at `size.headerNameFontSize` w700, one line, ellipsized. Right, in
+order: the hold pill, the sales-closed pill, the close ring.
 
 The venue-and-date meta line is **not drawn** on a phone. The event name alone
 is the identity.
@@ -265,8 +268,9 @@ is the identity.
 `color.*.divider`, glyph in `color.*.mutedText`; the press target is expanded to
 `size.minimumHitTarget` centred on it. Copy `strings.close`.
 
-**Hold pill.** Drawn only while the picker owns a live hold — a hold handed to
-the host is the host's to display (`hold.owner`). A true pill (`radius.pill`), a
+**Hold pill.** Drawn for as long as a live hold exists, whoever owns it
+(owner call 2026-09-05: the clock is always in the header; a host that draws
+its own clock turns it off with the `showHoldPill` option). A true pill (`radius.pill`), a
 dot and `m:ss` in `type.pill`, tabular figures, with a `size.minimumHitTarget`
 reach. Resting look is the accent mixed lightly into the surface with accent-
 toned ink; while expiring it inverts to the full accent with `color.*.onAccent`
@@ -307,31 +311,36 @@ reader every second; announce it on the minute and on the expiring transition.
 `size.topRailHeight`, on `color.*.surface` with a `color.*.divider` hairline
 beneath. It is not floated over the map: on a busy chart the seat numbers read
 through the gaps, and the last chip clipped under the Map/3D control. Inside it,
-one horizontally scrolling row of chips.
+one horizontally scrolling row of chips, indented by the rail's own 10 pt of
+horizontal margin (12 on wide).
 
 The band takes the **map chrome's** palette, so it darkens with the 3D scene,
 and it is not drawn at all while the immersive scene is up.
 
 **Chips.** Height `size.legendChipHeight` of ink inside a
 `size.minimumHitTarget` reach, `radius.chip`, ground `color.*.background`,
-hairline `color.*.divider`, label at `type.legendChip` with tabular figures. A
-leading dot of `size.legendChipDotSize`. Selected chips take the accent ground
-and `color.*.onAccent`, and the dot gains a ring in the ink colour so the colour
-key survives the inversion.
+hairline `color.*.divider`, label at `type.legendChip` with tabular figures. The
+chip's padding is 7 leading and 9 trailing, not symmetric. A leading dot of
+`size.legendChipDotSize`. Selected chips take the accent ground and
+`color.*.onAccent`, and the dot gains a ring in the ink colour so the colour key
+survives the inversion.
 
 On the **light** theme the dot is drawn as the category colour mixed into the
 surface with a full-strength ring of the category colour — matching how the map
-tints sections on light. Dark keeps the flat dot. This is a fixed recipe, not a
-token.
+tints sections on light. That ring is 1.5 pt drawn **outside** the dot and takes
+no layout room, so a `size.legendChipDotSize` swatch of 7 measures 10 pt of ink.
+Dark keeps the flat dot. This is a fixed recipe, not a token.
 
 **Amount rule.** A single price prints as itself; equal minimum and maximum
 print once; otherwise `{min}+` via `strings.fromPrice`'s sibling formatting. A
 category with no configured price shows its **name** instead of an amount.
 
-**All prices.** Always the first chip, pinned so it never scrolls away, at
-`type.findPill` weight on the band's own ground. Copy `strings.allPrices`. It is
-selected whenever no filter narrows the map, and pressing it clears both the
-band filter and any pinned category. While the scroller has scrolled, the pinned
+**All prices.** Always the first chip, pinned so it never scrolls away, and
+inset a further 1 pt inside the rail's own margin. The way out of a filter wears
+the band's own `color.*.surface` at w750, where a named category wears
+`color.*.background` at w800. Copy `strings.allPrices`. It is selected whenever
+no filter narrows the map, and pressing it clears both the band filter and any
+pinned category. While the scroller has scrolled, the pinned
 chip carries a halo of the band ground so chips slide *under* it rather than
 through it; at rest the halo is off so the first price keeps its rounded end.
 
@@ -392,8 +401,10 @@ Built only where the event offers 3D **and** the device can render it.
 **Anatomy.** A segmented track at `radius.pill` on `color.*.surface` with a
 hairline and a soft shadow, height `size.viewModeControlHeight`, holding two
 segments of `size.viewModeButtonMinWidth` × `size.viewModeButtonHeight` at
-`size.viewModeLabelFontSize`, letter-spaced, in `color.*.mutedText`. The active
-segment takes the accent ground and `color.*.onAccent`.
+`size.viewModeLabelFontSize`, letter-spaced, in `color.*.mutedText`. The
+segments sit on a 3 pt bed **inside** the track's own line — the hairline is
+part of the track's measured height, not painted over it. The active segment
+takes the accent ground and `color.*.onAccent`.
 
 On a phone it lives in the map's **top-right** corner, on the line below the
 price rail — the rail owns the band, the control owns the corner. On wide it
@@ -418,11 +429,12 @@ Required chrome for a test event. It has no host switch, and exactly one may
 render.
 
 **Anatomy.** One recipe in both themes: height `size.testChipHeight`,
-`radius.pill`, label at `size.testChipFontSize` in warning ink, ground the
+`radius.pill`, label at `size.testChipFontSize` w700 in warning ink, ground the
 warning colour at `opacity.warnPillWash` over the surface, hairline the warning
 colour at half strength, leading dot of `size.testChipDotSize` in
-`color.*.warning` with a soft halo. Amber, never the accent — an environment
-flag must not wear "buy" gold.
+`color.*.warning` inside a hard 3 pt halo of the warning at `.22`, drawn with no
+blur. The chip's padding is 8 leading and 10 trailing. Amber, never the accent
+— an environment flag must not wear "buy" gold.
 
 **Ink — measured against the wash, not the surface.** The chip is not painted
 on the surface; it is painted on the wash *over* it, which is a different and
@@ -518,10 +530,11 @@ phone mounts no dock, the lift is zero, and the corner controls rest at
 #### Accessibility control (bottom-left)
 
 A circle of `size.accessibilityControlSize` — the full
-`size.minimumHitTarget` — at `radius.pill`, ground `color.*.surface`, hairline
-`color.*.divider`, ink `color.*.text`, with a soft shadow. The glyph is **drawn**,
-never an emoji: a wheelchair mark where the chart authors accessible seats,
-otherwise a display-options glyph. Names: `strings.accessibility`, or
+`size.minimumHitTarget` — at `radius.pill`, ground `color.*.surface`, a
+whole-point hairline of `color.*.divider` like every other floating disc, ink
+`color.*.text`, with a soft shadow. The glyph is **drawn**, never an emoji: a
+wheelchair mark where the chart authors accessible seats, otherwise a
+display-options glyph. Names: `strings.accessibility`, or
 `strings.displayOptions` where the chart offers no provisions.
 
 Its sheet opens upward from the button and contains switch rows:
@@ -646,17 +659,14 @@ the web has no such sentence, because its popover never leaves the map — as ar
 A column of round controls of `size.mapControlSize` at `radius.pill`, gap
 `size.zoomColumnGap`, ground the surface at partial opacity over a blur,
 hairline the divider at partial opacity — each inside a `size.minimumHitTarget`
-target.
+target. The `+` and `−` glyphs are drawn at 20 — an arm of 11.33 and a stroke
+of 1.33, not 14 across at a stroke of 2.
 
-Phone rules:
-
-- **zoom in is never drawn.** Pinch is the gesture.
-- **zoom out** appears only once the buyer is deep — seats revealed, or a
-  section focused.
-- **fit** is always there. Copy `strings.fitVenue`, `strings.zoomIn`,
-  `strings.zoomOut`.
-
-So the ordinary phone column is fit alone, plus zoom-out when deep.
+This column is the **wide** composition's. On a phone there is no column: the
+one bottom-right slot described under "One way out, on the phone" above reads
+`+` at the whole venue and `−` once a section is framed (`map.canZoomOut`), and
+fit-to-screen is not drawn. Copy `strings.fitVenue`, `strings.zoomIn`,
+`strings.zoomOut`.
 
 **Commands.** `picker.zoomToFit`, `picker.zoomIn`, `picker.zoomOut`.
 
@@ -699,8 +709,9 @@ Contents, leading to trailing:
 
 1. A dot of `size.dockDotSize` in the section's colour, inset
    `size.dockLeadingInset`.
-2. The section name at `type.dockSection` / `size.dockNameFontSize`, taking the
-   free space, ellipsizing.
+2. The section name at `size.dockNameFontSize` with the weight of
+   `type.dockSection` (its size field is not read here), taking the free
+   space, ellipsizing.
 3. The seats-left count at `type.dockCount` / `size.dockCountFontSize`, which
    **collapses before the name does** and may never be clipped.
 4. Previous / next section steps, `size.dockNavWidth` × `size.dockNavHeight`,
@@ -770,7 +781,9 @@ blur, hairline `color.*.divider`, padding `size.floorRailPadding`, gap
 `size.floorChipHeight`, padding `size.floorChipPaddingX`, label at
 `size.floorChipFontSize`, `radius.pill`; idle ink `color.*.mutedText`,
 selected the accent ground with `color.*.onAccent`. An info glyph of
-`size.floorInfoSize` closes the track, inside a `size.minimumHitTarget` target.
+`size.floorInfoSize` closes the track, inside a `size.minimumHitTarget` target,
+and is drawn only where the host takes an `onFloorInfo` action for it — a
+control that opens nothing is not drawn.
 
 `strings.allFloors` is the first chip where the runtime offers an all-floors
 view.
@@ -959,7 +972,9 @@ same card over flat glass, which is a correct state, not a degraded one.
    lines: a numbered section such as `209` reads as one line of equals with the
    row and the seat, while a venue phrase such as `Upper Grand Circle` needs
    the room. Where there is no section the grid becomes two equal centred
-   cells. A missing value prints an em dash. Copy: `strings.sectionWord`,
+   cells. The cell set is chosen first — section only where the seat names one,
+   row only where it has one, the place always — and a cell that is present but
+   empty prints an em dash. Copy: `strings.sectionWord`,
    `strings.rowWord`, `strings.seatWord`, `strings.placeWord` — the row eyebrow
    follows the object's own word (Row, Table, Booth). **Print the row with its
    section prefix stripped**, or the card reads `Stalls D · Row Stalls D C`.
@@ -1296,7 +1311,7 @@ inset, ground
 `color.*.surface`, corner `radius.sheet`, elevation `elevation.sheet`, hairline
 on its top edge. A grabber of `size.sheetGrabberWidth` ×
 `size.sheetGrabberHeight` at `radius.pill` sits `size.sheetGrabberInset` from
-the top, centred, at reduced opacity — it overlaps into the same row rather than
+the top, centred, at opacity .5 — it overlaps into the same row rather than
 taking a row of its own. Trailing, a chevron of `size.sheetToggleSize` pointing
 **up** while collapsed and rotating over `motion.duration.chevron` on
 `motion.curve.easeEnter` when the sheet opens.
@@ -1336,11 +1351,12 @@ says the same thing.
 
 **Find seats** is the empty bar's one door: a rounded rectangle at
 `radius.peekButton`, height `size.findPillHeight`, 20 pt of horizontal padding,
-accent-filled, a sparkle glyph and `strings.findSeats` at `type.findPill`. It
-is the bar's primary action and is drawn as one — the small lozenge it replaced
-read as an aside. The word stays **`Find seats`**, never `Book now`: nothing is
-selected yet and the tap opens the best-available form, so the button says what
-the tap does. Pressing it opens the sheet on the best-seats form and moves
+accent-filled, a drawn three-star sparkle mark of 16 and `strings.findSeats` at
+`type.findPill` — never a single typed `✦`, which leaves the button short.
+It is the bar's primary action and is drawn as one — the small lozenge it
+replaced read as an aside. The word stays **`Find seats`**, never `Book now`:
+nothing is selected yet and the tap opens the best-available form, so the button
+says what the tap does. Pressing it opens the sheet on the best-seats form and moves
 focus to that form's action. It is withheld where the form would be refused —
 a performance group, closed sales, or an existing hold.
 
@@ -1514,8 +1530,10 @@ clock, and each held line's remove control releases one seat.
 **Name** `SeatLayerBestSeatsForm` · **file** `lib/src/picker/picker_best_seats.dart`
 
 Shown in the sheet while the cart is empty, and hidden the moment the cart has
-anything — once a phone cart has tickets it stays a cart. It is a card with an
-accent-tinted gradient ground and an accent-mixed hairline.
+anything — once a phone cart has tickets it stays a cart. It stands on one
+plate: padding 8, corner 11, a hairline of the accent at `.34` over
+`color.*.divider`, and a diagonal wash of the accent from `.05` to `.11` over
+`color.*.surface`.
 
 **Row order on a phone** — one decision per row, with the DOM/semantic order
 unchanged so focus order still follows the page:
@@ -1526,7 +1544,8 @@ unchanged so focus order still follows the page:
 4. the quantity stepper, leading, on the last row
 5. the action, trailing, on the same row
 
-Names take full lines; the narrow fixed-width stepper shares the last one.
+Names take full lines; the narrow fixed-width stepper shares the last one. Rows
+are 6 apart, and so are the stepper and the action beside it.
 
 **Selects** — height `size.bestSeatsSelectHeight`, corner `radius.control`,
 ground `color.*.surface`, hairline `color.*.divider`, label at
@@ -1535,12 +1554,12 @@ ground `color.*.surface`, hairline `color.*.divider`, label at
 category the select is omitted and takes no row.
 
 **Stepper** — width `size.bestSeatsStepperWidth`, height
-`size.minimumHitTarget`, corner `radius.control`, hairline, with two buttons
-inside it and a tabular value between. Copy `strings.fewerTickets`,
-`strings.moreTickets`.
+`size.minimumHitTarget`, corner `radius.control`, hairline, with a tabular value
+between two filled 34 pt keys at a 7 pt corner, their glyphs 14 at w800. Copy
+`strings.fewerTickets`, `strings.moreTickets`.
 
 **Action** — height `size.minimumHitTarget`, corner `radius.control`, accent
-ground, `type.bestSeatsGo`, with a leading sparkle. Copy
+ground, `type.bestSeatsGo`, with a leading `✦` flourish at 13. Copy
 `strings.findBestSeatsOne` / `strings.findBestSeatsOther`; busy is
 `strings.findingBestSeats` with a spinner, keeping the accent at slight
 transparency rather than going grey. Disabled uses the same designed disabled
@@ -1632,7 +1651,7 @@ reduced motion too. **Native calls nothing after the command.** The interim
 that framed the section of the newly added seats is gone; the web's own pops
 and chip flights stay web-only.
 
-**Seat removed.** No toast. See §3.11's removal rules: the tray is the answer.
+**Seat removed.** No toast. See §3.10.2's removal rules: the tray is the answer.
 
 **Accessibility filter flight.** Since runtime 0.77.1
 `picker.setAccessibilityFilter` takes the web menu's own focus path: turning a
@@ -2031,6 +2050,26 @@ chrome, dock bar, confirm card, sheet, header, pill, and the map scrim colour.
 Each slot is *partial* — an unset field keeps the spec's value. Each element that
 owns a slot also takes a per-instance override that wins over the theme.
 
+**4.2a Typography is inherited on exactly one platform.** Every text style in
+the picker passes the theme's `fontFamily`, which is **null** by default. On
+Flutter a null family merges with the `DefaultTextStyle` above the picker, so
+the picker silently takes the host app's typography. A platform with no such
+inheritance — React Native, SwiftUI, Compose — draws its own system face
+instead, and the same screen measures differently. Neither is a bug; the
+contract is that a host which wants its own face passes `fontFamily` on the
+theme, explicitly, on every platform.
+
+**4.2b A painted border and a boxed border are not the same border.** A Flutter
+`DecoratedBox` (or a `Material(shape:)`) paints its line without taking room
+from the child, so every padding this document states beside a hairline is
+measured from the **outer** edge. A platform whose border boxes its content
+must subtract the line from that padding — the test chip's 8 and 10 (§3.4) and
+the legend chip's 7 and 9 (§3.2) become 7/9 and 6/8 — or the element comes out
+two points wide with its word a point late. The exception is stated where it
+applies: where the spec says the bed is measured **inside** the line, as the
+Map/3D track's 3 pt bed is (§3.3), the line is already part of the measured
+height and nothing is subtracted.
+
 **4.3 String overrides.** Every buyer-facing string in `strings` is overridable,
 individually, without replacing the set. Counted strings need one/other forms
 (and the plural categories the platform's own locale rules require). Access-need
@@ -2081,8 +2120,9 @@ swap its title a second after opening.
 - **picker-owned** — the native chrome shows the countdown pill, may extend it,
   and releases seats when a line is removed.
 - **host-owned** — a hold handed in by the host is verified with the server and
-  always treated as host-owned. Native controls never release or mutate it, and
-  the countdown pill is not drawn: it is the host's to display.
+  always treated as host-owned. Native controls never release or mutate it —
+  no extend, no release from a cart row — but the header's countdown pill is
+  still drawn (§3.1), because the buyer's time is running whoever holds it.
 
 The hold id itself is delivered **only** at the checkout handoff
 (`checkout-handoff-v1`); ordinary snapshots never expose that booking
@@ -2174,10 +2214,13 @@ mountable on its own, where there is no order to join. Dart file:
   (`strings.venueMapHint`) that says the seats are picked with the controls
   around it. See the runtime gap in §4.9: naming a region that cannot be
   explored is the honest form of a canvas, not the intended design.
-- *Live regions*, and only these three (the dock's is there only where a host
-  opted into a dock; the default phone has two): the peek summary, the section dock's
-  name and seats-left, and the hold countdown. Each changes without the buyer
-  touching it, and none says so any other way.
+- *Live regions*, and only these three among the surfaces that are always up
+  (the dock's is there only where a host opted into a dock; the default phone
+  has two): the peek summary, the section dock's name and seats-left, and the
+  hold countdown. Each changes without the buyer touching it, and none says so
+  any other way. A surface that ARRIVES unasked — a buyer-facing state, a hold
+  notice, a toast, the best-seats count — is live as well; a notice that is part
+  of a surface's own statement (the card's limited-view line) is not.
 - *The hold countdown is throttled.* `m:ss` read aloud is a time of day. The
   pill announces `strings.holdMinutesLeft` at each minute mark, and
   `strings.holdSecondsLeft` for every second of the last minute, where the
