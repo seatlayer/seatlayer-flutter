@@ -307,21 +307,30 @@ class _AddSeatButtonState extends State<_AddSeatButton>
                               ),
                             ),
                             const SizedBox(width: 7),
+                            // Shrinks only when it must: `Remove seat` beside
+                            // the 3D square and a 34% Cancel does not fit at
+                            // full size on a 390 pt phone, and an answer the
+                            // buyer cannot read ("Remove s…") is worse than
+                            // one a point smaller.
                             Flexible(
-                              child: Text(
-                                widget.label,
-                                maxLines: 1,
-                                softWrap: false,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: ink,
-                                  fontSize: 13,
-                                  height: 1.15,
-                                  fontWeight: seatLayerBoldWeight(
-                                      context, FontWeight.w800),
-                                  fontFamily: theme.fontFamily,
-                                ).merge(
-                                  seatLayerStyleRole(widget.style?.textStyle),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  widget.label,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: TextStyle(
+                                    color: ink,
+                                    fontSize: 13,
+                                    height: 1.15,
+                                    fontWeight: seatLayerBoldWeight(
+                                        context, FontWeight.w800),
+                                    fontFamily: theme.fontFamily,
+                                  ).merge(
+                                    seatLayerStyleRole(
+                                      widget.style?.textStyle,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
