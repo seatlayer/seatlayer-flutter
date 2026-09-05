@@ -223,7 +223,7 @@ override** `style:`
 - **States** with a photo (loading, arrived, never arrived), without one (no
   strip at all, and the 3D square in the decision row), 3D-only, with a sight
   line, with tiers, with notices; the confidence teaser or its passport chip
-  inside 3D; resting or hugging the seat; committing.
+  inside 3D; at its resting home or its raised one; committing.
 - **Backdrop** the map goes behind glass: a black veil at
   `opacity.confirmScrim` under a `size.confirmScrimBlur` blur, masked clear to
   `size.confirmScrimClearRadius` around the tapped seat and reaching full
@@ -271,9 +271,11 @@ override** `style:`
      `size.confirm3dSquareFontSize` opens the row, then `Cancel` at 34 % of the
      whole row and `✓ Add seat` at the rest, each in its own box at
      `radius.button` inside the card's gutter.
-- **Placement** rests `size.confirmCardRestInset` above the map's foot; hugs
-  the seat at `size.confirmCardSeatGap` when it would otherwise cover it. Full
-  rule and constants: `picker-spec.md` §3.8.2.
+- **Placement** two fixed homes, never a slide between them: resting
+  `size.confirmCardRestInset` above the map's foot, or raised
+  `size.confirmCardSeatGap` clear of the whole band the resting card would have
+  covered. The tap chooses a home, never a height. Full rule and constants:
+  `picker-spec.md` §3.8.2.
 - **Motion** the map dims to ink behind it (`SeatLayerPickerStyles.scrimColor`);
   the card springs in from the seat's side with `motion.curve.spring` over
   `motion.duration.cardEnter`. `Add seat` invites once, breathes until touched,

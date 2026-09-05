@@ -721,35 +721,54 @@ The **bottom-centre** region is the exception — it comes forward at full opaci
 above the card, because it carries the toast that is the *reply* to the tap, and
 it stays press-through so it can never steal Cancel or Add seat.
 
-#### 3.8.2 Placement — rest or hug
+#### 3.8.2 Placement — two homes
 
 Four constants, all tokens:
 
 | Token | Meaning |
 | --- | --- |
 | `size.confirmCardRestInset` | daylight between the resting card and the map's foot |
-| `size.confirmCardSeatGap` | daylight between the card and the seat it hugs |
+| `size.confirmCardSeatGap` | daylight between the raised card and the seat band below it |
 | `size.confirmCardTopInset` | the closest the card may come to the map's top |
 | `size.confirmCardClearance` | extra room below the resting card before the seat counts as covered |
 
-The rule, with the seat's y in map-local coordinates:
+The card has **exactly two homes**, and a tap picks one of them. It never
+slides between them.
 
 ```
 covered = seatY >= mapHeight - restInset - cardHeight - clearance
-if not covered  ->  rest:  the card sits restInset above the map's foot,
-                           notch none, and points at nothing
-else            ->  hug:   the card's bottom edge sits seatGap above the seat,
-                           clamped so its top never rises above topInset,
-                           notch on the bottom edge pointing down at the seat
+if not covered  ->  rest:   the card sits restInset above the map's foot,
+                            notch none, and points at nothing
+else            ->  raised: the card's bottom edge sits seatGap above the
+                            HIGHEST seat that `covered` can be true of —
+                            not above the tapped seat — clamped so its top
+                            never rises above topInset, notch on the bottom
+                            edge pointing down at the seat
 ```
+
+Both homes are functions of the map and the card only. Every seat in the
+covered band therefore gets the *same* card in the *same* place, and Cancel and
+`Add seat` land under the same pixels on every tap.
+
+**Why, and why it is not the web's answer.** The card used to track the tapped
+seat's own y, so its height on screen was decided by wherever the finger
+happened to land — the buyer's second tap moved the buttons out from under the
+thumb that had just used them. Web 0.80.0 fixes the same complaint from the
+other end: it pins the card as a fixed bottom sheet and moves the **camera** so
+the seat lands at a constant fraction of the band left clear. Flutter keeps the
+opposite model on purpose — the card moves, the map never does, because a
+native picker that yanks the map under a buyer's fingers loses the pinch and
+pan they were in the middle of. Same invariant, opposite mechanism: one of the
+two must be constant, and here it is the card.
 
 A card that would sit *below* the seat was never in the seat's way, so it rests
 instead. `topInset` and `bottomInset` passed to the rule are the bands the
 picker's own chrome stands on, so the card never slides under the dock or behind
 the floor rail.
 
-The card's **growth origin** is always the tapped seat, whichever placement was
-chosen.
+The card's **growth origin** is always the tapped seat, whichever home was
+chosen — that, the pointer, and the spotlight hole in the glass are what tie a
+card at a fixed home back to the seat it is asking about.
 
 **Capability.** The seat's screen point requires `seat-screen-point-v1`
 (`selection[].screenPoint`). Until a runtime reports it the card rests, and that
