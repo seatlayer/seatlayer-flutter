@@ -1621,13 +1621,34 @@ card.
 `SeatLayerPickerExtendHoldPrompt`. A card in the bottom-centre region above the
 toast: `strings.seatsHeldForNeedMoreTime` with a live `m:ss`, a pill
 `strings.addMinutes(5)` → `strings.addingEllipsis`, and a `strings.close`
-dismiss at `size.minimumHitTarget`. Shown while the hold has under a minute
-left and the booked overlay is not up.
+dismiss at `size.minimumHitTarget`. Due while the hold has under a minute left
+and the booked overlay is not up — and mounted only where the layout asks for
+it, which by default is the wide layout alone.
 
-**It stays a floating pill, on every layout.** Native is always narrow, and
-docking it beside the hold clock at 390 px collapses the header's own
-information from 198 px to 64 px against a venue name that needs 201 px. The
-pill is the only shape that fits.
+**Decision (2026-09-04): not shown on the phone by default.** The phone picker
+gives the buyer ONE timer — the header's hold countdown
+(`SeatLayerPickerHoldCountdown`), which fills with the accent, breathes its
+status light, and counts the last minute out second by second to a screen
+reader. A card that arrives over the map inside that last minute is a second
+decision at the worst moment, and a countdown that can always be pushed back is
+not a deadline. If the hold does lapse, the non-blocking recovery of §3.13.7 —
+`SeatLayerHoldLapseNotice` and `reselectLapsedSeats` — offers the seats back.
+
+The card is not deleted: it stays a public component and a **host opt-in**, via
+`SeatLayerPickerChromeOptions(showExtendHoldPrompt: true)`. The option is
+layout-resolved like the other nullable chrome controls — `null` means auto,
+which is **off on the phone and on in the wide layout**, where the card sits
+beside the clock rather than over the map.
+
+**Porting SDKs follow Flutter here.** Swift, Kotlin and React Native default the
+prompt off on phone-width layouts and expose the same host opt-in. The web
+narrow layout still shows the floating pill by default; that is the current
+divergence, and it is the web side that is out of step.
+
+**Where a host opts it back in, it stays a floating pill.** Native is always
+narrow, and docking it beside the hold clock at 390 px collapses the header's
+own information from 198 px to 64 px against a venue name that needs 201 px.
+The pill is the only shape that fits.
 
 **One named step.** One tap asks for a fixed five minutes, and the button
 prints the number. The offer used to send the host's whole configured hold

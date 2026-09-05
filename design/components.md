@@ -106,7 +106,7 @@ PriceLegend band                           size.topRailHeight
 │  TestModeBadge (top-left)   ViewModeControl (top-right) │
 │  FloorStrip (left rail)                                 │
 │  corner controls: accessibility ◦ zoom column           │
-│  toast · extend prompt (bottom centre)                  │
+│  toast (bottom centre) · extend prompt: opt-in only     │
 │  ConfirmCard / Venue3D chrome / status overlay          │
 │  DockBar                                size.dockBarHeight│
 └─────────────────────────────────────────────────────────┘
@@ -498,7 +498,7 @@ specification. Names, slots and files:
 | `SeatLayerPickerAccessPanel` | — | §3.13.3 |
 | `SeatLayerPickerSalesClosedStatement` / `…SalesClosedPill` | — | §3.13.4 |
 | `SeatLayerPickerSoldOutOverlay` | — | §3.13.5 |
-| `SeatLayerPickerExtendHoldPrompt` | one named `+5 min` step, once per hold, dismissable | §3.13.8 |
+| `SeatLayerPickerExtendHoldPrompt` | one named `+5 min` step, once per hold, dismissable; **phone: off by default**, host opt-in via `SeatLayerPickerChromeOptions(showExtendHoldPrompt: true)`; wide keeps it | §3.13.8 |
 | `SeatLayerPickerBookedOverlay` | — | §3.13.10 |
 | `SeatLayerPickerGeneralAdmissionPrompt` / `…TablePrompt` | — | §3.13.11–12 |
 | `SeatLayerPickerAccessibilityFilters` | — | §3.5 |

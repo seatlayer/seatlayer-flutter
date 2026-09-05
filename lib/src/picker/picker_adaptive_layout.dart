@@ -539,8 +539,11 @@ class _SeatLayerPickerAdaptiveLayoutState
                           const Positioned.fill(
                             child: SeatLayerPickerToastLayer(),
                           ),
-                          const Positioned.fill(
-                            child: SeatLayerPickerStateLayer(),
+                          Positioned.fill(
+                            child: SeatLayerPickerStateLayer(
+                              showExtendHoldPrompt:
+                                  chrome.extendHoldPromptFor(phone: !wide),
+                            ),
                           ),
                           // --- end toasts and buyer-facing states ---
                           Positioned.fill(
@@ -827,6 +830,8 @@ class _SeatLayerPickerAdaptiveLayoutState
                         SeatLayerTypeScale.state(
                           child: SeatLayerPickerStateLayer(
                             bottomInset: bottomBand,
+                            showExtendHoldPrompt:
+                                chrome.extendHoldPromptFor(phone: !wide),
                           ),
                         ),
                       ),
