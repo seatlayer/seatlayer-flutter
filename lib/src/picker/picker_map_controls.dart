@@ -7,6 +7,7 @@ import 'picker_camera_actions.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_accessibility.dart';
+import 'picker_blocked_regions.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -199,26 +200,32 @@ class _CornerControls extends StatelessWidget {
           Positioned(
             top: inset,
             right: inset,
-            child: const SeatLayerPickerViewModeControl(),
+            child: const SeatLayerMapChromeRegion(
+              child: SeatLayerPickerViewModeControl(),
+            ),
           ),
         if (bottomLeftColumn.isNotEmpty)
           Positioned(
             left: inset,
             bottom: bottom,
-            child: _AnchorColumn(
-              gap: SeatLayerSizeTokens.mapAnchorGap,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: bottomLeftColumn,
+            child: SeatLayerMapChromeRegion(
+              child: _AnchorColumn(
+                gap: SeatLayerSizeTokens.mapAnchorGap,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: bottomLeftColumn,
+              ),
             ),
           ),
         if (zoomColumn.isNotEmpty)
           Positioned(
             right: inset,
             bottom: bottom,
-            child: _AnchorColumn(
-              gap: SeatLayerSizeTokens.zoomColumnGap,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: zoomColumn,
+            child: SeatLayerMapChromeRegion(
+              child: _AnchorColumn(
+                gap: SeatLayerSizeTokens.zoomColumnGap,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: zoomColumn,
+              ),
             ),
           ),
         // The back-to-overview control is a different question from the zoom
@@ -229,7 +236,9 @@ class _CornerControls extends StatelessWidget {
           Positioned(
             left: inset,
             top: inset,
-            child: const SeatLayerPickerOverviewButton(),
+            child: const SeatLayerMapChromeRegion(
+              child: SeatLayerPickerOverviewButton(),
+            ),
           ),
       ],
     );

@@ -11,6 +11,7 @@ import '../seat_layer_configuration.dart';
 import '../seat_layer_controller.dart';
 import '../seat_layer_error.dart';
 import 'picker_availability.dart';
+import 'picker_blocked_regions.dart';
 import 'picker_booked_tracker.dart';
 import 'picker_chart_load.dart';
 import 'picker_haptics.dart';
@@ -113,6 +114,11 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   int _reloadGeneration = 0;
   late final PickerViewportReport _viewportReport =
       PickerViewportReport(send: _sendViewportInsets);
+  late final PickerBlockedRegionsReport _blockedRegions =
+      PickerBlockedRegionsReport(
+    send: _sendBlockedRegions,
+    equals: seatLayerBlockedRegionsEqual,
+  );
   SeatLayerSheetDetent _cartSheetDetent = SeatLayerSheetDetent.peek;
   bool _cartSheetInitialized = false;
   late final PickerRevisionWaiters _revisionWaiters = PickerRevisionWaiters(
@@ -232,6 +238,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
       _reloadGeneration += 1;
       _haptics.reset();
       _viewportReport.forget();
+      _blockedRegions.forget();
       _seatView = null;
       // A retry is a second open, and its own wait starts here.
       _tapToReadyMs = null;
@@ -921,6 +928,33 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
     return bundle != null &&
         bundle.supportsCapability(seatLayerViewportInsetsCapability) &&
         bundle.supportsCommand('picker.setViewportInsets');
+  }
+
+  /// Tell the runtime where native chrome lies OVER the map, so a tap on it
+  /// never reaches the map — the guard iOS needs, standing before the finger
+  /// lands. See `picker_blocked_regions.dart`.
+  ///
+  /// The whole list, replaced on every call; `[]` clears. Repeats are dropped
+  /// and several calls inside one frame coalesce into the last, so the layout
+  /// may report from every pass. Nothing is sent to a runtime that does not
+  /// advertise the command. Input only: no busy state, no inventory.
+  Future<void> setBlockedRegions(List<SeatLayerBlockedRegion> rects) =>
+      supportsBlockedRegions
+          ? _blockedRegions
+              .report(List<SeatLayerBlockedRegion>.unmodifiable(rects))
+          : Future<void>.value();
+
+  Future<void> _sendBlockedRegions(List<SeatLayerBlockedRegion> rects) {
+    if (_disposed) return Future<void>.value();
+    return _serialize(() async {
+      await mapController.runBridgeCommand(
+        seatLayerBlockedRegionsCommand,
+        <String, Object?>{
+          'rects':
+              rects.map((r) => r.toBridgePayload()).toList(growable: false),
+        },
+      );
+    });
   }
 
   Future<void> _sendViewportInsets(SeatLayerViewportInsets? insets) {

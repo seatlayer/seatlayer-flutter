@@ -13,10 +13,12 @@ import 'picker_builders.dart';
 import 'picker_cart_list.dart';
 import 'seat_layer_picker.dart';
 import 'picker_seat_confirmation.dart';
+import 'picker_seat_lift.dart';
 import 'picker_states.dart';
 import 'picker_status_views.dart';
 import 'picker_toast.dart';
 import 'picker_best_seats.dart';
+import 'picker_blocked_regions.dart';
 import 'picker_cart_sheet.dart';
 import 'picker_confirm_card.dart';
 import 'picker_header.dart';
@@ -129,6 +131,28 @@ class _SeatLayerPickerAdaptiveLayoutState
   SeatLayerPickerController? _picker;
   Timer? _framingGraceTimer;
   bool _framingGraceLapsed = false;
+
+  /// Where the chrome standing on the map is, for the runtime's tap guard.
+  late final SeatLayerBlockedRegionRegistry _regions =
+      SeatLayerBlockedRegionRegistry(
+    report: (rects) {
+      final picker = _picker;
+      if (picker != null) ignorePickerAction(picker.setBlockedRegions(rects));
+    },
+  );
+
+  /// The pan that keeps a tapped seat above its card, and its undoing.
+  late final PickerSeatLift _seatLift = PickerSeatLift(
+    frame: (seatId, {required fraction, gestures}) =>
+        _picker?.frameSeat(seatId, fraction: fraction, gestures: gestures) ??
+        Future<SeatLayerSeatFrame?>.value(),
+  );
+
+  /// The map surface's box once it has been laid out.
+  RenderBox? _mapBox() {
+    final box = _mapKey.currentContext?.findRenderObject();
+    return box is RenderBox && box.hasSize ? box : null;
+  }
 
   @override
   void didChangeDependencies() {
@@ -540,117 +564,129 @@ class _SeatLayerPickerAdaptiveLayoutState
           // The wide composition puts its chrome beside the map rather than
           // on it, so the runtime frames against the whole surface again.
           _reportViewportInsets(SeatLayerViewportInsets.zero);
-          return Column(
-            children: [
-              header,
-              Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SeatLayerMapChromeStack(
-                        latch: _mapChromeLatch,
-                        children: [
-                          Positioned.fill(child: mapSurface),
-                          Positioned(
-                              top: _mapInset,
-                              left: _mapInset,
-                              child: testBadge),
-                          Positioned(
-                              top: _mapInset,
-                              right: _mapInset,
-                              child: controls),
-                          if (chrome.showFloorSelector)
-                            const Positioned(
-                              left: _mapInset,
-                              bottom: _mapInset,
-                              child: SeatLayerPickerFloorSelector(),
-                            ),
-                          Positioned(
-                            left: _mapInset,
-                            bottom: _bottomLeftLift(resolved.layout),
-                            child: accessibility,
-                          ),
-                          Positioned.fill(child: seatViewChrome),
-                          if (!immersiveUp)
-                            Positioned.fill(
-                              key: const ValueKey<String>(
-                                'seatlayer-picker-prompt-transition',
-                              ),
-                              child: PickerPromptTransition(
-                                scrimColor: pickerAlpha(
-                                  resolved.background,
-                                  .64,
+          _seatLift.forget();
+          _regions.remeasureAfterFrame();
+          return SeatLayerBlockedRegionScope(
+            registry: _regions,
+            mapBox: _mapBox,
+            child: Column(
+              children: [
+                header,
+                Expanded(
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SeatLayerMapChromeStack(
+                          latch: _mapChromeLatch,
+                          children: [
+                            Positioned.fill(child: mapSurface),
+                            Positioned(
+                                top: _mapInset,
+                                left: _mapInset,
+                                child:
+                                    SeatLayerMapChromeRegion(child: testBadge)),
+                            Positioned(
+                                top: _mapInset,
+                                right: _mapInset,
+                                child:
+                                    SeatLayerMapChromeRegion(child: controls)),
+                            if (chrome.showFloorSelector)
+                              const Positioned(
+                                left: _mapInset,
+                                bottom: _mapInset,
+                                child: SeatLayerMapChromeRegion(
+                                  child: SeatLayerPickerFloorSelector(),
                                 ),
-                                child: buyerPrompt,
+                              ),
+                            Positioned(
+                              left: _mapInset,
+                              bottom: _bottomLeftLift(resolved.layout),
+                              child: SeatLayerMapChromeRegion(
+                                  child: accessibility),
+                            ),
+                            Positioned.fill(child: seatViewChrome),
+                            if (!immersiveUp)
+                              Positioned.fill(
+                                key: const ValueKey<String>(
+                                  'seatlayer-picker-prompt-transition',
+                                ),
+                                child: PickerPromptTransition(
+                                  scrimColor: pickerAlpha(
+                                    resolved.background,
+                                    .64,
+                                  ),
+                                  child: buyerPrompt,
+                                ),
+                              ),
+                            // --- toasts and buyer-facing states (P4) ---
+                            const Positioned.fill(
+                              child: SeatLayerPickerToastLayer(),
+                            ),
+                            Positioned.fill(
+                              child: SeatLayerPickerStateLayer(
+                                showExtendHoldPrompt:
+                                    chrome.extendHoldPromptFor(phone: !wide),
                               ),
                             ),
-                          // --- toasts and buyer-facing states (P4) ---
-                          const Positioned.fill(
-                            child: SeatLayerPickerToastLayer(),
-                          ),
-                          Positioned.fill(
-                            child: SeatLayerPickerStateLayer(
-                              showExtendHoldPrompt:
-                                  chrome.extendHoldPromptFor(phone: !wide),
+                            // --- end toasts and buyer-facing states ---
+                            Positioned.fill(
+                              child:
+                                  PickerStatusOverlay(overlay: statusOverlay),
                             ),
-                          ),
-                          // --- end toasts and buyer-facing states ---
-                          Positioned.fill(
-                            child: PickerStatusOverlay(overlay: statusOverlay),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      width: 360,
-                      decoration: BoxDecoration(
-                        color: resolved.surface,
-                        border: Border(
-                          left: BorderSide(color: resolved.divider),
+                          ],
                         ),
                       ),
-                      child: Column(
-                        children: [
-                          prices,
-                          // Beside the map rather than on it, so the wide
-                          // layout reports no band for it.
-                          if (floorStripUp)
+                      Container(
+                        width: 360,
+                        decoration: BoxDecoration(
+                          color: resolved.surface,
+                          border: Border(
+                            left: BorderSide(color: resolved.divider),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            prices,
+                            // Beside the map rather than on it, so the wide
+                            // layout reports no band for it.
+                            if (floorStripUp)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: floorStrip,
+                              ),
+                            sections,
                             Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: floorStrip,
+                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  best,
+                                  const SizedBox(height: 8),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: accessibility,
+                                  ),
+                                ],
+                              ),
                             ),
-                          sections,
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                best,
-                                const SizedBox(height: 8),
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: accessibility,
-                                ),
-                              ],
+                            Expanded(child: SingleChildScrollView(child: tray)),
+                            actionError,
+                            const Padding(
+                              padding: EdgeInsetsDirectional.only(end: 8),
+                              child: Align(
+                                alignment: AlignmentDirectional.centerEnd,
+                                child: attribution,
+                              ),
                             ),
-                          ),
-                          Expanded(child: SingleChildScrollView(child: tray)),
-                          actionError,
-                          const Padding(
-                            padding: EdgeInsetsDirectional.only(end: 8),
-                            child: Align(
-                              alignment: AlignmentDirectional.centerEnd,
-                              child: attribution,
-                            ),
-                          ),
-                          checkout,
-                        ],
+                            checkout,
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
         }
 
@@ -722,214 +758,251 @@ class _SeatLayerPickerAdaptiveLayoutState
         // measured from the foot of the map surface and already contains
         // [bottomBand], so the larger of the two is the whole story. In 3D the
         // scene frames itself and the card rests over the picture.
+        //
+        // Where the runtime can PAN a seat into place (`picker.frameSeat`),
+        // the sheet is deliberately NOT reported: an inset re-frames the
+        // section and changes the zoom, where the web sheet lifts the seat at
+        // unchanged zoom and puts the map back when the card leaves. The lift
+        // folds the sheet into its own fraction instead — see
+        // `picker_seat_lift.dart`. An older runtime keeps the inset.
         final sheetBand = seatCardUp && !seatCard3D ? _sheetBand : 0.0;
+        final liftsSeat = controller.supportsSeatFraming;
         _reportViewportInsets(
           SeatLayerViewportInsets(
             top: topBand,
-            bottom: sheetBand > bottomBand ? sheetBand : bottomBand,
+            bottom:
+                !liftsSeat && sheetBand > bottomBand ? sheetBand : bottomBand,
           ),
         );
+        if (liftsSeat) {
+          _seatLift.sync(
+            seatId: sheetBand > 0 ? cardSeat?.id : null,
+            mapHeight: _mapBox()?.size.height ?? 0,
+            top: topBand,
+            bottom: bottomBand,
+            sheet: sheetBand,
+            revision: state.revision,
+          );
+        }
+        // Chrome that moved without rebuilding — a column riding up as the
+        // dock arrives — reports where it is now.
+        _regions.remeasureAfterFrame();
         // One reading order for the whole phone picker. The Column already
         // reads top to bottom, but the Stack in the middle does not: its paint
         // order puts the dock between two halves of the map's own chrome and
         // the seat card after the toast that answers it. Every surface says
         // where it belongs instead — see [SeatLayerPickerReadingOrder].
-        return Column(
-          children: [
-            seatLayerReadingOrder(SeatLayerPickerReadingOrder.header, header),
-            if (railUp)
-              seatLayerReadingOrder(
-                SeatLayerPickerReadingOrder.rail,
-                SeatLayerTypeScale.rail(child: topRail),
-              ),
-            Expanded(
-              // The whole map band takes its own place in the order, so the
-              // Column's four rows are all keyed: a group with some keys and
-              // some without falls back to geometry for the unkeyed ones,
-              // which is how the map came to be read before the prices.
-              child: seatLayerReadingOrder(
-                SeatLayerPickerReadingOrder.map,
-                SeatLayerMapChromeStack(
-                  latch: _mapChromeLatch,
-                  children: [
-                    Positioned.fill(
-                      child: seatLayerReadingOrder(
-                        SeatLayerPickerReadingOrder.map,
-                        mapSurface,
-                      ),
-                    ),
-                    // The floors are the one piece of "which seats am I looking
-                    // at" chrome that stays on the map, so they start at the
-                    // map's own edge.
-                    if (floorStripUp && !venue3DUp)
-                      Positioned(
-                        top: _floorStripTop(viewModeControl: viewModeControlUp),
-                        left: 0,
-                        right: 0,
+        return SeatLayerBlockedRegionScope(
+          registry: _regions,
+          mapBox: _mapBox,
+          child: Column(
+            children: [
+              seatLayerReadingOrder(SeatLayerPickerReadingOrder.header, header),
+              if (railUp)
+                seatLayerReadingOrder(
+                  SeatLayerPickerReadingOrder.rail,
+                  SeatLayerTypeScale.rail(child: topRail),
+                ),
+              Expanded(
+                // The whole map band takes its own place in the order, so the
+                // Column's four rows are all keyed: a group with some keys and
+                // some without falls back to geometry for the unkeyed ones,
+                // which is how the map came to be read before the prices.
+                child: seatLayerReadingOrder(
+                  SeatLayerPickerReadingOrder.map,
+                  SeatLayerMapChromeStack(
+                    latch: _mapChromeLatch,
+                    children: [
+                      Positioned.fill(
                         child: seatLayerReadingOrder(
-                          SeatLayerPickerReadingOrder.mapChrome,
-                          floorStrip,
+                          SeatLayerPickerReadingOrder.map,
+                          mapSurface,
                         ),
                       ),
-                    // The immersive scene puts `‹ Back to venue` in this
-                    // corner; the badge steps below that pill rather than under
-                    // it, and only while the pill is actually drawn.
-                    Positioned(
-                      top: _testBadgeTop(
-                        venue3D: venue3DUp,
-                        backPill: backPillUp,
-                        backPillInset: immersiveTopInset,
-                        viewModeControl: viewModeControlUp,
-                        floorStrip: floorStripUp,
-                        floorStripHeight: floorStripHeight,
-                      ),
-                      left: _mapInset,
-                      child: seatLayerReadingOrder(
-                        SeatLayerPickerReadingOrder.mapChrome,
-                        testBadge,
-                      ),
-                    ),
-                    if (viewModeControlUp)
-                      Positioned(
-                        top: _railTop,
-                        right: _mapInset,
-                        child: seatLayerReadingOrder(
-                          // It shares the rail's band, so it is read with the
-                          // prices rather than with the map's own corners.
-                          SeatLayerPickerReadingOrder.rail,
-                          const SizedBox(
-                            height: SeatLayerPickerViewModeControl.height,
-                            child: SeatLayerPickerViewModeControl(),
+                      // The floors are the one piece of "which seats am I looking
+                      // at" chrome that stays on the map, so they start at the
+                      // map's own edge.
+                      if (floorStripUp && !venue3DUp)
+                        Positioned(
+                          top: _floorStripTop(
+                              viewModeControl: viewModeControlUp),
+                          left: 0,
+                          right: 0,
+                          child: SeatLayerMapChromeRegion(
+                            child: seatLayerReadingOrder(
+                              SeatLayerPickerReadingOrder.mapChrome,
+                              floorStrip,
+                            ),
                           ),
                         ),
-                      ),
-                    if (chrome.showFloorSelector)
+                      // The immersive scene puts `‹ Back to venue` in this
+                      // corner; the badge steps below that pill rather than under
+                      // it, and only while the pill is actually drawn.
                       Positioned(
+                        top: _testBadgeTop(
+                          venue3D: venue3DUp,
+                          backPill: backPillUp,
+                          backPillInset: immersiveTopInset,
+                          viewModeControl: viewModeControlUp,
+                          floorStrip: floorStripUp,
+                          floorStripHeight: floorStripHeight,
+                        ),
                         left: _mapInset,
-                        bottom: dockLift + _bottomLeftLift(resolved.layout),
-                        child: seatLayerReadingOrder(
-                          SeatLayerPickerReadingOrder.mapChrome,
-                          const SeatLayerPickerFloorSelector(),
-                        ),
-                      ),
-                    Positioned.fill(
-                      child: seatLayerReadingOrder(
-                        SeatLayerPickerReadingOrder.mapChrome,
-                        controls,
-                      ),
-                    ),
-                    if (chrome.showVenue3DChrome)
-                      Positioned.fill(
-                        child: seatLayerReadingOrder(
-                          SeatLayerPickerReadingOrder.mapChrome,
-                          venue3D,
-                        ),
-                      ),
-                    Positioned.fill(
-                      child: seatLayerReadingOrder(
-                        SeatLayerPickerReadingOrder.mapChrome,
-                        seatViewChrome,
-                      ),
-                    ),
-                    if (dockUp)
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: seatLayerReadingOrder(
-                          SeatLayerPickerReadingOrder.dock,
-                          SeatLayerTypeScale.dock(child: dock),
-                        ),
-                      ),
-                    if (!immersiveUp || seatCard3D)
-                      Positioned.fill(
-                        key: const ValueKey<String>(
-                          'seatlayer-picker-prompt-transition',
-                        ),
-                        child: PickerPromptTransition(
-                          readingOrder: SeatLayerPickerReadingOrder.prompt,
-                          // No wash by default: the runtime itself pales the
-                          // venue outside the focused seat's section while a
-                          // card asks, and the neighbours keep their ink and
-                          // numbers, as on the web. A host that wants a wash
-                          // over the whole map sets the slot.
-                          scrimColor: seatCard3D
-                              ? const Color(0x00000000)
-                              : resolved.styles.scrimColor ??
-                                  const Color(0x00000000),
-                          // The card is the phone's fixed sheet, and the seat
-                          // it asks about is what the glass behind it leaves
-                          // clear. In the scene the seat IS the picture, so
-                          // there is nothing to spotlight and the card simply
-                          // rests over it.
-                          seatCard: seatCardUp,
-                          anchor: seatCard3D ? null : cardSeat?.screenPoint,
-                          topInset: topBand,
-                          // With no anchor in 3D this band only sets where the
-                          // card rests, so the lift is spent here.
-                          bottomInset:
-                              bottomBand - (seatCard3D ? _cardLift3D : 0),
-                          onDismiss: seatCardUp && cardSeat != null
-                              ? () => _dismissSeatCard(
-                                    controller,
-                                    cardSeat,
-                                    removing: removing,
-                                  )
-                              : null,
-                          onSheetBand: seatCardUp ? _reportSheetBand : null,
-                          child: buyerPrompt,
-                        ),
-                      ),
-                    // --- toasts and buyer-facing states (P4) ---
-                    // Above the card, never over it: the message is the reply to
-                    // the tap that opened the card, and a reply printed across
-                    // Cancel / Add seat is a reply the buyer has to move to read.
-                    Positioned.fill(
-                      child: seatLayerReadingOrder(
-                        SeatLayerPickerReadingOrder.notice,
-                        SeatLayerTypeScale.state(
-                          child: SeatLayerPickerToastLayer(
-                            bottomInset: bottomBand,
-                            lifted: seatCardUp,
+                        child: SeatLayerMapChromeRegion(
+                          child: seatLayerReadingOrder(
+                            SeatLayerPickerReadingOrder.mapChrome,
+                            testBadge,
                           ),
                         ),
                       ),
-                    ),
-                    Positioned.fill(
-                      child: seatLayerReadingOrder(
-                        SeatLayerPickerReadingOrder.notice,
-                        SeatLayerTypeScale.state(
-                          child: SeatLayerPickerStateLayer(
-                            bottomInset: bottomBand,
-                            showExtendHoldPrompt:
-                                chrome.extendHoldPromptFor(phone: !wide),
+                      if (viewModeControlUp)
+                        Positioned(
+                          top: _railTop,
+                          right: _mapInset,
+                          child: seatLayerReadingOrder(
+                            // It shares the rail's band, so it is read with the
+                            // prices rather than with the map's own corners.
+                            SeatLayerPickerReadingOrder.rail,
+                            const SeatLayerMapChromeRegion(
+                              child: SizedBox(
+                                height: SeatLayerPickerViewModeControl.height,
+                                child: SeatLayerPickerViewModeControl(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (chrome.showFloorSelector)
+                        Positioned(
+                          left: _mapInset,
+                          bottom: dockLift + _bottomLeftLift(resolved.layout),
+                          child: seatLayerReadingOrder(
+                            SeatLayerPickerReadingOrder.mapChrome,
+                            const SeatLayerMapChromeRegion(
+                              child: SeatLayerPickerFloorSelector(),
+                            ),
+                          ),
+                        ),
+                      Positioned.fill(
+                        child: seatLayerReadingOrder(
+                          SeatLayerPickerReadingOrder.mapChrome,
+                          controls,
+                        ),
+                      ),
+                      if (chrome.showVenue3DChrome)
+                        Positioned.fill(
+                          child: seatLayerReadingOrder(
+                            SeatLayerPickerReadingOrder.mapChrome,
+                            venue3D,
+                          ),
+                        ),
+                      Positioned.fill(
+                        child: seatLayerReadingOrder(
+                          SeatLayerPickerReadingOrder.mapChrome,
+                          seatViewChrome,
+                        ),
+                      ),
+                      if (dockUp)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          child: seatLayerReadingOrder(
+                            SeatLayerPickerReadingOrder.dock,
+                            SeatLayerMapChromeRegion(
+                              child: SeatLayerTypeScale.dock(child: dock),
+                            ),
+                          ),
+                        ),
+                      if (!immersiveUp || seatCard3D)
+                        Positioned.fill(
+                          key: const ValueKey<String>(
+                            'seatlayer-picker-prompt-transition',
+                          ),
+                          child: PickerPromptTransition(
+                            readingOrder: SeatLayerPickerReadingOrder.prompt,
+                            // No wash by default: the runtime itself pales the
+                            // venue outside the focused seat's section while a
+                            // card asks, and the neighbours keep their ink and
+                            // numbers, as on the web. A host that wants a wash
+                            // over the whole map sets the slot.
+                            scrimColor: seatCard3D
+                                ? const Color(0x00000000)
+                                : resolved.styles.scrimColor ??
+                                    const Color(0x00000000),
+                            // The card is the phone's fixed sheet, and the seat
+                            // it asks about is what the glass behind it leaves
+                            // clear. In the scene the seat IS the picture, so
+                            // there is nothing to spotlight and the card simply
+                            // rests over it.
+                            seatCard: seatCardUp,
+                            anchor: seatCard3D ? null : cardSeat?.screenPoint,
+                            topInset: topBand,
+                            // With no anchor in 3D this band only sets where the
+                            // card rests, so the lift is spent here.
+                            bottomInset:
+                                bottomBand - (seatCard3D ? _cardLift3D : 0),
+                            onDismiss: seatCardUp && cardSeat != null
+                                ? () => _dismissSeatCard(
+                                      controller,
+                                      cardSeat,
+                                      removing: removing,
+                                    )
+                                : null,
+                            onSheetBand: seatCardUp ? _reportSheetBand : null,
+                            child: buyerPrompt,
+                          ),
+                        ),
+                      // --- toasts and buyer-facing states (P4) ---
+                      // Above the card, never over it: the message is the reply to
+                      // the tap that opened the card, and a reply printed across
+                      // Cancel / Add seat is a reply the buyer has to move to read.
+                      Positioned.fill(
+                        child: seatLayerReadingOrder(
+                          SeatLayerPickerReadingOrder.notice,
+                          SeatLayerTypeScale.state(
+                            child: SeatLayerPickerToastLayer(
+                              bottomInset: bottomBand,
+                              lifted: seatCardUp,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    // --- end toasts and buyer-facing states ---
-                    Positioned.fill(
-                      child: seatLayerReadingOrder(
-                        SeatLayerPickerReadingOrder.notice,
-                        SeatLayerTypeScale.state(
-                          child: PickerStatusOverlay(overlay: statusOverlay),
+                      Positioned.fill(
+                        child: seatLayerReadingOrder(
+                          SeatLayerPickerReadingOrder.notice,
+                          SeatLayerTypeScale.state(
+                            child: SeatLayerPickerStateLayer(
+                              bottomInset: bottomBand,
+                              showExtendHoldPrompt:
+                                  chrome.extendHoldPromptFor(phone: !wide),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      // --- end toasts and buyer-facing states ---
+                      Positioned.fill(
+                        child: seatLayerReadingOrder(
+                          SeatLayerPickerReadingOrder.notice,
+                          SeatLayerTypeScale.state(
+                            child: PickerStatusOverlay(overlay: statusOverlay),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            if (chrome.showTicketPanel)
-              seatLayerReadingOrder(
-                SeatLayerPickerReadingOrder.sheet,
-                PickerPausedWhileConfirming(
-                  key: const ValueKey<String>('seatlayer-picker-sheet-pause'),
-                  confirming: seatCardUp,
-                  child: sheet,
+              if (chrome.showTicketPanel)
+                seatLayerReadingOrder(
+                  SeatLayerPickerReadingOrder.sheet,
+                  PickerPausedWhileConfirming(
+                    key: const ValueKey<String>('seatlayer-picker-sheet-pause'),
+                    confirming: seatCardUp,
+                    child: sheet,
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         );
       },
     );
@@ -1279,6 +1352,15 @@ class _SeatLayerPickerAdaptiveLayoutState
         _picker?.setViewportInsets(null) ?? Future<void>.value(),
       );
     }
+    if (_regions.rects.isNotEmpty) {
+      ignorePickerAction(
+        _picker?.setBlockedRegions(const <SeatLayerBlockedRegion>[]) ??
+            Future<void>.value(),
+      );
+    }
+    // The map is not put back: the runtime either goes with this layout or
+    // is re-framed by whatever mounts next.
+    _seatLift.forget();
     super.dispose();
   }
 

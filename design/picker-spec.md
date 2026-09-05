@@ -139,6 +139,9 @@ Not reported (they are rows, and the map surface already ends at their edge):
 - the header
 - the price rail band
 - the cart sheet, at peek or open
+- the **seat card**, on a runtime that can pan a seat (`picker.frameSeat`,
+  runtime 0.80.2+): the card's band is folded into the pan instead (§3.8.2).
+  Only an older runtime gets it as an inset.
 
 Rules for the reporter: coalesce to at most one report per frame, never send
 the same numbers twice, floor negative or non-finite sides to zero, and forget
@@ -181,8 +184,31 @@ additionally tell the runtime to stop accepting input at all
 (`picker.setInteractionEnabled`), so the map is quiet as well as unclaimed
 while a decision is open.
 
+**The second guard, on the runtime's side (2026-09-05).** The three rules
+above are necessary and, on iOS 26, not sufficient: measured on the
+simulator, the platform view is told it lost 134 ms before the finger lifts
+and WKWebView is handed the touch regardless, so a tap on the `−` disc still
+selected the seat under it. A guard sent on pointer-down cannot win that race
+(a bridge round trip is ~180 ms against a 24 ms tap). So every piece of
+chrome standing on the map also reports its **rectangle** — in the map's own
+logical px, from the map surface's top-left — and a runtime advertising
+`picker.setBlockedRegions` in its `hello` command table swallows any pointer
+sequence that starts inside one, before its gesture machine or canvas sees it.
+
+Rules for the reporter, the same shape as the insets: the whole list on every
+send, replaced not merged; at most one send per frame; never the same list
+twice; a control that unmounts takes its rectangle with it; the list is
+cleared (`[]`) when the composing layout leaves; and nothing is sent to a
+runtime whose command table lacks it. Every control in this section's list
+carries the region: the corner discs and their columns, the Map | 3D control,
+the test chip, the floor rail, the floor selector, the dock and the wide
+layout's rail. The region draws nothing and takes no pointer of its own — the
+control underneath still competes for the touch exactly as rules 1–3 require.
+
 Dart files: `lib/src/seat_layer_map_chrome.dart` (the stack, the scope and the
-recognizer), `lib/src/picker/picker_adaptive_layout.dart` (which composes them).
+recognizer), `lib/src/picker/picker_blocked_regions.dart` (the region, the
+registry and the command), `lib/src/picker/picker_adaptive_layout.dart` and
+`lib/src/picker/picker_map_controls.dart` (which compose them).
 
 ### 2.5 Safe areas
 
@@ -856,19 +882,33 @@ so the sheet never slides under the dock or behind the floor rail; a card
 taller than the band it lives in keeps its top edge rather than climbing past
 `topInset`.
 
-Keeping the seat and its card together is then the **map's** job:
+Keeping the seat and its card together is then the **map's** job, and it is
+done the way the web sheet does it — by a **pan**, never a zoom:
 
 ```
-band  = mapHeight - cardTop + seatGap        // measured from the map's foot
-report viewport insets { top: chromeTop, bottom: max(chromeBottom, band) }
+band     = mapHeight - cardTop + seatGap     // measured from the map's foot
+clear    = mapHeight - chromeTop - band      // what the sheet leaves
+fraction = 0.48 * clear / (mapHeight - chromeTop - chromeBottom)
+cmd picker.frameSeat { seatId, fraction, gestures? } → { dy, gestures }
 ```
 
-The runtime frames every fit and every focus glide *inside* the insets the host
-reports, so telling it what the sheet covers is what moves the venue out from
-under the card. The band is reported the frame after the card is measured — its
-height depends on the seat's own facts, a photo strip or the rail that stands
-in for it, tiers, notices — and taken back off the moment the question is
-answered. It is withheld in the immersive scene, which frames itself.
+The runtime pans so the seat rests at `fraction` of the band the reported
+insets leave (`chromeTop` … `mapHeight − chromeBottom`), x untouched, zoom
+untouched; the sheet is folded into the fraction rather than reported as an
+inset, because an inset re-frames the whole section and changes the zoom. The
+first frame is sent the frame after the card is measured — its height depends
+on the seat's own facts, a photo strip or the rail that stands in for it,
+tiers, notices — and re-sent after every snapshot the runtime publishes so a
+glide that lands with the card up is followed; the runtime answers `dy: 0`
+when the seat is already in place. The reply's `gestures` — the runtime's
+count of the BUYER's own camera moves — is handed back on every later frame,
+and the runtime declines once it has moved on. When the card leaves — Cancel,
+Add seat or an outside tap alike — one restore pans the map back by the sum
+of every lift, with the same count, so a buyer who has since taken the wheel
+is left where they are. A card replaced by another seat's card without a
+dismiss in between keeps the first lift standing and adds to it; the one
+restore at the end puts the map back where the buyer had it. Withheld in the
+immersive scene, which frames itself. Dart file: `lib/src/picker/picker_seat_lift.dart`.
 
 **Why, and what was tried.** The card used to move to the seat: first tracking
 the tapped seat's own y, then choosing between a resting and a raised home. On
@@ -880,19 +920,14 @@ from under the thumb that had just used them. Web 0.80.0 answers the same
 complaint from the other end, and this is now the same answer: pin the card and
 move the map.
 
-**What is honestly different from the web, and why.** The web widget owns its
-own camera, so it *pans* — x untouched, zoom untouched, the seat landing at a
-constant fraction of the clear band, and it declines to move at all for a buyer
-who has panned or pinched since the card came up. Over the bridge there is no
-pan-by-screen-delta and no frame-this-seat command; `picker.setBuyerView`'s
-`flyToSeatId` enters the 3D venue and flies the *scene* camera, which is a
-different surface, not a 2D pan. So the lever here is the viewport inset, and
-what the runtime does with it is `refitCurrentView` — it re-frames the focused
-section into the band left clear. The seat therefore lands *inside* the clear
-band rather than at a constant fraction of it, and a pinch the buyer had made
-inside the section is refit away with it. That is the closest honest behaviour
-the bridge allows today. A pan-only primitive on the bridge would let this
-match the web exactly, and is the one thing to ask the runtime for.
+**On an older runtime** (before 0.80.2, no `picker.frameSeat` in the `hello`
+command table) the lever is the viewport inset instead — `bottom:
+max(chromeBottom, band)` — and what the runtime does with it is
+`refitCurrentView`: it re-frames the focused section into the band left clear,
+so the seat lands *inside* the clear band rather than at a constant fraction
+of it, and a pinch the buyer had made inside the section is refit away with
+it. That was the closest the bridge allowed until the pan primitive landed;
+it is kept only as the fallback.
 
 The sheet rises from the foot of the map, always — one home, one entrance. The
 **spotlight hole** in the glass is what ties it back to the seat it is asking
@@ -2196,3 +2231,14 @@ from the wrong one.
 
 A capability the runtime does not advertise is a feature that is **not offered**,
 never a feature that fails.
+
+Three commands carry no capability string, because they change nothing a
+snapshot reports; their presence in the `hello` **command table** is the whole
+contract, and a runtime answering `unsupported_command` for one of them anyway
+leaves nothing on screen for the buyer to read (runtime 0.80.2+):
+
+| Command | What it unlocks |
+| --- | --- |
+| `picker.setSelectionFocus { seatId \| null }` | the seat a card is asking about is painted as the candidate — thick double ring, halo, neighbours paled (§3.8.2) |
+| `picker.setBlockedRegions { rects }` | the runtime's own tap guard under native chrome over the map (§2.4) |
+| `picker.frameSeat { seatId, fraction?, animate?, gestures? }` | the pan that keeps a tapped seat above the fixed sheet at unchanged zoom, and its restore (§3.8.2) |
