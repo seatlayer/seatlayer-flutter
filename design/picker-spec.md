@@ -2050,6 +2050,26 @@ chrome, dock bar, confirm card, sheet, header, pill, and the map scrim colour.
 Each slot is *partial* — an unset field keeps the spec's value. Each element that
 owns a slot also takes a per-instance override that wins over the theme.
 
+**4.2a Typography is inherited on exactly one platform.** Every text style in
+the picker passes the theme's `fontFamily`, which is **null** by default. On
+Flutter a null family merges with the `DefaultTextStyle` above the picker, so
+the picker silently takes the host app's typography. A platform with no such
+inheritance — React Native, SwiftUI, Compose — draws its own system face
+instead, and the same screen measures differently. Neither is a bug; the
+contract is that a host which wants its own face passes `fontFamily` on the
+theme, explicitly, on every platform.
+
+**4.2b A painted border and a boxed border are not the same border.** A Flutter
+`DecoratedBox` (or a `Material(shape:)`) paints its line without taking room
+from the child, so every padding this document states beside a hairline is
+measured from the **outer** edge. A platform whose border boxes its content
+must subtract the line from that padding — the test chip's 8 and 10 (§3.4) and
+the legend chip's 7 and 9 (§3.2) become 7/9 and 6/8 — or the element comes out
+two points wide with its word a point late. The exception is stated where it
+applies: where the spec says the bed is measured **inside** the line, as the
+Map/3D track's 3 pt bed is (§3.3), the line is already part of the measured
+height and nothing is subtracted.
+
 **4.3 String overrides.** Every buyer-facing string in `strings` is overridable,
 individually, without replacing the set. Counted strings need one/other forms
 (and the plural categories the platform's own locale rules require). Access-need
