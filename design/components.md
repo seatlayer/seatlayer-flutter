@@ -284,6 +284,79 @@ override** `style:`
 - **Commands** `picker.openSeatView`, `picker.showSeatIn3D`,
   `picker.deselect` on cancel.
 
+## HoverCard
+
+**Web only. There is no native surface and nothing here is to be ported.**
+No Dart name, no style slot, no token. Runtime source: `hoverCard.ts` (the DOM
+element) and `hoverCardContent.ts` (the pure model). Spec: `picker-spec.md`
+§3.8a.
+
+- **Mouse only, by design** every update is gated on `pointerType === 'mouse'`,
+  a touch or pen pointer hides the card, and a pointer-leave takes it down. A
+  tap synthesizes `mousemove`/`mouseover`, never `pointermove`, so a touch
+  sequence produces no card at all. It is decoration over a canvas that already
+  announces every seat on the keyboard path: `aria-hidden`, no pointer events,
+  no focus.
+- **Modes** one reused card, switched on the renderer's own `seatsPickable()` —
+  the same test that decides whether a click picks a seat or zooms. Above the
+  line it describes the seat under the cursor, below it the section block.
+- **Head** the labelled SECTION / ROW / SEAT cells shared with ConfirmCard,
+  hairline-divided, so a hover is the first frame of the card a click opens
+  rather than a differently shaped restatement of it. A section card's head is
+  its name, centred over the bands. Rows carry category name and price only —
+  availability counts were refused (2026-09-04): a per-category "12 left" on
+  every hover is a pressure device, and the number most likely to be stale.
+- **Category band** full bleed, edge to edge like a legend chip, no dot and no
+  rail — bands inside a margin read as buttons on a panel rather than as one
+  card about one place. Ink from `categoryBandInk()`, and **the direction is
+  chosen by the fill, not by strongest contrast**: a light fill takes dark ink,
+  a dark or saturated fill takes light ink, and either is kept when it clears
+  the small-text bar on its own. Strongest contrast put black on the arena red
+  (6.3 : 1 against white's 3.3 : 1), and the band read as a warning stripe
+  rather than as a price.
+- **Host stand-down** while the host has its own card up about that seat — the
+  pinned "cannot be taken" explanation, or the confirm card — `hostCardOpen()`
+  answers true, the model resolves to nothing and the map's card hides. Without
+  it, clicking a sold or held seat produced two cards saying the same thing.
+- **Placement** below-right of the cursor at 16 px; near a viewport edge it
+  flips to the other side at the same offset rather than sliding under the
+  pointer, and clamps at an 8 px margin only when it fits on neither side.
+
+## InterruptCard
+
+**One web shape, one native user.** The web picker uses a single interrupt
+shape (`.sl-interrupt`) for the two moments where something has ended and there
+is exactly one way on: hold expiry (`pickerHoldExpiredDialog.ts`) and session
+recovery (`accessPanelElement` / `accessCopy` in `pickerFragments.ts`). Styles
+in `pickerStyles.ts`. Values below are the web's own, in px — no token is
+minted for a shape three of the four SDKs do not draw.
+
+- **Veil** the scrim ink at 35 %, filling the widget root with 16 px of padding
+  and the card centred in it. The map keeps painting behind it, so the buyer
+  sees the venue they are coming back to rather than a blurred-out widget.
+- **Card** `min(420px, 100%)`, 24 px padding (20 px on a narrow layout), 15 px
+  radius, on the surface with a hairline and a deep shadow. Left-aligned — these
+  carry a sentence and a fact, and centred body copy makes both harder to scan
+  — and it scrolls rather than clipping its button when it cannot fit.
+- **Title** 20 px, weight 700 (18 px narrow), with an inline glyph at text size
+  rather than an accent disc, which gave a recoverable pause the weight of an
+  error.
+- **Body** 14 px in the muted colour. The one line that is fact rather than
+  explanation — which seats were released — takes the text colour at weight 700.
+- **Action, and there is exactly one.** A 44 px-minimum pill on the accent,
+  trailing on a wide layout and **full width on narrow**, where it is the only
+  thing to do and a right-aligned pill wastes the row that matters.
+  **Every interrupt has exactly one primary action**: two access reasons once
+  built none, which left the buyer behind a veil with nothing to press. On the
+  hold dialog a press on the veil and Escape run that same action rather than
+  dismissing into the state underneath, which is gone.
+
+**What Flutter takes.** The session-recovery panel, and only that:
+`SeatLayerPickerAccessPanel` (`picker-spec.md` §3.13.3) is this shape and keeps
+the one-action rule, including for the two reasons that used to be dead ends.
+**Hold expiry does not use it** — Flutter announces a lapse without blocking the
+map; see `picker-spec.md` §3.13.7, "Divergence from the web picker".
+
 ## CartSheet
 
 **Name** `SeatLayerCartSheet` · **Style slots** `sheetStyle`,

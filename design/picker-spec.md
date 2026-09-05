@@ -1015,6 +1015,43 @@ flown into.
 `seatlayer.picker.snapshot/1` carries a compare set, and a control that cannot
 say anything true is worse than an absent one.
 
+### 3.8a Hover card — web only, nothing to port
+
+The web runtime draws a card beside the cursor naming whatever it is over:
+the section block below the seats rung, the seat itself above it
+(`engine/render/hoverCard.ts` for the DOM, `hoverCardContent.ts` for the pure
+model). It has no Dart name, no style slot and no token, and **the native SDKs
+implement nothing for it.**
+
+**Mouse only, by construction.** Every update is gated on
+`pointerType === 'mouse'`, a touch or pen pointer hides the card, and a
+pointer-leave takes it down. A tap synthesizes `mousemove`/`mouseover`, never
+`pointermove`, so a touch sequence can never raise one. It is decoration over a
+canvas that already has a keyboard path — `aria-hidden`, no pointer events, no
+focus — and it adds nothing a keyboard user does not already have. A platform
+without a hovering pointer is therefore not missing a feature; the seat card
+(§3.8) is the whole answer to "what is this seat" on touch.
+
+**What it says**, for the record rather than for porting:
+
+- **Two modes, one reused card.** The switch is the renderer's own
+  `seatsPickable()` — the same test that decides whether a click picks a seat
+  or zooms — so the card can never describe a seat the buyer cannot hit.
+- **The head is the seat card's head:** the labelled SECTION / ROW / SEAT cells
+  of §3.8.3, hairline-divided, so a hover reads as the first frame of the card
+  a click opens rather than a differently shaped restatement of it. A section
+  card's head is just the section name. Rows are category name and price only.
+- **A full-bleed category band**, edge to edge like a legend chip, its ink from
+  `categoryBandInk()` — chosen by the FILL, not by strongest contrast. Under
+  strongest-contrast the arena red took black ink (6.3 : 1 against white's
+  3.3 : 1) and the band read as a warning stripe rather than as a price.
+- **It stands down for the host.** While the host has its own card up about the
+  same seat — the pinned "cannot be taken" explanation, or the confirm card —
+  `hostCardOpen()` answers true, the model resolves to nothing and the card
+  hides, so one seat never gets two cards.
+
+Full entry: `components.md` › HoverCard.
+
 ### 3.9 Peek bar (collapsed cart)
 
 **Name** `SeatLayerCartSheet` (peek head) · **slots** `sheetStyle`,
@@ -1527,6 +1564,38 @@ the way every failed hold is: the seats stay selected and unheld, never claimed.
 `haptics.holdExpired` fires from the runtime's own expiry signal, never from a
 snapshot: a snapshot only shows a hold going inactive, and a buyer releasing
 their seats deliberately must not feel like a loss.
+
+**Divergence from the web picker (decided 2026-09-04).**
+
+Web 0.79.0 answers an expiry with a BLOCKING interrupt card over the live map:
+a veil at 35 %, a card at 24 px padding (20 px on a narrow layout), a title at
+20 px / 18 px weight 700, and one full-width action — `Choose seats again` —
+which drops the dead selection, re-reads availability and returns the buyer to
+the venue. It closes any other card or dialog first, and a press on the veil or
+Escape does the same thing as the button rather than dismissing into the broken
+state. Catalogue entry: `components.md` › InterruptCard.
+
+Flutter deliberately does not, and keeps the non-blocking model described
+above. `SeatLayerHoldLapseNotice` (`lib/src/picker/picker_hold_lapse.dart`)
+says it on two surfaces and blocks neither: the persistent line in the cart
+sheet, where the buyer's tickets were and where they will look for them, and a
+toast for a buyer who is looking at the map instead.
+`reselectLapsedSeats()` (`lib/src/picker/seat_layer_picker_controller.dart`) is
+the `Choose seats again` analogue — it re-selects what the refresh still calls
+free and re-holds it, and reports the race honestly when it fails.
+`SeatLayerPickerOptions(announceHoldLapse: false)` hands the whole moment to a
+host that would rather own it, and `onHoldExpired` fires either way.
+
+**Why the divergence stands.** A dialog was considered and rejected. The buyer
+has usually just come back from somewhere else, and a modal is a second thing
+to dismiss before they can see whether their seats are still there — over a map
+that is still entirely usable, and a lapse that is often fully recoverable. A
+host may also be running its own recovery for this moment, which a blocking
+surface the SDK draws on top would step on.
+
+**Porting SDKs follow Flutter here, not web.** Swift, Kotlin and React Native
+build the cart-sheet line, the toast and the reselect action, and no interrupt
+card.
 
 #### 3.13.8 Need more time
 
