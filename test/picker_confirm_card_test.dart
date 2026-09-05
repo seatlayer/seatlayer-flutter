@@ -1068,15 +1068,42 @@ void main() {
       expect(placement.notch, SeatLayerConfirmCardNotch.none);
     });
 
-    test('a seat the resting card would cover makes it hug the seat', () {
+    test('a seat the resting card would cover raises it to its other home', () {
       final placement = seatLayerConfirmCardPlacement(
         seat: const Offset(155, 500),
         card: card,
         area: area,
       );
-      // 12 pt of daylight above the seat, and the card points down at it.
-      expect(placement.top, 500 - 12 - 140);
+      // Clear of the whole covered band — 12 pt above the highest seat in it,
+      // which is 600 less the 14 pt rest inset, the card, and 18 pt of
+      // clearance — and the card points down at the seat.
+      expect(placement.top, 600 - 14 - 140 - 18 - 12 - 140);
       expect(placement.notch, SeatLayerConfirmCardNotch.bottom);
+    });
+
+    test('every seat the resting card would cover gets the same card', () {
+      // The invariant: the buyer decides where the card is by tapping a seat
+      // low on the map, never by tapping a particular low seat. Cancel and
+      // Add seat are under the same pixels every time.
+      final tops = <double>{};
+      for (final fraction in <double>[.1, .3, .5, .7, .8, .85, .9, .95, 1]) {
+        final seat = Offset(155, area.height * fraction);
+        final placement = seatLayerConfirmCardPlacement(
+          seat: seat,
+          card: card,
+          area: area,
+        );
+        tops.add(placement.top);
+        // And wherever it lands, it is never on top of the seat it asks about.
+        expect(
+          seat.dy,
+          isNot(
+            inInclusiveRange(placement.top, placement.top + card.height),
+          ),
+          reason: 'the card covers the seat at dy ${seat.dy}',
+        );
+      }
+      expect(tops, hasLength(2));
     });
 
     test('a runtime that does not say rests the card at the foot of the map',
@@ -1102,14 +1129,16 @@ void main() {
       expect(placement.notch, SeatLayerConfirmCardNotch.none);
     });
 
-    test('a hugging card never slides behind the chrome below it', () {
+    test('the raised home is measured off the chrome below it too', () {
       final placement = seatLayerConfirmCardPlacement(
         seat: const Offset(155, 470),
         card: card,
         area: area,
         bottomInset: 120,
       );
-      expect(placement.top, 470 - 12 - 140);
+      // The band the card lives in ends at 480, not 600, so its raised home
+      // rises with it rather than staying where a full-height map put it.
+      expect(placement.top, 480 - 14 - 140 - 18 - 12 - 140);
       expect(placement.notch, SeatLayerConfirmCardNotch.bottom);
     });
 

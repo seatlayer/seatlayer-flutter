@@ -67,13 +67,19 @@ const double seatLayerConfirmCardClearance =
 
 /// Where a card of [card] size belongs over a [area]-sized map.
 ///
-/// Two placements, decided by one question: would the resting card cover the
-/// seat it is asking about? A card resting on the foot of the map is where the
-/// thumb already is and leaves the whole map readable, so that is the default.
-/// Only a seat low enough to end up underneath it — within
-/// [seatLayerConfirmCardClearance] of the resting card's top edge — makes the
-/// card rise and hug the seat instead, sitting
-/// [seatLayerConfirmCardSeatGap] above it and pointing down at it.
+/// **Two homes, never a slide between them.** A card resting on the foot of
+/// the map is where the thumb already is and leaves the whole map readable, so
+/// that is the default. A seat low enough to end up underneath it — within
+/// [seatLayerConfirmCardClearance] of the resting card's top edge — sends the
+/// card to its one raised home instead: [seatLayerConfirmCardSeatGap] above
+/// the *highest* seat the resting card could have covered, so the same tap
+/// anywhere in that band puts the card in the same place, and it points down
+/// at the seat.
+///
+/// The raised home is a constant of the map and the card, not of the tap. The
+/// card used to track the seat's own y, which meant its resting height varied
+/// with wherever the buyer's finger landed; a buyer who taps twice should find
+/// Cancel and Add seat under the same pixels both times.
 ///
 /// [topInset] and [bottomInset] are the bands the picker's own chrome stands
 /// on: the map the card lives over is what is left between them, so the card
@@ -94,20 +100,22 @@ SeatLayerConfirmCardPlacement seatLayerConfirmCardPlacement({
   // go inside it.
   final foot = area.height - bottomInset;
   final ceiling = topInset + headroom;
-  final resting = math.max(ceiling, foot - restInset - card.height);
-  if (seat == null || seat.dy < foot - restInset - card.height - clearance) {
+  // The first seat the resting card would be in the way of. Everything at or
+  // below it shares one answer.
+  final covered = foot - restInset - card.height - clearance;
+  if (seat == null || seat.dy < covered) {
     // Nothing to get out of the way of: rest on the bottom edge, so the map
     // above stays the buyer's and the card reads as a sheet.
     return SeatLayerConfirmCardPlacement(
-      top: resting,
+      top: math.max(ceiling, foot - restInset - card.height),
       notch: SeatLayerConfirmCardNotch.none,
     );
   }
+  // The raised home: clear of every seat in the covered band, and touching the
+  // top of it, so the pointer is as close to its seat as one fixed place can
+  // be. It does not move with the tap.
   return SeatLayerConfirmCardPlacement(
-    top: (seat.dy - gap - card.height).clamp(
-      ceiling,
-      math.max(ceiling, foot - card.height),
-    ),
+    top: math.max(ceiling, covered - gap - card.height),
     notch: SeatLayerConfirmCardNotch.bottom,
   );
 }
