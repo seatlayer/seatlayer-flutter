@@ -268,8 +268,9 @@ is the identity.
 `color.*.divider`, glyph in `color.*.mutedText`; the press target is expanded to
 `size.minimumHitTarget` centred on it. Copy `strings.close`.
 
-**Hold pill.** Drawn only while the picker owns a live hold — a hold handed to
-the host is the host's to display (`hold.owner`). A true pill (`radius.pill`), a
+**Hold pill.** Drawn for as long as a live hold exists, whoever owns it
+(owner call 2026-09-05: the clock is always in the header; a host that draws
+its own clock turns it off with the `showHoldPill` option). A true pill (`radius.pill`), a
 dot and `m:ss` in `type.pill`, tabular figures, with a `size.minimumHitTarget`
 reach. Resting look is the accent mixed lightly into the surface with accent-
 toned ink; while expiring it inverts to the full accent with `color.*.onAccent`
@@ -2085,8 +2086,9 @@ swap its title a second after opening.
 - **picker-owned** — the native chrome shows the countdown pill, may extend it,
   and releases seats when a line is removed.
 - **host-owned** — a hold handed in by the host is verified with the server and
-  always treated as host-owned. Native controls never release or mutate it, and
-  the countdown pill is not drawn: it is the host's to display.
+  always treated as host-owned. Native controls never release or mutate it —
+  no extend, no release from a cart row — but the header's countdown pill is
+  still drawn (§3.1), because the buyer's time is running whoever holds it.
 
 The hold id itself is delivered **only** at the checkout handoff
 (`checkout-handoff-v1`); ordinary snapshots never expose that booking
