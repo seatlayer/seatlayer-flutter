@@ -454,14 +454,84 @@ class _SpotlightGlass extends StatelessWidget {
       ).createShader(bounds),
       child: flat
           ? ColoredBox(color: veil)
-          : BackdropFilter(
-              filter: ImageFilter.blur(
-                sigmaX: SeatLayerSizeTokens.confirmScrimBlur,
-                sigmaY: SeatLayerSizeTokens.confirmScrimBlur,
-              ),
-              child: ColoredBox(color: veil),
+          : Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                // The mask above cannot clear a backdrop blur: the blur is
+                // applied to what is already painted behind, and a mask on
+                // the layer only shapes the veil drawn on top. So the seat
+                // the card asks about came out smeared under a clear tint.
+                // The blur is clipped around the hole instead, in rings that
+                // ramp it in — see _BlurAround — and the seat and its
+                // neighbours stay crisp, as on the web.
+                _BlurAround(at: at),
+                ColoredBox(color: veil),
+              ],
             ),
     );
     return IgnorePointer(child: glass);
   }
+}
+
+/// The backdrop blur everywhere but the spotlight, ramping in like the
+/// veil's feather.
+///
+/// The map is a platform view, and its compositor honours rectangle clips
+/// only: a path with a hole in it — even-odd, or a rectangle with a circle
+/// subtracted — blurred the whole surface, seat and all. So the blur is laid
+/// in rectangles: three nested square frames, each adding a third of the
+/// blur, from the clear radius out to the feather radius. The veil's own
+/// circular feather softens the squares' corners, and the seat and its
+/// neighbours stay crisp, as on the web.
+class _BlurAround extends StatelessWidget {
+  const _BlurAround({required this.at});
+
+  final Offset at;
+
+  static const double _clear = SeatLayerSizeTokens.confirmScrimClearRadius;
+  static const double _feather = SeatLayerSizeTokens.confirmScrimFeatherRadius;
+  static const double _blur = SeatLayerSizeTokens.confirmScrimBlur;
+  static const int _steps = 3;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          final h = constraints.maxHeight;
+          final filter = ImageFilter.blur(
+            sigmaX: _blur / _steps,
+            sigmaY: _blur / _steps,
+          );
+          Widget band(Rect rect) => Positioned.fromRect(
+                rect: rect,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: filter,
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              );
+          final bands = <Widget>[];
+          for (var i = 0; i < _steps; i += 1) {
+            final r = _clear + (_feather - _clear) * i / _steps;
+            final left = (at.dx - r).clamp(0.0, w);
+            final right = (at.dx + r).clamp(0.0, w);
+            final top = (at.dy - r).clamp(0.0, h);
+            final bottom = (at.dy + r).clamp(0.0, h);
+            if (top > 0) {
+              bands.add(band(Rect.fromLTRB(0, 0, w, top)));
+            }
+            if (bottom < h) {
+              bands.add(band(Rect.fromLTRB(0, bottom, w, h)));
+            }
+            if (left > 0) {
+              bands.add(band(Rect.fromLTRB(0, top, left, bottom)));
+            }
+            if (right < w) {
+              bands.add(band(Rect.fromLTRB(right, top, w, bottom)));
+            }
+          }
+          return Stack(children: bands);
+        },
+      );
 }
