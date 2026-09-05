@@ -1971,7 +1971,7 @@ from the wrong one.
 | --- | --- |
 | `native-chrome-contract-v1` | the runtime suppresses its own buyer chrome; native owns header, rail, dock, tray, prompts |
 | `viewport-insets-v1` | native reports the bands its chrome covers, so framing lands inside them |
-| `seat-screen-point-v1` | the seat's screen point, so the seat card can hug the seat instead of resting |
+| `seat-screen-point-v1` | the seat's screen point, so the seat card can take its raised home when the resting one would cover the seat |
 | `category-availability-v1` | live per-category free counts behind the rail's strike-through, the card's `N left` and the sold-out predicate |
 | `access-needs-v1` | the chart's own access needs, in the runtime's order, with live free counts |
 | `accessibility-focus-v1` | the filter's own camera flight, `picker.focusAccessibilityFilter`, and the accessible-section tour behind the sheet's count chip and the map's stepper |
