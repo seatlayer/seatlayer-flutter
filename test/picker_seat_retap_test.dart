@@ -61,6 +61,10 @@ Future<SeatLayerPickerController> _cartWithSeat(
   return picker;
 }
 
+/// Every command except the sheet's own viewport-inset reporting.
+Iterable<(String, Object?)> _inventoryCalls(FakePickerMap map) =>
+    map.calls.where((call) => call.$1 != 'picker.setViewportInsets');
+
 void main() {
   testWidgets('a retap raises the card asking to remove, and keeps the seat',
       (tester) async {
@@ -83,7 +87,9 @@ void main() {
     expect(picker.confirmedCartLines, hasLength(1));
     expect(picker.confirmedCartTotal, 25.0);
     // Asking is not doing: nothing has been sent to the runtime.
-    expect(map.calls, isEmpty);
+    // Inventory must be untouched. Inset reporting is not inventory: the fixed
+    // sheet tells the runtime its band on open and takes it back on close.
+    expect(_inventoryCalls(map), isEmpty);
   });
 
   testWidgets('Cancel keeps the seat and sends nothing', (tester) async {
@@ -100,7 +106,9 @@ void main() {
     expect(picker.seatAwaitingRemoval, isNull);
     expect(picker.state.selection.single.label, 'A-1');
     expect(picker.confirmedTicketCount, 1);
-    expect(map.calls, isEmpty);
+    // Inventory must be untouched. Inset reporting is not inventory: the fixed
+    // sheet tells the runtime its band on open and takes it back on close.
+    expect(_inventoryCalls(map), isEmpty);
   });
 
   testWidgets('the tap outside keeps the seat too', (tester) async {
@@ -121,7 +129,9 @@ void main() {
     expect(find.byType(SeatLayerConfirmCard), findsNothing);
     expect(picker.seatAwaitingRemoval, isNull);
     expect(picker.state.selection.single.label, 'A-1');
-    expect(map.calls, isEmpty);
+    // Inventory must be untouched. Inset reporting is not inventory: the fixed
+    // sheet tells the runtime its band on open and takes it back on close.
+    expect(_inventoryCalls(map), isEmpty);
   });
 
   testWidgets('Remove takes the seat back out, the way the cart ✕ does',
