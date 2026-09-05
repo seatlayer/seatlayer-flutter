@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.8.0
+
+Runtime pin 0.80.2. The phone picker now matches the web picker's phone
+layout item by item, and three of the differences needed the runtime to grow
+a command each; all three are gated on the runtime's `hello` command table
+and change nothing on an older runtime.
+
+- **The tapped seat is the candidate.** The seat a card is asking about is
+  painted the way the web paints it — thick double ring, halo, neighbours
+  paled — and the paint clears with the card (`picker.setSelectionFocus`).
+- **The map pans out from under the seat card.** The card is a fixed bottom
+  sheet, and the map is lifted so the seat rests at a constant fraction of
+  the band above it, at unchanged zoom, then put back when the card leaves
+  unless the buyer moved the map in between (`picker.frameSeat`). The
+  sheet's band is no longer reported as a viewport inset on a runtime that
+  can pan; an older runtime keeps the inset and its re-frame.
+- **Chrome over the map is guarded by the runtime.** On iOS 26 a tap on a
+  native control drawn over the map reached the web view as well, whatever
+  the platform-view gesture boundary decided — the zoom disc selected the
+  seat under it, Add seat raised a second card, the accessibility sheet's
+  scrim stepped the camera out. Every control on the map, the raised card
+  and any sheet or dialog over the page now report their rectangles
+  (`picker.setBlockedRegions`), the runtime swallows any touch that starts
+  inside one, and a rectangle keeps guarding for a moment after its control
+  has gone.
+- A second tap on a carted seat raises the card in its **Remove** state
+  instead of dropping the seat in silence (`seat.retap`, runtime 0.80.1+).
+- The card's answer scales down before it truncates; "Remove seat" fits on
+  a 390 pt phone.
+- Phone layout decisions carried over from the web round: no section dock,
+  no hold-extend prompt, one stepped `−` control (fit-to-screen wide only),
+  the accessibility sheet's switches apply live with no Apply button, "All
+  prices" from inside a section frames the whole venue, cart removal is
+  silent, the session-refresh and hold-lapse states each carry an action,
+  and the spotlight scrim behind the card.
+- `PickerViewportReport` is now `PickerCoalescedReport<T>`; the old name
+  remains as a typedef.
+
 ## 0.7.3
 
 The seat card's category band prints the category and the price, and nothing
