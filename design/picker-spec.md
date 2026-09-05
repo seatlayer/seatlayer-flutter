@@ -472,13 +472,15 @@ into, the next leaves it for the whole venue. Short on purpose, because a
 buyer's model of a seat map is a venue, a section in it, seats in that section —
 from the seats it is two taps home.
 
-At home the control is **dimmed, not gone**. It used to appear only once the
-buyer was deep enough to be lost, so the corner grew and shrank a button under
-their thumb. A control that stays put and plainly cannot be pressed says "you
-are already looking at everything" without moving the target. The enabled state
-is `map.canZoomOut`, which the runtime computes as *a section is framed, or
-seats are the visible layer* — deliberately broader than the LOD rung, which
-flips at a scale where a phone still shows labelled section blocks.
+At home the same disc reads **`+`** (owner call, 2026-09-05). There is
+nothing to step out of at the whole venue, and a dimmed `−` answered the wrong
+question — a buyer looking at everything wants *in*. So one slot carries two
+directions: `+` (`picker.zoomIn`) while `map.canZoomOut` is false, `−` the
+moment a section is framed or seats are the visible layer. It never moves and
+never disappears: the corner does not grow and shrink a button under the
+buyer's thumb. `map.canZoomOut` is the runtime's own answer, deliberately
+broader than the LOD rung, which flips at a scale where a phone still shows
+labelled section blocks.
 
 Back-to-overview is a different question and keeps its own condition: it renders
 only while a section is actually framed.

@@ -463,8 +463,7 @@ void main() {
           tester.getRect(find.byType(SeatLayerPickerViewModeControl));
       final access =
           tester.getRect(find.byType(SeatLayerPickerAccessibilityFilters));
-      final stepOut =
-          tester.getRect(find.byType(SeatLayerPickerZoomOutButton));
+      final stepOut = tester.getRect(find.byType(SeatLayerPickerZoomOutButton));
 
       expect(segmented.right, closeTo(screen.right - inset, .5));
       expect(segmented.top, closeTo(screen.top + inset, .5));
@@ -486,12 +485,12 @@ void main() {
       expect(find.byType(SeatLayerPickerOverviewButton), findsNothing);
     });
 
-    testWidgets('the way out of the venue stays put and dims',
+    testWidgets('the way out of the venue stays put, and reads + at home',
         (tester) async {
       // It used to appear only once the buyer was deep enough to be lost, so
-      // the corner grew and shrank a button under their thumb. A control that
-      // stays put and plainly cannot be pressed says "you are already looking
-      // at everything" without moving the target.
+      // the corner grew and shrank a button under their thumb. The slot now
+      // stays put and changes direction: at the whole venue there is nothing
+      // to step out of, and the buyer wants in.
       //
       // `canZoomOut` is the runtime's own answer to the same ladder question
       // the web picker asks: a section is framed, or seats are the visible
@@ -523,8 +522,18 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.byType(SeatLayerPickerZoomOutButton), findsOneWidget);
-      expect(tester.widget<IconButton>(stepOut).onPressed, isNull);
+      expect(find.byType(SeatLayerPickerZoomOutButton), findsNothing);
+      expect(find.byType(SeatLayerPickerZoomInButton), findsOneWidget);
+      final stepIn = find.descendant(
+        of: find.byType(SeatLayerPickerZoomInButton),
+        matching: find.byType(IconButton),
+      );
+      expect(tester.widget<IconButton>(stepIn).onPressed, isNotNull);
+      // Same corner, same size: the slot did not move under the thumb.
+      expect(
+        tester.getRect(stepIn).center,
+        tester.getRect(find.byType(SeatLayerPickerZoomInButton)).center,
+      );
     });
 
     testWidgets('the accessibility control is a 44-point target',
@@ -605,8 +614,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final screen = tester.getRect(find.byType(SeatLayerPickerMapControls));
-      final stepOut =
-          tester.getRect(find.byType(SeatLayerPickerZoomOutButton));
+      final stepOut = tester.getRect(find.byType(SeatLayerPickerZoomOutButton));
       expect(
         stepOut.bottom,
         closeTo(screen.bottom - 52 - SeatLayerSizeTokens.mapAnchorInset, .5),
@@ -749,7 +757,8 @@ void main() {
 }
 
 void _headerClockTests() {
-  testWidgets('the header keeps one clock: it stands down while the peek carries it',
+  testWidgets(
+      'the header keeps one clock: it stands down while the peek carries it',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);

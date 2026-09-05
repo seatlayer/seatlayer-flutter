@@ -166,13 +166,19 @@ class _CornerControls extends StatelessWidget {
     // stepped one. Pinch is what zooms in, so `+` is never here unless the
     // host asks.
     //
-    // DIMMED, NOT GONE. It used to appear only once the buyer was deep enough
-    // to be lost, so the corner grew and shrank a button under their thumb. A
-    // control that stays put and plainly cannot be pressed says "you are
-    // already looking at everything" without moving the target.
+    // ONE SLOT, TWO DIRECTIONS (owner call, 2026-09-05). At the whole venue
+    // there is nothing to step out of, and a `−` that plainly cannot be
+    // pressed answered the wrong question: the buyer at the overview wants
+    // IN. So the same disc reads `+` at home and `−` once a section is
+    // framed. It never moves and never disappears — the corner does not grow
+    // and shrink a button under the buyer's thumb.
+    final atHome = state.snapshot?.map.canZoomOut == false;
     final zoomColumn = <Widget>[
       if (onMap && phoneZoomPair) const SeatLayerPickerZoomInButton(),
-      if (onMap) const SeatLayerPickerZoomOutButton(),
+      if (onMap && !phoneZoomPair && atHome)
+        const SeatLayerPickerZoomInButton(),
+      if (onMap && !(atHome && !phoneZoomPair))
+        const SeatLayerPickerZoomOutButton(),
       if (onMap && chrome.zoomToFitControlFor(phone: true))
         const SeatLayerPickerZoomToFitButton(),
     ];
