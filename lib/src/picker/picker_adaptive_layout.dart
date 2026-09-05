@@ -610,12 +610,15 @@ class _SeatLayerPickerAdaptiveLayoutState
                                 key: const ValueKey<String>(
                                   'seatlayer-picker-prompt-transition',
                                 ),
-                                child: PickerPromptTransition(
-                                  scrimColor: pickerAlpha(
-                                    resolved.background,
-                                    .64,
+                                child: SeatLayerMapChromeRegion(
+                                  enabled: buyerPrompt != null,
+                                  child: PickerPromptTransition(
+                                    scrimColor: pickerAlpha(
+                                      resolved.background,
+                                      .64,
+                                    ),
+                                    child: buyerPrompt,
                                   ),
-                                  child: buyerPrompt,
                                 ),
                               ),
                             // --- toasts and buyer-facing states (P4) ---
@@ -918,38 +921,41 @@ class _SeatLayerPickerAdaptiveLayoutState
                           key: const ValueKey<String>(
                             'seatlayer-picker-prompt-transition',
                           ),
-                          child: PickerPromptTransition(
-                            readingOrder: SeatLayerPickerReadingOrder.prompt,
-                            // No wash by default: the runtime itself pales the
-                            // venue outside the focused seat's section while a
-                            // card asks, and the neighbours keep their ink and
-                            // numbers, as on the web. A host that wants a wash
-                            // over the whole map sets the slot.
-                            scrimColor: seatCard3D
-                                ? const Color(0x00000000)
-                                : resolved.styles.scrimColor ??
-                                    const Color(0x00000000),
-                            // The card is the phone's fixed sheet, and the seat
-                            // it asks about is what the glass behind it leaves
-                            // clear. In the scene the seat IS the picture, so
-                            // there is nothing to spotlight and the card simply
-                            // rests over it.
-                            seatCard: seatCardUp,
-                            anchor: seatCard3D ? null : cardSeat?.screenPoint,
-                            topInset: topBand,
-                            // With no anchor in 3D this band only sets where the
-                            // card rests, so the lift is spent here.
-                            bottomInset:
-                                bottomBand - (seatCard3D ? _cardLift3D : 0),
-                            onDismiss: seatCardUp && cardSeat != null
-                                ? () => _dismissSeatCard(
-                                      controller,
-                                      cardSeat,
-                                      removing: removing,
-                                    )
-                                : null,
-                            onSheetBand: seatCardUp ? _reportSheetBand : null,
-                            child: buyerPrompt,
+                          child: SeatLayerMapChromeRegion(
+                            enabled: buyerPrompt != null,
+                            child: PickerPromptTransition(
+                              readingOrder: SeatLayerPickerReadingOrder.prompt,
+                              // No wash by default: the runtime itself pales the
+                              // venue outside the focused seat's section while a
+                              // card asks, and the neighbours keep their ink and
+                              // numbers, as on the web. A host that wants a wash
+                              // over the whole map sets the slot.
+                              scrimColor: seatCard3D
+                                  ? const Color(0x00000000)
+                                  : resolved.styles.scrimColor ??
+                                      const Color(0x00000000),
+                              // The card is the phone's fixed sheet, and the seat
+                              // it asks about is what the glass behind it leaves
+                              // clear. In the scene the seat IS the picture, so
+                              // there is nothing to spotlight and the card simply
+                              // rests over it.
+                              seatCard: seatCardUp,
+                              anchor: seatCard3D ? null : cardSeat?.screenPoint,
+                              topInset: topBand,
+                              // With no anchor in 3D this band only sets where the
+                              // card rests, so the lift is spent here.
+                              bottomInset:
+                                  bottomBand - (seatCard3D ? _cardLift3D : 0),
+                              onDismiss: seatCardUp && cardSeat != null
+                                  ? () => _dismissSeatCard(
+                                        controller,
+                                        cardSeat,
+                                        removing: removing,
+                                      )
+                                  : null,
+                              onSheetBand: seatCardUp ? _reportSheetBand : null,
+                              child: buyerPrompt,
+                            ),
                           ),
                         ),
                       // --- toasts and buyer-facing states (P4) ---
@@ -1361,6 +1367,7 @@ class _SeatLayerPickerAdaptiveLayoutState
     // The map is not put back: the runtime either goes with this layout or
     // is re-framed by whatever mounts next.
     _seatLift.forget();
+    _regions.dispose();
     super.dispose();
   }
 

@@ -7,6 +7,8 @@
 // tells the runtime where it is — once per layout, the whole list, replaced
 // on every send — and a runtime that never advertised the command is never
 // told anything.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
@@ -145,6 +147,65 @@ void main() {
     expect(_sent(map).last, isEmpty);
   });
 
+  // The seat card's own buttons stand on the map too, and the Add button
+  // takes the card away with the very tap that has to be guarded — the late
+  // touch lands ~134 ms after the shell handled it.
+  testWidgets(
+      'a raised seat card is a region, and stays one for a moment after it leaves',
+      (tester) async {
+    final map = FakePickerMap(bundle: _bundle());
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+    await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
+    map.emit(pickerSnapshot(sections: pickerSections(), withSelection: false));
+    await pumpToRest(tester);
+    final bare = _sent(map).last;
+
+    map.emit(pickerSnapshot(revision: 2, sections: pickerSections()));
+    await pumpToRest(tester);
+    final withCard = _sent(map).last;
+    expect(withCard.length, greaterThan(bare.length));
+    final mapSize = tester.getSize(find.byType(SeatLayerPickerMap));
+    // The prompt layer fills the map: the whole band is guarded while a
+    // decision is open.
+    expect(
+      withCard
+          .any((r) => r.w >= mapSize.width - 1 && r.h >= mapSize.height - 1),
+      isTrue,
+    );
+
+    await tester.tap(find.text('Add seat'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    // Still guarded: the linger has not elapsed.
+    expect(_sent(map).last.length, withCard.length);
+
+    await tester.pump(SeatLayerBlockedRegionRegistry.defaultLinger);
+    await pumpToRest(tester);
+    expect(_sent(map).last.length, bare.length);
+  });
+
+  // The card's rectangle lingers on a timer, and a timer fires between
+  // frames. A report that only rode a post-frame callback would wait for a
+  // frame an idle app never draws, and the runtime would keep guarding a
+  // whole map whose card had long gone.
+  testWidgets('a report made outside a frame asks for one', (tester) async {
+    final sent = <List<SeatLayerBlockedRegion>>[];
+    final report = PickerBlockedRegionsReport(
+      send: (rects) async => sent.add(rects),
+      equals: seatLayerBlockedRegionsEqual,
+    );
+    await tester.pumpWidget(const SizedBox());
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    unawaited(report.report(const <SeatLayerBlockedRegion>[]));
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
+    expect(sent, hasLength(1));
+  });
+
   test('a region floors what the runtime would refuse', () {
     final r =
         SeatLayerBlockedRegion(x: 1, y: double.nan, w: -3, h: double.infinity);
@@ -169,7 +230,10 @@ void main() {
   test('the registry replaces, forgets and folds one pass into one report',
       () async {
     final reports = <List<SeatLayerBlockedRegion>>[];
-    final registry = SeatLayerBlockedRegionRegistry(report: reports.add);
+    final registry = SeatLayerBlockedRegionRegistry(
+      report: reports.add,
+      linger: Duration.zero,
+    );
     final a = Object();
     final b = Object();
     registry

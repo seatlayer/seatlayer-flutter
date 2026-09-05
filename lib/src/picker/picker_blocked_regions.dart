@@ -123,14 +123,30 @@ extension SeatLayerPickerBlockedRegions on SeatLayerPickerController {
 /// on dispose, so a control that unmounts takes its rectangle with it.
 class SeatLayerBlockedRegionRegistry {
   /// Creates a registry that hands each settled list to [report].
-  SeatLayerBlockedRegionRegistry({required this.report});
+  SeatLayerBlockedRegionRegistry({
+    required this.report,
+    this.linger = defaultLinger,
+  });
+
+  /// How long a rectangle keeps blocking after its control has gone.
+  ///
+  /// The leak this guards against is a touch delivered to the web view
+  /// ~134 ms AFTER the shell has already handled it. A control that leaves
+  /// on its own tap — the seat card's Add button, the overview disc — would
+  /// otherwise take its rectangle away before that late touch lands, and the
+  /// runtime would be told to stop guarding exactly where the finger is.
+  static const Duration defaultLinger = Duration(milliseconds: 600);
 
   /// Delivers the whole list; the caller coalesces and de-duplicates.
   final void Function(List<SeatLayerBlockedRegion> rects) report;
 
+  /// See [defaultLinger].
+  final Duration linger;
+
   final Map<Object, SeatLayerBlockedRegion> _rects =
       <Object, SeatLayerBlockedRegion>{};
   final Map<Object, VoidCallback> _measure = <Object, VoidCallback>{};
+  final Map<Object, Timer> _leaving = <Object, Timer>{};
   bool _flushScheduled = false;
   bool _remeasureScheduled = false;
 
@@ -139,16 +155,40 @@ class SeatLayerBlockedRegionRegistry {
       List<SeatLayerBlockedRegion>.unmodifiable(_rects.values);
 
   /// Record [rect] for [key], or forget [key] with null.
+  ///
+  /// Forgetting is deferred by [linger]; recording again in the meantime
+  /// simply keeps the rectangle.
   void set(Object key, SeatLayerBlockedRegion? rect) {
     final previous = _rects[key];
     if (rect == null) {
-      if (previous == null) return;
-      _rects.remove(key);
-    } else {
-      if (previous == rect) return;
-      _rects[key] = rect;
+      if (previous == null || _leaving.containsKey(key)) return;
+      if (linger == Duration.zero) {
+        _rects.remove(key);
+        _scheduleFlush();
+        return;
+      }
+      _leaving[key] = Timer(linger, () {
+        _leaving.remove(key);
+        if (_rects.remove(key) != null) _scheduleFlush();
+      });
+      return;
     }
+    _leaving.remove(key)?.cancel();
+    if (previous == rect) return;
+    _rects[key] = rect;
     _scheduleFlush();
+  }
+
+  /// Forget everything at once, with no linger — the layout itself is gone
+  /// and the runtime either goes with it or is told `[]` by whoever mounts
+  /// next.
+  void dispose() {
+    for (final timer in _leaving.values) {
+      timer.cancel();
+    }
+    _leaving.clear();
+    _measure.clear();
+    _rects.clear();
   }
 
   /// Keep [measure] for [key] so a layout pass can ask every region again.
@@ -223,10 +263,18 @@ class SeatLayerBlockedRegionScope extends InheritedWidget {
 /// guard, for the platform that lets the touch through anyway.
 class SeatLayerMapChromeRegion extends StatefulWidget {
   /// Creates a region around [child].
-  const SeatLayerMapChromeRegion({super.key, required this.child});
+  const SeatLayerMapChromeRegion({
+    super.key,
+    required this.child,
+    this.enabled = true,
+  });
 
   /// The control.
   final Widget child;
+
+  /// Whether the rectangle is reported at all. A surface that stays mounted
+  /// while empty — the prompt layer between prompts — reports nothing then.
+  final bool enabled;
 
   @override
   State<SeatLayerMapChromeRegion> createState() =>
@@ -259,7 +307,8 @@ class _SeatLayerMapChromeRegionState extends State<SeatLayerMapChromeRegion> {
     if (!mounted || scope == null) return;
     final box = context.findRenderObject();
     final map = scope.mapBox();
-    if (box is! RenderBox ||
+    if (!widget.enabled ||
+        box is! RenderBox ||
         map == null ||
         !box.attached ||
         !map.attached ||

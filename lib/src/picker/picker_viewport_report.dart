@@ -3,6 +3,7 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'picker_models.dart';
@@ -55,10 +56,16 @@ class PickerCoalescedReport<T> {
     if (_flushScheduled) return Future<void>.value();
     _flushScheduled = true;
     final completer = Completer<void>();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    final binding = WidgetsBinding.instance;
+    binding.addPostFrameCallback((_) {
       _flushScheduled = false;
       if (!completer.isCompleted) completer.complete(_flush());
     });
+    // A report made from a build rides the frame that is already being
+    // drawn. One made from a timer — a guard rectangle lingering after its
+    // control has gone — has no frame coming in an idle app, and a
+    // post-frame callback with no frame behind it is a report never sent.
+    if (binding.schedulerPhase == SchedulerPhase.idle) binding.scheduleFrame();
     return completer.future;
   }
 
