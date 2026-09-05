@@ -174,16 +174,18 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
     );
   }
 
-  /// Remove immediately, and offer the way back.
+  /// Remove immediately.
   ///
   /// A confirmation dialog for one ticket costs every buyer a tap to protect
-  /// against a mistake that is one tap to undo.
+  /// against a mistake that is one tap to reverse: re-picking the seat is the
+  /// same gesture that chose it.
   ///
   /// "Immediately" is the row, not the server. `picker.removeCartLine` re-holds
   /// the rest of the cart before it answers — close to two seconds on a real
   /// event — so the row is marked, faded and made inert in the same frame as
-  /// the press, against a decision that has already been taken. The mark is dropped by the snapshot that no longer carries the
-  /// line, or restored here if the mutation fails.
+  /// the press, against a decision that has already been taken. The mark is
+  /// dropped by the snapshot that no longer carries the line, or restored here
+  /// if the mutation fails.
   Future<void> _remove(
     SeatLayerPickerController controller,
     SeatLayerTicketLine line,
