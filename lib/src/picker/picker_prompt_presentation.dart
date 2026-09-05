@@ -7,7 +7,6 @@
 /// *which* surface is up, and this file decides how one arrives and leaves.
 library;
 
-import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -15,10 +14,8 @@ import 'package:flutter/services.dart';
 
 import 'picker_a11y.dart';
 import 'picker_confirm_card.dart';
-import 'picker_layout.dart';
 import 'picker_motion.dart';
 import 'picker_tokens.g.dart';
-import 'seat_layer_picker_theme.dart';
 
 /// The loading/failure overlay, fading out rather than popping.
 ///
@@ -57,6 +54,7 @@ class PickerPromptTransition extends StatelessWidget {
     this.topInset = 0,
     this.bottomInset = 0,
     this.onDismiss,
+    this.onSheetBand,
     this.readingOrder,
   });
 
@@ -66,11 +64,16 @@ class PickerPromptTransition extends StatelessWidget {
   /// Whether the prompt is the phone's seat card.
   ///
   /// The card is the only prompt that behaves like a native moment rather than
-  /// a dialog: it springs from the seat's direction, points back at it, and
-  /// the map behind it is still the way out. Dialogs are centred instead.
+  /// a dialog: it rises from the foot of the map as a sheet, spotlights the
+  /// seat it is asking about, and the map behind it is still the way out.
+  /// Dialogs are centred instead.
   final bool seatCard;
 
   /// Where on the map the seat was drawn, if the runtime said.
+  ///
+  /// The card no longer moves to it — it is a fixed sheet. The anchor is what
+  /// the glass behind the card cuts its hole around, so the seat under
+  /// discussion stays visible while the map around it recedes.
   final Offset? anchor;
 
   /// The band of map the picker's own chrome is standing on, at the top.
@@ -87,16 +90,19 @@ class PickerPromptTransition extends StatelessWidget {
   /// this seat.
   final VoidCallback? onDismiss;
 
+  /// What the raised seat card covers, as a bottom viewport inset, once it
+  /// has been measured.
+  ///
+  /// The card is a fixed sheet and the MAP is what moves out from under it,
+  /// which the runtime only does for chrome it has been told about.
+  final ValueChanged<double>? onSheetBand;
+
   /// Where the prompt sits in the picker's one reading order, if the host
   /// composition has one.
   final double? readingOrder;
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) => _build(context, constraints.biggest),
-      );
-
-  Widget _build(BuildContext context, Size area) {
+  Widget build(BuildContext context) {
     final reducedMotion = MediaQuery.disableAnimationsOf(context);
     final prompt = child;
     final springy = seatCard && !reducedMotion;
@@ -133,12 +139,12 @@ class PickerPromptTransition extends StatelessWidget {
                   reverseCurve: SeatLayerPickerMotion.easeExit,
                 );
                 if (springy) {
-                  // The card comes from where the seat is: up from under the seat
-                  // when the seat is high on the map, down onto it when it is low.
-                  // Points, not a fraction of the card's own height — the distance
-                  // is a property of the gesture, not of how tall the card is.
-                  final dy =
-                      _arrivesFromBelow(area) ? _cardTravel : -_cardTravel;
+                  // The sheet always rises: it has one home, at the foot of
+                  // the map, and arriving from under the screen's edge is the
+                  // entrance a phone buyer already knows. Points, not a
+                  // fraction of the card's own height — the distance is a
+                  // property of the gesture, not of how tall the card is.
+                  const dy = _cardTravel;
                   return FadeTransition(
                     opacity: eased,
                     child: AnimatedBuilder(
@@ -191,9 +197,9 @@ class PickerPromptTransition extends StatelessWidget {
                       // outer padding would quietly narrow it.
                       child: seatCard
                           ? _SeatCardFrame(
-                              anchor: anchor,
                               topInset: topInset,
                               bottomInset: bottomInset,
+                              onSheetBand: onSheetBand,
                               child: prompt,
                             )
                           : Center(child: prompt),
@@ -221,18 +227,6 @@ class PickerPromptTransition extends StatelessWidget {
       },
       child: child,
     );
-  }
-
-  /// Whether the card rises into place rather than settling down onto it.
-  ///
-  /// Measured against the card's resting middle — halfway down whatever the
-  /// chrome has left of the map — rather than against where this card ends
-  /// up, which is not known until it has been laid out. Without an anchor it
-  /// rises: arriving from the foot of a phone is the entrance buyers know.
-  bool _arrivesFromBelow(Size area) {
-    final seat = anchor;
-    if (seat == null) return true;
-    return seat.dy <= (topInset + (area.height - bottomInset)) / 2;
   }
 }
 
@@ -329,146 +323,53 @@ class PickerPausedWhileConfirming extends StatelessWidget {
       );
 }
 
-/// Puts the seat card where the seat is, and points it back at the seat.
+/// Holds the seat card at its one home: the fixed sheet at the foot of the
+/// map the picker's own chrome has left.
 ///
-/// The pointer is drawn here rather than inside the card because which edge
-/// carries it is a fact about the placement, not about the card. Both edges
-/// are reserved whatever happens, so the card's own box never changes size
-/// when the pointer moves from one edge to the other.
-class _SeatCardFrame extends StatefulWidget {
+/// It also measures the card, because the height of a sheet built from a
+/// seat's own facts — photo strip or rail, tiers, notices — is not known
+/// until it has been laid out, and the band the sheet covers is what the
+/// runtime has to be told to frame the map above.
+class _SeatCardFrame extends StatelessWidget {
   const _SeatCardFrame({
-    required this.anchor,
     required this.topInset,
     required this.bottomInset,
+    required this.onSheetBand,
     required this.child,
   });
 
-  final Offset? anchor;
   final double topInset;
   final double bottomInset;
+
+  /// The band this sheet covers, as a bottom viewport inset, once the card
+  /// has a height. Reported after the frame that measured it.
+  final ValueChanged<double>? onSheetBand;
+
   final Widget child;
 
   @override
-  State<_SeatCardFrame> createState() => _SeatCardFrameState();
-}
-
-class _SeatCardFrameState extends State<_SeatCardFrame> {
-  /// Which edge points at the seat, once the card's height is known.
-  ///
-  /// Null until the first layout has measured the card. The position itself is
-  /// right from the first frame — the layout delegate knows the card's size
-  /// when it places it — so all this lags by one frame is which 8 pt strip the
-  /// pointer is painted in, inside a 320 ms arrival.
-  SeatLayerConfirmCardNotch? _notch;
-
-  void _report(SeatLayerConfirmCardNotch notch) {
-    if (_notch == notch) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _notch != notch) setState(() => _notch = notch);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final notch = widget.anchor == null
-        ? SeatLayerConfirmCardNotch.none
-        : _notch ?? SeatLayerConfirmCardNotch.none;
-    final theme = seatLayerPickerThemeOf(context);
-    final layout = theme.layout;
-    const radius = SeatLayerRadiusTokens.confirmCard;
-    return LayoutBuilder(
-      builder: (context, constraints) => CustomSingleChildLayout(
+  Widget build(BuildContext context) => CustomSingleChildLayout(
         delegate: _SeatCardLayout(
-          anchor: widget.anchor,
-          topInset: widget.topInset,
-          bottomInset: widget.bottomInset,
-          onPlacement: _report,
+          topInset: topInset,
+          bottomInset: bottomInset,
+          onSheetBand: onSheetBand,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _pointer(
-              constraints.maxWidth,
-              layout,
-              radius,
-              up: true,
-              drawn: notch == SeatLayerConfirmCardNotch.top,
-            ),
-            widget.child,
-            _pointer(
-              constraints.maxWidth,
-              layout,
-              radius,
-              up: false,
-              drawn: notch == SeatLayerConfirmCardNotch.bottom,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// One reserved pointer strip, drawn only on the edge facing the seat.
-  ///
-  /// Held inside the card's own rounded corners: a pointer growing out of a
-  /// corner reads as a torn edge rather than as an arrow, and it would be
-  /// pointing at a seat the card's radius has already moved away from.
-  Widget _pointer(
-    double width,
-    SeatLayerPickerLayout layout,
-    double radius, {
-    required bool up,
-    required bool drawn,
-  }) {
-    const height = _pointerHeight;
-    if (!drawn || !width.isFinite) {
-      return const SizedBox(height: height);
-    }
-    final cardWidth = math.min(
-      layout.confirmCardMaxWidth,
-      width - (layout.confirmCardGutter * 2),
-    );
-    final left = (width - cardWidth) / 2;
-    final x = widget.anchor!.dx.clamp(
-      left + radius + _pointerWidth,
-      left + cardWidth - radius - _pointerWidth,
-    );
-    return SizedBox(
-      height: height,
-      child: Stack(
-        children: [
-          Positioned(
-            left: x - (_pointerWidth / 2),
-            top: 0,
-            child: SeatLayerConfirmCardPointer(
-              up: up,
-              height: height,
-              width: _pointerWidth,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+        child: child,
+      );
 }
 
-/// How far the pointer reaches out of the card, and how wide its base is.
-const double _pointerHeight = 8;
-const double _pointerWidth = 18;
-
-/// Places the card+pointer box from [seatLayerConfirmCardPlacement].
+/// Places the sheet from [seatLayerConfirmCardTop], and reports what it
+/// covers from [seatLayerConfirmSheetBand].
 class _SeatCardLayout extends SingleChildLayoutDelegate {
   const _SeatCardLayout({
-    required this.anchor,
     required this.topInset,
     required this.bottomInset,
-    required this.onPlacement,
+    required this.onSheetBand,
   });
 
-  final Offset? anchor;
   final double topInset;
   final double bottomInset;
-  final void Function(SeatLayerConfirmCardNotch notch) onPlacement;
+  final ValueChanged<double>? onSheetBand;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
@@ -476,23 +377,29 @@ class _SeatCardLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    // The child is the card with one reserved pointer strip above and below,
-    // so the card itself is that much shorter than the box being placed.
-    final card = Size(childSize.width, childSize.height - (_pointerHeight * 2));
-    final placement = seatLayerConfirmCardPlacement(
-      seat: anchor,
-      card: card,
+    final top = seatLayerConfirmCardTop(
+      card: childSize,
       area: size,
       topInset: topInset,
       bottomInset: bottomInset,
     );
-    onPlacement(placement.notch);
-    return Offset(0, placement.top - _pointerHeight);
+    final report = onSheetBand;
+    if (report != null) {
+      // Layout is not a place to call setState from, and the caller's answer
+      // is a viewport report that only has to be right by the next frame —
+      // the card is still arriving for another 320 ms.
+      final band = seatLayerConfirmSheetBand(
+        cardTop: top,
+        area: size,
+        topInset: topInset,
+      );
+      WidgetsBinding.instance.addPostFrameCallback((_) => report(band));
+    }
+    return Offset(0, top);
   }
 
   @override
   bool shouldRelayout(_SeatCardLayout oldDelegate) =>
-      oldDelegate.anchor != anchor ||
       oldDelegate.topInset != topInset ||
       oldDelegate.bottomInset != bottomInset;
 }

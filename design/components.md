@@ -236,7 +236,7 @@ override** `style:`
 - **States** with a photo (loading, arrived, never arrived), without one (no
   strip at all, and the 3D square in the decision row), 3D-only, with a sight
   line, with tiers, with notices; the confidence teaser or its passport chip
-  inside 3D; at its resting home or its raised one; committing; **removing** —
+  inside 3D; committing; **removing** —
   the same card over a seat already in the cart, raised by a second tap on it
   (bridge event `seat.retap`, payload `{ seat }`, the seat still selected). The
   primary reads `strings.removeSeat` in `color.*.error` with a cross rather
@@ -289,13 +289,14 @@ override** `style:`
      `size.confirm3dSquareFontSize` opens the row, then `Cancel` at 34 % of the
      whole row and `✓ Add seat` at the rest, each in its own box at
      `radius.button` inside the card's gutter.
-- **Placement** two fixed homes, never a slide between them: resting
-  `size.confirmCardRestInset` above the map's foot, or raised
-  `size.confirmCardSeatGap` clear of the whole band the resting card would have
-  covered. The tap chooses a home, never a height. Full rule and constants:
-  `picker-spec.md` §3.8.2.
+- **Placement** one home, and the map moves instead: a fixed bottom sheet
+  `size.confirmCardRestInset` above the map's foot, for every seat. Nothing
+  about the tap is read. While it is up, the picker reports the sheet's band
+  (`size.confirmCardSeatGap` above the card's top edge) as the bottom viewport
+  inset, so the runtime frames the venue into what is left clear above it. Full
+  rule and constants: `picker-spec.md` §3.8.2.
 - **Motion** the map dims to ink behind it (`SeatLayerPickerStyles.scrimColor`);
-  the card springs in from the seat's side with `motion.curve.spring` over
+  the card springs up from the foot of the map with `motion.curve.spring` over
   `motion.duration.cardEnter`. `Add seat` invites once, breathes until touched,
   and on the press sweeps, ticks and says `Added`. The seat counts on the press;
   only the card's departure waits.

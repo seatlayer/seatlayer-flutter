@@ -157,20 +157,23 @@ class SeatLayerPickerLayout {
   /// Ceiling for the confirm card's width.
   final double confirmCardMaxWidth;
 
-  /// Where the confirm card rests when it is not hugging a seat: the gap
-  /// between its bottom edge and the foot of the map.
+  /// Where the confirm card rests: the gap between its bottom edge and the
+  /// foot of the map. The phone card has no other home.
   final double confirmCardRestInset;
 
-  /// The daylight the card leaves above the seat it is hugging.
+  /// The daylight between the card's top edge and the band the map is framed
+  /// into above it, so a seat is never pressed against the card asking about
+  /// it.
   final double confirmCardSeatGap;
 
   /// The closest the card may come to the top of the map.
   final double confirmCardTopInset;
 
-  /// Extra room below the resting card before the seat counts as covered.
+  /// Retained for source compatibility; nothing reads it.
   ///
-  /// A seat this close to the foot of the map would sit under the resting
-  /// card, so the card hugs the seat instead of resting.
+  /// It measured the band of low seats that sent the card to a raised home.
+  /// The card no longer moves to the seat — it is a fixed sheet, and the map
+  /// is framed above it instead — so there is no covered band to size.
   final double confirmCardClearance;
 
   /// Smallest height of the confirm card's identity grid; it grows with a

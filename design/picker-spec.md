@@ -803,58 +803,72 @@ The **bottom-centre** region is the exception — it comes forward at full opaci
 above the card, because it carries the toast that is the *reply* to the tap, and
 it stays press-through so it can never steal Cancel or Add seat.
 
-#### 3.8.2 Placement — two homes
+#### 3.8.2 Placement — a fixed sheet, and the map moves
 
-Four constants, all tokens:
+Three constants, all tokens:
 
 | Token | Meaning |
 | --- | --- |
-| `size.confirmCardRestInset` | daylight between the resting card and the map's foot |
-| `size.confirmCardSeatGap` | daylight between the raised card and the seat band below it |
+| `size.confirmCardRestInset` | daylight between the card and the map's foot |
+| `size.confirmCardSeatGap` | daylight between the card's top edge and the band the map is framed into |
 | `size.confirmCardTopInset` | the closest the card may come to the map's top |
-| `size.confirmCardClearance` | extra room below the resting card before the seat counts as covered |
 
-The card has **exactly two homes**, and a tap picks one of them. It never
-slides between them.
+The card has **one home**. It is the bottom sheet the buyer already expects,
+`restInset` above the foot of whatever the picker's own chrome has left of the
+map, on every tap, for every seat — nothing about the tapped seat is read when
+it is placed. `topInset` and `bottomInset` are the bands that chrome stands on,
+so the sheet never slides under the dock or behind the floor rail; a card
+taller than the band it lives in keeps its top edge rather than climbing past
+`topInset`.
+
+Keeping the seat and its card together is then the **map's** job:
 
 ```
-covered = seatY >= mapHeight - restInset - cardHeight - clearance
-if not covered  ->  rest:   the card sits restInset above the map's foot,
-                            notch none, and points at nothing
-else            ->  raised: the card's bottom edge sits seatGap above the
-                            HIGHEST seat that `covered` can be true of —
-                            not above the tapped seat — clamped so its top
-                            never rises above topInset, notch on the bottom
-                            edge pointing down at the seat
+band  = mapHeight - cardTop + seatGap        // measured from the map's foot
+report viewport insets { top: chromeTop, bottom: max(chromeBottom, band) }
 ```
 
-Both homes are functions of the map and the card only. Every seat in the
-covered band therefore gets the *same* card in the *same* place, and Cancel and
-`Add seat` land under the same pixels on every tap.
+The runtime frames every fit and every focus glide *inside* the insets the host
+reports, so telling it what the sheet covers is what moves the venue out from
+under the card. The band is reported the frame after the card is measured — its
+height depends on the seat's own facts, a photo strip or the rail that stands
+in for it, tiers, notices — and taken back off the moment the question is
+answered. It is withheld in the immersive scene, which frames itself.
 
-**Why, and why it is not the web's answer.** The card used to track the tapped
-seat's own y, so its height on screen was decided by wherever the finger
-happened to land — the buyer's second tap moved the buttons out from under the
-thumb that had just used them. Web 0.80.0 fixes the same complaint from the
-other end: it pins the card as a fixed bottom sheet and moves the **camera** so
-the seat lands at a constant fraction of the band left clear. Flutter keeps the
-opposite model on purpose — the card moves, the map never does, because a
-native picker that yanks the map under a buyer's fingers loses the pinch and
-pan they were in the middle of. Same invariant, opposite mechanism: one of the
-two must be constant, and here it is the card.
+**Why, and what was tried.** The card used to move to the seat: first tracking
+the tapped seat's own y, then choosing between a resting and a raised home. On
+a 440×956 phone that read badly in both forms. The seat is a small ring inside
+a small hole in the glass, the card is at the foot of a tall map, and the two
+halves of one question could be some 600 pt apart — the buyer had to hunt for
+the seat they had just tapped, and with the sliding form the buttons moved out
+from under the thumb that had just used them. Web 0.80.0 answers the same
+complaint from the other end, and this is now the same answer: pin the card and
+move the map.
 
-A card that would sit *below* the seat was never in the seat's way, so it rests
-instead. `topInset` and `bottomInset` passed to the rule are the bands the
-picker's own chrome stands on, so the card never slides under the dock or behind
-the floor rail.
+**What is honestly different from the web, and why.** The web widget owns its
+own camera, so it *pans* — x untouched, zoom untouched, the seat landing at a
+constant fraction of the clear band, and it declines to move at all for a buyer
+who has panned or pinched since the card came up. Over the bridge there is no
+pan-by-screen-delta and no frame-this-seat command; `picker.setBuyerView`'s
+`flyToSeatId` enters the 3D venue and flies the *scene* camera, which is a
+different surface, not a 2D pan. So the lever here is the viewport inset, and
+what the runtime does with it is `refitCurrentView` — it re-frames the focused
+section into the band left clear. The seat therefore lands *inside* the clear
+band rather than at a constant fraction of it, and a pinch the buyer had made
+inside the section is refit away with it. That is the closest honest behaviour
+the bridge allows today. A pan-only primitive on the bridge would let this
+match the web exactly, and is the one thing to ask the runtime for.
 
-The card's **growth origin** is always the tapped seat, whichever home was
-chosen — that, the pointer, and the spotlight hole in the glass are what tie a
-card at a fixed home back to the seat it is asking about.
+The sheet rises from the foot of the map, always — one home, one entrance. The
+**spotlight hole** in the glass is what ties it back to the seat it is asking
+about; the hole is cut in map coordinates from `selection[].screenPoint`, so it
+follows the seat when the re-frame moves it.
 
 **Capability.** The seat's screen point requires `seat-screen-point-v1`
-(`selection[].screenPoint`). Until a runtime reports it the card rests, and that
-is a correct state, not a degraded one.
+(`selection[].screenPoint`). It no longer decides where the card goes — the
+sheet has one home either way — but it is what cuts the spotlight hole around
+the seat and what shows that the re-frame landed. A runtime without it gets the
+same card over flat glass, which is a correct state, not a degraded one.
 
 #### 3.8.3 Anatomy, 2D
 
@@ -2126,7 +2140,7 @@ from the wrong one.
 | --- | --- |
 | `native-chrome-contract-v1` | the runtime suppresses its own buyer chrome; native owns header, rail, dock, tray, prompts |
 | `viewport-insets-v1` | native reports the bands its chrome covers, so framing lands inside them |
-| `seat-screen-point-v1` | the seat's screen point, so the seat card can take its raised home when the resting one would cover the seat |
+| `seat-screen-point-v1` | the seat's screen point, so the glass behind the fixed seat card leaves that seat clear and follows it when reporting the sheet's band re-frames the map |
 | `category-availability-v1` | live per-category free counts behind the rail's strike-through, the card's `N left` and the sold-out predicate |
 | `access-needs-v1` | the chart's own access needs, in the runtime's order, with live free counts |
 | `accessibility-focus-v1` | the filter's own camera flight, `picker.focusAccessibilityFilter`, and the accessible-section tour behind the sheet's count chip and the map's stepper |

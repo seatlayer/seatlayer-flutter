@@ -61,7 +61,15 @@ void main() {
     await tester.pumpWidget(
       pickerHarness(map, _layout(), controller: controller),
     );
-    map.emit(pickerSnapshot(sections: pickerSections(), rung: 'overview'));
+    map.emit(
+      pickerSnapshot(
+        sections: pickerSections(),
+        rung: 'overview',
+        // No seat under a card: this is about the chrome the picker itself
+        // draws, and a raised seat card is a band of its own (§3.8.2).
+        withSelection: false,
+      ),
+    );
     await pumpToRest(tester);
 
     final atOverview = _insetPayloads(map).last! as Map<String, Object?>;
@@ -78,6 +86,7 @@ void main() {
         revision: controller.state.revision + 1,
         sections: pickerSections(),
         rung: 'seats',
+        withSelection: false,
       ),
     );
     await pumpToRest(tester);
@@ -112,7 +121,15 @@ void main() {
         ),
       ),
     );
-    map.emit(pickerSnapshot(sections: pickerSections(), rung: 'overview'));
+    map.emit(
+      pickerSnapshot(
+        sections: pickerSections(),
+        rung: 'overview',
+        // No seat under a card: this is about the chrome the picker itself
+        // draws, and a raised seat card is a band of its own (§3.8.2).
+        withSelection: false,
+      ),
+    );
     await pumpToRest(tester);
     expect((_insetPayloads(map).last! as Map<String, Object?>)['bottom'], 0.0);
 
@@ -121,6 +138,7 @@ void main() {
         revision: controller.state.revision + 1,
         sections: pickerSections(),
         rung: 'seats',
+        withSelection: false,
       ),
     );
     await pumpToRest(tester);
@@ -207,7 +225,13 @@ void main() {
     );
     // A live event, so nothing at all is drawn over the map: the test badge
     // is not one of the chrome switches and would still stand on it.
-    map.emit(pickerSnapshot(sections: pickerSections(), testEvent: false));
+    map.emit(
+      pickerSnapshot(
+        sections: pickerSections(),
+        testEvent: false,
+        withSelection: false,
+      ),
+    );
     await pumpToRest(tester);
 
     expect(
@@ -280,7 +304,9 @@ void main() {
     usePhoneSurface(tester);
 
     await tester.pumpWidget(pickerHarness(map, _layout()));
-    map.emit(pickerSnapshot(sections: pickerSections()));
+    map.emit(
+      pickerSnapshot(sections: pickerSections(), withSelection: false),
+    );
     await pumpToRest(tester);
     final onMap = _insetPayloads(map).last! as Map<String, Object?>;
 

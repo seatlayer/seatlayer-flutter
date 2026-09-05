@@ -1057,115 +1057,51 @@ void main() {
     const area = Size(390, 600);
     const card = Size(310, 140);
 
-    test('a seat the resting card would not cover leaves it resting', () {
-      final placement = seatLayerConfirmCardPlacement(
-        seat: const Offset(155, 400),
-        card: card,
-        area: area,
-      );
-      // 600 less the 14 pt rest inset less the card.
-      expect(placement.top, 446);
-      expect(placement.notch, SeatLayerConfirmCardNotch.none);
+    test('the card rests at the foot of the map, whatever was tapped', () {
+      // 600 less the 14 pt rest inset less the card, and nothing about the
+      // seat is read: the sheet has one home and the map is framed above it.
+      expect(seatLayerConfirmCardTop(card: card, area: area), 446);
     });
 
-    test('a seat the resting card would cover raises it to its other home', () {
-      final placement = seatLayerConfirmCardPlacement(
-        seat: const Offset(155, 500),
-        card: card,
-        area: area,
+    test('the chrome under the card is not somewhere it may rest', () {
+      expect(
+        seatLayerConfirmCardTop(card: card, area: area, bottomInset: 52),
+        600 - 52 - 14 - 140,
       );
-      // Clear of the whole covered band — 12 pt above the highest seat in it,
-      // which is 600 less the 14 pt rest inset, the card, and 18 pt of
-      // clearance — and the card points down at the seat.
-      expect(placement.top, 600 - 14 - 140 - 18 - 12 - 140);
-      expect(placement.notch, SeatLayerConfirmCardNotch.bottom);
-    });
-
-    test('every seat the resting card would cover gets the same card', () {
-      // The invariant: the buyer decides where the card is by tapping a seat
-      // low on the map, never by tapping a particular low seat. Cancel and
-      // Add seat are under the same pixels every time.
-      final tops = <double>{};
-      for (final fraction in <double>[.1, .3, .5, .7, .8, .85, .9, .95, 1]) {
-        final seat = Offset(155, area.height * fraction);
-        final placement = seatLayerConfirmCardPlacement(
-          seat: seat,
-          card: card,
-          area: area,
-        );
-        tops.add(placement.top);
-        // And wherever it lands, it is never on top of the seat it asks about.
-        expect(
-          seat.dy,
-          isNot(
-            inInclusiveRange(placement.top, placement.top + card.height),
-          ),
-          reason: 'the card covers the seat at dy ${seat.dy}',
-        );
-      }
-      expect(tops, hasLength(2));
-    });
-
-    test('a runtime that does not say rests the card at the foot of the map',
-        () {
-      final placement = seatLayerConfirmCardPlacement(
-        seat: null,
-        card: card,
-        area: area,
-        bottomInset: 52,
-      );
-      expect(placement.top, 600 - 52 - 14 - 140);
-      expect(placement.notch, SeatLayerConfirmCardNotch.none);
-    });
-
-    test('a resting card is still kept off the chrome under it', () {
-      final placement = seatLayerConfirmCardPlacement(
-        seat: null,
-        card: const Size(310, 400),
-        area: area,
-        bottomInset: 140,
-      );
-      expect(placement.top, 600 - 140 - 14 - 400);
-      expect(placement.notch, SeatLayerConfirmCardNotch.none);
-    });
-
-    test('the raised home is measured off the chrome below it too', () {
-      final placement = seatLayerConfirmCardPlacement(
-        seat: const Offset(155, 470),
-        card: card,
-        area: area,
-        bottomInset: 120,
-      );
-      // The band the card lives in ends at 480, not 600, so its raised home
-      // rises with it rather than staying where a full-height map put it.
-      expect(placement.top, 480 - 14 - 140 - 18 - 12 - 140);
-      expect(placement.notch, SeatLayerConfirmCardNotch.bottom);
-    });
-
-    test('a seat high on the map never pushes the card up to it', () {
-      final placement = seatLayerConfirmCardPlacement(
-        seat: const Offset(155, 20),
-        card: card,
-        area: area,
-        topInset: 60,
-      );
-      // Nothing to get out of the way of, so the card stays where the thumb
-      // is rather than chasing a seat it was never going to cover.
-      expect(placement.top, 446);
-      expect(placement.notch, SeatLayerConfirmCardNotch.none);
     });
 
     test('a card taller than the band it lives in keeps its top edge', () {
-      final placement = seatLayerConfirmCardPlacement(
-        seat: const Offset(155, 300),
-        card: const Size(310, 700),
-        area: area,
-        topInset: 40,
-        bottomInset: 80,
+      expect(
+        seatLayerConfirmCardTop(
+          card: const Size(310, 700),
+          area: area,
+          topInset: 40,
+          bottomInset: 80,
+        ),
+        // 40 of chrome plus the 12 pt the card keeps clear of the map's top.
+        52,
       );
-      // 40 of chrome plus the 12 pt the card keeps clear of the map's top.
-      expect(placement.top, 52);
-      expect(placement.notch, SeatLayerConfirmCardNotch.bottom);
+    });
+
+    test('the band reported to the runtime clears the card and its daylight',
+        () {
+      // The runtime frames inside the insets the host reports, so the sheet
+      // has to be one of them: from the foot of the map to 12 pt above the
+      // card's top edge.
+      expect(
+        seatLayerConfirmSheetBand(cardTop: 446, area: area),
+        600 - 446 + 12,
+      );
+    });
+
+    test('a host with no band left to frame into is left alone', () {
+      // A compact embed whose card fills it has nowhere to put the seat, and
+      // an inset taller than the viewport would ask the runtime to frame into
+      // nothing. Same guard the web widget keeps on the same number.
+      expect(
+        seatLayerConfirmSheetBand(cardTop: 52, area: area, topInset: 560),
+        0,
+      );
     });
   });
 

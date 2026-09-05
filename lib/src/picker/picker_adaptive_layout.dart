@@ -117,6 +117,15 @@ class _SeatLayerPickerAdaptiveLayoutState
   Timer? _mapUnlockTimer;
   String? _previousRung;
   SeatLayerViewportInsets? _reportedInsets;
+
+  /// What the raised seat card covers, as a bottom viewport inset.
+  ///
+  /// Zero until a card has been laid out and measured. The card is built from
+  /// the seat's own facts — a photo strip or the rail that stands in for it,
+  /// tiers, notices — so its height is not a constant this layout can know in
+  /// advance, and the runtime cannot frame the map above a sheet whose size
+  /// nobody has reported. See [_reportSheetBand].
+  double _sheetBand = 0;
   SeatLayerPickerController? _picker;
   Timer? _framingGraceTimer;
   bool _framingGraceLapsed = false;
@@ -703,8 +712,22 @@ class _SeatLayerPickerAdaptiveLayoutState
           dockLift: dockLift,
           venue3D: venue3DUp,
         );
+        // The seat card is a fixed sheet, and the MAP is what moves out from
+        // under it. The runtime frames every fit and every focus glide inside
+        // the insets the host reports, so the sheet's own band is reported
+        // along with the rest of the chrome for exactly as long as it is up:
+        // a sheet the runtime has not been told about is a sheet the venue
+        // goes on being framed underneath, which is how a tapped seat came to
+        // sit hundreds of points above the card asking about it. The band is
+        // measured from the foot of the map surface and already contains
+        // [bottomBand], so the larger of the two is the whole story. In 3D the
+        // scene frames itself and the card rests over the picture.
+        final sheetBand = seatCardUp && !seatCard3D ? _sheetBand : 0.0;
         _reportViewportInsets(
-          SeatLayerViewportInsets(top: topBand, bottom: bottomBand),
+          SeatLayerViewportInsets(
+            top: topBand,
+            bottom: sheetBand > bottomBand ? sheetBand : bottomBand,
+          ),
         );
         // One reading order for the whole phone picker. The Column already
         // reads top to bottom, but the Stack in the middle does not: its paint
@@ -834,9 +857,11 @@ class _SeatLayerPickerAdaptiveLayoutState
                               ? const Color(0x00000000)
                               : resolved.styles.scrimColor ??
                                   const Color(0x00000000),
-                          // The card arrives from the seat's direction and points
-                          // back at it. In the scene the seat IS the picture, so
-                          // nothing points at it and the card rests over it.
+                          // The card is the phone's fixed sheet, and the seat
+                          // it asks about is what the glass behind it leaves
+                          // clear. In the scene the seat IS the picture, so
+                          // there is nothing to spotlight and the card simply
+                          // rests over it.
                           seatCard: seatCardUp,
                           anchor: seatCard3D ? null : cardSeat?.screenPoint,
                           topInset: topBand,
@@ -851,6 +876,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                                     removing: removing,
                                   )
                               : null,
+                          onSheetBand: seatCardUp ? _reportSheetBand : null,
                           child: buyerPrompt,
                         ),
                       ),
@@ -1211,6 +1237,17 @@ class _SeatLayerPickerAdaptiveLayoutState
       if (!mounted) return;
       setState(() => _framingGraceLapsed = true);
     });
+  }
+
+  /// The measured band of a raised seat card, from the card's own layout.
+  ///
+  /// One frame behind the card's arrival on purpose: the height is a fact
+  /// about a laid-out card, and the card is still animating in for another
+  /// 320 ms. Dropping repeats here keeps a card whose size never changes from
+  /// rebuilding the whole picker on every frame of its entrance.
+  void _reportSheetBand(double band) {
+    if (!mounted || _sheetBand == band) return;
+    setState(() => _sheetBand = band);
   }
 
   /// Hand the runtime the current chrome bands.
