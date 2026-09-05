@@ -117,20 +117,17 @@ double seatLayerSheetLiftFraction({
   return (target / band).clamp(0.0, 1.0);
 }
 
-/// The fraction that puts a seat lifted by [dy] (the sum of every pan since
-/// the card came up, at [fraction] of a [band] this long) back where it was.
+/// Where the seat rests once its card has gone: the middle of the band the
+/// chrome leaves clear.
 ///
-/// Clamped to the band: a seat that had been standing under the chrome comes
-/// back to the band's edge rather than under it, which is as far as the
-/// runtime will pan.
-double seatLayerSheetRestoreFraction({
-  required double fraction,
-  required double dy,
-  required double band,
-}) {
-  if (!(band > 0)) return fraction;
-  return (fraction - dy / band).clamp(0.0, 1.0);
-}
+/// The web sheet undoes its own pans exactly. Over the bridge that sum is not
+/// trustworthy: the map is a platform view that re-fits itself when it
+/// changes size under a collapsing sheet, so a lift can be undone by a refit
+/// this side never sees and asked for again — and undoing both then throws
+/// the section off the screen (seen on device). A fixed resting place is
+/// honest and predictable; the gesture guard still leaves a buyer who moved
+/// the map where they put it.
+const double seatLayerSheetRestoreFraction = 0.5;
 
 /// The lift the layout makes for a seat card, and its undoing.
 ///
@@ -171,7 +168,6 @@ class PickerSeatLift {
 
   String? _seatId;
   double _fraction = 0;
-  double _band = 0;
   double _dy = 0;
   int? _gestures;
   int _revision = -1;
@@ -234,7 +230,6 @@ class PickerSeatLift {
     }
     _seatId = seatId;
     _fraction = fraction;
-    _band = band;
     _revision = revision;
     _cancelSettle();
     final generation = ++_generation;
@@ -280,20 +275,16 @@ class PickerSeatLift {
     _settleTimers.clear();
   }
 
-  /// Put the map back, unless the buyer has moved it, and forget the lift.
+  /// Put the seat at its resting place, unless the buyer has moved the map,
+  /// and forget the lift.
   void release() {
     final seatId = _seatId;
     final gestures = _gestures;
     final dy = _dy;
-    final restore = seatLayerSheetRestoreFraction(
-      fraction: _fraction,
-      dy: dy,
-      band: _band,
-    );
     forget();
     if (seatId == null || gestures == null || dy == 0) return;
     unawaited(
-      frame(seatId, fraction: restore, gestures: gestures)
+      frame(seatId, fraction: seatLayerSheetRestoreFraction, gestures: gestures)
           .catchError((Object _) => null),
     );
   }
@@ -306,7 +297,6 @@ class PickerSeatLift {
     _pending = false;
     _seatId = null;
     _fraction = 0;
-    _band = 0;
     _dy = 0;
     _gestures = null;
     _revision = -1;

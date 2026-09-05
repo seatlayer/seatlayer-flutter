@@ -97,18 +97,6 @@ void main() {
         0,
       );
     });
-
-    test('the restore fraction undoes the lift, within the band', () {
-      expect(
-        seatLayerSheetRestoreFraction(fraction: 0.3, dy: -100, band: 500),
-        closeTo(0.5, 1e-9),
-      );
-      expect(
-        seatLayerSheetRestoreFraction(fraction: 0.3, dy: -400, band: 500),
-        1,
-      );
-      expect(seatLayerSheetRestoreFraction(fraction: 0.3, dy: 5, band: 0), 0.3);
-    });
   });
 
   group('PickerSeatLift', () {
@@ -151,17 +139,7 @@ void main() {
       await Future<void>.delayed(Duration.zero);
       expect(calls, hasLength(3));
       expect(calls.last.$3, gestures);
-      expect(
-        calls.last.$2,
-        closeTo(
-          seatLayerSheetRestoreFraction(
-            fraction: calls.first.$2,
-            dy: -200,
-            band: 784,
-          ),
-          1e-9,
-        ),
-      );
+      expect(calls.last.$2, seatLayerSheetRestoreFraction);
       expect(lift.seatId, isNull);
       expect(lift.dy, 0);
     });
@@ -321,8 +299,9 @@ void main() {
     final restore = frames.last;
     expect(restore['seatId'], _seatId);
     expect(restore['gestures'], 2);
-    // Every lift was −120 px, so the restore aims that far back down the band.
-    expect(restore['fraction']! as double, greaterThan(liftFraction));
+    // The resting place is the middle of the clear band, never a sum of pans.
+    expect(restore['fraction'], seatLayerSheetRestoreFraction);
+    expect(liftFraction, lessThan(seatLayerSheetRestoreFraction));
   });
 
   testWidgets('a runtime without the pan keeps the sheet as an inset',
