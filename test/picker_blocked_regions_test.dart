@@ -188,6 +188,59 @@ void main() {
     expect(_sent(map).last.length, bare.length);
   });
 
+  // The corner column rides up as the sheet expands, without rebuilding the
+  // region inside it. Seen on device: the guard stayed where the disc had
+  // been, and a tap on the disc at its new place reached the map.
+  testWidgets('a region follows a control that moves without rebuilding',
+      (tester) async {
+    final reports = <List<SeatLayerBlockedRegion>>[];
+    final registry = SeatLayerBlockedRegionRegistry(
+      report: reports.add,
+      linger: Duration.zero,
+    );
+    final top = ValueNotifier<double>(0);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Stack(
+            children: [
+              Positioned.fill(
+                child: SeatLayerBlockedRegionScope(
+                  registry: registry,
+                  mapBox: () => context.findRenderObject() as RenderBox?,
+                  child: ValueListenableBuilder<double>(
+                    valueListenable: top,
+                    // The region's child is a const: only the AnimatedPositioned
+                    // around it rebuilds, exactly like the corner column.
+                    builder: (context, value, child) => Stack(
+                      children: [
+                        AnimatedPositioned(
+                          duration: const Duration(milliseconds: 300),
+                          top: value,
+                          left: 0,
+                          child: child!,
+                        ),
+                      ],
+                    ),
+                    child: const SeatLayerMapChromeRegion(
+                      child: SizedBox(width: 40, height: 40),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(reports.last.single.y, 0);
+
+    top.value = 200;
+    await tester.pumpAndSettle();
+    expect(reports.last.single.y, 200);
+  });
+
   testWidgets('a modal over the page guards the whole map while it is up',
       (tester) async {
     final map = FakePickerMap(bundle: _bundle());

@@ -310,6 +310,11 @@ class SeatLayerMapChromeRegion extends StatefulWidget {
 
 class _SeatLayerMapChromeRegionState extends State<SeatLayerMapChromeRegion> {
   SeatLayerBlockedRegionScope? _scope;
+  SeatLayerBlockedRegion? _last;
+  bool _following = false;
+
+  /// The rectangle last reported, for tests.
+  SeatLayerBlockedRegion? get lastRect => _last;
 
   @override
   void didChangeDependencies() {
@@ -342,6 +347,8 @@ class _SeatLayerMapChromeRegionState extends State<SeatLayerMapChromeRegion> {
         !box.hasSize ||
         !map.hasSize) {
       scope.registry.set(this, null);
+      _last = null;
+      _arm();
       return;
     }
     // In the map's own coordinates: the map is the web view, and the web
@@ -349,10 +356,26 @@ class _SeatLayerMapChromeRegionState extends State<SeatLayerMapChromeRegion> {
     // so the difference of their global origins is the offset between them.
     final origin =
         box.localToGlobal(Offset.zero) - map.localToGlobal(Offset.zero);
-    scope.registry.set(
-      this,
-      SeatLayerBlockedRegion.fromRect(origin & box.size),
-    );
+    final rect = SeatLayerBlockedRegion.fromRect(origin & box.size);
+    scope.registry.set(this, rect);
+    _last = rect;
+    // A control that is MOVING — the corner column riding up as the sheet
+    // expands — moves without rebuilding this widget, and a rectangle
+    // measured at the start of the slide guards where the disc used to be.
+    // Seen on device: a tap on the disc at its new place reached the map and
+    // flew the camera to the section behind it. So measure again after every
+    // frame the app draws — an animation draws them, an idle app draws none,
+    // and no frame is asked for here, so this costs nothing at rest.
+    _arm();
+  }
+
+  void _arm() {
+    if (_following) return;
+    _following = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _following = false;
+      if (mounted) _measure();
+    });
   }
 
   @override
