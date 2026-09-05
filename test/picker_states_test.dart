@@ -13,6 +13,7 @@ import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_states.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
+import 'package:seatlayer/src/picker/picker_toast.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 
 import 'picker_test_fixture.dart';
@@ -306,6 +307,128 @@ void main() {
 
       expect(find.text('+5 min'), findsNothing);
       expect(map.callsTo('picker.extendHold'), isEmpty);
+    });
+
+    testWidgets('spends the tap on itself, not on the map behind it',
+        (tester) async {
+      // The prompt stands in the map's bottom-centre band, over a surface that
+      // picks a seat wherever it is touched, and it leaves the tree mid-press:
+      // `+5 min` retires the card, and the toast that answers it takes the
+      // same band. Nothing in that sequence may let one press become both an
+      // extension and a seat.
+      final map = FakePickerMap(
+        handler: (command, payload) async {
+          if (command == 'picker.extendHold') {
+            return <String, Object?>{'extended': true};
+          }
+          return <String, Object?>{'revision': 1, 'snapshot': null};
+        },
+      );
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      var pressesOnTheMap = 0;
+      var tapsOnTheMap = 0;
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          Stack(
+            children: <Widget>[
+              // The stand-in for the WebView: a surface that answers a raw
+              // pointer as well as a recognised tap, because the leak being
+              // ruled out is a pointer that never reaches an arena.
+              Positioned.fill(
+                child: Listener(
+                  onPointerDown: (_) => pressesOnTheMap += 1,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => tapsOnTheMap += 1,
+                  ),
+                ),
+              ),
+              const Positioned.fill(child: SeatLayerPickerStateLayer()),
+              const Positioned.fill(child: SeatLayerPickerToastLayer()),
+            ],
+          ),
+        ),
+      );
+      map.emit(_expiringSnapshot(43));
+      await tester.pumpAndSettle();
+      expect(find.text('+5 min'), findsOneWidget);
+
+      final button = tester.getCenter(find.text('+5 min'));
+      await tester.tap(find.text('+5 min'));
+      await tester.pumpAndSettle();
+
+      // The step was taken, and the card is gone with the toast in its place.
+      expect(map.callsTo('picker.extendHold'), hasLength(1));
+      expect(find.text('+5 min'), findsNothing);
+      expect(find.text('More time added — your seats are still held.'),
+          findsOneWidget);
+
+      // And the map behind heard nothing at all.
+      expect(pressesOnTheMap, 0);
+      expect(tapsOnTheMap, 0);
+      expect(map.callsTo('picker.selectObjects'), isEmpty);
+
+      // The counters are not silent because the probe is unreachable: the very
+      // point the button stood on picks a seat once the card is not there.
+      await tester.tapAt(button);
+      await tester.pumpAndSettle();
+      expect(pressesOnTheMap, 1);
+      expect(tapsOnTheMap, 1);
+    });
+
+    testWidgets('takes the map nothing when it retires under a live finger',
+        (tester) async {
+      // The countdown can run out between the press and the release, which
+      // takes the card away with a pointer still down on it. The release then
+      // has nowhere native to land — and must not fall through to the map.
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      var pressesOnTheMap = 0;
+      var tapsOnTheMap = 0;
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          Stack(
+            children: <Widget>[
+              Positioned.fill(
+                child: Listener(
+                  onPointerDown: (_) => pressesOnTheMap += 1,
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => tapsOnTheMap += 1,
+                  ),
+                ),
+              ),
+              const Positioned.fill(child: SeatLayerPickerStateLayer()),
+              const Positioned.fill(child: SeatLayerPickerToastLayer()),
+            ],
+          ),
+        ),
+      );
+      map.emit(_expiringSnapshot(43));
+      await tester.pumpAndSettle();
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('+5 min')),
+      );
+      await tester.pump();
+      // The hold ends while the finger is still down.
+      map.emit(pickerSnapshot(revision: 4, holdOwner: 'none'));
+      await tester.pumpAndSettle();
+      expect(find.text('+5 min'), findsNothing);
+
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(pressesOnTheMap, 0);
+      expect(tapsOnTheMap, 0);
+      expect(map.callsTo('picker.extendHold'), isEmpty);
+      expect(map.callsTo('picker.selectObjects'), isEmpty);
     });
   });
 
