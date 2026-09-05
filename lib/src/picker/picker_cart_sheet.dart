@@ -941,72 +941,7 @@ class _ContinuePill extends StatelessWidget {
               ),
             ),
           ],
-          // The clock is the quietest thing on the pill: the buyer is being
-          // reminded that the seats are theirs for now, not being hurried.
-          if (!statesReason && line.showClock) ...[
-            const SizedBox(width: 6),
-            const _PeekClock(),
-          ],
         ],
-      ),
-    );
-  }
-}
-
-/// The remaining hold time, counted down in place on the pill.
-class _PeekClock extends StatefulWidget {
-  const _PeekClock();
-
-  @override
-  State<_PeekClock> createState() => _PeekClockState();
-}
-
-class _PeekClockState extends State<_PeekClock> {
-  Timer? _timer;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final state = SeatLayerPickerScope.stateOf(context);
-    if (state.hold == null) return const SizedBox.shrink();
-    final strings = SeatLayerPickerScope.stringsOf(context);
-    // The picker keeps one clock, on the header's countdown: two clocks
-    // would disagree with each other mid-second, and the goldens would never
-    // settle on a picture.
-    // ignore: invalid_use_of_visible_for_testing_member
-    final now = SeatLayerPickerHoldCountdown.debugClock();
-    final remaining = state.holdRemaining(now);
-    final minutes = remaining.inMinutes.remainder(60).toString();
-    final seconds =
-        remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return Opacity(
-      opacity: .72,
-      child: Text(
-        strings.heldFor('$minutes:$seconds'),
-        maxLines: 1,
-        softWrap: false,
-        // The same throttle the header pill uses: `m:ss` is not a sentence,
-        // and a clock read once a second is a clock nobody can listen past.
-        semanticsLabel: remaining <= SeatLayerPickerHoldCountdown.expiring
-            ? strings.holdSecondsLeft(remaining.inSeconds)
-            : strings.holdMinutesLeft((remaining.inSeconds + 59) ~/ 60),
-        style: TextStyle(
-          fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
-          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
-        ),
       ),
     );
   }

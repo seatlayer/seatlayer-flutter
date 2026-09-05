@@ -797,7 +797,7 @@ void main() {
     );
   });
 
-  testWidgets('a running hold counts down on the pill, and only when shut', (
+  testWidgets('the pill never carries the clock: the header does', (
     tester,
   ) async {
     final map = FakePickerMap();
@@ -812,13 +812,13 @@ void main() {
     map.emit(pickerSnapshot(holdOwner: 'picker'));
     await tester.pump();
 
-    expect(find.textContaining(':'), findsOneWidget);
-
-    // Open, the clock goes: the header carries it, and the sheet below
-    // carries the money. Saying it three times is three chances to disagree.
+    // Shut or open, no `m:ss` on the bar (owner call, 2026-09-05): the
+    // header's hold pill is the picker's one clock, and the Continue pill
+    // stays a button.
+    expect(find.textContaining(RegExp(r'\d:\d\d')), findsNothing);
     await tester.pumpWidget(pickerHarness(map, subject(true)));
     await tester.pump();
-    expect(find.textContaining(':'), findsNothing);
+    expect(find.textContaining(RegExp(r'\d:\d\d')), findsNothing);
   });
 
   group('goldens', () {
@@ -1048,8 +1048,7 @@ void _clockTests() {
               alignment: Alignment.bottomCenter,
               child: SeatLayerCartSheet(
                 expanded: expanded,
-                onExpandedChanged: (value) =>
-                    setState(() => expanded = value),
+                onExpandedChanged: (value) => setState(() => expanded = value),
                 onCheckout: _noopCheckout,
               ),
             );
@@ -1064,7 +1063,8 @@ void _clockTests() {
     expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsNothing);
     // The head still answers, and a screen reader still finds it: hiding the
     // chevron would otherwise have taken the cart's only named toggle with it.
-    expect(find.bySemanticsLabel(SeatLayerStringTokens.expandCart), findsOneWidget);
+    expect(find.bySemanticsLabel(SeatLayerStringTokens.expandCart),
+        findsOneWidget);
     // Through the semantics ACTION, not a pixel: the head's own centre is
     // over the Continue button, and a rotor activates the node it just read.
     tester.semantics.performAction(
@@ -1076,7 +1076,8 @@ void _clockTests() {
 
     // Open, the chevron is back and it is the one that carries the name.
     expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsOneWidget);
-    expect(find.bySemanticsLabel(SeatLayerStringTokens.collapseCart), findsOneWidget);
+    expect(find.bySemanticsLabel(SeatLayerStringTokens.collapseCart),
+        findsOneWidget);
     expect(
       find.bySemanticsLabel(SeatLayerStringTokens.expandCart),
       findsNothing,

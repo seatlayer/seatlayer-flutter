@@ -29,6 +29,8 @@ and change nothing on an older runtime.
   instead of dropping the seat in silence (`seat.retap`, runtime 0.80.1+) —
   including a seat already under a hold, which used to be released without a
   question (runtime 0.80.3+).
+- The hold countdown lives in the header pill for as long as the hold does;
+  the collapsed cart's Continue pill no longer carries a clock.
 - The phone's corner zoom disc reads `+` at the whole venue and `−` once a
   section is framed, in the same slot; the dimmed `−` at home is gone.
 - The card's answer scales down before it truncates; "Remove seat" fits on

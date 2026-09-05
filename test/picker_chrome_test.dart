@@ -758,7 +758,7 @@ void main() {
 
 void _headerClockTests() {
   testWidgets(
-      'the header keeps one clock: it stands down while the peek carries it',
+      'the header keeps the one clock, shut or open (owner call, 2026-09-05)',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -769,7 +769,8 @@ void _headerClockTests() {
     );
     map.emit(pickerSnapshot(holdOwner: 'picker'));
     await pumpToRest(tester);
-    expect(find.byType(SeatLayerPickerHoldCountdown), findsNothing);
+    // At peek too: the Continue pill below stays a button.
+    expect(find.byType(SeatLayerPickerHoldCountdown), findsOneWidget);
 
     final controller = SeatLayerPickerScope.controllerOf(
       tester.element(find.byType(SeatLayerPickerHeader)),

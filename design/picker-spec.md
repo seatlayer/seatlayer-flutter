@@ -235,9 +235,12 @@ gate them, and the reference file.
 
 ### 3.1 Header
 
-While the collapsed cart's pill carries the hold clock, the header's hold pill
-is not drawn (the web's `data-peek-clock` rule); it returns for the last
-minute, when the countdown is the point. The collapsed head always grows by
+The header's hold pill is drawn for as long as a hold is live (owner call,
+2026-09-05): it is the picker's one clock, and the collapsed cart's Continue
+pill stays a button. This deliberately departs from the web's
+`data-peek-clock` rule, under which the pill stepped aside while the peek bar
+carried the clock — a clock inside the button read as clutter on the phone.
+The collapsed head always grows by
 `size.peekClockLift` (8) so its row sits below the grabber: the bar's buttons
 are 44 pt in a 50 pt head and the grabber is painted in the head's top 4 pt,
 so without the lift the button covers the grabber (the web's narrow head,
@@ -267,8 +270,8 @@ the host is the host's to display (`hold.owner`). A true pill (`radius.pill`), a
 dot and `m:ss` in `type.pill`, tabular figures, with a `size.minimumHitTarget`
 reach. Resting look is the accent mixed lightly into the surface with accent-
 toned ink; while expiring it inverts to the full accent with `color.*.onAccent`
-and its dot pulses. Copy `strings.heldFor`. It is **hidden at peek while the
-Continue pill is carrying the clock** — the countdown is said once.
+and its dot pulses. Copy `strings.heldFor`. It is never hidden while the hold
+lives — the countdown is said once, here (owner call, 2026-09-05).
 
 **Sales-closed pill.** Same pill geometry, deliberately neutral — the text
 colour on a lightly text-tinted surface, never the accent. Copy

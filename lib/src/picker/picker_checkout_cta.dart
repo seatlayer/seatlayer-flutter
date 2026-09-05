@@ -69,6 +69,8 @@ class SeatLayerPeekLine {
   final String? total;
 
   /// Whether the live `m:ss` of a running hold follows the total.
+  /// Kept for hosts that set it; the pill no longer draws a clock (owner
+  /// call, 2026-09-05) — the header's hold pill is the picker's one clock.
   final bool showClock;
 
   /// Whether the empty bar offers its way into the best-seats form.
