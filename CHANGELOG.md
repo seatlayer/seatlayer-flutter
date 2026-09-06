@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **A sold-out accessibility filter can still be turned off.** A provision
+  whose count reached zero went dark even while its switch was on, which
+  trapped the buyer holding the last space on a filtered map.
 - **Tapping a cart card no longer closes the sheet.** The map still goes to
   the seat, in the room the open sheet leaves it, so a buyer can check one
   seat after another without reopening the cart each time.
