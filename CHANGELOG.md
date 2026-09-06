@@ -1,5 +1,40 @@
 # Changelog
 
+## Unreleased
+
+The phone picker follows the web picker's latest phone layout item by item.
+
+- **The bottom sheet is one surface with a footer block.** A pill handle
+  straddles its top edge; the cart shows one card per ticket on every width,
+  capped at three cards and a sliver of the fourth before it scrolls; the
+  total line reads "No seats selected" or "N tickets · total"; an empty cart
+  offers a full-width "Find best seats". The "From €X" line is gone.
+- **Three map controls on the phone.** "+", "−" and "Show whole venue" are
+  always drawn and dim only at their limit: "+" at maximum zoom, the other
+  two at the exact whole-venue pose, read from the runtime's `atVenueFit`
+  and `canZoomIn` snapshot fields (older runtimes fall back to
+  `canZoomOut`). The disabled look is real: a dimmed disc with no shadow.
+- **Seat notes on every popup.** The seat card lists every attribute the
+  seat carries as full-width bands under the category band, in a fixed
+  order: accommodation types, the wheelchair provision, restricted view,
+  obstructed view, premium seat, then the organizer's note. Twelve shared
+  accommodation glyphs replace platform icons; amber and gold tones come
+  from the theme (`warnText`, `premiumText`) and meet 4.5:1 in both
+  themes. The cart card says the same notes once, in words.
+- **Accessibility menu** rows carry the same glyphs, and a provision the
+  venue has sold out of says "Not available". The legend closes with one
+  grey "Not available" key.
+- **No card over an unavailable seat.** A sold seat, one not for sale, or
+  one another buyer holds never raises the seat card.
+- New strings — `fitWholeVenue`, `notAvailable`, `organizerNote`,
+  `emptyWheelchairSpace`, `accessiblePhysicalSeat`, `noSeatsSelected`,
+  `findBestSeatsCta` — carry the runtime's translation in all 37 locales.
+
+Breaking: `SeatLayerPickerStrings.accessNoneLeft` is removed (use
+`notAvailable`); `SeatLayerPeekLine`, `peekLine`, `fromPriceText`,
+`totalText` and `showPrices` are removed from the checkout call to action;
+the dense phone ticket list and its layout tokens are removed.
+
 ## 0.8.0
 
 Runtime pin 0.80.3. The phone picker now matches the web picker's phone
