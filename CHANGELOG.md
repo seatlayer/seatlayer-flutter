@@ -25,8 +25,10 @@ round.
   still running, a newly added seat joins the cart at once — the runtime's
   snapshot used to list only the held seats — and "Continue" replaces the hold
   with every seat instead of refusing with "Your seats are already in
-  checkout". Works on runtime 0.84.0; the runtime carries the same fix from
-  0.84.1.
+  checkout". Works on runtime 0.84.0 through the picker's own cart; the
+  runtime-side change that lists those seats in its own snapshot is on the
+  runtime's main branch and is not yet in a published runtime (0.84.1 does
+  not carry it).
 
 ## 0.9.0
 
