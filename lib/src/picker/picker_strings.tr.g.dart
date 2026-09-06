@@ -65,6 +65,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Erişilebilir fiziksel koltuk',
   emptyWheelchairSpace: 'Boş tekerlekli sandalye yeri',
   findSeatsTogether: 'Yan yana koltuk bul',
+  aboutBestSeats: 'Yan yana koltuk bulma hakkında',
+  closestGroupChosenInstantly: 'En yakın müsait grup, anında seçildi.',
   hideLimitedView: 'Kısıtlı manzaralı koltukları gizle',
   colorblindSafe: 'Renk körlüğüne uygun renkler',
   notAvailable: 'Müsait değil',

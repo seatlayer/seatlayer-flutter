@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'picker_internal.dart';
 import 'picker_tokens.g.dart';
 import 'picker_models.dart';
+import 'picker_motion.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -36,6 +37,7 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
   int? _quantity;
   String? _zoneId;
   String? _categoryKey;
+  bool _aboutOpen = false;
   bool _submitting = false;
   String? _sessionId;
 
@@ -106,7 +108,7 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
                 ),
               ),
               const SizedBox(width: 6),
-              Expanded(
+              Flexible(
                 child: Text(
                   strings.findSeatsTogether,
                   maxLines: 1,
@@ -120,7 +122,52 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
                   ),
                 ),
               ),
+              // The one-line explanation rides behind a ⓘ right after the
+              // title (web 0.84.1), not under it as a paragraph.
+              Semantics(
+                button: true,
+                expanded: _aboutOpen,
+                label: strings.aboutBestSeats,
+                child: ExcludeSemantics(
+                  child: InkWell(
+                    onTap: () => setState(() => _aboutOpen = !_aboutOpen),
+                    borderRadius:
+                        BorderRadius.circular(SeatLayerRadiusTokens.pill),
+                    child: Padding(
+                      padding: const EdgeInsets.all(6),
+                      child: Icon(
+                        _aboutOpen
+                            ? Icons.info_rounded
+                            : Icons.info_outline_rounded,
+                        size: 15,
+                        color: _aboutOpen ? theme.accent : theme.mutedText,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
+          ),
+          AnimatedSize(
+            duration: SeatLayerPickerMotion.of(
+              context,
+              SeatLayerPickerMotion.crossfade,
+            ),
+            alignment: Alignment.topCenter,
+            child: _aboutOpen
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      strings.closestGroupChosenInstantly,
+                      style: TextStyle(
+                        color: theme.mutedText,
+                        fontSize: 12,
+                        height: 1.3,
+                        fontFamily: theme.fontFamily,
+                      ),
+                    ),
+                  )
+                : const SizedBox(width: double.infinity),
           ),
           const SizedBox(height: 6),
           _CompactSelect(

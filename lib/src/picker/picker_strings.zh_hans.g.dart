@@ -63,6 +63,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       accessiblePhysicalSeat: '无障碍实体座位',
       emptyWheelchairSpace: '空闲的轮椅位',
       findSeatsTogether: '查找连坐座位',
+      aboutBestSeats: '关于查找相邻座位',
+      closestGroupChosenInstantly: '已即时选出最近的可售连坐座位。',
       hideLimitedView: '隐藏视野受限的座位',
       colorblindSafe: '色盲友好配色',
       notAvailable: '不可用',

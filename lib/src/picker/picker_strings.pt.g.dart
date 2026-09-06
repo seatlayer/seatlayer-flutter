@@ -66,6 +66,9 @@ const SeatLayerPickerStrings seatLayerPickerStringsPt = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Lugar físico acessível',
   emptyWheelchairSpace: 'Espaço para cadeira de rodas vazio',
   findSeatsTogether: 'Procurar lugares juntos',
+  aboutBestSeats: 'Sobre encontrar lugares juntos',
+  closestGroupChosenInstantly:
+      'O grupo disponível mais próximo, escolhido num instante.',
   hideLimitedView: 'Ocultar lugares com vista limitada',
   colorblindSafe: 'Cores adaptadas a daltonismo',
   notAvailable: 'Indisponível',

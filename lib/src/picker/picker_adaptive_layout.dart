@@ -788,7 +788,11 @@ class _SeatLayerPickerAdaptiveLayoutState
                 !liftsSeat && sheetBand > bottomBand ? sheetBand : bottomBand,
           ),
         );
-        if (liftsSeat) {
+        // The pull-back after an add waits for the chip to land (web 0.84.1):
+        // the map moving under a chip still in flight read as two motions
+        // fighting. The controller rebuilds this layout when the landing ends.
+        final landing = sheetBand == 0 && controller.cartLanding;
+        if (liftsSeat && !landing) {
           final mapHeight = _mapBox()?.size.height ?? 0;
           _seatLift.sync(
             seatId: sheetBand > 0 ? cardSeat?.id : null,

@@ -65,6 +65,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Bezbariérové fyzické místo',
   emptyWheelchairSpace: 'Volné místo pro vozík',
   findSeatsTogether: 'Najít místa vedle sebe',
+  aboutBestSeats: 'O hledání míst vedle sebe',
+  closestGroupChosenInstantly: 'Nejbližší dostupná skupina, vybraná okamžitě.',
   hideLimitedView: 'Skrýt místa s omezeným výhledem',
   colorblindSafe: 'Barvy vhodné pro barvoslepé',
   notAvailable: 'Není k dispozici',

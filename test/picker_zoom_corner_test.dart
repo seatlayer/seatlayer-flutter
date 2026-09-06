@@ -89,6 +89,17 @@ Future<FakePickerMap> _corner(
   return map;
 }
 
+/// Whether the `+` disc is drawn: it keeps its SLOT when retired, so the
+/// widget is still in the tree and only its visibility says.
+bool _zoomInShown(WidgetTester tester) => tester
+    .widget<Visibility>(
+      find.ancestor(
+        of: find.byType(SeatLayerPickerZoomInButton),
+        matching: find.byType(Visibility),
+      ),
+    )
+    .visible;
+
 void main() {
   testWidgets('the phone corner carries + and the whole venue', (tester) async {
     await _corner(
@@ -189,7 +200,7 @@ void main() {
       ),
     );
 
-    expect(find.byType(SeatLayerPickerZoomInButton), findsNothing);
+    expect(_zoomInShown(tester), isFalse);
     // The other two are a different question and are unaffected by it.
     expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsOneWidget);
   });
@@ -201,8 +212,29 @@ void main() {
       snapshot: pickerSnapshot(withSelection: false, rung: 'seats'),
     );
 
-    expect(find.byType(SeatLayerPickerZoomInButton), findsNothing);
+    expect(_zoomInShown(tester), isFalse);
     expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsOneWidget);
+  });
+
+  testWidgets('a retired + keeps its slot, so ♿ never moves', (tester) async {
+    // The column is anchored at its foot: a disc that left the tree moved the
+    // ♿ disc under the thumb reaching for it (web 0.84.1).
+    await _corner(
+      tester,
+      snapshot: pickerSnapshot(withSelection: false, rung: 'sections'),
+    );
+    final shown = tester.getTopLeft(
+      find.byType(SeatLayerPickerAccessibilityFilters),
+    );
+    await _corner(
+      tester,
+      snapshot: pickerSnapshot(withSelection: false, rung: 'seats'),
+    );
+    expect(_zoomInShown(tester), isFalse);
+    expect(
+      tester.getTopLeft(find.byType(SeatLayerPickerAccessibilityFilters)),
+      shown,
+    );
   });
 
   testWidgets('the whole-venue disc leaves the section as it fits',

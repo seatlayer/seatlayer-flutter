@@ -65,6 +65,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'صندلی فیزیکی مناسب کم‌توانان',
   emptyWheelchairSpace: 'جایگاه خالی ویلچر',
   findSeatsTogether: 'صندلی‌های کنار هم را پیدا کن',
+  aboutBestSeats: 'درباره یافتن صندلی‌های کنار هم',
+  closestGroupChosenInstantly: 'نزدیک‌ترین گروه موجود، بی‌درنگ انتخاب شد.',
   hideLimitedView: 'پنهان کردن صندلی‌های با دید محدود',
   colorblindSafe: 'رنگ‌های مناسب کوررنگی',
   notAvailable: 'در دسترس نیست',

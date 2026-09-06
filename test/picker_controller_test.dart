@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/bridge/bridge_protocol.dart';
 import 'package:seatlayer/src/bridge/bridge_client.dart';
 import 'package:seatlayer/src/open_enums.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
@@ -468,6 +469,50 @@ void main() {
     expect(results.first.holdId, 'hold-1');
     expect(picker.state.checkoutHandoff?.holdId, 'hold-1');
     expect(picker.state.holdOwner, SeatLayerHoldOwner.host);
+  });
+
+  test('a hold that no longer covers the selection is replaced on continue',
+      () async {
+    // Back from checkout the buyer added a seat. A runtime up to 0.84.0
+    // refuses `picker.continue` with `hold_selection_mismatch`; the controller
+    // replaces the hold through the chart's own `hold` — which carries every
+    // held seat along with the new ones — and asks for the handoff again.
+    var continues = 0;
+    final map = _FakeMapController((command, _) async {
+      if (command == 'picker.continue' && continues++ == 0) {
+        throw const SeatLayerError.bridge(
+          BridgeErrorPayload(
+            code: 'hold_selection_mismatch',
+            message: 'the active hold does not cover the selection',
+          ),
+        );
+      }
+      if (command == 'hold') {
+        return <String, Object?>{
+          'hold': <String, Object?>{'holdId': 'hold-2'}
+        };
+      }
+      return <String, Object?>{
+        'revision': 2,
+        'snapshot': pickerSnapshot(revision: 2, holdOwner: 'host'),
+        'handoff': checkoutHandoff(),
+      };
+    });
+    final picker = _picker(map);
+    addTearDown(() {
+      picker.dispose();
+      map.dispose();
+    });
+    await _deliver(map, pickerSnapshot(holdOwner: 'host'));
+
+    final handoff = await picker.checkout();
+    expect(handoff.holdId, 'hold-1');
+    expect(
+      map.calls.map((call) => call.name).toList(),
+      containsAllInOrder(
+          <String>['picker.continue', 'hold', 'picker.continue']),
+    );
+    expect(picker.state.error, isNull);
   });
 
   test('closing releases a picker-owned hold exactly once', () async {

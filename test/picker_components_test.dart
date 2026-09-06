@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/bridge/bridge_client.dart';
 import 'package:seatlayer/src/bridge/bridge_protocol.dart';
 import 'package:seatlayer/src/payloads.dart';
@@ -101,6 +102,29 @@ Widget _app(
 }
 
 void main() {
+  test('a seat selected after the hold joins the cart from the selection', () {
+    // A runtime with a live hold (≤ 0.84.0) reports the hold's lines as the
+    // cart and drops a seat selected since; the parser completes the cart from
+    // the selection and recounts.
+    final snapshot = pickerSnapshot(holdOwner: 'host');
+    final selection = snapshot['selection']! as Map<String, Object?>;
+    final seats = selection['seats']! as List<Object?>;
+    final held = seats.single! as Map<String, Object?>;
+    seats.add(<String, Object?>{
+      ...held,
+      'id': 'seat-a-2',
+      'label': 'A-2',
+      'seatNumber': '2',
+      'price': 30.0,
+      'currency': 'EUR',
+    });
+    final parsed = SeatLayerPickerSnapshot.fromJson(snapshot)!;
+    expect(parsed.cartLines.map((line) => line.label), <String>['A-1', 'A-2']);
+    expect(parsed.ticketCount, 2);
+    expect(parsed.cartTotal, 55.0);
+    expect(parsed.cartLines.last.seatId, 'seat-a-2');
+  });
+
   test('light theme serializes the complete renderer map palette', () {
     expect(
       const SeatLayerMapThemeData.light().toBridgeConfig(),

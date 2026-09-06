@@ -294,6 +294,10 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
     final bottomInset =
         widget.reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0;
     final hasTickets = controller.confirmedCartLines.isNotEmpty;
+    // The handle leaves while a confirm card is up (web 0.84.1): the disc was
+    // sitting half under the card's scrim, and the card is the only question
+    // on the screen until it is answered.
+    final confirming = controller.seatAwaitingConfirmation != null;
     final salesClosed = controller.state.event?.salesClosed == true;
     // The handle is a control, not type: it stays the size a thumb needs
     // whatever the platform's text setting is, and the head is exactly the
@@ -441,16 +445,17 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
                   ),
                 ),
               ),
-              PositionedDirectional(
-                top: -overhang,
-                start: 0,
-                end: 0,
-                child: _SheetHandle(
-                  expanded: open,
-                  height: overhang + headHeight,
-                  onPressed: () => _ask(!open),
+              if (!confirming)
+                PositionedDirectional(
+                  top: -overhang,
+                  start: 0,
+                  end: 0,
+                  child: _SheetHandle(
+                    expanded: open,
+                    height: overhang + headHeight,
+                    onPressed: () => _ask(!open),
+                  ),
                 ),
-              ),
             ],
           ),
         ),
@@ -767,6 +772,9 @@ class _TotalLineState extends State<_TotalLine>
   );
   String _last = '';
 
+  /// A change waiting for the chip to land before it is allowed to swell.
+  bool _bumpOnLanding = false;
+
   @override
   void dispose() {
     _bump.dispose();
@@ -792,11 +800,16 @@ class _TotalLineState extends State<_TotalLine>
         : pickerMoney(context, controller.confirmedCartTotal, currency);
     if (summary != _last) {
       _last = summary;
-      if (!SeatLayerPickerMotion.reduced(context)) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) _bump.forward(from: 0);
-        });
-      }
+      if (!SeatLayerPickerMotion.reduced(context)) _bumpOnLanding = true;
+    }
+    // The swell fires on the chip's LANDING, not on the press (web 0.84.1):
+    // while a chip is still flying the number holds still, and the controller
+    // rebuilds this line the moment the flight is over.
+    if (_bumpOnLanding && !controller.cartLanding) {
+      _bumpOnLanding = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _bump.forward(from: 0);
+      });
     }
     // Which seats, in one muted line under the count, while the cards are
     // folded away: "2 tickets" alone told the buyer they had bought something
@@ -813,7 +826,8 @@ class _TotalLineState extends State<_TotalLine>
       children: <Widget>[
         Flexible(
           child: _bumped(
-            SeatLayerCrossFade(
+            AlignmentDirectional.centerStart,
+            (ink) => SeatLayerCrossFade(
               token: summary,
               child: Text(
                 summary,
@@ -821,7 +835,7 @@ class _TotalLineState extends State<_TotalLine>
                 overflow: TextOverflow.ellipsis,
                 // design/tokens.json › type.footTotalLabel.
                 style: TextStyle(
-                  color: theme.text,
+                  color: ink,
                   fontSize: 13,
                   fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
                   fontFamily: theme.fontFamily,
@@ -831,20 +845,23 @@ class _TotalLineState extends State<_TotalLine>
           ),
         ),
         if (total.isNotEmpty)
-          SeatLayerCrossFade(
-            token: total,
-            child: Text(
-              total,
-              softWrap: false,
-              // design/tokens.json › type.footTotalAmount.
-              style: TextStyle(
-                color: theme.text,
-                fontSize: 17,
-                fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
-                fontFamily: theme.fontFamily,
-                fontFeatures: const <FontFeature>[
-                  FontFeature.tabularFigures(),
-                ],
+          _bumped(
+            AlignmentDirectional.centerEnd,
+            (ink) => SeatLayerCrossFade(
+              token: total,
+              child: Text(
+                total,
+                softWrap: false,
+                // design/tokens.json › type.footTotalAmount.
+                style: TextStyle(
+                  color: ink,
+                  fontSize: 17,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
+                  fontFamily: theme.fontFamily,
+                  fontFeatures: const <FontFeature>[
+                    FontFeature.tabularFigures(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -909,20 +926,32 @@ class _TotalLineState extends State<_TotalLine>
 
   /// The one beat of movement a changed count earns: the only feedback a buyer
   /// gets that a tap on the map reached a collapsed sheet.
-  Widget _bumped(Widget child) => AnimatedBuilder(
-        animation: _bump,
-        // Anchored on the leading edge, so the words grow out of the line
-        // rather than sliding across it.
-        builder: (context, inner) => Align(
-          alignment: AlignmentDirectional.centerStart,
+  ///
+  /// 1.3× at the peak with the ink blinking to the accent (web 0.84.1's phone
+  /// swell): the count is the chip's landing place, and the landing has to
+  /// read from the far side of the thumb.
+  Widget _bumped(
+    AlignmentGeometry anchor,
+    Widget Function(Color ink) build,
+  ) {
+    final theme = seatLayerMapChromeThemeOf(context);
+    return AnimatedBuilder(
+      animation: _bump,
+      // Anchored on its own edge, so the words grow out of the line rather
+      // than sliding across it.
+      builder: (context, _) {
+        final t = _bumpCurve(_bump.value);
+        return Align(
+          alignment: anchor,
           child: Transform.scale(
-            scale: 1 + (.15 * _bumpCurve(_bump.value)),
-            alignment: AlignmentDirectional.centerStart,
-            child: inner,
+            scale: 1 + (.3 * t),
+            alignment: anchor,
+            child: build(Color.lerp(theme.text, theme.accent, t)!),
           ),
-        ),
-        child: child,
-      );
+        );
+      },
+    );
+  }
 
   /// Out to the full swell at forty-five per cent, and back.
   static double _bumpCurve(double t) => t <= .45

@@ -66,6 +66,9 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Pristupačno fizičko mjesto',
   emptyWheelchairSpace: 'Slobodno mjesto za invalidska kolica',
   findSeatsTogether: 'Pronađi mjesta jedno uz drugo',
+  aboutBestSeats: 'O pronalaženju sjedala jedno uz drugo',
+  closestGroupChosenInstantly:
+      'Najbliža dostupna skupina, odabrana istog trena.',
   hideLimitedView: 'Sakrij mjesta s ograničenim pogledom',
   colorblindSafe: 'Boje prilagođene daltonizmu',
   notAvailable: 'Nije dostupno',

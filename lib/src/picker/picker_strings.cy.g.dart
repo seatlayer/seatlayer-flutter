@@ -66,6 +66,9 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Sedd ffisegol hygyrch',
   emptyWheelchairSpace: 'Lle cadair olwyn gwag',
   findSeatsTogether: 'Dod o hyd i seddi gyda\'i gilydd',
+  aboutBestSeats: 'Am ddod o hyd i seddi gyda’i gilydd',
+  closestGroupChosenInstantly:
+      'Y grŵp agosaf sydd ar gael, wedi\'i ddewis ar unwaith.',
   hideLimitedView: 'Cuddio seddi â golygfa gyfyngedig',
   colorblindSafe: 'Lliwiau sy\'n gyfeillgar i ddallineb lliw',
   notAvailable: 'Ddim ar gael',

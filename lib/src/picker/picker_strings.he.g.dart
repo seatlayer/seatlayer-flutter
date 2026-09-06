@@ -65,6 +65,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'מושב פיזי נגיש',
   emptyWheelchairSpace: 'מקום פנוי לכיסא גלגלים',
   findSeatsTogether: 'מצאו מושבים צמודים',
+  aboutBestSeats: 'על מציאת מקומות צמודים',
+  closestGroupChosenInstantly: 'הקבוצה הפנויה הקרובה ביותר, נבחרה מיד.',
   hideLimitedView: 'הסתרת מושבים עם נוף מוגבל',
   colorblindSafe: 'צבעים ידידותיים לעיוורי צבעים',
   notAvailable: 'לא זמין',

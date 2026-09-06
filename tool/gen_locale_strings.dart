@@ -53,6 +53,8 @@ const List<String> _plainFields = <String>[
   'accessiblePhysicalSeat',
   'emptyWheelchairSpace',
   'findSeatsTogether',
+  'aboutBestSeats',
+  'closestGroupChosenInstantly',
   'hideLimitedView',
   'colorblindSafe',
   'notAvailable',

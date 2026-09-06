@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.9.1
+
+The phone picker follows the web picker's post-0.84.0 round. Runtime pin
+unchanged at 0.84.0; the runtime's own 0.84.1 items arrive with the next pin.
+
+- **The add lands before anything else moves.** After "Add seat" the chip
+  flies from the seat to the footer; the count and total swell (1.3×, with a
+  blink of the accent) when the chip lands, and only then does the map pull
+  back from its lift. The sheet handle is hidden while a confirm card is up.
+- **Accessibility rows read label · ⓘ · count · switch.** The ⓘ sits right
+  after the words it explains, the count keeps its own column, and a 12pt gap
+  holds it clear of the switch. Tapping anywhere on a row toggles it.
+- **The best-seats card explains itself behind a ⓘ** beside its title —
+  "Closest available group, chosen instantly." — in all 37 locales.
+- **A retired "+" keeps its slot** so the accessibility disc above it never
+  moves under the thumb.
+- **Tapping a cart card takes the map to that seat** and, on the phone, steps
+  the sheet down so the map is what the buyer sees. The × and the eye still do
+  their own jobs.
+- **No section dock bar by default on any width.** `showDockBar: true` brings
+  it back for a host that wants it.
+- **Seats added after checkout now count.** Back from checkout with the hold
+  still running, a newly added seat joins the cart at once — the runtime's
+  snapshot used to list only the held seats — and "Continue" replaces the hold
+  with every seat instead of refusing with "Your seats are already in
+  checkout". Works on runtime 0.84.0; the runtime carries the same fix from
+  0.84.1.
+
 ## 0.9.0
 
 Runtime pin 0.84.0. The phone picker follows the web picker's latest phone

@@ -666,4 +666,11 @@ abstract final class SeatLayerStringTokens {
 
   /// {count} seconds left
   static const String holdSecondsLeftOther = '{count} seconds left';
+
+  /// About finding seats together
+  static const String aboutBestSeats = 'About finding seats together';
+
+  /// Closest available group, chosen instantly.
+  static const String closestGroupChosenInstantly =
+      'Closest available group, chosen instantly.';
 }

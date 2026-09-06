@@ -655,6 +655,9 @@ abstract final class SeatLayerSizeTokens {
 
   /// `44`
   static const double minimumHitTarget = 44;
+
+  /// `12`
+  static const double accessRowSwitchGap = 12;
 }
 
 /// How far each surface lets the platform grow its type.

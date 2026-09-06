@@ -65,6 +65,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsRu = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Доступное физическое место',
   emptyWheelchairSpace: 'Свободное место для коляски',
   findSeatsTogether: 'Найти места рядом',
+  aboutBestSeats: 'О поиске мест рядом',
+  closestGroupChosenInstantly: 'Ближайшая доступная группа, выбрана мгновенно.',
   hideLimitedView: 'Скрыть места с ограниченным обзором',
   colorblindSafe: 'Цвета для дальтоников',
   notAvailable: 'Недоступно',

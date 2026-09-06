@@ -66,6 +66,9 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Seient físic accessible',
   emptyWheelchairSpace: 'Espai lliure per a cadira de rodes',
   findSeatsTogether: 'Busca seients junts',
+  aboutBestSeats: 'Sobre trobar seients junts',
+  closestGroupChosenInstantly:
+      'El grup disponible més proper, triat a l\'instant.',
   hideLimitedView: 'Amaga els seients amb visibilitat limitada',
   colorblindSafe: 'Colors adaptats al daltonisme',
   notAvailable: 'No disponible',

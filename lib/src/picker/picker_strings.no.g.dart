@@ -65,6 +65,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Tilgjengelig fysisk plass',
   emptyWheelchairSpace: 'Ledig rullestolplass',
   findSeatsTogether: 'Finn plasser ved siden av hverandre',
+  aboutBestSeats: 'Om å finne plasser sammen',
+  closestGroupChosenInstantly: 'Nærmeste ledige gruppe, valgt med én gang.',
   hideLimitedView: 'Skjul plasser med begrenset sikt',
   colorblindSafe: 'Fargeblindvennlige farger',
   notAvailable: 'Ikke tilgjengelig',
