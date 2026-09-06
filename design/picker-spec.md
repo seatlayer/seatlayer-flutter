@@ -366,6 +366,15 @@ venue — the map must keep answering the filter that is still active.
 once scrolled, and of its trailing edge while more chips remain. Mirrored for
 right-to-left.
 
+**The key at the end.** One grey swatch, `strings.notAvailable`, after the last
+price. The map paints ONE inert grey disc for every seat a buyer cannot take —
+someone else's hold, a sale, a seat never put on sale — so the key explains it
+once. It used to be two entries with two drawings, a padlock for "held" and a
+diagonal for "sold", which taught a buyer a distinction they can act on either
+way. It is deliberately **not a chip**: it filters nothing, so it wears no
+pill, no hairline and no press target, and it is not a toggle to assistive
+technology.
+
 **Sold out.** A sold-out category keeps its chip, disabled and struck through —
 removing it would silently rewrite the price ladder the buyer was reading.
 An **absent** availability figure means *unknown*, never zero, and is never
@@ -541,7 +550,9 @@ Its sheet opens upward from the button and contains switch rows:
 
 - one row per access need the chart actually authors, in the runtime's order,
   each with its live free count — `strings.accessFreeCount`, or
-  `strings.accessNoneLeft` with the row disabled at zero. A count that is *not
+  `strings.notAvailable` with the row disabled at zero. (One word for
+  unavailability across the whole picker: the legend says the same about the
+  grey the map paints. `strings.accessNoneLeft` is retired.) A count that is *not
   counted* shows no number and is never disabled. **A provision the venue has
   but has sold out of stays on the sheet and goes dark; a provision it never had
   is absent** — "this venue has none" and "these are taken" are different
@@ -549,6 +560,17 @@ Its sheet opens upward from the button and contains switch rows:
   the chart has companion places.
 - `strings.hideLimitedView`, only where some seat is restricted or obstructed.
 - `strings.colorblindSafe`.
+
+**Every row wears a drawing, and it is the drawing that row is about.** Each
+provision row takes its own glyph from the shared per-attribute set (§3.8.9) by
+the runtime's own key — one wheelchair standing for twelve different provisions
+told the buyer nothing about which row was which. The limited-view switch wears
+the mark those seats carry (`restrictedView`), and the colour row wears a
+**contrast disc**, which is authored beside the shared set rather than in it:
+that row recolours the map, it does not choose seats, so it must not wear a
+seat's mark or an eye. Glyphs are `size.accessRowIconSize` inside the
+`size.accessRowIconCell` cell, in `color.*.mutedText`, and hidden from
+assistive technology — the row says the same fact in words.
 
 **Every switch applies as it is flipped, and there is no apply step.** The
 command goes to the runtime out of the row's own handler, exactly as the web
@@ -916,7 +938,7 @@ untouched; the sheet is folded into the fraction rather than reported as an
 inset, because an inset re-frames the whole section and changes the zoom. The
 first frame is sent the frame after the card is measured — its height depends
 on the seat's own facts, a photo strip or the rail that stands in for it,
-tiers, notices — and re-sent after every snapshot the runtime publishes so a
+tiers, note bands — and re-sent after every snapshot the runtime publishes so a
 glide that lands with the card up is followed; the runtime answers `dy: 0`
 when the seat is already in place. The reply's `gestures` — the runtime's
 count of the BUYER's own camera moves — is handed back on every later frame,
@@ -1030,9 +1052,16 @@ same card over flat glass, which is a correct state, not a degraded one.
    tint and an accent rail. A single tier renders as a guidance line
    (`strings.tierCompanionGuidance` and its kin), never as a one-option choice.
    File `lib/src/picker/picker_ticket_tiers.dart`.
-6. **Notices** — a premium chip (`strings.premiumSeat`) and a limited-view
-   warning (`strings.restrictedView` / `strings.obstructedView`, restricted
-   wins) — as their own small blocks above the actions.
+6. **Seat notes** — everything the organizer has marked on this seat, as
+   full-bleed BANDS directly under the category band and above the tier
+   chooser. One row per attribute, in one fixed order, each with the shared
+   drawing for that attribute. The whole of it is §3.8.9; two things belong
+   here. They are bands, not plates: no radius, no border, no inset, a hairline
+   on each join, so the popup stays the stack of bands it already is rather
+   than growing four small cards inside itself. And they sit **above** the tier
+   chooser — below it they read as a footnote to the price list instead of as
+   facts about the seat. Consequently the card's body owns no padding of its
+   own; the tier chooser carries the gutter itself.
 7. **Actions**, height `size.confirmActionHeight`, each in its own rounded box
    at `radius.button` inside the card's gutter — not a bar fused to the card's
    bottom edge, which read as the frame rather than as things to press. Where
@@ -1264,7 +1293,106 @@ flown into.
 `seatlayer.picker.snapshot/1` carries a compare set, and a control that cannot
 say anything true is worse than an absent one.
 
-### 3.8a Hover card — web only, nothing to port
+#### 3.8.9 Seat notes — one row model, one icon set
+
+A seat can carry twelve accommodations, a wheelchair provision, three selling
+marks and the organizer's own sentence. Five surfaces used to answer "what is
+special about this seat?" with their own subset and their own emoji, and they
+disagreed: the tap card showed a wheelchair line and ONE limited-view line in
+which restricted beat obstructed — so a seat behind both a rail and a pillar
+reported only the rail — the phone card showed a different pair, the cart
+showed markers, and premium reached two surfaces out of five.
+
+**The answer is a model, and the surfaces only draw it.** Dart:
+`seatLayerSeatNoteRows` in `lib/src/picker/picker_seat_notes.dart`, mirroring
+`core/seatNotes.ts` in the runtime row for row. Ports implement the same
+function, not the same screen.
+
+Rows, in this order, and the order is not discovery order:
+
+1. one row per `accessibility[]` key the chart reports, in the runtime's own
+   order, named through `strings.accessNeeds[key]` (the runtime's
+   `picker.access.*` dictionary);
+2. the wheelchair provision — `strings.emptyWheelchairSpace` for
+   `wheelchairSpaceType: 'no-seat'`, `strings.accessiblePhysicalSeat` for
+   `'seat-present'`. A `wheelchair` accommodation with a provision reported
+   yields the PROVISION row only: "empty wheelchair space" already says
+   everything "wheelchair space" would, and more precisely;
+3. `strings.restrictedView`, and
+4. `strings.obstructedView` — **separate rows**, never collapsed;
+5. `strings.premiumSeat`;
+6. the organizer's sentence. It attaches as a second line under the FIRST
+   selling mark on the seat, because an organizer writing "pillar at the aisle
+   end" is explaining the restriction rather than adding a fact. With no mark
+   to explain it becomes its own row, titled `strings.organizerNote`.
+
+A key this build has no name for is dropped rather than printed raw; two seats
+with the same attributes always produce the same list.
+
+**Tone** is the only thing that varies, and it varies in the ground as well as
+the ink:
+
+| tone | band | title ink |
+| --- | --- | --- |
+| access, note | `color.*.text` at `opacity.noteNeutralWash` over the surface | `color.*.text` |
+| warn | `color.*.warning` at `opacity.noteToneWash` | `color.*.warnText` |
+| premium | `color.*.premium` at `opacity.noteToneWash` | `color.*.premiumText` |
+
+Measured on the tint each pair actually paints on, not on the surface it is
+mixed from — the raw amber measures about 1.8:1 on a white card. Light 5.4:1
+(warn) and 5.7:1 (premium); dark 8.5:1 and 8.0:1. The organizer's second line
+is `color.*.mutedText` walked `opacity.noteBodyInk` of the way to the text, for
+the same reason. The glyph takes the muted ink on a neutral row and the title's
+ink on a toned one.
+
+**Geometry.** Padding `size.notePadY` × `size.notePadX`, glyph
+`size.noteIconSize` with `size.noteIconGap` beside it, title `type.noteTitle`,
+organizer line `type.noteBody`. The join between two rows is a hairline of
+`color.*.divider` at `opacity.noteHairline`; there is none above the first row,
+which sits flush against the category band. The **compact** form is the wide
+layout's tap card, which is narrower and floats over the map: leading inset
+`size.noteCompactPadLeading`, trailing `size.noteCompactPadX`, vertical
+`size.noteCompactPadY`, glyph `size.noteCompactIconSize`, and the type comes
+down a rung (`type.noteTitleCompact`, `type.noteBodyCompact`).
+
+**The icons.** Sixteen drawings — the twelve accommodations, the three selling
+marks and the organizer's `note` — transcribed verbatim from the runtime's
+shared set (`core/render-assets/seatTypeIcons.ts`), which is the designer's own
+artwork. Dart: `lib/src/picker/picker_seat_icons.dart`. Authored in a 20-unit
+box, stroke-only at 1.45 units with round caps and joins, and inheriting the
+row's ink, so a tone is one colour away rather than a second icon set. **No
+emoji and no platform icon**: an emoji arrives in a colour, weight and baseline
+the host font decides and no theme can reach, and the nearest Material icon is
+not the drawing the map and the web popups use. A key this build does not know
+draws nothing rather than a broken box. A port transcribes the same path data;
+redrawing a glyph "close enough" is how the surfaces drifted apart in the first
+place.
+
+**The cart chip is deliberately NOT this block.** It is the one surface that is
+not a popup — a bordered ticket in a narrow list, where a tinted band reads as
+a card inside a card and wraps a two-word title onto two lines. It says the
+same attributes in words on one line (§3.10).
+
+**Unavailable seats raise no card at all**, so they raise no notes either: see
+§3.8.10.
+
+#### 3.8.10 No card over a seat nobody can take
+
+A seat that is sold, blocked, or in another buyer's hold is **inert**. The
+engine swallows the tap — no pinned card with a reason in 2D, no state card in
+the scene — and the native side keeps the same rule for the case an older
+runtime still reports such a tap: `selection[].status` of `booked` or `blocked`
+never raises a card, and `held` raises one only while the picker's own hold is
+active, because that is when the buyer's own seats report as held and the card
+is what offers them back. A status this build does not recognise is left alone:
+an unknown word is not a reason to swallow a seat the runtime selected, and
+every runtime shipped before the field omits it entirely.
+
+There is therefore **no "held by another buyer" and no "already booked" card**
+anywhere in the picker, and no string for one. A reason the buyer can do
+nothing about is worse than being left on the map.
+
+### 3.8a Hover card and tooltip — web only, nothing to port
 
 The web runtime draws a card beside the cursor naming whatever it is over:
 the section block below the seats rung, the seat itself above it
@@ -1298,6 +1426,11 @@ without a hovering pointer is therefore not missing a feature; the seat card
   same seat — the pinned "cannot be taken" explanation, or the confirm card —
   `hostCardOpen()` answers true, the model resolves to nothing and the card
   hides, so one seat never gets two cards.
+
+The hover card draws the seat-note block too (§3.8.9), in its compact form.
+That is a consequence of the shared model, not a second thing to port: there is
+no hovering pointer to raise it on a phone, and the seat card is the whole
+answer to "what is this seat" on touch.
 
 Full entry: `components.md` › HoverCard.
 
@@ -2220,7 +2353,7 @@ mountable on its own, where there is no order to join. Dart file:
   hold countdown. Each changes without the buyer touching it, and none says so
   any other way. A surface that ARRIVES unasked — a buyer-facing state, a hold
   notice, a toast, the best-seats count — is live as well; a notice that is part
-  of a surface's own statement (the card's limited-view line) is not.
+  of a surface's own statement (the card's seat-note bands) is not.
 - *The hold countdown is throttled.* `m:ss` read aloud is a time of day. The
   pill announces `strings.holdMinutesLeft` at each minute mark, and
   `strings.holdSecondsLeft` for every second of the last minute, where the
