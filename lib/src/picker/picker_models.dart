@@ -693,6 +693,7 @@ class SeatLayerPickerMapState {
     required this.hideLimitedView,
     required this.canZoomIn,
     required this.canZoomOut,
+    this.atVenueFit,
     required this.categoryFilter,
     required this.accessibilityFilter,
     required this.floors,
@@ -740,6 +741,40 @@ class SeatLayerPickerMapState {
   final bool hideLimitedView;
   final bool canZoomIn;
   final bool canZoomOut;
+
+  /// Whether the camera stands exactly at the whole-venue fit pose.
+  ///
+  /// Null on a runtime that does not report it, which is a third answer and
+  /// not a `false`: [canStepBack] falls back to [canZoomOut] there rather than
+  /// inventing a pose the engine never described.
+  ///
+  /// Pose, not scale. A pan at the fit scale is not the fit.
+  final bool? atVenueFit;
+
+  /// Whether a back-out control still has somewhere to take the buyer.
+  ///
+  /// The ladder the runtime walks, read the way the web picker reads it:
+  ///
+  /// * inside a framed section there is always a rung left — out of the
+  ///   section, then out to the venue;
+  /// * otherwise the fit pose itself is the one camera with nothing to offer;
+  /// * and where the runtime cannot answer that, [canZoomOut] is the older,
+  ///   coarser reading it falls back to.
+  ///
+  /// The fallback is why this is not simply `!atVenueFit`. [canZoomOut] is
+  /// computed from whether seats are the visible layer, which reads every
+  /// camera a pinch leaves BETWEEN the venue fit and the seats — blocks on
+  /// screen, no seats, venue not framed — as "already home". A buyer there had
+  /// a dimmed control and nowhere to press. A runtime reporting the pose gives
+  /// the honest answer; an older one keeps its old behaviour rather than a new
+  /// guess.
+  bool get canStepBack {
+    if (focusedSectionId != null) return true;
+    final fit = atVenueFit;
+    if (fit != null) return !fit;
+    return canZoomOut;
+  }
+
   final Set<String> categoryFilter;
   final Set<String> accessibilityFilter;
   final List<FloorInfo> floors;
@@ -820,6 +855,7 @@ class SeatLayerPickerMapState {
         hideLimitedView: jBool(jGet(value, 'hideLimitedView')) ?? false,
         canZoomIn: jBool(jGet(value, 'canZoomIn')) ?? true,
         canZoomOut: jBool(jGet(value, 'canZoomOut')) ?? true,
+        atVenueFit: jBool(jGet(value, 'atVenueFit')),
         categoryFilter: Set<String>.unmodifiable(
           jListOf(jGet(value, 'categoryFilter'), (item) => jStr(item)),
         ),
