@@ -1756,8 +1756,8 @@ than springing to a guess and correcting.
 
 **The sheet never opens itself.** Only the buyer opens it — the handle, a
 swipe, the collapsed seat line (§3.9), or the empty cart's `Find best seats`.
-It collapses again when the buyer taps the map, and when a cart card frames its
-own seat (§3.10.2).
+It collapses again when the buyer taps the map. A cart card framing its own
+seat (§3.10.2) leaves the sheet where the buyer put it.
 
 #### 3.10.2 Cart cards
 
@@ -1798,9 +1798,11 @@ separated by `size.cartCardGap` (6). Contents, on one baseline:
 
 **A press on the card's own face — not on the × and not on the eye — takes the
 buyer to the seat.** It sends `picker.frameSeat { seatId, fraction: 0.5 }`, so
-the map pans the seat to the middle of the band the chrome leaves, and **the
-sheet collapses on the phone** so the map is what the buyer sees. A card whose
-line carries no selected seat is not pressable.
+the map pans the seat to the middle of the band the chrome leaves. **The sheet
+stays where the buyer put it**: the phone map sits above the sheet in the same
+column, so the seat lands in the room the open sheet leaves it, and a buyer can
+check one seat after another without reopening the cart each time. A card
+whose line carries no selected seat is not pressable.
 
 **Notes.** What the organizer said about the seat, said ONCE and in WORDS, on
 the card, under a hairline of the divider at 72 per cent inside it, with

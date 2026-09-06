@@ -568,9 +568,9 @@ map; see `picker-spec.md` §3.13.7, "Divergence from the web picker".
   photograph — then the ×. Cards may also be **swiped** toward the leading edge
   to remove.
 - **Card tap** a press on the card's own face — not the × and not the eye —
-  sends `picker.frameSeat { seatId, fraction: 0.5 }` and **collapses the sheet
-  on the phone**, so the map is what the buyer sees. A line with no selected
-  seat behind it is not pressable.
+  sends `picker.frameSeat { seatId, fraction: 0.5 }`; the sheet **stays where
+  the buyer put it**, and the seat lands in the room the open sheet leaves. A
+  line with no selected seat behind it is not pressable.
 - **Notes** what the organizer said about the seat, said ONCE and in WORDS,
   under a hairline inside the card: accommodations, then the wheelchair
   provision (`strings.accessiblePhysicalSeat` /
