@@ -2,8 +2,8 @@
 
 ## 0.9.1
 
-The phone picker follows the web picker's post-0.84.0 round. Runtime pin
-unchanged at 0.84.0; the runtime's own 0.84.1 items arrive with the next pin.
+Runtime pin 0.84.1. The phone picker follows the web picker's post-0.84.0
+round.
 
 - **The add lands before anything else moves.** After "Add seat" the chip
   flies from the seat to the footer; the count and total swell (1.3×, with a
