@@ -6,7 +6,6 @@
 // runtime still reports such a tap. A card asking "add this seat?" over a seat
 // that is already gone is a question with no true answer, and telling the buyer
 // a reason they can do nothing about is worse than leaving them on the map.
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_confirm_card.dart';
 import 'package:seatlayer/src/picker/picker_seat_confirmation.dart';
