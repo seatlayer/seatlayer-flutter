@@ -655,6 +655,9 @@ abstract final class SeatLayerOpacityTokens {
   /// `0.45`
   static const double removing = 0.45;
 
+  /// `0.42`
+  static const double mapControlDisabled = 0.42;
+
   /// `0.18`
   static const double warnPillWash = 0.18;
 
@@ -1021,6 +1024,9 @@ abstract final class SeatLayerStringTokens {
 
   /// Fit venue
   static const String fitVenue = 'Fit venue';
+
+  /// Show whole venue
+  static const String fitWholeVenue = 'Show whole venue';
 
   /// Zoom in
   static const String zoomIn = 'Zoom in';

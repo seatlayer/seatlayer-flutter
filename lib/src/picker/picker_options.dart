@@ -54,10 +54,11 @@ class SeatLayerPickerPricing {
 /// corresponding control remains available as a standalone public widget for
 /// hosts that build their own layout.
 ///
-/// The five nullable controls default to *auto*: present in the wide layout,
-/// absent on the phone, where pinch-to-zoom, the accessibility sheet and the
-/// header's own countdown already carry them. Set one explicitly to override
-/// that.
+/// The nullable controls default to *auto*, which is per control: the map's
+/// zoom discs are drawn on both layouts, while the back-to-overview control,
+/// the standalone colourblind toggle, the dock bar and the extend-hold card
+/// are wide-only — the phone's accessibility sheet and its own header already
+/// carry those. Set one explicitly to override that.
 @immutable
 class SeatLayerPickerChromeOptions {
   /// Creates a chrome visibility set. Defaults are the approved phone UX.
@@ -104,15 +105,26 @@ class SeatLayerPickerChromeOptions {
   /// Whether the back-to-overview control renders. Auto: wide only.
   final bool? showOverviewControl;
 
-  /// Whether the zoom in/out pair renders. Auto: wide only.
+  /// Whether the zoom in/out pair renders. Auto: both layouts.
+  ///
+  /// The phone drew `−` alone for a while, on the argument that pinch already
+  /// zooms in. It does — but a buyer who has pinched themselves somewhere odd
+  /// then has one control to reason with, and it is the one that also decides
+  /// when it has nothing left to do. Two labelled discs cost a corner nothing
+  /// and remove the dead end.
   final bool? showZoomControls;
 
-  /// Whether the fit-to-screen control renders. Auto: wide only.
+  /// Whether the show-the-whole-venue control renders. Auto: both layouts.
   ///
-  /// The phone used to stack two round controls in the same corner — `−` and
-  /// fit-to-screen — with nothing on either saying which was which. Both back
-  /// the camera out; one does it a step at a time and one does it all at once.
-  /// The phone keeps the stepped one.
+  /// The phone draws [SeatLayerPickerShowWholeVenueButton], which leaves any
+  /// framed section as it fits; the wide rail draws the fit-to-screen control
+  /// it has always had.
+  ///
+  /// It stopped being drawn on the phone once, as a second round button beside
+  /// `−` with nothing on either saying which was which. Naming it — "Show
+  /// whole venue", against `−`'s one rung — is what makes the pair readable,
+  /// and it is back because `−` alone left nowhere to press at the cameras a
+  /// pinch reaches.
   final bool? showZoomToFitControl;
 
   /// Whether the Map/3D control renders on a 3D-capable event.
@@ -192,11 +204,11 @@ class SeatLayerPickerChromeOptions {
       showOverviewControl ?? !phone;
 
   /// Resolve [showZoomControls] for a layout.
-  bool zoomControlsFor({required bool phone}) => showZoomControls ?? !phone;
+  bool zoomControlsFor({required bool phone}) => showZoomControls ?? true;
 
   /// Resolve [showZoomToFitControl] for a layout.
   bool zoomToFitControlFor({required bool phone}) =>
-      showZoomToFitControl ?? !phone;
+      showZoomToFitControl ?? true;
 
   /// Resolve [showColorblindControl] for a layout.
   bool colorblindControlFor({required bool phone}) =>

@@ -42,6 +42,8 @@ Map<String, Object?> pickerSnapshot({
   bool withSelection = true,
   String rung = 'seats',
   bool canZoomOut = true,
+  bool canZoomIn = true,
+  bool? atVenueFit,
   String focusedSectionId = 'section-a',
   List<Object?>? sections,
   List<Object?>? cartItems,
@@ -148,8 +150,9 @@ Map<String, Object?> pickerSnapshot({
         'accessibilityFilter': accessibilityFilter,
       'colorblindSafe': false,
       'hideLimitedView': false,
-      'canZoomIn': true,
+      'canZoomIn': canZoomIn,
       'canZoomOut': canZoomOut,
+      if (atVenueFit != null) 'atVenueFit': atVenueFit,
       'categoryFilter': <Object?>['standard'],
       'focusedSectionId': rung == 'overview' ? null : focusedSectionId,
       'focusedSection': rung == 'overview'
@@ -168,7 +171,7 @@ Map<String, Object?> pickerSnapshot({
           ? <Object?>[
               <String, Object?>{
                 'id': 'seat-a-1',
-      'seatViewKind': 'real',
+                'seatViewKind': 'real',
                 'label': 'A-1',
                 'displayLabel': 'Row A, Seat 1',
                 'displayType': 'Row',

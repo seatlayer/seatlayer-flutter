@@ -168,26 +168,36 @@ override** `style:`
 
 **Name** `SeatLayerPickerMapControls` · **Style slot** `iconButtonStyle`
 
-- **Inputs** `map.isVenue3D`, `map.focusedSectionId`, `capabilities`.
+- **Inputs** `map.isVenue3D`, `map.focusedSectionId`, `map.canZoomIn`,
+  `map.canStepBack` (from `map.atVenueFit`, falling back to `map.canZoomOut`),
+  `capabilities`.
 - **States** phone corners / wide rail; the map-only controls stand down while
   the immersive scene is up.
 - **Anatomy** round controls `size.mapControlSize`, except the accessibility
   control at `size.accessibilityControlSize` (`size.minimumHitTarget`).
-  Bottom-left accessibility, bottom-right the single back-out `−`, both at
+  Bottom-left accessibility, bottom-right the zoom column, both at
   `size.mapAnchorInset` from the map's bottom edge. They lift by
   `size.dockBarHeight` only where a host opted into a dock — a default phone
   mounts none, so there is nothing to lift over. The accessible-section stepper
   sits beside the accessibility control, `size.accessStepGap` from it.
-- **Phone ladder** one control, not two: `−` walks section → venue and then
-  **dims in place** (`map.canZoomOut`), rather than appearing and disappearing
-  under the thumb. Fit-to-screen is wide-only — it made the same journey in one
-  jump and neither round button said which was which.
+- **Phone zoom column** three discs, `size.zoomColumnGap` apart, top to bottom:
+  `+` (`picker.zoomIn`), `−` (`picker.zoomOut`, the ladder section → venue) and
+  a framed dot, `strings.fitWholeVenue`, that shows the whole venue from any
+  depth via `picker.overview`. `−` and the framed dot dim from ONE reading,
+  `map.canStepBack`, so they are done at the same moment; `+` dims from
+  `map.canZoomIn`.
+- **Disabled** discs **dim in place** rather than appearing and disappearing
+  under the thumb: `opacity.mapControlDisabled` over ink, ground and hairline
+  together, with the shadow dropped. A disc that cannot be pressed has to look
+  like one, and may only look like one where it is true — which is why the
+  reading is the runtime's fit pose and not a guess from what is on screen.
 - **Ground** `color.*.chrome` with a `color.*.chromeLine` hairline, from the
   **map chrome's** side, never the panel's `surface`/`divider` — those vanish
   into a dark map at 1.14:1. Dark separates by the fill (2.96:1 against the
   map), light by the edge (3.72:1 against the disc). Applies to every floating
   control, the accessibility disc and the Map/3D track included.
-- **Commands** `picker.zoomToFit`, `picker.setAccessibilityFilters`,
+- **Commands** `picker.zoomIn`, `picker.zoomOut`, `picker.overview` (phone),
+  `picker.zoomToFit` (wide), `picker.setAccessibilityFilters`,
   `picker.setColorblindSafe`, `picker.setBuyerView`.
 - **Note** `SeatLayerPickerViewModeControl` (the Map/3D segmented control) is a
   member of this stack on wide layouts only; on a phone the top rail owns it.

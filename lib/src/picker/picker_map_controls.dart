@@ -51,12 +51,24 @@ Widget seatLayerImmersiveGlass({
 /// The controls that sit on the map itself.
 ///
 /// On a phone they go to the map's anchor regions — accessibility bottom-left,
-/// Map/3D top-right, and one back-out control bottom-right. That control walks
-/// the ladder a step at a time and dims once the whole venue is on screen,
-/// rather than coming and going under the buyer's thumb. Fit-to-venue and
-/// zoom-in are absent by default: fit made the same journey in one jump with
-/// nothing to tell the two round buttons apart, and pinch already handles
-/// continuous zoom without drawing a toolbar over the venue.
+/// Map/3D top-right, and a column of three discs bottom-right: `+`, `−` and
+/// the whole venue.
+///
+/// The corner carried one disc before, and each of the two absences had an
+/// argument. Pinch already zooms in, so `+` was noise; fit-to-venue made the
+/// same journey as `−` in one jump, with nothing on either round button saying
+/// which was which. Together they left a buyer who had pinched to a camera
+/// between the whole-venue fit and the seats — section blocks on screen, no
+/// seats, the venue not framed — with a single control, and that control read
+/// "no seats visible" as "you are already home" and dimmed itself. Nothing
+/// left to press.
+///
+/// Three discs, each saying a different thing: `+` steps in, `−` walks one
+/// rung back out (out of the section, then out to the venue), and the framed
+/// dot puts the whole venue on screen from any depth. They dim in place rather
+/// than coming and going under the buyer's thumb, and the two back-out discs
+/// dim from ONE reading — the runtime's own fit pose — so they can never
+/// disagree about whether there is a venue left to go back to.
 ///
 /// The wide layout keeps the vertical rail, where there is room for it.
 class SeatLayerPickerMapControls extends StatelessWidget {
@@ -158,29 +170,24 @@ class _CornerControls extends StatelessWidget {
     // While the immersive scene is up there is no flat map to fit, filter or
     // pan, and SeatLayerVenue3D owns that corner. Only the way back stays.
     final onMap = !(state.snapshot?.map.isVenue3D ?? false);
-    final phoneZoomPair = chrome.zoomControlsFor(phone: true);
-    // ONE control, one ladder. `−` walks back a step at a time — the section
-    // the buyer drilled into, then the whole venue — and fit-to-screen did
-    // the same journey in one jump, so the corner carried two round buttons
-    // with nothing on either saying which was which. The phone keeps the
-    // stepped one. Pinch is what zooms in, so `+` is never here unless the
-    // host asks.
+    // THREE DISCS, ALWAYS THE SAME THREE. `+` steps in, `−` walks one rung
+    // back out, and the framed dot shows the whole venue from wherever the
+    // buyer is. None of them is conditional on the camera: a control that
+    // appears and disappears moves the target under a thumb that is already
+    // reaching for it, so they dim instead — and only where dimming is true,
+    // which is the whole point of reading the runtime's fit pose rather than
+    // guessing one from what happens to be on screen.
     //
-    // ONE SLOT, TWO DIRECTIONS (owner call, 2026-09-05). At the whole venue
-    // there is nothing to step out of, and a `−` that plainly cannot be
-    // pressed answered the wrong question: the buyer at the overview wants
-    // IN. So the same disc reads `+` at home and `−` once a section is
-    // framed. It never moves and never disappears — the corner does not grow
-    // and shrink a button under the buyer's thumb.
-    final atHome = state.snapshot?.map.canZoomOut == false;
+    // `−` and the whole-venue disc do not duplicate each other. `−` is the
+    // ladder, one rung at a time; the disc is the venue immediately, however
+    // deep the buyer went.
     final zoomColumn = <Widget>[
-      if (onMap && phoneZoomPair) const SeatLayerPickerZoomInButton(),
-      if (onMap && !phoneZoomPair && atHome)
+      if (onMap && chrome.zoomControlsFor(phone: true)) ...<Widget>[
         const SeatLayerPickerZoomInButton(),
-      if (onMap && !(atHome && !phoneZoomPair))
         const SeatLayerPickerZoomOutButton(),
+      ],
       if (onMap && chrome.zoomToFitControlFor(phone: true))
-        const SeatLayerPickerZoomToFitButton(),
+        const SeatLayerPickerShowWholeVenueButton(),
     ];
     final bottomLeftColumn = <Widget>[
       if (onMap && chrome.colorblindControlFor(phone: true))
@@ -456,6 +463,10 @@ class SeatLayerPickerZoomInButton extends StatelessWidget {
 }
 
 /// A standalone zoom-out control for custom picker compositions.
+///
+/// Dims where the ladder has no rung left — `map.canStepBack`, which is the
+/// runtime's fit pose where it reports one and its older, coarser
+/// `canZoomOut` where it does not.
 class SeatLayerPickerZoomOutButton extends StatelessWidget {
   /// Creates the zoom-out control.
   const SeatLayerPickerZoomOutButton({super.key});
@@ -467,7 +478,35 @@ class SeatLayerPickerZoomOutButton extends StatelessWidget {
     return _ControlButton(
       icon: Icons.remove_rounded,
       tooltip: SeatLayerPickerScope.stringsOf(context).zoomOut,
-      onPressed: map?.canZoomOut == false ? null : controller.zoomOut,
+      onPressed: map?.canStepBack == false ? null : controller.zoomOut,
+    );
+  }
+}
+
+/// A standalone show-the-whole-venue control for custom picker compositions.
+///
+/// The last rung of the `−` ladder on its own, reached from any depth. It
+/// sends `picker.overview` rather than `picker.zoomToFit` so a framed section
+/// is released with the same press that fits the chart — the two controls then
+/// agree about where "the whole venue" is, card and dim included.
+///
+/// It dims from the same reading as `−`, so the pair can never disagree about
+/// whether there is a venue left to go back to.
+class SeatLayerPickerShowWholeVenueButton extends StatelessWidget {
+  /// Creates the show-the-whole-venue control.
+  const SeatLayerPickerShowWholeVenueButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = SeatLayerPickerScope.controllerOf(context);
+    final map = controller.state.snapshot?.map;
+    return _ControlButton(
+      // A frame with a dot at its centre: the venue, and where the camera
+      // lands on it. Drawn, not lettered — the disc carries its name for a
+      // screen reader and its tooltip for a pointer.
+      icon: Icons.center_focus_strong_rounded,
+      tooltip: SeatLayerPickerScope.stringsOf(context).fitWholeVenue,
+      onPressed: map?.canStepBack == false ? null : controller.overview,
     );
   }
 }
@@ -618,7 +657,14 @@ class _ControlButton extends StatelessWidget {
     final disc = seatLayerMapChromeDisc(theme);
     final chrome = disc.ground;
     final chromeLine = disc.line;
-    return AnimatedContainer(
+    // A DISABLED DISC HAS TO LOOK DISABLED. These controls dim in place rather
+    // than disappearing, which only works as an answer — "you are already
+    // looking at everything" — if the buyer can see that it is one. The whole
+    // disc goes back, ink, ground and hairline together, and drops its shadow:
+    // it is no longer lifted off the map, because it is no longer a thing to
+    // press.
+    final disabled = onPressed == null;
+    final control = AnimatedContainer(
       duration: SeatLayerPickerMotion.of(context, SeatLayerPickerMotion.pop),
       curve: SeatLayerPickerMotion.easeEnter,
       width: size,
@@ -631,13 +677,15 @@ class _ControlButton extends StatelessWidget {
         border: Border.all(
           color: active ? pickerAlpha(theme.accent, .52) : chromeLine,
         ),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Color(0x26000000),
-            blurRadius: 8,
-            offset: Offset(0, 3),
-          ),
-        ],
+        boxShadow: disabled
+            ? const <BoxShadow>[]
+            : const <BoxShadow>[
+                BoxShadow(
+                  color: Color(0x26000000),
+                  blurRadius: 8,
+                  offset: Offset(0, 3),
+                ),
+              ],
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -658,5 +706,11 @@ class _ControlButton extends StatelessWidget {
         ),
       ),
     );
+    return disabled
+        ? Opacity(
+            opacity: SeatLayerOpacityTokens.mapControlDisabled,
+            child: control,
+          )
+        : control;
   }
 }

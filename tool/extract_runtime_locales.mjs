@@ -40,6 +40,7 @@ const KEYS = {
   accessibility: 'picker.accessibilityOptions',
   accessibilityTitle: 'picker.accessibilityOptions',
   fitVenue: 'picker.fitToScreen',
+  fitWholeVenue: 'picker.fitWholeVenue',
   loading: 'picker.loadingSeatMap',
   errorMessage: 'picker.mapDidNotLoad',
   retry: 'picker.accessRetry',
