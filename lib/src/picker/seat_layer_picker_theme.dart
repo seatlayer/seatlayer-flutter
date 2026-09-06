@@ -453,7 +453,12 @@ class SeatLayerResolvedPickerTheme {
     this.fontFamily,
     this.logo,
     this.mapBackground,
-  });
+    Color? warnText,
+    Color? premium,
+    Color? premiumText,
+  })  : _warnText = warnText,
+        _premium = premium,
+        _premiumText = premiumText;
 
   /// Which side of the theme this palette paints.
   final Brightness brightness;
@@ -484,6 +489,37 @@ class SeatLayerResolvedPickerTheme {
 
   /// Ink for advisories.
   final Color warning;
+
+  final Color? _warnText;
+  final Color? _premium;
+  final Color? _premiumText;
+
+  /// The gold a premium seat is marked in.
+  ///
+  /// A ground, not an ink: a mid-gold on a white card measures under 2:1, so
+  /// the words on a premium note band are [premiumText] rather than this.
+  Color get premium => _premium ??
+      (brightness == Brightness.dark
+          ? SeatLayerDarkTokens.premium
+          : SeatLayerLightTokens.premium);
+
+  /// Readable ink for a caution note, on the band [warning] tints.
+  ///
+  /// The raw amber is a colour a buyer can see and cannot read — about 1.8:1
+  /// on a white card — and a seat-note row puts it on WORDS rather than on a
+  /// badge. This token walks the hue toward the ink until it reads: measured
+  /// on the tinted band it actually paints on, 5.46:1 on light and 8.24:1 on
+  /// dark, rather than on the bare surface the tint is mixed from.
+  Color get warnText => _warnText ??
+      (brightness == Brightness.dark
+          ? SeatLayerDarkTokens.warnText
+          : SeatLayerLightTokens.warnText);
+
+  /// Readable ink for a premium note, on the band [premium] tints.
+  Color get premiumText => _premiumText ??
+      (brightness == Brightness.dark
+          ? SeatLayerDarkTokens.premiumText
+          : SeatLayerLightTokens.premiumText);
 
   /// Corner radius for cards, sheets and other containers.
   final double radius;

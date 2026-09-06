@@ -412,7 +412,7 @@ void main() {
         pickerSnapshot(accessNeeds: <Object?>[accessNeed('wheelchair', 0)]),
       );
 
-      await tester.tap(find.text('None left'), warnIfMissed: false);
+      await tester.tap(find.text('Not available'), warnIfMissed: false);
       await tester.pumpAndSettle();
 
       expect(map.callsTo('picker.focusNextAccessibleSection'), isEmpty);

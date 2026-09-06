@@ -83,9 +83,19 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
       // own edge; the rail's ten points are outside it.
       padding: const EdgeInsets.all(1),
       scrollDirection: Axis.horizontal,
-      itemCount: categories.length,
+      // One more than the categories: the key for the grey the map paints on
+      // a seat nobody can take. It is not a category and not a filter, so it
+      // closes the row rather than joining it.
+      itemCount: categories.length + 1,
       separatorBuilder: (_, __) => const SizedBox(width: 5),
       itemBuilder: (context, index) {
+        if (index == categories.length) {
+          return _UnavailableKey(
+            theme: theme,
+            compact: compact,
+            label: strings.notAvailable,
+          );
+        }
         final category = categories[index];
         final selected = active.contains(category.key);
         // A spread cannot fit a chip, so it becomes a floor: "€30+" is honest
@@ -347,6 +357,71 @@ class _LegendChip extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The one seat state the map paints that no price swatch covers.
+///
+/// A held seat and a sold seat used to be two entries with two drawings — a
+/// padlock and a diagonal — and a buyer was being taught the difference
+/// between two states they can do nothing about either way. The map paints one
+/// inert grey disc for both now, so the key shows that disc once and calls it
+/// what it is to the buyer: not available.
+///
+/// Deliberately NOT a chip: it filters nothing, so it wears no pill, no
+/// hairline and no press target. It reads as the sentence at the end of the
+/// row that it is.
+class _UnavailableKey extends StatelessWidget {
+  const _UnavailableKey({
+    required this.theme,
+    required this.compact,
+    required this.label,
+  });
+
+  final SeatLayerResolvedPickerTheme theme;
+  final bool compact;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = compact
+        ? SeatLayerSizeTokens.legendChipDotSize
+        : SeatLayerSizeTokens.legendChipDotSize + 3;
+    return Semantics(
+      label: label,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsetsDirectional.only(start: 4, end: 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Color.alphaBlend(
+                    pickerAlpha(theme.mutedText, .45),
+                    theme.background,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: SizedBox.square(dimension: size),
+              ),
+              const SizedBox(width: 5),
+              ExcludeSemantics(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: theme.mutedText,
+                    fontSize: compact ? theme.layout.legendChipFontSize : 12,
+                    fontWeight: const FontWeight(650),
+                    fontFamily: theme.fontFamily,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

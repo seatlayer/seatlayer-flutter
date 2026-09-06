@@ -315,4 +315,37 @@ void main() {
 
     expect(find.byType(SeatLayerPickerViewModeControl), findsOneWidget);
   });
+
+  testWidgets('the legend closes with ONE grey key, not a held/sold pair',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerPriceLegend(compact: true)),
+    );
+    map.emit(_snapshotWithCategories(3));
+    await tester.pumpAndSettle();
+
+    // A held seat and a sold seat are one inert grey disc on the map, so the
+    // key says it once. The padlock-and-diagonal pair is gone, not hidden.
+    expect(find.text('Not available'), findsOneWidget);
+    expect(find.text('Held'), findsNothing);
+    expect(find.text('Sold'), findsNothing);
+
+    // It filters nothing, so it is not a control: it comes after every price
+    // and answers no press.
+    final key = tester.getRect(find.text('Not available'));
+    final last = tester.getRect(find.text('€115'));
+    expect(key.left, greaterThan(last.left));
+    expect(
+      tester.widgetList<Semantics>(find.byType(Semantics)).where(
+            (node) =>
+                node.properties.label == 'Not available' &&
+                node.properties.button == true,
+          ),
+      isEmpty,
+    );
+  });
 }

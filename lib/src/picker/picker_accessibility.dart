@@ -9,6 +9,7 @@ import 'picker_blocked_regions.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_pending_seat.dart';
+import 'picker_seat_icons.dart';
 import 'picker_tokens.g.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_controller.dart';
@@ -223,14 +224,18 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                           // such seats, which is a different fact.
                           final enabled = need.count == null || need.count! > 0;
                           return _AccessOptionRow(
-                            icon: Icons.accessible_rounded,
+                            // The same drawing the seat itself carries on the
+                            // map and on every popup — one wheelchair for
+                            // twelve different provisions told the buyer
+                            // nothing about which one a row was.
+                            iconKey: need.key,
                             label: need.label,
                             note: need.note,
                             count: need.count == null
                                 ? null
                                 : need.count! > 0
                                     ? strings.accessFreeCount(need.count!)
-                                    : strings.accessNoneLeft,
+                                    : strings.notAvailable,
                             // The web menu's own "12 free" button, which steps
                             // the camera through the sections that hold them.
                             // Only where the runtime can fly and there is
@@ -265,7 +270,10 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                   ),
                 if (available.limited)
                   _AccessOptionRow(
-                    icon: Icons.contrast_rounded,
+                    // The switch that hides limited-view seats wears the mark
+                    // those seats carry, so the row and the thing it acts on
+                    // are one idea.
+                    iconKey: 'restrictedView',
                     label: strings.hideLimitedView,
                     value: hideLimited,
                     onChanged: () {
@@ -276,7 +284,10 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                   ),
                 if (available.colorblind)
                   _AccessOptionRow(
-                    icon: Icons.contrast_rounded,
+                    // NOT an eye and not a seat mark: this row recolours the
+                    // map, it does not choose seats. A contrast disc is the
+                    // one shape on this sheet that is about the palette.
+                    iconKey: 'contrast',
                     label: strings.colorblindSafe,
                     value: colorblind,
                     onChanged: () {
@@ -397,7 +408,7 @@ const double _controlIconSize = 21;
 /// the end of one — so the buyer aims at the words rather than at the toggle.
 class _AccessOptionRow extends StatelessWidget {
   const _AccessOptionRow({
-    required this.icon,
+    required this.iconKey,
     required this.label,
     required this.value,
     required this.onChanged,
@@ -407,7 +418,8 @@ class _AccessOptionRow extends StatelessWidget {
     this.onCountPressed,
   });
 
-  final IconData icon;
+  /// Which shared drawing this row wears, by the runtime's own key.
+  final String iconKey;
   final String label;
   final String? note;
   final String? count;
@@ -454,7 +466,11 @@ class _AccessOptionRow extends StatelessWidget {
                   children: <Widget>[
                     SizedBox(
                       width: SeatLayerSizeTokens.accessRowIconCell,
-                      child: Icon(icon, size: 16, color: theme.mutedText),
+                      child: SeatLayerSeatIcon(
+                        iconKey: iconKey,
+                        color: theme.mutedText,
+                        size: SeatLayerSizeTokens.accessRowIconSize,
+                      ),
                     ),
                     const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
                     Expanded(

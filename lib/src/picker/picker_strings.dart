@@ -53,6 +53,10 @@ class SeatLayerPickerStrings {
     this.premiumSeat = SeatLayerStringTokens.premiumSeat,
     this.restrictedView = SeatLayerStringTokens.restrictedView,
     this.obstructedView = SeatLayerStringTokens.obstructedView,
+    this.organizerNote = SeatLayerStringTokens.organizerNote,
+    this.emptyWheelchairSpace = SeatLayerStringTokens.emptyWheelchairSpace,
+    this.accessiblePhysicalSeat = SeatLayerStringTokens.accessiblePhysicalSeat,
+    this.notAvailable = SeatLayerStringTokens.notAvailable,
     this.venueZone = SeatLayerStringTokens.venueZone,
     this.fewerTickets = SeatLayerStringTokens.fewerTickets,
     this.moreTickets = SeatLayerStringTokens.moreTickets,
@@ -88,7 +92,6 @@ class SeatLayerPickerStrings {
     this.testModeExplained = SeatLayerStringTokens.testModeExplained,
     this.accessibility = SeatLayerStringTokens.accessibility,
     this.displayOptions = SeatLayerStringTokens.displayOptions,
-    this.accessNoneLeft = SeatLayerStringTokens.accessNoneLeft,
     this.companionSeatsNote = SeatLayerStringTokens.companionSeatsNote,
     this.accessFreeCount = _defaultAccessFreeCount,
     this.accessibleStep = _defaultAccessibleStep,
@@ -323,11 +326,34 @@ class SeatLayerPickerStrings {
   /// Confirm-card notice title for a seat sold with a restricted view.
   final String restrictedView;
 
-  /// Confirm-card notice title for a seat with something in the way.
+  /// Seat-note row title for a seat with something in the way.
   ///
-  /// Only ever shown when the seat is not already restricted: a seat that is
-  /// both is described by the stronger of the two words, once.
+  /// Its own row, beside [restrictedView] rather than instead of it: a seat
+  /// behind both a rail and a pillar used to report only the rail.
   final String obstructedView;
+
+  /// Seat-note row title for the organizer's own sentence about a seat.
+  ///
+  /// Only drawn where the sentence belongs to no other row. Where the seat
+  /// also carries a view restriction or a premium mark, the sentence sits
+  /// under THAT row, because that is what the organizer is explaining.
+  final String organizerNote;
+
+  /// Seat-note row title for a wheelchair space with no fixed chair in it.
+  final String emptyWheelchairSpace;
+
+  /// Seat-note row title for an accessible place that does have a chair.
+  final String accessiblePhysicalSeat;
+
+  /// One word for a seat, or a provision, nobody can take tonight.
+  ///
+  /// The accessibility sheet says this about a provision the venue has and has
+  /// sold out of — the row stays, dimmed, because "this venue has no
+  /// wheelchair spaces" and "its wheelchair spaces are taken" are different
+  /// facts — and the legend says it about the grey the map paints. It used to
+  /// be "None left" in the sheet and something else again in the legend; one
+  /// unavailability deserves one word.
+  final String notAvailable;
 
   /// Tooltip on the 3D chrome's previous-seat step.
   final String previousSeat;
@@ -538,15 +564,6 @@ class SeatLayerPickerStrings {
   /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
   /// its English wording in every locale until one exists.
   final String displayOptions;
-
-  /// "None left" — a provision the venue has, and has sold out of.
-  ///
-  /// The row stays, dimmed: "this venue has no wheelchair spaces" and "its
-  /// wheelchair spaces are taken" are different facts.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
-  final String accessNoneLeft;
 
   /// The note under a wheelchair row on a chart that also authors companion
   /// places, so a buyer knows the seat beside them is still theirs to take.

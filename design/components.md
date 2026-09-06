@@ -157,12 +157,53 @@ override** `style:`
   is `color.*.background` with a hairline; selected is the accent with
   `color.*.onAccent` and a ring on the dot. `All prices` is pinned first and
   never scrolls away. On the light theme the dot is the category colour mixed
-  into the surface under a full-strength ring of it.
+  into the surface under a full-strength ring of it. The row CLOSES with one
+  grey swatch and `strings.notAvailable` — the single inert disc the map paints
+  for a seat nobody can take, whatever the reason. It is not a chip: no pill,
+  no hairline, no press target, not a toggle to assistive technology. (It
+  replaces a held/sold pair with a padlock and a diagonal.)
 - **Callbacks** none.
 - **Commands** `picker.setCategoryFilter { keys, focus }` — the first tap
   filters and frames that band; the second clears the filter and frames the
   whole venue. **`focus` is sent on both**: the unframed path leaves the camera
   inside the buyer's drill-in and the map returns washed out.
+
+## SeatNotes
+
+**Name** `SeatLayerSeatNotes` (rows from `seatLayerSeatNoteRows`) · **Style
+slots** none — the bands take the surface's own tone tokens · **Spec** §3.8.9
+
+- **Inputs** a seat's `accessibility[]`, `wheelchairSpaceType` and
+  `commercial` (`restrictedView`, `obstructedView`, `premium`, `note`).
+- **Model first.** `seatLayerSeatNoteRows` decides which rows a seat earns and
+  in what order — accommodations, the wheelchair provision, restricted,
+  obstructed, premium, the organizer's sentence — and every popup draws that
+  one list. Restricted and obstructed are SEPARATE rows; a wheelchair
+  accommodation with a provision reported yields the provision row only; the
+  organizer's sentence hangs under the first selling mark it explains, and is
+  its own row when there is none.
+- **Anatomy** full-bleed bands, no radius and no border, `size.notePadY` ×
+  `size.notePadX`, a `size.noteIconSize` glyph with `size.noteIconGap` beside
+  it, title `type.noteTitle` and organizer line `type.noteBody`, a hairline of
+  `color.*.divider` at `opacity.noteHairline` on every join but the first.
+  `compact` (the wide layout's tap card) uses the `noteCompact*` sizes.
+- **Tones** neutral `color.*.text` at `opacity.noteNeutralWash`; caution
+  `color.*.warning` at `opacity.noteToneWash` with `color.*.warnText`; premium
+  `color.*.premium` with `color.*.premiumText`. Each ink is measured against
+  the tinted band, not the surface it is mixed from.
+- **Callbacks** none. It is a statement, not a control.
+
+## SeatIcons
+
+**Name** `SeatLayerSeatIcon` / `seatLayerSeatGlyphs` · **Spec** §3.8.9
+
+Sixteen drawings — the twelve accommodations, `restrictedView`,
+`obstructedView`, `premium` and `note` — plus the accessibility sheet's own
+`contrast` disc. Authored in a 20-unit box, stroked at 1.45 units with round
+caps and joins in the caller's ink, hidden from assistive technology. The path
+data is transcribed verbatim from the runtime's shared set and is the contract:
+a port transcribes the same strings rather than redrawing them, and never
+substitutes an emoji or a platform icon. An unknown key draws nothing.
 
 ## MapControls
 
@@ -245,7 +286,7 @@ override** `style:`
   (`SeatLayerConfirmCardMode.add` | `.remove`), which chooses the question.
 - **States** with a photo (loading, arrived, never arrived), without one (no
   strip at all, and the 3D square in the decision row), 3D-only, with a sight
-  line, with tiers, with notices; the confidence teaser or its passport chip
+  line, with tiers, with seat notes; the confidence teaser or its passport chip
   inside 3D; committing; **removing** —
   the same card over a seat already in the cart, raised by a second tap on it
   (bridge event `seat.retap`, payload `{ seat }`, the seat still selected). The
@@ -299,7 +340,11 @@ override** `style:`
      `strings.passport` (with an accent dot) and `strings.viewFromHere`
      (spoken as `strings.viewFromThisSeat`) — at
      `size.confirmInspectChipFontSize`.
-  4. Tiers (`size.confirmTierHeight`) and notices, where the seat has them.
+  4. Seat notes, where the seat carries any, as full-bleed bands directly
+     under the category band and ABOVE the tier chooser — see SeatNotes below.
+     Then tiers (`size.confirmTierHeight`). The body owns no padding of its
+     own; the tier chooser carries the gutter so the bands can reach both
+     edges.
   5. Actions, `size.confirmActionHeight`: with no photo strip a 44 × 44 ghost
      square carrying a cube and `strings.venue3D` at
      `size.confirm3dSquareFontSize` opens the row, then `Cancel` at 34 % of the
@@ -538,7 +583,7 @@ specification. Names, slots and files:
 | `SeatLayerPickerExtendHoldPrompt` | one named `+5 min` step, once per hold, dismissable; **phone: off by default**, host opt-in via `SeatLayerPickerChromeOptions(showExtendHoldPrompt: true)`; wide keeps it | §3.13.8 |
 | `SeatLayerPickerBookedOverlay` | — | §3.13.10 |
 | `SeatLayerPickerGeneralAdmissionPrompt` / `…TablePrompt` | — | §3.13.11–12 |
-| `SeatLayerPickerAccessibilityFilters` | — | §3.5 — switches apply on change, no apply step, the sheet stays open; opening it clears a pending seat card |
+| `SeatLayerPickerAccessibilityFilters` | — | §3.5 — switches apply on change, no apply step, the sheet stays open; opening it clears a pending seat card; each row wears its own provision's glyph, the colour row a contrast disc, and a sold-out provision reads `strings.notAvailable` |
 | `SeatLayerPickerAccessibleStepper` | — | §3.4.1 |
 | `SeatLayerSeatViewChrome` | `seatViewChromeStyle` | §3.15 |
 | `SeatLayerPickerAttribution` | — | §3.10.3 |

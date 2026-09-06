@@ -11,6 +11,15 @@ import 'dart:convert';
 import 'dart:io';
 
 const String _output = 'lib/src/picker/picker_tokens.g.dart';
+
+/// The string table, in a part of its own.
+///
+/// Two hundred buyer-facing defaults, each with its English text above it as
+/// documentation, is four hundred lines — enough to push the single generated
+/// file past the package's 1,500-line readability cap. Splitting it costs
+/// nothing at the call site: `part` keeps one library, so every reader still
+/// imports `picker_tokens.g.dart` alone.
+const String _outputStrings = 'lib/src/picker/picker_tokens_strings.g.dart';
 const String _input = 'design/tokens.json';
 
 void main(List<String> args) {
@@ -18,34 +27,44 @@ void main(List<String> args) {
   final tokens =
       jsonDecode(File(_input).readAsStringSync()) as Map<String, Object?>;
   final generated = _render(tokens);
+  final generatedStrings = _renderStrings(tokens);
   final file = File(_output);
+  final stringsFile = File(_outputStrings);
 
   // Compare formatted against formatted: `dart format` is part of the
   // repository's own definition of correct source, so a generator that emitted
   // unformatted text would leave the file permanently "stale".
   final formatted = _formatted(generated);
+  final formattedStrings = _formatted(generatedStrings, name: 'strings');
 
   if (!check) {
     file.writeAsStringSync(formatted);
-    stdout.writeln('wrote $_output');
+    stringsFile.writeAsStringSync(formattedStrings);
+    stdout.writeln('wrote $_output and $_outputStrings');
     return;
   }
-  final current = file.existsSync() ? file.readAsStringSync() : '';
-  if (current == formatted) {
-    stdout.writeln('$_output is up to date');
+  final stale = <String>[
+    if ((file.existsSync() ? file.readAsStringSync() : '') != formatted)
+      _output,
+    if ((stringsFile.existsSync() ? stringsFile.readAsStringSync() : '') !=
+        formattedStrings)
+      _outputStrings,
+  ];
+  if (stale.isEmpty) {
+    stdout.writeln('$_output and $_outputStrings are up to date');
     return;
   }
   stderr.writeln(
-    '$_output is out of date. Run `dart run tool/gen_tokens.dart`.',
+    '${stale.join(', ')} out of date. Run `dart run tool/gen_tokens.dart`.',
   );
   exitCode = 1;
 }
 
 /// [source] as `dart format` would write it.
-String _formatted(String source) {
+String _formatted(String source, {String name = 'picker_tokens'}) {
   final scratch = Directory.systemTemp.createTempSync('seatlayer-tokens');
   try {
-    final file = File('${scratch.path}/picker_tokens.g.dart')
+    final file = File('${scratch.path}/$name.g.dart')
       ..writeAsStringSync(source);
     final result = Process.runSync('dart', <String>['format', file.path]);
     if (result.exitCode != 0) {
@@ -93,7 +112,6 @@ String _render(Map<String, Object?> tokens) {
   final outside = _map(motion['durationOutsideBudget']);
   final physics = _map(motion['physics']);
   final haptics = _map(tokens['haptics']);
-  final strings = _map(tokens['strings']);
 
   final buffer = StringBuffer()
     ..writeln('// GENERATED — do not edit.')
@@ -104,6 +122,8 @@ String _render(Map<String, Object?> tokens) {
     ..writeln('// This file is the one place the picker\'s spec numbers enter')
     ..writeln('// Dart. Change the JSON, not this file.')
     ..writeln("import 'dart:ui' show Color;")
+    ..writeln()
+    ..writeln("part 'picker_tokens_strings.g.dart';")
     ..writeln()
     ..writeln('/// The design-token version this file was generated from.')
     ..writeln('const int seatLayerTokensVersion = ${_num(tokens['version'])};')
@@ -228,8 +248,22 @@ String _render(Map<String, Object?> tokens) {
     buffer.writeln('  /// `$value`');
     buffer.writeln('  static const String $key = ${_dartString(value)};');
   });
-  buffer
-    ..writeln('}')
+  buffer.writeln('}');
+  return buffer.toString();
+}
+
+/// The string table, as the part file `picker_tokens.g.dart` declares.
+String _renderStrings(Map<String, Object?> tokens) {
+  final strings = _map(tokens['strings']);
+  final buffer = StringBuffer()
+    ..writeln('// GENERATED — do not edit.')
+    ..writeln('//')
+    ..writeln('// Source: $_input')
+    ..writeln('// Regenerate: dart run tool/gen_tokens.dart')
+    ..writeln('//')
+    ..writeln('// Split out of picker_tokens.g.dart so neither generated file')
+    ..writeln("// passes the package's readability cap.")
+    ..writeln("part of 'picker_tokens.g.dart';")
     ..writeln()
     ..writeln('/// The English default for every buyer-facing chrome string.')
     ..writeln('abstract final class SeatLayerStringTokens {');

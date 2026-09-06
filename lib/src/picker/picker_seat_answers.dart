@@ -66,10 +66,37 @@ mixin _PickerSeatAnswers on ValueNotifier<SeatLayerPickerState> {
     // with were adopted as answered when it appeared (see _applySnapshot), so
     // what is left unanswered here is what the buyer tapped since.
     for (final seat in value.selection.reversed) {
-      if (!_confirmedLabels.contains(seat.label)) return seat;
+      if (_confirmedLabels.contains(seat.label)) continue;
+      if (!mayAskAboutSeat(seat)) continue;
+      return seat;
     }
     return null;
   }
+
+  /// Whether a card may be raised over [seat] at all.
+  ///
+  ///
+  /// A seat the buyer cannot take is INERT. The engine stopped reporting taps
+  /// on one — no pinned card with a reason, no state card in the scene — and
+  /// this is the same rule on this side of the bridge, for the case where an
+  /// older runtime still reports the tap: a card asking "add this seat?" over
+  /// a seat that is sold, blocked or in someone else's hold is a question with
+  /// no true answer, and the buyer would be told a reason they can do nothing
+  /// about instead of being left on the map.
+  ///
+  /// `held` is the one status that depends on WHOSE hold it is. The picker's
+  /// own hold makes the buyer's seats held, and those seats keep their card —
+  /// it is the card that offers them back. With no hold of the picker's own,
+  /// a held seat belongs to someone else.
+  @internal
+  bool mayAskAboutSeat(SelectedSeat seat) => switch (seat.status) {
+        null => true,
+        SeatStatus.booked || SeatStatus.blocked => false,
+        SeatStatus.held => value.snapshot?.hold.active ?? false,
+        // A status this build does not know is not a reason to swallow a seat
+        // the runtime put in the selection.
+        _ => true,
+      };
 
   /// Tell the controller which seat the open confirm card is showing.
   ///
@@ -147,6 +174,8 @@ mixin _PickerSeatAnswers on ValueNotifier<SeatLayerPickerState> {
     if (_disposed || _options.readOnly) return;
     final seat = SelectedSeat.fromJson(jGet(payload, 'seat'));
     if (seat == null || seat.label == _confirmCardSeat?.label) return;
+    // The same rule the add card follows: no card over a seat nobody can take.
+    if (!mayAskAboutSeat(seat)) return;
     if (_retapSeat?.label == seat.label && _retapSeat == seat) return;
     _retapSeat = seat;
     _syncSelectionFocus();

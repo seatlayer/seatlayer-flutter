@@ -15,6 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_seat_icons.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
 
 import 'picker_test_fixture.dart';
@@ -44,29 +45,30 @@ BundleInfo _accessBundle({
 /// A row is read as `label` or `label · count`, which is the pair of things it
 /// draws — the provision and how much of it is left.
 List<String> _rowLabels(WidgetTester tester) => tester
-    .widgetList<Semantics>(
-      find.descendant(
-        of: find.byType(SingleChildScrollView),
-        matching: find.byType(Semantics),
-      ),
-    )
-    .where((row) => row.properties.toggled != null)
-    .map((row) {
+        .widgetList<Semantics>(
+          find.descendant(
+            of: find.byType(SingleChildScrollView),
+            matching: find.byType(Semantics),
+          ),
+        )
+        .where((row) => row.properties.toggled != null)
+        .map((row) {
       final label = row.properties.label!;
       final count = _countFor(tester, label);
       return count == null ? label : '$label · $count';
-    })
-    .toList(growable: false);
+    }).toList(growable: false);
 
 /// The count drawn at the end of the row named [label], if it draws one.
 String? _countFor(WidgetTester tester, String label) {
   final texts = tester
       .widgetList<Text>(
         find.descendant(
-          of: find.ancestor(
-            of: find.text(label),
-            matching: find.byType(Row),
-          ).first,
+          of: find
+              .ancestor(
+                of: find.text(label),
+                matching: find.byType(Row),
+              )
+              .first,
           matching: find.byType(Text),
         ),
       )
@@ -156,7 +158,9 @@ void main() {
 
     expect(
       _rowLabels(tester),
-      <String>['Wheelchair · None left', 'Companion · 6 free'],
+      // ONE word for unavailability across the picker: the legend says the
+      // same about the grey the map paints.
+      <String>['Wheelchair · Not available', 'Companion · 6 free'],
     );
     expect(
       _rowEnabled(tester, 'Wheelchair'),
@@ -169,7 +173,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       _rowLabels(tester),
-      <String>['Wheelchair · None left', 'Companion · 6 free'],
+      // ONE word for unavailability across the picker: the legend says the
+      // same about the grey the map paints.
+      <String>['Wheelchair · Not available', 'Companion · 6 free'],
     );
   });
 
@@ -412,4 +418,79 @@ void main() {
           'still reachable under its wire key',
     );
   });
+
+  testWidgets('each row wears the drawing its own provision carries',
+      (tester) async {
+    final map = FakePickerMap(bundle: _accessBundle(limited: true));
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    final snapshot = pickerSnapshot(
+      accessNeeds: <Object?>[
+        accessNeed('wheelchair', 4),
+        accessNeed('hearing', 2),
+      ],
+    );
+    (snapshot['features']! as Map<String, Object?>)['limitedViewFilter'] = true;
+    await _openSheet(tester, map, snapshot);
+
+    final keys = tester
+        .widgetList<SeatLayerSeatIcon>(find.byType(SeatLayerSeatIcon))
+        .map((icon) => icon.iconKey)
+        .toList(growable: false);
+    expect(
+      keys,
+      <String>[
+        // One drawing per provision — every row used to wear the same
+        // wheelchair, which said nothing about which provision it was.
+        'wheelchair',
+        'hearing',
+        // The switch that hides limited-view seats wears the mark those seats
+        // carry…
+        'restrictedView',
+        // …and the colour row wears a contrast disc, because it recolours the
+        // map rather than choosing seats.
+        'contrast',
+      ],
+    );
+  });
+
+  for (final brightness in Brightness.values) {
+    testWidgets('the sheet\'s rows golden — ${brightness.name}',
+        (tester) async {
+      final map = FakePickerMap(bundle: _accessBundle(limited: true));
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+
+      final snapshot = pickerSnapshot(
+        accessNeeds: <Object?>[
+          accessNeed('wheelchair', 4),
+          accessNeed('companion', 4),
+          accessNeed('hearing', 0),
+        ],
+      );
+      (snapshot['features']! as Map<String, Object?>)['limitedViewFilter'] =
+          true;
+
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const Align(
+            alignment: Alignment.bottomLeft,
+            child: SeatLayerPickerAccessibilityFilters(compact: true),
+          ),
+          platformBrightness: brightness,
+        ),
+      );
+      map.emit(snapshot);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(IconButton));
+      await tester.pumpAndSettle();
+
+      await expectLater(
+        find.byType(SingleChildScrollView).first,
+        matchesGoldenFile('goldens/access_sheet_${brightness.name}.png'),
+      );
+    }, tags: goldenTag, skip: goldenSkip != null);
+  }
 }
