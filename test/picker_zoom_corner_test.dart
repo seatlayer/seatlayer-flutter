@@ -51,11 +51,21 @@ bool _enabled(WidgetTester tester, Type control) =>
     _disc(tester, control).onPressed != null;
 
 /// How far back a disc is drawn, or null where it is drawn at full strength.
+/// Whether the disc is drawn dimmed: no shadow lifting it off the map.
+///
+/// A disabled disc keeps its ground in both themes; the glyph and the ring
+/// step back and the shadow goes. Returns null when the disc is lifted.
 double? _dim(WidgetTester tester, Type control) {
-  final opacities = tester.widgetList<Opacity>(
-    find.descendant(of: find.byType(control), matching: find.byType(Opacity)),
+  final boxes = tester.widgetList<AnimatedContainer>(
+    find.descendant(
+      of: find.byType(control),
+      matching: find.byType(AnimatedContainer),
+    ),
   );
-  return opacities.isEmpty ? null : opacities.first.opacity;
+  if (boxes.isEmpty) return null;
+  final decoration = boxes.first.decoration as BoxDecoration?;
+  final shadows = decoration?.boxShadow ?? const <BoxShadow>[];
+  return shadows.isEmpty ? SeatLayerOpacityTokens.mapControlDisabled : null;
 }
 
 /// Mount the phone corner and stand the camera where [snapshot] says.

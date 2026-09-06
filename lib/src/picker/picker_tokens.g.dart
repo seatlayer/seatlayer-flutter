@@ -227,11 +227,11 @@ abstract final class SeatLayerSizeTokens {
   /// `11`
   static const double sheetHeadHeight = 11;
 
-  /// `64`
-  static const double cartCardMinHeight = 64;
+  /// `52`
+  static const double cartCardMinHeight = 52;
 
-  /// `7`
-  static const double cartCardGap = 7;
+  /// `6`
+  static const double cartCardGap = 6;
 
   /// `12`
   static const double cartCardRadius = 12;
@@ -245,8 +245,8 @@ abstract final class SeatLayerSizeTokens {
   /// `14`
   static const double cartTrayPadX = 14;
 
-  /// `228`
-  static const double cartPeekMaxHeight = 228;
+  /// `189`
+  static const double cartPeekMaxHeight = 189;
 
   /// `3`
   static const double cartNoteGap = 3;
@@ -455,8 +455,8 @@ abstract final class SeatLayerSizeTokens {
   /// `112`
   static const double bestSeatsStepperWidth = 112;
 
-  /// `44`
-  static const double accessibilityControlSize = 44;
+  /// `36`
+  static const double accessibilityControlSize = 36;
 
   /// `36`
   static const double mapControlSize = 36;

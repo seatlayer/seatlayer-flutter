@@ -5,15 +5,21 @@
 The phone picker follows the web picker's latest phone layout item by item.
 
 - **The bottom sheet is one surface with a footer block.** A pill handle
-  straddles its top edge; the cart shows one card per ticket on every width,
-  capped at three cards and a sliver of the fourth before it scrolls; the
-  total line reads "No seats selected" or "N tickets · total"; an empty cart
-  offers a full-width "Find best seats". The "From €X" line is gone.
+  straddles its top edge over the map; collapsed, the sheet is the total line
+  and the button alone, and the cards wait behind the handle. Open, the cart
+  shows one card per ticket, capped at three cards and a sliver of the fourth
+  before it scrolls inside its box; the total line reads "No seats selected"
+  or "N tickets · total"; an empty cart offers a full-width "Find best
+  seats". The "From €X" line is gone. A seat the card is still asking about
+  is not listed until the buyer adds it, and while a card is open the footer
+  keeps its button, disabled, rather than turning into a sentence.
 - **Three map controls on the phone.** "+", "−" and "Show whole venue" are
   always drawn and dim only at their limit: "+" at maximum zoom, the other
   two at the exact whole-venue pose, read from the runtime's `atVenueFit`
   and `canZoomIn` snapshot fields (older runtimes fall back to
-  `canZoomOut`). The disabled look is real: a dimmed disc with no shadow.
+  `canZoomOut`). A disabled disc keeps its ground in both themes: the glyph
+  and ring step back and the shadow goes. The accessibility disc matches the
+  other three in size.
 - **Seat notes on every popup.** The seat card lists every attribute the
   seat carries as full-width bands under the category band, in a fixed
   order: accommodation types, the wheelchair provision, restricted view,
@@ -32,6 +38,8 @@ The phone picker follows the web picker's latest phone layout item by item.
   the phone's whole-venue disc are the two fit affordances, both saying
   "Show whole venue". The best-seats card carries a one-line "Find seats
   together" title.
+- **The seat card's spotlight follows the seat** through the lift that pans
+  the map out from under the card; it used to sit one lift band below.
 - **No card over an unavailable seat.** A sold seat, one not for sale, or
   one another buyer holds never raises the seat card.
 - New strings — `fitWholeVenue`, `notAvailable`, `organizerNote`,

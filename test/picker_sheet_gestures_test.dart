@@ -207,7 +207,7 @@ void main() {
       expect(picker.cartSheetDetent, SeatLayerSheetDetent.peek);
     });
 
-    testWidgets('a cart taller than the ceiling opens a place above it',
+    testWidgets('a cart taller than its box scrolls inside it, not past it',
         (tester) async {
       final map = FakePickerMap();
       addTearDown(map.dispose);
@@ -221,30 +221,23 @@ void main() {
       map.emit(_tenDistinctRows());
       picker.setCartSheetExpanded(true);
       await tester.pumpAndSettle();
-      // Ten cards, all of them in the list: the cart is taller than the web
-      // picker's ceiling, so the sheet rests ON the ceiling.
-      final ceiling = _height(tester);
-      expect(ceiling, 480);
+      // Ten cards, all of them in the list, and the list capped at three and
+      // a sliver: the sheet rests well under the web picker's ceiling and the
+      // map keeps its room.
+      final rest = _height(tester);
+      expect(rest, lessThan(480));
 
+      // A pull past the resting height goes nowhere: there is no taller
+      // place to offer, because the cart scrolls inside its own box.
       final drag = await tester.startGesture(_head(tester));
       await _prime(tester, drag);
       await drag.moveBy(const Offset(0, -240));
       await tester.pump();
       await drag.up();
       await tester.pumpAndSettle();
-
-      // A place the picker never puts the sheet itself, and only offered
-      // because there was more cart to see.
-      expect(picker.cartSheetDetent, SeatLayerSheetDetent.full);
-      expect(_height(tester), greaterThan(ceiling));
+      expect(picker.cartSheetDetent, SeatLayerSheetDetent.content);
+      expect(_height(tester), rest);
       expect(picker.cartSheetExpanded, isTrue);
-
-      // And back down to the ceiling, which is still where a tap rests it.
-      picker.setCartSheetExpanded(false);
-      await tester.pumpAndSettle();
-      picker.setCartSheetExpanded(true);
-      await tester.pumpAndSettle();
-      expect(_height(tester), ceiling);
     });
 
     testWidgets('the map still collapses it', (tester) async {

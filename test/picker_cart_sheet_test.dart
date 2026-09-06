@@ -539,7 +539,7 @@ void main() {
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
   });
 
-  testWidgets('the footer states the card standing over the map',
+  testWidgets('the footer holds its button while a seat card is open',
       (tester) async {
     // ONE button on the sheet, so it is the surface that owes the reason: a
     // grey button still reading "Hold seats & checkout" tells the buyer only
@@ -577,15 +577,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(picker.seatAwaitingConfirmation, isNotNull);
-    expect(find.text('Confirm or cancel this seat'), findsOneWidget);
-    expect(
-      tester
-          .widget<FilledButton>(
-            find.widgetWithText(FilledButton, 'Confirm or cancel this seat'),
-          )
-          .onPressed,
-      isNull,
-    );
+    // The card is the question; the footer keeps the label it had and simply
+    // cannot be pressed until the card is answered. A sentence-button read as
+    // a second control the buyer was being asked to press.
+    expect(find.text('Confirm or cancel this seat'), findsNothing);
+    final button = tester.widget<FilledButton>(find.byType(FilledButton));
+    expect(button.onPressed, isNull);
   });
 
   testWidgets('a closed event states itself in the open tray', (tester) async {
@@ -722,7 +719,7 @@ void main() {
     expect(find.byType(SeatLayerBestSeatsForm), findsNothing);
   });
 
-  testWidgets('the collapsed cart shows three cards and a sliver of a fourth',
+  testWidgets('the collapsed sheet keeps its cards behind the handle',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -740,6 +737,37 @@ void main() {
     map.emit(_tenDistinctRows());
     await tester.pumpAndSettle();
 
+    // Collapsed is the footer block alone — total and button. A list that
+    // unrolled itself every time a seat was added read as a panel the buyer
+    // had not opened.
+    final region = tester.getRect(
+      find.ancestor(
+        of: find.byType(SeatLayerCartList),
+        matching: find.byType(SingleChildScrollView),
+      ),
+    );
+    expect(region.height, 0);
+    expect(find.text('10 tickets'), findsOneWidget);
+  });
+
+  testWidgets('the open cart shows three cards and a sliver of a fourth',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: _sheet(expanded: true),
+        ),
+      ),
+    );
+    map.emit(_tenDistinctRows());
+    await tester.pumpAndSettle();
+
     // Ten tickets used to be a sheet that grew until it owned the phone. The
     // cards are all in the tree; the box is what caps them.
     expect(find.byType(SeatLayerCartCard), findsNWidgets(10));
@@ -749,7 +777,19 @@ void main() {
         matching: find.byType(SingleChildScrollView),
       ),
     );
-    expect(region.height, SeatLayerSizeTokens.cartPeekMaxHeight);
+    // The box is the list's cap plus the tray's own foot under it: never a
+    // whole extra card, so the fourth card is always cut.
+    expect(
+      region.height,
+      greaterThanOrEqualTo(SeatLayerSizeTokens.cartPeekMaxHeight),
+    );
+    expect(
+      region.height,
+      lessThan(
+        SeatLayerSizeTokens.cartPeekMaxHeight +
+            SeatLayerSizeTokens.cartCardMinHeight,
+      ),
+    );
 
     // Three whole cards inside it, and the fourth cut by the box's own edge —
     // a sliver, so the list reads as scrollable rather than finished.
@@ -788,7 +828,9 @@ void main() {
     expect(handle.width, SeatLayerSizeTokens.sheetHandleWidth);
     expect(handle.height, SeatLayerSizeTokens.sheetHandleHeight);
     final sheet = tester.getRect(find.byType(SeatLayerCartSheet));
-    expect(handle.top, sheet.top);
+    // The pill straddles the edge: its top half hangs over the map, above the
+    // sheet's own box, so there is no strip of page ground under it.
+    expect(handle.top, sheet.top - SeatLayerSizeTokens.sheetHandleOverhang);
     // The chevron is INSIDE it, in both states — one thing, not two.
     expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsOneWidget);
 

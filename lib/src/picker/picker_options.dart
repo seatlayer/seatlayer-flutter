@@ -82,7 +82,16 @@ class SeatLayerPickerChromeOptions {
     this.showHoldPill = true,
     this.showExtendHoldPrompt,
     this.manageSystemOverlays = true,
+    this.seatCardGlass = true,
   });
+
+  /// Whether the map behind an open seat card is put behind blurred glass
+  /// with a clear hole around the seat.
+  ///
+  /// On by default, as on the web. The hole follows the seat through the
+  /// lift (see `picker_seat_lift.dart`); a host that would rather rely on
+  /// the runtime paling the venue outside the seat's section turns it off.
+  final bool seatCardGlass;
 
   /// Whether the header renders.
   final bool showHeader;

@@ -708,7 +708,11 @@ class _ControlButton extends StatelessWidget {
             ? Color.alphaBlend(pickerAlpha(theme.accent, .13), chrome)
             : chrome,
         border: Border.all(
-          color: active ? pickerAlpha(theme.accent, .52) : chromeLine,
+          color: active
+              ? pickerAlpha(theme.accent, .52)
+              : disabled
+                  ? pickerAlpha(chromeLine, .6)
+                  : chromeLine,
         ),
         boxShadow: disabled
             ? const <BoxShadow>[]
@@ -734,16 +738,18 @@ class _ControlButton extends StatelessWidget {
           icon: Icon(
             icon,
             size: 20,
-            color: active ? theme.accent : theme.text,
+            color: active
+                ? theme.accent
+                : disabled
+                    ? pickerAlpha(theme.mutedText, .55)
+                    : theme.text,
           ),
         ),
       ),
     );
-    return disabled
-        ? Opacity(
-            opacity: SeatLayerOpacityTokens.mapControlDisabled,
-            child: control,
-          )
-        : control;
+    // The disc keeps its ground in both themes; only the glyph and the ring
+    // step back, and the shadow goes. A wash over the whole disc read as a
+    // grey blot on the light map and vanished on the dark one.
+    return control;
   }
 }

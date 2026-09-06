@@ -102,11 +102,14 @@ void main() {
     expect(cta.statesReason, isTrue);
   });
 
-  test('an open seat card says what to do about it', () {
+  test('an open seat card holds the button without a sentence', () {
+    // The card is the question; the footer keeps the label it would have had
+    // and simply cannot be pressed until the card is answered.
+    final under = _cta(_state());
     final cta = _cta(_state(), seatCardOpen: true);
-    expect(cta.label, 'Confirm or cancel this seat');
+    expect(cta.label, under.label);
     expect(cta.enabled, isFalse);
-    expect(cta.statesReason, isTrue);
+    expect(cta.statesReason, under.statesReason);
   });
 
   test('a quantity prompt asks for tickets, not for a seat', () {
@@ -233,7 +236,8 @@ void main() {
         seatCardOpen: true,
         handoffInFlight: true,
       );
-      expect(cta.label, 'Confirm or cancel this seat');
+      expect(cta.label, isNot('Confirm or cancel this seat'));
+      expect(cta.enabled, isFalse);
     });
 
     test('the hold outranks the handoff it has to precede', () {

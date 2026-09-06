@@ -314,16 +314,21 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
     // assumed: it grows with the platform's text size, with a lapse notice and
     // with an inline error, and a cap derived from a guess would clip the
     // button rather than the list.
-    final chrome = overhang + headHeight + _footHeight + bottomInset;
+    final chrome = headHeight + _footHeight + bottomInset;
     final maxBody = (maxSheet - chrome).clamp(0.0, screenHeight);
 
     // THREE CARDS AND A SLIVER OF THE FOURTH. Ten tickets used to be a sheet
     // that grew until it owned the phone; the cart scrolls inside its own box
     // and the map keeps its room. On a short phone the fraction wins instead,
     // the region shrinks and scrolls, and the button is never what gets cut.
-    _collapsedCart =
-        _atMost(_cartNatural, layout.cartPeekMaxHeight).clamp(0.0, maxBody);
-    final openNatural = _cartNatural + _extrasNatural;
+    // The collapsed sheet is the footer block alone — the total line and the
+    // button. The cards wait behind the handle: a list that unrolled itself
+    // every time a seat was added read as a panel the buyer had not opened.
+    _collapsedCart = 0.0;
+    // THREE CARDS AND A SLIVER OF THE FOURTH once open: the cart scrolls
+    // inside its own box and the map keeps its room.
+    final openNatural =
+        _atMost(_cartNatural, layout.cartPeekMaxHeight) + _extrasNatural;
     final content =
         (_atMost(openNatural, maxBody) - _collapsedCart).clamp(0.0, maxBody);
     // The one height the web has no equivalent for: how far a FINGER may pull
@@ -371,21 +376,17 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
             // tested at all.
             clipBehavior: Clip.none,
             children: <Widget>[
+              // The panel fills the box; the handle's upper half hangs over the
+              // MAP above it rather than over a strip of page ground, which is
+              // what a padded stack left between the venue and the edge.
               Padding(
-                padding: EdgeInsets.only(top: overhang),
+                padding: EdgeInsets.zero,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
+                    // A hairline and nothing else above it: the web's upward
+                    // shadow read as a grey band over the map on a phone, a
+                    // few points of nothing between the venue and the handle.
                     border: Border(top: BorderSide(color: theme.divider)),
-                    boxShadow: <BoxShadow>[
-                      // The web's `0 -8px 26px -20px`: a shadow that says the
-                      // sheet is above the map without drawing a band under it.
-                      BoxShadow(
-                        color: pickerAlpha(Colors.black, .72),
-                        offset: const Offset(0, -8),
-                        blurRadius: 26,
-                        spreadRadius: -20,
-                      ),
-                    ],
                   ),
                   child: Material(
                     // The PANEL'S own ground, not the card's: the cards inside
@@ -425,6 +426,7 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
                               _footHeight = v;
                             }),
                             child: _SheetFoot(
+                              divider: open && hasTickets,
                               actionError: widget.actionError,
                               checkoutBar: widget.checkoutBar,
                               attribution: widget.attribution,
@@ -440,7 +442,7 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
                 ),
               ),
               PositionedDirectional(
-                top: 0,
+                top: -overhang,
                 start: 0,
                 end: 0,
                 child: _SheetHandle(
@@ -668,6 +670,7 @@ class _SheetHandle extends StatelessWidget {
 /// button, which [seatLayerCheckoutCtaState] decides.
 class _SheetFoot extends StatelessWidget {
   const _SheetFoot({
+    required this.divider,
     required this.actionError,
     required this.checkoutBar,
     required this.attribution,
@@ -679,6 +682,13 @@ class _SheetFoot extends StatelessWidget {
   final Widget? actionError;
   final Widget? checkoutBar;
   final Widget attribution;
+
+  /// Whether a card list sits above the foot and wants a rule under it.
+  ///
+  /// The collapsed sheet has nothing above the foot but the panel's own top
+  /// edge, and a second hairline a few points under the first read as two
+  /// lines for one edge.
+  final bool divider;
   final SeatLayerCheckoutCallback onCheckout;
   final VoidCallback onFindBestSeats;
   final ButtonStyle? buttonStyle;
@@ -688,7 +698,9 @@ class _SheetFoot extends StatelessWidget {
     final theme = seatLayerMapChromeThemeOf(context);
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: theme.divider)),
+        border: divider
+            ? Border(top: BorderSide(color: theme.divider))
+            : const Border(),
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(

@@ -110,7 +110,31 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
   }
   // The card standing over the map is the answer to this one; the footer says
   // so rather than reading as live behind it.
-  if (seatCardOpen) return reason(strings.confirmOrCancelSeat);
+  // A seat card that is open holds the button, but says nothing about it:
+  // the card is the question, and the footer keeps the label it had so the
+  // buyer's cart still reads as their cart underneath it.
+  if (seatCardOpen) {
+    final under = seatLayerCheckoutCtaState(
+      state: state,
+      strings: strings,
+      label: label,
+      canCheckout: canCheckout,
+      seatCardOpen: false,
+      handoffInFlight: handoffInFlight,
+      ticketCount: ticketCount,
+      pendingCount: pendingCount,
+      canOfferFind: canOfferFind,
+    );
+    return SeatLayerCheckoutCtaState(
+      label: under.label,
+      enabled: false,
+      busy: under.busy,
+      statesReason: under.statesReason,
+      // Not even the finder: nothing on the sheet is pressable while the
+      // card is asking.
+      findsBestSeats: false,
+    );
+  }
 
   // 3. and 4. Work the buyer has already asked for. The hold comes first
   //    because the handoff cannot exist until it succeeds — which is also why

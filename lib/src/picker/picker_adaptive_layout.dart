@@ -966,7 +966,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                               // there is nothing to spotlight and the card simply
                               // rests over it.
                               seatCard: seatCardUp,
-                              anchor: seatCard3D
+                              anchor: seatCard3D || !chrome.seatCardGlass
                                   ? null
                                   : _spotlightAnchor(cardSeat?.screenPoint),
                               topInset: topBand,

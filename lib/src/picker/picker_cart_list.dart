@@ -243,9 +243,13 @@ List<SeatLayerTicketLine> _resolveLines(
   SeatLayerPickerState state,
 ) {
   final theme = seatLayerPickerThemeOf(context);
+  // A seat the card is still asking about is not in the cart yet: it is in
+  // the runtime's selection, and listing it here before the buyer has said
+  // yes shows them a ticket they have not taken.
+  final confirmed =
+      SeatLayerPickerScope.controllerOf(context).confirmedCartLines;
   return <SeatLayerTicketLine>[
-    for (final item in state.cartLines)
-      _resolveLine(context, state, item, theme),
+    for (final item in confirmed) _resolveLine(context, state, item, theme),
   ];
 }
 
@@ -386,7 +390,7 @@ class SeatLayerCartCard extends StatelessWidget {
               borderRadius:
                   BorderRadius.circular(SeatLayerSizeTokens.cartCardRadius),
             ),
-            padding: const EdgeInsetsDirectional.fromSTEB(12, 9, 6, 9),
+            padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 4, 4),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
@@ -576,13 +580,13 @@ class _CardAction extends StatelessWidget {
           width: SeatLayerSizeTokens.minimumHitTarget,
           height: SeatLayerSizeTokens.minimumHitTarget,
         ),
-        color: theme.mutedText,
+        color: theme.text,
         style: IconButton.styleFrom(
           minimumSize: const Size.square(SeatLayerSizeTokens.minimumHitTarget),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
-        icon: Icon(icon, size: 14),
+        icon: Icon(icon, size: 18),
       ),
     );
   }
