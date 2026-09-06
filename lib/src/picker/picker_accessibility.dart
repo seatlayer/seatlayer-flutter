@@ -230,7 +230,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                                 ? null
                                 : need.count! > 0
                                     ? strings.accessFreeCount(need.count!)
-                                    : strings.accessNoneLeft,
+                                    : strings.notAvailable,
                             // The web menu's own "12 free" button, which steps
                             // the camera through the sections that hold them.
                             // Only where the runtime can fly and there is
