@@ -145,7 +145,28 @@ class _SeatLayerPickerAdaptiveLayoutState
     frame: (seatId, {required fraction, gestures}) =>
         _picker?.frameSeat(seatId, fraction: fraction, gestures: gestures) ??
         Future<SeatLayerSeatFrame?>.value(),
+    // The pan publishes no snapshot, so nothing else rebuilds this layout
+    // when the map moves under the card — and the spotlight hole is cut
+    // against where the seat is NOW. See [_spotlightAnchor].
+    onChanged: () {
+      if (mounted) setState(() {});
+    },
   );
+
+  /// Where the glass behind the seat card leaves the map clear.
+  ///
+  /// [point] is `selection[].screenPoint`, computed when the runtime built the
+  /// snapshot the chrome is reading. `picker.frameSeat` then pans the map
+  /// without publishing one — camera only, no revision — so the seat has since
+  /// moved by the lift standing over that snapshot, and the hole has to move
+  /// with it or it is cut a whole lift band below the seat it is showing.
+  /// Both are in the map surface's own coordinates, which is also this
+  /// backdrop's: the prompt and the map fill the same stack.
+  Offset? _spotlightAnchor(Offset? point) {
+    if (point == null) return null;
+    final dy = _seatLift.anchorDy;
+    return dy == 0 ? point : point.translate(0, dy);
+  }
 
   /// The map surface's box once it has been laid out.
   RenderBox? _mapBox() {
@@ -945,7 +966,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                               // there is nothing to spotlight and the card simply
                               // rests over it.
                               seatCard: seatCardUp,
-                              anchor: seatCard3D ? null : cardSeat?.screenPoint,
+                              anchor: seatCard3D
+                                  ? null
+                                  : _spotlightAnchor(cardSeat?.screenPoint),
                               topInset: topBand,
                               // With no anchor in 3D this band only sets where the
                               // card rests, so the lift is spent here.

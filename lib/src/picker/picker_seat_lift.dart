@@ -139,7 +139,19 @@ const double seatLayerSheetRestoreFraction = 0.5;
 /// half way — the web card's rule.
 class PickerSeatLift {
   /// Creates a lift that pans through [frame].
-  PickerSeatLift({required this.frame, this.settle = defaultSettle});
+  PickerSeatLift({
+    required this.frame,
+    this.onChanged,
+    this.settle = defaultSettle,
+  });
+
+  /// Called after a pan lands, so the chrome drawn against the seat's screen
+  /// position can be laid out again.
+  ///
+  /// The pan carries no revision — it is camera only — so nothing else on
+  /// this side hears about it, and the spotlight hole would keep the place
+  /// the seat had before the map moved.
+  final void Function()? onChanged;
 
   /// When the lift is asked again after it first lands.
   ///
@@ -169,6 +181,7 @@ class PickerSeatLift {
   String? _seatId;
   double _fraction = 0;
   double _dy = 0;
+  double _anchorDy = 0;
   int? _gestures;
   int _revision = -1;
   int _generation = 0;
@@ -180,6 +193,17 @@ class PickerSeatLift {
 
   /// The total pan standing, in screen px.
   double get dy => _dy;
+
+  /// The pan made since the snapshot the chrome is reading, in screen px.
+  ///
+  /// `selection[].screenPoint` is computed when the runtime BUILDS a snapshot,
+  /// and `picker.frameSeat` publishes none — it is camera only, with no
+  /// revision — so a seat's reported point is where it sat before this lift.
+  /// Anything the shell draws against that point adds this, or it lands a
+  /// whole lift band away from the seat (the spotlight hole did, on device).
+  /// A newer snapshot already contains the pans made before it, so this is
+  /// reset the moment one arrives rather than accumulated for the card's life.
+  double get anchorDy => _anchorDy;
 
   /// Whether a lift is waiting for the map to hold still — the layout keeps
   /// rebuilding while this is true, so the next [sync] can see a settled
@@ -228,6 +252,10 @@ class PickerSeatLift {
     if (seatId == _seatId && fraction == _fraction && revision == _revision) {
       return;
     }
+    // A newer snapshot recomputed every screen point against the camera this
+    // lift has already moved, so the pans folded into it are no longer the
+    // shell's to add.
+    if (revision != _revision) _anchorDy = 0;
     _seatId = seatId;
     _fraction = fraction;
     _revision = revision;
@@ -256,6 +284,10 @@ class PickerSeatLift {
     if (_gestures != null && answer.gestures != _gestures) return;
     _gestures = answer.gestures;
     _dy += answer.dy;
+    if (answer.dy != 0) {
+      _anchorDy += answer.dy;
+      onChanged?.call();
+    }
     if (_settleTimers.isEmpty) {
       for (final delay in settle) {
         _settleTimers.add(
@@ -298,6 +330,7 @@ class PickerSeatLift {
     _seatId = null;
     _fraction = 0;
     _dy = 0;
+    _anchorDy = 0;
     _gestures = null;
     _revision = -1;
   }
