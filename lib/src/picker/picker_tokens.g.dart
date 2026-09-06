@@ -260,8 +260,8 @@ abstract final class SeatLayerSizeTokens {
   /// `16`
   static const double footPadX = 16;
 
-  /// `8`
-  static const double footPadBottom = 8;
+  /// `2`
+  static const double footPadBottom = 2;
 
   /// `10`
   static const double footTotalGap = 10;

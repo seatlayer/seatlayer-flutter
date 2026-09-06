@@ -90,7 +90,7 @@ Future<FakePickerMap> _corner(
 }
 
 void main() {
-  testWidgets('the phone corner carries +, − and the whole venue',
+  testWidgets('the phone corner carries + and the whole venue',
       (tester) async {
     await _corner(
       tester,
@@ -98,11 +98,12 @@ void main() {
     );
 
     expect(find.byType(SeatLayerPickerZoomInButton), findsOneWidget);
-    expect(find.byType(SeatLayerPickerZoomOutButton), findsOneWidget);
+    // No "−" on the phone (owner, 2026-09-06): pinch steps out, the disc goes home.
+    expect(find.byType(SeatLayerPickerZoomOutButton), findsNothing);
     expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsOneWidget);
   });
 
-  testWidgets('at the whole venue the two back-out discs dim, and stay',
+  testWidgets('at the whole venue the home disc stays live',
       (tester) async {
     await _corner(
       tester,
@@ -116,9 +117,7 @@ void main() {
     // DIMMED, NOT GONE. A control that disappears moves the target under a
     // thumb already reaching for it; one that stays put and plainly cannot be
     // pressed says "you are already looking at everything".
-    expect(find.byType(SeatLayerPickerZoomOutButton), findsOneWidget);
     expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsOneWidget);
-    expect(_enabled(tester, SeatLayerPickerZoomOutButton), isFalse);
     // The whole-venue disc is ALWAYS live: the camera facts in the snapshot
     // are only as fresh as the last state change, and a pinch changes none,
     // so a dimmed escape hatch stranded buyers on a stale reading.
@@ -129,14 +128,10 @@ void main() {
     // And it has to LOOK dimmed, or "cannot be pressed" is a fact the buyer
     // only discovers by pressing it.
     expect(_dim(tester, SeatLayerPickerShowWholeVenueButton), isNull);
-    expect(
-      _dim(tester, SeatLayerPickerZoomOutButton),
-      SeatLayerOpacityTokens.mapControlDisabled,
-    );
     expect(_dim(tester, SeatLayerPickerZoomInButton), isNull);
   });
 
-  testWidgets('inside a section both back-out discs are live', (tester) async {
+  testWidgets('inside a section the home disc is live', (tester) async {
     // Even standing at the fit pose: leaving the section is a rung of its own,
     // with a card and a dim to clear.
     await _corner(
@@ -144,7 +139,6 @@ void main() {
       snapshot: pickerSnapshot(withSelection: false, atVenueFit: true),
     );
 
-    expect(_enabled(tester, SeatLayerPickerZoomOutButton), isTrue);
     expect(_enabled(tester, SeatLayerPickerShowWholeVenueButton), isTrue);
   });
 
@@ -162,9 +156,6 @@ void main() {
       ),
     );
 
-    // "−" belongs to the seats rung alone (owner, 2026-09-06): from a
-    // pinched venue the way home is the whole-venue disc, which stays live.
-    expect(_enabled(tester, SeatLayerPickerZoomOutButton), isFalse);
     expect(_enabled(tester, SeatLayerPickerShowWholeVenueButton), isTrue);
   });
 
@@ -182,7 +173,6 @@ void main() {
       ),
     );
 
-    expect(_enabled(tester, SeatLayerPickerZoomOutButton), isFalse);
     // The whole-venue disc is ALWAYS live: the camera facts in the snapshot
     // are only as fresh as the last state change, and a pinch changes none,
     // so a dimmed escape hatch stranded buyers on a stale reading.
@@ -198,7 +188,6 @@ void main() {
     expect(find.byType(SeatLayerPickerZoomInButton), findsOneWidget);
     expect(_enabled(tester, SeatLayerPickerZoomInButton), isFalse);
     // The other two are a different question and are unaffected by it.
-    expect(_enabled(tester, SeatLayerPickerZoomOutButton), isTrue);
   });
 
   testWidgets('the whole-venue disc leaves the section as it fits',

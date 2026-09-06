@@ -130,12 +130,12 @@ void main() {
     map.emit(pickerSnapshot(withSelection: false));
     await tester.pumpAndSettle();
 
-    final disc = find.byTooltip('Zoom out');
+    final disc = find.byTooltip('Zoom in');
     expect(disc, findsOneWidget);
     await tester.tap(disc);
     await tester.pumpAndSettle();
 
-    expect(map.callsTo('picker.zoomOut'), hasLength(1));
+    expect(map.callsTo('picker.zoomIn'), hasLength(1));
     // The map heard the touch and was told, in the same sequence, that it lost
     // it. That verdict is what stops the engine forwarding it to the web view.
     expect(verdicts, <_Verdict>[_Verdict.rejected]);
@@ -161,7 +161,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final gesture = await tester.startGesture(
-      tester.getCenter(find.byTooltip('Zoom out')),
+      tester.getCenter(find.byTooltip('Zoom in')),
     );
     expect(verdicts, <_Verdict>[_Verdict.rejected]);
 
@@ -170,7 +170,7 @@ void main() {
     // And exactly once: the arena resolving later must not send a second
     // verdict for a sequence the engine has already been told about.
     expect(verdicts, <_Verdict>[_Verdict.rejected]);
-    expect(map.callsTo('picker.zoomOut'), hasLength(1));
+    expect(map.callsTo('picker.zoomIn'), hasLength(1));
   });
 
   testWidgets('the map still claims a touch that landed on the map',

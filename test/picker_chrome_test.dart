@@ -463,7 +463,6 @@ void main() {
           tester.getRect(find.byType(SeatLayerPickerViewModeControl));
       final access =
           tester.getRect(find.byType(SeatLayerPickerAccessibilityFilters));
-      final stepOut = tester.getRect(find.byType(SeatLayerPickerZoomOutButton));
 
       expect(segmented.right, closeTo(screen.right - inset, .5));
       expect(segmented.top, closeTo(screen.top + inset, .5));
@@ -474,8 +473,8 @@ void main() {
       final stepIn = tester.getRect(find.byType(SeatLayerPickerZoomInButton));
       expect(wholeVenue.right, closeTo(screen.right - inset, .5));
       expect(wholeVenue.bottom, closeTo(screen.bottom - inset, .5));
-      expect(stepIn.bottom, lessThan(stepOut.top + .5));
-      expect(stepOut.bottom, lessThan(wholeVenue.top + .5));
+      // Two discs in the column now: "+" above the whole-venue disc.
+      expect(stepIn.bottom, lessThan(wholeVenue.top + .5));
       // THE ♿ DISC IS THE HEAD OF THAT COLUMN, not a lone control in the
       // opposite corner (owner call 2026-09-06). Same right edge as the
       // discs, and above `+`.

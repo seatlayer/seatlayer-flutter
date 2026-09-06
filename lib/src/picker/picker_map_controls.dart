@@ -223,10 +223,11 @@ class _CornerControls extends StatelessWidget {
                 const SeatLayerPickerAccessibilityFilters(compact: true),
           ],
         ),
-      if (onMap && chrome.zoomControlsFor(phone: true)) ...<Widget>[
+      // "+" and the whole-venue disc, nothing between them (owner, 2026-09-06):
+      // a "−" that only sometimes had a step to take read as a control that
+      // sometimes worked. Pinch steps out; the disc below goes home.
+      if (onMap && chrome.zoomControlsFor(phone: true))
         const SeatLayerPickerZoomInButton(),
-        const SeatLayerPickerZoomOutButton(),
-      ],
       if (onMap && chrome.zoomToFitControlFor(phone: true))
         const SeatLayerPickerShowWholeVenueButton(),
     ];

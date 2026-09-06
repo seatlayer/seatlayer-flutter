@@ -119,7 +119,7 @@ void main() {
       final header = _at(dump, 'Mobile Test Event');
       final rail = _at(dump, strings.allPrices);
       final venue = _at(dump, 'seat map');
-      final chrome = _at(dump, strings.zoomOut);
+      final chrome = _at(dump, strings.zoomIn);
       final cart = _at(dump, strings.expandCart);
       expect(header, lessThan(rail));
       expect(rail, lessThan(venue));

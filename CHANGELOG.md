@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.9.0
 
-The phone picker follows the web picker's latest phone layout item by item.
+Runtime pin 0.83.0. The phone picker follows the web picker's latest phone
+layout item by item, and the runtime now tells native chrome when the camera
+is at the whole-venue pose and at the zoom ceiling.
 
 - **The bottom sheet is one surface with a footer block.** A pill handle
   straddles its top edge over the map; collapsed, the sheet is the total line
@@ -39,9 +41,9 @@ The phone picker follows the web picker's latest phone layout item by item.
   "Show whole venue". The best-seats card carries a one-line "Find seats
   together" title.
 - **The collapsed footer says which seats.** Under "N tickets" a muted line
-  lists the seats held, and tapping it opens the cards. The whole-venue disc
-  is always live, so a pinched camera can always be brought home; "−" is
-  live only among the seats, where it has a step to take. The disc column
+  lists the seats held, and tapping it opens the cards. The phone map keeps
+  two discs, "+" and "Show whole venue"; the whole-venue disc is always live,
+  so a pinched camera can always be brought home, and pinching steps out. The disc column
   fades out while a seat card asks. The phone price rail carries prices
   alone. The accessibility sheet is one aligned list: fixed rows with
   hairlines, counts in their own column, the two map switches under a

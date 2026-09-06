@@ -70,11 +70,11 @@ void main() {
     final rects = reports.last;
     expect(rects, isNotEmpty);
 
-    // The `−` disc, the accessibility disc and the Map/3D control each sit
+    // The `+` disc, the accessibility disc and the Map/3D control each sit
     // inside one reported rectangle, measured from the map surface's corner.
     final mapOrigin = tester.getTopLeft(find.byType(SeatLayerPickerMap));
     for (final control in <Finder>[
-      find.byType(SeatLayerPickerZoomOutButton),
+      find.byType(SeatLayerPickerZoomInButton),
       find.byType(SeatLayerPickerViewModeControl),
     ]) {
       expect(control, findsOneWidget);
