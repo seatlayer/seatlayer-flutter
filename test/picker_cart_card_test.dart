@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_cart_list.dart';
+import 'package:seatlayer/src/picker/picker_seat_lift.dart';
+import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 
@@ -233,5 +235,41 @@ void main() {
     // The × is still there: it is the one action a cart line always owes.
     expect(
         find.widgetWithIcon(IconButton, Icons.close_rounded), findsOneWidget);
+  });
+
+  testWidgets('tapping a card takes the map to the seat and keeps the sheet',
+      (tester) async {
+    // The sheet used to step down to peek on every card tap, so checking
+    // three seats meant opening the cart three times (owner, 2026-09-06).
+    final map = FakePickerMap(
+      bundle: nativeChromeBundle(
+        commands: const <String>['picker.frameSeat'],
+      ),
+    );
+    addTearDown(map.dispose);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    useFakeWebViewPlatform();
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SingleChildScrollView(child: SeatLayerCartList()),
+        controller: picker,
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+    picker.setCartSheetExpanded(true);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byType(SeatLayerCartCard));
+    await tester.pumpAndSettle();
+
+    final frames = map.callsTo(seatLayerFrameSeatCommand);
+    expect(frames, hasLength(1));
+    expect((frames.single.$2! as Map<String, Object?>)['seatId'], 'seat-a-1');
+    expect(picker.cartSheetExpanded, isTrue);
   });
 }
