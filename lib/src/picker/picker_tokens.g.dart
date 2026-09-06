@@ -33,6 +33,15 @@ abstract final class SeatLayerLightTokens {
   /// `#F4B740`
   static const Color warning = Color(0xFFF4B740);
 
+  /// `#745F2C`
+  static const Color warnText = Color(0xFF745F2C);
+
+  /// `#E8C15A`
+  static const Color premium = Color(0xFFE8C15A);
+
+  /// `#6C5E3F`
+  static const Color premiumText = Color(0xFF6C5E3F);
+
   /// `#5B4B8A`
   static const Color accent = Color(0xFF5B4B8A);
 
@@ -80,6 +89,15 @@ abstract final class SeatLayerDarkTokens {
 
   /// `#F4B740`
   static const Color warning = Color(0xFFF4B740);
+
+  /// `#E3CC93`
+  static const Color warnText = Color(0xFFE3CC93);
+
+  /// `#E8C15A`
+  static const Color premium = Color(0xFFE8C15A);
+
+  /// `#DCCBA5`
+  static const Color premiumText = Color(0xFFDCCBA5);
 
   /// `#9B8AFB`
   static const Color accent = Color(0xFF9B8AFB);
@@ -287,6 +305,30 @@ abstract final class SeatLayerSizeTokens {
 
   /// `3`
   static const double confirmSightPadY = 3;
+
+  /// `14`
+  static const double notePadX = 14;
+
+  /// `9`
+  static const double notePadY = 9;
+
+  /// `9`
+  static const double noteIconGap = 9;
+
+  /// `17`
+  static const double noteIconSize = 17;
+
+  /// `15`
+  static const double noteCompactPadLeading = 15;
+
+  /// `12`
+  static const double noteCompactPadX = 12;
+
+  /// `7`
+  static const double noteCompactPadY = 7;
+
+  /// `15`
+  static const double noteCompactIconSize = 15;
 
   /// `38`
   static const double confirmTierHeight = 38;
@@ -655,6 +697,18 @@ abstract final class SeatLayerOpacityTokens {
   /// `0.45`
   static const double removing = 0.45;
 
+  /// `0.1`
+  static const double noteToneWash = 0.1;
+
+  /// `0.06`
+  static const double noteNeutralWash = 0.06;
+
+  /// `0.6`
+  static const double noteHairline = 0.6;
+
+  /// `0.75`
+  static const double noteBodyInk = 0.75;
+
   /// `0.18`
   static const double warnPillWash = 0.18;
 
@@ -901,6 +955,18 @@ abstract final class SeatLayerStringTokens {
   /// Premium seat
   static const String premiumSeat = 'Premium seat';
 
+  /// Not available
+  static const String notAvailable = 'Not available';
+
+  /// Organizer note
+  static const String organizerNote = 'Organizer note';
+
+  /// Empty wheelchair space
+  static const String emptyWheelchairSpace = 'Empty wheelchair space';
+
+  /// Accessible physical seat
+  static const String accessiblePhysicalSeat = 'Accessible physical seat';
+
   /// Restricted view
   static const String restrictedView = 'Restricted view';
 
@@ -999,9 +1065,6 @@ abstract final class SeatLayerStringTokens {
 
   /// {count} free
   static const String accessFreeCount = '{count} free';
-
-  /// None left
-  static const String accessNoneLeft = 'None left';
 
   /// {index} of {total}
   static const String accessibleStep = '{index} of {total}';
