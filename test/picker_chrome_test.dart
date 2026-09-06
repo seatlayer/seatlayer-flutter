@@ -469,71 +469,24 @@ void main() {
       expect(segmented.top, closeTo(screen.top + inset, .5));
       expect(access.left, closeTo(screen.left + inset, .5));
       expect(access.bottom, closeTo(screen.bottom - inset, .5));
-      // ONE way out of the venue, at the corner. Fit-to-screen went the same
-      // journey in one jump and sat in the same column, so the corner carried
-      // two round buttons with nothing on either saying which was which.
-      expect(stepOut.right, closeTo(screen.right - inset, .5));
-      expect(stepOut.bottom, closeTo(screen.bottom - inset, .5));
+      // The zoom column is anchored by its foot, and its foot is the disc that
+      // shows the whole venue — `+`, `−` and the venue, top to bottom.
+      final wholeVenue =
+          tester.getRect(find.byType(SeatLayerPickerShowWholeVenueButton));
+      final stepIn = tester.getRect(find.byType(SeatLayerPickerZoomInButton));
+      expect(wholeVenue.right, closeTo(screen.right - inset, .5));
+      expect(wholeVenue.bottom, closeTo(screen.bottom - inset, .5));
+      expect(stepIn.bottom, lessThan(stepOut.top + .5));
+      expect(stepOut.bottom, lessThan(wholeVenue.top + .5));
+      // The wide rail's fit-to-screen control is not the phone's: that one
+      // only fits, and this one also leaves a framed section.
       expect(find.byType(SeatLayerPickerZoomToFitButton), findsNothing);
 
-      // Pinch already zooms in, and the colourblind palette lives in the
-      // accessibility sheet.
-      expect(find.byType(SeatLayerPickerZoomInButton), findsNothing);
+      // The colourblind palette lives in the accessibility sheet.
       expect(find.byType(SeatLayerPickerColorblindButton), findsNothing);
       // The dock's `‹ Venue` is the phone's way back to the whole venue; a
       // second one on the map would be the same door twice.
       expect(find.byType(SeatLayerPickerOverviewButton), findsNothing);
-    });
-
-    testWidgets('the way out of the venue stays put, and reads + at home',
-        (tester) async {
-      // It used to appear only once the buyer was deep enough to be lost, so
-      // the corner grew and shrank a button under their thumb. The slot now
-      // stays put and changes direction: at the whole venue there is nothing
-      // to step out of, and the buyer wants in.
-      //
-      // `canZoomOut` is the runtime's own answer to the same ladder question
-      // the web picker asks: a section is framed, or seats are the visible
-      // layer. The chrome only dresses it.
-      final map = FakePickerMap();
-      addTearDown(map.dispose);
-      usePhoneSurface(tester);
-
-      await tester.pumpWidget(
-        pickerHarness(map, const SeatLayerPickerMapControls(compact: true)),
-      );
-      map.emit(pickerSnapshot(withSelection: false));
-      await tester.pumpAndSettle();
-
-      final stepOut = find.descendant(
-        of: find.byType(SeatLayerPickerZoomOutButton),
-        matching: find.byType(IconButton),
-      );
-      expect(tester.widget<IconButton>(stepOut).onPressed, isNotNull);
-
-      // At the whole venue there is nowhere left to walk back to.
-      map.emit(
-        pickerSnapshot(
-          revision: 2,
-          withSelection: false,
-          rung: 'overview',
-          canZoomOut: false,
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byType(SeatLayerPickerZoomOutButton), findsNothing);
-      expect(find.byType(SeatLayerPickerZoomInButton), findsOneWidget);
-      final stepIn = find.descendant(
-        of: find.byType(SeatLayerPickerZoomInButton),
-        matching: find.byType(IconButton),
-      );
-      expect(tester.widget<IconButton>(stepIn).onPressed, isNotNull);
-      // Same corner, same size: the slot did not move under the thumb.
-      expect(
-        tester.getRect(stepIn).center,
-        tester.getRect(find.byType(SeatLayerPickerZoomInButton)).center,
-      );
     });
 
     testWidgets('the accessibility control is a 44-point target',
@@ -614,14 +567,17 @@ void main() {
       await tester.pumpAndSettle();
 
       final screen = tester.getRect(find.byType(SeatLayerPickerMapControls));
-      final stepOut = tester.getRect(find.byType(SeatLayerPickerZoomOutButton));
+      final foot =
+          tester.getRect(find.byType(SeatLayerPickerShowWholeVenueButton));
       expect(
-        stepOut.bottom,
+        foot.bottom,
         closeTo(screen.bottom - 52 - SeatLayerSizeTokens.mapAnchorInset, .5),
       );
     });
 
-    testWidgets('a host can ask for the zoom pair back', (tester) async {
+    testWidgets('a host can take the zoom pair away again', (tester) async {
+      // The pair is standard now, so the switch it used to turn on is the
+      // switch that turns it off — for a host whose own chrome carries zoom.
       final map = FakePickerMap();
       addTearDown(map.dispose);
       usePhoneSurface(tester);
@@ -631,14 +587,20 @@ void main() {
           map,
           const SeatLayerPickerMapControls(compact: true),
           options: const SeatLayerPickerOptions(
-            chrome: SeatLayerPickerChromeOptions(showZoomControls: true),
+            chrome: SeatLayerPickerChromeOptions(showZoomControls: false),
           ),
         ),
       );
       map.emit(pickerSnapshot(withSelection: false));
       await tester.pumpAndSettle();
 
-      expect(find.byType(SeatLayerPickerZoomInButton), findsOneWidget);
+      expect(find.byType(SeatLayerPickerZoomInButton), findsNothing);
+      expect(find.byType(SeatLayerPickerZoomOutButton), findsNothing);
+      // The whole-venue disc is a separate switch and stays.
+      expect(
+        find.byType(SeatLayerPickerShowWholeVenueButton),
+        findsOneWidget,
+      );
     });
 
     testWidgets('chrome options can empty the map entirely', (tester) async {
