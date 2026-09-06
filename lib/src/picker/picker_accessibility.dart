@@ -26,10 +26,7 @@ import 'picker_a11y.dart';
 /// button on the map — which is where someone who needs it goes looking.
 class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
   /// Creates the accessibility filter control.
-  const SeatLayerPickerAccessibilityFilters({
-    super.key,
-    this.compact = false,
-  });
+  const SeatLayerPickerAccessibilityFilters({super.key, this.compact = false});
 
   /// Whether to render the phone's single round control.
   final bool compact;
@@ -43,13 +40,15 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     if (!available.any) {
       return const SizedBox.shrink();
     }
-    final activeCount = (available.accessibility
+    final activeCount =
+        (available.accessibility
             ? snapshot!.map.accessibilityFilter.length
             : 0) +
         (available.limited && snapshot?.map.hideLimitedView == true ? 1 : 0) +
         (available.colorblind && snapshot?.map.colorblindSafe == true ? 1 : 0);
-    final onPressed =
-        state.isBusy ? null : () => ignorePickerAction(_show(context));
+    final onPressed = state.isBusy
+        ? null
+        : () => ignorePickerAction(_show(context));
     final strings = SeatLayerPickerScope.stringsOf(context);
     // A chart with no access provisions at all has nothing behind this
     // control but how the map is drawn, and the icon says which of the two
@@ -57,8 +56,9 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     // provisions, a palette when all it offers is colour.
     final provisions = available.accessibility;
     final name = provisions ? strings.accessibility : strings.displayOptions;
-    final icon =
-        provisions ? Icons.accessible_forward_rounded : Icons.palette_outlined;
+    final icon = provisions
+        ? Icons.accessible_forward_rounded
+        : Icons.palette_outlined;
     if (compact) {
       // Floating on the venue, so the MAP's palette and the disc's own ground
       // — the panel surface vanishes into a dark map at 1.14:1.
@@ -102,9 +102,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
       );
     }
     return OutlinedButton.icon(
-      style: seatLayerButtonShape(
-        seatLayerPickerThemeOf(context).buttonRadius,
-      ),
+      style: seatLayerButtonShape(seatLayerPickerThemeOf(context).buttonRadius),
       onPressed: onPressed,
       icon: Icon(icon, size: 18),
       label: Text(activeCount == 0 ? name : '$activeCount filters'),
@@ -149,8 +147,9 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     final canJump = controller.supportsAccessibilityFocus;
     // The companion note is only true of a chart that authors companion
     // places, so it is drawn from the same inventory the rows are.
-    final hasCompanionPlaces =
-        offered.any((need) => need.key == _companionNeedKey);
+    final hasCompanionPlaces = offered.any(
+      (need) => need.key == _companionNeedKey,
+    );
     final needs = <_AccessNeedRow>[
       if (available.accessibility)
         for (final need in offered)
@@ -161,7 +160,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
             note: hasCompanionPlaces && need.key == _wheelchairNeedKey
                 ? strings.companionSeatsNote
                 : null,
-          )
+          ),
     ];
     // Each switch goes straight to the runtime. Availability is re-read at the
     // moment of the flip, not captured when the sheet opened: a snapshot that
@@ -217,62 +216,69 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                     child: SingleChildScrollView(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: needs.map((need) {
-                          final on = selected.contains(need.key);
-                          // A need with nothing free stays on the sheet and
-                          // goes dark. Removing it would claim the venue has no
-                          // such seats, which is a different fact.
-                          final enabled = need.count == null || need.count! > 0;
-                          return _AccessOptionRow(
-                            // The same drawing the seat itself carries on the
-                            // map and on every popup — one wheelchair for
-                            // twelve different provisions told the buyer
-                            // nothing about which one a row was.
-                            iconKey: need.key,
-                            label: need.label,
-                            note: need.note,
-                            // A NUMBER, INCLUDING AT ZERO. The row used to
-                            // say "Not available" when the last space went,
-                            // which was a sentence where every other row
-                            // carries a figure — it needed a chip to hold it
-                            // and made the sold-out row the loudest line in
-                            // the sheet. The dimmed switch beside it is what
-                            // says it cannot be had, and the count stays part
-                            // of the row's spoken name.
-                            count: need.count == null
-                                ? null
-                                : need.count! > 0
+                        children: needs
+                            .map((need) {
+                              final on = selected.contains(need.key);
+                              // A need with nothing free stays on the sheet and
+                              // goes dark. Removing it would claim the venue has no
+                              // such seats, which is a different fact. A switch
+                              // that is ON stays live at zero: the buyer holding
+                              // the last space is the one who emptied it, and a
+                              // filter they cannot turn off traps them on a map
+                              // with nothing left to show.
+                              final enabled =
+                                  on || need.count == null || need.count! > 0;
+                              return _AccessOptionRow(
+                                // The same drawing the seat itself carries on the
+                                // map and on every popup — one wheelchair for
+                                // twelve different provisions told the buyer
+                                // nothing about which one a row was.
+                                iconKey: need.key,
+                                label: need.label,
+                                note: need.note,
+                                // A NUMBER, INCLUDING AT ZERO. The row used to
+                                // say "Not available" when the last space went,
+                                // which was a sentence where every other row
+                                // carries a figure — it needed a chip to hold it
+                                // and made the sold-out row the loudest line in
+                                // the sheet. The dimmed switch beside it is what
+                                // says it cannot be had, and the count stays part
+                                // of the row's spoken name.
+                                count: need.count == null
+                                    ? null
+                                    : need.count! > 0
                                     ? strings.accessFreeCount(need.count!)
                                     : _zeroCount,
-                            // The web menu's own "12 free" button, which steps
-                            // the camera through the sections that hold them.
-                            // Only where the runtime can fly and there is
-                            // something to fly to; otherwise the number stays
-                            // the static fact it has always been.
-                            countLabel: canJump && (need.count ?? 0) > 0
-                                ? '${need.label}, '
-                                    '${strings.accessFreeCount(need.count!)}, '
-                                    '${strings.accessJumpFirstSection}'
-                                : null,
-                            // The one control on the sheet that is not a
-                            // switch, and the one that closes it: the walk it
-                            // starts happens on the map this sheet covers.
-                            onCountPressed: canJump && (need.count ?? 0) > 0
-                                ? () => Navigator.of(context).pop(need.key)
-                                : null,
-                            value: on,
-                            onChanged: enabled
-                                ? () {
-                                    final next = <String>{...selected};
-                                    on
-                                        ? next.remove(need.key)
-                                        : next.add(need.key);
-                                    setSheetState(() => selected = next);
-                                    ignorePickerAction(applyTypes(next));
-                                  }
-                                : null,
-                          );
-                        }).toList(growable: false),
+                                // The web menu's own "12 free" button, which steps
+                                // the camera through the sections that hold them.
+                                // Only where the runtime can fly and there is
+                                // something to fly to; otherwise the number stays
+                                // the static fact it has always been.
+                                countLabel: canJump && (need.count ?? 0) > 0
+                                    ? '${need.label}, '
+                                          '${strings.accessFreeCount(need.count!)}, '
+                                          '${strings.accessJumpFirstSection}'
+                                    : null,
+                                // The one control on the sheet that is not a
+                                // switch, and the one that closes it: the walk it
+                                // starts happens on the map this sheet covers.
+                                onCountPressed: canJump && (need.count ?? 0) > 0
+                                    ? () => Navigator.of(context).pop(need.key)
+                                    : null,
+                                value: on,
+                                onChanged: enabled
+                                    ? () {
+                                        final next = <String>{...selected};
+                                        on
+                                            ? next.remove(need.key)
+                                            : next.add(need.key);
+                                        setSheetState(() => selected = next);
+                                        ignorePickerAction(applyTypes(next));
+                                      }
+                                    : null,
+                              );
+                            })
+                            .toList(growable: false),
                       ),
                     ),
                   ),
@@ -284,8 +290,10 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                       style: TextStyle(
                         color: theme.mutedText,
                         fontSize: 11,
-                        fontWeight:
-                            seatLayerBoldWeight(context, FontWeight.w700),
+                        fontWeight: seatLayerBoldWeight(
+                          context,
+                          FontWeight.w700,
+                        ),
                         letterSpacing: .6,
                         fontFamily: theme.fontFamily,
                       ),
@@ -375,17 +383,20 @@ _FilterAvailability _availability(
   final bundle = controller.mapController.bundleInfo;
   final nativeChrome =
       bundle?.supportsCapability('native-chrome-contract-v1') == true;
-  final accessibility = snapshot != null &&
+  final accessibility =
+      snapshot != null &&
       snapshot.capabilities.contains('accessibilityFilter') &&
       controller.supportsAccessNeeds &&
       snapshot.map.accessNeeds.isNotEmpty &&
       nativeChrome &&
       bundle?.supportsCommand('picker.setAccessibilityFilter') == true;
-  final limited = snapshot != null &&
+  final limited =
+      snapshot != null &&
       snapshot.capabilities.contains('limitedViewFilter') &&
       nativeChrome &&
       bundle?.supportsCommand('picker.setLimitedViewFilter') == true;
-  final colorblind = snapshot != null &&
+  final colorblind =
+      snapshot != null &&
       nativeChrome &&
       bundle?.supportsCapability('colorblind-safe') == true &&
       bundle?.supportsCommand('picker.setColorblindSafe') == true;
@@ -621,9 +632,8 @@ class _AccessOptionRowState extends State<_AccessOptionRow> {
                                     open: _noteOpen,
                                     label: note,
                                     theme: theme,
-                                    onPressed: () => setState(
-                                      () => _noteOpen = !_noteOpen,
-                                    ),
+                                    onPressed: () =>
+                                        setState(() => _noteOpen = !_noteOpen),
                                   ),
                                 ),
                               ),
@@ -676,7 +686,8 @@ class _AccessOptionRowState extends State<_AccessOptionRow> {
           child: _noteOpen
               ? Padding(
                   padding: const EdgeInsets.only(
-                    left: SeatLayerSizeTokens.accessRowIconCell +
+                    left:
+                        SeatLayerSizeTokens.accessRowIconCell +
                         SeatLayerSizeTokens.accessRowGap +
                         SeatLayerSizeTokens.accessRowPaddingX,
                     right: SeatLayerSizeTokens.accessRowPaddingX,
@@ -721,32 +732,32 @@ class _AccessNoteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Semantics(
-        button: true,
-        expanded: open,
-        label: label,
-        child: ExcludeSemantics(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: SeatLayerSizeTokens.minimumHitTarget,
-              minHeight: SeatLayerSizeTokens.minimumHitTarget,
-            ),
-            child: Material(
-              type: MaterialType.transparency,
-              child: InkWell(
-                onTap: onPressed,
-                borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
-                child: Center(
-                  child: Icon(
-                    open ? Icons.info_rounded : Icons.info_outline_rounded,
-                    size: SeatLayerSizeTokens.accessNoteIconSize,
-                    color: open ? theme.accent : theme.mutedText,
-                  ),
-                ),
+    button: true,
+    expanded: open,
+    label: label,
+    child: ExcludeSemantics(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: SeatLayerSizeTokens.minimumHitTarget,
+          minHeight: SeatLayerSizeTokens.minimumHitTarget,
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
+            child: Center(
+              child: Icon(
+                open ? Icons.info_rounded : Icons.info_outline_rounded,
+                size: SeatLayerSizeTokens.accessNoteIconSize,
+                color: open ? theme.accent : theme.mutedText,
               ),
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 }
 
 /// The "12 free" at the end of a row — a fact, or the button that starts the
@@ -850,8 +861,14 @@ class SeatLayerPickerAccessibleStepper extends StatelessWidget {
     final tour = seatLayerAccessibleTourOf(controller);
     return AnimatedBuilder(
       animation: tour,
-      builder: (context, _) => _build(context, controller, snapshot, active,
-          tour, SeatLayerPickerScope.stringsOf(context)),
+      builder: (context, _) => _build(
+        context,
+        controller,
+        snapshot,
+        active,
+        tour,
+        SeatLayerPickerScope.stringsOf(context),
+      ),
     );
   }
 
@@ -866,7 +883,8 @@ class SeatLayerPickerAccessibleStepper extends StatelessWidget {
     // A walk over provisions the buyer has since turned off is not this
     // filter's walk. It is read as "not started" rather than reset here,
     // because a notifier must not fire from inside a build.
-    final current = tour.types.isNotEmpty &&
+    final current =
+        tour.types.isNotEmpty &&
         tour.types.every((type) => active.contains(type));
     final step = current ? tour.step : null;
     // The runtime answered that nothing matches: the pill goes, rather than
@@ -876,7 +894,9 @@ class SeatLayerPickerAccessibleStepper extends StatelessWidget {
     final counted = controller.supportsSectionAccessCounts;
     final sections = counted
         ? seatLayerAccessibleSectionCount(
-            snapshot, current ? tour.types : active)
+            snapshot,
+            current ? tour.types : active,
+          )
         : 0;
     // Where the counts ARE reported and none of them is positive, there is
     // nothing to walk. Where they are not reported at all, the pill is drawn
@@ -888,8 +908,8 @@ class SeatLayerPickerAccessibleStepper extends StatelessWidget {
     final label = step != null
         ? strings.accessibleStep(step.index + 1, step.total)
         : counted
-            ? strings.accessibleSections(sections)
-            : null;
+        ? strings.accessibleSections(sections)
+        : null;
 
     final theme = seatLayerPickerThemeOf(context);
     final busy = tour.walking || controller.state.isBusy;
@@ -925,7 +945,8 @@ class SeatLayerPickerAccessibleStepper extends StatelessWidget {
     SeatLayerAccessibleTour tour,
     Set<String> active,
   ) async {
-    final current = tour.types.isNotEmpty &&
+    final current =
+        tour.types.isNotEmpty &&
         tour.types.every((type) => active.contains(type));
     if (!current) tour.begin(active);
     await tour.next(controller);

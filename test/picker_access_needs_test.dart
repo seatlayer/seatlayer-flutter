@@ -25,38 +25,38 @@ BundleInfo _accessBundle({
   bool access = true,
   bool limited = false,
   bool colorblind = true,
-}) =>
-    nativeChromeBundle(
-      capabilities: <String>[
-        'native-chrome-contract-v1',
-        if (access) 'access-needs-v1',
-        if (colorblind) 'colorblind-safe',
-      ],
-      commands: <String>[
-        'picker.setThemeMode',
-        if (access) 'picker.setAccessibilityFilter',
-        if (limited) 'picker.setLimitedViewFilter',
-        if (colorblind) 'picker.setColorblindSafe',
-      ],
-    );
+}) => nativeChromeBundle(
+  capabilities: <String>[
+    'native-chrome-contract-v1',
+    if (access) 'access-needs-v1',
+    if (colorblind) 'colorblind-safe',
+  ],
+  commands: <String>[
+    'picker.setThemeMode',
+    if (access) 'picker.setAccessibilityFilter',
+    if (limited) 'picker.setLimitedViewFilter',
+    if (colorblind) 'picker.setColorblindSafe',
+  ],
+);
 
 /// Every access-need row on the open sheet, in the order it is drawn.
 ///
 /// A row is read as `label` or `label · count`, which is the pair of things it
 /// draws — the provision and how much of it is left.
 List<String> _rowLabels(WidgetTester tester) => tester
-        .widgetList<Semantics>(
-          find.descendant(
-            of: find.byType(SingleChildScrollView),
-            matching: find.byType(Semantics),
-          ),
-        )
-        .where((row) => row.properties.toggled != null)
-        .map((row) {
+    .widgetList<Semantics>(
+      find.descendant(
+        of: find.byType(SingleChildScrollView),
+        matching: find.byType(Semantics),
+      ),
+    )
+    .where((row) => row.properties.toggled != null)
+    .map((row) {
       final label = row.properties.label!;
       final count = _countFor(tester, label);
       return count == null ? label : '$label · $count';
-    }).toList(growable: false);
+    })
+    .toList(growable: false);
 
 /// The count drawn at the end of the row named [label], if it draws one.
 String? _countFor(WidgetTester tester, String label) {
@@ -66,10 +66,7 @@ String? _countFor(WidgetTester tester, String label) {
           // The label shares an inner Row with its ⓘ (web 0.84.1); the count
           // sits on the row's outer Row, one ancestor further up.
           of: find
-              .ancestor(
-                of: find.text(label),
-                matching: find.byType(Row),
-              )
+              .ancestor(of: find.text(label), matching: find.byType(Row))
               .at(1),
           matching: find.byType(Text),
         ),
@@ -110,8 +107,9 @@ Future<void> _openSheet(
 }
 
 void main() {
-  testWidgets('only the needs this event offers render, in the runtime order',
-      (tester) async {
+  testWidgets('only the needs this event offers render, in the runtime order', (
+    tester,
+  ) async {
     final map = FakePickerMap(bundle: _accessBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -135,14 +133,16 @@ void main() {
         'Wheelchair · 4 free',
         'Companion · 4 free',
       ],
-      reason: 'the runtime already ordered these; re-sorting them here would '
+      reason:
+          'the runtime already ordered these; re-sorting them here would '
           'be a second opinion about the same venue',
     );
     expect(find.text('Hearing support'), findsNothing);
   });
 
-  testWidgets('a need whose seats are gone stays, named and disabled',
-      (tester) async {
+  testWidgets('a need whose seats are gone stays, named and disabled', (
+    tester,
+  ) async {
     final map = FakePickerMap(bundle: _accessBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -175,14 +175,15 @@ void main() {
 
     await tester.tap(find.text('Wheelchair'));
     await tester.pumpAndSettle();
-    expect(
-      _rowLabels(tester),
-      <String>['Wheelchair · 0', 'Companion · 6 free'],
-    );
+    expect(_rowLabels(tester), <String>[
+      'Wheelchair · 0',
+      'Companion · 6 free',
+    ]);
   });
 
-  testWidgets('a wheelchair row says the companion place beside it stays',
-      (tester) async {
+  testWidgets('a wheelchair row says the companion place beside it stays', (
+    tester,
+  ) async {
     final map = FakePickerMap(bundle: _accessBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -216,8 +217,9 @@ void main() {
     );
   });
 
-  testWidgets('every row is one line, even with the whole vocabulary on it',
-      (tester) async {
+  testWidgets('every row is one line, even with the whole vocabulary on it', (
+    tester,
+  ) async {
     // Seen on the web the same day: a chart carrying the full attribute set
     // gave the menu twelve accommodation rows plus two display switches, and
     // an unbounded panel put the first rows off the top of the screen. The
@@ -270,8 +272,11 @@ void main() {
       final text = tester.widget<Text>(find.text(label));
       expect(text.maxLines, 1, reason: label);
       expect(text.overflow, TextOverflow.ellipsis, reason: label);
-      expect(tester.getSize(find.text(label)).height, lessThan(24),
-          reason: label);
+      expect(
+        tester.getSize(find.text(label)).height,
+        lessThan(24),
+        reason: label,
+      );
     }
   });
 
@@ -284,8 +289,9 @@ void main() {
     expect(seatLayerAccessSheetMaxHeight(200), 200);
   });
 
-  testWidgets('a chart with no companion places makes no such promise',
-      (tester) async {
+  testWidgets('a chart with no companion places makes no such promise', (
+    tester,
+  ) async {
     final map = FakePickerMap(bundle: _accessBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -302,8 +308,9 @@ void main() {
     );
   });
 
-  testWidgets('a chart with no provisions at all is named Display options',
-      (tester) async {
+  testWidgets('a chart with no provisions at all is named Display options', (
+    tester,
+  ) async {
     // The control is still worth having — the palette lives behind it — but
     // calling it accessibility on a chart that authors none would promise
     // seats this venue does not have.
@@ -329,8 +336,9 @@ void main() {
     expect(find.byTooltip('Accessibility and view filters'), findsNothing);
   });
 
-  testWidgets('an empty inventory does not invent the static taxonomy',
-      (tester) async {
+  testWidgets('an empty inventory does not invent the static taxonomy', (
+    tester,
+  ) async {
     final map = FakePickerMap(bundle: _accessBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -342,8 +350,9 @@ void main() {
     expect(find.text('Hide limited-view seats'), findsNothing);
   });
 
-  testWidgets('a limited-view-only event shows only its supported group',
-      (tester) async {
+  testWidgets('a limited-view-only event shows only its supported group', (
+    tester,
+  ) async {
     final map = FakePickerMap(
       bundle: _accessBundle(access: false, limited: true, colorblind: false),
     );
@@ -361,8 +370,9 @@ void main() {
     expect(find.text('Colourblind-friendly colours'), findsNothing);
   });
 
-  testWidgets('the control disappears when no filter operation is supported',
-      (tester) async {
+  testWidgets('the control disappears when no filter operation is supported', (
+    tester,
+  ) async {
     final map = FakePickerMap(bundle: nativeChromeBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -379,8 +389,9 @@ void main() {
     expect(find.byType(IconButton), findsNothing);
   });
 
-  testWidgets('a switch applies as it is flipped, with no apply step',
-      (tester) async {
+  testWidgets('a switch applies as it is flipped, with no apply step', (
+    tester,
+  ) async {
     // A switch IS the action. Staging the flips behind an "Apply filters"
     // button made the sheet ask twice for one decision, and left a buyer who
     // dragged the sheet away — the gesture that closes every other sheet —
@@ -424,15 +435,48 @@ void main() {
       map.callsTo('picker.setLimitedViewFilter').single.$2,
       <String, Object?>{'on': true},
     );
-    expect(
-      map.callsTo('picker.setColorblindSafe').single.$2,
-      <String, Object?>{'on': true},
-    );
+    expect(map.callsTo('picker.setColorblindSafe').single.$2, <String, Object?>{
+      'on': true,
+    });
     expect(find.text('Hide limited-view seats'), findsOneWidget);
   });
 
-  testWidgets('flipping a switch back turns it off on the runtime too',
-      (tester) async {
+  testWidgets('a sold-out need whose switch is ON can still be turned off', (
+    tester,
+  ) async {
+    // The buyer holding the last wheelchair space emptied the count; a
+    // switch that went dark with it would trap them on a filtered map.
+    final map = FakePickerMap(bundle: _accessBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await _openSheet(
+      tester,
+      map,
+      pickerSnapshot(
+        accessNeeds: <Object?>[
+          accessNeed('wheelchair', 0),
+          accessNeed('companion', 6),
+        ],
+        accessibilityFilter: <String>['wheelchair'],
+      ),
+    );
+
+    expect(_rowEnabled(tester, 'Wheelchair'), isTrue);
+    await tester.tap(find.text('Wheelchair'));
+    await tester.pumpAndSettle();
+    expect(
+      map.callsTo('picker.setAccessibilityFilter').map((call) => call.$2),
+      <Map<String, Object?>>[
+        <String, Object?>{'types': null},
+      ],
+      reason: 'an empty set is sent as null, which clears the filter',
+    );
+  });
+
+  testWidgets('flipping a switch back turns it off on the runtime too', (
+    tester,
+  ) async {
     final map = FakePickerMap(bundle: _accessBundle());
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -496,13 +540,15 @@ void main() {
     expect(
       _rowLabels(tester),
       <String>['Rollstuhlplatz · 3 free', 'quiet-room · 1 free'],
-      reason: 'the override wins, and a need this table has no name for is '
+      reason:
+          'the override wins, and a need this table has no name for is '
           'still reachable under its wire key',
     );
   });
 
-  testWidgets('each row wears the drawing its own provision carries',
-      (tester) async {
+  testWidgets('each row wears the drawing its own provision carries', (
+    tester,
+  ) async {
     final map = FakePickerMap(bundle: _accessBundle(limited: true));
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -520,59 +566,60 @@ void main() {
         .widgetList<SeatLayerSeatIcon>(find.byType(SeatLayerSeatIcon))
         .map((icon) => icon.iconKey)
         .toList(growable: false);
-    expect(
-      keys,
-      <String>[
-        // One drawing per provision — every row used to wear the same
-        // wheelchair, which said nothing about which provision it was.
-        'wheelchair',
-        'hearing',
-        // The switch that hides limited-view seats wears the mark those seats
-        // carry…
-        'restrictedView',
-        // …and the colour row wears a contrast disc, because it recolours the
-        // map rather than choosing seats.
-        'contrast',
-      ],
-    );
+    expect(keys, <String>[
+      // One drawing per provision — every row used to wear the same
+      // wheelchair, which said nothing about which provision it was.
+      'wheelchair',
+      'hearing',
+      // The switch that hides limited-view seats wears the mark those seats
+      // carry…
+      'restrictedView',
+      // …and the colour row wears a contrast disc, because it recolours the
+      // map rather than choosing seats.
+      'contrast',
+    ]);
   });
 
   for (final brightness in Brightness.values) {
-    testWidgets('the sheet\'s rows golden — ${brightness.name}',
-        (tester) async {
-      final map = FakePickerMap(bundle: _accessBundle(limited: true));
-      addTearDown(map.dispose);
-      usePhoneSurface(tester);
+    testWidgets(
+      'the sheet\'s rows golden — ${brightness.name}',
+      (tester) async {
+        final map = FakePickerMap(bundle: _accessBundle(limited: true));
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
 
-      final snapshot = pickerSnapshot(
-        accessNeeds: <Object?>[
-          accessNeed('wheelchair', 4),
-          accessNeed('companion', 4),
-          accessNeed('hearing', 0),
-        ],
-      );
-      (snapshot['features']! as Map<String, Object?>)['limitedViewFilter'] =
-          true;
+        final snapshot = pickerSnapshot(
+          accessNeeds: <Object?>[
+            accessNeed('wheelchair', 4),
+            accessNeed('companion', 4),
+            accessNeed('hearing', 0),
+          ],
+        );
+        (snapshot['features']! as Map<String, Object?>)['limitedViewFilter'] =
+            true;
 
-      await tester.pumpWidget(
-        pickerHarness(
-          map,
-          const Align(
-            alignment: Alignment.bottomLeft,
-            child: SeatLayerPickerAccessibilityFilters(compact: true),
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            const Align(
+              alignment: Alignment.bottomLeft,
+              child: SeatLayerPickerAccessibilityFilters(compact: true),
+            ),
+            platformBrightness: brightness,
           ),
-          platformBrightness: brightness,
-        ),
-      );
-      map.emit(snapshot);
-      await tester.pumpAndSettle();
-      await tester.tap(find.byType(IconButton));
-      await tester.pumpAndSettle();
+        );
+        map.emit(snapshot);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(IconButton));
+        await tester.pumpAndSettle();
 
-      await expectLater(
-        find.byType(SingleChildScrollView).first,
-        matchesGoldenFile('goldens/access_sheet_${brightness.name}.png'),
-      );
-    }, tags: goldenTag, skip: goldenSkip != null);
+        await expectLater(
+          find.byType(SingleChildScrollView).first,
+          matchesGoldenFile('goldens/access_sheet_${brightness.name}.png'),
+        );
+      },
+      tags: goldenTag,
+      skip: goldenSkip != null,
+    );
   }
 }
