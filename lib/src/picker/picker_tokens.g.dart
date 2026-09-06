@@ -558,6 +558,9 @@ abstract final class SeatLayerSizeTokens {
   /// `20`
   static const double accessRowIconCell = 20;
 
+  /// `17`
+  static const double accessRowIconSize = 17;
+
   /// `10`
   static const double accessRowGap = 10;
 
