@@ -31,10 +31,14 @@ Widget _layout() => SeatLayerPickerAdaptiveLayout(
     );
 
 /// The venue as the buyer meets it: no card up, one section focused.
-Map<String, Object?> _onTheMap({int revision = 1}) => pickerSnapshot(
+Map<String, Object?> _onTheMap({int revision = 1, String rung = 'sections'}) =>
+    pickerSnapshot(
       revision: revision,
       withSelection: false,
       sections: pickerSections(),
+      // Among the sections by default, where `+` still has somewhere to go;
+      // the dock tests stand among the seats, which is where the dock draws.
+      rung: rung,
     );
 
 /// The same venue with a tapped seat still waiting for an answer.
@@ -213,7 +217,7 @@ void main() {
           ),
         ),
       );
-      map.emit(_onTheMap());
+      map.emit(_onTheMap(rung: 'seats'));
       await pumpToRest(tester);
 
       final live = _liveRegions(tester);
@@ -441,7 +445,7 @@ void main() {
           ),
         ),
       );
-      map.emit(_onTheMap());
+      map.emit(_onTheMap(rung: 'seats'));
       await pumpToRest(tester);
 
       // Clamped at the dock's own 1.3, whatever the platform asked for — and

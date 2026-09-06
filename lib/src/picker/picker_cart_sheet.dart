@@ -622,23 +622,31 @@ class _SheetHandle extends StatelessWidget {
           onTap: onPressed,
           child: SizedBox(
             height: height,
-            child: Align(
+            // The disc keeps its own size whatever strip the sheet lends it:
+            // a head shorter than the disc must not squash it into an oval.
+            child: OverflowBox(
               alignment: Alignment.topCenter,
+              minWidth: layout.sheetHandleWidth,
+              maxWidth: layout.sheetHandleWidth,
+              minHeight: layout.sheetHandleHeight,
+              maxHeight: layout.sheetHandleHeight,
               child: Container(
                 width: layout.sheetHandleWidth,
                 height: layout.sheetHandleHeight,
+                // A disc on the line (web 0.84.0): white, lifted by its own
+                // shadow, half over the map and half in the sheet, with no
+                // hairline under it — the arrow between two lines read as a
+                // band, not a handle.
                 decoration: BoxDecoration(
-                  // 62 per cent OF the hairline, not 62 per cent opacity: the
-                  // divider token already carries its own alpha, and replacing
-                  // it painted a dark slate lozenge where the web has a pale
-                  // grey one.
-                  color: Color.alphaBlend(
-                    pickerAlpha(theme.divider, theme.divider.a * .62),
-                    theme.background,
-                  ),
-                  border: Border.all(color: theme.divider),
-                  borderRadius:
-                      BorderRadius.circular(SeatLayerRadiusTokens.pill),
+                  color: theme.background,
+                  shape: BoxShape.circle,
+                  boxShadow: const <BoxShadow>[
+                    BoxShadow(
+                      color: Color(0x33000000),
+                      blurRadius: 10,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: AnimatedRotation(
                   duration: SeatLayerPickerMotion.of(
@@ -800,48 +808,48 @@ class _TotalLineState extends State<_TotalLine>
             .join(',  ')
         : '';
     final line = Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Flexible(
-              child: _bumped(
-                SeatLayerCrossFade(
-                  token: summary,
-                  child: Text(
-                    summary,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    // design/tokens.json › type.footTotalLabel.
-                    style: TextStyle(
-                      color: theme.text,
-                      fontSize: 13,
-                      fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
-                      fontFamily: theme.fontFamily,
-                    ),
-                  ),
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Flexible(
+          child: _bumped(
+            SeatLayerCrossFade(
+              token: summary,
+              child: Text(
+                summary,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                // design/tokens.json › type.footTotalLabel.
+                style: TextStyle(
+                  color: theme.text,
+                  fontSize: 13,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
+                  fontFamily: theme.fontFamily,
                 ),
               ),
             ),
-            if (total.isNotEmpty)
-              SeatLayerCrossFade(
-                token: total,
-                child: Text(
-                  total,
-                  softWrap: false,
-                  // design/tokens.json › type.footTotalAmount.
-                  style: TextStyle(
-                    color: theme.text,
-                    fontSize: 17,
-                    fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
-                    fontFamily: theme.fontFamily,
-                    fontFeatures: const <FontFeature>[
-                      FontFeature.tabularFigures(),
-                    ],
-                  ),
-                ),
+          ),
+        ),
+        if (total.isNotEmpty)
+          SeatLayerCrossFade(
+            token: total,
+            child: Text(
+              total,
+              softWrap: false,
+              // design/tokens.json › type.footTotalAmount.
+              style: TextStyle(
+                color: theme.text,
+                fontSize: 17,
+                fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
+                fontFamily: theme.fontFamily,
+                fontFeatures: const <FontFeature>[
+                  FontFeature.tabularFigures(),
+                ],
               ),
-          ],
-        );
+            ),
+          ),
+      ],
+    );
     return Semantics(
       // The one line that says what the cart holds. It is announced on change
       // rather than on a timer: the sentence changes when the cart does, and

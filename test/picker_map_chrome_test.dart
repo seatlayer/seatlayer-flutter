@@ -127,7 +127,7 @@ void main() {
     await tester.pumpWidget(
       pickerHarness(map, _picker(verdicts), options: _withZoomDiscs),
     );
-    map.emit(pickerSnapshot(withSelection: false));
+    map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
     await tester.pumpAndSettle();
 
     final disc = find.byTooltip('Zoom in');
@@ -157,7 +157,7 @@ void main() {
     await tester.pumpWidget(
       pickerHarness(map, _picker(verdicts), options: _withZoomDiscs),
     );
-    map.emit(pickerSnapshot(withSelection: false));
+    map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
     await tester.pumpAndSettle();
 
     final gesture = await tester.startGesture(
@@ -187,7 +187,7 @@ void main() {
     await tester.pumpWidget(
       pickerHarness(map, _picker(verdicts), options: _withZoomDiscs),
     );
-    map.emit(pickerSnapshot(withSelection: false));
+    map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
     await tester.pumpAndSettle();
 
     // The middle of the map band, clear of every corner, rail and strip.

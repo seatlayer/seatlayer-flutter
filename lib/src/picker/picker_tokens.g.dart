@@ -62,8 +62,8 @@ abstract final class SeatLayerLightTokens {
   /// `#5B4B8A`
   static const Color mapSelection = Color(0xFF5B4B8A);
 
-  /// `#FFFFFF`
-  static const Color chrome = Color(0xFFFFFFFF);
+  /// `#d6dce6`
+  static const Color chrome = Color(0xFFD6DCE6);
 
   /// `#8C172033`
   static const Color chromeLine = Color(0x8C172033);
@@ -215,17 +215,17 @@ abstract final class SeatLayerSizeTokens {
   /// `48`
   static const double peekButtonHeight = 48;
 
-  /// `40`
-  static const double sheetHandleWidth = 40;
+  /// `44`
+  static const double sheetHandleWidth = 44;
+
+  /// `44`
+  static const double sheetHandleHeight = 44;
 
   /// `22`
-  static const double sheetHandleHeight = 22;
+  static const double sheetHandleOverhang = 22;
 
-  /// `11`
-  static const double sheetHandleOverhang = 11;
-
-  /// `11`
-  static const double sheetHeadHeight = 11;
+  /// `16`
+  static const double sheetHeadHeight = 16;
 
   /// `52`
   static const double cartCardMinHeight = 52;
@@ -254,8 +254,8 @@ abstract final class SeatLayerSizeTokens {
   /// `5`
   static const double cartNotePadTop = 5;
 
-  /// `6`
-  static const double footPadTop = 6;
+  /// `4`
+  static const double footPadTop = 4;
 
   /// `16`
   static const double footPadX = 16;
@@ -263,8 +263,8 @@ abstract final class SeatLayerSizeTokens {
   /// `2`
   static const double footPadBottom = 2;
 
-  /// `10`
-  static const double footTotalGap = 10;
+  /// `8`
+  static const double footTotalGap = 8;
 
   /// `44`
   static const double checkoutButtonHeight = 44;

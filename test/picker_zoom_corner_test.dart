@@ -90,11 +90,10 @@ Future<FakePickerMap> _corner(
 }
 
 void main() {
-  testWidgets('the phone corner carries + and the whole venue',
-      (tester) async {
+  testWidgets('the phone corner carries + and the whole venue', (tester) async {
     await _corner(
       tester,
-      snapshot: pickerSnapshot(withSelection: false),
+      snapshot: pickerSnapshot(withSelection: false, rung: 'sections'),
     );
 
     expect(find.byType(SeatLayerPickerZoomInButton), findsOneWidget);
@@ -103,8 +102,7 @@ void main() {
     expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsOneWidget);
   });
 
-  testWidgets('at the whole venue the home disc stays live',
-      (tester) async {
+  testWidgets('at the whole venue the home disc stays live', (tester) async {
     await _corner(
       tester,
       snapshot: pickerSnapshot(
@@ -179,15 +177,32 @@ void main() {
     expect(_enabled(tester, SeatLayerPickerShowWholeVenueButton), isTrue);
   });
 
-  testWidgets('+ dims at the far end of the zoom, and stays', (tester) async {
+  testWidgets('+ retires at the far end of the zoom', (tester) async {
+    // A disc that does nothing is the broken-map reading (web 0.84.0), so at
+    // the zoom ceiling `+` leaves rather than dims.
     await _corner(
       tester,
-      snapshot: pickerSnapshot(withSelection: false, canZoomIn: false),
+      snapshot: pickerSnapshot(
+        withSelection: false,
+        rung: 'sections',
+        canZoomIn: false,
+      ),
     );
 
-    expect(find.byType(SeatLayerPickerZoomInButton), findsOneWidget);
-    expect(_enabled(tester, SeatLayerPickerZoomInButton), isFalse);
+    expect(find.byType(SeatLayerPickerZoomInButton), findsNothing);
     // The other two are a different question and are unaffected by it.
+    expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsOneWidget);
+  });
+
+  testWidgets('+ retires among the seats', (tester) async {
+    // Once the buyer is at the seats there is nothing left to step into.
+    await _corner(
+      tester,
+      snapshot: pickerSnapshot(withSelection: false, rung: 'seats'),
+    );
+
+    expect(find.byType(SeatLayerPickerZoomInButton), findsNothing);
+    expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsOneWidget);
   });
 
   testWidgets('the whole-venue disc leaves the section as it fits',
@@ -218,7 +233,7 @@ void main() {
     await tester.pumpWidget(
       pickerHarness(map, const SeatLayerPickerMapControls()),
     );
-    map.emit(pickerSnapshot(withSelection: false));
+    map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
     await tester.pumpAndSettle();
 
     // THE WIDE FIT-TO-SCREEN CONTROL WENT (2026-09-06). Two ways to frame the
@@ -246,7 +261,7 @@ void main() {
       await tester.pumpWidget(
         pickerHarness(map, const SeatLayerPickerMapControls(compact: true)),
       );
-      map.emit(pickerSnapshot(withSelection: false));
+      map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
       await tester.pumpAndSettle();
 
       final screen = tester.getRect(find.byType(SeatLayerPickerMapControls));
@@ -267,7 +282,7 @@ void main() {
       await tester.pumpWidget(
         pickerHarness(map, const SeatLayerPickerMapControls()),
       );
-      map.emit(pickerSnapshot(withSelection: false));
+      map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
       await tester.pumpAndSettle();
 
       final access =
@@ -303,7 +318,7 @@ void main() {
             ),
           ),
         );
-        map.emit(pickerSnapshot(withSelection: false));
+        map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
         await pumpToRest(tester);
 
         expect(
@@ -328,7 +343,7 @@ void main() {
           ),
         ),
       );
-      map.emit(pickerSnapshot(withSelection: false));
+      map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
       await tester.pumpAndSettle();
 
       expect(find.text('mine'), findsOneWidget);
@@ -349,7 +364,7 @@ void main() {
           ),
         ),
       );
-      map.emit(pickerSnapshot(withSelection: false));
+      map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
       await tester.pumpAndSettle();
 
       expect(find.byType(SeatLayerPickerAccessibilityFilters), findsNothing);

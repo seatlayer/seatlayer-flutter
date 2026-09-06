@@ -226,7 +226,12 @@ class _CornerControls extends StatelessWidget {
       // "+" and the whole-venue disc, nothing between them (owner, 2026-09-06):
       // a "−" that only sometimes had a step to take read as a control that
       // sometimes worked. Pinch steps out; the disc below goes home.
-      if (onMap && chrome.zoomControlsFor(phone: true))
+      // "+" retires once the buyer is among the seats or at the zoom ceiling
+      // (web 0.84.0): a disc that does nothing is the broken-map reading.
+      if (onMap &&
+          chrome.zoomControlsFor(phone: true) &&
+          state.snapshot?.map.rung != 'seats' &&
+          state.snapshot?.map.canZoomIn != false)
         const SeatLayerPickerZoomInButton(),
       if (onMap && chrome.zoomToFitControlFor(phone: true))
         const SeatLayerPickerShowWholeVenueButton(),

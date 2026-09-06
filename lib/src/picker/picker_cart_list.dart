@@ -411,7 +411,7 @@ class SeatLayerCartCard extends StatelessWidget {
                           // design/tokens.json › type.cartCardName.
                           style: TextStyle(
                             color: theme.text,
-                            fontSize: 13,
+                            fontSize: 15,
                             height: 1.25,
                             fontWeight:
                                 seatLayerBoldWeight(context, FontWeight.w700),
@@ -439,7 +439,7 @@ class SeatLayerCartCard extends StatelessWidget {
                       // design/tokens.json › type.cartCardAmount.
                       style: TextStyle(
                         color: theme.text,
-                        fontSize: 13,
+                        fontSize: 15,
                         fontWeight:
                             seatLayerBoldWeight(context, FontWeight.w800),
                         fontFamily: theme.fontFamily,
@@ -498,7 +498,7 @@ class _PositionLine extends StatelessWidget {
         // design/tokens.json › type.cartCardPosition.
         style: TextStyle(
           color: theme.mutedText,
-          fontSize: 11.5,
+          fontSize: 13,
           height: 1.3,
           fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
           fontFamily: theme.fontFamily,

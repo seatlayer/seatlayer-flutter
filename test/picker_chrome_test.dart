@@ -454,7 +454,7 @@ void main() {
       await tester.pumpWidget(
         pickerHarness(map, const SeatLayerPickerMapControls(compact: true)),
       );
-      map.emit(pickerSnapshot(withSelection: false));
+      map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
       await tester.pumpAndSettle();
 
       const inset = SeatLayerSizeTokens.mapAnchorInset;

@@ -2,7 +2,7 @@
 
 ## 0.9.0
 
-Runtime pin 0.83.0. The phone picker follows the web picker's latest phone
+Runtime pin 0.84.0. The phone picker follows the web picker's latest phone
 layout item by item, and the runtime now tells native chrome when the camera
 is at the whole-venue pose and at the zoom ceiling.
 
@@ -48,6 +48,14 @@ is at the whole-venue pose and at the zoom ceiling.
   alone. The accessibility sheet is one aligned list: fixed rows with
   hairlines, counts in their own column, the two map switches under a
   "View" heading.
+- **The sheet handle is a disc on the line (web 0.84.0).** A white disc,
+  lifted by its own shadow, sits half over the map and half in the sheet with
+  no hairline under it; the head strip under it and the footer's paddings are
+  tighter, so the collapsed sheet is shorter. "+" retires once the buyer is
+  among the seats or at the zoom ceiling instead of dimming: a disc that does
+  nothing read as a broken map. Cart cards use 15pt names and amounts over a
+  13pt position line, and the phone's disc tint is lighter in the light
+  theme.
 - **The seat card's spotlight follows the seat** through the lift that pans
   the map out from under the card; it used to sit one lift band below.
 - **No card over an unavailable seat.** A sold seat, one not for sale, or

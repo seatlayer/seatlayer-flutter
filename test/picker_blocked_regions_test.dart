@@ -62,7 +62,11 @@ void main() {
     useFakeWebViewPlatform();
     usePhoneSurface(tester);
     await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
-    map.emit(pickerSnapshot(sections: pickerSections(), withSelection: false));
+    map.emit(pickerSnapshot(
+      sections: pickerSections(),
+      withSelection: false,
+      rung: 'sections',
+    ));
     await pumpToRest(tester);
 
     final reports = _sent(map);
