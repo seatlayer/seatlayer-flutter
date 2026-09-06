@@ -1022,6 +1022,9 @@ abstract final class SeatLayerStringTokens {
   /// Fit venue
   static const String fitVenue = 'Fit venue';
 
+  /// Show whole venue
+  static const String fitWholeVenue = 'Show whole venue';
+
   /// Zoom in
   static const String zoomIn = 'Zoom in';
 

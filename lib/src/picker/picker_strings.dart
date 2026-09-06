@@ -96,6 +96,7 @@ class SeatLayerPickerStrings {
     this.accessJumpFirstSection = SeatLayerStringTokens.accessJumpFirstSection,
     this.accessJumpNextSection = SeatLayerStringTokens.accessJumpNextSection,
     this.fitVenue = SeatLayerStringTokens.fitVenue,
+    this.fitWholeVenue = SeatLayerStringTokens.fitWholeVenue,
     this.zoomIn = SeatLayerStringTokens.zoomIn,
     this.zoomOut = SeatLayerStringTokens.zoomOut,
     this.rotateVenue = SeatLayerStringTokens.rotateVenue,
@@ -586,6 +587,14 @@ class SeatLayerPickerStrings {
 
   /// Tooltip on the fit-to-screen map control.
   final String fitVenue;
+
+  /// Name of the phone's third map disc, which puts the whole venue on screen
+  /// from wherever the buyer is.
+  ///
+  /// Deliberately not [fitVenue]: that one is the wide rail's fit-to-screen,
+  /// and this one leaves a framed section as well as fitting, so the two read
+  /// differently in the sentence a screen reader speaks.
+  final String fitWholeVenue;
 
   /// Tooltip on the zoom-in map control, which a phone only draws when the
   /// host asks for the pair back: pinch is the gesture.

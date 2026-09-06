@@ -42,6 +42,7 @@ const List<String> _plainFields = <String>[
   'accessibility',
   'accessibilityTitle',
   'fitVenue',
+  'fitWholeVenue',
   'loading',
   'errorMessage',
   'retry',
