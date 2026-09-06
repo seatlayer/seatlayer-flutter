@@ -186,13 +186,15 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
   /// frame as the press, against a decision that has already been taken. The
   /// mark is dropped by the snapshot that no longer carries the line, or
   /// restored here if the mutation fails.
-  /// The map frames the seat at its resting place and, on the phone, the
-  /// sheet steps down so the map is what the buyer sees (web 0.84.1).
+  /// The map frames the seat at its resting place. The sheet STAYS where the
+  /// buyer put it (owner call 2026-09-06): it used to step down to peek on
+  /// every card tap, so checking three or four seats meant opening the sheet
+  /// three or four times. The phone map sits above the sheet in the same
+  /// column, so the seat lands in the room the open sheet leaves it.
   void _showSeat(SeatLayerPickerController controller, SelectedSeat seat) {
     unawaited(
       controller.frameSeat(seat.id, fraction: seatLayerSheetRestoreFraction),
     );
-    controller.setCartSheetExpanded(false);
   }
 
   Future<void> _remove(

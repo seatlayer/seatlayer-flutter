@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- **Tapping a cart card no longer closes the sheet.** The map still goes to
+  the seat, in the room the open sheet leaves it, so a buyer can check one
+  seat after another without reopening the cart each time.
+
 ## 0.9.1
 
 Runtime pin 0.84.1. The phone picker follows the web picker's post-0.84.0
