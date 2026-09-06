@@ -205,7 +205,8 @@ void main() {
     );
   });
 
-  testWidgets('the wide rail is untouched', (tester) async {
+  testWidgets('the wide rail keeps `+` and `−` and frames nothing itself',
+      (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -216,10 +217,15 @@ void main() {
     map.emit(pickerSnapshot(withSelection: false));
     await tester.pumpAndSettle();
 
-    // Wide keeps the fit-to-screen control it has always had; the phone's
-    // whole-venue disc belongs to the corner.
-    expect(find.byType(SeatLayerPickerZoomToFitButton), findsOneWidget);
+    // THE WIDE FIT-TO-SCREEN CONTROL WENT (2026-09-06). Two ways to frame the
+    // same flat venue on one layout is one too many, and the one that went is
+    // the one pinch already does. The immersive scene keeps its own Fit chip,
+    // which frames a camera rather than a map.
+    expect(find.byType(SeatLayerPickerZoomToFitButton), findsNothing);
+    // The phone's whole-venue disc belongs to the phone corner.
     expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsNothing);
+    expect(find.byType(SeatLayerPickerZoomInButton), findsOneWidget);
+    expect(find.byType(SeatLayerPickerZoomOutButton), findsOneWidget);
   });
 
   group('the ♿ disc heads the column', () {

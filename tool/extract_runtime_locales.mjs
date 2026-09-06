@@ -39,7 +39,10 @@ const KEYS = {
   testMode: 'picker.testMode',
   accessibility: 'picker.accessibilityOptions',
   accessibilityTitle: 'picker.accessibilityOptions',
-  fitVenue: 'picker.fitToScreen',
+  // The runtime retired its own fit-to-screen wording along with the wide 2D
+  // control that used to carry it; both surfaces that still frame a venue say
+  // "Show whole venue".
+  fitVenue: 'picker.fitWholeVenue',
   fitWholeVenue: 'picker.fitWholeVenue',
   loading: 'picker.loadingSeatMap',
   errorMessage: 'picker.mapDidNotLoad',

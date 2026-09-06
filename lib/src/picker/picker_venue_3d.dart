@@ -229,7 +229,9 @@ class _SeatDeck extends StatelessWidget {
           _ImmersiveAction(
             theme: theme,
             icon: Icons.fit_screen_rounded,
-            label: strings.fitVenue,
+            // The same words as the phone's whole-venue disc: one name for
+            // "put the whole thing on screen", whichever camera is asking.
+            label: strings.fitWholeVenue,
             onPressed:
                 busy ? null : () => ignorePickerAction(controller.zoomToFit()),
           ),

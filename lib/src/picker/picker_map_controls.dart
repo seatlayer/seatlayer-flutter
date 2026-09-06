@@ -150,8 +150,6 @@ class _RailControls extends StatelessWidget {
             const SeatLayerPickerZoomInButton(),
             const SeatLayerPickerZoomOutButton(),
           ],
-          if (chrome.zoomToFitControlFor(phone: false))
-            const SeatLayerPickerZoomToFitButton(),
           if (chrome.showViewModeControl &&
               options.enable3D &&
               state.snapshot?.capabilities.contains('venue3d') == true)
@@ -541,6 +539,12 @@ class SeatLayerPickerShowWholeVenueButton extends StatelessWidget {
 }
 
 /// A standalone fit-to-venue control for custom picker compositions.
+///
+/// NOT drawn by the wide rail any more. Two ways to frame the venue on one
+/// layout is one too many: the phone's [SeatLayerPickerShowWholeVenueButton]
+/// also releases a framed section, the immersive scene's own Fit chip frames
+/// the 3D camera, and this one only re-fitted a flat map that pinch already
+/// walks. A host whose composition wants it back mounts it itself.
 class SeatLayerPickerZoomToFitButton extends StatelessWidget {
   /// Creates the fit-to-venue control.
   const SeatLayerPickerZoomToFitButton({super.key});
