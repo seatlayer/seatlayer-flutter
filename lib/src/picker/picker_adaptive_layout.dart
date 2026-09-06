@@ -914,7 +914,21 @@ class _SeatLayerPickerAdaptiveLayoutState
                       Positioned.fill(
                         child: seatLayerReadingOrder(
                           SeatLayerPickerReadingOrder.mapChrome,
-                          controls,
+                          // The discs step out of the way of a seat card: a
+                          // column of controls poking out beside the sheet
+                          // asking about a seat read as clutter, and none of
+                          // them may be pressed while it asks.
+                          IgnorePointer(
+                            ignoring: seatCardUp && !wide,
+                            child: AnimatedOpacity(
+                              opacity: seatCardUp && !wide ? 0 : 1,
+                              duration: SeatLayerPickerMotion.of(
+                                context,
+                                SeatLayerPickerMotion.crossfade,
+                              ),
+                              child: controls,
+                            ),
+                          ),
                         ),
                       ),
                       if (chrome.showVenue3DChrome)

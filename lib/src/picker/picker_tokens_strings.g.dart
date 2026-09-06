@@ -112,6 +112,9 @@ abstract final class SeatLayerStringTokens {
   /// Not available
   static const String notAvailable = 'Not available';
 
+  /// VIEW
+  static const String viewGroupTitle = 'VIEW';
+
   /// Organizer note
   static const String organizerNote = 'Organizer note';
 

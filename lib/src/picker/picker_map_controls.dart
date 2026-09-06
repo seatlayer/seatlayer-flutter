@@ -505,7 +505,13 @@ class SeatLayerPickerZoomOutButton extends StatelessWidget {
     return _ControlButton(
       icon: Icons.remove_rounded,
       tooltip: SeatLayerPickerScope.stringsOf(context).zoomOut,
-      onPressed: map?.canStepBack == false ? null : controller.zoomOut,
+      // Live only once the buyer is in among the seats: at a section's own
+      // frame the only step back is the whole venue, and that is the disc
+      // below this one. Two discs for one move read as a puzzle (owner,
+      // 2026-09-06).
+      onPressed: map?.canStepBack == false || map?.rung != 'seats'
+          ? null
+          : controller.zoomOut,
     );
   }
 }
@@ -526,14 +532,17 @@ class SeatLayerPickerShowWholeVenueButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
-    final map = controller.state.snapshot?.map;
     return _ControlButton(
       // A frame with a dot at its centre: the venue, and where the camera
       // lands on it. Drawn, not lettered — the disc carries its name for a
       // screen reader and its tooltip for a pointer.
       icon: Icons.center_focus_strong_rounded,
       tooltip: SeatLayerPickerScope.stringsOf(context).fitWholeVenue,
-      onPressed: map?.canStepBack == false ? null : controller.overview,
+      // ALWAYS live. The camera facts in the snapshot are only as fresh as the
+      // last state change, and a pinch changes no state: dimming this disc on
+      // a stale "at the venue" reading stranded a buyer with no way out. At
+      // the venue already, the press is a harmless no-op.
+      onPressed: controller.overview,
     );
   }
 }

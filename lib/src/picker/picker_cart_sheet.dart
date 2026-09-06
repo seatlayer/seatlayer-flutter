@@ -790,16 +790,16 @@ class _TotalLineState extends State<_TotalLine>
         });
       }
     }
-    return Semantics(
-      // The one line that says what the cart holds. It is announced on change
-      // rather than on a timer: the sentence changes when the cart does, and
-      // never otherwise, so the live region speaks exactly as often as
-      // something happened.
-      liveRegion: true,
-      container: true,
-      label: total.isEmpty ? summary : '$summary, $total',
-      child: ExcludeSemantics(
-        child: Row(
+    // Which seats, in one muted line under the count, while the cards are
+    // folded away: "2 tickets" alone told the buyer they had bought something
+    // and not what, and the chevron above was the only way to find out.
+    final collapsed = !controller.cartSheetExpanded;
+    final seats = collapsed && count > 0
+        ? controller.confirmedCartLines
+            .map((line) => line.label.replaceAll('-', ' · '))
+            .join(',  ')
+        : '';
+    final line = Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
@@ -841,6 +841,59 @@ class _TotalLineState extends State<_TotalLine>
                 ),
               ),
           ],
+        );
+    return Semantics(
+      // The one line that says what the cart holds. It is announced on change
+      // rather than on a timer: the sentence changes when the cart does, and
+      // never otherwise, so the live region speaks exactly as often as
+      // something happened.
+      liveRegion: true,
+      container: true,
+      label: total.isEmpty ? summary : '$summary, $total',
+      child: ExcludeSemantics(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: collapsed && count > 0
+              ? () => controller.setCartSheetExpanded(true)
+              : null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              line,
+              if (seats.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 3),
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: Text(
+                          seats,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: theme.mutedText,
+                            fontSize: 12,
+                            fontWeight:
+                                seatLayerBoldWeight(context, FontWeight.w600),
+                            fontFamily: theme.fontFamily,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      // Not the handle's chevron: the handle stays the cart's
+                      // one named toggle, and this is only a hint that the
+                      // line opens.
+                      Icon(
+                        Icons.unfold_more_rounded,
+                        size: 16,
+                        color: theme.mutedText,
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

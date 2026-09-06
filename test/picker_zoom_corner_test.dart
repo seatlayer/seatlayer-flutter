@@ -119,16 +119,16 @@ void main() {
     expect(find.byType(SeatLayerPickerZoomOutButton), findsOneWidget);
     expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsOneWidget);
     expect(_enabled(tester, SeatLayerPickerZoomOutButton), isFalse);
-    expect(_enabled(tester, SeatLayerPickerShowWholeVenueButton), isFalse);
+    // The whole-venue disc is ALWAYS live: the camera facts in the snapshot
+    // are only as fresh as the last state change, and a pinch changes none,
+    // so a dimmed escape hatch stranded buyers on a stale reading.
+    expect(_enabled(tester, SeatLayerPickerShowWholeVenueButton), isTrue);
     // The buyer looking at everything wants in, and `+` is what answers that.
     expect(_enabled(tester, SeatLayerPickerZoomInButton), isTrue);
 
     // And it has to LOOK dimmed, or "cannot be pressed" is a fact the buyer
     // only discovers by pressing it.
-    expect(
-      _dim(tester, SeatLayerPickerShowWholeVenueButton),
-      SeatLayerOpacityTokens.mapControlDisabled,
-    );
+    expect(_dim(tester, SeatLayerPickerShowWholeVenueButton), isNull);
     expect(
       _dim(tester, SeatLayerPickerZoomOutButton),
       SeatLayerOpacityTokens.mapControlDisabled,
@@ -162,7 +162,9 @@ void main() {
       ),
     );
 
-    expect(_enabled(tester, SeatLayerPickerZoomOutButton), isTrue);
+    // "−" belongs to the seats rung alone (owner, 2026-09-06): from a
+    // pinched venue the way home is the whole-venue disc, which stays live.
+    expect(_enabled(tester, SeatLayerPickerZoomOutButton), isFalse);
     expect(_enabled(tester, SeatLayerPickerShowWholeVenueButton), isTrue);
   });
 
@@ -181,7 +183,10 @@ void main() {
     );
 
     expect(_enabled(tester, SeatLayerPickerZoomOutButton), isFalse);
-    expect(_enabled(tester, SeatLayerPickerShowWholeVenueButton), isFalse);
+    // The whole-venue disc is ALWAYS live: the camera facts in the snapshot
+    // are only as fresh as the last state change, and a pinch changes none,
+    // so a dimmed escape hatch stranded buyers on a stale reading.
+    expect(_enabled(tester, SeatLayerPickerShowWholeVenueButton), isTrue);
   });
 
   testWidgets('+ dims at the far end of the zoom, and stays', (tester) async {

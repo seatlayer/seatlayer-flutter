@@ -56,6 +56,7 @@ const List<String> _plainFields = <String>[
   'hideLimitedView',
   'colorblindSafe',
   'notAvailable',
+  'viewGroupTitle',
   'restrictedView',
   'obstructedView',
   'premiumSeat',

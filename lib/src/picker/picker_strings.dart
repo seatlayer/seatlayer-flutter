@@ -57,6 +57,7 @@ class SeatLayerPickerStrings {
     this.emptyWheelchairSpace = SeatLayerStringTokens.emptyWheelchairSpace,
     this.accessiblePhysicalSeat = SeatLayerStringTokens.accessiblePhysicalSeat,
     this.notAvailable = SeatLayerStringTokens.notAvailable,
+    this.viewGroupTitle = SeatLayerStringTokens.viewGroupTitle,
     this.venueZone = SeatLayerStringTokens.venueZone,
     this.fewerTickets = SeatLayerStringTokens.fewerTickets,
     this.moreTickets = SeatLayerStringTokens.moreTickets,
@@ -362,6 +363,9 @@ class SeatLayerPickerStrings {
   /// wheelchair spaces" and "its wheelchair spaces are taken" are different
   /// facts.
   final String notAvailable;
+
+  /// Heading over the two switches that change how the map is drawn.
+  final String viewGroupTitle;
 
   /// Tooltip on the 3D chrome's previous-seat step.
   final String previousSeat;

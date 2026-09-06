@@ -38,6 +38,14 @@ The phone picker follows the web picker's latest phone layout item by item.
   the phone's whole-venue disc are the two fit affordances, both saying
   "Show whole venue". The best-seats card carries a one-line "Find seats
   together" title.
+- **The collapsed footer says which seats.** Under "N tickets" a muted line
+  lists the seats held, and tapping it opens the cards. The whole-venue disc
+  is always live, so a pinched camera can always be brought home; "−" is
+  live only among the seats, where it has a step to take. The disc column
+  fades out while a seat card asks. The phone price rail carries prices
+  alone. The accessibility sheet is one aligned list: fixed rows with
+  hairlines, counts in their own column, the two map switches under a
+  "View" heading.
 - **The seat card's spotlight follows the seat** through the lift that pans
   the map out from under the card; it used to sit one lift band below.
 - **No card over an unavailable seat.** A sold seat, one not for sale, or

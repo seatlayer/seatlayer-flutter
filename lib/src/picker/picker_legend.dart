@@ -86,7 +86,11 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
       // One more than the categories: the key for the grey the map paints on
       // a seat nobody can take. It is not a category and not a filter, so it
       // closes the row rather than joining it.
-      itemCount: categories.length + 1,
+      // On the phone the rail carries the prices alone, as the web's does:
+      // a key that ends the row half off the screen reads as a cut word, and
+      // the grey disc explains itself the moment a seat is tapped. The wide
+      // layout has the room, and keeps the key.
+      itemCount: categories.length + (compact ? 0 : 1),
       separatorBuilder: (_, __) => const SizedBox(width: 5),
       itemBuilder: (context, index) {
         if (index == categories.length) {

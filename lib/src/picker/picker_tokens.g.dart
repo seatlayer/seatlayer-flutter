@@ -239,8 +239,8 @@ abstract final class SeatLayerSizeTokens {
   /// `10`
   static const double cartTrayPadTop = 10;
 
-  /// `14`
-  static const double cartTrayPadBottom = 14;
+  /// `2`
+  static const double cartTrayPadBottom = 2;
 
   /// `14`
   static const double cartTrayPadX = 14;
@@ -254,8 +254,8 @@ abstract final class SeatLayerSizeTokens {
   /// `5`
   static const double cartNotePadTop = 5;
 
-  /// `10`
-  static const double footPadTop = 10;
+  /// `6`
+  static const double footPadTop = 6;
 
   /// `16`
   static const double footPadX = 16;
