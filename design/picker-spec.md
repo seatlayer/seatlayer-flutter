@@ -105,8 +105,8 @@ Price rail band                            size.topRailHeight          (row)
 │  top-left anchor    test chip · 3D back pill                            │
 │  top-right anchor   Map | 3D control                                    │
 │  left-rail anchor   floor rail                                          │
-│  bottom-left        accessibility control                               │
-│  bottom-right       zoom column                                         │
+│  bottom-left        (empty on a phone by default)                       │
+│  bottom-right       ♿ control, then the zoom discs                      │
 │  bottom-centre      toast · hold-extend prompt                          │
 │  seat card / prompts / status overlays                                  │
 │  (no section dock on a phone — host opt-in only; see 3.6)               │
@@ -482,8 +482,14 @@ inset `size.mapAnchorInset` from the map's edges, with `size.mapAnchorGap`
 between members. Regions do not receive presses; their children do. Nothing
 free-floats.
 
-**Three discs on the phone** (owner call, 2026-09-06), in the bottom-right
-region, top to bottom:
+**One column, bottom-right, on both compositions** (owner call, 2026-09-06).
+The ♿ filter disc heads it; the zoom discs follow. It used to stand alone in
+the bottom-left region — one control facing a stack of them, in the corner the
+floor rail already owns — and read as something the layout had forgotten. Who
+can sit where is an earlier question than how close the camera is, so it is the
+disc above `+`.
+
+**Three zoom discs on the phone**, under it, top to bottom:
 
 | Disc | Name | Command | Dims when |
 |---|---|---|---|
@@ -532,7 +538,14 @@ the same moment. `map.canStepBack`:
    older, coarser fallback — see §4.9 for what that costs and why it is not a
    guess of the SDK's own.
 
-Wide is unchanged: `+`, `−` and the fit-to-screen control it has always had.
+Wide draws `+` and `−` under the same ♿ disc, and **no fit control of its
+own** (2026-09-06). It carried a plain fit-to-screen button beside them until
+then; two ways to frame the same flat venue on one composition is one too many,
+and the one that went is the one a pinch already does. The immersive scene
+keeps its own Fit chip (§3.14), which frames a camera rather than a map, and
+says `strings.fitWholeVenue` like the phone's disc.
+`SeatLayerPickerZoomToFitButton` stays a public component for a host that wants
+it back in a composition of its own.
 
 Back-to-overview is a different question and keeps its own condition: it renders
 only while a section is actually framed.
@@ -564,28 +577,47 @@ regions lift by the dock's height plus the bottom safe inset. By default a
 phone mounts no dock, the lift is zero, and the corner controls rest at
 `size.mapAnchorInset`.
 
-#### Accessibility control (bottom-left)
+#### Accessibility control (head of the control column)
 
 A circle of `size.accessibilityControlSize` — the full
 `size.minimumHitTarget` — at `radius.pill`, ground `color.*.surface`, a
 whole-point hairline of `color.*.divider` like every other floating disc, ink
-`color.*.text`, with a soft shadow. The glyph is **drawn**, never an emoji: a
+`color.*.text`, with a soft shadow. The **same disc on both compositions**: it
+floats on the map either way, so the wide side does not get a labelled button
+of its own, and the wide panel no longer repeats the control under the
+best-seats card. The glyph is **drawn**, never an emoji: a
 wheelchair mark where the chart authors accessible seats, otherwise a
 display-options glyph. Names: `strings.accessibility`, or
 `strings.displayOptions` where the chart offers no provisions.
 
+**The sheet is bounded, and scrolls inside the bound.** A chart carrying the
+whole vocabulary gives it twelve accommodation rows plus the limited-view and
+colourblind switches; an unbounded scroll-controlled sheet answers that by
+taking the entire screen, and the map the buyer is filtering disappears behind
+the filter. The bound is
+`size.accessSheetMaxHeightFraction` of the screen, floored at
+`size.accessSheetMinHeight` and never taller than the screen itself, and the
+row list scrolls within it. (The web bounds its popover to the room above the
+♿ button *inside the map*, for the mirror-image reason: a panel measured
+against the window opens straight through the ticket sheet below it.)
+
 Its sheet opens upward from the button and contains switch rows:
 
 - one row per access need the chart actually authors, in the runtime's order,
-  each with its live free count — `strings.accessFreeCount`, or
-  `strings.notAvailable` with the row disabled at zero. (One word for
-  unavailability across the whole picker: the legend says the same about the
-  grey the map paints. `strings.accessNoneLeft` is retired.) A count that is *not
-  counted* shows no number and is never disabled. **A provision the venue has
+  each with its live free count — `strings.accessFreeCount`, or **`0`** with
+  the row disabled when the last space goes. A figure, not a sentence: the
+  count column carries numbers on every other row, "Not available" needed a
+  chip to hold it and made the sold-out row the loudest line on the sheet, and
+  the dimmed switch beside it is already what says the provision cannot be
+  had. The absence is still spoken — the count is part of the row's name.
+  (`strings.notAvailable` stays the picker's one word for a seat nobody can
+  take, on the legend and the seat card; `strings.accessNoneLeft` is retired.)
+  A count that is *not counted* shows no number and is never disabled. **A provision the venue has
   but has sold out of stays on the sheet and goes dark; a provision it never had
   is absent** — "this venue has none" and "these are taken" are different
   answers. A wheelchair row carries the note `strings.companionSeatsNote` where
-  the chart has companion places.
+  the chart has companion places — **behind an ⓘ**, not on a second line of the
+  row: see "one line per row" below.
 - `strings.hideLimitedView`, only where some seat is restricted or obstructed.
 - `strings.colorblindSafe`.
 
@@ -617,6 +649,24 @@ hold the screen; the web picker clears them all before another goes up
 first — the seat given back and marked answered, exactly as an outside tap on
 the card does it — so the sheet never comes up over a dimmed question the buyer
 can neither read nor answer.
+
+**One line per row.** A row used to be able to grow a second, muted line under
+its label — the companion sentence — and with twelve provisions that turned a
+sheet of switches into a page of prose. The sentence rides an ⓘ beside the
+label now (`size.accessNoteIconSize`, muted, accent while open, inside a
+`size.minimumHitTarget` target) and opens *under* the row that owns it, so the
+line is a line whether or not the buyer has asked for it. The ⓘ carries the
+sentence as its own accessible name, so it is spoken either way, and it is a
+separate node from the row's switch because the two do different things. The
+label itself is `maxLines: 1` and truncates: a translation that runs long
+shortens rather than wrapping. The line reads icon · name · count · ⓘ · switch.
+
+The names are the SHORT ones. The runtime's own taxonomy labels
+(`picker.access.*`) are written for a seat popup, where "Designated aisle /
+transfer seat" is the honest length; every place this SDK prints a provision is
+a single line in a narrow column. The English defaults in `design/tokens.json`
+have always been short, and the locale extractor takes the other thirty-six
+from `picker.accessShort.*` so they agree.
 
 Row anatomy: height `size.minimumHitTarget`, padding
 `size.accessRowPaddingX` / `size.accessRowPaddingY`, corner `radius.button`,
@@ -667,8 +717,9 @@ colourblind-safe support. Commands `picker.setAccessibilityFilters`,
 `lib/src/picker/picker_accessibility.dart` · state in
 `lib/src/picker/picker_accessibility_focus.dart`
 
-`♿ 2 of 6 ›` — a stadium pill sitting **beside** the accessibility control in
-the same bottom-left region, `size.accessStepGap` from it. Height
+`♿ 2 of 6 ›` — a stadium pill sitting **beside** the accessibility control at
+the head of the bottom-right control column, `size.accessStepGap` from it, on
+its inner side so the column's own right edge stays the discs'. Height
 `size.accessStepHeight` drawn inside a `size.minimumHitTarget` target, side
 padding `size.accessStepPaddingX`, ground `color.*.surface`, hairline
 `color.*.divider`, glyph in the accent, chevron in the muted ink, figure at
@@ -712,17 +763,19 @@ hairline the divider at partial opacity — each inside a `size.minimumHitTarget
 target. The `+` and `−` glyphs are drawn at 20 — an arm of 11.33 and a stroke
 of 1.33, not 14 across at a stroke of 2.
 
-The wide composition draws `+`, `−` and fit-to-screen (`strings.fitVenue`,
-`picker.zoomToFit`). The phone draws the three discs described under "Three
-discs on the phone" above — `strings.zoomIn`, `strings.zoomOut`,
-`strings.fitWholeVenue` — in the same column, at the same size and gap.
+The wide composition draws `+` and `−`. The phone draws the three discs
+described under "Three zoom discs on the phone" above — `strings.zoomIn`,
+`strings.zoomOut`, `strings.fitWholeVenue` — in the same column, at the same
+size and gap. Both columns are headed by the ♿ disc.
 
-`strings.fitWholeVenue` is deliberately not `strings.fitVenue`: the wide
-control only fits, and the phone's also leaves a framed section, so the two
-read differently in the sentence a screen reader speaks.
+`strings.fitWholeVenue` is the one name for "put the whole thing on screen",
+shared with the immersive scene's Fit chip. `strings.fitVenue` survives as the
+label of the retired `SeatLayerPickerZoomToFitButton`, and takes the same
+runtime key, so a host that mounts that component itself is not left with a
+word the rest of the picker no longer uses.
 
-**Commands.** `picker.zoomIn`, `picker.zoomOut`, `picker.overview` (phone),
-`picker.zoomToFit` (wide).
+**Commands.** `picker.zoomIn`, `picker.zoomOut`, `picker.overview` (the phone's
+whole-venue disc).
 
 An overview thumbnail (minimap) is **not built on a phone**, and neither are
 level-of-detail rung pills: measured against the map's top edge they restated
@@ -1722,6 +1775,7 @@ plate: padding 8, corner 11, a hairline of the accent at `.34` over
 **Row order on a phone** — one decision per row, with the DOM/semantic order
 unchanged so focus order still follows the page:
 
+0. the title line
 1. the premium chip, only where the chart has premium seats
 2. ticket type, full width
 3. venue zone, full width, **only where the venue has zones**
@@ -1730,6 +1784,16 @@ unchanged so focus order still follows the page:
 
 Names take full lines; the narrow fixed-width stepper shares the last one. Rows
 are 6 apart, and so are the stepper and the action beside it.
+
+**Title line** — a `✦` in the accent at 14 with a 6 pt gap, then
+`strings.findSeatsTogether` at 12.5 / w800 in `color.*.text`, `maxLines: 1`
+with an ellipsis. SHORT on purpose: the long form ("Find the closest seats
+together") is a sentence, and in the 300-point column it wrapped onto a second
+line above a card whose whole point is that it is compact. The words are the
+only part of the line that may shrink, and they shrink by truncating. The card
+still needs the line even though the action below says what pressing it does —
+while the action is busy it says `strings.findingBestSeats` instead, and
+nothing else on the card names the feature.
 
 **Selects** — height `size.bestSeatsSelectHeight`, corner `radius.control`,
 ground `color.*.surface`, hairline `color.*.divider`, label at
@@ -2433,6 +2497,17 @@ mountable on its own, where there is no order to join. Dart file:
   the answer to the press, and the cart is what the seat is being added to.
 - *Every control is a button* with a name, and a state where it has one:
   pressed, selected, expanded, toggled.
+
+**A surface that lists everything must still fit the screen.** Twelve
+accommodation rows is the widest case the picker has, and it is the case a
+wheelchair user meets: the accessibility sheet is bounded to
+`size.accessSheetMaxHeightFraction` of the screen (floored at
+`size.accessSheetMinHeight`) and scrolls inside that bound, and each of its
+rows is one line — short name, truncating rather than wrapping, with any
+sentence it needs behind an ⓘ that opens under it. Unbounded and multi-line,
+the same list took the whole screen on a phone and put its first two rows —
+the wheelchair and companion filters, the two rows the sheet exists for — off
+the top of the web's popover entirely. §3.5.
 
 **Dynamic type.** Every string scales with the platform's text-size setting, to
 a ceiling per surface (`type.scaleClamp` — rail, dock, peek and card at 1.3;
