@@ -63,6 +63,9 @@ class SeatLayerPickerStrings {
     this.moreTickets = SeatLayerStringTokens.moreTickets,
     this.bestSeats = SeatLayerStringTokens.bestSeats,
     this.findSeatsTogether = SeatLayerStringTokens.findSeatsTogether,
+    this.aboutBestSeats = SeatLayerStringTokens.aboutBestSeats,
+    this.closestGroupChosenInstantly =
+        SeatLayerStringTokens.closestGroupChosenInstantly,
     this.findingBestSeats = SeatLayerStringTokens.findingBestSeats,
     this.findSeats = SeatLayerStringTokens.findSeats,
     this.showLess = SeatLayerStringTokens.showLess,
@@ -423,6 +426,12 @@ class SeatLayerPickerStrings {
   /// point is that it is compact. The card's button still says what pressing
   /// it will do, and it counts the tickets while it is at it.
   final String findSeatsTogether;
+
+  /// The best-seats card's ⓘ, as a screen reader names it.
+  final String aboutBestSeats;
+
+  /// The one line behind that ⓘ.
+  final String closestGroupChosenInstantly;
 
   /// What the best-seats action says while it is searching.
   ///

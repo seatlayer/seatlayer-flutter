@@ -65,6 +65,9 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Cihê fizîkî yê gihîştbar',
   emptyWheelchairSpace: 'Cihê vala yê kursiya teker',
   findSeatsTogether: 'Cihên li kêleka hev bibîne',
+  aboutBestSeats: 'Derbarê dîtina kursiyên li kêleka hev',
+  closestGroupChosenInstantly:
+      'Koma berdest a herî nêzîk, di cih de hat hilbijartin.',
   hideLimitedView: 'Cihên bi dîmena sînordar veşêre',
   colorblindSafe: 'Rengên guncav ji bo kortiya rengan',
   notAvailable: 'Ne berdest e',

@@ -787,14 +787,14 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
   /// says which ticket went where, which is the one thing a card that closes
   /// cannot say by closing. Skipped entirely under reduced motion — an
   /// indicator that appears and vanishes in the same frame is just a flicker.
-  void _flyToPeek(
+  bool _flyToPeek(
     Offset? from,
     SelectedSeat seat,
     SeatLayerPickerController controller,
   ) {
-    if (from == null || SeatLayerPickerMotion.reduced(context)) return;
+    if (from == null || SeatLayerPickerMotion.reduced(context)) return false;
     final overlay = Overlay.maybeOf(context);
-    if (overlay == null) return;
+    if (overlay == null) return false;
     final screen = MediaQuery.sizeOf(context);
     final theme = seatLayerPickerThemeOf(context);
     final category = controller.state.categories
@@ -809,10 +809,17 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
         color: pickerColor(category?.color) ?? theme.accent,
         label: seat.buyerFacingLabel,
         fontFamily: theme.fontFamily,
-        onDone: entry.remove,
+        onDone: () {
+          entry.remove();
+          // The landing is the chip's to call: the count swells and the map
+          // pulls back only now (web 0.84.1).
+          controller.endCartLanding();
+        },
       ),
     );
+    controller.beginCartLanding();
     overlay.insert(entry);
+    return true;
   }
 }
 

@@ -65,6 +65,9 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Akadálymentes fizikai hely',
   emptyWheelchairSpace: 'Üres kerekesszékes hely',
   findSeatsTogether: 'Egymás melletti helyek keresése',
+  aboutBestSeats: 'Az egymás melletti helyek kereséséről',
+  closestGroupChosenInstantly:
+      'A legközelebbi szabad csoport, azonnal kiválasztva.',
   hideLimitedView: 'Korlátozott kilátású helyek elrejtése',
   colorblindSafe: 'Színvakbarát színek',
   notAvailable: 'Nem elérhető',

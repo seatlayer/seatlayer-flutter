@@ -17,6 +17,8 @@
 /// Gone with the fold: the run model, the `+N more` tail and the plate.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
@@ -24,6 +26,7 @@ import '../payloads.dart';
 import 'picker_buyer_asset_loader.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
+import 'picker_seat_lift.dart';
 import 'picker_seat_notes.dart';
 import 'picker_cart_removal.dart';
 import 'picker_haptics.dart';
@@ -160,6 +163,9 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
                 onLocate: locate == null || lines[index].seat == null
                     ? null
                     : () => locate(lines[index].seat!),
+                onTap: lines[index].seat == null
+                    ? null
+                    : () => _showSeat(controller, lines[index].seat!),
               ),
             ),
           ],
@@ -180,6 +186,15 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
   /// frame as the press, against a decision that has already been taken. The
   /// mark is dropped by the snapshot that no longer carries the line, or
   /// restored here if the mutation fails.
+  /// The map frames the seat at its resting place and, on the phone, the
+  /// sheet steps down so the map is what the buyer sees (web 0.84.1).
+  void _showSeat(SeatLayerPickerController controller, SelectedSeat seat) {
+    unawaited(
+      controller.frameSeat(seat.id, fraction: seatLayerSheetRestoreFraction),
+    );
+    controller.setCartSheetExpanded(false);
+  }
+
   Future<void> _remove(
     SeatLayerPickerController controller,
     SeatLayerTicketLine line,
@@ -311,10 +326,15 @@ class SeatLayerCartCard extends StatelessWidget {
     required this.removing,
     required this.onRemove,
     this.onLocate,
+    this.onTap,
   });
 
   /// The ticket this card stands for.
   final SeatLayerTicketLine line;
+
+  /// Takes the buyer to the seat on the map: a press on the card's own face,
+  /// not on its × or eye.
+  final VoidCallback? onTap;
 
   /// Whether this session may remove tickets at all.
   final bool removable;
@@ -357,120 +377,125 @@ class SeatLayerCartCard extends StatelessWidget {
       child: _SwipeToRemove(
         enabled: removable && !line.held && !removing,
         onRemove: onRemove,
-        child: AnimatedOpacity(
-          // The one beat that says the press landed. It is not a departure —
-          // the card is still there — so it fades to a state rather than out.
-          opacity: removing ? SeatLayerOpacityTokens.removing : 1,
-          duration: SeatLayerPickerMotion.of(
-            context,
-            SeatLayerPickerMotion.crossfade,
-          ),
-          child: Container(
-            constraints: BoxConstraints(
-              minHeight: seatLayerScaledExtent(
-                context,
-                layout.cartCardMinHeight,
-                max: SeatLayerTypeScaleTokens.sheet,
-              ),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          excludeFromSemantics: true,
+          onTap: onTap,
+          child: AnimatedOpacity(
+            // The one beat that says the press landed. It is not a departure —
+            // the card is still there — so it fades to a state rather than out.
+            opacity: removing ? SeatLayerOpacityTokens.removing : 1,
+            duration: SeatLayerPickerMotion.of(
+              context,
+              SeatLayerPickerMotion.crossfade,
             ),
-            decoration: BoxDecoration(
-              // A held card is inventory the server has already set aside. A
-              // wash of the accent and a warmer border say so without spending
-              // a column on a word.
-              color: line.held
-                  ? Color.alphaBlend(
-                      pickerAlpha(theme.accent, .07), theme.surface)
-                  : theme.surface,
-              border: Border.all(
+            child: Container(
+              constraints: BoxConstraints(
+                minHeight: seatLayerScaledExtent(
+                  context,
+                  layout.cartCardMinHeight,
+                  max: SeatLayerTypeScaleTokens.sheet,
+                ),
+              ),
+              decoration: BoxDecoration(
+                // A held card is inventory the server has already set aside. A
+                // wash of the accent and a warmer border say so without spending
+                // a column on a word.
                 color: line.held
                     ? Color.alphaBlend(
-                        pickerAlpha(theme.accent, .45), theme.divider)
-                    : theme.divider,
-              ),
-              borderRadius:
-                  BorderRadius.circular(SeatLayerSizeTokens.cartCardRadius),
-            ),
-            padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 4, 4),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                ExcludeSemantics(child: _CardMark(line: line)),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: ExcludeSemantics(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        // The name ellipsizes — a long venue section is the one
-                        // fact here that can be longer than the panel.
-                        Text(
-                          line.section,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          // design/tokens.json › type.cartCardName.
-                          style: TextStyle(
-                            color: theme.text,
-                            fontSize: 15,
-                            height: 1.25,
-                            fontWeight:
-                                seatLayerBoldWeight(context, FontWeight.w700),
-                            fontFamily: theme.fontFamily,
-                          ),
-                        ),
-                        _PositionLine(
-                          parts: <String>[
-                            ...identity.skip(1),
-                            if (!typeIsName) line.categoryLabel,
-                          ],
-                        ),
-                        if (notes.isNotEmpty) _CardNotes(notes: notes),
-                      ],
-                    ),
-                  ),
+                        pickerAlpha(theme.accent, .07), theme.surface)
+                    : theme.surface,
+                border: Border.all(
+                  color: line.held
+                      ? Color.alphaBlend(
+                          pickerAlpha(theme.accent, .45), theme.divider)
+                      : theme.divider,
                 ),
-                const SizedBox(width: 8),
-                ExcludeSemantics(
-                  child: SeatLayerCrossFade(
-                    token: line.amountText,
-                    child: Text(
-                      line.amountText,
-                      softWrap: false,
-                      // design/tokens.json › type.cartCardAmount.
-                      style: TextStyle(
-                        color: theme.text,
-                        fontSize: 15,
-                        fontWeight:
-                            seatLayerBoldWeight(context, FontWeight.w800),
-                        fontFamily: theme.fontFamily,
-                        fontFeatures: const <FontFeature>[
-                          FontFeature.tabularFigures(),
+                borderRadius:
+                    BorderRadius.circular(SeatLayerSizeTokens.cartCardRadius),
+              ),
+              padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 4, 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  ExcludeSemantics(child: _CardMark(line: line)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ExcludeSemantics(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          // The name ellipsizes — a long venue section is the one
+                          // fact here that can be longer than the panel.
+                          Text(
+                            line.section,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            // design/tokens.json › type.cartCardName.
+                            style: TextStyle(
+                              color: theme.text,
+                              fontSize: 15,
+                              height: 1.25,
+                              fontWeight:
+                                  seatLayerBoldWeight(context, FontWeight.w700),
+                              fontFamily: theme.fontFamily,
+                            ),
+                          ),
+                          _PositionLine(
+                            parts: <String>[
+                              ...identity.skip(1),
+                              if (!typeIsName) line.categoryLabel,
+                            ],
+                          ),
+                          if (notes.isNotEmpty) _CardNotes(notes: notes),
                         ],
                       ),
                     ),
                   ),
-                ),
-                // A HORIZONTAL PAIR, NOT A BORDERED COLUMN, and both boxes are
-                // the full touch floor: they sit two points apart, so growing
-                // invisible boxes any further would let the ✕ claim part of the
-                // eye's own ink.
-                if (onLocate != null)
-                  _CardAction(
-                    icon: Icons.visibility_outlined,
-                    label: strings.viewFromHere,
-                    onPressed: onLocate,
+                  const SizedBox(width: 8),
+                  ExcludeSemantics(
+                    child: SeatLayerCrossFade(
+                      token: line.amountText,
+                      child: Text(
+                        line.amountText,
+                        softWrap: false,
+                        // design/tokens.json › type.cartCardAmount.
+                        style: TextStyle(
+                          color: theme.text,
+                          fontSize: 15,
+                          fontWeight:
+                              seatLayerBoldWeight(context, FontWeight.w800),
+                          fontFamily: theme.fontFamily,
+                          fontFeatures: const <FontFeature>[
+                            FontFeature.tabularFigures(),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
-                if (removable)
-                  _CardAction(
-                    icon: Icons.close_rounded,
-                    label: '${strings.removeSeat} ${line.section} '
-                        '${line.seatLabel}',
-                    // Inert, not gone: a target that disappears under the thumb
-                    // takes the card's shape with it, and the press it was
-                    // answering has already been accepted.
-                    onPressed: removing ? null : onRemove,
-                  ),
-              ],
+                  // A HORIZONTAL PAIR, NOT A BORDERED COLUMN, and both boxes are
+                  // the full touch floor: they sit two points apart, so growing
+                  // invisible boxes any further would let the ✕ claim part of the
+                  // eye's own ink.
+                  if (onLocate != null)
+                    _CardAction(
+                      icon: Icons.visibility_outlined,
+                      label: strings.viewFromHere,
+                      onPressed: onLocate,
+                    ),
+                  if (removable)
+                    _CardAction(
+                      icon: Icons.close_rounded,
+                      label: '${strings.removeSeat} ${line.section} '
+                          '${line.seatLabel}',
+                      // Inert, not gone: a target that disappears under the thumb
+                      // takes the card's shape with it, and the press it was
+                      // answering has already been accepted.
+                      onPressed: removing ? null : onRemove,
+                    ),
+                ],
+              ),
             ),
           ),
         ),

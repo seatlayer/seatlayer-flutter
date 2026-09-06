@@ -1201,13 +1201,23 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
     final future = _serialize(() async {
       value = value.withBusy(SeatLayerPickerBusyAction.creatingHold);
       try {
-        final result = await mapController.runBridgeCommand(
-          'picker.continue',
-          <String, Object?>{
-            if (_options.holdTtl != null)
-              'ttlMs': _options.holdTtl!.inMilliseconds,
-          },
-        );
+        final ttl = <String, Object?>{
+          if (_options.holdTtl != null)
+            'ttlMs': _options.holdTtl!.inMilliseconds,
+        };
+        Object? result;
+        try {
+          result = await mapController.runBridgeCommand('picker.continue', ttl);
+        } on SeatLayerError catch (error) {
+          // Back from checkout with more seats: the runtime (≤ 0.84.0) still
+          // counts the hold as checkout's and refuses to carry the new seats.
+          // The host is the one asking to continue again, so the hold is
+          // replaced first — the runtime's own hold call carries every held
+          // seat along with the new ones — and the handoff is asked for again.
+          if (error.code != 'hold_selection_mismatch') rethrow;
+          await mapController.runBridgeCommand('hold', ttl);
+          result = await mapController.runBridgeCommand('picker.continue', ttl);
+        }
         _applySnapshotFromResult(result);
         final revision = jInt(jGet(result, 'revision'));
         if (revision != null) await _awaitRevision(revision);

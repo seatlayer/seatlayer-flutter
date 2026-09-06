@@ -587,25 +587,49 @@ class _AccessOptionRowState extends State<_AccessOptionRow> {
                         ),
                       ),
                       const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
+                      // The label and its ⓘ share ONE cell (web 0.84.1): the
+                      // ⓘ explains the words beside it, not the switch at the
+                      // far end. The count keeps its own column so every
+                      // figure lines up down the sheet, and a gap holds it
+                      // clear of the switch.
                       Expanded(
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: theme.text,
-                            fontSize:
-                                SeatLayerSizeTokens.accessRowLabelFontSize,
-                            fontWeight:
-                                seatLayerBoldWeight(context, FontWeight.w600),
-                            height: 1.25,
-                            fontFamily: theme.fontFamily,
-                          ),
+                        child: Row(
+                          children: <Widget>[
+                            Flexible(
+                              child: Text(
+                                label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: theme.text,
+                                  fontSize: SeatLayerSizeTokens
+                                      .accessRowLabelFontSize,
+                                  fontWeight: seatLayerBoldWeight(
+                                    context,
+                                    FontWeight.w600,
+                                  ),
+                                  height: 1.25,
+                                  fontFamily: theme.fontFamily,
+                                ),
+                              ),
+                            ),
+                            if (note != null)
+                              SizedBox(
+                                width: _noteColumn,
+                                child: Center(
+                                  child: _AccessNoteButton(
+                                    open: _noteOpen,
+                                    label: note,
+                                    theme: theme,
+                                    onPressed: () => setState(
+                                      () => _noteOpen = !_noteOpen,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
-                      // The trailing cluster is three fixed columns — count,
-                      // note, switch — so every figure sits on one vertical
-                      // line down the sheet, whether or not its row has a ⓘ.
                       if (count != null || widget.reserveNoteSlot)
                         SizedBox(
                           width: _countColumn,
@@ -621,22 +645,9 @@ class _AccessOptionRowState extends State<_AccessOptionRow> {
                                   ),
                           ),
                         ),
-                      if (note != null || widget.reserveNoteSlot)
-                        SizedBox(
-                          width: _noteColumn,
-                          child: note == null
-                              ? const SizedBox.shrink()
-                              : Center(
-                                  child: _AccessNoteButton(
-                                    open: _noteOpen,
-                                    label: note,
-                                    theme: theme,
-                                    onPressed: () =>
-                                        setState(() => _noteOpen = !_noteOpen),
-                                  ),
-                                ),
-                        ),
-                      const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
+                      const SizedBox(
+                        width: SeatLayerSizeTokens.accessRowSwitchGap,
+                      ),
                       _AccessSwitch(on: value, theme: theme),
                     ],
                   ),

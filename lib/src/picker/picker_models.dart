@@ -464,6 +464,30 @@ class SeatLayerCheckoutLineItem {
     );
   }
 
+  /// A line for a seat the runtime selected but did not put in its cart.
+  ///
+  /// The seat carries its own price, category and address, so nothing here
+  /// is invented; a seat without a price is a line at zero, which the
+  /// runtime's own hold corrects the moment it is made.
+  factory SeatLayerCheckoutLineItem.fromSelectedSeat(SelectedSeat seat) =>
+      SeatLayerCheckoutLineItem(
+        lineKey: seat.objectId ?? seat.id,
+        label: seat.label,
+        displayLabel: seat.displayLabel,
+        displayType: seat.displayType,
+        objectId: seat.objectId ?? seat.id,
+        objectType: seat.objectType ?? ObjectType.seat,
+        categoryKey: seat.categoryKey ?? '',
+        tierId: seat.tierId,
+        unitPrice: seat.price ?? 0,
+        currency: seat.currency ?? 'USD',
+        quantity: seat.quantity ?? 1,
+        seatId: seat.id,
+        sectionLabel: seat.sectionLabel,
+        rowLabel: seat.rowLabel,
+        seatNumber: seat.seatNumber,
+      );
+
   HoldLineItem toHoldLineItem() => HoldLineItem(
         label: label,
         objectId: objectId,
@@ -950,15 +974,31 @@ class SeatLayerPickerSnapshot {
     final cart = jGet(value, 'cart');
     final holdNode = jGet(value, 'hold');
     final access = jGet(value, 'access');
-    final lines = List<SeatLayerCheckoutLineItem>.unmodifiable(
-      jListOf(
-        jGet(cart, 'items') ?? jGet(cart, 'lines'),
-        SeatLayerCheckoutLineItem.fromJson,
-      ),
+    final reported = jListOf(
+      jGet(cart, 'items') ?? jGet(cart, 'lines'),
+      SeatLayerCheckoutLineItem.fromJson,
     );
     final selected = List<SelectedSeat>.unmodifiable(
       jListOf(jGet(selectionNode, 'seats'), SelectedSeat.fromJson),
     );
+    // A runtime with a live hold reports the HOLD's lines as the cart and
+    // drops a seat the buyer selected since (runtime ≤ 0.84.0, bridge
+    // `checkoutLines`): back from checkout, every new seat was drawn selected
+    // on the map and missing from the cart. The seat is a fact the snapshot
+    // still carries, so the cart is completed from it here; the runtime's
+    // Continue already replaces the hold with the whole selection.
+    final reportedLabels = <String>{for (final line in reported) line.label};
+    final missing = <SeatLayerCheckoutLineItem>[
+      for (final seat in selected)
+        if (!reportedLabels.contains(seat.label))
+          SeatLayerCheckoutLineItem.fromSelectedSeat(seat),
+    ];
+    final lines = List<SeatLayerCheckoutLineItem>.unmodifiable(
+      <SeatLayerCheckoutLineItem>[...reported, ...missing],
+    );
+    // The runtime's own count and total describe the lines it reported; once
+    // a line is added here they are recounted from the lines themselves.
+    final completed = missing.isNotEmpty;
 
     return SeatLayerPickerSnapshot(
       schema: schema!,
@@ -993,10 +1033,14 @@ class SeatLayerPickerSnapshot {
         jGet(selectionNode, 'validity'),
       ),
       maxSelection: jInt(jGet(selectionNode, 'maxSelection')) ?? 10,
-      ticketCount: jInt(jGet(cart, 'quantity')) ?? selected.length,
+      ticketCount: completed
+          ? lines.fold<int>(0, (sum, line) => sum + line.quantity)
+          : (jInt(jGet(cart, 'quantity')) ?? selected.length),
       cartLines: lines,
-      cartTotal: jDouble(jGet(cart, 'total')) ??
-          lines.fold<double>(0, (sum, line) => sum + line.total),
+      cartTotal: completed
+          ? lines.fold<double>(0, (sum, line) => sum + line.total)
+          : (jDouble(jGet(cart, 'total')) ??
+              lines.fold<double>(0, (sum, line) => sum + line.total)),
       currency: jStr(jGet(cart, 'currency')) ?? event.currency,
       hold: SeatLayerPickerHold.fromJson(holdNode),
       accessConfigured: jBool(jGet(access, 'configured')) ?? false,

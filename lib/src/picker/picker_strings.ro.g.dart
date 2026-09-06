@@ -66,6 +66,9 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Loc fizic accesibil',
   emptyWheelchairSpace: 'Spațiu liber pentru scaun cu rotile',
   findSeatsTogether: 'Găsește locuri alăturate',
+  aboutBestSeats: 'Despre găsirea locurilor alăturate',
+  closestGroupChosenInstantly:
+      'Cel mai apropiat grup disponibil, ales instantaneu.',
   hideLimitedView: 'Ascunde locurile cu vizibilitate limitată',
   colorblindSafe: 'Culori potrivite pentru daltonism',
   notAvailable: 'Indisponibil',

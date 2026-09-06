@@ -63,12 +63,14 @@ String? _countFor(WidgetTester tester, String label) {
   final texts = tester
       .widgetList<Text>(
         find.descendant(
+          // The label shares an inner Row with its ⓘ (web 0.84.1); the count
+          // sits on the row's outer Row, one ancestor further up.
           of: find
               .ancestor(
                 of: find.text(label),
                 matching: find.byType(Row),
               )
-              .first,
+              .at(1),
           matching: find.byType(Text),
         ),
       )

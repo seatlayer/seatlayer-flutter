@@ -228,11 +228,18 @@ class _CornerControls extends StatelessWidget {
       // sometimes worked. Pinch steps out; the disc below goes home.
       // "+" retires once the buyer is among the seats or at the zoom ceiling
       // (web 0.84.0): a disc that does nothing is the broken-map reading.
-      if (onMap &&
-          chrome.zoomControlsFor(phone: true) &&
-          state.snapshot?.map.rung != 'seats' &&
-          state.snapshot?.map.canZoomIn != false)
-        const SeatLayerPickerZoomInButton(),
+      // A retired "+" keeps its SLOT (web 0.84.1): the column is anchored at
+      // its foot, so a disc that left the tree moved the ♿ disc under the
+      // thumb reaching for it.
+      if (onMap && chrome.zoomControlsFor(phone: true))
+        Visibility(
+          visible: state.snapshot?.map.rung != 'seats' &&
+              state.snapshot?.map.canZoomIn != false,
+          maintainSize: true,
+          maintainState: true,
+          maintainAnimation: true,
+          child: const SeatLayerPickerZoomInButton(),
+        ),
       if (onMap && chrome.zoomToFitControlFor(phone: true))
         const SeatLayerPickerShowWholeVenueButton(),
     ];

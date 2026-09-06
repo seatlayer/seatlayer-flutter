@@ -66,6 +66,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Pritaikyta fizinė vieta',
   emptyWheelchairSpace: 'Laisva vieta vežimėliui',
   findSeatsTogether: 'Rasti vietas greta',
+  aboutBestSeats: 'Apie vietų šalia viena kitos paiešką',
+  closestGroupChosenInstantly: 'Artimiausia laisva grupė, parinkta iškart.',
   hideLimitedView: 'Slėpti vietas su ribotu matomumu',
   colorblindSafe: 'Daltonikams pritaikytos spalvos',
   notAvailable: 'Negalima',

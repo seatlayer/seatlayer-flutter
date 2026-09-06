@@ -65,6 +65,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Ligipääsetav füüsiline koht',
   emptyWheelchairSpace: 'Vaba ratastoolikoht',
   findSeatsTogether: 'Otsi kõrvuti kohti',
+  aboutBestSeats: 'Kõrvuti kohtade leidmisest',
+  closestGroupChosenInstantly: 'Lähim vaba rühm, valitud kohe.',
   hideLimitedView: 'Peida piiratud vaatega kohad',
   colorblindSafe: 'Värvipimedasõbralikud värvid',
   notAvailable: 'Pole saadaval',

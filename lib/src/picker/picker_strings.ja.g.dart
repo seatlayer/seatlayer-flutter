@@ -62,6 +62,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'バリアフリー対応の座席',
   emptyWheelchairSpace: '空きの車椅子スペース',
   findSeatsTogether: '隣り合った席を探す',
+  aboutBestSeats: '隣り合う座席の検索について',
+  closestGroupChosenInstantly: '最も近い空きのまとまりを即座に選びました。',
   hideLimitedView: '視界制限のある座席を隠す',
   colorblindSafe: '色覚に配慮した配色',
   notAvailable: '利用できません',

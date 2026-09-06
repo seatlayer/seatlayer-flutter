@@ -41,6 +41,38 @@ mixin _PickerSeatAnswers on ValueNotifier<SeatLayerPickerState> {
   /// The seat an open confirm card is asking to REMOVE.
   SelectedSeat? _retapSeat;
 
+  bool _cartLanding = false;
+
+  /// Whether a ticket the buyer just added is still on its way to the footer.
+  ///
+  /// On the phone the confirm card's chip flies from the seat to the count,
+  /// and the count swells only when it lands (web 0.84.1) — a number that
+  /// changed before the chip arrived told the buyer the flight was decoration.
+  /// While this is true the map's lift also stands: the pull-back after the
+  /// card runs once the landing is over, not under the chip.
+  bool get cartLanding => _cartLanding;
+
+  /// A chip has left the card for the footer.
+  ///
+  /// The chip itself says when it lands — see [endCartLanding] — rather than
+  /// a clock here guessing at its flight: the flight is drawn under the
+  /// picker's own motion setting, and a timer of its own would outlive a
+  /// widget tree that has already gone.
+  @internal
+  void beginCartLanding() {
+    if (_cartLanding) return;
+    _cartLanding = true;
+    notifyListeners();
+  }
+
+  /// The chip has landed on the count; the swell and the map's pull-back run.
+  @internal
+  void endCartLanding() {
+    if (!_cartLanding) return;
+    _cartLanding = false;
+    if (!_disposed) notifyListeners();
+  }
+
   /// The seat a confirm card is standing over, unanswered.
   ///
   /// The runtime has no notion of an unconfirmed selection: a tapped seat is
@@ -152,6 +184,7 @@ mixin _PickerSeatAnswers on ValueNotifier<SeatLayerPickerState> {
       ? (value.snapshot?.cartTotal ??
           value.cartLines.fold<double>(0, (sum, line) => sum + line.total))
       : confirmedCartLines.fold<double>(0, (sum, line) => sum + line.total);
+
   /// The seat the buyer has tapped a second time, still in their cart.
   ///
   /// Set by a `seat.retap` bridge event, which a runtime sends INSTEAD of

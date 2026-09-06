@@ -65,6 +65,9 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Toegankelijke fysieke plaats',
   emptyWheelchairSpace: 'Lege rolstoelplaats',
   findSeatsTogether: 'Zoek plaatsen naast elkaar',
+  aboutBestSeats: 'Over stoelen naast elkaar vinden',
+  closestGroupChosenInstantly:
+      'De dichtstbijzijnde beschikbare groep, direct gekozen.',
   hideLimitedView: 'Plaatsen met beperkt zicht verbergen',
   colorblindSafe: 'Kleurenblindvriendelijke kleuren',
   notAvailable: 'Niet beschikbaar',

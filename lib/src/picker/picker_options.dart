@@ -230,7 +230,7 @@ class SeatLayerPickerChromeOptions {
       showColorblindControl ?? !phone;
 
   /// Resolve [showDockBar] for a layout.
-  bool dockBarFor({required bool phone}) => showDockBar ?? !phone;
+  bool dockBarFor({required bool phone}) => showDockBar ?? false;
 
   /// Resolve [showExtendHoldPrompt] for a layout.
   bool extendHoldPromptFor({required bool phone}) =>

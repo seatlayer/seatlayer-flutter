@@ -66,6 +66,9 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   accessiblePhysicalSeat: 'Προσβάσιμη φυσική θέση',
   emptyWheelchairSpace: 'Κενή θέση αναπηρικού αμαξιδίου',
   findSeatsTogether: 'Βρείτε θέσεις μαζί',
+  aboutBestSeats: 'Σχετικά με την εύρεση θέσεων μαζί',
+  closestGroupChosenInstantly:
+      'Η πλησιέστερη διαθέσιμη ομάδα, επιλεγμένη αμέσως.',
   hideLimitedView: 'Απόκρυψη θέσεων με περιορισμένη θέα',
   colorblindSafe: 'Χρώματα φιλικά προς την αχρωματοψία',
   notAvailable: 'Μη διαθέσιμο',
