@@ -4,7 +4,7 @@
 // hold was never in one, so joining a line back to `selection` to render an
 // address finds nothing for exactly the two paths where the buyer did not tap
 // the seat — the line arrived as a price with no place on it. The runtime now
-// puts the address on the line, and the dense list reads it from there first.
+// puts the address on the line, and the cart card reads it from there first.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/open_enums.dart';
@@ -14,12 +14,12 @@ import 'package:seatlayer/src/picker/picker_models.dart';
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
 
-/// The dense list draws its identity as one `Text.rich`, so a plain text
-/// finder cannot see it.
+/// A card's name is its own line; the grey line under it carries the rest.
 Finder _identity(String value) => find.byWidgetPredicate(
       (widget) =>
-          widget is Text && widget.textSpan?.toPlainText() == value,
-      description: 'a dense line reading "$value"',
+          widget is Text &&
+          (widget.data ?? widget.textSpan?.toPlainText()) == value,
+      description: 'a cart card line reading "$value"',
     );
 
 void main() {
@@ -35,9 +35,11 @@ void main() {
     map.emit(bestAvailableHeldSnapshot());
     await tester.pumpAndSettle();
 
-    // Two consecutive seats fold into one run, and the row keeps only its own
-    // name: the chart authored it `Choir A`, inside a section already named.
-    expect(_identity('Choir · A · 9–10'), findsOneWidget);
+    // One card per ticket — no folding — and the row keeps only its own name:
+    // the chart authored it `Choir A`, inside a section already named.
+    expect(_identity('Choir'), findsNWidgets(2));
+    expect(_identity('A · 9 · Standard'), findsOneWidget);
+    expect(_identity('A · 10 · Standard'), findsOneWidget);
   });
 
   testWidgets('a line with no address of its own falls back to the join',
@@ -53,7 +55,8 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
-    expect(_identity('Gallery · A · 1'), findsOneWidget);
+    expect(_identity('Gallery'), findsOneWidget);
+    expect(_identity('A · 1 · Standard'), findsOneWidget);
   });
 
   testWidgets('an older runtime keeps the category name it always showed',
@@ -68,9 +71,11 @@ void main() {
     map.emit(bestAvailableHeldSnapshot(identityOnLines: false));
     await tester.pumpAndSettle();
 
-    // Nothing knows the address, so the line reads as it did before: the
-    // category, then the raw inventory labels.
-    expect(_identity('Standard · A-9, A-10'), findsOneWidget);
+    // Nothing knows the address, so the card reads as it did before: the
+    // category names it, and the raw inventory label stands in for the seat.
+    expect(_identity('Standard'), findsNWidgets(2));
+    expect(_identity('A-9'), findsOneWidget);
+    expect(_identity('A-10'), findsOneWidget);
   });
 
   test('a line knows whether it carries an address', () {

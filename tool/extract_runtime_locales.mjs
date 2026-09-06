@@ -71,6 +71,8 @@ const KEYS = {
   continueWord: 'picker.continue',
   seatsLeft: 'picker.seatsLeftShort',
   fromPrice: 'picker.peekFromPrice',
+  noSeatsSelected: 'picker.noSeatsSelected',
+  findBestSeatsCta: 'picker.findBestSeats',
   moreCount: 'picker.moreCount',
   addMinutes: 'picker.addMinutes',
   'ticketCount.one': 'picker.ticketsCount.one',

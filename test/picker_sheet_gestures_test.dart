@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_toast.dart';
-import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_haptics.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
@@ -49,21 +48,12 @@ Widget _wired(SeatLayerPickerController picker) => AnimatedBuilder(
 double _height(WidgetTester tester) =>
     tester.getSize(find.byType(SeatLayerCartSheet)).height;
 
-/// A point on the sheet's head — the grab handle, and the one place a drag can
-/// never be taken by the ticket list underneath it.
+/// A point on the sheet's handle — the one place a drag can never be taken by
+/// the ticket list underneath it.
 Offset _head(WidgetTester tester) {
   final rect = tester.getRect(find.byType(SeatLayerCartSheet));
   return Offset(rect.center.dx, rect.top + 8);
 }
-
-/// The head is fifty points shut and thirty-six open, so the first fourteen
-/// points of a drag are spent compressing it.
-const double _headGive = 50 - 36;
-
-/// The collapsed bar at rest: its head plus the lift that keeps the way on
-/// clear of the grab handle.
-const double _peekRest =
-    SeatLayerSizeTokens.peekHeight + SeatLayerSizeTokens.peekClockLift;
 
 void main() {
   group('the sheet drags', () {
@@ -78,19 +68,26 @@ void main() {
       await tester.pumpWidget(
         pickerHarness(map, _wired(picker), controller: picker),
       );
-      map.emit(pickerSnapshot());
+      // A cart the collapsed sheet has to cap, so there is somewhere to drag
+      // to: with three tickets or fewer the collapsed sheet already shows
+      // everything the open one would.
+      map.emit(_tenDistinctRows());
       await tester.pumpAndSettle();
-      expect(_height(tester), _peekRest);
+      // The collapsed sheet is the height of the block the phone draws — the
+      // handle, the capped cart, the foot — rather than a fixed peek.
+      final rest = _height(tester);
 
       final drag = await tester.startGesture(_head(tester));
       await _prime(tester, drag);
       await drag.moveBy(const Offset(0, -30));
       await tester.pump();
-      expect(_height(tester), 50 + 30 - _headGive);
+      // Point for point: the head no longer compresses on the way, so there is
+      // nothing to subtract.
+      expect(_height(tester), rest + 30);
 
       await drag.moveBy(const Offset(0, -30));
       await tester.pump();
-      expect(_height(tester), 50 + 60 - _headGive);
+      expect(_height(tester), rest + 60);
 
       await drag.up();
       await tester.pumpAndSettle();
@@ -224,10 +221,8 @@ void main() {
       map.emit(_tenDistinctRows());
       picker.setCartSheetExpanded(true);
       await tester.pumpAndSettle();
-      // Ten separate rows, all of them shown: the cart is now taller than the
-      // web picker's ceiling, so the sheet rests ON the ceiling.
-      await tester.tap(find.textContaining('more'));
-      await tester.pumpAndSettle();
+      // Ten cards, all of them in the list: the cart is taller than the web
+      // picker's ceiling, so the sheet rests ON the ceiling.
       final ceiling = _height(tester);
       expect(ceiling, 480);
 
@@ -262,16 +257,18 @@ void main() {
       await tester.pumpWidget(
         pickerHarness(map, _wired(picker), controller: picker),
       );
-      map.emit(pickerSnapshot());
+      map.emit(_tenDistinctRows());
+      await tester.pumpAndSettle();
+      final rest = _height(tester);
       picker.setCartSheetExpanded(true);
       await tester.pumpAndSettle();
-      expect(_height(tester), greaterThan(_peekRest));
+      expect(_height(tester), greaterThan(rest));
 
       // What a tap on the map does to the sheet.
       picker.setCartSheetExpanded(false);
       await tester.pumpAndSettle();
       expect(picker.cartSheetDetent, SeatLayerSheetDetent.peek);
-      expect(_height(tester), _peekRest);
+      expect(_height(tester), rest);
     });
 
     testWidgets('reduced motion arrives without a spring', (tester) async {

@@ -29,18 +29,19 @@ class SeatLayerPickerLayout {
     this.emptyTrayMaxHeightFraction =
         SeatLayerSizeTokens.emptyTrayMaxHeightFraction,
     this.findPillHeight = SeatLayerSizeTokens.findPillHeight,
-    this.denseCollapseFrom = SeatLayerSizeTokens.denseCollapseFrom,
-    this.denseRemoveSize = SeatLayerSizeTokens.denseRemoveSize,
-    this.denseRunToggleWidth = SeatLayerSizeTokens.denseRunToggleWidth,
-    this.denseMoreRowHeight = SeatLayerSizeTokens.denseMoreRowHeight,
     this.checkoutButtonHeight = SeatLayerSizeTokens.checkoutButtonHeight,
+    this.sheetHandleWidth = SeatLayerSizeTokens.sheetHandleWidth,
+    this.sheetHandleHeight = SeatLayerSizeTokens.sheetHandleHeight,
+    this.sheetHandleOverhang = SeatLayerSizeTokens.sheetHandleOverhang,
+    this.sheetHeadHeight = SeatLayerSizeTokens.sheetHeadHeight,
+    this.cartCardMinHeight = SeatLayerSizeTokens.cartCardMinHeight,
+    this.cartCardGap = SeatLayerSizeTokens.cartCardGap,
+    this.cartPeekMaxHeight = SeatLayerSizeTokens.cartPeekMaxHeight,
     this.bestSeatsSelectHeight = SeatLayerSizeTokens.bestSeatsSelectHeight,
     this.bestSeatsStepperWidth = SeatLayerSizeTokens.bestSeatsStepperWidth,
     this.sheetMaxHeightFraction = SeatLayerSizeTokens.sheetMaxHeightFraction,
     this.emptyTrayMaxHeight = SeatLayerSizeTokens.emptyTrayMaxHeight,
     this.sheetFullHeightFraction = SeatLayerSizeTokens.sheetFullHeightFraction,
-    this.denseLineHeight = SeatLayerSizeTokens.denseLineHeight,
-    this.denseVisibleLines = SeatLayerSizeTokens.denseVisibleLines,
     this.confirmCardGutter = SeatLayerSizeTokens.confirmCardGutter,
     this.confirmCardMaxWidth = SeatLayerSizeTokens.confirmCardMaxWidth,
     this.confirmCardRestInset = SeatLayerSizeTokens.confirmCardRestInset,
@@ -110,18 +111,6 @@ class SeatLayerPickerLayout {
   /// Height of the empty peek bar's "Find seats" ink.
   final double findPillHeight;
 
-  /// How many runs the dense list tolerates before it collapses its tail.
-  final int denseCollapseFrom;
-
-  /// Edge length of a dense line's remove glyph, inside its larger target.
-  final double denseRemoveSize;
-
-  /// Width of a run's fold chevron.
-  final double denseRunToggleWidth;
-
-  /// Height of the dense list's "+N more" row.
-  final double denseMoreRowHeight;
-
   /// Height of the sheet footer's call to action.
   final double checkoutButtonHeight;
 
@@ -145,11 +134,26 @@ class SeatLayerPickerLayout {
   /// order, not a resting height the picker ever chooses for them.
   final double sheetFullHeightFraction;
 
-  /// Height of one line in the dense ticket list.
-  final double denseLineHeight;
+  /// Width of the handle pill that straddles the sheet's top edge.
+  final double sheetHandleWidth;
 
-  /// How many dense lines render before the list collapses the remainder.
-  final int denseVisibleLines;
+  /// Height of that pill; half of it sits above the sheet.
+  final double sheetHandleHeight;
+
+  /// How much of the pill stands above the sheet's own top edge.
+  final double sheetHandleOverhang;
+
+  /// Height of the sheet's head — the lower half of the handle, and nothing else drawn under it.
+  final double sheetHeadHeight;
+
+  /// Least height of one cart card, which is what its two full-size targets need.
+  final double cartCardMinHeight;
+
+  /// Gap between two cart cards.
+  final double cartCardGap;
+
+  /// Ceiling on the cart list while the sheet is collapsed: three whole cards and a sliver of the fourth.
+  final double cartPeekMaxHeight;
 
   /// Horizontal inset between the confirm card and the screen edge.
   final double confirmCardGutter;
@@ -236,18 +240,19 @@ class SeatLayerPickerLayout {
     double? sheetMaxHeight,
     double? emptyTrayMaxHeightFraction,
     double? findPillHeight,
-    int? denseCollapseFrom,
-    double? denseRemoveSize,
-    double? denseRunToggleWidth,
-    double? denseMoreRowHeight,
     double? checkoutButtonHeight,
     double? bestSeatsSelectHeight,
     double? bestSeatsStepperWidth,
     double? sheetMaxHeightFraction,
     double? emptyTrayMaxHeight,
     double? sheetFullHeightFraction,
-    double? denseLineHeight,
-    int? denseVisibleLines,
+    double? sheetHandleWidth,
+    double? sheetHandleHeight,
+    double? sheetHandleOverhang,
+    double? sheetHeadHeight,
+    double? cartCardMinHeight,
+    double? cartCardGap,
+    double? cartPeekMaxHeight,
     double? confirmCardGutter,
     double? confirmCardMaxWidth,
     double? confirmCardRestInset,
@@ -285,10 +290,6 @@ class SeatLayerPickerLayout {
         emptyTrayMaxHeightFraction:
             emptyTrayMaxHeightFraction ?? this.emptyTrayMaxHeightFraction,
         findPillHeight: findPillHeight ?? this.findPillHeight,
-        denseCollapseFrom: denseCollapseFrom ?? this.denseCollapseFrom,
-        denseRemoveSize: denseRemoveSize ?? this.denseRemoveSize,
-        denseRunToggleWidth: denseRunToggleWidth ?? this.denseRunToggleWidth,
-        denseMoreRowHeight: denseMoreRowHeight ?? this.denseMoreRowHeight,
         checkoutButtonHeight: checkoutButtonHeight ?? this.checkoutButtonHeight,
         bestSeatsSelectHeight:
             bestSeatsSelectHeight ?? this.bestSeatsSelectHeight,
@@ -299,8 +300,13 @@ class SeatLayerPickerLayout {
         emptyTrayMaxHeight: emptyTrayMaxHeight ?? this.emptyTrayMaxHeight,
         sheetFullHeightFraction:
             sheetFullHeightFraction ?? this.sheetFullHeightFraction,
-        denseLineHeight: denseLineHeight ?? this.denseLineHeight,
-        denseVisibleLines: denseVisibleLines ?? this.denseVisibleLines,
+        sheetHandleWidth: sheetHandleWidth ?? this.sheetHandleWidth,
+        sheetHandleHeight: sheetHandleHeight ?? this.sheetHandleHeight,
+        sheetHandleOverhang: sheetHandleOverhang ?? this.sheetHandleOverhang,
+        sheetHeadHeight: sheetHeadHeight ?? this.sheetHeadHeight,
+        cartCardMinHeight: cartCardMinHeight ?? this.cartCardMinHeight,
+        cartCardGap: cartCardGap ?? this.cartCardGap,
+        cartPeekMaxHeight: cartPeekMaxHeight ?? this.cartPeekMaxHeight,
         confirmCardGutter: confirmCardGutter ?? this.confirmCardGutter,
         confirmCardMaxWidth: confirmCardMaxWidth ?? this.confirmCardMaxWidth,
         confirmCardRestInset: confirmCardRestInset ?? this.confirmCardRestInset,
@@ -342,18 +348,19 @@ class SeatLayerPickerLayout {
       other.sheetMaxHeight == sheetMaxHeight &&
       other.emptyTrayMaxHeightFraction == emptyTrayMaxHeightFraction &&
       other.findPillHeight == findPillHeight &&
-      other.denseCollapseFrom == denseCollapseFrom &&
-      other.denseRemoveSize == denseRemoveSize &&
-      other.denseRunToggleWidth == denseRunToggleWidth &&
-      other.denseMoreRowHeight == denseMoreRowHeight &&
       other.checkoutButtonHeight == checkoutButtonHeight &&
       other.bestSeatsSelectHeight == bestSeatsSelectHeight &&
       other.bestSeatsStepperWidth == bestSeatsStepperWidth &&
       other.sheetMaxHeightFraction == sheetMaxHeightFraction &&
       other.emptyTrayMaxHeight == emptyTrayMaxHeight &&
       other.sheetFullHeightFraction == sheetFullHeightFraction &&
-      other.denseLineHeight == denseLineHeight &&
-      other.denseVisibleLines == denseVisibleLines &&
+      other.sheetHandleWidth == sheetHandleWidth &&
+      other.sheetHandleHeight == sheetHandleHeight &&
+      other.sheetHandleOverhang == sheetHandleOverhang &&
+      other.sheetHeadHeight == sheetHeadHeight &&
+      other.cartCardMinHeight == cartCardMinHeight &&
+      other.cartCardGap == cartCardGap &&
+      other.cartPeekMaxHeight == cartPeekMaxHeight &&
       other.confirmCardGutter == confirmCardGutter &&
       other.confirmCardMaxWidth == confirmCardMaxWidth &&
       other.confirmCardRestInset == confirmCardRestInset &&
@@ -391,18 +398,19 @@ class SeatLayerPickerLayout {
         sheetMaxHeight,
         emptyTrayMaxHeightFraction,
         findPillHeight,
-        denseCollapseFrom,
-        denseRemoveSize,
-        denseRunToggleWidth,
-        denseMoreRowHeight,
         checkoutButtonHeight,
         bestSeatsSelectHeight,
         bestSeatsStepperWidth,
         sheetMaxHeightFraction,
         emptyTrayMaxHeight,
         sheetFullHeightFraction,
-        denseLineHeight,
-        denseVisibleLines,
+        sheetHandleWidth,
+        sheetHandleHeight,
+        sheetHandleOverhang,
+        sheetHeadHeight,
+        cartCardMinHeight,
+        cartCardGap,
+        cartPeekMaxHeight,
         confirmCardGutter,
         confirmCardMaxWidth,
         confirmCardRestInset,

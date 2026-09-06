@@ -60,7 +60,13 @@ export 'src/picker/picker_buyer_asset_loader.dart'
         SeatLayerAssetFetch,
         SeatLayerBuyerAssetLoader,
         SeatLayerPickerAssetLoader;
-export 'src/picker/picker_cart_list.dart' show SeatLayerCartList;
+export 'src/picker/picker_cart_list.dart'
+    show
+        SeatLayerCartCard,
+        SeatLayerCartList,
+        SeatLayerCartNoteLine,
+        SeatLayerTicketLine,
+        seatLayerCartNoteLines;
 export 'src/picker/picker_cart_sheet.dart'
     show SeatLayerBookButton, SeatLayerCartSheet;
 export 'src/picker/picker_checkout_cta.dart'
@@ -148,13 +154,6 @@ export 'src/picker/picker_toast.dart'
 export 'src/picker/picker_styles.dart'
     show SeatLayerPickerStyles, SeatLayerSurfaceStyle, seatLayerStyleRole;
 export 'src/picker/picker_system_overlay.dart' show seatLayerPickerOverlayStyle;
-export 'src/picker/picker_tray_dense.dart'
-    show
-        SeatLayerTicketLine,
-        SeatLayerTicketRun,
-        groupTicketLines,
-        runSeatsLabel,
-        ticketIsGroupable;
 export 'src/picker/picker_venue_3d.dart' show SeatLayerVenue3D;
 export 'src/picker/seat_layer_picker.dart'
     show

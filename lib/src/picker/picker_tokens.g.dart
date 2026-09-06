@@ -215,23 +215,56 @@ abstract final class SeatLayerSizeTokens {
   /// `48`
   static const double peekButtonHeight = 48;
 
-  /// `44`
-  static const double denseLineHeight = 44;
-
-  /// `4`
-  static const int denseVisibleLines = 4;
-
-  /// `6`
-  static const int denseCollapseFrom = 6;
-
-  /// `32`
-  static const double denseRemoveSize = 32;
-
-  /// `24`
-  static const double denseRunToggleWidth = 24;
-
   /// `40`
-  static const double denseMoreRowHeight = 40;
+  static const double sheetHandleWidth = 40;
+
+  /// `22`
+  static const double sheetHandleHeight = 22;
+
+  /// `11`
+  static const double sheetHandleOverhang = 11;
+
+  /// `11`
+  static const double sheetHeadHeight = 11;
+
+  /// `64`
+  static const double cartCardMinHeight = 64;
+
+  /// `7`
+  static const double cartCardGap = 7;
+
+  /// `12`
+  static const double cartCardRadius = 12;
+
+  /// `10`
+  static const double cartTrayPadTop = 10;
+
+  /// `14`
+  static const double cartTrayPadBottom = 14;
+
+  /// `14`
+  static const double cartTrayPadX = 14;
+
+  /// `228`
+  static const double cartPeekMaxHeight = 228;
+
+  /// `3`
+  static const double cartNoteGap = 3;
+
+  /// `5`
+  static const double cartNotePadTop = 5;
+
+  /// `10`
+  static const double footPadTop = 10;
+
+  /// `16`
+  static const double footPadX = 16;
+
+  /// `8`
+  static const double footPadBottom = 8;
+
+  /// `10`
+  static const double footTotalGap = 10;
 
   /// `44`
   static const double checkoutButtonHeight = 44;

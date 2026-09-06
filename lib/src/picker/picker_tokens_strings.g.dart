@@ -163,6 +163,12 @@ abstract final class SeatLayerStringTokens {
   /// Secure more
   static const String secureMore = 'Secure more';
 
+  /// No seats selected
+  static const String noSeatsSelected = 'No seats selected';
+
+  /// Find best seats
+  static const String findBestSeatsCta = 'Find best seats';
+
   /// Select seats
   static const String selectSeats = 'Select seats';
 

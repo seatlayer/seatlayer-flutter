@@ -71,6 +71,8 @@ class SeatLayerPickerStrings {
     this.continueToCheckout = SeatLayerStringTokens.continueToCheckout,
     this.secureMore = SeatLayerStringTokens.secureMore,
     this.selectSeats = SeatLayerStringTokens.selectSeats,
+    this.noSeatsSelected = SeatLayerStringTokens.noSeatsSelected,
+    this.findBestSeatsCta = SeatLayerStringTokens.findBestSeatsCta,
     this.pickYourSeats = SeatLayerStringTokens.pickYourSeats,
     this.salesClosedPill = SeatLayerStringTokens.salesClosedPill,
     this.seatsSecuredOpeningCheckout =
@@ -462,6 +464,16 @@ class SeatLayerPickerStrings {
   /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
   /// its English wording in every locale until one exists.
   final String selectSeats;
+
+  /// The foot's total line while the cart is empty.
+  final String noSeatsSelected;
+
+  /// The phone foot's primary button while the cart is empty: the door into
+  /// the best-seats form.
+  ///
+  /// Not [findBestSeats], which counts the tickets it is about to find — this
+  /// one opens the form that asks how many.
+  final String findBestSeatsCta;
 
   /// The empty peek line where the chart has no price to quote.
   ///
