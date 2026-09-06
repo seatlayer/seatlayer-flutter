@@ -508,7 +508,7 @@ class SeatLayerResolvedPickerTheme {
   /// The raw amber is a colour a buyer can see and cannot read — about 1.8:1
   /// on a white card — and a seat-note row puts it on WORDS rather than on a
   /// badge. This token walks the hue toward the ink until it reads: measured
-  /// on the tinted band it actually paints on, 5.4:1 on light and 8.5:1 on
+  /// on the tinted band it actually paints on, 5.46:1 on light and 8.24:1 on
   /// dark, rather than on the bare surface the tint is mixed from.
   Color get warnText => _warnText ??
       (brightness == Brightness.dark

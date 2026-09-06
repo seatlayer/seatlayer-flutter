@@ -1339,8 +1339,9 @@ the ink:
 | premium | `color.*.premium` at `opacity.noteToneWash` | `color.*.premiumText` |
 
 Measured on the tint each pair actually paints on, not on the surface it is
-mixed from — the raw amber measures about 1.8:1 on a white card. Light 5.4:1
-(warn) and 5.7:1 (premium); dark 8.5:1 and 8.0:1. The organizer's second line
+mixed from — the raw amber measures about 1.8:1 on a white card. Measured:
+light 5.46:1 (warn) and 5.67:1 (premium); dark 8.24:1 and 8.03:1. The neutral
+row is 13.5:1 and 12.0:1. The organizer's second line
 is `color.*.mutedText` walked `opacity.noteBodyInk` of the way to the text, for
 the same reason. The glyph takes the muted ink on a neutral row and the title's
 ink on a toned one.
