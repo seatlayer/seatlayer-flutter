@@ -632,6 +632,15 @@ abstract final class SeatLayerSizeTokens {
   /// `11`
   static const double accessStepFontSize = 11;
 
+  /// `0.72`
+  static const double accessSheetMaxHeightFraction = 0.72;
+
+  /// `240`
+  static const double accessSheetMinHeight = 240;
+
+  /// `15`
+  static const double accessNoteIconSize = 15;
+
   /// `232`
   static const double toastCardLift = 232;
 

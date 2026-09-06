@@ -212,17 +212,26 @@ substitutes an emoji or a platform icon. An unknown key draws nothing.
 
 - **Inputs** `map.isVenue3D`, `map.focusedSectionId`, `map.canZoomIn`,
   `map.canStepBack` (from `map.atVenueFit`, falling back to `map.canZoomOut`),
-  `capabilities`.
+  `capabilities`. **Instance override** `accessibilityControl:` — the widget
+  drawn at the head of the column; null draws
+  `SeatLayerPickerAccessibilityFilters`. The drop-in layout passes whatever
+  `builders.accessibilityFilters` returns, so replacing the control does not
+  mean rebuilding the column.
 - **States** phone corners / wide rail; the map-only controls stand down while
   the immersive scene is up.
 - **Anatomy** round controls `size.mapControlSize`, except the accessibility
-  control at `size.accessibilityControlSize` (`size.minimumHitTarget`).
-  Bottom-left accessibility, bottom-right the zoom column, both at
-  `size.mapAnchorInset` from the map's bottom edge. They lift by
-  `size.dockBarHeight` only where a host opted into a dock — a default phone
-  mounts none, so there is nothing to lift over. The accessible-section stepper
-  sits beside the accessibility control, `size.accessStepGap` from it.
-- **Phone zoom column** three discs, `size.zoomColumnGap` apart, top to bottom:
+  control at `size.accessibilityControlSize` (`size.minimumHitTarget`). ONE
+  bottom-right column on both compositions — the ♿ control, then the zoom
+  discs — at `size.mapAnchorInset` from the map's edges. It lifts by
+  `size.dockBarHeight` only where a host opted into a dock; a default phone
+  mounts none. The accessible-section stepper sits beside the accessibility
+  control, `size.accessStepGap` from it, on its inner side.
+- **The ♿ control heads the column** (2026-09-06). It stood alone in the
+  bottom-left region, opposite the stack of discs, and the wide composition
+  drew it a second time in its side panel. Who can sit where is an earlier
+  question than how close the camera is, so it is the disc above `+`, once,
+  on both widths.
+- **Phone zoom discs** three, `size.zoomColumnGap` apart, top to bottom:
   `+` (`picker.zoomIn`), `−` (`picker.zoomOut`, the ladder section → venue) and
   a framed dot, `strings.fitWholeVenue`, that shows the whole venue from any
   depth via `picker.overview`. `−` and the framed dot dim from ONE reading,
@@ -238,8 +247,12 @@ substitutes an emoji or a platform icon. An unknown key draws nothing.
   into a dark map at 1.14:1. Dark separates by the fill (2.96:1 against the
   map), light by the edge (3.72:1 against the disc). Applies to every floating
   control, the accessibility disc and the Map/3D track included.
-- **Commands** `picker.zoomIn`, `picker.zoomOut`, `picker.overview` (phone),
-  `picker.zoomToFit` (wide), `picker.setAccessibilityFilters`,
+- **Wide** `+` and `−` under the same ♿ disc, and no fit control of its own:
+  `SeatLayerPickerZoomToFitButton` left the rail on 2026-09-06 and stays a
+  public component for a host that mounts it itself. The immersive scene keeps
+  its Fit chip, which says `strings.fitWholeVenue` like the phone's disc.
+- **Commands** `picker.zoomIn`, `picker.zoomOut`, `picker.overview` (the
+  phone's whole-venue disc), `picker.setAccessibilityFilters`,
   `picker.setColorblindSafe`, `picker.setBuyerView`.
 - **Note** `SeatLayerPickerViewModeControl` (the Map/3D segmented control) is a
   member of this stack on wide layouts only; on a phone the top rail owns it.
@@ -608,7 +621,7 @@ specification. Names, slots and files:
 | Component | Slot | Spec |
 | --- | --- | --- |
 | `SeatLayerFloorStrip` | `floorStripStyle` | §3.7 |
-| `SeatLayerBestSeatsForm` | — | §3.11 |
+| `SeatLayerBestSeatsForm` | — | §3.11 — a one-line `✦ strings.findSeatsTogether` title above the decisions, truncating rather than wrapping |
 | `SeatLayerPickerToast` / `…ToastQueue` / `…ToastLayer` | — | §3.12 |
 | `SeatLayerPickerLoadingView` / `…ErrorView` / `…EmptyView` | — | §3.13.1–2 |
 | `SeatLayerPickerAccessPanel` | — | §3.13.3 |
@@ -617,7 +630,7 @@ specification. Names, slots and files:
 | `SeatLayerPickerExtendHoldPrompt` | one named `+5 min` step, once per hold, dismissable; **phone: off by default**, host opt-in via `SeatLayerPickerChromeOptions(showExtendHoldPrompt: true)`; wide keeps it | §3.13.8 |
 | `SeatLayerPickerBookedOverlay` | — | §3.13.10 |
 | `SeatLayerPickerGeneralAdmissionPrompt` / `…TablePrompt` | — | §3.13.11–12 |
-| `SeatLayerPickerAccessibilityFilters` | — | §3.5 — switches apply on change, no apply step, the sheet stays open; opening it clears a pending seat card; each row wears its own provision's glyph, the colour row a contrast disc, and a sold-out provision reads `strings.notAvailable` |
+| `SeatLayerPickerAccessibilityFilters` | — | §3.5 — the head of the map's control column on both widths; switches apply on change, no apply step, the sheet stays open; opening it clears a pending seat card; the sheet is bounded to `size.accessSheetMaxHeightFraction` (floor `size.accessSheetMinHeight`) and scrolls inside it; every row is ONE line — short name, truncating, any sentence behind an ⓘ that opens under it — each wearing its own provision's glyph, the colour row a contrast disc, and a sold-out provision reads `0` |
 | `SeatLayerPickerAccessibleStepper` | — | §3.4.1 |
 | `SeatLayerSeatViewChrome` | `seatViewChromeStyle` | §3.15 |
 | `SeatLayerPickerAttribution` | — | §3.10.3 |

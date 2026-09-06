@@ -89,6 +89,40 @@ class _SeatLayerBestSeatsFormState extends State<SeatLayerBestSeatsForm> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // ONE TITLE LINE, AND IT CANNOT WRAP. The card says what it is
+          // before the buyer reads the controls, which matters most while the
+          // button below is busy saying "Finding the best seats…" instead of
+          // what it does. The words are the only part of the line that may
+          // shrink, and they shrink by truncating: a title that wrapped to two
+          // lines was the whole cost this card was trying not to pay.
+          Row(
+            children: [
+              Text(
+                '✦',
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1,
+                  color: theme.accent,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  strings.findSeatsTogether,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: theme.text,
+                    fontSize: 12.5,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
+                    height: 1.2,
+                    fontFamily: theme.fontFamily,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
           _CompactSelect(
             label: strings.ticketType,
             placeholder: strings.anyTicketType,
@@ -441,4 +475,3 @@ class _StepIcon extends StatelessWidget {
     );
   }
 }
-

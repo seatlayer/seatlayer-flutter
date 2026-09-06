@@ -114,11 +114,14 @@ class SeatLayerPickerChromeOptions {
   /// and remove the dead end.
   final bool? showZoomControls;
 
-  /// Whether the show-the-whole-venue control renders. Auto: both layouts.
+  /// Whether the show-the-whole-venue control renders. Auto: on.
   ///
-  /// The phone draws [SeatLayerPickerShowWholeVenueButton], which leaves any
-  /// framed section as it fits; the wide rail draws the fit-to-screen control
-  /// it has always had.
+  /// It is the phone's [SeatLayerPickerShowWholeVenueButton], which leaves any
+  /// framed section as it fits. The wide rail drew a second, plainer
+  /// fit-to-screen control beside it until 2026-09-06; it went, because two
+  /// ways to frame the same venue on one layout is one too many and the flat
+  /// map is what pinch already walks. The immersive scene keeps its own Fit
+  /// chip, which frames a camera rather than a map.
   ///
   /// It stopped being drawn on the phone once, as a second round button beside
   /// `−` with nothing on either saying which was which. Naming it — "Show
@@ -207,6 +210,9 @@ class SeatLayerPickerChromeOptions {
   bool zoomControlsFor({required bool phone}) => showZoomControls ?? true;
 
   /// Resolve [showZoomToFitControl] for a layout.
+  ///
+  /// The same answer either way: only the phone corner asks, since the wide
+  /// rail no longer carries a fit control of its own.
   bool zoomToFitControlFor({required bool phone}) =>
       showZoomToFitControl ?? true;
 

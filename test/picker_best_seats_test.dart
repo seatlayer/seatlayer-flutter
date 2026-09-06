@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_best_seats.dart';
 import 'package:seatlayer/src/picker/picker_layout.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_strings.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 
 import 'picker_test_fixture.dart';
@@ -25,8 +26,9 @@ void main() {
     expect(find.text('Standard'), findsOneWidget);
     expect(find.text('Gallery'), findsOneWidget);
     expect(find.text('Find 2 best seats'), findsOneWidget);
-    // No card title, no helper paragraph.
-    expect(find.text('Find the best seats together'), findsNothing);
+    // A title, but a short one and no helper paragraph.
+    expect(find.text('Find seats together'), findsOneWidget);
+    expect(find.text('Find the closest seats together'), findsNothing);
     expect(find.text('Ticket type'), findsNothing);
   });
 
@@ -245,6 +247,61 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Find 2 best seats'), findsNothing);
+  });
+
+  testWidgets('the card says what it is, on a title line that cannot wrap',
+      (tester) async {
+    // "Find the closest seats together" is a sentence, and in the 300-point
+    // panel it wrapped to two lines above a card whose whole point is that it
+    // is compact. The short title says the same thing, and it is what the
+    // buyer reads while the button below is busy.
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerBestSeatsForm()));
+    map.emit(bestAvailableSnapshot());
+    await tester.pumpAndSettle();
+
+    final title = tester.widget<Text>(find.text('Find seats together'));
+    expect(title.maxLines, 1);
+    expect(title.overflow, TextOverflow.ellipsis);
+    expect(find.text('Find the closest seats together'), findsNothing);
+    // One line of type, whatever the words measure.
+    expect(
+      tester.getSize(find.text('Find seats together')).height,
+      lessThan(24),
+    );
+    // Above the first decision, not between them.
+    expect(
+      tester.getRect(find.text('Find seats together')).bottom,
+      lessThan(
+        tester.getRect(find.byType(DropdownButtonHideUnderline).first).top + .5,
+      ),
+    );
+  });
+
+  testWidgets('a long translation truncates rather than growing the card',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    const long = 'Find the closest available seats that are together in one '
+        'row of the same section';
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SeatLayerBestSeatsForm(),
+        options: const SeatLayerPickerOptions(
+          strings: SeatLayerPickerStrings(findSeatsTogether: long),
+        ),
+      ),
+    );
+    map.emit(bestAvailableSnapshot());
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.text(long)).height, lessThan(24));
   });
 
   group('goldens', () {

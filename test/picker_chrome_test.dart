@@ -445,7 +445,7 @@ void main() {
   });
 
   group('map controls', () {
-    testWidgets('the phone puts three controls in three corners',
+    testWidgets('the phone puts the map controls in two corners',
         (tester) async {
       final map = FakePickerMap();
       addTearDown(map.dispose);
@@ -467,10 +467,8 @@ void main() {
 
       expect(segmented.right, closeTo(screen.right - inset, .5));
       expect(segmented.top, closeTo(screen.top + inset, .5));
-      expect(access.left, closeTo(screen.left + inset, .5));
-      expect(access.bottom, closeTo(screen.bottom - inset, .5));
       // The zoom column is anchored by its foot, and its foot is the disc that
-      // shows the whole venue — `+`, `−` and the venue, top to bottom.
+      // shows the whole venue — ♿, `+`, `−` and the venue, top to bottom.
       final wholeVenue =
           tester.getRect(find.byType(SeatLayerPickerShowWholeVenueButton));
       final stepIn = tester.getRect(find.byType(SeatLayerPickerZoomInButton));
@@ -478,6 +476,12 @@ void main() {
       expect(wholeVenue.bottom, closeTo(screen.bottom - inset, .5));
       expect(stepIn.bottom, lessThan(stepOut.top + .5));
       expect(stepOut.bottom, lessThan(wholeVenue.top + .5));
+      // THE ♿ DISC IS THE HEAD OF THAT COLUMN, not a lone control in the
+      // opposite corner (owner call 2026-09-06). Same right edge as the
+      // discs, and above `+`.
+      expect(access.right, closeTo(screen.right - inset, .5));
+      expect(access.bottom, lessThan(stepIn.top + .5));
+      expect(access.left, greaterThan(screen.left + inset));
       // The wide rail's fit-to-screen control is not the phone's: that one
       // only fits, and this one also leaves a framed section.
       expect(find.byType(SeatLayerPickerZoomToFitButton), findsNothing);
