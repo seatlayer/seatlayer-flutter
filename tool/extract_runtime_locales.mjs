@@ -53,20 +53,29 @@ const KEYS = {
   restrictedView: 'picker.restrictedView',
   obstructedView: 'picker.obstructedView',
   premiumSeat: 'picker.premiumSeat',
-  // The twelve accommodations, which the seat-note rows and the accessibility
-  // sheet both name. Extracted per key and rebuilt into `accessNeeds`.
-  'accessNeeds.wheelchair': 'picker.access.wheelchair',
-  'accessNeeds.companion': 'picker.access.companion',
-  'accessNeeds.semi-ambulatory': 'picker.access.semi-ambulatory',
-  'accessNeeds.designated-aisle': 'picker.access.designated-aisle',
-  'accessNeeds.step-free': 'picker.access.step-free',
-  'accessNeeds.hearing': 'picker.access.hearing',
-  'accessNeeds.cart': 'picker.access.cart',
-  'accessNeeds.sign-language': 'picker.access.sign-language',
-  'accessNeeds.low-vision': 'picker.access.low-vision',
-  'accessNeeds.sensory-friendly': 'picker.access.sensory-friendly',
-  'accessNeeds.plus-size': 'picker.access.plus-size',
-  'accessNeeds.lift-armrest': 'picker.access.lift-armrest',
+  // The twelve accommodations, which the seat-note rows, the cart lines and
+  // the accessibility sheet all name. Extracted per key and rebuilt into
+  // `accessNeeds`.
+  //
+  // The SHORT name of each, not the taxonomy's own. `picker.access.*` is
+  // written for a seat popup, where "Designated aisle / transfer seat" is the
+  // honest length; every place this SDK prints a provision is a single line in
+  // a narrow column, and the long names wrapped those lines onto two and three
+  // each. The English defaults in `design/tokens.json` have always been the
+  // short ones, so this is what makes the other thirty-six locales agree with
+  // them.
+  'accessNeeds.wheelchair': 'picker.accessShort.wheelchair',
+  'accessNeeds.companion': 'picker.accessShort.companion',
+  'accessNeeds.semi-ambulatory': 'picker.accessShort.semi-ambulatory',
+  'accessNeeds.designated-aisle': 'picker.accessShort.designated-aisle',
+  'accessNeeds.step-free': 'picker.accessShort.step-free',
+  'accessNeeds.hearing': 'picker.accessShort.hearing',
+  'accessNeeds.cart': 'picker.accessShort.cart',
+  'accessNeeds.sign-language': 'picker.accessShort.sign-language',
+  'accessNeeds.low-vision': 'picker.accessShort.low-vision',
+  'accessNeeds.sensory-friendly': 'picker.accessShort.sensory-friendly',
+  'accessNeeds.plus-size': 'picker.accessShort.plus-size',
+  'accessNeeds.lift-armrest': 'picker.accessShort.lift-armrest',
   colorblindSafe: 'picker.colorblindColors',
   continueWord: 'picker.continue',
   seatsLeft: 'picker.seatsLeftShort',

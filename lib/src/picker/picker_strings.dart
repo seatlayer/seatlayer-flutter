@@ -347,14 +347,19 @@ class SeatLayerPickerStrings {
   /// Seat-note row title for an accessible place that does have a chair.
   final String accessiblePhysicalSeat;
 
-  /// One word for a seat, or a provision, nobody can take tonight.
+  /// One word for a seat nobody can take tonight.
   ///
-  /// The accessibility sheet says this about a provision the venue has and has
-  /// sold out of — the row stays, dimmed, because "this venue has no
+  /// The legend says it about the grey the map paints, and the seat card says
+  /// it about a seat that is already gone. It used to be "None left" in one
+  /// place and something else again in the other; one unavailability deserves
+  /// one word.
+  ///
+  /// The accessibility sheet no longer uses it: a provision the venue has and
+  /// has sold out of reads `0` in the same count column every other row
+  /// carries a figure in, and the dimmed switch beside it is what says it
+  /// cannot be had. The row itself still stays, because "this venue has no
   /// wheelchair spaces" and "its wheelchair spaces are taken" are different
-  /// facts — and the legend says it about the grey the map paints. It used to
-  /// be "None left" in the sheet and something else again in the legend; one
-  /// unavailability deserves one word.
+  /// facts.
   final String notAvailable;
 
   /// Tooltip on the 3D chrome's previous-seat step.

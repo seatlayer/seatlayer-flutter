@@ -158,9 +158,11 @@ void main() {
 
     expect(
       _rowLabels(tester),
-      // ONE word for unavailability across the picker: the legend says the
-      // same about the grey the map paints.
-      <String>['Wheelchair · Not available', 'Companion · 6 free'],
+      // A FIGURE, INCLUDING AT ZERO. "Not available" was a sentence in a
+      // column of numbers; it needed a chip to hold it and made the sold-out
+      // row the loudest line in the sheet. The dimmed switch beside it is
+      // what says it cannot be had.
+      <String>['Wheelchair · 0', 'Companion · 6 free'],
     );
     expect(
       _rowEnabled(tester, 'Wheelchair'),
@@ -173,9 +175,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       _rowLabels(tester),
-      // ONE word for unavailability across the picker: the legend says the
-      // same about the grey the map paints.
-      <String>['Wheelchair · Not available', 'Companion · 6 free'],
+      <String>['Wheelchair · 0', 'Companion · 6 free'],
     );
   });
 
@@ -196,10 +196,90 @@ void main() {
       ),
     );
 
+    // BEHIND AN ⓘ, not on a second line of the row. Twelve provisions each
+    // able to grow one turned a sheet of switches into a page of prose, so
+    // the sentence opens under the row that owns it and the row itself stays
+    // one line.
+    expect(
+      find.text('Companion places beside them stay selectable'),
+      findsNothing,
+    );
+    final info = find.byIcon(Icons.info_outline_rounded);
+    expect(info, findsOneWidget);
+    await tester.tap(info);
+    await tester.pumpAndSettle();
     expect(
       find.text('Companion places beside them stay selectable'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('every row is one line, even with the whole vocabulary on it',
+      (tester) async {
+    // Seen on the web the same day: a chart carrying the full attribute set
+    // gave the menu twelve accommodation rows plus two display switches, and
+    // an unbounded panel put the first rows off the top of the screen. The
+    // sheet is bounded and scrolls inside the bound, and no row is taller
+    // than one line of type plus its padding.
+    const keys = <String>[
+      'wheelchair',
+      'companion',
+      'semi-ambulatory',
+      'designated-aisle',
+      'step-free',
+      'hearing',
+      'cart',
+      'sign-language',
+      'low-vision',
+      'sensory-friendly',
+      'plus-size',
+      'lift-armrest',
+    ];
+    final map = FakePickerMap(bundle: _accessBundle(limited: true));
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+    final snapshot = pickerSnapshot(
+      accessNeeds: <Object?>[for (final key in keys) accessNeed(key, 6)],
+    );
+    (snapshot['features']! as Map<String, Object?>)['limitedViewFilter'] = true;
+
+    await _openSheet(tester, map, snapshot);
+
+    expect(_rowLabels(tester), hasLength(keys.length));
+    // The sheet stops short of the screen, so the map it is filtering is
+    // still there behind it.
+    final sheet = tester.getRect(find.byType(SingleChildScrollView));
+    expect(
+      sheet.height,
+      lessThanOrEqualTo(
+        seatLayerAccessSheetMaxHeight(tester.view.physicalSize.height),
+      ),
+    );
+    // Twelve rows do not fit that window — which is exactly why it scrolls.
+    expect(
+      find.descendant(
+        of: find.byType(SingleChildScrollView),
+        matching: find.byType(Scrollable),
+      ),
+      findsOneWidget,
+    );
+    for (final key in keys) {
+      final label = SeatLayerPickerStrings.defaultAccessNeeds[key]!;
+      final text = tester.widget<Text>(find.text(label));
+      expect(text.maxLines, 1, reason: label);
+      expect(text.overflow, TextOverflow.ellipsis, reason: label);
+      expect(tester.getSize(find.text(label)).height, lessThan(24),
+          reason: label);
+    }
+  });
+
+  test('the sheet is bounded to a fraction of the screen, with a floor', () {
+    // A tall phone gets the fraction; a short one gets the floor, so it is
+    // handed a window worth scrolling rather than a sliver.
+    expect(seatLayerAccessSheetMaxHeight(844), closeTo(844 * .72, .001));
+    expect(seatLayerAccessSheetMaxHeight(300), 240);
+    // Never taller than the screen bounding it.
+    expect(seatLayerAccessSheetMaxHeight(200), 200);
   });
 
   testWidgets('a chart with no companion places makes no such promise',

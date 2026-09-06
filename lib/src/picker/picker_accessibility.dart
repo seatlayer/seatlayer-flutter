@@ -231,11 +231,19 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                             iconKey: need.key,
                             label: need.label,
                             note: need.note,
+                            // A NUMBER, INCLUDING AT ZERO. The row used to
+                            // say "Not available" when the last space went,
+                            // which was a sentence where every other row
+                            // carries a figure — it needed a chip to hold it
+                            // and made the sold-out row the loudest line in
+                            // the sheet. The dimmed switch beside it is what
+                            // says it cannot be had, and the count stays part
+                            // of the row's spoken name.
                             count: need.count == null
                                 ? null
                                 : need.count! > 0
                                     ? strings.accessFreeCount(need.count!)
-                                    : strings.notAvailable,
+                                    : _zeroCount,
                             // The web menu's own "12 free" button, which steps
                             // the camera through the sections that hold them.
                             // Only where the runtime can fly and there is
@@ -313,6 +321,16 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
         isScrollControlled: true,
         showDragHandle: true,
         backgroundColor: theme.surface,
+        // BOUNDED, AND IT SCROLLS INSIDE THE BOUND. A chart carrying the whole
+        // vocabulary gives this sheet twelve accommodation rows plus the
+        // limited-view and colourblind switches, and an unbounded scroll-
+        // controlled sheet answers that by taking the entire screen — the map
+        // the buyer is filtering disappears behind the filter. The bound is a
+        // fraction of the room that exists, floored so a short phone still
+        // gets a window worth scrolling rather than a sliver.
+        constraints: BoxConstraints(
+          maxHeight: _sheetMaxHeight(MediaQuery.sizeOf(context).height),
+        ),
         builder: (_) => body,
       ),
     );
@@ -394,6 +412,34 @@ class _AccessNeedRow {
   final String? note;
 }
 
+/// How tall the sheet may grow, given the room the screen has.
+///
+/// The web bounds its popover to the space above the ♿ button inside the map,
+/// because a panel measured against the window opens straight through the
+/// ticket sheet below. A native modal sheet has the same problem from the
+/// other side: scroll-controlled and unbounded, twelve rows simply take the
+/// whole screen and the map the buyer is filtering is gone. A fraction of the
+/// room that exists says the same thing without measuring a button, and the
+/// floor keeps a short phone from being handed a sliver.
+@visibleForTesting
+double seatLayerAccessSheetMaxHeight(double screenHeight) {
+  final bound = screenHeight * SeatLayerSizeTokens.accessSheetMaxHeightFraction;
+  final floored = bound < SeatLayerSizeTokens.accessSheetMinHeight
+      ? SeatLayerSizeTokens.accessSheetMinHeight
+      : bound;
+  // Never taller than the screen it is bounded by: on a very short viewport
+  // the floor would otherwise exceed it.
+  return floored > screenHeight ? screenHeight : floored;
+}
+
+double _sheetMaxHeight(double screenHeight) =>
+    seatLayerAccessSheetMaxHeight(screenHeight);
+
+/// What a row with nothing free reads in its count column.
+///
+/// A figure, not a sentence: see the row that draws it.
+const String _zeroCount = '0';
+
 /// The runtime's own key for the two provisions the sheet says more about.
 const String _wheelchairNeedKey = 'wheelchair';
 const String _companionNeedKey = 'companion';
@@ -406,7 +452,14 @@ const double _controlIconSize = 21;
 ///
 /// The whole row is the control — a 44-point line, not a 20-point switch at
 /// the end of one — so the buyer aims at the words rather than at the toggle.
-class _AccessOptionRow extends StatelessWidget {
+///
+/// ONE LINE PER ROW. The row used to be able to grow a second, muted line
+/// under the label — the companion-seat sentence — and with twelve provisions
+/// that turned a sheet of switches into a page of prose. The sentence rides an
+/// ⓘ beside the label now and opens under the row that owns it, and the label
+/// truncates rather than wrapping when a translation runs long, so twelve rows
+/// stay twelve lines on any phone.
+class _AccessOptionRow extends StatefulWidget {
   const _AccessOptionRow({
     required this.iconKey,
     required this.label,
@@ -435,10 +488,24 @@ class _AccessOptionRow extends StatelessWidget {
   final VoidCallback? onChanged;
 
   @override
+  State<_AccessOptionRow> createState() => _AccessOptionRowState();
+}
+
+class _AccessOptionRowState extends State<_AccessOptionRow> {
+  bool _noteOpen = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
+    final label = widget.label;
+    final note = widget.note;
+    final count = widget.count;
+    final countLabel = widget.countLabel;
+    final onCountPressed = widget.onCountPressed;
+    final value = widget.value;
+    final onChanged = widget.onChanged;
     final enabled = onChanged != null;
-    return Semantics(
+    final row = Semantics(
       toggled: value,
       enabled: enabled,
       label: label,
@@ -467,54 +534,47 @@ class _AccessOptionRow extends StatelessWidget {
                     SizedBox(
                       width: SeatLayerSizeTokens.accessRowIconCell,
                       child: SeatLayerSeatIcon(
-                        iconKey: iconKey,
+                        iconKey: widget.iconKey,
                         color: theme.mutedText,
                         size: SeatLayerSizeTokens.accessRowIconSize,
                       ),
                     ),
                     const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text(
-                            label,
-                            style: TextStyle(
-                              color: theme.text,
-                              fontSize:
-                                  SeatLayerSizeTokens.accessRowLabelFontSize,
-                              fontWeight:
-                                  seatLayerBoldWeight(context, FontWeight.w700),
-                              height: 1.25,
-                              fontFamily: theme.fontFamily,
-                            ),
-                          ),
-                          if (note != null) ...<Widget>[
-                            const SizedBox(height: 1),
-                            Text(
-                              note!,
-                              style: TextStyle(
-                                color: theme.mutedText,
-                                fontSize:
-                                    SeatLayerSizeTokens.accessRowNoteFontSize,
-                                fontWeight: seatLayerBoldWeight(
-                                    context, FontWeight.w600),
-                                height: 1.3,
-                                fontFamily: theme.fontFamily,
-                              ),
-                            ),
-                          ],
-                        ],
+                      child: Text(
+                        label,
+                        // The words are the only part of the line that may
+                        // shrink, and they shrink by truncating: a label that
+                        // wrapped took the row to two lines and the sheet to
+                        // a page.
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: theme.text,
+                          fontSize: SeatLayerSizeTokens.accessRowLabelFontSize,
+                          fontWeight:
+                              seatLayerBoldWeight(context, FontWeight.w700),
+                          height: 1.25,
+                          fontFamily: theme.fontFamily,
+                        ),
                       ),
                     ),
                     if (count != null) ...<Widget>[
                       const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
                       _AccessCount(
-                        count: count!,
+                        count: count,
                         label: countLabel,
                         onPressed: enabled ? onCountPressed : null,
                         theme: theme,
+                      ),
+                    ],
+                    if (note != null) ...<Widget>[
+                      const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
+                      _AccessNoteButton(
+                        open: _noteOpen,
+                        label: note,
+                        theme: theme,
+                        onPressed: () => setState(() => _noteOpen = !_noteOpen),
                       ),
                     ],
                     const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
@@ -527,7 +587,95 @@ class _AccessOptionRow extends StatelessWidget {
         ),
       ),
     );
+    if (note == null) return row;
+    // The sentence opens UNDER the row it explains rather than inside it, so
+    // the line stays a line whether or not the buyer has asked for it.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        row,
+        AnimatedSize(
+          duration: SeatLayerPickerMotion.of(
+            context,
+            SeatLayerPickerMotion.crossfade,
+          ),
+          curve: SeatLayerPickerMotion.easeEnter,
+          alignment: Alignment.topCenter,
+          child: _noteOpen
+              ? Padding(
+                  padding: const EdgeInsets.only(
+                    left: SeatLayerSizeTokens.accessRowIconCell +
+                        SeatLayerSizeTokens.accessRowGap +
+                        SeatLayerSizeTokens.accessRowPaddingX,
+                    right: SeatLayerSizeTokens.accessRowPaddingX,
+                    bottom: SeatLayerSizeTokens.accessRowPaddingY,
+                  ),
+                  child: Text(
+                    note,
+                    style: TextStyle(
+                      color: theme.mutedText,
+                      fontSize: SeatLayerSizeTokens.accessRowNoteFontSize,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
+                      height: 1.3,
+                      fontFamily: theme.fontFamily,
+                    ),
+                  ),
+                )
+              : const SizedBox(width: double.infinity),
+        ),
+      ],
+    );
   }
+}
+
+/// The ⓘ a row wears when it has a sentence to add.
+///
+/// A real button beside the switch, not inside it: the two do different things,
+/// and a buyer who only hears the toggle cannot find the explanation. It
+/// carries the sentence as its own accessible name, so the note is spoken
+/// whether or not it is open.
+class _AccessNoteButton extends StatelessWidget {
+  const _AccessNoteButton({
+    required this.open,
+    required this.label,
+    required this.theme,
+    required this.onPressed,
+  });
+
+  final bool open;
+  final String label;
+  final SeatLayerResolvedPickerTheme theme;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        button: true,
+        expanded: open,
+        label: label,
+        child: ExcludeSemantics(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: SeatLayerSizeTokens.minimumHitTarget,
+              minHeight: SeatLayerSizeTokens.minimumHitTarget,
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                onTap: onPressed,
+                borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
+                child: Center(
+                  child: Icon(
+                    open ? Icons.info_rounded : Icons.info_outline_rounded,
+                    size: SeatLayerSizeTokens.accessNoteIconSize,
+                    color: open ? theme.accent : theme.mutedText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 /// The "12 free" at the end of a row — a fact, or the button that starts the
