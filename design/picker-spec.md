@@ -1056,8 +1056,23 @@ it is kept only as the fallback.
 
 The sheet rises from the foot of the map, always — one home, one entrance. The
 **spotlight hole** in the glass is what ties it back to the seat it is asking
-about; the hole is cut in map coordinates from `selection[].screenPoint`, so it
-follows the seat when the re-frame moves it.
+about; the hole is cut in the map surface's own coordinates — the glass fills
+the same box as the map, so nothing is added for the chrome above it — from
+`selection[].screenPoint` **plus the pan standing over that snapshot**.
+
+That sum is the whole geometry rule, and the second half of it is easy to
+lose. `screenPoint` is computed when the runtime BUILDS a snapshot, and
+`picker.frameSeat` publishes none — it is camera only, no revision, no
+selection — so the reported point is where the seat sat BEFORE the lift. Cut
+the hole at the reported point alone and it lands one lift band below the
+seat, showing its neighbours while the seat itself stays under the blur (seen
+on device, iOS 26.5). So the lift reports what it has panned since the
+snapshot the chrome is reading (`PickerSeatLift.anchorDy`), the hole moves by
+it, and the count resets the moment a newer snapshot arrives — that snapshot's
+points already stand where the map now is, and adding the pan again would push
+the hole as far above the seat as it used to sit below it. It follows the
+re-frames too: the 350/800 ms re-asks and every later revision each move the
+hole with the seat.
 
 **Capability.** The seat's screen point requires `seat-screen-point-v1`
 (`selection[].screenPoint`). It no longer decides where the card goes — the

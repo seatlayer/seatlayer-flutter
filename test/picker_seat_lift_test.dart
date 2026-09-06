@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
+import 'package:seatlayer/src/picker/picker_prompt_presentation.dart';
 import 'package:seatlayer/src/picker/picker_seat_lift.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
@@ -38,18 +39,60 @@ List<Map<String, Object?>> _frames(FakePickerMap map) => map
 Map<String, Object?> _lastInsets(FakePickerMap map) =>
     map.callsTo('picker.setViewportInsets').last.$2! as Map<String, Object?>;
 
+/// The same snapshot, with the runtime reporting where it drew the seat.
+///
+/// `screenPoint` is computed when the snapshot is built, so it is where the
+/// seat sat BEFORE any pan this card asks for.
+Map<String, Object?> _seatDrawnAt(double x, double y, {int revision = 1}) {
+  final snapshot =
+      pickerSnapshot(sections: pickerSections(), revision: revision);
+  final selection = Map<String, Object?>.from(
+    snapshot['selection']! as Map<String, Object?>,
+  );
+  final seats = (selection['seats']! as List<Object?>)
+      .map((seat) => Map<String, Object?>.from(seat! as Map<String, Object?>))
+      .toList();
+  seats.first['screenPoint'] = <String, Object?>{'x': x, 'y': y};
+  selection['seats'] = seats;
+  return <String, Object?>{...snapshot, 'selection': selection};
+}
+
+/// Where the glass behind the card leaves the map clear.
+Offset? _spotlight(WidgetTester tester) => tester
+    .widget<PickerPromptTransition>(find.byType(PickerPromptTransition))
+    .anchor;
+
+/// A runtime that pans the seat into place once and then reports it settled,
+/// which is what a real one does: the second ask answers `dy: 0`.
+FakePickerMap _pansOnceMap({double dy = -120, int gestures = 2}) {
+  var panned = false;
+  return FakePickerMap(
+    bundle: _framingBundle(),
+    handler: (command, payload) async {
+      if (command != seatLayerFrameSeatCommand) return null;
+      final answer = <String, Object?>{
+        'dy': panned ? 0.0 : dy,
+        'gestures': gestures,
+      };
+      panned = true;
+      return answer;
+    },
+  );
+}
+
 /// A mounted phone picker with the ADD card up over A-1, on a runtime that
 /// answers every frame with a 120 px lift at gesture count 2.
 Future<SeatLayerPickerController> _cardUp(
   WidgetTester tester,
-  FakePickerMap map,
-) async {
+  FakePickerMap map, {
+  Map<String, Object?>? snapshot,
+}) async {
   final picker = SeatLayerPickerController(mapController: map);
   addTearDown(picker.dispose);
   useFakeWebViewPlatform();
   usePhoneSurface(tester);
   await tester.pumpWidget(pickerHarness(map, _layout(), controller: picker));
-  map.emit(pickerSnapshot(sections: pickerSections()));
+  map.emit(snapshot ?? pickerSnapshot(sections: pickerSections()));
   await pumpToRest(tester);
   // The lift waits for the map to hold still across two frames.
   await tester.pump();
@@ -142,6 +185,51 @@ void main() {
       expect(calls.last.$2, seatLayerSheetRestoreFraction);
       expect(lift.seatId, isNull);
       expect(lift.dy, 0);
+    });
+
+    test('reports the pan the chrome has to add, and forgets it on a snapshot',
+        () async {
+      // The spotlight hole is cut against `screenPoint`, which is only ever as
+      // fresh as the last snapshot. A pan carries no revision, so the shell
+      // adds what has been panned SINCE that snapshot — and nothing once a
+      // newer one has folded the pan in.
+      var changed = 0;
+      final lift = PickerSeatLift(
+        onChanged: () => changed += 1,
+        frame: (seatId, {required fraction, int? gestures}) async =>
+            const SeatLayerSeatFrame(dy: -100, gestures: 2),
+        settle: const <Duration>[Duration(milliseconds: 5)],
+      );
+      void sync({int revision = 1}) => lift.sync(
+            seatId: 's1',
+            mapHeight: 844,
+            top: 60,
+            bottom: 0,
+            sheet: 300,
+            revision: revision,
+          );
+
+      // Two syncs at one height: the lift waits for the map to hold still.
+      sync();
+      sync();
+      await Future<void>.delayed(Duration.zero);
+      expect(lift.anchorDy, -100);
+      expect(changed, 1);
+
+      // The runtime re-fitted under the card and the lift went again: the
+      // hole moves with it, on the same snapshot.
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(lift.anchorDy, -200);
+      expect(changed, 2);
+
+      // A newer snapshot's screen points already stand where the map is now.
+      sync(revision: 2);
+      expect(lift.anchorDy, 0);
+      await Future<void>.delayed(Duration.zero);
+      expect(lift.anchorDy, -100);
+
+      lift.forget();
+      expect(lift.anchorDy, 0);
     });
 
     test('an unmeasured card sends nothing, and a refused lift is not undone',
@@ -302,6 +390,54 @@ void main() {
     // The resting place is the middle of the clear band, never a sum of pans.
     expect(restore['fraction'], seatLayerSheetRestoreFraction);
     expect(liftFraction, lessThan(seatLayerSheetRestoreFraction));
+  });
+
+  testWidgets('the spotlight follows the seat the lift moved', (tester) async {
+    // The hole in the glass is cut around `selection[].screenPoint`, which the
+    // runtime computes when it BUILDS a snapshot. `picker.frameSeat` is camera
+    // only — no revision, no snapshot — so the point the chrome holds is where
+    // the seat sat before the lift, and the hole was left a whole lift band
+    // below the seat it was meant to be showing (iOS 26.5, on device).
+    final map = _pansOnceMap();
+    addTearDown(map.dispose);
+    await _cardUp(tester, map, snapshot: _seatDrawnAt(195, 500));
+
+    expect(_frames(map), isNotEmpty);
+    final anchor = _spotlight(tester);
+    expect(anchor, isNotNull);
+    expect(anchor!.dx, closeTo(195, .01));
+    expect(
+      anchor.dy,
+      closeTo(380, .01),
+      reason: 'the seat was panned 120 px up out from under the card',
+    );
+  });
+
+  testWidgets(
+      'a fresh snapshot already carries the lift, and is not counted '
+      'twice', (tester) async {
+    // A later snapshot — an availability refresh, a glide landing — recomputes
+    // the screen point against the camera the lift already moved. Adding the
+    // standing pan to THAT point would push the hole as far above the seat as
+    // it used to sit below it.
+    final map = _pansOnceMap();
+    addTearDown(map.dispose);
+    await _cardUp(tester, map, snapshot: _seatDrawnAt(195, 500));
+
+    map.emit(_seatDrawnAt(195, 380, revision: 2));
+    await pumpToRest(tester);
+
+    expect(_spotlight(tester)!.dy, closeTo(380, .01));
+  });
+
+  testWidgets('a runtime that cannot pan cuts the hole where the seat is',
+      (tester) async {
+    final map = FakePickerMap(bundle: nativeChromeBundle());
+    addTearDown(map.dispose);
+    await _cardUp(tester, map, snapshot: _seatDrawnAt(195, 500));
+
+    expect(map.callsTo(seatLayerFrameSeatCommand), isEmpty);
+    expect(_spotlight(tester)!.dy, closeTo(500, .01));
   });
 
   testWidgets('a runtime without the pan keeps the sheet as an inset',
