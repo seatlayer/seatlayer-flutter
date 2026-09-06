@@ -477,25 +477,57 @@ inset `size.mapAnchorInset` from the map's edges, with `size.mapAnchorGap`
 between members. Regions do not receive presses; their children do. Nothing
 free-floats.
 
-**One way out, on the phone.** Narrow carries a single back-out control, `−`,
-in the bottom-right region. Fit-to-screen is **not drawn there**: both back the
-camera out, one a step at a time and one all at once, and nothing on either
-round button said which was which. Wide keeps `+`, `−` and fit as they were.
+**Three discs on the phone** (owner call, 2026-09-06), in the bottom-right
+region, top to bottom:
 
-The ladder is the runtime's: one tap returns to the section the buyer drilled
-into, the next leaves it for the whole venue. Short on purpose, because a
-buyer's model of a seat map is a venue, a section in it, seats in that section —
-from the seats it is two taps home.
+| Disc | Name | Command | Dims when |
+|---|---|---|---|
+| `+` | `strings.zoomIn` | `picker.zoomIn` | `map.canZoomIn` is false |
+| `−` | `strings.zoomOut` | `picker.zoomOut` | `map.canStepBack` is false |
+| framed dot | `strings.fitWholeVenue` | `picker.overview` | `map.canStepBack` is false |
 
-At home the same disc reads **`+`** (owner call, 2026-09-05). There is
-nothing to step out of at the whole venue, and a dimmed `−` answered the wrong
-question — a buyer looking at everything wants *in*. So one slot carries two
-directions: `+` (`picker.zoomIn`) while `map.canZoomOut` is false, `−` the
-moment a section is framed or seats are the visible layer. It never moves and
-never disappears: the corner does not grow and shrink a button under the
-buyer's thumb. `map.canZoomOut` is the runtime's own answer, deliberately
-broader than the LOD rung, which flips at a scale where a phone still shows
-labelled section blocks.
+`−` is the **ladder**: one tap returns to the section the buyer drilled into,
+the next leaves it for the whole venue. Short on purpose, because a buyer's
+model of a seat map is a venue, a section in it, seats in that section — from
+the seats it is two taps home. The framed dot is that last rung on its own,
+from any depth.
+
+They do not duplicate each other, and the corner needs all three. It carried
+`−` alone for a while: `+` was left out because pinch already zooms in, and the
+whole-venue disc had been dropped earlier as a second round button beside `−`
+with nothing on either saying which was which. The result was that a buyer who
+had pinched to a camera BETWEEN the whole-venue fit and the seats — section
+blocks on screen, no seats, the venue not framed — had one control, and that
+control decided from "no seats visible" that it was already home and dimmed
+itself. Nothing left to press. Naming the third disc is what makes the pair
+readable; three labelled discs cost a corner very little and remove every dead
+end.
+
+The whole-venue disc sends `picker.overview`, **not** `picker.zoomToFit`, so it
+lands on exactly the camera `−`'s last rung lands on — a framed section is
+released, its card closed and its dim cleared — and the two controls can never
+disagree about where "the whole venue" is.
+
+**Dimmed, not hidden, and only where dimming is true.** A control that appears
+and disappears moves the target under a thumb already reaching for it. One that
+stays put and plainly cannot be pressed says "you are already looking at
+everything" — which it is only allowed to say when the buyer is. A disabled
+disc is drawn at `opacity.mapControlDisabled` with its shadow dropped: it is no
+longer lifted off the map, because it is no longer a thing to press.
+
+**The reading behind both back-out discs is one reading**, so they are done at
+the same moment. `map.canStepBack`:
+
+1. a framed section (`map.focusedSectionId`) always has a rung left — leaving
+   it is a step even at the fit pose, card and dim included;
+2. otherwise `map.atVenueFit` decides: the fit pose itself is the one camera
+   with nothing left to offer, and every other camera is one tap from the whole
+   chart, however the buyer reached it;
+3. where the runtime does not report `atVenueFit`, `map.canZoomOut` is the
+   older, coarser fallback — see §4.9 for what that costs and why it is not a
+   guess of the SDK's own.
+
+Wide is unchanged: `+`, `−` and the fit-to-screen control it has always had.
 
 Back-to-overview is a different question and keeps its own condition: it renders
 only while a section is actually framed.
@@ -662,13 +694,17 @@ hairline the divider at partial opacity — each inside a `size.minimumHitTarget
 target. The `+` and `−` glyphs are drawn at 20 — an arm of 11.33 and a stroke
 of 1.33, not 14 across at a stroke of 2.
 
-This column is the **wide** composition's. On a phone there is no column: the
-one bottom-right slot described under "One way out, on the phone" above reads
-`+` at the whole venue and `−` once a section is framed (`map.canZoomOut`), and
-fit-to-screen is not drawn. Copy `strings.fitVenue`, `strings.zoomIn`,
-`strings.zoomOut`.
+The wide composition draws `+`, `−` and fit-to-screen (`strings.fitVenue`,
+`picker.zoomToFit`). The phone draws the three discs described under "Three
+discs on the phone" above — `strings.zoomIn`, `strings.zoomOut`,
+`strings.fitWholeVenue` — in the same column, at the same size and gap.
 
-**Commands.** `picker.zoomToFit`, `picker.zoomIn`, `picker.zoomOut`.
+`strings.fitWholeVenue` is deliberately not `strings.fitVenue`: the wide
+control only fits, and the phone's also leaves a framed section, so the two
+read differently in the sentence a screen reader speaks.
+
+**Commands.** `picker.zoomIn`, `picker.zoomOut`, `picker.overview` (phone),
+`picker.zoomToFit` (wide).
 
 An overview thumbnail (minimap) is **not built on a phone**, and neither are
 level-of-detail rung pills: measured against the map's top edge they restated
@@ -2144,6 +2180,16 @@ not fake them, and do not design around their absence as if it were permanent.
   needs how many of the buyer's tickets are already held and how many are still
   pending. Until the split is reported the label falls back to
   `strings.continueToCheckout`.
+- **The camera's fit pose, `map.atVenueFit`.** The two back-out discs
+  (§3.5) dim from it, and the SDK reads it from the snapshot's `map` object as
+  an optional boolean. A runtime that does not report it leaves the field
+  absent, and the SDK falls back to `map.canZoomOut` rather than reading the
+  absence as a pose. That fallback is honest but coarse: `canZoomOut` is
+  computed from whether seats are the visible layer, so every camera a pinch
+  leaves between the venue fit and the seats reads as "already home" and both
+  discs dim with the venue still not framed. Absent must never be read as
+  `false`, and the SDK must never infer a pose from scale, rung or what happens
+  to be on screen — only a pose the engine reports is a pose.
 - **3D section stops.** The immersive scene's caption can name a stop, but the
   list of stops a venue offers is not in the snapshot, so the deck cannot offer
   section-to-section travel.
