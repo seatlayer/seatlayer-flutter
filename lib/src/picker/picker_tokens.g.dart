@@ -204,8 +204,8 @@ abstract final class SeatLayerSizeTokens {
   /// `11`
   static const double sheetHandleOverhang = 11;
 
-  /// `10`
-  static const double sheetHeadHeight = 10;
+  /// `11`
+  static const double sheetHeadHeight = 11;
 
   /// `64`
   static const double cartCardMinHeight = 64;
@@ -245,24 +245,6 @@ abstract final class SeatLayerSizeTokens {
 
   /// `10`
   static const double footTotalGap = 10;
-
-  /// `44`
-  static const double denseLineHeight = 44;
-
-  /// `4`
-  static const int denseVisibleLines = 4;
-
-  /// `6`
-  static const int denseCollapseFrom = 6;
-
-  /// `32`
-  static const double denseRemoveSize = 32;
-
-  /// `24`
-  static const double denseRunToggleWidth = 24;
-
-  /// `40`
-  static const double denseMoreRowHeight = 40;
 
   /// `44`
   static const double checkoutButtonHeight = 44;

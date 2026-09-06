@@ -175,7 +175,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('the peek summary is the phone\'s live region',
+    testWidgets('the foot\'s total line is the phone\'s live region',
         (tester) async {
       final handle = tester.ensureSemantics();
       final map = FakePickerMap();
@@ -190,7 +190,7 @@ void main() {
       // What the buyer has. It changes without them touching it, and it says
       // so no other way. Where they ARE is no longer announced on a phone:
       // there is no dock to carry it.
-      expect(live.any((label) => label.startsWith('From')), isTrue,
+      expect(live.any((label) => label.startsWith('No seats selected')), isTrue,
           reason: 'the cart summary is a live region: $live');
       expect(live.any((label) => label.startsWith('Gallery')), isFalse,
           reason: 'no dock, so no section announcement: $live');

@@ -100,21 +100,18 @@ AnimatedOpacity _pausedSheet(WidgetTester tester) => tester.widget<AnimatedOpaci
       find.descendant(of: _sheetPause, matching: find.byType(AnimatedOpacity)).first,
     );
 
-/// The peek bar's Continue button, or null when it is not offered at all.
+/// The sheet's one call to action, or null when it is not drawn at all.
 ///
-/// The pill draws its label and its money as two spans — `Continue` beside a
-/// tabular `€25` — so it is found by its own word and then read for the total
-/// standing next to it.
+/// It carries its own label and nothing else: the total is on the line above
+/// it, and a foot that states the money twice is how the button ended up
+/// being read as a second, different price.
 FilledButton? _continueButton(WidgetTester tester) {
-  final found = find.ancestor(
-    of: find.text('Continue'),
-    matching: find.byType(FilledButton),
-  );
+  final found = find.byType(FilledButton);
   if (found.evaluate().isEmpty) return null;
   expect(
     find.descendant(of: found.first, matching: find.text('€25')),
-    findsOneWidget,
-    reason: 'the pill carries the cart total beside its label',
+    findsNothing,
+    reason: 'the total is the foot\'s own line, not the button',
   );
   return tester.widget<FilledButton>(found.first);
 }

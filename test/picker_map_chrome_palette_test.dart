@@ -188,11 +188,11 @@ void main() {
     );
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
-    expect(_sheetGround(tester), SeatLayerLightTokens.surface);
+    expect(_sheetGround(tester), SeatLayerLightTokens.background);
 
     map.emit(_inVenue3D(revision: 4));
     await tester.pumpAndSettle();
-    expect(_sheetGround(tester), SeatLayerDarkTokens.surface);
+    expect(_sheetGround(tester), SeatLayerDarkTokens.background);
   });
 
   testWidgets('the credit line keeps its words on the scene sheet',
