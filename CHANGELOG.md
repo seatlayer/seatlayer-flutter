@@ -21,14 +21,22 @@ The phone picker follows the web picker's latest phone layout item by item.
   accommodation glyphs replace platform icons; amber and gold tones come
   from the theme (`warnText`, `premiumText`) and meet 4.5:1 in both
   themes. The cart card says the same notes once, in words.
-- **Accessibility menu** rows carry the same glyphs, and a provision the
-  venue has sold out of says "Not available". The legend closes with one
-  grey "Not available" key.
+- **The accessibility control heads the map's control column** on phone and
+  wide, above "+", instead of sitting alone in the bottom-left corner. Its
+  menu is bounded to the screen and scrolls inside, with one line per
+  accommodation and the longer explanation behind an ⓘ; rows carry the
+  shared glyphs and a sold-out provision shows 0. The legend closes with one
+  grey "Not available" key. The wide layout no longer drew the control
+  twice.
+- **The wide layout's fit-to-screen button is gone**; the 3D "Fit" chip and
+  the phone's whole-venue disc are the two fit affordances, both saying
+  "Show whole venue". The best-seats card carries a one-line "Find seats
+  together" title.
 - **No card over an unavailable seat.** A sold seat, one not for sale, or
   one another buyer holds never raises the seat card.
 - New strings — `fitWholeVenue`, `notAvailable`, `organizerNote`,
   `emptyWheelchairSpace`, `accessiblePhysicalSeat`, `noSeatsSelected`,
-  `findBestSeatsCta` — carry the runtime's translation in all 37 locales.
+  `findBestSeatsCta`, `findSeatsTogether` — carry the runtime's translation in all 37 locales.
 
 Breaking: `SeatLayerPickerStrings.accessNoneLeft` is removed (use
 `notAvailable`); `SeatLayerPeekLine`, `peekLine`, `fromPriceText`,
