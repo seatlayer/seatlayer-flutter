@@ -46,6 +46,11 @@ const List<String> _plainFields = <String>[
   'errorMessage',
   'retry',
   'accessRefresh',
+  'noSeatsSelected',
+  'findBestSeatsCta',
+  'organizerNote',
+  'accessiblePhysicalSeat',
+  'emptyWheelchairSpace',
   'hideLimitedView',
   'colorblindSafe',
   // Also composed into `continueWithTotal` below. It is a standalone button

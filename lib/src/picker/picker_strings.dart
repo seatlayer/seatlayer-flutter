@@ -53,6 +53,9 @@ class SeatLayerPickerStrings {
     this.premiumSeat = SeatLayerStringTokens.premiumSeat,
     this.restrictedView = SeatLayerStringTokens.restrictedView,
     this.obstructedView = SeatLayerStringTokens.obstructedView,
+    this.accessiblePhysicalSeat = SeatLayerStringTokens.accessiblePhysicalSeat,
+    this.emptyWheelchairSpace = SeatLayerStringTokens.emptyWheelchairSpace,
+    this.organizerNote = SeatLayerStringTokens.organizerNote,
     this.venueZone = SeatLayerStringTokens.venueZone,
     this.fewerTickets = SeatLayerStringTokens.fewerTickets,
     this.moreTickets = SeatLayerStringTokens.moreTickets,
@@ -67,6 +70,8 @@ class SeatLayerPickerStrings {
     this.continueToCheckout = SeatLayerStringTokens.continueToCheckout,
     this.secureMore = SeatLayerStringTokens.secureMore,
     this.selectSeats = SeatLayerStringTokens.selectSeats,
+    this.noSeatsSelected = SeatLayerStringTokens.noSeatsSelected,
+    this.findBestSeatsCta = SeatLayerStringTokens.findBestSeatsCta,
     this.pickYourSeats = SeatLayerStringTokens.pickYourSeats,
     this.salesClosedPill = SeatLayerStringTokens.salesClosedPill,
     this.seatsSecuredOpeningCheckout =
@@ -328,6 +333,19 @@ class SeatLayerPickerStrings {
   /// both is described by the stronger of the two words, once.
   final String obstructedView;
 
+  /// Note-row title on a wheelchair place that has a seat in it.
+  ///
+  /// Drawn instead of the plain "Wheelchair" accommodation, which the
+  /// provision already says and says more precisely.
+  final String accessiblePhysicalSeat;
+
+  /// Note-row title on a wheelchair place with no seat in it.
+  final String emptyWheelchairSpace;
+
+  /// Note-row title carrying the organizer's own sentence about a seat, on a
+  /// seat with no selling mark for the sentence to belong to.
+  final String organizerNote;
+
   /// Tooltip on the 3D chrome's previous-seat step.
   final String previousSeat;
 
@@ -435,6 +453,16 @@ class SeatLayerPickerStrings {
   /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
   /// its English wording in every locale until one exists.
   final String selectSeats;
+
+  /// The foot's total line while the cart is empty.
+  final String noSeatsSelected;
+
+  /// The phone foot's primary button while the cart is empty: the door into
+  /// the best-seats form.
+  ///
+  /// Not [findBestSeats], which counts the tickets it is about to find — this
+  /// one opens the form that asks how many.
+  final String findBestSeatsCta;
 
   /// The empty peek line where the chart has no price to quote.
   ///
