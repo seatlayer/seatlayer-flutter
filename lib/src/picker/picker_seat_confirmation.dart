@@ -80,6 +80,8 @@ class _SeatLayerPickerSeatConfirmationState
     if (seat == null || immersiveUp || seat.label == _dismissedLabel) {
       return const SizedBox.shrink();
     }
+    // No card over a seat the buyer cannot take, whichever runtime reported it.
+    if (!controller.mayAskAboutSeat(seat)) return const SizedBox.shrink();
     _tierId ??= seat.tierId ?? seat.tiers?.firstOrNull?.id;
     final theme = seatLayerPickerThemeOf(context);
     final category = controller.state.categories

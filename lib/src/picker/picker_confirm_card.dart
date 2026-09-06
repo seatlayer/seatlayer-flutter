@@ -185,7 +185,11 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     // scene is already moving toward it, and the web card does not wait.
     final panoramaUp = controller.seatView?.hasContent == true;
     final immersive = !panoramaUp && (map?.isVenue3D ?? false);
+    // A seat nobody can take is inert: the layout above already filters one
+    // out of the question, and a host composing this card by hand gets the
+    // same rule rather than a card asking for a seat that is already gone.
     if (seat == null || panoramaUp) return const SizedBox.shrink();
+    if (!controller.mayAskAboutSeat(seat)) return const SizedBox.shrink();
     final seatKey = '${seat.id}\u0000${seat.label}';
     if (_seatKey != seatKey) {
       _seatKey = seatKey;
