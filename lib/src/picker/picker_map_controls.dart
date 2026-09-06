@@ -50,9 +50,15 @@ Widget seatLayerImmersiveGlass({
 
 /// The controls that sit on the map itself.
 ///
-/// On a phone they go to the map's anchor regions — accessibility bottom-left,
-/// Map/3D top-right, and a column of three discs bottom-right: `+`, `−` and
-/// the whole venue.
+/// On a phone they go to the map's anchor regions — Map/3D top-right, and one
+/// column bottom-right: the ♿ filter disc, then `+`, `−` and the whole venue.
+///
+/// The ♿ disc used to stand alone in the map's bottom-left corner, opposite
+/// the stack of zoom discs. One control facing four, in the corner the floor
+/// selector already owns, read as something the layout had forgotten — so it
+/// is the TOP DISC OF THIS COLUMN now, on both layouts, which is where a buyer
+/// already looks for the controls that act on the map. A control about who can
+/// sit where does not belong below the controls about how close the camera is.
 ///
 /// The corner carried one disc before, and each of the two absences had an
 /// argument. Pinch already zooms in, so `+` was noise; fit-to-venue made the
@@ -79,6 +85,7 @@ class SeatLayerPickerMapControls extends StatelessWidget {
     this.edgeInset = SeatLayerSizeTokens.mapAnchorInset,
     this.bottomInset = 0,
     this.includeViewModeControl = true,
+    this.accessibilityControl,
   });
 
   /// Whether to render the phone's corner placement.
@@ -97,6 +104,14 @@ class SeatLayerPickerMapControls extends StatelessWidget {
   /// translated labels measure. It therefore takes the control out of here and
   /// places it itself. A host composing its own layout keeps the default.
   final bool includeViewModeControl;
+
+  /// The control drawn at the head of the map's control column.
+  ///
+  /// Null draws the picker's own [SeatLayerPickerAccessibilityFilters]. The
+  /// drop-in layout passes whatever `builders.accessibilityFilters` returns,
+  /// so a host that replaces the filter control still has it placed here
+  /// rather than having to rebuild the column around it.
+  final Widget? accessibilityControl;
 
   @override
   Widget build(BuildContext context) =>
@@ -120,7 +135,14 @@ class _RailControls extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
+          // FIRST IN THE COLUMN, above `+`, on this layout too: a control
+          // about who can sit where does not belong below the controls about
+          // how close the camera is.
+          if (chrome.showAccessibilityControl)
+            owner.accessibilityControl ??
+                const SeatLayerPickerAccessibilityFilters(compact: true),
           if (chrome.overviewControlFor(phone: false) &&
               map?.focusedSection != null)
             const SeatLayerPickerOverviewButton(),
@@ -182,6 +204,27 @@ class _CornerControls extends StatelessWidget {
     // ladder, one rung at a time; the disc is the venue immediately, however
     // deep the buyer went.
     final zoomColumn = <Widget>[
+      // THE ♿ DISC HEADS THE COLUMN. It stood alone in the opposite corner
+      // until 2026-09-06 — one control facing a stack of them, in the corner
+      // the floor selector owns — and a buyer already looks here for whatever
+      // acts on the map. Above `+`, because who can sit where is a different
+      // and earlier question than how close the camera is.
+      //
+      // The stepper that walks the sections holding matching spaces rides
+      // with it, beside it rather than above it: they are one subject. It
+      // draws nothing at all until a filter is on and the runtime answers the
+      // tour, so the column is three discs the rest of the time.
+      if (onMap && chrome.showAccessibilityControl)
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            const SeatLayerPickerAccessibleStepper(),
+            const SizedBox(width: SeatLayerSizeTokens.accessStepGap),
+            owner.accessibilityControl ??
+                const SeatLayerPickerAccessibilityFilters(compact: true),
+          ],
+        ),
       if (onMap && chrome.zoomControlsFor(phone: true)) ...<Widget>[
         const SeatLayerPickerZoomInButton(),
         const SeatLayerPickerZoomOutButton(),
@@ -192,20 +235,6 @@ class _CornerControls extends StatelessWidget {
     final bottomLeftColumn = <Widget>[
       if (onMap && chrome.colorblindControlFor(phone: true))
         const SeatLayerPickerColorblindButton(),
-      // The round control, and — while a filter is on and the runtime answers
-      // the tour — the stepper that walks the sections holding matching
-      // spaces. Beside it rather than above it: they are one subject, and the
-      // corner already stacks the colourblind control above both.
-      if (onMap && chrome.showAccessibilityControl)
-        const Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            SeatLayerPickerAccessibilityFilters(compact: true),
-            SizedBox(width: SeatLayerSizeTokens.accessStepGap),
-            SeatLayerPickerAccessibleStepper(),
-          ],
-        ),
     ];
     return Stack(
       children: <Widget>[

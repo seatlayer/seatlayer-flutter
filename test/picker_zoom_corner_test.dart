@@ -14,12 +14,31 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/payloads.dart';
+import 'package:seatlayer/src/picker/picker_accessibility.dart';
+import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
+import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
+
+/// A runtime that offers the colourblind palette, so the ♿ control has
+/// something to open even on a chart that authors no provisions.
+BundleInfo _colorblindBundle() => nativeChromeBundle(
+      capabilities: const <String>[
+        'native-chrome-contract-v1',
+        'viewport-insets-v1',
+        'colorblind-safe',
+      ],
+      commands: const <String>[
+        'picker.setThemeMode',
+        'picker.setViewportInsets',
+        'picker.setColorblindSafe',
+      ],
+    );
 
 /// The pressable button inside one of the corner discs.
 IconButton _disc(WidgetTester tester, Type control) =>
@@ -201,6 +220,131 @@ void main() {
     // whole-venue disc belongs to the corner.
     expect(find.byType(SeatLayerPickerZoomToFitButton), findsOneWidget);
     expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsNothing);
+  });
+
+  group('the ♿ disc heads the column', () {
+    // Owner call 2026-09-06. It stood alone in the map's bottom-left corner —
+    // one control facing a stack of them, in the corner the floor selector
+    // owns — and read as something the layout had forgotten. It is the top
+    // disc of the right-hand column now, on BOTH layouts, because who can sit
+    // where is an earlier question than how close the camera is.
+    testWidgets('on the phone, above `+` and off the opposite corner',
+        (tester) async {
+      final map = FakePickerMap(bundle: _colorblindBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerPickerMapControls(compact: true)),
+      );
+      map.emit(pickerSnapshot(withSelection: false));
+      await tester.pumpAndSettle();
+
+      final screen = tester.getRect(find.byType(SeatLayerPickerMapControls));
+      final access =
+          tester.getRect(find.byType(SeatLayerPickerAccessibilityFilters));
+      final stepIn = tester.getRect(find.byType(SeatLayerPickerZoomInButton));
+      expect(
+        access.right,
+        closeTo(screen.right - SeatLayerSizeTokens.mapAnchorInset, .5),
+      );
+      expect(access.bottom, lessThan(stepIn.top + .5));
+    });
+
+    testWidgets('on the wide rail too, above the discs', (tester) async {
+      final map = FakePickerMap(bundle: _colorblindBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerPickerMapControls()),
+      );
+      map.emit(pickerSnapshot(withSelection: false));
+      await tester.pumpAndSettle();
+
+      final access =
+          tester.getRect(find.byType(SeatLayerPickerAccessibilityFilters));
+      final stepIn = tester.getRect(find.byType(SeatLayerPickerZoomInButton));
+      expect(access.bottom, lessThan(stepIn.top + .5));
+      // The same 44-point disc as the phone's, not the panel's labelled
+      // button: it floats on the map on both widths.
+      expect(find.byType(OutlinedButton), findsNothing);
+    });
+
+    testWidgets('and the drop-in layout draws exactly one, at either width',
+        (tester) async {
+      // The wide composition used to draw TWO: one lifted off the map's
+      // bottom-left corner, one repeated under the best-seats card in the
+      // side panel. One control, in the map's column.
+      for (final wide in <bool>[false, true]) {
+        final map = FakePickerMap(bundle: _colorblindBundle());
+        addTearDown(map.dispose);
+        tester.view.devicePixelRatio = 1;
+        tester.view.physicalSize =
+            wide ? const Size(1280, 900) : const Size(390, 844);
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            SeatLayerPickerAdaptiveLayout(
+              onCheckout: (_) async {},
+              builders: SeatLayerPickerBuilders(
+                map: (context, part) => const SizedBox.expand(),
+              ),
+            ),
+          ),
+        );
+        map.emit(pickerSnapshot(withSelection: false));
+        await pumpToRest(tester);
+
+        expect(
+          find.byType(SeatLayerPickerAccessibilityFilters),
+          findsOneWidget,
+          reason: 'wide=$wide',
+        );
+        await tester.pumpWidget(const SizedBox.shrink());
+      }
+    });
+
+    testWidgets('a host can put its own control at that head', (tester) async {
+      final map = FakePickerMap(bundle: _colorblindBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const SeatLayerPickerMapControls(
+            compact: true,
+            accessibilityControl: Text('mine'),
+          ),
+        ),
+      );
+      map.emit(pickerSnapshot(withSelection: false));
+      await tester.pumpAndSettle();
+
+      expect(find.text('mine'), findsOneWidget);
+      expect(find.byType(SeatLayerPickerAccessibilityFilters), findsNothing);
+    });
+
+    testWidgets('and can take it away entirely', (tester) async {
+      final map = FakePickerMap(bundle: _colorblindBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const SeatLayerPickerMapControls(compact: true),
+          options: const SeatLayerPickerOptions(
+            chrome:
+                SeatLayerPickerChromeOptions(showAccessibilityControl: false),
+          ),
+        ),
+      );
+      map.emit(pickerSnapshot(withSelection: false));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SeatLayerPickerAccessibilityFilters), findsNothing);
+      expect(find.byType(SeatLayerPickerZoomInButton), findsOneWidget);
+    });
   });
 
   group('goldens', () {

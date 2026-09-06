@@ -28,7 +28,6 @@ import 'picker_venue_3d.dart';
 import 'picker_dock_bar.dart';
 import 'picker_floor_strip.dart';
 import 'picker_haptics.dart';
-import 'picker_layout.dart';
 import 'picker_camera_actions.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
@@ -281,14 +280,16 @@ class _SeatLayerPickerAdaptiveLayoutState
             reserveBottomInset: !chrome.showTicketPanel,
           ),
         );
-        final accessibility = panoramaUp
-            ? const SizedBox.shrink()
+        // The filter control is no longer placed by this layout: it rides the
+        // map's own control column, above `+`, on both widths. The builder
+        // slot still decides WHAT is drawn there, so a host that replaces the
+        // control keeps its placement for free.
+        final accessibility = panoramaUp || !chrome.showAccessibilityControl
+            ? null
             : _part(
                 context,
                 widget.builders.accessibilityFilters,
-                chrome.showAccessibilityControl
-                    ? SeatLayerPickerAccessibilityFilters(compact: !wide)
-                    : const SizedBox.shrink(),
+                const SeatLayerPickerAccessibilityFilters(compact: true),
               );
         final tray = _part(
           context,
@@ -358,6 +359,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                             : 0,
                         // On a phone the top rail below owns the Map/3D control.
                         includeViewModeControl: wide,
+                        accessibilityControl: accessibility,
                       )
                     : const SizedBox.shrink(),
               );
@@ -598,12 +600,6 @@ class _SeatLayerPickerAdaptiveLayoutState
                                   child: SeatLayerPickerFloorSelector(),
                                 ),
                               ),
-                            Positioned(
-                              left: _mapInset,
-                              bottom: _bottomLeftLift(resolved.layout),
-                              child: SeatLayerMapChromeRegion(
-                                  child: accessibility),
-                            ),
                             Positioned.fill(child: seatViewChrome),
                             if (!immersiveUp)
                               Positioned.fill(
@@ -658,19 +654,13 @@ class _SeatLayerPickerAdaptiveLayoutState
                                 child: floorStrip,
                               ),
                             sections,
+                            // The filter control used to be repeated here,
+                            // under the best-seats card, while a second copy
+                            // stood in the map's bottom-left corner. One
+                            // control, in the map's column.
                             Padding(
                               padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  best,
-                                  const SizedBox(height: 8),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: accessibility,
-                                  ),
-                                ],
-                              ),
+                              child: best,
                             ),
                             Expanded(child: SingleChildScrollView(child: tray)),
                             actionError,
@@ -889,7 +879,10 @@ class _SeatLayerPickerAdaptiveLayoutState
                       if (chrome.showFloorSelector)
                         Positioned(
                           left: _mapInset,
-                          bottom: dockLift + _bottomLeftLift(resolved.layout),
+                          // The map's own bottom-left edge again: the ♿ disc
+                          // that used to stand above it moved into the map's
+                          // control column on the other side.
+                          bottom: dockLift + _mapInset,
                           child: seatLayerReadingOrder(
                             SeatLayerPickerReadingOrder.mapChrome,
                             const SeatLayerMapChromeRegion(
@@ -1171,10 +1164,6 @@ class _SeatLayerPickerAdaptiveLayoutState
         _mapInset + dockLift + SeatLayerVenue3D.seatDeckHeight(seated: seated);
     return deck > dock ? deck : dock;
   }
-
-  /// One gap above whatever else shares the map's bottom-left corner.
-  static double _bottomLeftLift(SeatLayerPickerLayout layout) =>
-      _mapInset + layout.accessibilityControlSize + _badgeGap;
 
   /// Whether the picker still has a rung of its own to descend.
   bool _ownsBackGesture(SeatLayerPickerState state) =>
