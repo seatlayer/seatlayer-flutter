@@ -24,6 +24,7 @@ import '../payloads.dart';
 import 'picker_buyer_asset_loader.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
+import 'picker_seat_notes.dart';
 import 'picker_cart_removal.dart';
 import 'picker_haptics.dart';
 import 'picker_motion.dart';
@@ -605,60 +606,21 @@ class SeatLayerCartNoteLine {
 
 /// Every note a cart card owes, in reading order.
 ///
-/// The same order the seat card's rows follow — what the seat PROVIDES first
-/// (accommodations, then the physical wheelchair fact), then what a buyer
-/// should know before paying (restricted, obstructed, premium), then the
-/// organizer's own words. Restricted and obstructed are SEPARATE lines: they
-/// used to collapse into one with restricted winning, which meant a seat
-/// marked both told the buyer about the railing and never about the pillar.
-///
-/// The cart says all of this ONCE, in WORDS. The card used to carry icon
-/// markers as well, and since both drew the same set the line read as the same
-/// fact printed twice.
+/// The cart says all of this ONCE, in WORDS: the same rows the seat card
+/// draws as bands ([seatLayerSeatNotesFor]), read here as title and sentence
+/// and nothing else. One row model, two readings — the card used to carry
+/// icon markers as well, and since both drew the same set the line read as
+/// the same fact printed twice.
 List<SeatLayerCartNoteLine> seatLayerCartNoteLines(
   SelectedSeat? seat,
   SeatLayerPickerStrings strings,
 ) {
   if (seat == null) return const <SeatLayerCartNoteLine>[];
-  final lines = <SeatLayerCartNoteLine>[];
-  final provision = seat.wheelchairSpaceType;
-  for (final type in seat.accessibility ?? const <String>[]) {
-    // A wheelchair seat with a provision gets the provision line INSTEAD:
-    // "empty wheelchair space" already says everything "wheelchair" would, and
-    // more precisely. Listing both is one seat explained twice.
-    if (type == 'wheelchair' && provision != null) continue;
-    final label = strings.accessNeeds[type];
-    if (label == null) continue; // a key this build's taxonomy does not know
-    lines.add(SeatLayerCartNoteLine(title: label));
-  }
-  if (provision == 'no-seat') {
-    lines.add(SeatLayerCartNoteLine(title: strings.emptyWheelchairSpace));
-  } else if (provision == 'seat-present') {
-    lines.add(SeatLayerCartNoteLine(title: strings.accessiblePhysicalSeat));
-  }
-  final commercial = seat.commercial;
-  final marks = <String>[
-    if (commercial?.restrictedView == true) strings.restrictedView,
-    if (commercial?.obstructedView == true) strings.obstructedView,
-    if (commercial?.premium == true) strings.premiumSeat,
-  ];
-  final note = commercial?.note?.trim();
-  final hasNote = note != null && note.isNotEmpty;
-  for (var index = 0; index < marks.length; index++) {
-    // The sentence belongs to the FIRST selling mark on the seat — an organizer
-    // writing "pillar at the aisle end" is explaining the restriction, not
-    // adding a second unrelated fact.
-    lines.add(
-      SeatLayerCartNoteLine(
-        title: marks[index],
-        note: hasNote && index == 0 ? note : null,
-      ),
-    );
-  }
-  if (hasNote && marks.isEmpty) {
-    lines.add(SeatLayerCartNoteLine(title: strings.organizerNote, note: note));
-  }
-  return List<SeatLayerCartNoteLine>.unmodifiable(lines);
+  return List<SeatLayerCartNoteLine>.unmodifiable(
+    seatLayerSeatNotesFor(seat, strings).map(
+      (row) => SeatLayerCartNoteLine(title: row.title, note: row.note),
+    ),
+  );
 }
 
 /// The notes, as a footnote under the line they belong to.
