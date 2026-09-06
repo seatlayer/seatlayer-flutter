@@ -9,6 +9,7 @@ import 'picker_blocked_regions.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_pending_seat.dart';
+import 'picker_seat_icons.dart';
 import 'picker_tokens.g.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_controller.dart';
@@ -223,14 +224,26 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                           // such seats, which is a different fact.
                           final enabled = need.count == null || need.count! > 0;
                           return _AccessOptionRow(
-                            icon: Icons.accessible_rounded,
+                            // The same drawing the seat itself carries on the
+                            // map and on every popup — one wheelchair for
+                            // twelve different provisions told the buyer
+                            // nothing about which one a row was.
+                            iconKey: need.key,
                             label: need.label,
                             note: need.note,
+                            // A NUMBER, INCLUDING AT ZERO. The row used to
+                            // say "Not available" when the last space went,
+                            // which was a sentence where every other row
+                            // carries a figure — it needed a chip to hold it
+                            // and made the sold-out row the loudest line in
+                            // the sheet. The dimmed switch beside it is what
+                            // says it cannot be had, and the count stays part
+                            // of the row's spoken name.
                             count: need.count == null
                                 ? null
                                 : need.count! > 0
                                     ? strings.accessFreeCount(need.count!)
-                                    : strings.accessNoneLeft,
+                                    : _zeroCount,
                             // The web menu's own "12 free" button, which steps
                             // the camera through the sections that hold them.
                             // Only where the runtime can fly and there is
@@ -263,10 +276,30 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                       ),
                     ),
                   ),
+                if (available.limited || available.colorblind)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 18, 8, 4),
+                    child: Text(
+                      strings.viewGroupTitle,
+                      style: TextStyle(
+                        color: theme.mutedText,
+                        fontSize: 11,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w700),
+                        letterSpacing: .6,
+                        fontFamily: theme.fontFamily,
+                      ),
+                    ),
+                  ),
                 if (available.limited)
                   _AccessOptionRow(
-                    icon: Icons.contrast_rounded,
+                    // The switch that hides limited-view seats wears the mark
+                    // those seats carry, so the row and the thing it acts on
+                    // are one idea.
+                    iconKey: 'restrictedView',
                     label: strings.hideLimitedView,
+                    reserveNoteSlot: false,
+                    hairline: available.colorblind,
                     value: hideLimited,
                     onChanged: () {
                       final next = !hideLimited;
@@ -276,8 +309,13 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                   ),
                 if (available.colorblind)
                   _AccessOptionRow(
-                    icon: Icons.contrast_rounded,
+                    // NOT an eye and not a seat mark: this row recolours the
+                    // map, it does not choose seats. A contrast disc is the
+                    // one shape on this sheet that is about the palette.
+                    iconKey: 'contrast',
                     label: strings.colorblindSafe,
+                    reserveNoteSlot: false,
+                    hairline: false,
                     value: colorblind,
                     onChanged: () {
                       final next = !colorblind;
@@ -302,6 +340,16 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
         isScrollControlled: true,
         showDragHandle: true,
         backgroundColor: theme.surface,
+        // BOUNDED, AND IT SCROLLS INSIDE THE BOUND. A chart carrying the whole
+        // vocabulary gives this sheet twelve accommodation rows plus the
+        // limited-view and colourblind switches, and an unbounded scroll-
+        // controlled sheet answers that by taking the entire screen — the map
+        // the buyer is filtering disappears behind the filter. The bound is a
+        // fraction of the room that exists, floored so a short phone still
+        // gets a window worth scrolling rather than a sliver.
+        constraints: BoxConstraints(
+          maxHeight: _sheetMaxHeight(MediaQuery.sizeOf(context).height),
+        ),
         builder: (_) => body,
       ),
     );
@@ -383,6 +431,34 @@ class _AccessNeedRow {
   final String? note;
 }
 
+/// How tall the sheet may grow, given the room the screen has.
+///
+/// The web bounds its popover to the space above the ♿ button inside the map,
+/// because a panel measured against the window opens straight through the
+/// ticket sheet below. A native modal sheet has the same problem from the
+/// other side: scroll-controlled and unbounded, twelve rows simply take the
+/// whole screen and the map the buyer is filtering is gone. A fraction of the
+/// room that exists says the same thing without measuring a button, and the
+/// floor keeps a short phone from being handed a sliver.
+@visibleForTesting
+double seatLayerAccessSheetMaxHeight(double screenHeight) {
+  final bound = screenHeight * SeatLayerSizeTokens.accessSheetMaxHeightFraction;
+  final floored = bound < SeatLayerSizeTokens.accessSheetMinHeight
+      ? SeatLayerSizeTokens.accessSheetMinHeight
+      : bound;
+  // Never taller than the screen it is bounded by: on a very short viewport
+  // the floor would otherwise exceed it.
+  return floored > screenHeight ? screenHeight : floored;
+}
+
+double _sheetMaxHeight(double screenHeight) =>
+    seatLayerAccessSheetMaxHeight(screenHeight);
+
+/// What a row with nothing free reads in its count column.
+///
+/// A figure, not a sentence: see the row that draws it.
+const String _zeroCount = '0';
+
 /// The runtime's own key for the two provisions the sheet says more about.
 const String _wheelchairNeedKey = 'wheelchair';
 const String _companionNeedKey = 'companion';
@@ -395,9 +471,16 @@ const double _controlIconSize = 21;
 ///
 /// The whole row is the control — a 44-point line, not a 20-point switch at
 /// the end of one — so the buyer aims at the words rather than at the toggle.
-class _AccessOptionRow extends StatelessWidget {
+///
+/// ONE LINE PER ROW. The row used to be able to grow a second, muted line
+/// under the label — the companion-seat sentence — and with twelve provisions
+/// that turned a sheet of switches into a page of prose. The sentence rides an
+/// ⓘ beside the label now and opens under the row that owns it, and the label
+/// truncates rather than wrapping when a translation runs long, so twelve rows
+/// stay twelve lines on any phone.
+class _AccessOptionRow extends StatefulWidget {
   const _AccessOptionRow({
-    required this.icon,
+    required this.iconKey,
     required this.label,
     required this.value,
     required this.onChanged,
@@ -405,9 +488,12 @@ class _AccessOptionRow extends StatelessWidget {
     this.count,
     this.countLabel,
     this.onCountPressed,
+    this.reserveNoteSlot = true,
+    this.hairline = true,
   });
 
-  final IconData icon;
+  /// Which shared drawing this row wears, by the runtime's own key.
+  final String iconKey;
   final String label;
   final String? note;
   final String? count;
@@ -419,14 +505,44 @@ class _AccessOptionRow extends StatelessWidget {
   /// count the static fact it is on a runtime that cannot fly.
   final VoidCallback? onCountPressed;
 
+  /// Whether the row keeps an empty ⓘ slot so counts line up in one column
+  /// with the rows that do carry a note.
+  final bool reserveNoteSlot;
+
+  /// Whether a hairline closes the row.
+  final bool hairline;
+
   final bool value;
   final VoidCallback? onChanged;
 
   @override
+  State<_AccessOptionRow> createState() => _AccessOptionRowState();
+}
+
+/// One row height for the whole sheet.
+const double _rowHeight = 50;
+
+/// The width of the count column, right-aligned, wide enough for "999 free".
+const double _countColumn = 68;
+
+/// The width of the ⓘ column.
+const double _noteColumn = 36;
+
+class _AccessOptionRowState extends State<_AccessOptionRow> {
+  bool _noteOpen = false;
+
+  @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
+    final label = widget.label;
+    final note = widget.note;
+    final count = widget.count;
+    final countLabel = widget.countLabel;
+    final onCountPressed = widget.onCountPressed;
+    final value = widget.value;
+    final onChanged = widget.onChanged;
     final enabled = onChanged != null;
-    return Semantics(
+    final row = Semantics(
       toggled: value,
       enabled: enabled,
       label: label,
@@ -441,69 +557,89 @@ class _AccessOptionRow extends StatelessWidget {
           child: InkWell(
             onTap: onChanged,
             borderRadius: BorderRadius.circular(theme.buttonRadius),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: SeatLayerSizeTokens.minimumHitTarget,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                border: widget.hairline
+                    ? Border(
+                        bottom: BorderSide(
+                          color: pickerAlpha(theme.divider, .35),
+                        ),
+                      )
+                    : const Border(),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: SeatLayerSizeTokens.accessRowPaddingX,
-                  vertical: SeatLayerSizeTokens.accessRowPaddingY,
-                ),
-                child: Row(
-                  children: <Widget>[
-                    SizedBox(
-                      width: SeatLayerSizeTokens.accessRowIconCell,
-                      child: Icon(icon, size: 16, color: theme.mutedText),
-                    ),
-                    const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text(
-                            label,
-                            style: TextStyle(
-                              color: theme.text,
-                              fontSize:
-                                  SeatLayerSizeTokens.accessRowLabelFontSize,
-                              fontWeight:
-                                  seatLayerBoldWeight(context, FontWeight.w700),
-                              height: 1.25,
-                              fontFamily: theme.fontFamily,
-                            ),
-                          ),
-                          if (note != null) ...<Widget>[
-                            const SizedBox(height: 1),
-                            Text(
-                              note!,
-                              style: TextStyle(
-                                color: theme.mutedText,
-                                fontSize:
-                                    SeatLayerSizeTokens.accessRowNoteFontSize,
-                                fontWeight: seatLayerBoldWeight(
-                                    context, FontWeight.w600),
-                                height: 1.3,
-                                fontFamily: theme.fontFamily,
-                              ),
-                            ),
-                          ],
-                        ],
+              child: ConstrainedBox(
+                // ONE height for every row, whatever it carries: a sheet whose
+                // rows breathe differently reads as three lists in a trench
+                // coat.
+                constraints: const BoxConstraints(minHeight: _rowHeight),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: SeatLayerSizeTokens.accessRowPaddingX,
+                  ),
+                  child: Row(
+                    children: <Widget>[
+                      SizedBox(
+                        width: SeatLayerSizeTokens.accessRowIconCell,
+                        child: SeatLayerSeatIcon(
+                          iconKey: widget.iconKey,
+                          color: theme.mutedText,
+                          size: SeatLayerSizeTokens.accessRowIconSize,
+                        ),
                       ),
-                    ),
-                    if (count != null) ...<Widget>[
                       const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
-                      _AccessCount(
-                        count: count!,
-                        label: countLabel,
-                        onPressed: enabled ? onCountPressed : null,
-                        theme: theme,
+                      Expanded(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: theme.text,
+                            fontSize:
+                                SeatLayerSizeTokens.accessRowLabelFontSize,
+                            fontWeight:
+                                seatLayerBoldWeight(context, FontWeight.w600),
+                            height: 1.25,
+                            fontFamily: theme.fontFamily,
+                          ),
+                        ),
                       ),
+                      // The trailing cluster is three fixed columns — count,
+                      // note, switch — so every figure sits on one vertical
+                      // line down the sheet, whether or not its row has a ⓘ.
+                      if (count != null || widget.reserveNoteSlot)
+                        SizedBox(
+                          width: _countColumn,
+                          child: Align(
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: count == null
+                                ? const SizedBox.shrink()
+                                : _AccessCount(
+                                    count: count,
+                                    label: countLabel,
+                                    onPressed: enabled ? onCountPressed : null,
+                                    theme: theme,
+                                  ),
+                          ),
+                        ),
+                      if (note != null || widget.reserveNoteSlot)
+                        SizedBox(
+                          width: _noteColumn,
+                          child: note == null
+                              ? const SizedBox.shrink()
+                              : Center(
+                                  child: _AccessNoteButton(
+                                    open: _noteOpen,
+                                    label: note,
+                                    theme: theme,
+                                    onPressed: () =>
+                                        setState(() => _noteOpen = !_noteOpen),
+                                  ),
+                                ),
+                        ),
+                      const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
+                      _AccessSwitch(on: value, theme: theme),
                     ],
-                    const SizedBox(width: SeatLayerSizeTokens.accessRowGap),
-                    _AccessSwitch(on: value, theme: theme),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -511,7 +647,95 @@ class _AccessOptionRow extends StatelessWidget {
         ),
       ),
     );
+    if (note == null) return row;
+    // The sentence opens UNDER the row it explains rather than inside it, so
+    // the line stays a line whether or not the buyer has asked for it.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        row,
+        AnimatedSize(
+          duration: SeatLayerPickerMotion.of(
+            context,
+            SeatLayerPickerMotion.crossfade,
+          ),
+          curve: SeatLayerPickerMotion.easeEnter,
+          alignment: Alignment.topCenter,
+          child: _noteOpen
+              ? Padding(
+                  padding: const EdgeInsets.only(
+                    left: SeatLayerSizeTokens.accessRowIconCell +
+                        SeatLayerSizeTokens.accessRowGap +
+                        SeatLayerSizeTokens.accessRowPaddingX,
+                    right: SeatLayerSizeTokens.accessRowPaddingX,
+                    bottom: SeatLayerSizeTokens.accessRowPaddingY,
+                  ),
+                  child: Text(
+                    note,
+                    style: TextStyle(
+                      color: theme.mutedText,
+                      fontSize: SeatLayerSizeTokens.accessRowNoteFontSize,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
+                      height: 1.3,
+                      fontFamily: theme.fontFamily,
+                    ),
+                  ),
+                )
+              : const SizedBox(width: double.infinity),
+        ),
+      ],
+    );
   }
+}
+
+/// The ⓘ a row wears when it has a sentence to add.
+///
+/// A real button beside the switch, not inside it: the two do different things,
+/// and a buyer who only hears the toggle cannot find the explanation. It
+/// carries the sentence as its own accessible name, so the note is spoken
+/// whether or not it is open.
+class _AccessNoteButton extends StatelessWidget {
+  const _AccessNoteButton({
+    required this.open,
+    required this.label,
+    required this.theme,
+    required this.onPressed,
+  });
+
+  final bool open;
+  final String label;
+  final SeatLayerResolvedPickerTheme theme;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        button: true,
+        expanded: open,
+        label: label,
+        child: ExcludeSemantics(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: SeatLayerSizeTokens.minimumHitTarget,
+              minHeight: SeatLayerSizeTokens.minimumHitTarget,
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                onTap: onPressed,
+                borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
+                child: Center(
+                  child: Icon(
+                    open ? Icons.info_rounded : Icons.info_outline_rounded,
+                    size: SeatLayerSizeTokens.accessNoteIconSize,
+                    color: open ? theme.accent : theme.mutedText,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 /// The "12 free" at the end of a row — a fact, or the button that starts the
@@ -538,7 +762,9 @@ class _AccessCount extends StatelessWidget {
     final text = Text(
       count,
       style: TextStyle(
-        color: onPressed == null ? theme.mutedText : theme.accent,
+        // Ink, not the accent: twelve red figures down a list read as twelve
+        // warnings. The pill's ground already says the number can be pressed.
+        color: onPressed == null ? theme.mutedText : theme.text,
         fontSize: SeatLayerSizeTokens.accessRowNoteFontSize,
         fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
         fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
@@ -571,11 +797,12 @@ class _AccessCount extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(
                     horizontal: SeatLayerSizeTokens.accessStepPaddingX,
                   ),
+                  // A quiet ground, not the accent: the figure is a fact
+                  // first and a button second, and twelve pink pills down a
+                  // sheet were the loudest thing on it.
                   decoration: ShapeDecoration(
-                    color: pickerAlpha(theme.accent, .12),
-                    shape: StadiumBorder(
-                      side: BorderSide(color: theme.divider),
-                    ),
+                    color: pickerAlpha(theme.text, .06),
+                    shape: const StadiumBorder(),
                   ),
                   child: text,
                 ),

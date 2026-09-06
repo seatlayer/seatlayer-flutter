@@ -42,17 +42,50 @@ const List<String> _plainFields = <String>[
   'accessibility',
   'accessibilityTitle',
   'fitVenue',
+  'fitWholeVenue',
   'loading',
   'errorMessage',
   'retry',
   'accessRefresh',
+  'noSeatsSelected',
+  'findBestSeatsCta',
+  'organizerNote',
+  'accessiblePhysicalSeat',
+  'emptyWheelchairSpace',
+  'findSeatsTogether',
   'hideLimitedView',
   'colorblindSafe',
+  'notAvailable',
+  'viewGroupTitle',
+  'restrictedView',
+  'obstructedView',
+  'premiumSeat',
   // Also composed into `continueWithTotal` below. It is a standalone button
   // label in its own right — the cart sheet, the checkout action and the
   // access panel all print it alone — so it has to be emitted here too, or
   // every locale but English says "Continue" under a translated map.
   'continueWord',
+];
+
+/// The wire keys of the twelve accommodations, whose translated names are
+/// rebuilt into the `accessNeeds` map.
+///
+/// Extracted as `accessNeeds.<key>` rather than as twelve fields because that
+/// is the shape the picker reads them in: a row, a seat-note title and the
+/// map's own filter all look the need up by the runtime's own key.
+const List<String> _accessNeedKeys = <String>[
+  'wheelchair',
+  'companion',
+  'semi-ambulatory',
+  'designated-aisle',
+  'step-free',
+  'hearing',
+  'cart',
+  'sign-language',
+  'low-vision',
+  'sensory-friendly',
+  'plus-size',
+  'lift-armrest',
 ];
 
 /// Strings the runtime writes with one placeholder, and the Dart parameter
@@ -204,6 +237,18 @@ String _renderLocale(String locale, Map<String, Object?> values) {
     final value = values[field] as String?;
     if (value == null) continue;
     buffer.writeln("  $field: '${_escape(value)}',");
+  }
+  final needs = <String, String>{
+    for (final key in _accessNeedKeys)
+      if (values['accessNeeds.$key'] != null)
+        key: values['accessNeeds.$key']! as String,
+  };
+  if (needs.isNotEmpty) {
+    buffer.writeln('  accessNeeds: <String, String>{');
+    needs.forEach((key, value) {
+      buffer.writeln("    '$key': '${_escape(value)}',");
+    });
+    buffer.writeln('  },');
   }
   for (final entry in functions.entries) {
     buffer.writeln('  ${entry.key}: ${entry.value},');

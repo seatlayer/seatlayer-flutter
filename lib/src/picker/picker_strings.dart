@@ -53,10 +53,16 @@ class SeatLayerPickerStrings {
     this.premiumSeat = SeatLayerStringTokens.premiumSeat,
     this.restrictedView = SeatLayerStringTokens.restrictedView,
     this.obstructedView = SeatLayerStringTokens.obstructedView,
+    this.organizerNote = SeatLayerStringTokens.organizerNote,
+    this.emptyWheelchairSpace = SeatLayerStringTokens.emptyWheelchairSpace,
+    this.accessiblePhysicalSeat = SeatLayerStringTokens.accessiblePhysicalSeat,
+    this.notAvailable = SeatLayerStringTokens.notAvailable,
+    this.viewGroupTitle = SeatLayerStringTokens.viewGroupTitle,
     this.venueZone = SeatLayerStringTokens.venueZone,
     this.fewerTickets = SeatLayerStringTokens.fewerTickets,
     this.moreTickets = SeatLayerStringTokens.moreTickets,
     this.bestSeats = SeatLayerStringTokens.bestSeats,
+    this.findSeatsTogether = SeatLayerStringTokens.findSeatsTogether,
     this.findingBestSeats = SeatLayerStringTokens.findingBestSeats,
     this.findSeats = SeatLayerStringTokens.findSeats,
     this.showLess = SeatLayerStringTokens.showLess,
@@ -67,6 +73,8 @@ class SeatLayerPickerStrings {
     this.continueToCheckout = SeatLayerStringTokens.continueToCheckout,
     this.secureMore = SeatLayerStringTokens.secureMore,
     this.selectSeats = SeatLayerStringTokens.selectSeats,
+    this.noSeatsSelected = SeatLayerStringTokens.noSeatsSelected,
+    this.findBestSeatsCta = SeatLayerStringTokens.findBestSeatsCta,
     this.pickYourSeats = SeatLayerStringTokens.pickYourSeats,
     this.salesClosedPill = SeatLayerStringTokens.salesClosedPill,
     this.seatsSecuredOpeningCheckout =
@@ -88,7 +96,6 @@ class SeatLayerPickerStrings {
     this.testModeExplained = SeatLayerStringTokens.testModeExplained,
     this.accessibility = SeatLayerStringTokens.accessibility,
     this.displayOptions = SeatLayerStringTokens.displayOptions,
-    this.accessNoneLeft = SeatLayerStringTokens.accessNoneLeft,
     this.companionSeatsNote = SeatLayerStringTokens.companionSeatsNote,
     this.accessFreeCount = _defaultAccessFreeCount,
     this.accessibleStep = _defaultAccessibleStep,
@@ -96,6 +103,7 @@ class SeatLayerPickerStrings {
     this.accessJumpFirstSection = SeatLayerStringTokens.accessJumpFirstSection,
     this.accessJumpNextSection = SeatLayerStringTokens.accessJumpNextSection,
     this.fitVenue = SeatLayerStringTokens.fitVenue,
+    this.fitWholeVenue = SeatLayerStringTokens.fitWholeVenue,
     this.zoomIn = SeatLayerStringTokens.zoomIn,
     this.zoomOut = SeatLayerStringTokens.zoomOut,
     this.rotateVenue = SeatLayerStringTokens.rotateVenue,
@@ -322,11 +330,42 @@ class SeatLayerPickerStrings {
   /// Confirm-card notice title for a seat sold with a restricted view.
   final String restrictedView;
 
-  /// Confirm-card notice title for a seat with something in the way.
+  /// Seat-note row title for a seat with something in the way.
   ///
-  /// Only ever shown when the seat is not already restricted: a seat that is
-  /// both is described by the stronger of the two words, once.
+  /// Its own row, beside [restrictedView] rather than instead of it: a seat
+  /// behind both a rail and a pillar used to report only the rail.
   final String obstructedView;
+
+  /// Seat-note row title for the organizer's own sentence about a seat.
+  ///
+  /// Only drawn where the sentence belongs to no other row. Where the seat
+  /// also carries a view restriction or a premium mark, the sentence sits
+  /// under THAT row, because that is what the organizer is explaining.
+  final String organizerNote;
+
+  /// Seat-note row title for a wheelchair space with no fixed chair in it.
+  final String emptyWheelchairSpace;
+
+  /// Seat-note row title for an accessible place that does have a chair.
+  final String accessiblePhysicalSeat;
+
+  /// One word for a seat nobody can take tonight.
+  ///
+  /// The legend says it about the grey the map paints, and the seat card says
+  /// it about a seat that is already gone. It used to be "None left" in one
+  /// place and something else again in the other; one unavailability deserves
+  /// one word.
+  ///
+  /// The accessibility sheet no longer uses it: a provision the venue has and
+  /// has sold out of reads `0` in the same count column every other row
+  /// carries a figure in, and the dimmed switch beside it is what says it
+  /// cannot be had. The row itself still stays, because "this venue has no
+  /// wheelchair spaces" and "its wheelchair spaces are taken" are different
+  /// facts.
+  final String notAvailable;
+
+  /// Heading over the two switches that change how the map is drawn.
+  final String viewGroupTitle;
 
   /// Tooltip on the 3D chrome's previous-seat step.
   final String previousSeat;
@@ -376,6 +415,14 @@ class SeatLayerPickerStrings {
 
   /// Name of the best-seats feature.
   final String bestSeats;
+
+  /// The best-seats card's own title, on one line.
+  ///
+  /// SHORT on purpose. "Find the closest seats together" is a sentence, and in
+  /// a 300-point column it wrapped onto a second line above a card whose whole
+  /// point is that it is compact. The card's button still says what pressing
+  /// it will do, and it counts the tickets while it is at it.
+  final String findSeatsTogether;
 
   /// What the best-seats action says while it is searching.
   ///
@@ -435,6 +482,16 @@ class SeatLayerPickerStrings {
   /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
   /// its English wording in every locale until one exists.
   final String selectSeats;
+
+  /// The foot's total line while the cart is empty.
+  final String noSeatsSelected;
+
+  /// The phone foot's primary button while the cart is empty: the door into
+  /// the best-seats form.
+  ///
+  /// Not [findBestSeats], which counts the tickets it is about to find — this
+  /// one opens the form that asks how many.
+  final String findBestSeatsCta;
 
   /// The empty peek line where the chart has no price to quote.
   ///
@@ -538,15 +595,6 @@ class SeatLayerPickerStrings {
   /// its English wording in every locale until one exists.
   final String displayOptions;
 
-  /// "None left" — a provision the venue has, and has sold out of.
-  ///
-  /// The row stays, dimmed: "this venue has no wheelchair spaces" and "its
-  /// wheelchair spaces are taken" are different facts.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
-  final String accessNoneLeft;
-
   /// The note under a wheelchair row on a chart that also authors companion
   /// places, so a buyer knows the seat beside them is still theirs to take.
   ///
@@ -586,6 +634,14 @@ class SeatLayerPickerStrings {
 
   /// Tooltip on the fit-to-screen map control.
   final String fitVenue;
+
+  /// Name of the phone's third map disc, which puts the whole venue on screen
+  /// from wherever the buyer is.
+  ///
+  /// Deliberately not [fitVenue]: that one is the wide rail's fit-to-screen,
+  /// and this one leaves a framed section as well as fitting, so the two read
+  /// differently in the sentence a screen reader speaks.
+  final String fitWholeVenue;
 
   /// Tooltip on the zoom-in map control, which a phone only draws when the
   /// host asks for the pair back: pinch is the gesture.

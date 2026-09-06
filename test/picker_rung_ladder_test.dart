@@ -75,12 +75,14 @@ void main() {
     map.emit(pickerSnapshot(sections: pickerSections(), withSelection: false));
     await tester.pumpAndSettle();
 
-    // The `−` stepper is the phone's one way back now, so nothing may push it
-    // up the screen to make room for a bar that is not there.
+    // The zoom column is the phone's way back, so nothing may push it up the
+    // screen to make room for a bar that is not there. Its foot is the disc
+    // that shows the whole venue.
     final band = tester.getRect(find.byType(SeatLayerPickerMapControls));
-    final stepOut = tester.getRect(find.byType(SeatLayerPickerZoomOutButton));
+    final foot =
+        tester.getRect(find.byType(SeatLayerPickerShowWholeVenueButton));
     expect(
-      stepOut.bottom,
+      foot.bottom,
       closeTo(band.bottom - SeatLayerSizeTokens.mapAnchorInset, .5),
     );
   });

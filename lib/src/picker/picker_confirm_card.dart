@@ -13,6 +13,7 @@ import 'picker_buyer_asset_loader.dart';
 import 'picker_haptics.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
+import 'picker_seat_notes.dart';
 import 'picker_strings.dart';
 import 'picker_styles.dart';
 import 'picker_motion.dart';
@@ -184,7 +185,11 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     // scene is already moving toward it, and the web card does not wait.
     final panoramaUp = controller.seatView?.hasContent == true;
     final immersive = !panoramaUp && (map?.isVenue3D ?? false);
+    // A seat nobody can take is inert: the layout above already filters one
+    // out of the question, and a host composing this card by hand gets the
+    // same rule rather than a card asking for a seat that is already gone.
     if (seat == null || panoramaUp) return const SizedBox.shrink();
+    if (!controller.mayAskAboutSeat(seat)) return const SizedBox.shrink();
     final seatKey = '${seat.id}\u0000${seat.label}';
     if (_seatKey != seatKey) {
       _seatKey = seatKey;
@@ -244,30 +249,17 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     final categoryColor = pickerColor(category?.color) ?? theme.accent;
     final invite = !_touched && !SeatLayerPickerMotion.reduced(context);
 
-    // What the organizer has said about this particular seat, in the order a
-    // buyer needs it: the badge that raises the price, then the warning that
-    // lowers it, then whatever else was written about it.
-    final commercial = seat.commercial;
-    final premium = commercial?.premium ?? false;
-    // Restricted wins over obstructed: two words for the same disappointment
-    // is one word too many, and the stronger of the pair is the honest one.
-    final viewNotice = commercial?.restrictedView == true
-        ? strings.restrictedView
-        : commercial?.obstructedView == true
-            ? strings.obstructedView
-            : null;
-    final note = commercial?.note?.trim();
-    final hasNote = note != null && note.isNotEmpty;
+    // Everything the organizer has said about this particular seat, in the one
+    // order every SeatLayer surface says it: what the seat provides, then what
+    // the buyer should know before paying, then the organizer's own sentence.
+    final notes = seatLayerSeatNotesFor(seat, strings);
     // A lone tier is guidance, never a fieldset: an exclusive choice between
     // one option is not a choice, and drawing it as one asks for a decision
     // the buyer cannot make.
     final loneTierNote =
         tiers.length == 1 ? tiers.first.buyerMessage?.trim() : null;
-    final bodyContent = tiers.length > 1 ||
-        premium ||
-        viewNotice != null ||
-        hasNote ||
-        (loneTierNote?.isNotEmpty ?? false);
+    final tierContent = tiers.length > 1 || (loneTierNote?.isNotEmpty ?? false);
+    final bodyContent = tierContent || notes.isNotEmpty;
     // Which question this card is asking. In `remove` the seat is already in
     // the cart and stays there — counted, priced and part of the total — until
     // the buyer answers, so nothing here takes it out of the reckoning.
@@ -419,34 +411,44 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                                           ? null
                                           : () => _inspect(seat, venue3D),
                                 ),
+                              // The notes are BANDS, and they sit directly
+                              // under the category band: below the tier
+                              // chooser they read as a footnote to the price
+                              // list rather than as facts about the seat. So
+                              // the body owns no padding of its own — the
+                              // bands reach both edges and the tier chooser
+                              // carries the card's gutter itself.
                               if (bodyContent)
                                 Flexible(
                                   child: SingleChildScrollView(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(10, 8, 10, 0),
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.stretch,
                                       children: [
-                                        if (tiers.length > 1)
-                                          _TierPicker(
-                                            tiers: tiers,
-                                            currency: seat.currency ?? 'USD',
-                                            selectedId: _tierId,
-                                            enabled: !controller.state.isBusy,
-                                            onSelected: (id) =>
-                                                setState(() => _tierId = id),
-                                          )
-                                        else if (loneTierNote != null &&
-                                            loneTierNote.isNotEmpty)
-                                          _TierNote(note: loneTierNote),
-                                        if (premium ||
-                                            viewNotice != null ||
-                                            hasNote)
-                                          _SeatNotices(
-                                            premium: premium,
-                                            viewNotice: viewNotice,
-                                            note: hasNote ? note : null,
+                                        SeatLayerSeatNotes(rows: notes),
+                                        if (tierContent)
+                                          Padding(
+                                            padding: EdgeInsets.fromLTRB(
+                                              10,
+                                              notes.isEmpty ? 8 : 10,
+                                              10,
+                                              0,
+                                            ),
+                                            child: tiers.length > 1
+                                                ? _TierPicker(
+                                                    tiers: tiers,
+                                                    currency:
+                                                        seat.currency ?? 'USD',
+                                                    selectedId: _tierId,
+                                                    enabled: !controller
+                                                        .state.isBusy,
+                                                    onSelected: (id) =>
+                                                        setState(
+                                                            () => _tierId = id),
+                                                  )
+                                                : _TierNote(
+                                                    note: loneTierNote!,
+                                                  ),
                                           ),
                                       ],
                                     ),
@@ -589,8 +591,8 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
                                                   .styles.primaryButtonStyle,
                                               onPressed: controller.state.isBusy
                                                   ? null
-                                                  : () => _answer(
-                                                      controller, seat),
+                                                  : () =>
+                                                      _answer(controller, seat),
                                             ),
                                           ),
                                         ),

@@ -1,37 +1,105 @@
+/// The buyer's tickets, one card each — the SAME card on every width.
+///
+/// The phone used to draw a second cart: a bordered plate of 44 pt
+/// hairline-divided lines, with consecutive seats folded into runs behind a
+/// `+N more`. It saved real pixels and it cost the sheet its coherence — a
+/// bordered list on its own surface between a chrome band and a shadowed
+/// footer reads as three blocks stacked in a panel rather than as one panel —
+/// and it was a second rendering of one cart to keep in step with the first.
+///
+/// So there is one card now (owner call 2026-09-06: "cards should be the same
+/// design as desktop"): a colour dot, the name, the position and type in grey
+/// under it, whatever the organizer has said about the seat, the price, and the
+/// two actions. The collapsed sheet caps the list at three of them and scrolls
+/// (see `picker_cart_sheet.dart`), which is the same answer folding gave
+/// without a second design.
+///
+/// Gone with the fold: the run model, the `+N more` tail and the plate.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
 import '../payloads.dart';
+import 'picker_buyer_asset_loader.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
+import 'picker_seat_notes.dart';
 import 'picker_cart_removal.dart';
 import 'picker_haptics.dart';
 import 'picker_motion.dart';
+
 import 'picker_sheet_drag.dart';
 import 'picker_tokens.g.dart';
-import 'picker_tray_dense.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 import 'picker_a11y.dart';
 import 'picker_strings.dart';
 
-/// The buyer's tickets, one full-target line each.
+/// One ticket, resolved for the cart card.
 ///
-/// Consecutive seats that differ only by number fold into a run —
-/// `Gallery · A · 1–6   6 × €25   €150` — which a tap opens in place, so a
-/// buyer can still drop one seat out of six. Past a handful of runs the tail
-/// collapses behind a `+N more` control rather than turning the sheet into a
-/// scroll.
+/// The strings arrive already looked up, so everything below is pure data and
+/// can be tested without a widget tree.
+@immutable
+class SeatLayerTicketLine {
+  /// Creates one resolved ticket line.
+  const SeatLayerTicketLine({
+    required this.item,
+    required this.section,
+    required this.rowLabel,
+    required this.seatLabel,
+    required this.categoryLabel,
+    required this.categoryColor,
+    required this.amountText,
+    required this.amount,
+    required this.held,
+    this.seat,
+  });
+
+  /// The cart line this stands for; [SeatLayerCheckoutLineItem.label] is the
+  /// inventory identity used for removal.
+  final SeatLayerCheckoutLineItem item;
+
+  /// The selected seat behind the line, when the runtime reported one.
+  final SelectedSeat? seat;
+
+  /// Buyer-facing place name.
+  final String section;
+
+  /// Buyer-facing row name; empty when the object has no row.
+  final String rowLabel;
+
+  /// Buyer-facing seat name.
+  final String seatLabel;
+
+  /// The category's name. Drawn on the grey line only when it is not already
+  /// the name of the card, and always read out.
+  final String categoryLabel;
+
+  /// The category's display colour.
+  final Color categoryColor;
+
+  /// Rendered price for this line.
+  final String amountText;
+
+  /// Numeric total for this line.
+  final double amount;
+
+  /// Whether the line is a server-committed hold rather than a fresh pick.
+  final bool held;
+}
+
+/// The buyer's tickets, one card each.
 ///
 /// Reads everything from the scope, so it works standalone inside a
 /// [SeatLayerPickerScope].
 class SeatLayerCartList extends StatefulWidget {
-  /// Creates a dense ticket list.
+  /// Creates the cart list.
   const SeatLayerCartList({super.key, this.compact = true});
 
-  /// Kept for source compatibility with the card-based tray it replaces; the
-  /// dense line is the same height either way.
+  /// Kept for source compatibility with the widths that used to draw a denser
+  /// list; the card is the same card either way.
   final bool compact;
 
   @override
@@ -39,152 +107,79 @@ class SeatLayerCartList extends StatefulWidget {
 }
 
 class _SeatLayerCartListState extends State<SeatLayerCartList> {
-  final Set<int> _openRuns = <int>{};
   final Set<String> _seenKeys = <String>{};
-  bool _showAll = false;
 
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
     final theme = seatLayerPickerThemeOf(context);
-    final strings = SeatLayerPickerScope.stringsOf(context);
     final removals = seatLayerCartRemovalsOf(controller);
     // The mark is answered by the snapshot, not by the reply: a line the cart
     // no longer carries has finished leaving however the runtime said so.
     removals.settle(<String>{for (final item in state.cartLines) item.label});
-    final runs = groupTicketLines(_resolveLines(context, state));
-    if (runs.isEmpty) {
+    final lines = _resolveLines(context, state);
+    if (lines.isEmpty) {
       _seenKeys.clear();
       return const SizedBox.shrink();
     }
 
-    // Two numbers, not one: a list only collapses once it is long enough to
-    // be a scroll, and when it does it keeps fewer lines than that. Four
-    // visible out of six is a tail worth hiding; four out of five is not.
-    final visibleLimit = theme.layout.denseVisibleLines;
-    final collapsible = runs.length >= theme.layout.denseCollapseFrom;
-    final collapsed = !_showAll && collapsible;
-    final shown = collapsed ? runs.take(visibleLimit).toList() : runs;
     final arrivals = <String>[
-      for (final run in runs)
-        if (!_seenKeys.contains(run.members.first.item.lineKey))
-          run.members.first.item.lineKey,
+      for (final line in lines)
+        if (!_seenKeys.contains(line.item.lineKey)) line.item.lineKey,
     ];
     _seenKeys
       ..clear()
-      ..addAll(runs.map((run) => run.members.first.item.lineKey));
+      ..addAll(lines.map((line) => line.item.lineKey));
 
-    // The × stays on a line even while the host owns the hold (2026-09-05,
+    // The × stays on a card even while the host owns the hold (2026-09-05,
     // TestFlight): hiding it left a buyer back from checkout with a washed
-    // row and no way to change anything. The runtime refuses the removal, and
-    // that refusal is drawn as a state with a way out — "Your seats are
-    // already in checkout", release and change seats — by the action bar.
+    // card and no way to change anything. The runtime refuses the removal, and
+    // that refusal is drawn as a state with a way out by the action bar.
     final removable = !SeatLayerPickerScope.optionsOf(context).readOnly;
+    final locate = _seatViewOpener(context, controller);
 
-    // One plate, hairlines inside it. The lines are stubs of one ticket,
-    // and a stack of separately bordered cards read as a stack of unrelated
-    // things rather than as one order.
-    //
-    // The plate is rebuilt on the removals as well as on the snapshot: the
-    // press that starts a removal changes how a row is drawn a second or more
+    // The cards are rebuilt on the removals as well as on the snapshot: the
+    // press that starts a removal changes how a card is drawn a second or more
     // before the snapshot that finishes it arrives.
     return ListenableBuilder(
       listenable: removals,
-      builder: (context, _) => _plate(
-        theme: theme,
-        strings: strings,
-        runs: runs,
-        shown: shown,
-        collapsible: collapsible,
-        collapsed: collapsed,
-        visibleLimit: visibleLimit,
-        arrivals: arrivals,
-        removable: removable,
-        removals: removals,
-        onRemove: (line) => _remove(controller, line),
-      ),
-    );
-  }
-
-  /// The plate, as it is drawn for one reading of the cart.
-  Widget _plate({
-    required SeatLayerResolvedPickerTheme theme,
-    required SeatLayerPickerStrings strings,
-    required List<SeatLayerTicketRun> runs,
-    required List<SeatLayerTicketRun> shown,
-    required bool collapsible,
-    required bool collapsed,
-    required int visibleLimit,
-    required List<String> arrivals,
-    required bool removable,
-    required SeatLayerCartRemovals removals,
-    required ValueChanged<SeatLayerTicketLine> onRemove,
-  }) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.surface,
-        border: Border.all(color: theme.divider),
-        borderRadius: BorderRadius.circular(
-          theme.radius * SeatLayerRadiusTokens.smallRatio,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(
-          theme.radius * SeatLayerRadiusTokens.smallRatio,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // The eyebrow is read out, never drawn: a visible
-            // SECTION · ROW · SEAT strip spends a whole row explaining lines
-            // that already read as ticket stubs.
-            Semantics(
-              label: 'Section, row, seat',
-              child: const SizedBox.shrink(),
-            ),
-            for (var index = 0; index < shown.length; index++)
-              _RunBlock(
-                run: shown[index],
-                first: index == 0,
-                open: _openRuns.contains(index),
+      builder: (context, _) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          for (var index = 0; index < lines.length; index++) ...<Widget>[
+            if (index > 0) SizedBox(height: theme.layout.cartCardGap),
+            _ArrivalPop(
+              index: arrivals.indexOf(lines[index].item.lineKey),
+              child: SeatLayerCartCard(
+                line: lines[index],
                 removable: removable,
-                removals: removals,
-                arrivalIndex:
-                    arrivals.indexOf(shown[index].members.first.item.lineKey),
-                onToggle: () => setState(
-                  () => _openRuns.contains(index)
-                      ? _openRuns.remove(index)
-                      : _openRuns.add(index),
-                ),
-                onRemove: onRemove,
+                removing: removals.isRemoving(lines[index].item.label),
+                onRemove: () => _remove(controller, lines[index]),
+                onLocate: locate == null || lines[index].seat == null
+                    ? null
+                    : () => locate(lines[index].seat!),
               ),
-            if (collapsible)
-              _MoreRow(
-                collapsed: collapsed,
-                label: collapsed
-                    ? strings.moreCount(runs.length - visibleLimit)
-                    : strings.showLess,
-                onPressed: () => setState(() => _showAll = !_showAll),
-              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
 
-  /// Remove immediately, and offer the way back.
+  /// Remove immediately.
   ///
   /// A confirmation dialog for one ticket costs every buyer a tap to protect
-  /// against a mistake that is one tap to undo.
+  /// against a mistake that is one tap to reverse: re-picking the seat is the
+  /// same gesture that chose it.
   ///
-  /// "Immediately" is the row, not the server. `picker.removeCartLine` re-holds
-  /// the rest of the cart before it answers — close to two seconds on a real
-  /// event — so the row is marked, faded and made inert in the same frame as
-  /// the press, and the undo bar is offered against a decision that has already
-  /// been taken. The mark is dropped by the snapshot that no longer carries the
-  /// line, or restored here if the mutation fails.
+  /// "Immediately" is the card, not the server. `picker.removeCartLine`
+  /// re-holds the rest of the cart before it answers — close to two seconds on
+  /// a real event — so the card is marked, faded and made inert in the same
+  /// frame as the press, against a decision that has already been taken. The
+  /// mark is dropped by the snapshot that no longer carries the line, or
+  /// restored here if the mutation fails.
   Future<void> _remove(
     SeatLayerPickerController controller,
     SeatLayerTicketLine line,
@@ -193,15 +188,12 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
     final removals = seatLayerCartRemovalsOf(controller);
     final label = line.item.label;
     removals.mark(label);
-    // Felt, not just seen: the row is on its way out from under the finger,
+    // Felt, not just seen: the card is on its way out from under the finger,
     // and nothing else will say so.
     controller.emitHaptic(PickerHapticCue.ticketRemoved);
-    // NOTHING IS SAID. The buyer pressed ✕ on a specific line and that line is
+    // NOTHING IS SAID. The buyer pressed ✕ on a specific card and that card is
     // now gone from the tray, the total has moved and the checkout action has
-    // recounted — announcing it as well is telling someone what they just
-    // did. The toast also carried an Undo, which made a one-tap action into a
-    // two-tap one and put a timer on the second tap; re-picking the seat is
-    // the same gesture that chose it in the first place.
+    // recounted — announcing it as well is telling someone what they just did.
     //
     // The FAILURE path below keeps its telling: a removal that did not happen
     // is the one case the tray cannot show by itself.
@@ -209,17 +201,40 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
       await controller.removeObject(label);
     } catch (_) {
       // The controller has already published the typed failure, which the
-      // sheet's inline action error draws. What is owed here is the row: it
+      // sheet's inline action error draws. What is owed here is the card: it
       // was faded in the same frame as the press, and it comes back.
       removals.restore(label);
       return;
     }
     // A reply that left the line standing is not a removal, however it was
-    // reported; the row comes back rather than staying faded for good. Where
-    // the line really did go, the mark is already spent and this is a no-op.
+    // reported; the card comes back rather than staying faded for good.
     removals.restore(label);
     callbacks.onSeatRemoved?.call(label);
   }
+}
+
+/// Who opens the view from a seat, or null where there is no view to open.
+///
+/// The same gate the confirm card's strip uses: the host has to allow it, the
+/// runtime has to advertise `seatView`, and — because a stand-in the runtime
+/// could draw for any seat is never offered — the seat has to carry an
+/// authored photograph.
+ValueChanged<SelectedSeat>? _seatViewOpener(
+  BuildContext context,
+  SeatLayerPickerController controller,
+) {
+  final options = SeatLayerPickerScope.optionsOf(context);
+  final capabilities =
+      controller.state.snapshot?.capabilities ?? const <String>{};
+  if (!options.enableSeatView || !capabilities.contains('seatView')) {
+    return null;
+  }
+  if (!controller.supportsSeatViewThumbnails) return null;
+  return (seat) {
+    if (seat.seatViewThumb == null) return;
+    ignorePickerAction(controller.openSeatView(seat));
+    SeatLayerPickerScope.callbacksOf(context).onSeatViewOpened?.call(seat);
+  };
 }
 
 /// Resolve the cart into display lines.
@@ -228,9 +243,13 @@ List<SeatLayerTicketLine> _resolveLines(
   SeatLayerPickerState state,
 ) {
   final theme = seatLayerPickerThemeOf(context);
+  // A seat the card is still asking about is not in the cart yet: it is in
+  // the runtime's selection, and listing it here before the buyer has said
+  // yes shows them a ticket they have not taken.
+  final confirmed =
+      SeatLayerPickerScope.controllerOf(context).confirmedCartLines;
   return <SeatLayerTicketLine>[
-    for (final item in state.cartLines)
-      _resolveLine(context, state, item, theme),
+    for (final item in confirmed) _resolveLine(context, state, item, theme),
   ];
 }
 
@@ -254,9 +273,7 @@ SeatLayerTicketLine _resolveLine(
   // the seat is.
   //
   // Where the chart has no sections the ticket type names the line instead:
-  // `Row D · Seat 1` on its own names nothing a buyer can find in a venue. The
-  // type is never *added* to a section for the same reason it is not drawn
-  // beside one — `Gallery · Gallery · A · 1` is a stutter, not an address.
+  // `Row D · Seat 1` on its own names nothing a buyer can find in a venue.
   final section = _first(item.sectionLabel, seat?.sectionLabel);
   final row = _first(item.rowLabel, seat?.rowLabel);
   final number = _first(item.seatNumber, seat?.seatNumber);
@@ -274,343 +291,185 @@ SeatLayerTicketLine _resolveLine(
     categoryColor: pickerColor(category?.color) ?? theme.accent,
     amountText: pickerMoney(context, item.total, item.currency),
     amount: item.total,
-    groupable: ticketIsGroupable(item, seat),
     held: state.holdOwner == SeatLayerHoldOwner.host,
   );
 }
 
-class _RunBlock extends StatelessWidget {
-  const _RunBlock({
-    required this.run,
-    required this.first,
-    required this.open,
-    required this.removable,
-    required this.removals,
-    required this.arrivalIndex,
-    required this.onToggle,
-    required this.onRemove,
-  });
-
-  final SeatLayerTicketRun run;
-  final bool first;
-  final bool open;
-  final bool removable;
-
-  /// Which lines the buyer has already asked to remove.
-  final SeatLayerCartRemovals removals;
-  final int arrivalIndex;
-  final VoidCallback onToggle;
-  final ValueChanged<SeatLayerTicketLine> onRemove;
-
-  @override
-  Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _ArrivalPop(
-            index: arrivalIndex,
-            child: _DenseLine(
-              line: run.members.first,
-              run: run.isGroup ? run : null,
-              first: first,
-              member: false,
-              open: open,
-              removable: removable,
-              // A run's × takes the seat at its head, so the head is the row
-              // that answers the press — and, when the rest of the run stays,
-              // the row whose range then changes under it.
-              removing: removals.isRemoving(run.members.first.item.label),
-              onToggle: run.isGroup ? onToggle : null,
-              onRemove: () => onRemove(run.members.first),
-            ),
-          ),
-          if (run.isGroup && open)
-            for (final member in run.membersInSeatOrder)
-              _DenseLine(
-                line: member,
-                run: null,
-                first: false,
-                member: true,
-                open: false,
-                removable: removable,
-                removing: removals.isRemoving(member.item.label),
-                onToggle: null,
-                onRemove: () => onRemove(member),
-              ),
-        ],
-      );
-}
-
-/// The list's tail, and the one control that unfolds it.
-class _MoreRow extends StatelessWidget {
-  const _MoreRow({
-    required this.collapsed,
-    required this.label,
-    required this.onPressed,
-  });
-
-  final bool collapsed;
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = seatLayerPickerThemeOf(context);
-    return InkWell(
-      onTap: onPressed,
-      child: Container(
-        height: seatLayerScaledExtent(
-          context,
-          theme.layout.denseMoreRowHeight,
-          max: SeatLayerTypeScaleTokens.sheet,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: theme.divider)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                color: theme.mutedText,
-                fontSize: 12.5,
-                fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
-                fontFamily: theme.fontFamily,
-              ),
-            ),
-            AnimatedRotation(
-              duration: SeatLayerPickerMotion.of(
-                context,
-                SeatLayerPickerMotion.pop,
-              ),
-              turns: collapsed ? 0 : .5,
-              child: Icon(
-                Icons.keyboard_arrow_down_rounded,
-                size: 13,
-                color: theme.mutedText,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DenseLine extends StatelessWidget {
-  const _DenseLine({
+/// One ticket, as the desktop panel and the phone sheet both draw it.
+///
+/// A row, not a two-column grid: everything the card needs sits on one
+/// baseline, so its trailing edge lands on the panel's own gutter with every
+/// other card's. The organizer's notes are a footnote UNDER that line — the
+/// card is already a bordered ticket, and a tinted band inside one reads as a
+/// card inside a card.
+class SeatLayerCartCard extends StatelessWidget {
+  /// Creates one cart card.
+  const SeatLayerCartCard({
+    super.key,
     required this.line,
-    required this.run,
-    required this.first,
-    required this.member,
-    required this.open,
     required this.removable,
     required this.removing,
-    required this.onToggle,
     required this.onRemove,
+    this.onLocate,
   });
 
+  /// The ticket this card stands for.
   final SeatLayerTicketLine line;
-  final SeatLayerTicketRun? run;
-  final bool first;
-  final bool member;
-  final bool open;
+
+  /// Whether this session may remove tickets at all.
   final bool removable;
 
   /// Whether the buyer has asked for this line and the server has not answered
-  /// yet. The row is drawn at `opacity.removing` and its × is inert.
+  /// yet. The card is drawn at `opacity.removing` and its × is inert.
   final bool removing;
-  final VoidCallback? onToggle;
+
+  /// Takes the ticket out of the cart.
   final VoidCallback onRemove;
+
+  /// Opens the view from this seat, or null where there is none to open.
+  final VoidCallback? onLocate;
 
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
+    final layout = theme.layout;
     final strings = SeatLayerPickerScope.stringsOf(context);
-    final group = run;
-    final seats = group == null ? line.seatLabel : group.seatsLabel;
-    final total = group == null ? line.amount : group.total;
-    final size = group?.members.length ?? 1;
     final identity = <String>[
       line.section,
       if (line.rowLabel.isNotEmpty) line.rowLabel,
-      if (seats.isNotEmpty && line.section.isNotEmpty) seats,
+      if (line.seatLabel.isNotEmpty && line.section.isNotEmpty) line.seatLabel,
     ];
-
-    // The type is read out only when it is not already the name of the line;
+    // The type is read out only when it is not already the name of the card;
     // on a chart with no sections the two are the same string, and hearing
-    // "Standard, Standard · Row D · 1" is the spoken form of the stutter the
-    // drawn line avoids.
-    final spokenType =
-        line.categoryLabel.toLowerCase() == line.section.toLowerCase()
-            ? ''
-            : '${line.categoryLabel}, ';
+    // "Standard, Standard · Row D · 1" is the spoken form of a stutter.
+    final typeIsName =
+        line.categoryLabel.toLowerCase() == line.section.toLowerCase();
+    final notes = seatLayerCartNoteLines(line.seat, strings);
 
     return Semantics(
       container: true,
-      label: '$spokenType${strings.seatIdentity(identity)}, '
-          '${pickerMoney(context, total, line.item.currency)}',
+      label: <String>[
+        if (!typeIsName) line.categoryLabel,
+        strings.seatIdentity(identity),
+        line.amountText,
+        for (final note in notes) note.spoken,
+      ].join(', '),
       child: _SwipeToRemove(
-        // A run's head stands for every seat under it, and a swipe that took
-        // six tickets away on one flick is a gesture nobody would trust. Open
-        // the run and swipe a seat, or press the ×, which still asks the same
-        // question of the whole run as it always did.
-        enabled: removable && !line.held && run == null && !removing,
+        enabled: removable && !line.held && !removing,
         onRemove: onRemove,
         child: AnimatedOpacity(
           // The one beat that says the press landed. It is not a departure —
-          // the row is still there, and a run's head is about to come back
-          // with a shorter range — so it fades to a state rather than out.
+          // the card is still there — so it fades to a state rather than out.
           opacity: removing ? SeatLayerOpacityTokens.removing : 1,
           duration: SeatLayerPickerMotion.of(
             context,
             SeatLayerPickerMotion.crossfade,
           ),
           child: Container(
-            height: seatLayerScaledExtent(
-              context,
-              theme.layout.denseLineHeight,
-              max: SeatLayerTypeScaleTokens.sheet,
-            ),
-            decoration: BoxDecoration(
-              // A held row is inventory the server has already set aside. A wash
-              // of the accent and a bar down its leading edge say so without
-              // spending a column on a word.
-              color: line.held
-                  ? pickerAlpha(theme.accent, .07)
-                  : member
-                      ? pickerAlpha(theme.divider, .16)
-                      : null,
-              border: Border(
-                top: first
-                    ? BorderSide.none
-                    : BorderSide(color: pickerAlpha(theme.divider, .7)),
+            constraints: BoxConstraints(
+              minHeight: seatLayerScaledExtent(
+                context,
+                layout.cartCardMinHeight,
+                max: SeatLayerTypeScaleTokens.sheet,
               ),
             ),
-            child: Stack(
-              children: [
-                if (line.held)
-                  PositionedDirectional(
-                    start: 0,
-                    top: 0,
-                    bottom: 0,
-                    child: ColoredBox(
-                      color: pickerAlpha(theme.accent, .72),
-                      child: const SizedBox(width: 3),
-                    ),
-                  ),
-                InkWell(
-                  onTap: onToggle,
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.only(
-                      start: member ? 26 : 9,
-                      end: 4,
-                    ),
-                    child: Row(
-                      children: [
-                        _LineMark(line: line, run: group, open: open),
-                        const SizedBox(width: 7),
-                        Expanded(
-                          // `103 · A · 9–10` becomes `103 · A · 10` when one
-                          // seat of a run goes. The address is the same ticket
-                          // either way, so the cell swaps its words in place
-                          // rather than the list redrawing around it.
-                          child: SeatLayerCrossFade(
-                            token: identity.join(' · '),
-                            child: Text.rich(
-                              TextSpan(
-                                children: <InlineSpan>[
-                                  TextSpan(
-                                    text: line.section,
-                                    style: TextStyle(
-                                        fontWeight: seatLayerBoldWeight(
-                                            context, FontWeight.w700)),
-                                  ),
-                                  for (final part
-                                      in identity.skip(1)) ...<InlineSpan>[
-                                    TextSpan(
-                                      text: ' · ',
-                                      style: TextStyle(color: theme.mutedText),
-                                    ),
-                                    TextSpan(text: part),
-                                  ],
-                                ],
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: theme.text,
-                                fontSize: 13,
-                                fontWeight: seatLayerBoldWeight(
-                                    context, FontWeight.w600),
-                                fontFamily: theme.fontFamily,
-                                fontFeatures: const <FontFeature>[
-                                  FontFeature.tabularFigures(),
-                                ],
-                              ),
-                            ),
+            decoration: BoxDecoration(
+              // A held card is inventory the server has already set aside. A
+              // wash of the accent and a warmer border say so without spending
+              // a column on a word.
+              color: line.held
+                  ? Color.alphaBlend(
+                      pickerAlpha(theme.accent, .07), theme.surface)
+                  : theme.surface,
+              border: Border.all(
+                color: line.held
+                    ? Color.alphaBlend(
+                        pickerAlpha(theme.accent, .45), theme.divider)
+                    : theme.divider,
+              ),
+              borderRadius:
+                  BorderRadius.circular(SeatLayerSizeTokens.cartCardRadius),
+            ),
+            padding: const EdgeInsetsDirectional.fromSTEB(12, 4, 4, 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                ExcludeSemantics(child: _CardMark(line: line)),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ExcludeSemantics(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        // The name ellipsizes — a long venue section is the one
+                        // fact here that can be longer than the panel.
+                        Text(
+                          line.section,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          // design/tokens.json › type.cartCardName.
+                          style: TextStyle(
+                            color: theme.text,
+                            fontSize: 15,
+                            height: 1.25,
+                            fontWeight:
+                                seatLayerBoldWeight(context, FontWeight.w700),
+                            fontFamily: theme.fontFamily,
                           ),
                         ),
-                        // `2 × €180` is a fact about a run, and a run of one has
-                        // none: the cell fades away rather than the row jumping
-                        // when the second seat leaves. Its own leading gap goes
-                        // with it, so an empty cell costs no width.
-                        SeatLayerCrossFade(
-                          token: size > 1 ? '$size × ${line.amountText}' : '',
-                          child: size > 1
-                              ? Padding(
-                                  padding: const EdgeInsetsDirectional.only(
-                                      start: 7),
-                                  child: Text(
-                                    '$size × ${line.amountText}',
-                                    style: TextStyle(
-                                      color: theme.mutedText,
-                                      fontSize: 11,
-                                      fontWeight: seatLayerBoldWeight(
-                                          context, FontWeight.w600),
-                                      fontFamily: theme.fontFamily,
-                                      fontFeatures: const <FontFeature>[
-                                        FontFeature.tabularFigures(),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              : const SizedBox.shrink(),
+                        _PositionLine(
+                          parts: <String>[
+                            ...identity.skip(1),
+                            if (!typeIsName) line.categoryLabel,
+                          ],
                         ),
-                        const SizedBox(width: 7),
-                        SeatLayerCrossFade(
-                          token:
-                              pickerMoney(context, total, line.item.currency),
-                          child: Text(
-                            pickerMoney(context, total, line.item.currency),
-                            softWrap: false,
-                            style: TextStyle(
-                              color: theme.text,
-                              fontSize: 13,
-                              fontWeight:
-                                  seatLayerBoldWeight(context, FontWeight.w700),
-                              fontFamily: theme.fontFamily,
-                              fontFeatures: const <FontFeature>[
-                                FontFeature.tabularFigures(),
-                              ],
-                            ),
-                          ),
-                        ),
-                        if (removable)
-                          _RemoveButton(
-                            line: line,
-                            // Inert, not gone: a target that disappears under
-                            // the thumb takes the row's shape with it, and the
-                            // press it was answering has already been accepted.
-                            onPressed: removing ? null : onRemove,
-                          )
-                        else
-                          const SizedBox(width: 7),
+                        if (notes.isNotEmpty) _CardNotes(notes: notes),
                       ],
                     ),
                   ),
                 ),
+                const SizedBox(width: 8),
+                ExcludeSemantics(
+                  child: SeatLayerCrossFade(
+                    token: line.amountText,
+                    child: Text(
+                      line.amountText,
+                      softWrap: false,
+                      // design/tokens.json › type.cartCardAmount.
+                      style: TextStyle(
+                        color: theme.text,
+                        fontSize: 15,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w800),
+                        fontFamily: theme.fontFamily,
+                        fontFeatures: const <FontFeature>[
+                          FontFeature.tabularFigures(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // A HORIZONTAL PAIR, NOT A BORDERED COLUMN, and both boxes are
+                // the full touch floor: they sit two points apart, so growing
+                // invisible boxes any further would let the ✕ claim part of the
+                // eye's own ink.
+                if (onLocate != null)
+                  _CardAction(
+                    icon: Icons.visibility_outlined,
+                    label: strings.viewFromHere,
+                    onPressed: onLocate,
+                  ),
+                if (removable)
+                  _CardAction(
+                    icon: Icons.close_rounded,
+                    label: '${strings.removeSeat} ${line.section} '
+                        '${line.seatLabel}',
+                    // Inert, not gone: a target that disappears under the thumb
+                    // takes the card's shape with it, and the press it was
+                    // answering has already been accepted.
+                    onPressed: removing ? null : onRemove,
+                  ),
               ],
             ),
           ),
@@ -620,17 +479,230 @@ class _DenseLine extends StatelessWidget {
   }
 }
 
+/// The grey line under the name: where the seat is, and what kind it is.
+class _PositionLine extends StatelessWidget {
+  const _PositionLine({required this.parts});
+
+  final List<String> parts;
+
+  @override
+  Widget build(BuildContext context) {
+    if (parts.isEmpty) return const SizedBox.shrink();
+    final theme = seatLayerPickerThemeOf(context);
+    return SeatLayerCrossFade(
+      token: parts.join(' · '),
+      child: Text(
+        parts.join(' · '),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        // design/tokens.json › type.cartCardPosition.
+        style: TextStyle(
+          color: theme.mutedText,
+          fontSize: 13,
+          height: 1.3,
+          fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
+          fontFamily: theme.fontFamily,
+          fontFeatures: const <FontFeature>[FontFeature.tabularFigures()],
+        ),
+      ),
+    );
+  }
+}
+
+/// What stands at the head of a card: the category colour, or the lock of a
+/// seat the server has already set aside.
+///
+/// A lock is not a colour: a held seat gets a mark that survives being read in
+/// greyscale, because it is the one state with consequences.
+class _CardMark extends StatelessWidget {
+  const _CardMark({required this.line});
+
+  final SeatLayerTicketLine line;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    if (line.held) {
+      return DecoratedBox(
+        decoration: BoxDecoration(
+          color: Color.alphaBlend(
+            pickerAlpha(theme.accent, .18),
+            theme.surface,
+          ),
+          shape: BoxShape.circle,
+        ),
+        child: SizedBox.square(
+          dimension: 17,
+          child: Icon(Icons.lock_rounded, size: 10, color: theme.accent),
+        ),
+      );
+    }
+    // The same hairline the confirm card's band dot carries, for the same
+    // reason: a pale category on the panel's own surface is otherwise a disc
+    // you cannot find.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: line.categoryColor,
+        shape: BoxShape.circle,
+        border: Border.all(color: pickerAlpha(theme.text, .22)),
+      ),
+      child: const SizedBox.square(dimension: 9),
+    );
+  }
+}
+
+/// One of the card's two actions: the glyph stays small, the target does not.
+class _CardAction extends StatelessWidget {
+  const _CardAction({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    // A TIGHT BOX, not a minimum. Material pads an icon button out to its own
+    // 48-point tap target whatever the style asks for, and four points per
+    // card is what puts the fourth card past the collapsed cart's cap: the
+    // box is the touch floor exactly, and the glyph inside it does not move.
+    return SizedBox.square(
+      dimension: SeatLayerSizeTokens.minimumHitTarget,
+      child: IconButton(
+        tooltip: label,
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(
+          width: SeatLayerSizeTokens.minimumHitTarget,
+          height: SeatLayerSizeTokens.minimumHitTarget,
+        ),
+        color: theme.text,
+        style: IconButton.styleFrom(
+          minimumSize: const Size.square(SeatLayerSizeTokens.minimumHitTarget),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+        icon: Icon(icon, size: 18),
+      ),
+    );
+  }
+}
+
+/// One line of what the organizer has said about a seat.
+@immutable
+class SeatLayerCartNoteLine {
+  /// Creates one resolved note line.
+  const SeatLayerCartNoteLine({required this.title, this.note});
+
+  /// The attribute's buyer-facing name.
+  final String title;
+
+  /// The organizer's own sentence, where it belongs to this line.
+  final String? note;
+
+  /// The whole line as it is read out.
+  String get spoken => note == null ? title : '$title: $note';
+}
+
+/// Every note a cart card owes, in reading order.
+///
+/// The cart says all of this ONCE, in WORDS: the same rows the seat card
+/// draws as bands ([seatLayerSeatNotesFor]), read here as title and sentence
+/// and nothing else. One row model, two readings — the card used to carry
+/// icon markers as well, and since both drew the same set the line read as
+/// the same fact printed twice.
+List<SeatLayerCartNoteLine> seatLayerCartNoteLines(
+  SelectedSeat? seat,
+  SeatLayerPickerStrings strings,
+) {
+  if (seat == null) return const <SeatLayerCartNoteLine>[];
+  return List<SeatLayerCartNoteLine>.unmodifiable(
+    seatLayerSeatNotesFor(seat, strings).map(
+      (row) => SeatLayerCartNoteLine(title: row.title, note: row.note),
+    ),
+  );
+}
+
+/// The notes, as a footnote under the line they belong to.
+class _CardNotes extends StatelessWidget {
+  const _CardNotes({required this.notes});
+
+  final List<SeatLayerCartNoteLine> notes;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    return Padding(
+      padding: const EdgeInsets.only(top: SeatLayerSizeTokens.cartNotePadTop),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(color: pickerAlpha(theme.divider, .72)),
+          ),
+        ),
+        child: Padding(
+          padding:
+              const EdgeInsets.only(top: SeatLayerSizeTokens.cartNotePadTop),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              for (var index = 0; index < notes.length; index++) ...<Widget>[
+                if (index > 0)
+                  const SizedBox(height: SeatLayerSizeTokens.cartNoteGap),
+                Text.rich(
+                  TextSpan(
+                    children: <InlineSpan>[
+                      TextSpan(
+                        text: notes[index].title,
+                        // design/tokens.json › type.cartNoteTitle.
+                        style: TextStyle(
+                          color: theme.text,
+                          fontWeight:
+                              seatLayerBoldWeight(context, FontWeight.w800),
+                        ),
+                      ),
+                      if (notes[index].note case final String note)
+                        TextSpan(
+                          text: ' $note',
+                          style: TextStyle(color: theme.mutedText),
+                        ),
+                    ],
+                  ),
+                  // design/tokens.json › type.cartNoteText.
+                  style: TextStyle(
+                    color: theme.mutedText,
+                    fontSize: 10,
+                    height: 1.35,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
+                    fontFamily: theme.fontFamily,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A ticket the buyer can push out of the list.
 ///
-/// The native way out, beside the × rather than instead of it: the row follows
+/// The native way out, beside the × rather than instead of it: the card follows
 /// the finger toward the leading edge, uncovers a red plate as it goes, and
 /// leaves once it has travelled far enough — or once it has been thrown, which
 /// is the same instruction given faster. Everything the × does afterwards, a
-/// swipe does too, undo bar included.
+/// swipe does too.
 ///
-/// It is deliberately not a [Dismissible]: that widget owns the removal, animates
-/// the gap closed itself, and needs a key per row; here the cart is the source of
-/// truth and the row disappears because the snapshot no longer has it.
+/// It is deliberately not a [Dismissible]: that widget owns the removal,
+/// animates the gap closed itself, and needs a key per row; here the cart is
+/// the source of truth and the card disappears because the snapshot no longer
+/// has it.
 class _SwipeToRemove extends StatefulWidget {
   const _SwipeToRemove({
     required this.enabled,
@@ -638,8 +710,8 @@ class _SwipeToRemove extends StatefulWidget {
     required this.child,
   });
 
-  /// Whether this row may be swiped at all. A held row never is: those seats
-  /// belong to a hold the host owns, and the row says so with a lock.
+  /// Whether this card may be swiped at all. A held card never is: those seats
+  /// belong to a hold the host owns, and the card says so with a lock.
   final bool enabled;
 
   /// Called once the swipe has committed — the same callback the × uses.
@@ -653,7 +725,7 @@ class _SwipeToRemove extends StatefulWidget {
 
 class _SwipeToRemoveState extends State<_SwipeToRemove>
     with SingleTickerProviderStateMixin {
-  /// How far the row has travelled toward the remove edge, in points. Always
+  /// How far the card has travelled toward the remove edge, in points. Always
   /// positive; which way that is on screen is [Directionality]'s business.
   late final AnimationController _slide;
 
@@ -664,7 +736,7 @@ class _SwipeToRemoveState extends State<_SwipeToRemove>
   @override
   void initState() {
     super.initState();
-    // Eagerly, not lazily: a row that is never swiped is still disposed, and a
+    // Eagerly, not lazily: a card that is never swiped is still disposed, and a
     // ticker created during dispose looks up an ancestor that is already gone.
     _slide = AnimationController.unbounded(vsync: this)
       ..addListener(() => setState(() {}));
@@ -720,7 +792,7 @@ class _SwipeToRemoveState extends State<_SwipeToRemove>
       _finish();
       return;
     }
-    // Out of the plate first, then gone: a row that vanishes under the finger
+    // Out of the plate first, then gone: a card that vanishes under the finger
     // leaves the buyer unsure which ticket they removed.
     _slide
         .animateWith(
@@ -757,22 +829,27 @@ class _SwipeToRemoveState extends State<_SwipeToRemove>
               // list at rest is the same list it has always been.
               if (travelled > 0)
                 Positioned.fill(
-                  child: ColoredBox(
-                    // The one place in the picker that is never the accent: a
-                    // brand colour that happens to be red would make every
-                    // other swipe look like a warning, and a brand colour that
-                    // happens to be green would make this one look safe.
-                    color: theme.error,
-                    child: const Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.only(end: 14),
-                        child: Icon(
-                          Icons.delete_outline_rounded,
-                          size: 16,
-                          // The same ink the inline error bar puts on this
-                          // same red.
-                          color: Colors.white,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(
+                      SeatLayerSizeTokens.cartCardRadius,
+                    ),
+                    child: ColoredBox(
+                      // The one place in the picker that is never the accent: a
+                      // brand colour that happens to be red would make every
+                      // other swipe look like a warning, and a brand colour that
+                      // happens to be green would make this one look safe.
+                      color: theme.error,
+                      child: const Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.only(end: 14),
+                          child: Icon(
+                            Icons.delete_outline_rounded,
+                            size: 16,
+                            // The same ink the inline error bar puts on this
+                            // same red.
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -790,101 +867,7 @@ class _SwipeToRemoveState extends State<_SwipeToRemove>
   }
 }
 
-/// What stands at the head of a line: a run's fold control, a category
-/// colour, or the lock of a seat the server has already set aside.
-///
-/// A lock is not a colour: a held seat gets a mark that survives being read
-/// in greyscale, because it is the one state with consequences.
-class _LineMark extends StatelessWidget {
-  const _LineMark({required this.line, required this.run, required this.open});
-
-  final SeatLayerTicketLine line;
-  final SeatLayerTicketRun? run;
-  final bool open;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = seatLayerPickerThemeOf(context);
-    final group = run;
-    if (group != null) {
-      // The chevron is a marker, not the target: the whole line opens the
-      // run, and the line clears the touch floor in both directions on its
-      // own.
-      return SizedBox(
-        width: theme.layout.denseRunToggleWidth,
-        child: AnimatedRotation(
-          duration: SeatLayerPickerMotion.of(
-            context,
-            SeatLayerPickerMotion.pop,
-          ),
-          turns: open ? .25 : 0,
-          child: Icon(
-            Icons.chevron_right_rounded,
-            size: 13,
-            color: theme.mutedText,
-          ),
-        ),
-      );
-    }
-    if (line.held) {
-      return DecoratedBox(
-        decoration: BoxDecoration(
-          color: Color.alphaBlend(
-            pickerAlpha(theme.accent, .18),
-            theme.surface,
-          ),
-          shape: BoxShape.circle,
-        ),
-        child: SizedBox.square(
-          dimension: 14,
-          child: Icon(Icons.lock_rounded, size: 9, color: theme.accent),
-        ),
-      );
-    }
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: line.categoryColor,
-        shape: BoxShape.circle,
-      ),
-      child: const SizedBox.square(dimension: 9),
-    );
-  }
-}
-
-/// One ticket's way out.
-///
-/// The glyph stays small; the target around it does not.
-class _RemoveButton extends StatelessWidget {
-  const _RemoveButton({required this.line, required this.onPressed});
-
-  final SeatLayerTicketLine line;
-
-  /// Null while this line's own removal is still in flight — the press has
-  /// been accepted, and a second one would ask for a seat that is going.
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = seatLayerPickerThemeOf(context);
-    return IconButton(
-      tooltip: 'Remove ${line.section} ${line.seatLabel}',
-      onPressed: onPressed,
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints.tightFor(
-        width: SeatLayerSizeTokens.minimumHitTarget,
-        height: SeatLayerSizeTokens.minimumHitTarget,
-      ),
-      color: theme.mutedText,
-      style: IconButton.styleFrom(
-        minimumSize: Size.square(theme.layout.denseRemoveSize),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-      icon: const Icon(Icons.close_rounded, size: 12),
-    );
-  }
-}
-
-/// A newly arrived line settling in, one after the next.
+/// A newly arrived card settling in, one after the next.
 ///
 /// Best-available drops several seats into the cart at once; landing them
 /// together reads as a page redraw, landing them in sequence reads as seats
@@ -894,6 +877,7 @@ class _ArrivalPop extends StatelessWidget {
   const _ArrivalPop({required this.index, required this.child});
 
   final int index;
+
   final Widget child;
 
   @override

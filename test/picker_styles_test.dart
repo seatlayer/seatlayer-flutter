@@ -22,7 +22,7 @@ OutlinedBorder? _shapeOf(WidgetTester tester, Finder button) {
 }
 
 void main() {
-  testWidgets('the peek Continue is a rounded box the host can still reshape',
+  testWidgets('the sheet\'s button is a rounded box the host can still reshape',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -44,15 +44,15 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
-    // The web picker draws this one as a rounded rectangle at the same 11 pt
-    // radius, and the phone is 1:1 with it. It is a radius rather than a
-    // shape class, so a host style can still override it.
+    // The collapsed sheet's one button is the footer's own call to action, so
+    // it takes the picker's button radius. It is a radius rather than a shape
+    // class, so a host style can still override it.
     final button = find.byType(FilledButton);
     expect(button, findsOneWidget);
     expect(_shapeOf(tester, button), isA<RoundedRectangleBorder>());
     expect(
       (_shapeOf(tester, button)! as RoundedRectangleBorder).borderRadius,
-      BorderRadius.circular(SeatLayerRadiusTokens.peekButton),
+      BorderRadius.circular(SeatLayerRadiusTokens.button),
     );
     final painted = tester
         .widget<Material>(
@@ -61,8 +61,8 @@ void main() {
         .shape;
     expect(painted, isA<RoundedRectangleBorder>());
 
-    // And the pill is the picker's default, not a shape the picker insists
-    // on: a host that names its own shape still gets it.
+    // And it is the picker's default, not a shape the picker insists on: a
+    // host that names its own shape still gets it.
     await tester.pumpWidget(
       pickerHarness(
         map,
@@ -89,7 +89,7 @@ void main() {
     );
   });
 
-  testWidgets('a continue slot reaches the rendered peek button',
+  testWidgets('a continue slot reaches the sheet\'s rendered button',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);

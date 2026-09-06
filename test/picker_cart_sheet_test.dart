@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/seat_layer_error.dart';
 import 'package:seatlayer/src/bridge/bridge_protocol.dart';
 import 'package:seatlayer/src/picker/picker_best_seats.dart';
-import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_cart_list.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
@@ -12,7 +11,6 @@ import 'package:seatlayer/src/picker/picker_toast.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_states.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
-import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
 
 import 'fake_webview_platform.dart';
 import 'picker_test_fixture.dart';
@@ -90,7 +88,7 @@ void main() {
   _identityJoinTests();
   _clockTests();
 
-  testWidgets('the peek states the cart and the way on, and nothing else', (
+  testWidgets('the collapsed sheet IS the footer block', (
     tester,
   ) async {
     final map = FakePickerMap();
@@ -109,21 +107,20 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
-    // The count on the left, the money on the button — never the same number
-    // twice on one screen.
+    // The cart, the total line and the way on — the same block the open sheet
+    // has, and the same one the desktop panel has.
+    expect(find.byType(SeatLayerCartCard), findsOneWidget);
     expect(find.text('1 ticket'), findsOneWidget);
+    expect(find.text('€25'), findsWidgets);
+    expect(find.text('Hold seats & checkout'), findsOneWidget);
+    // No second summary of one cart, and no price with nothing to do about it.
     expect(find.text('1 ticket · €25'), findsNothing);
-    expect(find.text('Continue'), findsOneWidget);
-    expect(find.text('€25'), findsOneWidget);
-    // The tray form is the only way into best seats.
-    expect(find.text('Best seats'), findsNothing);
-    expect(
-      _sheetHeight(tester),
-      SeatLayerSizeTokens.peekHeight + SeatLayerSizeTokens.peekClockLift,
-    );
+    expect(find.textContaining('From '), findsNothing);
+    // The open sheet's own contents stay behind the handle.
+    expect(find.byType(SeatLayerBestSeatsForm), findsNothing);
   });
 
-  testWidgets('an empty peek offers the cheapest ticket, not a button', (
+  testWidgets('an empty cart says so, and never a price it cannot act on', (
     tester,
   ) async {
     final map = FakePickerMap();
@@ -142,34 +139,24 @@ void main() {
     map.emit(pickerSnapshot(withSelection: false));
     await tester.pumpAndSettle();
 
-    expect(find.text('From €25'), findsOneWidget);
+    // `From €25` stated a price and offered nothing to do about it, on the one
+    // line the buyer reads to find out what they are about to pay.
+    expect(find.text('No seats selected'), findsOneWidget);
+    expect(find.textContaining('From '), findsNothing);
     expect(find.textContaining('Continue'), findsNothing);
-    // A price with nothing to do about it is not an offer; the button is.
-    expect(find.text('Find seats'), findsOneWidget);
-
-    // The AMOUNT is the fact and the word around it is the caption, so the
-    // money is printed large in the text ink and `From` small and muted.
-    final line = tester.widget<Text>(find.text('From €25')).textSpan!;
-    final sizes = <String, double?>{};
-    final colours = <String, Color?>{};
-    line.visitChildren((span) {
-      if (span is TextSpan && span.text != null) {
-        sizes[span.text!] = span.style?.fontSize;
-        colours[span.text!] = span.style?.color;
-      }
-      return true;
-    });
-    expect(sizes['€25'], 19);
-    expect(sizes['From '], isNull, reason: 'the caption keeps the base style');
-    expect(line.style!.fontSize, 12);
+    // The door is the footer's own button, full width and live.
+    expect(find.text('Find best seats'), findsOneWidget);
     expect(
-      line.style!.color,
-      const SeatLayerPickerThemeData.light().mutedText,
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Find best seats'),
+          )
+          .onPressed,
+      isNotNull,
     );
-    expect(colours['€25'], const SeatLayerPickerThemeData.light().text);
   });
 
-  testWidgets('the empty peek offers a full-size way into the finder', (
+  testWidgets('the empty cart\'s button opens the finder', (
     tester,
   ) async {
     final map = FakePickerMap();
@@ -193,21 +180,23 @@ void main() {
     map.emit(pickerSnapshot(withSelection: false));
     await tester.pumpAndSettle();
 
-    final pill = find.ancestor(
-      of: find.text('Find seats'),
-      matching: find.byType(InkWell),
-    );
+    // Full width and the full touch floor: on a phone the footer IS the sheet.
+    final button = find.widgetWithText(FilledButton, 'Find best seats');
     expect(
-      tester.getSize(pill.first).height,
-      SeatLayerSizeTokens.peekButtonHeight,
+        tester.getSize(button).width, 390 - (SeatLayerSizeTokens.footPadX * 2));
+    expect(
+      tester.getSize(button).height,
+      greaterThanOrEqualTo(SeatLayerSizeTokens.checkoutButtonHeight),
     );
 
-    await tester.tap(find.text('Find seats'));
-    await tester.pump();
+    await tester.tap(button);
+    await tester.pumpAndSettle();
     expect(expanded, isTrue);
+    // And the form it opens on is now in the tree.
+    expect(find.byType(SeatLayerBestSeatsForm), findsOneWidget);
   });
 
-  testWidgets('the finder pill is withheld where the form would be refused', (
+  testWidgets('the finder door is withheld where the form would be refused', (
     tester,
   ) async {
     Future<void> expectNoPill(
@@ -231,7 +220,7 @@ void main() {
       );
       map.emit(snapshot);
       await tester.pumpAndSettle();
-      expect(find.text('Find seats'), findsNothing);
+      expect(find.text('Find best seats'), findsNothing);
     }
 
     final closed = pickerSnapshot(withSelection: false);
@@ -307,7 +296,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.getSize(find.widgetWithText(FilledButton, 'Continue')).height,
+      tester
+          .getSize(find.widgetWithText(FilledButton, 'Hold seats & checkout'))
+          .height,
       greaterThanOrEqualTo(44),
     );
   });
@@ -417,12 +408,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
-    expect(
-      _sheetHeight(tester),
-      SeatLayerSizeTokens.peekHeight +
-          SeatLayerSizeTokens.peekClockLift +
-          _safeBottom,
-    );
+    final withCredit = _sheetHeight(tester);
     final attributionRect = tester.getRect(find.text('Powered by SeatLayer'));
     final sheetRect = tester.getRect(find.byType(SeatLayerCartSheet));
     // Centred: a phone's rounded corner clips whatever hugs the trailing edge.
@@ -437,12 +423,13 @@ void main() {
     map.emit(hidden);
     await tester.pumpAndSettle();
     expect(find.text('Powered by SeatLayer'), findsNothing);
-    // The safe area stays reserved; only the words in it go.
+    // The credit is the only thing that goes: the sheet is shorter by exactly
+    // the line it stopped drawing, and the safe area is still reserved.
+    expect(_sheetHeight(tester), lessThan(withCredit));
     expect(
-      _sheetHeight(tester),
-      SeatLayerSizeTokens.peekHeight +
-          SeatLayerSizeTokens.peekClockLift +
-          _safeBottom,
+      tester.getRect(find.byType(SeatLayerCartSheet)).bottom -
+          tester.getRect(find.byType(FilledButton)).bottom,
+      greaterThanOrEqualTo(_safeBottom),
     );
   });
 
@@ -490,10 +477,11 @@ void main() {
     // Seventy-two per cent of the screen, and never more than 480 points.
     expect(tenRows, lessThanOrEqualTo(480));
 
-    // Ten seats in one row are one run, so the sheet does not grow for them.
+    // Ten seats in one row are ten cards now, and they reach the same ceiling.
     map.emit(snapshotWithTicketCount(10, revision: 20));
     await tester.pumpAndSettle();
-    expect(_sheetHeight(tester), oneTicket);
+    expect(_sheetHeight(tester), greaterThan(oneTicket));
+    expect(_sheetHeight(tester), lessThanOrEqualTo(480));
   });
 
   testWidgets('an empty tray stays short and hides its hint from the eye', (
@@ -543,61 +531,19 @@ void main() {
 
     expect(find.text('Hold seats & checkout'), findsOneWidget);
     expect(find.text('Total'), findsNothing);
-    expect(tester.getSize(find.byType(SeatLayerBookButton)).width, 390);
+    // The foot's own gutters, and nothing narrower: one block on both widths.
+    expect(
+      tester.getSize(find.byType(SeatLayerBookButton)).width,
+      390 - (SeatLayerSizeTokens.footPadX * 2),
+    );
     expect(find.text('Powered by SeatLayer'), findsOneWidget);
   });
 
-  testWidgets('the collapsed pill says why it cannot be pressed', (
-    tester,
-  ) async {
-    // The card standing over the map is the reason, and the whole sheet is
-    // dimmed and inert behind it, so the pill is left as the buyer last read
-    // it — `Continue · €25`, down — exactly as the web picker leaves it. The
-    // footer button, which is the surface that owes a reason, states one.
-    final map = FakePickerMap(bundle: nativeChromeBundle());
-    addTearDown(map.dispose);
-    final picker = SeatLayerPickerController(mapController: map);
-    addTearDown(picker.dispose);
-    useFakeWebViewPlatform();
-    usePhoneSurface(tester);
-
-    await tester.pumpWidget(
-      pickerHarness(
-        map,
-        const SeatLayerPickerAdaptiveLayout(onCheckout: _noopCheckout),
-        controller: picker,
-      ),
-    );
-    map.emit(_twoSeatSnapshot());
-    // A confirm card is on screen throughout, and its invitation breathes
-    // until it is answered, so these waits are bounded rather than settles.
-    await pumpToRest(tester);
-
-    // One seat answered for, one still being asked about: the cart has
-    // something in it, so the pill is drawn — and it cannot be pressed.
-    await tester.tap(find.text('Add seat'));
-    await pumpToRest(tester);
-    expect(picker.seatAwaitingConfirmation?.label, 'A-1');
-    expect(find.text('1 ticket'), findsOneWidget);
-
-    // The peek keeps its own line, money and all.
-    final pill = find
-        .ancestor(
-            of: find.text('Continue'), matching: find.byType(FilledButton))
-        .first;
-    expect(pill, findsOneWidget);
-    expect(
-      find.descendant(of: pill, matching: find.text('€25')),
-      findsOneWidget,
-    );
-    expect(tester.widget<FilledButton>(pill).onPressed, isNull);
-    // And it does not repeat the reason the footer is stating.
-    expect(find.text('Confirm or cancel this seat'), findsNothing);
-  });
-
-  testWidgets('the footer states the card the peek does not', (tester) async {
-    // The same situation, read from the open sheet: here the button IS the
-    // thing the buyer would press, so it says why it will not answer.
+  testWidgets('the footer holds its button while a seat card is open',
+      (tester) async {
+    // ONE button on the sheet, so it is the surface that owes the reason: a
+    // grey button still reading "Hold seats & checkout" tells the buyer only
+    // that pressing it achieved nothing.
     final map = FakePickerMap(bundle: nativeChromeBundle());
     addTearDown(map.dispose);
     final picker = SeatLayerPickerController(mapController: map);
@@ -631,15 +577,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(picker.seatAwaitingConfirmation, isNotNull);
-    expect(find.text('Confirm or cancel this seat'), findsOneWidget);
-    expect(
-      tester
-          .widget<FilledButton>(
-            find.widgetWithText(FilledButton, 'Confirm or cancel this seat'),
-          )
-          .onPressed,
-      isNull,
-    );
+    // The card is the question; the footer keeps the label it had and simply
+    // cannot be pressed until the card is answered. A sentence-button read as
+    // a second control the buyer was being asked to press.
+    expect(find.text('Confirm or cancel this seat'), findsNothing);
+    final button = tester.widget<FilledButton>(find.byType(FilledButton));
+    expect(button.onPressed, isNull);
   });
 
   testWidgets('a closed event states itself in the open tray', (tester) async {
@@ -666,7 +609,7 @@ void main() {
     );
   });
 
-  testWidgets('the collapsed pill says when the event has stopped selling', (
+  testWidgets('the collapsed footer says when the event has stopped selling', (
     tester,
   ) async {
     final map = FakePickerMap();
@@ -686,7 +629,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Sales closed'), findsOneWidget);
-    expect(find.text('€25'), findsNothing);
+    // The cart is still drawn — a buyer whose seats are in it has to see them
+    // — but nothing on the foot offers a way on.
     expect(
       tester
           .widget<FilledButton>(
@@ -697,7 +641,9 @@ void main() {
     );
   });
 
-  testWidgets('six seats in one row collapse to one line', (tester) async {
+  testWidgets('six seats are six cards, and the sixth is scrolled to', (
+    tester,
+  ) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -711,8 +657,10 @@ void main() {
     map.emit(snapshotWithTicketCount(6));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('1–6'), findsOneWidget);
-    expect(find.text('6 × €25'), findsOneWidget);
+    // One card per ticket — no folding, no `6 × €25` multiplier — and the
+    // total is said once, on the foot's own line.
+    expect(find.byType(SeatLayerCartCard), findsNWidgets(6));
+    expect(find.text('6 × €25'), findsNothing);
     expect(find.text('€150'), findsOneWidget);
   });
 
@@ -771,7 +719,8 @@ void main() {
     expect(find.byType(SeatLayerBestSeatsForm), findsNothing);
   });
 
-  testWidgets('a long list collapses behind one more control', (tester) async {
+  testWidgets('the collapsed sheet keeps its cards behind the handle',
+      (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
@@ -781,26 +730,84 @@ void main() {
         map,
         Align(
           alignment: Alignment.bottomCenter,
-          child: SeatLayerCartSheet(
-            expanded: true,
-            onExpandedChanged: (_) {},
-            onCheckout: _noopCheckout,
-            // One run per line, so the collapse rule is what is under test.
-            cartList: const SeatLayerCartList(),
-          ),
+          child: _sheet(expanded: false),
         ),
       ),
     );
     map.emit(_tenDistinctRows());
     await tester.pumpAndSettle();
 
-    expect(find.text('+6 more'), findsOneWidget);
-    await tester.tap(find.text('+6 more'));
-    await tester.pumpAndSettle();
-    expect(find.text('Show less'), findsOneWidget);
+    // Collapsed is the footer block alone — total and button. A list that
+    // unrolled itself every time a seat was added read as a panel the buyer
+    // had not opened.
+    final region = tester.getRect(
+      find.ancestor(
+        of: find.byType(SeatLayerCartList),
+        matching: find.byType(SingleChildScrollView),
+      ),
+    );
+    expect(region.height, 0);
+    expect(find.text('10 tickets'), findsOneWidget);
   });
 
-  testWidgets('the head is fifty-eight points shut and thirty-six open', (
+  testWidgets('the open cart shows three cards and a sliver of a fourth',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: _sheet(expanded: true),
+        ),
+      ),
+    );
+    map.emit(_tenDistinctRows());
+    await tester.pumpAndSettle();
+
+    // Ten tickets used to be a sheet that grew until it owned the phone. The
+    // cards are all in the tree; the box is what caps them.
+    expect(find.byType(SeatLayerCartCard), findsNWidgets(10));
+    final region = tester.getRect(
+      find.ancestor(
+        of: find.byType(SeatLayerCartList),
+        matching: find.byType(SingleChildScrollView),
+      ),
+    );
+    // The box is the list's cap plus the tray's own foot under it: never a
+    // whole extra card, so the fourth card is always cut.
+    expect(
+      region.height,
+      greaterThanOrEqualTo(SeatLayerSizeTokens.cartPeekMaxHeight),
+    );
+    expect(
+      region.height,
+      lessThan(
+        SeatLayerSizeTokens.cartPeekMaxHeight +
+            SeatLayerSizeTokens.cartCardMinHeight,
+      ),
+    );
+
+    // Three whole cards inside it, and the fourth cut by the box's own edge —
+    // a sliver, so the list reads as scrollable rather than finished.
+    final cards = tester
+        .widgetList<SeatLayerCartCard>(find.byType(SeatLayerCartCard))
+        .toList();
+    Rect rect(int index) => tester.getRect(find.byWidget(cards[index]));
+    expect(rect(2).bottom, lessThanOrEqualTo(region.bottom));
+    expect(rect(3).top, lessThan(region.bottom));
+    expect(rect(3).bottom, greaterThan(region.bottom));
+
+    // And it really scrolls: the box used to clip its rows with nowhere to go.
+    await tester.dragFrom(region.center, const Offset(0, -120));
+    await tester.pumpAndSettle();
+    expect(rect(0).top, lessThan(region.top));
+  });
+
+  testWidgets('the handle is one pill on the sheet\'s own edge', (
     tester,
   ) async {
     final map = FakePickerMap();
@@ -815,21 +822,23 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
-    // The grabber overlaps into the head rather than taking a row of its own,
-    // which is what keeps the collapsed bar to one row of chrome.
-    expect(_grabber(tester), isTrue);
-    expect(
-      _sheetHeight(tester),
-      SeatLayerSizeTokens.peekHeight + SeatLayerSizeTokens.peekClockLift,
-    );
+    // A 40 x 22 pill, half of it above the panel's top edge — a drawer's
+    // handle, not a disc floating in a band of chrome.
+    final handle = tester.getRect(_handle);
+    expect(handle.width, SeatLayerSizeTokens.sheetHandleWidth);
+    expect(handle.height, SeatLayerSizeTokens.sheetHandleHeight);
+    final sheet = tester.getRect(find.byType(SeatLayerCartSheet));
+    // The pill straddles the edge: its top half hangs over the map, above the
+    // sheet's own box, so there is no strip of page ground under it.
+    expect(handle.top, sheet.top - SeatLayerSizeTokens.sheetHandleOverhang);
+    // The chevron is INSIDE it, in both states — one thing, not two.
+    expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsOneWidget);
 
     await tester.pumpWidget(pickerHarness(map, subject(true)));
     await tester.pumpAndSettle();
-    // Open, the head gives its height back to the tickets underneath.
+    expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsOneWidget);
     expect(
-      tester.getSize(find.byIcon(Icons.keyboard_arrow_up_rounded)).height,
-      lessThanOrEqualTo(50),
-    );
+        tester.getRect(_handle).height, SeatLayerSizeTokens.sheetHandleHeight);
   });
 
   testWidgets('the pill never carries the clock: the header does', (
@@ -860,7 +869,13 @@ void main() {
     for (final brightness in Brightness.values) {
       for (final entry in <(String, Map<String, Object?>, bool)>[
         ('empty', bestAvailableSnapshot(), true),
+        // The collapsed sheet is a designed state of its own now, so it is
+        // recorded at both ends of the cart: nothing picked, and enough
+        // tickets to reach the cap.
+        ('empty_peek', bestAvailableSnapshot(), false),
         ('one', pickerSnapshot(), true),
+        ('three', snapshotWithTicketCount(3), true),
+        ('three_peek', snapshotWithTicketCount(3), false),
         ('six', snapshotWithTicketCount(6), true),
         ('many', _tenDistinctRows(), true),
         ('peek', pickerSnapshot(), false),
@@ -985,49 +1000,17 @@ void _identityJoinTests() {
   });
 }
 
-/// Whether the head is drawing the 35 x 4 grabber.
-///
-/// It is a private widget, so the test reaches it the way the buyer's eye
-/// does: by its measured size.
-bool _grabber(WidgetTester tester) => tester
-    .widgetList<SizedBox>(find.byType(SizedBox))
-    .any((box) => box.width == 35 && box.height == 4);
+/// The handle pill, reached the way the buyer's eye reaches it: the box the
+/// chevron sits inside.
+final Finder _handle = find
+    .ancestor(
+      of: find.byIcon(Icons.keyboard_arrow_up_rounded),
+      matching: find.byType(Container),
+    )
+    .first;
 
 void _clockTests() {
-  testWidgets('a pill carrying the clock gets room under the grabber',
-      (tester) async {
-    final map = FakePickerMap();
-    addTearDown(map.dispose);
-    usePhoneSurface(tester);
-
-    await tester.pumpWidget(
-      pickerHarness(
-        map,
-        Align(
-            alignment: Alignment.bottomCenter, child: _sheet(expanded: false)),
-      ),
-    );
-    map.emit(pickerSnapshot(holdOwner: 'picker'));
-    await pumpToRest(tester);
-
-    // The head's own height, plus the lift that keeps the way on off the
-    // way up.
-    expect(
-      _sheetHeight(tester),
-      SeatLayerSizeTokens.peekHeight + SeatLayerSizeTokens.peekClockLift,
-    );
-    final pill = tester.getRect(find.widgetWithText(FilledButton, 'Continue'));
-    final sheet = tester.getRect(find.byType(SeatLayerCartSheet));
-    expect(pill.top - sheet.top, greaterThanOrEqualTo(8));
-    // AND ITS WHOLE HEIGHT IS INSIDE THE BAR. The web shipped a bar whose
-    // clip was shorter than its head, which cut the bottom off the very
-    // button the bar exists for. Here the head IS the collapsed height, so
-    // there is one number and nothing to disagree with — this pins it.
-    expect(pill.height, SeatLayerSizeTokens.peekButtonHeight);
-    expect(pill.bottom, lessThanOrEqualTo(sheet.bottom + .01));
-  });
-
-  testWidgets('the collapsed bar is exactly its head plus the safe area',
+  testWidgets('the collapsed sheet is its own content, and clips none of it',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -1049,25 +1032,24 @@ void _clockTests() {
         ),
       ),
     );
-    map.emit(pickerSnapshot());
+    map.emit(pickerSnapshot(holdOwner: 'picker'));
     await pumpToRest(tester);
 
-    // One number: the head's own height plus the lift, plus whatever the
-    // platform reserves at the bottom. Nothing clips it to something shorter.
+    // The collapsed height is the height of the card the phone actually draws
+    // — the handle, the cart, the foot — plus whatever the platform reserves
+    // at the bottom. Not a fixed peek that a taller block then overflows: the
+    // web shipped a 50 px clip under a 58 px head and lost the lower edge of
+    // every button on it.
     final sheet = tester.getRect(find.byType(SeatLayerCartSheet));
-    expect(
-      sheet.height,
-      SeatLayerSizeTokens.peekHeight +
-          SeatLayerSizeTokens.peekClockLift +
-          _safeBottom,
-    );
-    // And the way on is wholly inside it, top and bottom.
-    final pill = tester.getRect(find.widgetWithText(FilledButton, 'Continue'));
-    expect(pill.top, greaterThanOrEqualTo(sheet.top));
-    expect(pill.bottom, lessThanOrEqualTo(sheet.bottom + .01));
+    final button = tester.getRect(find.byType(FilledButton));
+    expect(button.top, greaterThan(sheet.top));
+    expect(button.bottom, lessThanOrEqualTo(sheet.bottom - _safeBottom + .01));
+    // And no `m:ss` anywhere on it (owner call, 2026-09-05): the header's hold
+    // pill is the picker's one clock.
+    expect(find.textContaining(RegExp(r'\d:\d\d')), findsNothing);
   });
 
-  testWidgets('the collapsed bar drops the chevron and answers as the toggle',
+  testWidgets('the handle is the cart\'s one named toggle, in both states',
       (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
@@ -1094,10 +1076,9 @@ void _clockTests() {
     map.emit(pickerSnapshot());
     await pumpToRest(tester);
 
-    // The arrow only took width from the one button the bar exists for.
-    expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsNothing);
-    // The head still answers, and a screen reader still finds it: hiding the
-    // chevron would otherwise have taken the cart's only named toggle with it.
+    // ONE named toggle, and the chevron that shows the state lives inside it:
+    // two controls over one action read as two different things to press.
+    expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsOneWidget);
     expect(find.bySemanticsLabel(SeatLayerStringTokens.expandCart),
         findsOneWidget);
     // Through the semantics ACTION, not a pixel: the head's own centre is
@@ -1109,7 +1090,7 @@ void _clockTests() {
     await pumpToRest(tester);
     expect(expanded, isTrue);
 
-    // Open, the chevron is back and it is the one that carries the name.
+    // Open, the same handle carries the other name and the chevron turns over.
     expect(find.byIcon(Icons.keyboard_arrow_up_rounded), findsOneWidget);
     expect(find.bySemanticsLabel(SeatLayerStringTokens.collapseCart),
         findsOneWidget);

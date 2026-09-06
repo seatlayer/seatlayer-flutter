@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../open_enums.dart';
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_seat_notes.dart';
 import 'picker_ticket_tiers.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -79,6 +80,8 @@ class _SeatLayerPickerSeatConfirmationState
     if (seat == null || immersiveUp || seat.label == _dismissedLabel) {
       return const SizedBox.shrink();
     }
+    // No card over a seat the buyer cannot take, whichever runtime reported it.
+    if (!controller.mayAskAboutSeat(seat)) return const SizedBox.shrink();
     _tierId ??= seat.tierId ?? seat.tiers?.firstOrNull?.id;
     final theme = seatLayerPickerThemeOf(context);
     final category = controller.state.categories
@@ -105,11 +108,13 @@ class _SeatLayerPickerSeatConfirmationState
             : seat.buyerFacingLabel,
       ),
     ];
-    final limitedView = seat.commercial?.restrictedView == true ||
-        seat.commercial?.obstructedView == true;
-    final wheelchair = seat.wheelchairSpaceType != null ||
-        (seat.accessibility ?? const <String>[])
-            .any((item) => item.toLowerCase().contains('wheelchair'));
+    // The same rows the phone's card draws, in the same order — this card used
+    // to name a wheelchair provision and ONE limited-view line in which
+    // restricted beat obstructed, so a seat marked both said only half of it.
+    final notes = seatLayerSeatNotesFor(
+      seat,
+      SeatLayerPickerScope.stringsOf(context),
+    );
     final tiers = seat.tiers ?? const <CategoryTier>[];
     final selectedPrice = seatLayerPickerSelectedPrice(seat, _tierId);
     final selectedCurrency = seatLayerPickerSelectedCurrency(seat, _tierId);
@@ -243,6 +248,7 @@ class _SeatLayerPickerSeatConfirmationState
                       ),
                     ),
                   ),
+                  SeatLayerSeatNotes(rows: notes, compact: true),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 14),
                     child: Column(
@@ -277,23 +283,6 @@ class _SeatLayerPickerSeatConfirmationState
                           ),
                           const SizedBox(height: 10),
                         ],
-                        if (limitedView)
-                          _SeatNotice(
-                            icon: Icons.visibility_off_outlined,
-                            color: theme.warning,
-                            title: 'View information',
-                            message: seat.commercial?.note ??
-                                'This seat may have a limited or obstructed view.',
-                          ),
-                        if (wheelchair)
-                          _SeatNotice(
-                            icon: Icons.accessible_rounded,
-                            color: theme.accent,
-                            title: 'Accessible place',
-                            message: seat.wheelchairSpaceType == 'no-seat'
-                                ? 'Wheelchair space without a fixed chair.'
-                                : 'Wheelchair-accessible seating.',
-                          ),
                         if (inspectionActions.isNotEmpty) ...[
                           _SeatInspectionActions(children: inspectionActions),
                           const SizedBox(height: 14),
@@ -593,71 +582,7 @@ class _SeatIdentityField extends StatelessWidget {
   }
 }
 
-class _SeatNotice extends StatelessWidget {
-  const _SeatNotice({
-    required this.icon,
-    required this.color,
-    required this.title,
-    required this.message,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = seatLayerPickerThemeOf(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: pickerAlpha(color, .10),
-          borderRadius: BorderRadius.circular(theme.radius),
-          border: Border.all(color: pickerAlpha(color, .35)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(11),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: color, size: 20),
-              const SizedBox(width: 9),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: theme.text,
-                        fontWeight:
-                            seatLayerBoldWeight(context, FontWeight.w800),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      message,
-                      style: TextStyle(
-                        color: theme.mutedText,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 extension<T> on List<T> {
   T? get firstOrNull => isEmpty ? null : first;
   T? get lastOrNull => isEmpty ? null : last;
 }
-
-// ignore: unused_element

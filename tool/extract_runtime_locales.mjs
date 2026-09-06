@@ -32,6 +32,7 @@ const KEYS = {
   anyTicketType: 'picker.anyTicketType',
   anyVenueZone: 'picker.anyVenueZone',
   bestSeats: 'picker.bestSeatsPremium',
+  findSeatsTogether: 'picker.findSeatsTogether',
   showLess: 'picker.showLess',
   undo: 'picker.undo',
   holdAndCheckout: 'picker.holdSeatsAndCheckout',
@@ -39,16 +40,52 @@ const KEYS = {
   testMode: 'picker.testMode',
   accessibility: 'picker.accessibilityOptions',
   accessibilityTitle: 'picker.accessibilityOptions',
-  fitVenue: 'picker.fitToScreen',
+  // The runtime retired its own fit-to-screen wording along with the wide 2D
+  // control that used to carry it; both surfaces that still frame a venue say
+  // "Show whole venue".
+  fitVenue: 'picker.fitWholeVenue',
+  fitWholeVenue: 'picker.fitWholeVenue',
   loading: 'picker.loadingSeatMap',
   errorMessage: 'picker.mapDidNotLoad',
   retry: 'picker.accessRetry',
   accessRefresh: 'picker.accessRefresh',
   hideLimitedView: 'picker.hideLimitedView',
+  notAvailable: 'picker.notAvailable',
+  organizerNote: 'picker.organizerNote',
+  emptyWheelchairSpace: 'picker.emptyWheelchairSpace',
+  accessiblePhysicalSeat: 'picker.accessiblePhysicalSeat',
+  restrictedView: 'picker.restrictedView',
+  obstructedView: 'picker.obstructedView',
+  premiumSeat: 'picker.premiumSeat',
+  // The twelve accommodations, which the seat-note rows, the cart lines and
+  // the accessibility sheet all name. Extracted per key and rebuilt into
+  // `accessNeeds`.
+  //
+  // The SHORT name of each, not the taxonomy's own. `picker.access.*` is
+  // written for a seat popup, where "Designated aisle / transfer seat" is the
+  // honest length; every place this SDK prints a provision is a single line in
+  // a narrow column, and the long names wrapped those lines onto two and three
+  // each. The English defaults in `design/tokens.json` have always been the
+  // short ones, so this is what makes the other thirty-six locales agree with
+  // them.
+  'accessNeeds.wheelchair': 'picker.accessShort.wheelchair',
+  'accessNeeds.companion': 'picker.accessShort.companion',
+  'accessNeeds.semi-ambulatory': 'picker.accessShort.semi-ambulatory',
+  'accessNeeds.designated-aisle': 'picker.accessShort.designated-aisle',
+  'accessNeeds.step-free': 'picker.accessShort.step-free',
+  'accessNeeds.hearing': 'picker.accessShort.hearing',
+  'accessNeeds.cart': 'picker.accessShort.cart',
+  'accessNeeds.sign-language': 'picker.accessShort.sign-language',
+  'accessNeeds.low-vision': 'picker.accessShort.low-vision',
+  'accessNeeds.sensory-friendly': 'picker.accessShort.sensory-friendly',
+  'accessNeeds.plus-size': 'picker.accessShort.plus-size',
+  'accessNeeds.lift-armrest': 'picker.accessShort.lift-armrest',
   colorblindSafe: 'picker.colorblindColors',
   continueWord: 'picker.continue',
   seatsLeft: 'picker.seatsLeftShort',
   fromPrice: 'picker.peekFromPrice',
+  noSeatsSelected: 'picker.noSeatsSelected',
+  findBestSeatsCta: 'picker.findBestSeats',
   moreCount: 'picker.moreCount',
   addMinutes: 'picker.addMinutes',
   'ticketCount.one': 'picker.ticketsCount.one',

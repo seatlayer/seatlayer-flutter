@@ -312,6 +312,7 @@ class SelectedSeat {
     this.maxOccupancy,
     this.accessibility,
     this.wheelchairSpaceType,
+    this.status,
     this.screenPoint,
     this.seatViewThumb,
     this.sightlineMetres,
@@ -355,6 +356,16 @@ class SelectedSeat {
   final int? maxOccupancy;
   final List<String>? accessibility;
   final String? wheelchairSpaceType;
+
+  /// What the runtime says this seat's live status is, where it says anything.
+  ///
+  /// Null on every runtime that does not report it, which is why nothing may
+  /// require it to be present. It exists for one rule: a seat the buyer cannot
+  /// take never raises a card (see `unansweredSeat`). The engine stopped
+  /// reporting taps on such seats at all, so this is the belt to that braces —
+  /// an older runtime that still reports one must not produce a card asking
+  /// the buyer to buy a seat that is already gone.
+  final SeatStatus? status;
 
   /// Where the seat is drawn on the map, in the map surface's own logical
   /// points, or null when the runtime does not report it.
@@ -426,6 +437,7 @@ class SelectedSeat {
           ? null
           : jListOf(jGet(v, 'accessibility'), (item) => jStr(item)),
       wheelchairSpaceType: jStr(jGet(v, 'wheelchairSpaceType')),
+      status: seatStatusOrNull(jGet(v, 'status')),
       screenPoint: _screenPoint(jGet(v, 'screenPoint')),
       seatViewThumb: SeatViewThumb.fromJson(jGet(v, 'seatViewThumb')),
       sightlineMetres: jDouble(jGet(v, 'sightlineMetres')),

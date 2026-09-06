@@ -1,5 +1,74 @@
 # Changelog
 
+## 0.9.0
+
+Runtime pin 0.84.0. The phone picker follows the web picker's latest phone
+layout item by item, and the runtime now tells native chrome when the camera
+is at the whole-venue pose and at the zoom ceiling.
+
+- **The bottom sheet is one surface with a footer block.** A pill handle
+  straddles its top edge over the map; collapsed, the sheet is the total line
+  and the button alone, and the cards wait behind the handle. Open, the cart
+  shows one card per ticket, capped at three cards and a sliver of the fourth
+  before it scrolls inside its box; the total line reads "No seats selected"
+  or "N tickets · total"; an empty cart offers a full-width "Find best
+  seats". The "From €X" line is gone. A seat the card is still asking about
+  is not listed until the buyer adds it, and while a card is open the footer
+  keeps its button, disabled, rather than turning into a sentence.
+- **Three map controls on the phone.** "+", "−" and "Show whole venue" are
+  always drawn and dim only at their limit: "+" at maximum zoom, the other
+  two at the exact whole-venue pose, read from the runtime's `atVenueFit`
+  and `canZoomIn` snapshot fields (older runtimes fall back to
+  `canZoomOut`). A disabled disc keeps its ground in both themes: the glyph
+  and ring step back and the shadow goes. The accessibility disc matches the
+  other three in size.
+- **Seat notes on every popup.** The seat card lists every attribute the
+  seat carries as full-width bands under the category band, in a fixed
+  order: accommodation types, the wheelchair provision, restricted view,
+  obstructed view, premium seat, then the organizer's note. Twelve shared
+  accommodation glyphs replace platform icons; amber and gold tones come
+  from the theme (`warnText`, `premiumText`) and meet 4.5:1 in both
+  themes. The cart card says the same notes once, in words.
+- **The accessibility control heads the map's control column** on phone and
+  wide, above "+", instead of sitting alone in the bottom-left corner. Its
+  menu is bounded to the screen and scrolls inside, with one line per
+  accommodation and the longer explanation behind an ⓘ; rows carry the
+  shared glyphs and a sold-out provision shows 0. The legend closes with one
+  grey "Not available" key. The wide layout no longer drew the control
+  twice.
+- **The wide layout's fit-to-screen button is gone**; the 3D "Fit" chip and
+  the phone's whole-venue disc are the two fit affordances, both saying
+  "Show whole venue". The best-seats card carries a one-line "Find seats
+  together" title.
+- **The collapsed footer says which seats.** Under "N tickets" a muted line
+  lists the seats held, and tapping it opens the cards. The phone map keeps
+  two discs, "+" and "Show whole venue"; the whole-venue disc is always live,
+  so a pinched camera can always be brought home, and pinching steps out. The disc column
+  fades out while a seat card asks. The phone price rail carries prices
+  alone. The accessibility sheet is one aligned list: fixed rows with
+  hairlines, counts in their own column, the two map switches under a
+  "View" heading.
+- **The sheet handle is a disc on the line (web 0.84.0).** A white disc,
+  lifted by its own shadow, sits half over the map and half in the sheet with
+  no hairline under it; the head strip under it and the footer's paddings are
+  tighter, so the collapsed sheet is shorter. "+" retires once the buyer is
+  among the seats or at the zoom ceiling instead of dimming: a disc that does
+  nothing read as a broken map. Cart cards use 15pt names and amounts over a
+  13pt position line, and the phone's disc tint is lighter in the light
+  theme.
+- **The seat card's spotlight follows the seat** through the lift that pans
+  the map out from under the card; it used to sit one lift band below.
+- **No card over an unavailable seat.** A sold seat, one not for sale, or
+  one another buyer holds never raises the seat card.
+- New strings — `fitWholeVenue`, `notAvailable`, `organizerNote`,
+  `emptyWheelchairSpace`, `accessiblePhysicalSeat`, `noSeatsSelected`,
+  `findBestSeatsCta`, `findSeatsTogether` — carry the runtime's translation in all 37 locales.
+
+Breaking: `SeatLayerPickerStrings.accessNoneLeft` is removed (use
+`notAvailable`); `SeatLayerPeekLine`, `peekLine`, `fromPriceText`,
+`totalText` and `showPrices` are removed from the checkout call to action;
+the dense phone ticket list and its layout tokens are removed.
+
 ## 0.8.0
 
 Runtime pin 0.80.3. The phone picker now matches the web picker's phone

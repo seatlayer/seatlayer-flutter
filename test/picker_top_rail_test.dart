@@ -315,4 +315,58 @@ void main() {
 
     expect(find.byType(SeatLayerPickerViewModeControl), findsOneWidget);
   });
+
+  testWidgets('the phone rail carries prices alone', (tester) async {
+    // The key ended the phone row half off the screen and read as a cut
+    // word; the grey disc explains itself the moment a seat is tapped, and
+    // the web's phone rail carries no key either.
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerPriceLegend(compact: true)),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pumpAndSettle();
+    expect(find.text('Not available'), findsNothing);
+  });
+
+  testWidgets('the wide legend closes with ONE grey key, not a held/sold pair',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    // A wide rail, so the key at the end of the row is inside the viewport:
+    // a horizontal list only builds what it can show.
+    tester.view.physicalSize = const Size(1440, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerPriceLegend(compact: false)),
+    );
+    map.emit(_snapshotWithCategories(3));
+    await tester.pumpAndSettle();
+
+    // A held seat and a sold seat are one inert grey disc on the map, so the
+    // key says it once. The padlock-and-diagonal pair is gone, not hidden.
+    // The key sits at the far end of a lazily built row; ask for it wherever
+    // it stands rather than only where a phone viewport would show it.
+    expect(find.text('Not available', skipOffstage: false), findsOneWidget);
+    expect(find.text('Held'), findsNothing);
+    expect(find.text('Sold'), findsNothing);
+
+    // It filters nothing, so it is not a control: it comes after every price
+    // and answers no press.
+    final key = tester.getRect(find.text('Not available', skipOffstage: false));
+    final last = tester.getRect(find.textContaining('€115'));
+    expect(key.left, greaterThan(last.left));
+    expect(
+      tester.widgetList<Semantics>(find.byType(Semantics)).where(
+            (node) =>
+                node.properties.label == 'Not available' &&
+                node.properties.button == true,
+          ),
+      isEmpty,
+    );
+  });
 }

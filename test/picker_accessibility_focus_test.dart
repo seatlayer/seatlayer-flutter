@@ -412,7 +412,9 @@ void main() {
         pickerSnapshot(accessNeeds: <Object?>[accessNeed('wheelchair', 0)]),
       );
 
-      await tester.tap(find.text('None left'), warnIfMissed: false);
+      // A figure, including at zero: the count column carries numbers, and
+      // the dimmed switch is what says the provision cannot be had.
+      await tester.tap(find.text('0'), warnIfMissed: false);
       await tester.pumpAndSettle();
 
       expect(map.callsTo('picker.focusNextAccessibleSection'), isEmpty);

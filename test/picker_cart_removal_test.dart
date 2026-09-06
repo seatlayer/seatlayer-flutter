@@ -274,20 +274,19 @@ void main() {
     map.emit(_runSnapshot());
     await tester.pumpAndSettle();
 
-    // `Gallery · A · 1–2`, and the run's `2 × €25`.
-    expect(_cellTokens(tester), contains('Gallery · A · 1–2'));
-    expect(_cellTokens(tester), contains('2 × €25'));
+    // One card per ticket, each with its own place and its own price.
+    expect(_cellTokens(tester), contains('A · 1 · Standard'));
+    expect(_cellTokens(tester), contains('A · 2 · Standard'));
     expect(_inList(AnimatedSwitcher), findsWidgets);
 
     map.emit(_afterRemovalSnapshot(revision: 2));
     await tester.pumpAndSettle();
 
-    // The same row, restating the same fact — so the cell is keyed on the
-    // words rather than on the widget, and the swap is a cross-fade.
-    expect(_cellTokens(tester), contains('Gallery · A · 2'));
-    // The run's own `2 × €25` is not a fact about a single ticket; the cell
-    // empties rather than the row jumping.
-    expect(_cellTokens(tester), contains(''));
+    // The card that stayed keeps its own words; the one that went took its
+    // cells with it. The cells are keyed on the words rather than on the
+    // widget, so a card that restates a fact cross-fades it.
+    expect(_cellTokens(tester), contains('A · 2 · Standard'));
+    expect(_cellTokens(tester), isNot(contains('A · 1 · Standard')));
   });
 
   testWidgets('a viewer who asked for less movement gets no switcher', (

@@ -70,8 +70,10 @@ void main() {
     expect(layout.peekHeight, size['peekHeight']);
     expect(layout.sheetMaxHeightFraction, size['sheetMaxHeightFraction']);
     expect(layout.confirmPhotoHeight, size['confirmPhotoHeight']);
-    expect(layout.denseVisibleLines, size['denseVisibleLines']);
-    expect(layout.accessibilityControlSize, size['minimumHitTarget']);
+    expect(layout.cartCardMinHeight, size['cartCardMinHeight']);
+    expect(layout.cartPeekMaxHeight, size['cartPeekMaxHeight']);
+    expect(layout.sheetHandleWidth, size['sheetHandleWidth']);
+    expect(layout.accessibilityControlSize, size['accessibilityControlSize']);
   });
 
   test('the radii are design/tokens.json, and buttons are not pills', () {

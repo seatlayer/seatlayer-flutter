@@ -283,7 +283,7 @@ void main() {
 
     expect(find.text('Back to venue'), findsNothing);
     expect(find.text('Seat map'), findsNothing);
-    expect(find.text('Fit venue'), findsOneWidget);
+    expect(find.text('Show whole venue'), findsOneWidget);
   });
 
   testWidgets('the 3D overview exposes zoom and fit camera controls',
@@ -304,11 +304,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byTooltip('Zoom out'), findsOneWidget);
-    expect(find.text('Fit venue'), findsOneWidget);
+    expect(find.text('Show whole venue'), findsOneWidget);
     expect(find.byTooltip('Zoom in'), findsOneWidget);
     expect(find.text('Back to venue'), findsNothing);
 
-    await tester.tap(find.text('Fit venue'));
+    await tester.tap(find.text('Show whole venue'));
     await tester.pump();
     expect(map.callsTo('picker.zoomToFit'), hasLength(1));
   });

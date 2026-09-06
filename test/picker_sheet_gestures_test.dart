@@ -2,7 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_toast.dart';
-import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_haptics.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
@@ -49,21 +48,12 @@ Widget _wired(SeatLayerPickerController picker) => AnimatedBuilder(
 double _height(WidgetTester tester) =>
     tester.getSize(find.byType(SeatLayerCartSheet)).height;
 
-/// A point on the sheet's head — the grab handle, and the one place a drag can
-/// never be taken by the ticket list underneath it.
+/// A point on the sheet's handle — the one place a drag can never be taken by
+/// the ticket list underneath it.
 Offset _head(WidgetTester tester) {
   final rect = tester.getRect(find.byType(SeatLayerCartSheet));
   return Offset(rect.center.dx, rect.top + 8);
 }
-
-/// The head is fifty points shut and thirty-six open, so the first fourteen
-/// points of a drag are spent compressing it.
-const double _headGive = 50 - 36;
-
-/// The collapsed bar at rest: its head plus the lift that keeps the way on
-/// clear of the grab handle.
-const double _peekRest =
-    SeatLayerSizeTokens.peekHeight + SeatLayerSizeTokens.peekClockLift;
 
 void main() {
   group('the sheet drags', () {
@@ -78,19 +68,26 @@ void main() {
       await tester.pumpWidget(
         pickerHarness(map, _wired(picker), controller: picker),
       );
-      map.emit(pickerSnapshot());
+      // A cart the collapsed sheet has to cap, so there is somewhere to drag
+      // to: with three tickets or fewer the collapsed sheet already shows
+      // everything the open one would.
+      map.emit(_tenDistinctRows());
       await tester.pumpAndSettle();
-      expect(_height(tester), _peekRest);
+      // The collapsed sheet is the height of the block the phone draws — the
+      // handle, the capped cart, the foot — rather than a fixed peek.
+      final rest = _height(tester);
 
       final drag = await tester.startGesture(_head(tester));
       await _prime(tester, drag);
       await drag.moveBy(const Offset(0, -30));
       await tester.pump();
-      expect(_height(tester), 50 + 30 - _headGive);
+      // Point for point: the head no longer compresses on the way, so there is
+      // nothing to subtract.
+      expect(_height(tester), rest + 30);
 
       await drag.moveBy(const Offset(0, -30));
       await tester.pump();
-      expect(_height(tester), 50 + 60 - _headGive);
+      expect(_height(tester), rest + 60);
 
       await drag.up();
       await tester.pumpAndSettle();
@@ -210,7 +207,7 @@ void main() {
       expect(picker.cartSheetDetent, SeatLayerSheetDetent.peek);
     });
 
-    testWidgets('a cart taller than the ceiling opens a place above it',
+    testWidgets('a cart taller than its box scrolls inside it, not past it',
         (tester) async {
       final map = FakePickerMap();
       addTearDown(map.dispose);
@@ -224,32 +221,23 @@ void main() {
       map.emit(_tenDistinctRows());
       picker.setCartSheetExpanded(true);
       await tester.pumpAndSettle();
-      // Ten separate rows, all of them shown: the cart is now taller than the
-      // web picker's ceiling, so the sheet rests ON the ceiling.
-      await tester.tap(find.textContaining('more'));
-      await tester.pumpAndSettle();
-      final ceiling = _height(tester);
-      expect(ceiling, 480);
+      // Ten cards, all of them in the list, and the list capped at three and
+      // a sliver: the sheet rests well under the web picker's ceiling and the
+      // map keeps its room.
+      final rest = _height(tester);
+      expect(rest, lessThan(480));
 
+      // A pull past the resting height goes nowhere: there is no taller
+      // place to offer, because the cart scrolls inside its own box.
       final drag = await tester.startGesture(_head(tester));
       await _prime(tester, drag);
       await drag.moveBy(const Offset(0, -240));
       await tester.pump();
       await drag.up();
       await tester.pumpAndSettle();
-
-      // A place the picker never puts the sheet itself, and only offered
-      // because there was more cart to see.
-      expect(picker.cartSheetDetent, SeatLayerSheetDetent.full);
-      expect(_height(tester), greaterThan(ceiling));
+      expect(picker.cartSheetDetent, SeatLayerSheetDetent.content);
+      expect(_height(tester), rest);
       expect(picker.cartSheetExpanded, isTrue);
-
-      // And back down to the ceiling, which is still where a tap rests it.
-      picker.setCartSheetExpanded(false);
-      await tester.pumpAndSettle();
-      picker.setCartSheetExpanded(true);
-      await tester.pumpAndSettle();
-      expect(_height(tester), ceiling);
     });
 
     testWidgets('the map still collapses it', (tester) async {
@@ -262,16 +250,18 @@ void main() {
       await tester.pumpWidget(
         pickerHarness(map, _wired(picker), controller: picker),
       );
-      map.emit(pickerSnapshot());
+      map.emit(_tenDistinctRows());
+      await tester.pumpAndSettle();
+      final rest = _height(tester);
       picker.setCartSheetExpanded(true);
       await tester.pumpAndSettle();
-      expect(_height(tester), greaterThan(_peekRest));
+      expect(_height(tester), greaterThan(rest));
 
       // What a tap on the map does to the sheet.
       picker.setCartSheetExpanded(false);
       await tester.pumpAndSettle();
       expect(picker.cartSheetDetent, SeatLayerSheetDetent.peek);
-      expect(_height(tester), _peekRest);
+      expect(_height(tester), rest);
     });
 
     testWidgets('reduced motion arrives without a spring', (tester) async {

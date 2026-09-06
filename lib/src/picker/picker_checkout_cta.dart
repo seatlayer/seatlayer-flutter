@@ -1,15 +1,15 @@
 /// What the checkout call to action says, and whether it can be pressed.
 ///
-/// The picker draws that one button in three places — the collapsed cart's
-/// `Continue · €190` pill, the expanded sheet's book button and the wide
-/// layout's checkout bar — and all three used to do the same thing when the
+/// The picker draws that one button in two places — the sheet's foot, which
+/// the phone shows collapsed as well as open, and the wide layout's checkout
+/// bar — and both used to do the same thing when the
 /// cart could not be handed over: go grey, keep their label, and say nothing
 /// about why. A grey button that still reads "Hold seats & checkout" tells the
 /// buyer only that pressing it achieved nothing; it does not tell them a
 /// confirm card is open behind their thumb, that two more seats are needed, or
 /// that the hold is already on its way.
 ///
-/// [seatLayerCheckoutCtaState] is the single rule the three share, in the same
+/// [seatLayerCheckoutCtaState] is the single rule they share, in the same
 /// precedence the web picker resolves, so they cannot disagree with each other
 /// or with the web. [SeatLayerCheckoutCta] wraps it with the one fact the
 /// picker state cannot supply — whether this button's own handoff is still
@@ -23,75 +23,17 @@ import 'picker_models.dart';
 import 'picker_strings.dart';
 import 'seat_layer_picker_scope.dart';
 
-/// What the collapsed peek bar draws instead of a button.
-///
-/// The peek line and the footer button are two readings of one situation, so
-/// they are resolved together by [seatLayerCheckoutCtaState] rather than by two
-/// rule sets that could disagree. Where the footer says why it cannot be
-/// pressed, the collapsed bar says what is happening: a bar fifty points tall
-/// has no room for a disabled button AND a sentence, so whenever a sentence is
-/// owed the pill is not drawn at all.
-@immutable
-class SeatLayerPeekLine {
-  /// Creates one resolved peek line.
-  const SeatLayerPeekLine({
-    this.summary,
-    this.sentence,
-    this.pillLabel,
-    this.total,
-    this.fromAmount,
-    this.showClock = false,
-    this.offerFind = false,
-  });
-
-  /// The leading summary — `3 tickets`, `From €25` — or null when [sentence]
-  /// has taken the whole line.
-  final String? summary;
-
-  /// A whole-line statement that replaces the pill: seats being secured,
-  /// seats secured, sales closed.
-  final String? sentence;
-
-  /// The money inside [summary] on the empty bar, or null on every other
-  /// reading.
-  ///
-  /// The sentence stays the locale's own — `From {price}`, in whatever order
-  /// the language puts it — and this is the substring of it that carries the
-  /// amount, so the bar can print the fact large and the word small without a
-  /// second string per locale.
-  final String? fromAmount;
-
-  /// The words on the pill — `Continue`, `Secure more` — or null for no pill.
-  final String? pillLabel;
-
-  /// The money that follows [pillLabel] on the pill, or null when this
-  /// session hides prices.
-  final String? total;
-
-  /// Whether the live `m:ss` of a running hold follows the total.
-  /// Kept for hosts that set it; the pill no longer draws a clock (owner
-  /// call, 2026-09-05) — the header's hold pill is the picker's one clock.
-  final bool showClock;
-
-  /// Whether the empty bar offers its way into the best-seats form.
-  final bool offerFind;
-}
-
 /// One resolved reading of the checkout call to action.
 @immutable
 class SeatLayerCheckoutCtaState {
   /// Creates a resolved call-to-action reading.
-  ///
-  /// [peekStatesReason] defaults to [statesReason]: a reason worth stating on
-  /// the footer is normally worth stating on the pill too.
   const SeatLayerCheckoutCtaState({
     required this.label,
     required this.enabled,
     required this.busy,
     required this.statesReason,
-    bool? peekStatesReason,
-    this.peekLine = const SeatLayerPeekLine(),
-  }) : peekStatesReason = peekStatesReason ?? statesReason;
+    this.findsBestSeats = false,
+  });
 
   /// The words on the button.
   final String label;
@@ -107,28 +49,17 @@ class SeatLayerCheckoutCtaState {
 
   /// Whether [label] is a reason the button cannot be pressed, rather than the
   /// caller's own label.
-  ///
-  /// The collapsed peek pill reads this: its own label carries the money
-  /// (`Continue · €190`), and a reason and a price together would wrap on a
-  /// 44 pt pill, so it drops the money whenever a reason is being stated.
   final bool statesReason;
 
-  /// Whether the collapsed pill is the surface that should state [label].
+  /// Whether a press opens the best-seats form rather than starting a
+  /// checkout.
   ///
-  /// Almost always the same as [statesReason]. It parts from it for the one
-  /// situation the buyer is already looking at: a seat's confirm card, which
-  /// stands over the map with the whole sheet dimmed and inert behind it. The
-  /// web picker leaves its pill reading `Continue · €190` there, because the
-  /// card itself is the reason and the sheet under it is plainly out of play;
-  /// swapping the pill for a sentence rewrote a line the buyer could not
-  /// reach anyway, and it flickered back on the way out.
-  final bool peekStatesReason;
-
-  /// The same situation as the collapsed cart sheet renders it.
-  ///
-  /// Empty on every call that did not supply the peek's own facts, so a
-  /// surface that only draws a button pays nothing for it.
-  final SeatLayerPeekLine peekLine;
+  /// The phone's empty cart, and only that: the desktop footer's "Select
+  /// seats" is a disabled label telling a buyer to use the map beside it,
+  /// which is fair on a width that shows both at once. On a phone the footer
+  /// IS the sheet, so a full-width disabled button would be the largest thing
+  /// on screen saying no.
+  final bool findsBestSeats;
 }
 
 /// Resolve the checkout call to action for [state].
@@ -156,40 +87,17 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
   bool handoffInFlight = false,
   int? ticketCount,
   int pendingCount = 0,
-  String? totalText,
-  String? fromPriceText,
-  bool showPrices = true,
   bool canOfferFind = false,
 }) {
   final count = ticketCount ?? 0;
   final holdActive = state.hold != null;
-  final peek = _peekLine(
-    state: state,
-    strings: strings,
-    count: count,
-    pendingCount: pendingCount,
-    totalText: totalText,
-    fromPriceText: fromPriceText,
-    showPrices: showPrices,
-    canOfferFind: canOfferFind,
-    holdActive: holdActive,
-    handoffInFlight: handoffInFlight,
-  );
 
-  // `onPeek: false` leaves the collapsed pill saying what it was saying; see
-  // [SeatLayerCheckoutCtaState.peekStatesReason].
-  SeatLayerCheckoutCtaState reason(
-    String words, {
-    bool busy = false,
-    bool onPeek = true,
-  }) =>
+  SeatLayerCheckoutCtaState reason(String words, {bool busy = false}) =>
       SeatLayerCheckoutCtaState(
         label: words,
         enabled: false,
         busy: busy,
         statesReason: true,
-        peekStatesReason: onPeek,
-        peekLine: peek,
       );
 
   // 1. Nothing else is worth saying about an event that has stopped selling.
@@ -200,10 +108,32 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
   if (state.generalAdmissionCandidate != null) {
     return reason(strings.confirmYourTickets);
   }
-  // The footer says why it is down; the pill behind the card does not, because
-  // the card IS the answer to it and the sheet is dimmed and inert underneath.
+  // The card standing over the map is the answer to this one; the footer says
+  // so rather than reading as live behind it.
+  // A seat card that is open holds the button, but says nothing about it:
+  // the card is the question, and the footer keeps the label it had so the
+  // buyer's cart still reads as their cart underneath it.
   if (seatCardOpen) {
-    return reason(strings.confirmOrCancelSeat, onPeek: false);
+    final under = seatLayerCheckoutCtaState(
+      state: state,
+      strings: strings,
+      label: label,
+      canCheckout: canCheckout,
+      seatCardOpen: false,
+      handoffInFlight: handoffInFlight,
+      ticketCount: ticketCount,
+      pendingCount: pendingCount,
+      canOfferFind: canOfferFind,
+    );
+    return SeatLayerCheckoutCtaState(
+      label: under.label,
+      enabled: false,
+      busy: under.busy,
+      statesReason: under.statesReason,
+      // Not even the finder: nothing on the sheet is pressable while the
+      // card is asking.
+      findsBestSeats: false,
+    );
   }
 
   // 3. and 4. Work the buyer has already asked for. The hold comes first
@@ -232,7 +162,22 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
     return reason(strings.adjustSelection);
   }
 
-  // 6. A hold that already exists changes what the button is offering: the
+  // 6. THE EMPTY PHONE CART HAS A DOOR, NOT A DEAD BUTTON (owner call
+  //    2026-09-05). The same button offers the best-seats form instead, gated
+  //    exactly as the tray's own card is: a performance group or an existing
+  //    hold means no card would render, and a door into an empty room is
+  //    worse than none. The caller decides that and passes [canOfferFind].
+  if (ticketCount != null && count == 0 && canOfferFind && !holdActive) {
+    return SeatLayerCheckoutCtaState(
+      label: strings.findBestSeatsCta,
+      enabled: true,
+      busy: false,
+      statesReason: false,
+      findsBestSeats: true,
+    );
+  }
+
+  // 7. A hold that already exists changes what the button is offering: the
   //    seats are secured, so it offers the till — or offers to take the seats
   //    picked since into the same hold first.
   if (ticketCount != null && holdActive) {
@@ -243,11 +188,10 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
       enabled: canCheckout,
       busy: false,
       statesReason: false,
-      peekLine: peek,
     );
   }
 
-  // 7. An empty cart. Not a reason the button failed — there is simply
+  // 8. An empty cart. Not a reason the button failed — there is simply
   //    nothing in it yet — but it is still the one thing left to do.
   if (ticketCount != null && count == 0) {
     return SeatLayerCheckoutCtaState(
@@ -255,68 +199,16 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
       enabled: false,
       busy: false,
       statesReason: true,
-      peekLine: peek,
     );
   }
 
-  // 8. Nothing in the way: the caller's own label, live if there is anything
+  // 9. Nothing in the way: the caller's own label, live if there is anything
   //    to check out with.
   return SeatLayerCheckoutCtaState(
     label: label,
     enabled: canCheckout,
     busy: false,
     statesReason: false,
-    peekLine: peek,
-  );
-}
-
-/// The collapsed bar's reading of the same situation.
-///
-/// Follows the web picker's own table in the same order, which is NOT the
-/// footer's: work already in flight outranks an event that has stopped
-/// selling, because a buyer whose hold is landing is being told about their
-/// own press rather than about the event.
-SeatLayerPeekLine _peekLine({
-  required SeatLayerPickerState state,
-  required SeatLayerPickerStrings strings,
-  required int count,
-  required int pendingCount,
-  required String? totalText,
-  required String? fromPriceText,
-  required bool showPrices,
-  required bool canOfferFind,
-  required bool holdActive,
-  required bool handoffInFlight,
-}) {
-  if (count > 0) {
-    if (state.busyAction == SeatLayerPickerBusyAction.creatingHold) {
-      return SeatLayerPeekLine(sentence: strings.securingSeats);
-    }
-    if (handoffInFlight) {
-      return SeatLayerPeekLine(
-        sentence: showPrices && totalText != null
-            ? strings.peekSecured(count, totalText)
-            : strings.seatsSecuredOpeningCheckout,
-      );
-    }
-    return SeatLayerPeekLine(
-      summary: strings.ticketCount(count),
-      pillLabel: holdActive && pendingCount > 0
-          ? strings.secureMore
-          : strings.continueWord,
-      total: showPrices ? totalText : null,
-      showClock: holdActive,
-    );
-  }
-  if (state.event?.salesClosed == true) {
-    return SeatLayerPeekLine(sentence: strings.salesClosedPill);
-  }
-  return SeatLayerPeekLine(
-    summary: fromPriceText == null
-        ? strings.pickYourSeats
-        : strings.fromPrice(fromPriceText),
-    fromAmount: fromPriceText,
-    offerFind: canOfferFind,
   );
 }
 
@@ -337,18 +229,15 @@ class SeatLayerCheckoutCta extends StatefulWidget {
     required this.builder,
     this.ticketCount,
     this.pendingCount = 0,
-    this.totalText,
-    this.fromPriceText,
-    this.showPrices = true,
     this.canOfferFind = false,
   });
 
   /// How many tickets the buyer has agreed to, when the caller knows.
   ///
-  /// Supplying it turns on the two readings that depend on the size of the
-  /// cart — the hold's own wording, and an empty cart's — and builds the
-  /// [SeatLayerCheckoutCtaState.peekLine]. A caller that leaves it null gets
-  /// exactly the resolution it got before there was a peek line.
+  /// Supplying it turns on the readings that depend on the size of the cart —
+  /// the hold's own wording, the empty cart's door into the finder, and the
+  /// disabled "Select seats". A caller that leaves it null gets exactly the
+  /// resolution it got before the cart was counted here.
   final int? ticketCount;
 
   /// How many of those tickets are not yet inside the hold.
@@ -356,16 +245,7 @@ class SeatLayerCheckoutCta extends StatefulWidget {
   /// Zero unless the session can tell a held seat from a freshly picked one.
   final int pendingCount;
 
-  /// The cart's total, already rendered as money.
-  final String? totalText;
-
-  /// The cheapest ticket on the chart, already rendered as money.
-  final String? fromPriceText;
-
-  /// Whether this session shows prices at all.
-  final bool showPrices;
-
-  /// Whether the empty peek line may offer the best-seats form.
+  /// Whether an empty cart may offer the best-seats form here.
   final bool canOfferFind;
 
   /// The caller's own wording for the ordinary case, resolved against the
@@ -402,9 +282,6 @@ class _SeatLayerCheckoutCtaState extends State<SeatLayerCheckoutCta> {
       handoffInFlight: _handingOff,
       ticketCount: widget.ticketCount,
       pendingCount: widget.pendingCount,
-      totalText: widget.totalText,
-      fromPriceText: widget.fromPriceText,
-      showPrices: widget.showPrices,
       canOfferFind: widget.canOfferFind,
     );
     return widget.builder(context, cta, cta.enabled ? _press : null);
