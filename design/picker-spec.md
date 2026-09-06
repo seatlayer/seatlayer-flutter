@@ -111,7 +111,7 @@ Price rail band                            size.topRailHeight          (row)
 │  seat card / prompts / status overlays                                  │
 │  (no section dock on a phone — host opt-in only; see 3.6)               │
 └─────────────────────────────────────────────────────────────────────────┘
-Cart sheet (peek)                          size.peekHeight   + bottom safe area
+Cart sheet (collapsed)          handle + capped cart + foot + bottom safe area
 ```
 
 The header, the price rail and the cart sheet are **rows of the same column**:
@@ -138,7 +138,7 @@ Not reported (they are rows, and the map surface already ends at their edge):
 
 - the header
 - the price rail band
-- the cart sheet, at peek or open
+- the cart sheet, collapsed or open
 - the **seat card**, on a runtime that can pan a seat (`picker.frameSeat`,
   runtime 0.80.2+): the card's band is folded into the pan instead (§3.8.2).
   Only an older runtime gets it as an inset.
@@ -217,9 +217,9 @@ edge at that moment:
 
 - open sheet — the sheet's own container carries it, and every height ceiling
   adds the same amount so no content box shrinks
-- peek — the **head** carries it, because the collapsed sheet's last
-  `size.peekHeight` is where the system gesture bar lives and the Continue pill
-  must clear it
+- collapsed — the same container carries it, and it is the foot that sits
+  above it in both states. Padding the foot instead would shorten the pay
+  button inside it rather than lifting it off the home indicator
 - section dock — where a host has opted into one, the dock carries it, and the
   lift it applies to the bottom anchors is `size.dockBarHeight` plus the same
   inset. With no dock — the default on a phone — the bottom anchors sit at
@@ -236,16 +236,12 @@ gate them, and the reference file.
 ### 3.1 Header
 
 The header's hold pill is drawn for as long as a hold is live (owner call,
-2026-09-05): it is the picker's one clock, and the collapsed cart's Continue
-pill stays a button. This deliberately departs from the web's
-`data-peek-clock` rule, under which the pill stepped aside while the peek bar
-carried the clock — a clock inside the button read as clutter on the phone.
-The collapsed head always grows by
-`size.peekClockLift` (8) so its row sits below the grabber: the bar's buttons
-are 44 pt in a 50 pt head and the grabber is painted in the head's top 4 pt,
-so without the lift the button covers the grabber (the web's narrow head,
-`min-height:50px` with a 44 pt `.go`, has the same overlap — reported to the
-runtime lane; the Flutter head is 58 pt at rest).
+2026-09-05): it is the picker's ONE clock. There is no hold clock anywhere on
+the cart sheet, in either state, and no "display buffer" on it — the pill shows
+the full server hold. This deliberately departs from the web's
+`data-peek-clock` rule, under which the pill stepped aside while a peek bar
+carried the clock; there is no peek bar any more (§3.9), and a clock inside a
+button read as clutter on the phone.
 
 **Name** `SeatLayerPickerHeader` · **slot** `headerStyle` · **file**
 `lib/src/picker/picker_header.dart`
@@ -1074,7 +1070,7 @@ invitation never starts, the sweep and tick do not play, the flight chip is not
 created at all, and the card departs on the press without waiting.
 
 The **flight target** is measured *before* the count reflows: on a phone that is
-the peek summary.
+the foot's total line.
 
 While a card is up and a toast is showing, the whole bottom-centre region moves
 so the message sits **above** the card — unless that would push it within a
@@ -1301,113 +1297,102 @@ without a hovering pointer is therefore not missing a feature; the seat card
 
 Full entry: `components.md` › HoverCard.
 
-### 3.9 Peek bar (collapsed cart)
+### 3.9 The collapsed sheet
 
-**Name** `SeatLayerCartSheet` (peek head) · **slots** `sheetStyle`,
-`continueButtonStyle` · **file** `lib/src/picker/picker_cart_sheet.dart`
+**Name** `SeatLayerCartSheet` · **slots** `sheetStyle`, `continueButtonStyle`
+· **file** `lib/src/picker/picker_cart_sheet.dart`
 
-**Anatomy.** Height `size.peekHeight` plus the lift below plus the bottom safe
-inset, ground
-`color.*.surface`, corner `radius.sheet`, elevation `elevation.sheet`, hairline
-on its top edge. A grabber of `size.sheetGrabberWidth` ×
-`size.sheetGrabberHeight` at `radius.pill` sits `size.sheetGrabberInset` from
-the top, centred, at opacity .5 — it overlaps into the same row rather than
-taking a row of its own. Trailing, a chevron of `size.sheetToggleSize` pointing
-**up** while collapsed and rotating over `motion.duration.chevron` on
-`motion.curve.easeEnter` when the sheet opens.
+**THE COLLAPSED SHEET IS THE FOOTER** (owner call 2026-09-06), and the footer
+is the same block the wide panel has: the cart, the total line, the call to
+action and the by-line, in one set of rules for both widths.
 
-The summary line is `type.peekSummary`, one line, ellipsized, in
-`color.*.mutedText` while collapsed.
+It used to be a bespoke one-liner — `From €25 · Find seats` with nothing
+picked, `2 tickets · Continue €60` once seats existed — with its own markup,
+its own resolver and its own type scale, restating in fifty points of chrome
+what the foot eight lines below already said. Two summaries of one cart is two
+things to keep in step, and they drifted: the hold clock moved between the pill
+and the header as the sheet opened, and a buyer with seats already held could
+not see the button that takes their money, because the foot that carries it was
+hidden at peek. **Ports must not reintroduce a peek bar.**
 
-**THE BAR IS EXACTLY ITS HEAD.** There is one number for the collapsed
-surface: `size.peekHeight` + the lift + the safe inset. A port that clips the
-sheet to a *different* height than the head it contains cuts the bottom off the
-head's own buttons — the web shipped a 50 px clip under a 58 px head and lost
-the lower edge of every 44 px button on it. Derive the clip from the head, or
-do not clip at all.
+**One surface.** Ground `color.*.background` — the PANEL's ground, not the
+card's, or the cart cards inside have nothing to sit on. A hairline on the top
+edge, and a shadow of `0 -8 26 -20` at 72 per cent black. `radius.sheet`.
+`elevation.sheet` stays available through `sheetStyle` and is 0 by default,
+because the shadow is drawn rather than cast.
 
-**The chevron leaves the collapsed bar** (it stays on the open sheet, where it
-is the way back down). The whole head is already the tap and the swipe, and the
-arrow only took width from the one button the bar exists for. **The head then
-carries the toggle's accessibility itself** — button role, expanded state,
-`strings.expandCart`, and its own tap action on the same node — or a
-screen-reader buyer loses the only named way into the cart.
+**The handle** is a `size.sheetHandleWidth` × `size.sheetHandleHeight` pill at
+`radius.pill`, straddling the sheet's own top edge the way a drawer handle sits
+on a drawer: `size.sheetHandleOverhang` above the edge, the rest inside, with
+the head reduced to `size.sheetHeadHeight` and **nothing drawn under it** — no
+divider, no band. Its ground is the hairline at 62 per cent **of its own
+alpha** over the sheet (a token that already carries alpha, re-alpha'd to .62,
+paints a dark slate lozenge instead of a pale grey one), bordered with the same
+hairline. The chevron is INSIDE it and rotates over `motion.duration.chevron` on
+`motion.curve.easeEnter` when the sheet opens, so the state and the control that
+changes it are one thing.
 
-**On the empty bar the price is the loud part.** The line stays the locale's
-own sentence — `strings.fromPrice`, in whatever order the language puts it —
-and only the **amount inside it** is lifted: `type.peekFromPrice` in
-`color.*.text`, tabular figures, with the word around it left at
-`type.peekSummary` in `color.*.mutedText`. One string per locale, two weights.
-Ports substitute the money into the sentence and then style that substring;
-where the amount cannot be found in the resolved sentence, the whole line is
-printed at the caption weight rather than guessed at.
+A port that draws the pill outside its parent's own box must make the parent
+take the overhang into its height, or the upper half is neither painted nor
+pressable.
 
-**The Continue button** is a rounded rectangle at `radius.peekButton`, height
-`size.peekButtonHeight`, 18 pt of horizontal padding, accent ground,
-`color.*.onAccent` ink, `type.peekPill`, tabular total. It is a real button and runs the **same**
-checkout action the sheet's footer button runs: from the collapsed bar it *is*
-the way to pay. It is hidden entirely while the sheet is open, where the footer
-says the same thing.
+**Collapsed height is the height of the block it draws** — the handle, the
+capped cart and the whole foot — plus the bottom safe inset. Never a fixed
+peek: a surface clipped to a *different* height than the content it holds cuts
+the bottom off its own buttons, which is exactly what a 50 px clip under a
+58 px head did on the web.
 
-**Find seats** is the empty bar's one door: a rounded rectangle at
-`radius.peekButton`, height `size.findPillHeight`, 20 pt of horizontal padding,
-accent-filled, a drawn three-star sparkle mark of 16 and `strings.findSeats` at
-`type.findPill` — never a single typed `✦`, which leaves the button short.
-It is the bar's primary action and is drawn as one — the small lozenge it
-replaced read as an aside. The word stays **`Find seats`**, never `Book now`:
-nothing is selected yet and the tap opens the best-available form, so the button
-says what the tap does. Pressing it opens the sheet on the best-seats form and moves
-focus to that form's action. It is withheld where the form would be refused —
-a performance group, closed sales, or an existing hold.
+**The cart region.** The CartList in the panel's own `size.cartTrayPadX`
+gutters, capped at `size.cartPeekMaxHeight` while collapsed and scrolling
+inside its own box. That cap is three whole cards and a sliver of the fourth,
+measured: `size.cartTrayPadTop` + three `size.cartCardMinHeight` cards + their
+`size.cartCardGap` gaps + one more gap + five points of the next card = 228.
+Ten tickets used to grow the sheet until it owned the phone. On a short device
+the sheet's own ceiling wins instead, the region shrinks and scrolls, and the
+button is never what gets cut off.
 
-**Every line the peek can say**, in resolution order (one resolver drives the
-collapsed pill, the sheet's button and the wide bar, so they can never
-disagree — `lib/src/picker/picker_checkout_cta.dart`):
+Collapsed, the region carries the cart and nothing else. The closed-sales
+statement and the best-seats form belong to the opened sheet, which has the
+room to read them — but they stay LAID OUT while it is shut, so the sheet knows
+how tall it would open to and opens straight to it.
 
-| Condition | Line |
-| --- | --- |
-| tickets, securing | `strings.securingSeats`, no pill |
-| tickets, opening checkout, prices shown | `strings.peekSecured` |
-| tickets, opening checkout, prices suppressed | `strings.seatsSecuredOpeningCheckout` |
-| tickets, idle | `strings.ticketCount…` + the pill — `strings.secureMore` where a hold exists and more are pending, else `strings.continueWord` — then the total, then the live `m:ss` while a hold runs |
-| sales closed, nothing picked | `strings.salesClosedPill`, no pill |
-| empty, a price is known | `strings.fromPrice` + Find seats |
-| empty, no price | `strings.pickYourSeats` + Find seats |
+**The total line** reads `strings.noSeatsSelected` on an empty cart, and
+`strings.ticketCount` at `type.footTotalLabel` with the total on the trailing
+edge at `type.footTotalAmount` in tabular figures once there is one. It is a
+live region, and the count swells once on `motion.duration.bump` when it
+changes — the only feedback a buyer gets that a tap on the map reached a shut
+sheet.
 
-Both buttons sit against the head's own trailing inset of 12 pt — the same
-inset the summary starts at on the leading side — so the bar reads as one row
-with a margin rather than a button hanging off its edge.
+**There is no `From <min>` anywhere.** It stated a price and offered nothing to
+do about it, on the one line a buyer reads to find out what they are about to
+pay. `fromAmount` / `fromPriceText` and every path that carried them are gone.
 
-The peek pill is **never rendered disabled**: the states that would disable it
-render a different line instead. The footer button carries the disabled
-language.
+**The foot** is the lapse notice, the inline action error, the total line, the
+BookButton and the attribution, inside `size.footPadX` /
+`size.footPadTop` / `size.footPadBottom` under a hairline — and it is **not
+restyled on a phone at all**. The only narrow-only difference left is the WORD
+on the button (§3.10.3).
 
-**Motion.** The count swells once on `motion.duration.bump` when it changes
-while collapsed — the only feedback a buyer gets that a tap on the map reached
-the cart with the sheet shut. On first reveal the bar rises last, after the map
-and rail.
+**Accessibility.** There is exactly ONE named toggle for the sheet, in both
+states: the handle, with a button role, the expanded state, its own tap action
+and `strings.expandCart` / `strings.collapseCart`. Never two — two controls
+over one action read as two different things to press.
 
-**Gestures.** The **whole head** is the toggle. A drag up past a small threshold
-opens; a drag down past it collapses; a press with almost no movement toggles.
-The gesture must not start on the dock, the chevron or the pill — and that guard
-must be evaluated at press-down, before any pointer capture retargets later
-events. A tap on the map collapses an open sheet back to peek.
+**Gestures.** The whole handle band is the tap target and the sheet's own drag
+runs under it. A drag up past a small threshold opens; a drag down past it
+collapses; a press with almost no movement toggles. A tap on the map collapses
+an open sheet.
 
-Springs, not tweens: `motion.physics.sheetSpringMass`,
-`…Stiffness`, `…Damping`, with `motion.physics.sheetFlingVelocity` as the
-threshold at which a flick decides on its own and `motion.physics.rubberBand`
-for over-drag.
-
-**Accessibility.** There is exactly ONE named toggle for the sheet in either
-state, with an expanded state and its own tap action: while collapsed it is the
-head itself (`strings.expandCart`), and while open it is the chevron
-(`strings.collapseCart`). Never both — two controls over one action read as two
-different things to press. The summary is a live region that updates politely.
+Springs, not tweens: `motion.physics.sheetSpringMass`, `…Stiffness`,
+`…Damping`, with `motion.physics.sheetFlingVelocity` as the threshold at which
+a flick decides on its own and `motion.physics.rubberBand` for over-drag. The
+value the physics moves is the cart region's height ABOVE what the collapsed
+sheet already shows, so peek stays zero and the detent table below is unchanged.
 
 **Snapshot.** `cart.ticketCount`, `cart.cartTotal`, `cart.lines[]`, `hold`,
 `event.currency`, `event.salesClosed`, `capabilities.bestAvailable`.
 
-### 3.10 Expanded sheet, cart rows and foot
+### 3.10 The open sheet, cart cards and foot
 
 #### 3.10.1 The sheet
 
@@ -1418,96 +1403,125 @@ Content-height, growing ticket by ticket, capped at:
 | open with tickets | the lesser of `size.sheetMaxHeightFraction` of the height and `size.sheetMaxHeight`, plus the safe inset |
 | open with an empty cart | the lesser of `size.emptyTrayMaxHeightFraction` and `size.emptyTrayMaxHeight`, plus the safe inset |
 | a native-only full detent | `size.sheetFullHeightFraction` |
-| peek | `size.peekHeight` plus the safe inset |
+| collapsed | the handle, the capped cart and the foot, plus the safe inset |
 
-At peek, every child except the head is not drawn. The open head shrinks to
-`size.sheetOpenHeadHeight`, its summary grows to `type.peekSummaryOpen`, and the
-chevron's ink shrinks to `size.sheetToggleOpenSize` inside the same
-`size.minimumHitTarget` target.
+Opening lifts the cart's cap to that ceiling and adds the closed-sales
+statement and, on an empty cart, the best-seats form. With three tickets or
+fewer and neither of those to add, opening turns the chevron and changes
+nothing else: the collapsed sheet is already the whole block. That is the
+intended reading, not a bug to design around.
 
-**The sheet never opens itself.** Only the buyer opens it — the grabber, the
-chevron, a swipe, or `Find seats`.
+**The sheet never opens itself.** Only the buyer opens it — the handle, a
+swipe, or the empty cart's `Find best seats`.
 
-#### 3.10.2 Cart rows
+#### 3.10.2 Cart cards
 
-**Name** `SeatLayerCartList` · **file** `lib/src/picker/picker_cart_list.dart`
+**Name** `SeatLayerCartList` / `SeatLayerCartCard` ·
+**file** `lib/src/picker/picker_cart_list.dart`
 
-One plate: a column on `color.*.surface` with a hairline and corner
-`radius.base × radius.smallRatio`, rows divided by hairlines rather than each
-row being its own card.
+ONE CARD PER TICKET, AND THE SAME CARD ON EVERY WIDTH (owner call 2026-09-06:
+"cards should be the same design as desktop"). The phone used to draw a second
+cart — a bordered plate of `44` pt hairline-divided lines, with consecutive
+seats folded into runs behind a `+N more`. It saved real pixels and it cost the
+sheet its coherence: a bordered list on its own surface between a band of
+chrome and a shadowed foot reads as three blocks stacked in a panel rather than
+as one panel. **The run model, the fold and the `+N more` are gone**; the
+collapsed sheet caps the list and scrolls instead.
 
-Each line is `size.denseLineHeight` — not less: a remove glyph of
-`size.denseRemoveSize` inside a `size.minimumHitTarget` target cannot reach the
-floor in a shorter row. Contents: a category dot, then the identity at
-`type.denseLine` with tabular figures — the **section** (or the seat label where
-there is no section) is the only part that ellipsizes, then a muted separator,
-then the row and seats, which never shrink. The category **name** is not on the
-line; its colour is the dot, and the name goes to the accessible label.
-Trailing: a multiplier at `type.denseMultiplier`, the amount, and the remove
-control.
+Each card is at least `size.cartCardMinHeight` on `color.*.surface`, with a
+hairline border, corner `size.cartCardRadius` and padding `12 / 9 / 6 / 9`.
+Cards are separated by `size.cartCardGap`. Contents, on one baseline:
 
-**Held rows** wear a wash of the accent at low strength and an accent rail on the
-leading edge, and the dot becomes a **lock** — a lock is not a colour.
+- a 9 pt category dot with a hairline of the ink at 22 per cent, so a pale
+  category on the panel's own surface is still a disc you can find;
+- the **name** at `type.cartCardName` — the section, or the ticket type where
+  the chart has no sections — the only part that ellipsizes;
+- under it the position and type at `type.cartCardPosition` in
+  `color.*.mutedText` with tabular figures. The type joins the line only when
+  it is not already the name;
+- the amount at `type.cartCardAmount`;
+- the **eye**, then the **×**, each a TIGHT `size.minimumHitTarget` box. Tight,
+  not a minimum: the platform's own icon button pads itself to 48, and four
+  points per card is what puts the fourth card past the collapsed cap. The eye
+  is drawn only where the host allows it, the runtime advertises `seatView`,
+  and the seat carries an authored photograph.
 
-**Folding.** Consecutive tickets fold into one run only when held-state,
-section, row, category and price all match. A run's seats print as a true
-consecutive range (`1–6`) where they really are consecutive; otherwise up to
-three labels and then `+N`. A ticket that carries its own control — a table's
-guest count, a tier choice, an accessibility marker — is **never** folded. A run
-of one is not a run and keeps its dot. An opened run lists its members **in seat
-order**, matching the range its own label states, indented on a faint ground. A
-run's remove control removes the whole run, and says so.
+`size.cartCardMinHeight` is 64 because the two targets are 44 and the padding
+is 9 above and below plus the two hairlines. That is the card a coarse pointer
+draws, and it is the number the collapsed cap is derived from.
 
-The fold chevron is `size.denseRunToggleWidth` of ink inside a full-size target
-and rotates on press.
+**Notes.** What the organizer said about the seat, said ONCE and in WORDS, on
+the card, under a hairline of the divider at 72 per cent inside it. Order:
+accommodations (by wire key, through `strings.accessNeeds`), then the
+wheelchair provision — `strings.accessiblePhysicalSeat` for `seat-present`,
+`strings.emptyWheelchairSpace` for `no-seat`, and the plain wheelchair
+accommodation is dropped when a provision exists — then **Restricted view**,
+**Obstructed view** and **Premium seat** as SEPARATE lines, then the
+organizer's own sentence, attached to the first selling mark or standing on its
+own `strings.organizerNote` line where there is none. Title at
+`type.cartNoteTitle`, sentence at `type.cartNoteText` in `color.*.mutedText`.
 
-**Overflow.** Once there are `size.denseCollapseFrom` runs, everything past
-`size.denseVisibleLines` collapses behind a row of `size.denseMoreRowHeight` at
-`type.denseMore`, reading `strings.moreCount` ↔ `strings.showLess`.
+No plate, no ground and no icon: the card is already a bordered ticket, a
+tinted band inside one reads as a card inside a card, and the column is narrow
+enough that a plate's padding wrapped "Restricted view" onto two lines. **The
+glyph rows belong to the seat card (§3.8), not here** — the card used to carry
+markers AND rows, and since both drew the same icon set the line read as the
+same fact printed twice.
 
-**Motion.** A row arrives on `motion.duration.enter` with a small rise and
-scale-up; a removed row collapses on `motion.duration.exit`. A swipe on a row
-settles from the finger, committing past `motion.physics.swipeCommitFraction` of
-its width or above `motion.physics.swipeFlingVelocity`.
+**Held cards** wear a wash of the accent at low strength and a border blended
+toward it, and the dot becomes a **lock** — a lock is not a colour.
+
+**Motion.** A card arrives on `motion.duration.enter` with a small rise and
+scale-up, staggered across a set that lands together. A swipe on a card settles
+from the finger, committing past `motion.physics.swipeCommitFraction` of its
+width or above `motion.physics.swipeFlingVelocity`; the red plate under it is
+clipped to the card's own corner.
 
 **Haptics.** `haptics.ticketRemoved`.
 
-**Nothing is said.** A removal is silent: no toast, and no Undo. The line has
+**Nothing is said.** A removal is silent: no toast, and no Undo. The card has
 gone from the tray, the total has moved and the checkout action has recounted,
-so a sentence naming what the buyer just did adds nothing. The Undo it used to
-carry made a one-tap action into a two-tap one and put a timer on the second
-tap — and re-picking the seat is the same gesture that chose it in the first
-place. A removal that *fails* still speaks, through the inline action error:
-that is the one case the tray cannot show by itself.
+so a sentence naming what the buyer just did adds nothing. A removal that
+*fails* still speaks, through the inline action error.
 
 **Commands.** `picker.deselect { label }`, and the runtime's
 `cart-line-remove-v1` for a line the selection cannot name.
 
 #### 3.10.3 Foot
 
-Order: the lapse notice if there is one, then the checkout button, then the
-attribution.
+Order: the lapse notice if there is one, the inline action error, the total
+line, the checkout button, then the attribution. The whole foot is drawn in
+both sheet states.
 
-**Checkout button** — `SeatLayerBookButton`, slot `primaryButtonStyle`. Full
-width, height `size.checkoutButtonHeight`, corner `radius.button`,
+**Checkout button** — `SeatLayerBookButton`, slot `primaryButtonStyle` (the
+sheet merges its own `continueButtonStyle` over it). Full width inside the
+foot's gutters, height `size.checkoutButtonHeight`, corner `radius.button`,
 `type.bookButton`, accent ground with `color.*.onAccent`. It carries **its own
-label only**; the total is already on the peek bar. Disabled is a designed
-state, not a Material grey: a surface-toned ground, muted ink, an inset hairline
-— Material's own disabled colours vanish on the dark scene sheet.
+label only**; the total is on the line above it. Disabled is a designed state,
+not a Material grey: a surface-toned ground, muted ink, an inset hairline.
 
 Label ladder, in priority order:
 
 1. sales closed → disabled, `strings.salesClosedCta`
-2. a seat card or table prompt is open → disabled,
-   `strings.confirmOrCancelSeat` / `strings.confirmTable`
-3. securing → disabled, spinner, `strings.securingSeats`
-4. opening checkout → disabled, spinner, `strings.openingCheckout`
-5. the selection breaks the event's rules → disabled,
+2. a general-admission prompt is unanswered → disabled,
+   `strings.confirmYourTickets`
+3. a seat card is open → disabled, `strings.confirmOrCancelSeat`
+4. securing → disabled, spinner, `strings.securingSeats`
+5. opening checkout → disabled, spinner, `strings.openingCheckout`
+6. the selection breaks the event's rules → disabled,
    `strings.chooseMore` / `strings.removeTickets…` / `strings.adjustSelection`
-6. a hold exists and more are pending → `strings.secureMoreAndCheckout`
-7. a hold exists, nothing pending → `strings.continueToCheckout`
-8. tickets, no hold → `strings.holdAndCheckout`
-9. nothing picked → disabled, `strings.selectSeats`
+7. **an empty cart on a surface that may offer the finder** → ENABLED,
+   `strings.findBestSeatsCta`, and a press opens the sheet on the best-seats
+   form. The wide foot's `Select seats` is a disabled label telling a buyer to
+   use the map beside it, which is fair on a width that shows both at once; on
+   a phone the foot IS the sheet, so a full-width disabled button would be the
+   largest thing on screen saying no. Gated exactly as the tray's own card is —
+   best-available enabled, not read-only, no existing hold — because a door
+   into an empty room is worse than none.
+8. a hold exists and more are pending → `strings.secureMoreAndCheckout`
+9. a hold exists, nothing pending → `strings.continueToCheckout`
+10. tickets, no hold → `strings.holdAndCheckout`
+11. nothing picked, and no finder to offer → disabled, `strings.selectSeats`
 
 **Commands.** `picker.checkout`, then `picker.rejectHandoff`
 (`checkout-handoff-reject-v1`) if the host refuses the handoff, so a rejected
@@ -1521,9 +1535,9 @@ chrome's palette, not the picker's, so its words survive on the dark scene
 sheet. Copy `strings.poweredBy`. Drawn when `branding.attributionRequired`; a
 white-label entitlement hides it server-side, with no host switch.
 
-The total is **not** repeated in the foot, and there is no separate "secured"
-strip on a phone: the head says the count and total once, the header pill is the
-clock, and each held line's remove control releases one seat.
+The total is said ONCE, on the foot's own line, and there is no separate
+"secured" strip on a phone: the header pill is the clock, and each held card's
+× releases one seat.
 
 ### 3.11 Best-seats form
 
@@ -1695,7 +1709,7 @@ progress strip at the top of the map. The sentence
 Reveal sequence, once the runtime has framed the map: the loading surface fades
 out over `motion.duration.exit`-scale time, a sweep passes over the shells for
 `motion.durationOutsideBudget.shellSweep`, the rail chips stagger in, and the
-peek bar rises last; the whole arrival is done by
+cart sheet rises last; the whole arrival is done by
 `motion.durationOutsideBudget.revealDelay`. Under reduced motion the loading
 surface is simply removed — no fade, no sweep, no stagger.
 
@@ -1762,7 +1776,7 @@ A polite live region.
 Said in five places, each a different job:
 
 - header — `strings.salesClosedPill`, neutral
-- peek line — the same words, no pill
+- cart region — the tray statement below, drawn only in the open sheet
 - checkout button — disabled, `strings.salesClosedCta`
 - toast on any attempted action — `strings.salesClosedToast`, warning tone
 - **tray statement** (`SeatLayerPickerSalesClosedStatement`) — a card on a
@@ -1785,7 +1799,7 @@ clears live. Informational only — there is no waitlist.
 #### 3.13.6 Hold pill and countdown
 
 The clock is `m:ss`, floored at zero, ticking twice a second so a second never
-appears to skip. The same tick updates the peek clock. `is-expiring` begins at
+appears to skip. It is the picker's only clock. `is-expiring` begins at
 one minute remaining. The countdown **stops the moment a read finds the hold
 gone**, even when the snapshot in hand still describes a live one: it was read
 before the reconciliation that ended it, and a clock still running over released
@@ -2045,7 +2059,7 @@ regenerated, never hand-edited. (Flutter: `lib/src/picker/picker_tokens.g.dart`.
 
 **4.2 Style slots.** Expose the same named slots so one element can be restyled
 without replacing the widget that draws it: primary action, secondary action,
-the peek Continue, icon buttons, chip shape, legend chip, floor strip, seat-view
+the sheet's own button, icon buttons, chip shape, legend chip, floor strip, seat-view
 chrome, dock bar, confirm card, sheet, header, pill, and the map scrim colour.
 Each slot is *partial* — an unset field keeps the spec's value. Each element that
 owns a slot also takes a per-instance override that wins over the theme.
@@ -2216,7 +2230,7 @@ mountable on its own, where there is no order to join. Dart file:
   explored is the honest form of a canvas, not the intended design.
 - *Live regions*, and only these three among the surfaces that are always up
   (the dock's is there only where a host opted into a dock; the default phone
-  has two): the peek summary, the section dock's name and seats-left, and the
+  has two): the foot's total line, the section dock's name and seats-left, and the
   hold countdown. Each changes without the buyer touching it, and none says so
   any other way. A surface that ARRIVES unasked — a buyer-facing state, a hold
   notice, a toast, the best-seats count — is live as well; a notice that is part

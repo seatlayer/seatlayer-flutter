@@ -47,14 +47,15 @@ chips and its tier rows; the sheet's `Hold seats & checkout`; the
 accessibility sheet's rows; `Try again`; the prompts'
 action pairs.
 
-**`radius.peekButton` (12):** the collapsed bar's two doors — `Continue ·
-total` and `✦ Find seats`. They were true pills; a rounded rectangle at the
-full `size.peekButtonHeight` reads as the primary action each of them is.
+**`radius.peekButton` (12):** nothing on the phone sheet any more — the
+collapsed bar's two doors are gone, and the sheet's one button takes
+`radius.button` with every other primary action. The token stays for hosts and
+for the wide checkout bar.
 
 **`radius.control`:** the best-seats selects, its stepper and its action.
 
 Round icon controls — the map buttons, the 3D seat stepper — are circles and
-are unaffected. The cart plate rounds to `radius.base × radius.smallRatio`; the
+are unaffected. A cart card rounds to `size.cartCardRadius`; the
 seat card to `radius.confirmCard`; the sheet to `radius.sheet`.
 
 Dart: `SeatLayerPickerThemeData(buttonRadius:)` moves every `radius.button`
@@ -110,7 +111,7 @@ PriceLegend band                           size.topRailHeight
 │  ConfirmCard / Venue3D chrome / status overlay          │
 │  (no DockBar — wide only; host opt-in on a phone)       │
 └─────────────────────────────────────────────────────────┘
-CartSheet peek                             size.peekHeight
+CartSheet (collapsed)     handle + capped cart + foot + safe inset
 ```
 
 The prices keep a band of their own between the header and the map: floated on
@@ -393,73 +394,106 @@ map; see `picker-spec.md` §3.13.7, "Divergence from the web picker".
 `continueButtonStyle:`
 
 - **Inputs** `cart`, `hold`, `capabilities.bestAvailable`, `event.currency`.
-- **States** peek empty, peek with tickets, expanded empty (the best-seats
-  form), expanded with tickets.
-- **Anatomy** radius `radius.sheet`, elevation `elevation.sheet`.
-  - **Peek** `size.peekHeight` plus the lift and the safe inset — and the
-    surface is clipped to exactly that, never to something shorter than the
-    head it holds. A grabber, then left `N tickets`, or `From <min>` when
-    empty — the sentence at `type.peekSummary` in `color.*.mutedText` with the
-    AMOUNT inside it lifted to `type.peekFromPrice` in `color.*.text`; right
-    the filled `Continue · total` button at `size.peekButtonHeight` and
-    `radius.peekButton`, against a 12 pt trailing inset. **No chevron while
-    collapsed** — the head is the toggle and carries its accessibility. With
-    an empty cart the button is `✦ Find seats` at
-    `size.findPillHeight` / `radius.peekButton` / `type.findPill`, which opens
-    the sheet on the best-seats form — withheld where that form would be
-    refused. The peek also
-    carries the securing, checkout and closed-sales lines; see
-    `picker-spec.md` §3.9.
-  - **Expanded** content height, capped at
-    `size.sheetMaxHeightFraction` of the screen; the empty tray is capped at
-    `size.emptyTrayMaxHeight`. Header is one line, `N tickets` plus the ✦
-    best-seats control and the chevron — no title and no repeated total.
-  - **Footer** the full-width BookButton, then the attribution when
-    `branding.attributionRequired`.
+- **States** collapsed empty, collapsed with tickets, expanded empty (the
+  best-seats form), expanded with tickets.
+- **Anatomy** ONE surface: ground `color.*.background`, a hairline on its top
+  edge and a shadow of `0 -8 26 -20`. Radius `radius.sheet`; `elevation.sheet`
+  is available through `sheetStyle` and is 0 by default, because the shadow is
+  drawn.
+  - **Handle** a `size.sheetHandleWidth` × `size.sheetHandleHeight` pill at
+    `radius.pill`, straddling the sheet's own top edge —
+    `size.sheetHandleOverhang` above it, the rest inside — on a ground of the
+    hairline at 62 per cent of ITS OWN alpha over the sheet, with the same
+    hairline as a border. The chevron sits inside it and rotates over
+    `motion.duration.chevron`. The whole band is the tap target and the
+    sheet's drag runs under it. It is the cart's ONE named toggle in both
+    states: `strings.expandCart` / `strings.collapseCart`, with the expanded
+    state and its own tap action.
+  - **Collapsed** the height of the block it draws — handle, cart, foot — plus
+    the safe inset. Never a fixed peek: a surface clipped to a different
+    height than the content it holds cuts the bottom off its own buttons.
+  - **Cart region** the CartList in `size.cartTrayPadX` gutters, capped at
+    `size.cartPeekMaxHeight` while collapsed and scrolling inside its own box;
+    opened, the cap lifts to the sheet's ceiling and the region also carries
+    the closed-sales statement and, on an empty cart, the best-seats form.
+  - **Foot** the lapse notice, the inline action error, the total line, the
+    BookButton and the attribution, in `size.footPadX` /
+    `size.footPadTop` / `size.footPadBottom`, under a hairline. Not restyled
+    on a phone at all — one block on both widths.
+  - **Total line** `strings.noSeatsSelected` on an empty cart, else
+    `strings.ticketCount` at `type.footTotalLabel` with the total at
+    `type.footTotalAmount` in tabular figures on the trailing edge. A live
+    region; the count swells once on `motion.duration.bump` when it changes.
+    There is no `From <min>` anywhere: it stated a price and offered nothing
+    to do about it.
 - **Rules** the sheet never opens itself; any map tap while expanded collapses
-  it to peek.
-- **Motion** `motion.duration.sheet`.
-- **Commands** `picker.checkout` from either call to action.
+  it. With three tickets or fewer and no extras to show, opening changes the
+  chevron and nothing else — the collapsed sheet is already the whole block.
+- **Motion** `motion.duration.sheet`; springs, not tweens (see
+  `picker-spec.md` §3.9).
+- **Commands** `picker.checkout` from the foot's own button.
 
 ## CartList
 
-**Name** `SeatLayerCartList`
+**Name** `SeatLayerCartList` · **Card** `SeatLayerCartCard`
 
 - **Inputs** `cart.lines[]` joined to `selection[]`.
-- **Anatomy** one `size.denseLineHeight` line per entry:
-  `● Section · Row · Seat …… price ✕` (`type.denseLine`). Consecutive entries
-  sharing section, row, category and price fold into one line:
-  `Section · Row · 1–6   6 × €25   €150`, tapped to open in place. An opened
-  run lists its members **in seat order**, matching the range its own label
-  states. A run of one is not a group and keeps its category dot. Beyond
-  `size.denseVisibleLines` lines the rest collapse behind `+N more`.
-- **Rules** a range is only drawn when the seat numbers really are consecutive;
-  anything else lists up to three labels and then `+N`. A ticket that carries
-  its own control (a table's guest count, a tier choice) never folds.
-- **States** a line the buyer has asked to remove is drawn at
+- **Anatomy** one card per ticket — the SAME card on every width — separated by
+  `size.cartCardGap`. Each is at least `size.cartCardMinHeight` on
+  `color.*.surface`, hairline border, `size.cartCardRadius`, padded
+  `12 / 9 / 6 / 9`: a category dot (9 pt, with a hairline so a pale category is
+  still findable), the name at `type.cartCardName` — the only part that
+  ellipsizes — the position and type under it at `type.cartCardPosition` in
+  `color.*.mutedText` with tabular figures, then the amount at
+  `type.cartCardAmount`, then the two actions. Both actions are a TIGHT
+  `size.minimumHitTarget` box: Material pads an icon button to 48 of its own
+  accord, and four points per card is what puts the fourth card past the
+  collapsed cap.
+- **Actions** the eye opens the view from that seat — drawn only where the host
+  allows it, the runtime advertises `seatView` and the seat carries an authored
+  photograph — then the ×.
+- **Notes** what the organizer said about the seat, said ONCE and in WORDS,
+  under a hairline inside the card: accommodations, then the wheelchair
+  provision (`strings.accessiblePhysicalSeat` /
+  `strings.emptyWheelchairSpace`), then Restricted view, Obstructed view and
+  Premium seat as SEPARATE lines, then the organizer's sentence — attached to
+  the first selling mark, or its own `strings.organizerNote` line where there
+  is none. Title at `type.cartNoteTitle`, the sentence at `type.cartNoteText`.
+  No plate and no ground: the card is already a bordered ticket, and a tinted
+  band inside one reads as a card inside a card. The icon rows belong to the
+  seat card, not here.
+- **Held cards** a wash of the accent, a warmer border, and the dot becomes a
+  lock — a lock is not a colour.
+- **Rules** no folding and no `+N more`. Consecutive seats used to collapse
+  into a run, which was a second rendering of one cart to keep in step; the
+  collapsed sheet caps and scrolls instead.
+- **States** a card the buyer has asked to remove is drawn at
   `opacity.removing` with its × inert and its swipe disabled, from the press
-  until the snapshot that drops it (or the failure that puts it back). Any
-  cell whose words change between snapshots cross-fades over
-  `motion.duration.crossfade`; the rest of the line does not move. See
+  until the snapshot that drops it (or the failure that puts it back). Any cell
+  whose words change between snapshots cross-fades over
+  `motion.duration.crossfade`; the rest of the card does not move. See
   `picker-spec.md` §3.13.
 - **Commands** `picker.removeCartLine { label }`, sent silently — no toast and
-  no undo, because the row leaving and the total moving are the whole answer.
+  no undo, because the card leaving and the total moving are the whole answer.
   It carries its own busy action (`removingCartLine`) because it is the one
   inventory mutation that does not put the checkout call to action down.
 
 ## BookButton
 
-**Name** `SeatLayerBookButton` · **Style slot** `primaryButtonStyle` ·
-**Instance override** `style:`
+**Name** `SeatLayerBookButton` · **Style slot** `primaryButtonStyle` (the
+sheet merges `continueButtonStyle` over it) · **Instance override** `style:`
 
-- **Inputs** `cart`, `hold`, busy state.
+- **Inputs** `cart`, `hold`, busy state, and whether this width may offer the
+  best-seats form (`onFindBestSeats`).
 - **Anatomy** full width, `size.checkoutButtonHeight`, radius `radius.button`,
-  `type.bookButton`. Carries its own label only — the total is already on the
-  peek bar.
-- **States** idle, busy (spinner), disabled with a reason. Disabled is a
-  designed state — a surface-toned ground, muted ink, an inset hairline — not
-  Material's own greys, which vanish on the dark scene sheet. The label ladder
-  is in `picker-spec.md` §3.10.3.
+  `type.bookButton`. Carries its own label only — the total is on the line
+  above it.
+- **States** idle, busy (spinner), disabled with a reason, and — on a phone
+  with an empty cart — an ENABLED `strings.findBestSeatsCta` that opens the
+  sheet on the best-seats form. Disabled is a designed state — a
+  surface-toned ground, muted ink, an inset hairline — not Material's own
+  greys, which vanish on the dark scene sheet. The label ladder is in
+  `picker-spec.md` §3.10.3.
 - **Commands** `picker.checkout`, then `picker.rejectHandoff` if the host
   refuses the handoff, so a rejected hold is never stranded.
 
