@@ -61,6 +61,7 @@ class SeatLayerPickerStrings {
     this.fewerTickets = SeatLayerStringTokens.fewerTickets,
     this.moreTickets = SeatLayerStringTokens.moreTickets,
     this.bestSeats = SeatLayerStringTokens.bestSeats,
+    this.findSeatsTogether = SeatLayerStringTokens.findSeatsTogether,
     this.findingBestSeats = SeatLayerStringTokens.findingBestSeats,
     this.findSeats = SeatLayerStringTokens.findSeats,
     this.showLess = SeatLayerStringTokens.showLess,
@@ -410,6 +411,14 @@ class SeatLayerPickerStrings {
 
   /// Name of the best-seats feature.
   final String bestSeats;
+
+  /// The best-seats card's own title, on one line.
+  ///
+  /// SHORT on purpose. "Find the closest seats together" is a sentence, and in
+  /// a 300-point column it wrapped onto a second line above a card whose whole
+  /// point is that it is compact. The card's button still says what pressing
+  /// it will do, and it counts the tickets while it is at it.
+  final String findSeatsTogether;
 
   /// What the best-seats action says while it is searching.
   ///

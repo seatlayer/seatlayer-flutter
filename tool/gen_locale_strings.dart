@@ -52,6 +52,7 @@ const List<String> _plainFields = <String>[
   'organizerNote',
   'accessiblePhysicalSeat',
   'emptyWheelchairSpace',
+  'findSeatsTogether',
   'hideLimitedView',
   'colorblindSafe',
   'notAvailable',

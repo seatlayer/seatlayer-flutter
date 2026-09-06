@@ -139,6 +139,9 @@ abstract final class SeatLayerStringTokens {
   /// Best seats
   static const String bestSeats = 'Best seats';
 
+  /// Find seats together
+  static const String findSeatsTogether = 'Find seats together';
+
   /// Finding the best seats…
   static const String findingBestSeats = 'Finding the best seats…';
 

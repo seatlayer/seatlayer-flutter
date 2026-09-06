@@ -32,6 +32,7 @@ const KEYS = {
   anyTicketType: 'picker.anyTicketType',
   anyVenueZone: 'picker.anyVenueZone',
   bestSeats: 'picker.bestSeatsPremium',
+  findSeatsTogether: 'picker.findSeatsTogether',
   showLess: 'picker.showLess',
   undo: 'picker.undo',
   holdAndCheckout: 'picker.holdSeatsAndCheckout',
