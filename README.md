@@ -26,6 +26,10 @@ holds, then confirm bookings on your trusted backend.
 > release and validate your event, checkout handoff, lifecycle, and supported
 > physical devices before rollout.
 
+## Scale evidence
+
+SeatLayer is benchmarked on public 100,000-, 150,000- and 200,000-seat venue fixtures: 200,000 seats chart-ready in 1.95 s with 58 FPS zoom and 60 FPS pan in a desktop benchmark (15 September 2026). Fixtures, method, all runs and SHA-256 manifests: https://github.com/seatlayer/seatlayer-performance · Try the 53,018-seat live demo: https://app.seatlayer.io/demo/play/large-stadium
+
 ## Works as a native picker
 
 **Every piece of chrome is a Flutter widget.** The header, price rail, floor strip, section dock, seat confirm card,
