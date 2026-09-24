@@ -16,6 +16,10 @@ typedef SeatLayerCheckoutCallback = FutureOr<void> Function(
 typedef SeatLayerMoneyFormatter = String Function(
     double amount, String currency);
 
+/// The runtime capability that carries [SeatLayerPickerPricing.categories]
+/// to the map: `init.config.pricing` and `cmd picker.setPricing`.
+const String seatLayerHostPricingCapability = 'host-pricing-v1';
+
 /// Host-supplied prices for one category and its tiers.
 @immutable
 class SeatLayerCategoryPricing {
@@ -25,14 +29,32 @@ class SeatLayerCategoryPricing {
     this.tiers = const <String, double>{},
   });
 
-  /// Price when the category has no tiers.
+  /// Price when the category has no tiers, and for a tier not in [tiers].
   final double? base;
 
   /// Price per tier id.
   final Map<String, double> tiers;
+
+  /// The runtime's shape: a bare number for a flat price, else
+  /// `{ base, tiers }`; null when this entry sets nothing.
+  Object? toBridgeJson() {
+    if (tiers.isEmpty) return base;
+    return <String, Object?>{
+      if (base != null) 'base': base,
+      'tiers': Map<String, double>.of(tiers),
+    };
+  }
 }
 
 /// Host-supplied pricing and money formatting.
+///
+/// [categories] are the prices the buyer is shown — on the price rail, the
+/// seat card, the cart and the checkout handoff — in place of the chart's own.
+/// A ticketing host that charges from its own catalogue sets them so the map
+/// says what checkout will charge; a category it leaves out keeps the chart's
+/// price. Display only: the hold is still priced by SeatLayer. Needs a runtime
+/// advertising [seatLayerHostPricingCapability]; an older one keeps the chart's
+/// prices.
 @immutable
 class SeatLayerPickerPricing {
   /// Creates a pricing override.
@@ -46,6 +68,16 @@ class SeatLayerPickerPricing {
 
   /// How every amount in the native chrome is rendered.
   final SeatLayerMoneyFormatter? formatter;
+
+  /// The runtime's `pricing` value, or null when no category sets a price.
+  Map<String, Object?>? toBridgeConfig() {
+    final prices = <String, Object?>{
+      for (final entry in categories.entries)
+        if (entry.value.toBridgeJson() != null)
+          entry.key: entry.value.toBridgeJson(),
+    };
+    return prices.isEmpty ? null : <String, Object?>{'prices': prices};
+  }
 }
 
 /// Visibility of the turnkey picker's native chrome.
@@ -401,6 +433,8 @@ class SeatLayerPickerOptions {
         'hideEventDetails': hideEventDetails,
         'panelCollapsed': panelInitiallyCollapsed,
         'languages': languages.map((locale) => locale.toLanguageTag()).toList(),
+        if (pricing?.toBridgeConfig() != null)
+          'pricing': pricing!.toBridgeConfig(),
       };
 }
 

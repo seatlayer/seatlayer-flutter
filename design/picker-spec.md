@@ -2748,6 +2748,7 @@ from the wrong one.
 | `hold-ownership-v1`, `hold-selection-v1` | who owns a hold, and holding a named selection |
 | `checkout-handoff-v1`, `checkout-handoff-reject-v1` | the hold crossing to the host, and giving it back |
 | `cart-line-remove-v1` | removing a cart line the selection cannot name |
+| `host-pricing-v1` | the host's own category and tier prices (`pricing.categories`) on the rail, the seat card, the cart and the handoff, sent in `init.config.pricing` and changed live with `picker.setPricing`; a category the host leaves out keeps the chart's price, and an older runtime keeps the chart's prices for all |
 
 A capability the runtime does not advertise is a feature that is **not offered**,
 never a feature that fails.
