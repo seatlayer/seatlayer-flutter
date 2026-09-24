@@ -1,9 +1,8 @@
 # Changelog
 
-## 0.10.0 (unreleased)
+## 0.10.0 (2026-09-24)
 
-Cut with runtime 0.99.0: the pin moves from 0.98.0 to 0.99.0 when that
-runtime is on the CDN, since `host-pricing-v1` first ships there.
+Runtime pin 0.99.0, the first runtime with `host-pricing-v1`.
 
 - **Host prices reach the map.** `SeatLayerPickerOptions.pricing.categories`
   was declared but never sent, so a host that sells from its own catalogue
@@ -12,11 +11,11 @@ runtime is on the CDN, since `host-pricing-v1` first ships there.
   `SeatLayerPickerController.setPricing` changes them without a reload.
   Needs a runtime advertising `host-pricing-v1`; an older one keeps the
   chart's prices. Display only — the hold is still priced by SeatLayer.
-- **Runtime pin 0.98.0.** The map now loads SeatLayer runtime 0.98.0
-  (was 0.84.1): the section overview, seat rendering and row labels of the
-  current web picker, the maintenance-pause message, and seats added after
-  checkout listed in the runtime's own snapshot. The bridge protocol range is
-  unchanged (1–2).
+- **Runtime pin 0.99.0** (was 0.84.1): the section overview, seat rendering
+  and row labels of the current web picker, the maintenance-pause message,
+  seats added after checkout listed in the runtime's own snapshot, host
+  pricing, and a seat card that no longer freezes 3D drag and pinch. The
+  bridge protocol range is unchanged (1–2).
 - **A sold-out accessibility filter can still be turned off.** A provision
   whose count reached zero went dark even while its switch was on, which
   trapped the buyer holding the last space on a filtered map.
