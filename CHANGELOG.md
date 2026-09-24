@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.10.0 (unreleased)
+
+Cut with runtime 0.99.0: the pin moves from 0.98.0 to 0.99.0 when that
+runtime is on the CDN, since `host-pricing-v1` first ships there.
 
 - **Host prices reach the map.** `SeatLayerPickerOptions.pricing.categories`
   was declared but never sent, so a host that sells from its own catalogue
