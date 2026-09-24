@@ -843,6 +843,26 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   /// contain. Runtimes that do not report `floorMode` ignore it.
   Future<void> showAllFloors() => setFloor(seatLayerAllFloors);
 
+  /// Whether the runtime takes host prices ([SeatLayerPickerPricing]).
+  bool get supportsHostPricing {
+    final bundle = mapController.bundleInfo;
+    return bundle != null &&
+        bundle.supportsCapability(seatLayerHostPricingCapability);
+  }
+
+  /// Show [pricing]'s category prices in place of the chart's without a
+  /// reload (null: the chart's own). Boot prices come from
+  /// [SeatLayerPickerOptions.pricing]; a runtime without
+  /// [seatLayerHostPricingCapability] keeps the chart's prices.
+  Future<void> setPricing(SeatLayerPickerPricing? pricing) {
+    if (!supportsHostPricing) return Future<void>.value();
+    return _mutation(
+      'picker.setPricing',
+      <String, Object?>{'pricing': pricing?.toBridgeConfig()},
+      SeatLayerPickerBusyAction.none,
+    );
+  }
+
   Future<void> setColorblindSafe(bool enabled) => _mutation(
         'picker.setColorblindSafe',
         <String, Object?>{'on': enabled},

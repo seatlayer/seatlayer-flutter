@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Host prices reach the map.** `SeatLayerPickerOptions.pricing.categories`
+  was declared but never sent, so a host that sells from its own catalogue
+  saw the chart's prices on the rail, the seat card and the cart. The picker
+  now boots the runtime with them (`init.config.pricing`) and
+  `SeatLayerPickerController.setPricing` changes them without a reload.
+  Needs a runtime advertising `host-pricing-v1`; an older one keeps the
+  chart's prices. Display only — the hold is still priced by SeatLayer.
 - **Runtime pin 0.98.0.** The map now loads SeatLayer runtime 0.98.0
   (was 0.84.1): the section overview, seat rendering and row labels of the
   current web picker, the maintenance-pause message, and seats added after
