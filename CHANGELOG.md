@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Runtime pin 0.98.0.** The map now loads SeatLayer runtime 0.98.0
+  (was 0.84.1): the section overview, seat rendering and row labels of the
+  current web picker, the maintenance-pause message, and seats added after
+  checkout listed in the runtime's own snapshot. The bridge protocol range is
+  unchanged (1–2).
 - **A sold-out accessibility filter can still be turned off.** A provision
   whose count reached zero went dark even while its switch was on, which
   trapped the buyer holding the last space on a filtered map.
