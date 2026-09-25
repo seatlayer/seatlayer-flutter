@@ -244,7 +244,7 @@ void main() {
   });
 
   group('the name never loses letters before anything else does', () {
-    // The owner's screenshot: `Sponsor Ta… · 72 left`. A truncated place name
+    // A reported screenshot: `Sponsor Ta… · 72 left`. A truncated place name
     // is the one thing in the dock a buyer cannot reconstruct, and it was
     // being cut while the count still spelled out its own word.
     testWidgets('a long name keeps its letters and the count keeps its word',

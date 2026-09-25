@@ -15,7 +15,7 @@ import 'seat_layer_picker_theme.dart';
 
 /// Where the buyer is, and the two ways out, docked under the map.
 ///
-/// THE DROP-IN MOUNTS NO DOCK ON A PHONE (owner call, 2026-09-04). Pinch-out
+/// THE DROP-IN MOUNTS NO DOCK ON A PHONE. Pinch-out
 /// and the zoom-out stepper already walk a buyer back to the venue, so the
 /// prev/next arrows bought a two-tap version of a gesture the finger does
 /// better, and the bar's height plus the home-indicator inset pushed every

@@ -12,7 +12,7 @@ import 'seat_layer_picker_theme.dart';
 /// The bars are the host operating system's, but the surface behind them is
 /// the picker's, so the picker is the only thing that can know what colour
 /// the clock has to be. A dark picker with the platform's default dark icons
-/// is what the owner reported: a clock, a wifi glyph and a battery drawn in
+/// is what was reported: a clock, a wifi glyph and a battery drawn in
 /// near-black on a near-black header, invisible until the buyer tilts the
 /// phone into the light.
 ///

@@ -1,6 +1,6 @@
 // The device's clock, wifi glyph and battery are drawn by the operating
 // system on a surface the picker owns, so the picker has to say what colour
-// they should be. The owner's screenshot of the dark picker showed the iOS
+// they should be. A screenshot of the dark picker showed the iOS
 // defaults: near-black glyphs on a near-black header, invisible.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

@@ -223,7 +223,7 @@ class _CornerControls extends StatelessWidget {
                 const SeatLayerPickerAccessibilityFilters(compact: true),
           ],
         ),
-      // "+" and the whole-venue disc, nothing between them (owner, 2026-09-06):
+      // "+" and the whole-venue disc, nothing between them:
       // a "−" that only sometimes had a step to take read as a control that
       // sometimes worked. Pinch steps out; the disc below goes home.
       // "+" retires once the buyer is among the seats or at the zoom ceiling
@@ -520,8 +520,7 @@ class SeatLayerPickerZoomOutButton extends StatelessWidget {
       tooltip: SeatLayerPickerScope.stringsOf(context).zoomOut,
       // Live only once the buyer is in among the seats: at a section's own
       // frame the only step back is the whole venue, and that is the disc
-      // below this one. Two discs for one move read as a puzzle (owner,
-      // 2026-09-06).
+      // below this one. Two discs for one move read as a puzzle.
       onPressed: map?.canStepBack == false || map?.rung != 'seats'
           ? null
           : controller.zoomOut,

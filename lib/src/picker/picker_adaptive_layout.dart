@@ -228,7 +228,7 @@ class _SeatLayerPickerAdaptiveLayoutState
         final immersiveUp = panoramaUp || venue3DUp;
         // Whether the scene has finished diving to a seat.
         final targeted = state.snapshot?.map.view3DTargetSeatId != null;
-        // NO DOCK ON THE PHONE by default (owner call, 2026-09-04). The bar
+        // NO DOCK ON THE PHONE by default. The bar
         // is auto-resolved wide-only, and the drop-in mounts it only in the
         // narrow branch, so by default nothing docks anywhere and a phone's
         // bottom-corner controls sit at the map's own edge. A host that asks

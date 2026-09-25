@@ -240,7 +240,7 @@ void main() {
   testWidgets('tapping a card takes the map to the seat and keeps the sheet',
       (tester) async {
     // The sheet used to step down to peek on every card tap, so checking
-    // three seats meant opening the cart three times (owner, 2026-09-06).
+    // three seats meant opening the cart three times.
     final map = FakePickerMap(
       bundle: nativeChromeBundle(
         commands: const <String>['picker.frameSeat'],

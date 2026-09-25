@@ -162,8 +162,8 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
     return reason(strings.adjustSelection);
   }
 
-  // 6. THE EMPTY PHONE CART HAS A DOOR, NOT A DEAD BUTTON (owner call
-  //    2026-09-05). The same button offers the best-seats form instead, gated
+  // 6. THE EMPTY PHONE CART HAS A DOOR, NOT A DEAD BUTTON. The same button
+  //    offers the best-seats form instead, gated
   //    exactly as the tray's own card is: a performance group or an existing
   //    hold means no card would render, and a door into an empty room is
   //    worse than none. The caller decides that and passes [canOfferFind].

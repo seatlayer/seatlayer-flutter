@@ -100,7 +100,7 @@ class SeatLayerPickerHeader extends StatelessWidget {
                       SeatLayerPickerSalesClosedPill(compact: compact)),
                   gap,
                 ],
-                // The one clock in the picker (owner call, 2026-09-05): it
+                // The one clock in the picker: it
                 // stands here for as long as the hold does, and the Continue
                 // pill below stays a button. It used to step aside while the
                 // collapsed cart's pill carried the clock, the web's

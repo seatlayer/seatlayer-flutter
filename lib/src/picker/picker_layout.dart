@@ -6,7 +6,7 @@ import 'picker_tokens.g.dart';
 ///
 /// Every number the phone layout depends on lives here rather than inside a
 /// widget, so an integrator can retune the chrome without forking it. The
-/// defaults are the owner-approved phone specification and are what the
+/// defaults are the approved phone specification and are what the
 /// zero-configuration [SeatLayerPicker] renders.
 @immutable
 class SeatLayerPickerLayout {

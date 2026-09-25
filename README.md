@@ -6,12 +6,11 @@
 [![Dart](https://img.shields.io/badge/Dart-%E2%89%A53.4-0175C2.svg)](https://dart.dev/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-111827.svg)](LICENSE)
 
-SeatLayer is interactive seating chart software built for stadium scale. Platforms embed the white-label seat picker with their own checkout; organizers sell seated events on their own website with their own payment gateway.
-
-The official SeatLayer Flutter package adds an interactive seating chart and
-seat picker to iOS and Android ticketing apps. Use Dart APIs and customizable
+The official SeatLayer Flutter seat map SDK adds an interactive seating chart
+and seat picker to Flutter ticketing apps on iOS and Android. Use Dart APIs and customizable
 Flutter widgets for live availability, best-available seats, and temporary
-holds, then confirm bookings on your trusted backend.
+holds, then confirm bookings on your trusted backend. SeatLayer is seating chart
+and reserved-seat ticketing software built for venues up to stadium scale.
 
 [SeatLayer Flutter package on pub.dev](https://pub.dev/packages/seatlayer) ·
 [Flutter seat-map documentation](https://docs.seatlayer.io/buyer-sdk/flutter/) ·
@@ -40,13 +39,13 @@ Benchmarked on public 100,000-, 150,000- and 200,000-seat venue fixtures on 15 S
 
 **Every piece of chrome is a Flutter widget.** The header, price rail, floor strip, section dock, seat confirm card,
 cart sheet, checkout button and the captions over the 3D scene and the seat-view
-panorama are all Dart — drawn in your palette, laid out by Flutter, replaceable
+panorama are all Dart: drawn in your palette, laid out by Flutter, replaceable
 one at a time. The SeatLayer venue map draws the geometry: seats, labels,
 section shells, the immersive scene and the panorama photograph. It knows
 Flutter owns the furniture, so it draws none of its own: no second tooltip, no
 second test badge, no duplicate button under a native one.
 
-Three ways in, and they are a ladder — each level keeps what the one below gave
+Three ways in, and they are a ladder: each level keeps what the one below gave
 you. Level 2 is not an escape hatch and level 3 is not a rewrite: the drop-in is
 built from exactly the widgets level 3 hands you.
 
@@ -91,7 +90,7 @@ SeatLayerPicker(
 That is the whole flow: live inventory, price and accessibility filters, section
 and floor navigation, seat confirmation, GA and table prompts, Best Available,
 the cart, a hold with its countdown, real venue 3D, the seat-view panorama and
-the checkout handoff. It fills the bounded space its parent gives it — do not
+the checkout handoff. It fills the bounded space its parent gives it, so do not
 nest it in a gesture-driven `ListView` or `SingleChildScrollView`.
 
 `SeatLayerPickerPage(configuration:, onCheckout:)` is the same widget as a route
@@ -99,11 +98,11 @@ you push; `showSeatLayerPicker(context, configuration:, presentation:)` is it as
 a modal returning the handoff, or `null` if the buyer closes it. `adaptive` is
 edge-to-edge on a phone and a constrained dialog at 700 logical pixels or wider;
 `.fullScreen` / `.dialog` force one. Both intercept close and system back and
-release a picker-owned hold before the route leaves — a hold already handed to
+release a picker-owned hold before the route leaves. A hold already handed to
 you is never released.
 
 **The renderer pin.** Each SDK release is pinned to a matching SeatLayer
-renderer version — exported as `seatLayerHostedWebVersion` — so an app on a
+renderer version (exported as `seatLayerHostedWebVersion`), so an app on a
 given `seatlayer` version always gets the same renderer, and
 `SeatLayerConfiguration(assetPath:)` points it elsewhere while you validate a
 pre-release.
@@ -150,7 +149,7 @@ any other failed hold, and the seats are left selected and unheld rather than
 claimed.
 
 Add `SeatLayerPicker.routeObserver` so the same thing happens when your own
-checkout screen pops back — that path never backgrounds the application, so
+checkout screen pops back; that path never backgrounds the application, so
 nothing else can notice it:
 
 ```dart
@@ -163,12 +162,12 @@ MaterialApp(
 It is optional: without it the lifecycle trigger still works and nothing
 complains. `SeatLayerPickerOptions(refreshOnResume: false)` turns both triggers
 off, and `announceHoldLapse: false` keeps the refresh but leaves the lapse
-message to you — `onHoldExpired` fires either way. Call
+message to you; `onHoldExpired` fires either way. Call
 `controller.refreshAvailability()` yourself from a composed layout.
 
 `refreshOnResume: false` stops the SDK *asking* for a read; it does not make it
 ignore one the runtime volunteers. Coming to the foreground re-reads
-availability inside the runtime, and that answer is always applied — the
+availability inside the runtime, and that answer is always applied: the
 runtime has already released a hold that ran out, so discarding what it reports
 would leave the buyer with an emptied cart and no explanation. Use
 `announceHoldLapse: false` when what you want is silence.
@@ -177,14 +176,14 @@ would leave the buyer with an emptied cart and no explanation. Use
 
 Four levels, cheapest first. None of them rebuilds the layout or the flow.
 
-**Colours and type — a theme.** One line adopts an app palette whole — before,
+**Colours and type: a theme.** One line adopts an app palette whole. Before,
 the SeatLayer palette; after, yours, on the chrome and the drawn map together:
 
 ```dart
 theme: SeatLayerPickerThemeData.fromColorScheme(Theme.of(context).colorScheme),
 ```
 
-**One control's shape — a style slot.** Every surface the picker draws has a
+**One control's shape: a style slot.** Every surface the picker draws has a
 slot on the theme, so one control changes without replacing the widget:
 
 ```dart
@@ -202,10 +201,10 @@ Slots: `primaryButtonStyle`, `secondaryButtonStyle`, `continueButtonStyle`,
 `seatViewChromeStyle`, `dockBarStyle`, `confirmCardStyle`, `sheetStyle`,
 `headerStyle`, `pillStyle`. Button slots take a Material `ButtonStyle`; surface
 slots take a `SeatLayerSurfaceStyle` (colour, shape, elevation, padding, type).
-Every widget owning a slot also takes `style:`, which wins for that one instance
-— `SeatLayerDockBar(style: SeatLayerSurfaceStyle(shape: …))`.
+Every widget owning a slot also takes `style:`, which wins for that one instance,
+for example `SeatLayerDockBar(style: SeatLayerSurfaceStyle(shape: …))`.
 
-**Sizes, visibility and words — layout, chrome switches, strings.** The spec's
+**Sizes, visibility and words: layout, chrome switches, strings.** The spec's
 numbers are defaults, not constants, and every buyer-facing string is an
 override:
 
@@ -224,12 +223,12 @@ options: SeatLayerPickerOptions(
 Or take the thirty-seven translations SeatLayer already ships, from the same
 reviewed dictionaries the drawn map uses:
 `strings: SeatLayerPickerStrings.forLocale(Localizations.localeOf(context))`.
-It resolves by language, and by script for Chinese; an untranslated locale — and
-any entry with no runtime wording, currently just `allFloors` — keeps its
+It resolves by language, and by script for Chinese; an untranslated locale (and
+any entry with no runtime wording, currently just `allFloors`) keeps its
 English default, and the result is an ordinary `SeatLayerPickerStrings` you can
 still override on top of.
 
-**One whole part — a builder slot.** The builder receives the live state, the
+**One whole part: a builder slot.** The builder receives the live state, the
 controller and the widget the drop-in would have rendered:
 
 ```dart
@@ -246,7 +245,7 @@ Slots: `map`, `header`, `legend`, `floorStrip`, `sectionNavigator`, `dockBar`,
 
 The test badge and the required attribution have no builder slot: colours and
 type follow your theme, but required chrome cannot be returned as an empty
-widget — a white-label entitlement turns attribution off, server-side. Organizer
+widget; a white-label entitlement turns attribution off, server-side. Organizer
 ticket categories are likewise never rebranded, because they mean a price.
 
 ## Build your own layout
@@ -309,8 +308,8 @@ await picker.setViewportInsets(insets); // frame clear of your own chrome
 Dispose a controller you created, and `await picker.close()` first so a
 picker-owned hold is acknowledged as released.
 
-**Cover the map safely.** An `IgnorePointer` is not enough on iOS — UIKit can
-hit-test the venue map beneath composited Flutter chrome — so bracket your own
+**Cover the map safely.** An `IgnorePointer` is not enough on iOS: UIKit can
+hit-test the venue map beneath composited Flutter chrome, so bracket your own
 overlay with `await picker.setMapInteractionEnabled(false)` and `true` in a
 `finally`, which makes the map itself inert. The turnkey layout already does
 this around its decision chrome. Do not wrap the map in an app-level drag or
@@ -328,7 +327,7 @@ off the snapshot so they never buzz twice for one seat;
 
 `themeMode` resolves in one order: **your `themeMode` → your app's theme → the
 device.** `auto` reads `Theme.of(context).brightness` first, so it tracks the
-dark-mode switch inside your app — the setting the buyer actually chose — and
+dark-mode switch inside your app (the setting the buyer actually chose) and
 falls back to `MediaQuery.platformBrightness` only when no Material or Cupertino
 theme sits above the picker. Either reading is live: flip your app's theme or
 the device appearance and the chrome **and the drawn map** repaint together, no
@@ -342,18 +341,18 @@ theme: const SeatLayerPickerThemeData(accent: Color(0xFFE54558)),
 The default constructor sets only the roles you name, so every ground role still
 comes from `themeMode`. Name `accent` alone and the ink on it is derived for
 you: white, the colour a brand already puts on its own, unless the accent is
-pale enough that white cannot be read on it — a yellow, a mint, a near-white
-tint — where it turns black. Pass `onAccent` to say it yourself and the picker
+pale enough that white cannot be read on it (a yellow, a mint, a near-white
+tint), where it turns black. Pass `onAccent` to say it yourself and the picker
 uses exactly that, whatever it reads like. **A preset pins the mode:**
-`SeatLayerPickerThemeData.light()` and `.dark()` are complete ground palettes —
+`SeatLayerPickerThemeData.light()` and `.dark()` are complete ground palettes;
 each also sends a contrast-paired `SeatLayerMapThemeData` for the canvas
-background, row labels, free text and the selection ring — and an explicit
+background, row labels, free text and the selection ring, and an explicit
 ground outranks a resolved mode, so `themeMode: auto` with `.light()` never goes
 dark. Reach for a preset when you want one fixed side; pick the preset yourself
 if you want both.
 
 The status and navigation bars are the picker's surface, so the picker dresses
-them — light glyphs on a dark picker, dark on a light one, dark for the
+them: light glyphs on a dark picker, dark on a light one, dark for the
 immersive scene either way, re-evaluated on every `auto` flip.
 `SeatLayerPickerChromeOptions(manageSystemOverlays: false)` opts out;
 `seatLayerPickerOverlayStyle(resolvedTheme)` still says what it would have set.
@@ -379,7 +378,7 @@ Checkout transfers ownership: closing the picker afterwards must not release the
 hold, while closing *before* handoff releases a picker-owned one. Process
 termination cannot guarantee a release, so the server TTL is the final boundary.
 If a turnkey `onCheckout` throws, the picker rejects the handoff before
-surfacing your error — it can release only the exact hold that session just
+surfacing your error; it can release only the exact hold that session just
 handed over. A custom flow rolls back the same way:
 
 ```dart
@@ -463,7 +462,7 @@ haptic map and `SeatLayerPickerStrings` all read the file, and
 ### How do I add a seat map to a Flutter app?
 
 Add the [`seatlayer` package](https://pub.dev/packages/seatlayer) and place a
-`SeatLayerPicker` with your event key on a route. That is the whole buyer flow —
+`SeatLayerPicker` with your event key on a route. That is the whole buyer flow:
 map, filters, seat confirmation, cart, holds and the checkout handoff. The quick
 start above is complete; the
 [Flutter seat-map integration guide](https://docs.seatlayer.io/buyer-sdk/flutter/)
@@ -472,7 +471,7 @@ app that wants only the raw map and owns every control itself.
 
 ### Is SeatLayer a Flutter widget or only a JavaScript snippet?
 
-It is a native Flutter picker — every control is a Flutter widget.
+It is a native Flutter picker: every control is a Flutter widget.
 
 ### Which Flutter platforms are supported?
 
@@ -490,8 +489,8 @@ book with a stable `bookingRef`.
 
 When a buyer selects seats, the SDK creates a temporary hold that reserves the
 inventory against concurrent buyers for a limited window. The hold expires
-automatically if checkout does not complete — `onHoldExpired` tells the app to
-return the buyer to the map — and `extendHold` and `resumeHold` cover longer
+automatically if checkout does not complete (`onHoldExpired` tells the app to
+return the buyer to the map), and `extendHold` and `resumeHold` cover longer
 checkouts and app restarts. This prevents double-selling without locking seats
 forever.
 
@@ -504,14 +503,14 @@ back whichever of their seats are still free.
 
 Yes. SeatLayer never processes payment inside the seat map. The app hands the
 `holdId` to your backend, and your backend charges through any payment
-provider you already use — Stripe, Adyen, Razorpay, or your own — before
+provider you already use (Stripe, Adyen, Razorpay, or your own) before
 booking the hold through the
 [server-side checkout flow](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/).
 
 ### Can I try the Flutter seat map without a SeatLayer account or API key?
 
-Yes. The repository's example app runs on a packaged offline fixture — no
-account, event key or backend needed — and exercises the real Flutter view,
+Yes. The repository's example app runs on a packaged offline fixture (no
+account, event key or backend needed) and exercises the real Flutter view,
 venue map, commands and event streams. The fixture lives with the example
 rather than in the published package, so it costs your app nothing.
 Create a free SeatLayer test event when you are ready to validate live
@@ -535,7 +534,7 @@ inventory, holds, snapshots and the checkout handoff. See
 ### Does the Flutter seat map support light and dark mode?
 
 Yes, live. `SeatLayerThemeMode.auto` follows your app's theme first and the
-device second, and repaints the Flutter chrome and the drawn map together —
+device second, and repaints the Flutter chrome and the drawn map together,
 without reloading, without losing the selection and without moving the camera.
 A `.light()` or `.dark()` preset pins one side deliberately.
 

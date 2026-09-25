@@ -108,7 +108,7 @@ void main() {
     );
 
     expect(find.byType(SeatLayerPickerZoomInButton), findsOneWidget);
-    // No "−" on the phone (owner, 2026-09-06): pinch steps out, the disc goes home.
+    // No "−" on the phone: pinch steps out, the disc goes home.
     expect(find.byType(SeatLayerPickerZoomOutButton), findsNothing);
     expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsOneWidget);
   });
@@ -280,9 +280,9 @@ void main() {
   });
 
   group('the ♿ disc heads the column', () {
-    // Owner call 2026-09-06. It stood alone in the map's bottom-left corner —
-    // one control facing a stack of them, in the corner the floor selector
-    // owns — and read as something the layout had forgotten. It is the top
+    // It used to stand alone in the map's bottom-left corner (one control
+    // facing a stack of them, in the corner the floor selector owns) and read
+    // as something the layout had forgotten. It is the top
     // disc of the right-hand column now, on BOTH layouts, because who can sit
     // where is an earlier question than how close the camera is.
     testWidgets('on the phone, above `+` and off the opposite corner',

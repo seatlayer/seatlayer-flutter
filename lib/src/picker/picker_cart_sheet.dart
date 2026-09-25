@@ -26,9 +26,8 @@ import 'seat_layer_picker_theme.dart';
 
 /// The buyer's cart, docked at the bottom of the phone.
 ///
-/// ONE SURFACE, AND THE COLLAPSED SHEET IS THE FOOTER (owner call
-/// 2026-09-06). It used to be three stacked blocks that had each been designed
-/// well on its own and none of which agreed with the others: a chrome band
+/// ONE SURFACE, AND THE COLLAPSED SHEET IS THE FOOTER. It used to be three
+/// stacked blocks that had each been designed well on its own and none of which agreed with the others: a chrome band
 /// carrying a bespoke one-liner — `From €25 · Find seats` with nothing picked,
 /// `2 tickets · Continue €60` once seats existed — then a bordered list on its
 /// own ground, then a shadowed foot. Two summaries of one cart is two things
