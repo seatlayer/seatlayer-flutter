@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+Needs a runtime advertising `staff-map-v1` (not yet pinned by this package).
+
+- **Staff map.** `SeatLayerConfiguration.manageAccessToken` and
+  `manageAccessTokenProvider` boot `SeatLayerView` with an event-scoped manage
+  grant (`mse_…`) instead of buyer access. The view then shows the organizer's
+  live board: staff pick seats, held and sold seats included, and the
+  selection arrives on `onSelectionChanged` with no hold placed.
+  `onStaffConnectionChanged` reports the live connection; `focusSection`,
+  `setUnavailableObjects` and `setCategoryPrices` drive the board. A renderer
+  without the capability fails the load with `SeatLayerError.incompatible`,
+  and a manage grant mixed with buyer access throws an `ArgumentError`.
+
 ## 0.12.0 (2026-09-25)
 
 Runtime pin 0.101.0. No Dart API changes; the map inside the picker is newer.
