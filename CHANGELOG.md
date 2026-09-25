@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.0 (2026-09-25)
+
+Runtime pin 0.100.0. No Dart API changes; the map inside the picker is newer.
+
+- **3D on a phone:** the first tap zooms to the seats, and a second tap picks one.
+- **Seat types in 3D:** wheelchair, companion, access, limited-view and premium seats show their icon, as in 2D.
+- **Arena venues:** floors stay level, straight banks stand as one tier, and floor seats face the stage.
+- Picking a seat no longer moves the camera.
+
 ## 0.10.0 (2026-09-24)
 
 Runtime pin 0.99.0, the first runtime with `host-pricing-v1`.
