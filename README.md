@@ -398,6 +398,46 @@ changes refused in the runtime *and* in the controller, which fails such a call
 with a typed `read_only` error rather than relying on hidden UI. Continue with
 [holds and secure server-side checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/).
 
+## Staff map (box office and door)
+
+For an app used by an organizer's own staff, `SeatLayerView` can show the
+organizer's live board instead of the buyer map. Staff pick seats on the live
+map, held and sold seats included, and the selection arrives on
+`onSelectionChanged`. Nothing is held while they pick; your app completes the
+sale separately.
+
+Boot it with an event-scoped manage grant (`mse_…`) instead of buyer access.
+Your backend mints the grant for one event with the `event:view` capability
+and `seatLayerMobileOrigin` (`https://cdn.seatlayer.io`) as its allowed origin.
+Grants are short-lived, so give the view a provider that renews them:
+
+```dart
+SeatLayerView(
+  controller: controller,
+  configuration: SeatLayerConfiguration(
+    event: 'ev_xxx',
+    manageAccessTokenProvider: (context) async {
+      final grant = await myBackend.mintSeatMapGrant('ev_xxx');
+      return ManageAccessToken(token: grant.token, expiresAt: grant.expiresAt);
+    },
+  ),
+);
+
+controller.onSelectionChanged.listen((seats) => sale.setSeats(seats));
+controller.onGAClick.listen((area) => sale.askQuantity(area.id));
+controller.onStaffConnectionChanged.listen((state) => showLive(state.isLive));
+await controller.focusSection('Stalls'); // or null for the whole venue
+```
+
+- A manage grant cannot be combined with `publicKey` or buyer access; the
+  configuration throws an `ArgumentError`.
+- The staff map runs in `SeatLayerView`, not `SeatLayerPicker`.
+- It needs a renderer advertising `staff-map-v1`. On an older renderer the
+  load fails with `SeatLayerError.incompatible`.
+- Staff map commands: `selectObjects`, `deselectObjects`, `clearSelection`,
+  `getSelection`, `zoomToFit`, `focusSection`, `setUnavailableObjects` and
+  `setCategoryPrices`. Hold commands answer `unsupported_command`.
+
 ## Widget catalogue
 
 Every widget below works standalone inside a `SeatLayerPickerScope`.

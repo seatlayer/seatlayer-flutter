@@ -2,6 +2,7 @@ import 'bridge/bridge_client.dart';
 import 'bridge/bridge_protocol.dart';
 import 'open_enums.dart';
 import 'payloads.dart';
+import 'staff_map.dart';
 
 /// This SDK's version.
 const String seatLayerSdkVersion = '0.12.0';
@@ -52,6 +53,8 @@ class SeatLayerConfiguration {
     this.showsWebSeatTooltip = false,
     this.buyerAccessToken,
     this.buyerAccessTokenProvider,
+    this.manageAccessToken,
+    this.manageAccessTokenProvider,
     this.selectedObjects,
     this.selectableObjects,
     this.numberOfPlacesToSelect,
@@ -75,6 +78,22 @@ class SeatLayerConfiguration {
         (buyerAccessToken!.token.trim().isEmpty ||
             buyerAccessToken!.expiresAt?.isFinite == false)) {
       throw ArgumentError.value(buyerAccessToken, 'buyerAccessToken');
+    }
+    if (manageAccessToken != null && !manageAccessToken!.isWellFormed) {
+      throw ArgumentError.value(
+        manageAccessToken,
+        'manageAccessToken',
+        'must be an mse_ grant with a finite expiresAt',
+      );
+    }
+    if (usesManageAccess &&
+        (publicKey != null ||
+            buyerAccessToken != null ||
+            buyerAccessTokenProvider != null)) {
+      throw ArgumentError(
+        'A manage grant cannot be combined with buyer access '
+        '(publicKey, buyerAccessToken, buyerAccessTokenProvider).',
+      );
     }
     for (final validator
         in selectionValidators ?? const <SelectionValidator>[]) {
@@ -132,6 +151,25 @@ class SeatLayerConfiguration {
   /// Renews private buyer access in memory without rebuilding the view.
   final BuyerAccessTokenProvider? buyerAccessTokenProvider;
 
+  /// An event-scoped manage grant (`mse_…`): the view shows the staff map
+  /// instead of the buyer map.
+  ///
+  /// The staff map is the organizer's live board in pick mode. Staff pick
+  /// seats (held and sold seats included) and the selection arrives on
+  /// `SeatLayerController.onSelectionChanged`; nothing is held while they
+  /// pick. It cannot be combined with [publicKey], [buyerAccessToken] or
+  /// [buyerAccessTokenProvider], and it runs in `SeatLayerView` only.
+  ///
+  /// Mint the grant for this event with the `event:view` capability and
+  /// [seatLayerMobileOrigin] as its allowed origin. Prefer
+  /// [manageAccessTokenProvider], which also renews it.
+  final ManageAccessToken? manageAccessToken;
+
+  /// Mints and renews the staff map's manage grant in memory. When
+  /// [manageAccessToken] is also set, it is used first and this renews it;
+  /// without one, this is also asked for the first grant.
+  final ManageAccessTokenProvider? manageAccessTokenProvider;
+
   final List<String>? selectedObjects;
   final List<String>? selectableObjects;
   final int? numberOfPlacesToSelect;
@@ -180,6 +218,12 @@ class SeatLayerConfiguration {
       config['buyerAccessToken'] = buyerAccessToken!.toJson();
     }
     if (buyerAccessTokenProvider != null) config['nativeAccessProvider'] = true;
+    if (manageAccessToken != null) {
+      config['manageAccessToken'] = manageAccessToken!.toJson();
+    }
+    if (manageAccessTokenProvider != null) {
+      config['manageAccessProvider'] = true;
+    }
     if (selectedObjects != null) config['selectedObjects'] = selectedObjects;
     if (selectableObjects != null) {
       config['selectableObjects'] = selectableObjects;
@@ -202,6 +246,10 @@ class SeatLayerConfiguration {
 
   bool get usesPrivateAccess =>
       buyerAccessToken != null || buyerAccessTokenProvider != null;
+
+  /// Whether this configuration boots the staff map.
+  bool get usesManageAccess =>
+      manageAccessToken != null || manageAccessTokenProvider != null;
 
   bool get usesSelectionPolicy =>
       selectedObjects != null ||
@@ -229,6 +277,11 @@ class SeatLayerConfiguration {
         other.buyerAccessToken?.toJson(),
       ) &&
       identical(buyerAccessTokenProvider, other.buyerAccessTokenProvider) &&
+      _deepEquals(
+        manageAccessToken?.toJson(),
+        other.manageAccessToken?.toJson(),
+      ) &&
+      identical(manageAccessTokenProvider, other.manageAccessTokenProvider) &&
       _deepEquals(selectedObjects, other.selectedObjects) &&
       _deepEquals(selectableObjects, other.selectableObjects) &&
       numberOfPlacesToSelect == other.numberOfPlacesToSelect &&
