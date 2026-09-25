@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.12.0 (2026-09-25)
+
+Runtime pin 0.101.0. No Dart API changes; the map inside the picker is newer.
+
+- **3D moves like a venue:** at the overview a drag turns the venue, and the near side follows your finger. Zoomed in, a drag moves you, and a two-finger twist turns.
+- **Seat card on the view:** a seat's card opens on the view from that seat.
+- **Your seat:** after you pick, a figure sits in your seat under a spotlight.
+- **Section tags** carry the category colour and a free wheelchair-space count. **Gates** are signed, with an arrow on the ground.
+- **Prices:** when the app sends its own prices, the seat card shows them, the same as the price list.
+
 ## 0.11.0 (2026-09-25)
 
 Runtime pin 0.100.0. No Dart API changes; the map inside the picker is newer.
