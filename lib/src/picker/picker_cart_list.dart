@@ -7,8 +7,8 @@
 /// footer reads as three blocks stacked in a panel rather than as one panel —
 /// and it was a second rendering of one cart to keep in step with the first.
 ///
-/// So there is one card now (owner call 2026-09-06: "cards should be the same
-/// design as desktop"): a colour dot, the name, the position and type in grey
+/// So there is one card now, the same design as desktop: a colour dot, the
+/// name, the position and type in grey
 /// under it, whatever the organizer has said about the seat, the price, and the
 /// two actions. The collapsed sheet caps the list at three of them and scrolls
 /// (see `picker_cart_sheet.dart`), which is the same answer folding gave
@@ -187,7 +187,7 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
   /// mark is dropped by the snapshot that no longer carries the line, or
   /// restored here if the mutation fails.
   /// The map frames the seat at its resting place. The sheet STAYS where the
-  /// buyer put it (owner call 2026-09-06): it used to step down to peek on
+  /// buyer put it: it used to step down to peek on
   /// every card tap, so checking three or four seats meant opening the sheet
   /// three or four times. The phone map sits above the sheet in the same
   /// column, so the seat lands in the room the open sheet leaves it.

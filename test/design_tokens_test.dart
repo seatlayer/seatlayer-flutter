@@ -83,7 +83,7 @@ void main() {
     expect(light.radius, radius['base']);
     expect(light.buttonRadius, radius['button']);
     expect(dark.buttonRadius, radius['button']);
-    // The owner's decision, pinned: the picker's actions round like the web
+    // The design decision, pinned: the picker's actions round like the web
     // picker's (~8 pt), and only the hold pill, the legend chips and the
     // Map/3D control are true pills.
     expect(radius['button'], lessThan(radius['base']! as num));

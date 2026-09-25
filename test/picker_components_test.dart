@@ -586,9 +586,9 @@ void main() {
     expect(interactionCalls.last.$2, <String, Object?>{'enabled': true});
   });
 
-  // N1 (owner decision 2026-09-05, option B): a buyer back from checkout who
+  // §3.13.13: a buyer back from checkout who
   // tries to change their seats meets a state with a way out, in their own
-  // words — not the bridge's `hold_owned_by_host` sentence.
+  // words, not the bridge's `hold_owned_by_host` sentence.
   testWidgets('a hold the host owns is a state with a way out, not an error',
       (tester) async {
     final map = _FakeMapController(

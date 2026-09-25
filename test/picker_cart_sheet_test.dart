@@ -856,7 +856,7 @@ void main() {
     map.emit(pickerSnapshot(holdOwner: 'picker'));
     await tester.pump();
 
-    // Shut or open, no `m:ss` on the bar (owner call, 2026-09-05): the
+    // Shut or open, no `m:ss` on the bar: the
     // header's hold pill is the picker's one clock, and the Continue pill
     // stays a button.
     expect(find.textContaining(RegExp(r'\d:\d\d')), findsNothing);
@@ -1044,7 +1044,7 @@ void _clockTests() {
     final button = tester.getRect(find.byType(FilledButton));
     expect(button.top, greaterThan(sheet.top));
     expect(button.bottom, lessThanOrEqualTo(sheet.bottom - _safeBottom + .01));
-    // And no `m:ss` anywhere on it (owner call, 2026-09-05): the header's hold
+    // And no `m:ss` anywhere on it: the header's hold
     // pill is the picker's one clock.
     expect(find.textContaining(RegExp(r'\d:\d\d')), findsNothing);
   });

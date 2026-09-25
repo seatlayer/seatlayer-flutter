@@ -476,7 +476,7 @@ void main() {
       // Two discs in the column now: "+" above the whole-venue disc.
       expect(stepIn.bottom, lessThan(wholeVenue.top + .5));
       // THE ♿ DISC IS THE HEAD OF THAT COLUMN, not a lone control in the
-      // opposite corner (owner call 2026-09-06). Same right edge as the
+      // opposite corner. Same right edge as the
       // discs, and above `+`.
       expect(access.right, closeTo(screen.right - inset, .5));
       expect(access.bottom, lessThan(stepIn.top + .5));
@@ -722,9 +722,7 @@ void main() {
 }
 
 void _headerClockTests() {
-  testWidgets(
-      'the header keeps the one clock, shut or open (owner call, 2026-09-05)',
-      (tester) async {
+  testWidgets('the header keeps the one clock, shut or open', (tester) async {
     final map = FakePickerMap();
     addTearDown(map.dispose);
     usePhoneSurface(tester);
