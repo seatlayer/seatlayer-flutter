@@ -12,6 +12,7 @@ import 'open_enums.dart';
 import 'payloads.dart';
 import 'seat_layer_configuration.dart';
 import 'seat_layer_error.dart';
+import 'staff_map.dart';
 
 /// The public, `Future`- and `Stream`-based API for a seat map.
 ///
@@ -70,6 +71,8 @@ class SeatLayerController {
   final _onDeckTap = StreamController<String>.broadcast();
   final _onUnknownEvent = StreamController<UnknownEvent>.broadcast();
   final _onBridgeEvent = StreamController<EventSignal>.broadcast();
+  final _onStaffConnectionChanged =
+      StreamController<StaffConnectionState>.broadcast();
 
   // MARK: - State
 
@@ -140,6 +143,11 @@ class SeatLayerController {
 
   /// An event this build does not model — a bundle newer than the app.
   Stream<UnknownEvent> get onUnknownEvent => _onUnknownEvent.stream;
+
+  /// Staff map only: the live connection went up or down, or ended because
+  /// the manage grant could not be renewed. See [StaffConnectionState].
+  Stream<StaffConnectionState> get onStaffConnectionChanged =>
+      _onStaffConnectionChanged.stream;
 
   /// Every accepted bridge event, before raw-chart routing.
   ///
@@ -262,6 +270,31 @@ class SeatLayerController {
             );
             return;
           }
+          if (config.usesManageAccess) {
+            if (profile.isPicker) {
+              _finishHandshake(
+                const SeatLayerError.bridge(
+                  BridgeErrorPayload(
+                    code: 'bad_payload',
+                    message: 'The staff map runs in SeatLayerView, not in '
+                        'SeatLayerPicker.',
+                  ),
+                ),
+              );
+              return;
+            }
+            if (!info.supportsCapability(seatLayerStaffMapCapability)) {
+              _finishHandshake(
+                SeatLayerError.incompatible(
+                  native: profile.protocolRange,
+                  web: info.protocolRange,
+                  reason:
+                      'the bundle does not support the staff map ($seatLayerStaffMapCapability)',
+                ),
+              );
+              return;
+            }
+          }
           if (config.usesPrivateAccess &&
               !info.supportsCapability('native-access-provider')) {
             _finishHandshake(
@@ -343,7 +376,14 @@ class SeatLayerController {
         final maximum = jIntLocal(jGetLocal(payload, 'maxSelection'));
         if (maximum != null) _onSelectionLimit.add(maximum);
       case 'access.token.request':
-        unawaited(_provideBuyerAccessToken(payload));
+        unawaited(
+          _configuration?.usesManageAccess == true
+              ? _provideManageAccessToken(payload)
+              : _provideBuyerAccessToken(payload),
+        );
+      case 'staff.connection':
+        final state = StaffConnectionState.fromJson(payload);
+        if (state != null) _onStaffConnectionChanged.add(state);
       case 'access.expired':
         final event = BuyerAccessExpiredEvent.fromJson(payload);
         if (event != null) _onBuyerAccessExpired.add(event);
@@ -430,6 +470,47 @@ class SeatLayerController {
           'token': token.token,
           if (token.expiresAt != null) 'expiresAt': token.expiresAt,
         },
+      );
+    } catch (_) {
+      // The request may have timed out or the view may have reloaded.
+    }
+  }
+
+  Future<void> _provideManageAccessToken(Object? payload) async {
+    final requestId = jStrLocal(jGetLocal(payload, 'requestId'));
+    if (requestId == null) return;
+    final client = _client;
+    if (client == null) return;
+    final rawReason = jStrLocal(jGetLocal(payload, 'reason')) ?? 'initial';
+    final provider = _configuration?.manageAccessTokenProvider;
+
+    Future<void> unavailable() async {
+      try {
+        await client.command(
+          'access.token.unavailable',
+          payload: {'requestId': requestId},
+        );
+      } catch (_) {}
+    }
+
+    if (provider == null) return unavailable();
+    ManageAccessToken token;
+    try {
+      token = await provider(
+        ManageAccessRequestContext(
+          reason: ManageAccessRefreshReason.fromRaw(rawReason),
+        ),
+      );
+      if (!token.isWellFormed) throw StateError('invalid manage grant');
+    } catch (_) {
+      // Provider failures are sanitized; errors and grants never become events.
+      return unavailable();
+    }
+
+    try {
+      await client.command(
+        'access.token.provide',
+        payload: {'requestId': requestId, ...token.toJson()},
       );
     } catch (_) {
       // The request may have timed out or the view may have reloaded.
@@ -638,6 +719,30 @@ class SeatLayerController {
     );
   }
 
+  /// Staff map only: frame one section by its public label, or the whole
+  /// venue for `null`. Returns whether the label matched a section.
+  Future<bool> focusSection(String? label) async {
+    final result = await _run('staff.focusSection', {'label': label});
+    return jBoolLocal(jGetLocal(result, 'found')) ?? false;
+  }
+
+  /// Staff map only: show these seats as unavailable although the event has
+  /// them free, and refuse to pick them. [reason] is the word the map's hover
+  /// shows. Display only; replaces the previous list.
+  Future<void> setUnavailableObjects(List<String> objects, {String? reason}) =>
+      _run('staff.setUnavailableObjects', {
+        'objects': objects,
+        if (reason != null) 'reason': reason,
+      });
+
+  /// Staff map only: the price the map's hover shows per ticket category, for
+  /// a sale at a price the event does not carry. `null` shows no price; a
+  /// category left out keeps its own. Display only.
+  Future<void> setCategoryPrices(Map<String, StaffCategoryPrice>? prices) =>
+      _run('staff.setCategoryPrices', {
+        'prices': prices?.map((key, price) => MapEntry(key, price.toJson())),
+      });
+
   Future<void> zoomIn() => _run('zoomIn');
   Future<void> zoomOut() => _run('zoomOut');
   Future<void> zoomToFit() => _run('zoomToFit');
@@ -677,6 +782,7 @@ class SeatLayerController {
     _onDeckTap.close();
     _onUnknownEvent.close();
     _onBridgeEvent.close();
+    _onStaffConnectionChanged.close();
   }
 
   List<T> _decodeList<T>(Object? value, T? Function(Object?) decode) {

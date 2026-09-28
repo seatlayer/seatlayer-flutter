@@ -183,3 +183,4 @@ export 'src/seat_layer_controller.dart';
 export 'src/seat_layer_error.dart';
 export 'src/seat_layer_prewarm.dart' show seatLayerPrewarmDefaultTtl;
 export 'src/seat_layer_view.dart';
+export 'src/staff_map.dart';
