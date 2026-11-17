@@ -467,9 +467,13 @@ start above is complete; the
 covers lifecycle, commands and events in depth. `SeatLayerView` remains for an
 app that wants only the raw map and owns every control itself.
 
-### Is SeatLayer a Flutter widget or only a JavaScript snippet?
+### What is native in the SeatLayer Flutter SDK?
 
-It is a native Flutter picker: every control is a Flutter widget.
+Every control around the seat map is a Flutter widget: the header, price rail,
+section dock, seat card, cart sheet and checkout button, drawn in your palette
+and replaceable one at a time. The seat map itself is the SeatLayer map from the
+web, shown inside your app, so a seat, its price and its 3D view (for venues up
+to 60,000 seats) are the same on Flutter, iOS, Android and the web.
 
 ### Which Flutter platforms are supported?
 
