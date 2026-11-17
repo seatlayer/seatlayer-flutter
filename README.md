@@ -489,17 +489,12 @@ book with a stable `bookingRef`.
 
 ### How do temporary seat holds work?
 
-When a buyer selects seats, the SDK creates a temporary hold that reserves the
-inventory against concurrent buyers for a limited window. The hold expires
-automatically if checkout does not complete (`onHoldExpired` tells the app to
-return the buyer to the map), and `extendHold` and `resumeHold` cover longer
-checkouts and app restarts. This prevents double-selling without locking seats
-forever.
-
-A hold that runs out while the app is in the background is caught on the way
-back in: the picker asks the server whether the hold still stands rather than
-trusting a timer that may never have fired, tells the buyer once, and offers
-back whichever of their seats are still free.
+When a buyer goes to checkout, the SeatLayer picker holds the seats they picked
+for that buyer for a set time, which you can change per event, so no other buyer
+can take them. A hold that is never booked lapses on its own, and
+`onHoldExpired` tells your app. If it lapses while the app is in the background,
+the picker checks with the server when the buyer returns, tells them once, and
+offers back the seats that are still free.
 
 ### Can I use my own payment provider?
 
