@@ -24,9 +24,9 @@ and reserved-seat ticketing software built for venues up to stadium scale.
 
 ![Seat map picker running in a Flutter app: venue overview, section dock, seat confirmation, ticket list and the 3D venue view](https://raw.githubusercontent.com/seatlayer/seatlayer-flutter/main/doc/media/picker-flow.gif)
 
-> **Production SDK:** `0.7.2` is the current public Flutter release. Pin the documented
-> release and validate your event, checkout handoff, lifecycle, and supported
-> physical devices before rollout.
+> **Latest release:** see the version on [pub.dev](https://pub.dev/packages/seatlayer).
+> Pin it in `pubspec.yaml` and test your event, checkout hand-off and target
+> devices before release.
 
 Two-step shape: the buyer picks and holds seats in the client with your public key, then your server confirms the booking with your secret key while your platform keeps checkout and its own payment provider.
 
