@@ -577,10 +577,6 @@ dart run tool/gen_tokens.dart     # after editing design/tokens.json
 dart pub publish --dry-run
 ```
 
-Verification stays proportional to the changed behaviour. Live checkout and
-buyer credentials belong only in protected, manually dispatched end-to-end
-validation.
-
 ## License
 
 MIT © SeatLayer
