@@ -24,27 +24,27 @@ and reserved-seat ticketing software built for venues up to stadium scale.
 
 ![Seat map picker running in a Flutter app: venue overview, section dock, seat confirmation, ticket list and the 3D venue view](https://raw.githubusercontent.com/seatlayer/seatlayer-flutter/main/doc/media/picker-flow.gif)
 
-> **Production SDK:** `0.7.2` is the current public Flutter release. Pin the documented
-> release and validate your event, checkout handoff, lifecycle, and supported
-> physical devices before rollout.
+> **Latest release:** see the version on [pub.dev](https://pub.dev/packages/seatlayer).
+> Pin it in `pubspec.yaml` and test your event, checkout hand-off and target
+> devices before release.
 
 Two-step shape: the buyer picks and holds seats in the client with your public key, then your server confirms the booking with your secret key while your platform keeps checkout and its own payment provider.
 
-**Start here:** [Quickstart](https://docs.seatlayer.io/start/quickstart/) · [Holds and checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/) · [Flutter guide](https://docs.seatlayer.io/buyer-sdk/flutter/) · [SDK catalog](https://docs.seatlayer.io/sdk-catalog.json) · [Pricing](https://seatlayer.io/pricing/): $0 entry, 100 free confirmed-sold-seat credits per organization each month, then $0.10 down to $0.05 a credit, and credits never expire.
+**Start here:** [Quickstart](https://docs.seatlayer.io/start/quickstart/) · [Holds and checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/) · [Flutter guide](https://docs.seatlayer.io/buyer-sdk/flutter/) · [SDK catalog](https://docs.seatlayer.io/sdk-catalog.json) · [Pricing](https://seatlayer.io/pricing/): test mode is free; live, the first 100 sold seats each month are free, then 10¢ down to 5¢ per sold seat, with no subscription, and purchased credits never expire.
 
 ## Scale evidence
 
-Benchmarked on public 100,000-, 150,000- and 200,000-seat venue fixtures on 15 September 2026: 200,000 seats chart-ready in 1.95 s, desktop, local production build. Fixtures, method and run logs: https://github.com/seatlayer/seatlayer-performance. Live 200,000-seat stadium demo: https://app.seatlayer.io/demo/play/century-stadium-200k. This is renderer evidence, not a concurrent-buyer claim.
+Benchmarked on public 100,000-, 150,000- and 200,000-seat venue fixtures on 15 September 2026: 200,000 seats chart-ready in 1.95 s, desktop, local production build. Tested at 10,000 simulated concurrent buyers on one 12,000-seat event (18 September 2026): engine-side hold latency p99 9 ms, zero server errors. Method, fixtures and run files: https://github.com/seatlayer/seatlayer-performance. Live 200,000-seat stadium demo: https://app.seatlayer.io/demo/play/century-stadium-200k.
 
 ## Works as a native picker
 
 **Every piece of chrome is a Flutter widget.** The header, price rail, floor strip, section dock, seat confirm card,
 cart sheet, checkout button and the captions over the 3D scene and the seat-view
 panorama are all Dart: drawn in your palette, laid out by Flutter, replaceable
-one at a time. The SeatLayer venue map draws the geometry: seats, labels,
-section shells, the immersive scene and the panorama photograph. It knows
-Flutter owns the furniture, so it draws none of its own: no second tooltip, no
-second test badge, no duplicate button under a native one.
+one at a time. The seat map itself (seats, labels, sections, the 3D scene and
+the view from a seat) is the SeatLayer map from the web, shown inside your app.
+It leaves the tooltip, test badge and buttons to your Flutter widgets, so
+nothing is drawn twice.
 
 Three ways in, and they are a ladder: each level keeps what the one below gave
 you. Level 2 is not an escape hatch and level 3 is not a rewrite: the drop-in is
@@ -102,11 +102,9 @@ edge-to-edge on a phone and a constrained dialog at 700 logical pixels or wider;
 release a picker-owned hold before the route leaves. A hold already handed to
 you is never released.
 
-**The renderer pin.** Each SDK release is pinned to a matching SeatLayer
-renderer version (exported as `seatLayerHostedWebVersion`), so an app on a
-given `seatlayer` version always gets the same renderer, and
-`SeatLayerConfiguration(assetPath:)` points it elsewhere while you validate a
-pre-release.
+**Map version.** Each SDK release uses one matching SeatLayer map version,
+exported as `seatLayerHostedWebVersion`, so an app on a given `seatlayer`
+version always shows the same map.
 
 Register the SDK's renderer origin, `https://cdn.seatlayer.io` (exported as
 `seatLayerMobileOrigin`), on the publishable key you use. For private,
@@ -123,9 +121,9 @@ SeatLayerConfiguration(
 
 Never ship a SeatLayer secret in the app binary.
 
-**Open faster.** Call `SeatLayerPicker.prewarm()` when the event screen appears
-so the picker opens without a delay. It is safe to call on every build; an
-unused prewarm is released after a few minutes or on memory pressure, and
+**Prepare the picker in advance (optional).** Call `SeatLayerPicker.prewarm()`
+when the event screen appears. It is safe to call on every build; an unused one
+is released after a few minutes or on memory pressure, and
 `SeatLayerPicker.cancelPrewarm()` releases it early.
 
 ```dart
@@ -244,10 +242,9 @@ Slots: `map`, `header`, `legend`, `floorStrip`, `sectionNavigator`, `dockBar`,
 `accessibilityFilters`, `mapControls`, `selectionTray`, `cartSheet`,
 `checkoutBar`, `venue3D`, `seatViewChrome`.
 
-The test badge and the required attribution have no builder slot: colours and
-type follow your theme, but required chrome cannot be returned as an empty
-widget; a white-label entitlement turns attribution off, server-side. Organizer
-ticket categories are likewise never rebranded, because they mean a price.
+The test badge has no builder slot: its colours and type follow your theme, but
+it cannot be returned as an empty widget. Organizer ticket categories are never
+rebranded, because they mean a price.
 
 ## Build your own layout
 
@@ -422,7 +419,7 @@ Every widget below works standalone inside a `SeatLayerPickerScope`.
 | `SeatLayerPickerTablePrompt` / `…GeneralAdmissionPrompt` | Quantity prompts |
 | `SeatLayerPickerSectionNavigator` | Section list and stepping |
 | `SeatLayerPickerTestModeIndicator` | The one test-event badge |
-| `SeatLayerPickerAttribution` | `Powered by SeatLayer`, when required |
+| `SeatLayerPickerAttribution` | Draws the badge only when the server requires it; the server requires it on no plan, so it draws nothing |
 
 The individual corner controls (`…ZoomInButton`, `…ZoomToFitButton`,
 `…ViewModeControl`, `…ColorblindButton`, `…OverviewButton`,
@@ -470,9 +467,12 @@ start above is complete; the
 covers lifecycle, commands and events in depth. `SeatLayerView` remains for an
 app that wants only the raw map and owns every control itself.
 
-### Is SeatLayer a Flutter widget or only a JavaScript snippet?
+### What is native in the SeatLayer Flutter SDK?
 
-It is a native Flutter picker: every control is a Flutter widget.
+Every control around the seat map is a Flutter widget: the header, price rail,
+section dock, seat card, cart sheet and checkout button, drawn in your palette
+and replaceable one at a time. The seat map itself is the SeatLayer map from the
+web, shown inside your app, so a seat, its price and its 3D view are the same on Flutter, iOS, Android and the web. 3D is offered for venues up to 30,000 seats on phones and 60,000 on desktop by default; set `max3DSeats` to change it.
 
 ### Which Flutter platforms are supported?
 
@@ -488,34 +488,25 @@ book with a stable `bookingRef`.
 
 ### How do temporary seat holds work?
 
-When a buyer selects seats, the SDK creates a temporary hold that reserves the
-inventory against concurrent buyers for a limited window. The hold expires
-automatically if checkout does not complete (`onHoldExpired` tells the app to
-return the buyer to the map), and `extendHold` and `resumeHold` cover longer
-checkouts and app restarts. This prevents double-selling without locking seats
-forever.
-
-A hold that runs out while the app is in the background is caught on the way
-back in: the picker asks the server whether the hold still stands rather than
-trusting a timer that may never have fired, tells the buyer once, and offers
-back whichever of their seats are still free.
+When a buyer goes to checkout, the SeatLayer picker holds the seats they picked
+for that buyer for a set time, which you can change per event, so no other buyer
+can take them. A hold that is never booked lapses on its own, and
+`onHoldExpired` tells your app. If it lapses while the app is in the background,
+the picker checks with the server when the buyer returns, tells them once, and
+offers back the seats that are still free.
 
 ### Can I use my own payment provider?
 
-Yes. SeatLayer never processes payment inside the seat map. The app hands the
-`holdId` to your backend, and your backend charges through any payment
-provider you already use (Stripe, Adyen, Razorpay, or your own) before
-booking the hold through the
-[server-side checkout flow](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/).
+Yes. Nothing in the app takes a payment. Your server reads the held seats and
+their prices, charges through the provider you already use, and books the hold
+with a stable booking reference.
 
 ### Can I try the Flutter seat map without a SeatLayer account or API key?
 
-Yes. The repository's example app runs on a packaged offline fixture (no
-account, event key or backend needed) and exercises the real Flutter view,
-venue map, commands and event streams. The fixture lives with the example
-rather than in the published package, so it costs your app nothing.
-Create a free SeatLayer test event when you are ready to validate live
-inventory, holds, expiry, conflicts and checkout.
+Yes. In the repository's example app,
+`flutter run -t lib/offline_fixture_demo.dart` opens the seat map on a packaged
+sample venue with no account or key. The complete picker needs a test event.
+Test mode is free, with no time limit and no card, and it uses no credits.
 
 ### Can I restyle the picker without rebuilding it?
 
@@ -556,8 +547,8 @@ A `.light()` or `.dark()` preset pins one side deliberately.
 - [Compare SeatLayer's mobile seat map SDKs](https://docs.seatlayer.io/buyer-sdk/mobile/)
   when choosing between Flutter, React Native, and the native iOS and Android
   packages.
-- [Explore the 3D seating chart for web buyers](https://seatlayer.io/3d-seat-map/)
-  as a separate browser capability when comparing the wider buyer experience.
+- [See how the 3D seat map works](https://seatlayer.io/3d-seat-map/): the 3D
+  venue and the view from each seat, built from the same chart, on every plan. 3D is offered for venues up to 30,000 seats on phones and 60,000 on desktop by default; set `max3DSeats` to change it.
 - [Point AI coding agents at the SeatLayer docs index](https://docs.seatlayer.io/llms.txt)
   (`llms.txt`) for an agent-readable map of the documentation.
 
@@ -583,10 +574,6 @@ flutter test --tags golden        # recorded and enforced on macOS
 dart run tool/gen_tokens.dart     # after editing design/tokens.json
 dart pub publish --dry-run
 ```
-
-Verification stays proportional to the changed behaviour. Live checkout and
-buyer credentials belong only in protected, manually dispatched end-to-end
-validation.
 
 ## License
 
