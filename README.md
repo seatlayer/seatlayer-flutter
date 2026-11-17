@@ -553,8 +553,9 @@ A `.light()` or `.dark()` preset pins one side deliberately.
 - [Compare SeatLayer's mobile seat map SDKs](https://docs.seatlayer.io/buyer-sdk/mobile/)
   when choosing between Flutter, React Native, and the native iOS and Android
   packages.
-- [Explore the 3D seating chart for web buyers](https://seatlayer.io/3d-seat-map/)
-  as a separate browser capability when comparing the wider buyer experience.
+- [See how the 3D seat map works](https://seatlayer.io/3d-seat-map/): the 3D
+  venue and the view from each seat, built from the same chart, on every plan,
+  for venues up to 60,000 seats.
 - [Point AI coding agents at the SeatLayer docs index](https://docs.seatlayer.io/llms.txt)
   (`llms.txt`) for an agent-readable map of the documentation.
 
