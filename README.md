@@ -41,10 +41,10 @@ Benchmarked on public 100,000-, 150,000- and 200,000-seat venue fixtures on 15 S
 **Every piece of chrome is a Flutter widget.** The header, price rail, floor strip, section dock, seat confirm card,
 cart sheet, checkout button and the captions over the 3D scene and the seat-view
 panorama are all Dart: drawn in your palette, laid out by Flutter, replaceable
-one at a time. The SeatLayer venue map draws the geometry: seats, labels,
-section shells, the immersive scene and the panorama photograph. It knows
-Flutter owns the furniture, so it draws none of its own: no second tooltip, no
-second test badge, no duplicate button under a native one.
+one at a time. The seat map itself (seats, labels, sections, the 3D scene and
+the view from a seat) is the SeatLayer map from the web, shown inside your app.
+It leaves the tooltip, test badge and buttons to your Flutter widgets, so
+nothing is drawn twice.
 
 Three ways in, and they are a ladder: each level keeps what the one below gave
 you. Level 2 is not an escape hatch and level 3 is not a rewrite: the drop-in is
@@ -102,11 +102,9 @@ edge-to-edge on a phone and a constrained dialog at 700 logical pixels or wider;
 release a picker-owned hold before the route leaves. A hold already handed to
 you is never released.
 
-**The renderer pin.** Each SDK release is pinned to a matching SeatLayer
-renderer version (exported as `seatLayerHostedWebVersion`), so an app on a
-given `seatlayer` version always gets the same renderer, and
-`SeatLayerConfiguration(assetPath:)` points it elsewhere while you validate a
-pre-release.
+**Map version.** Each SDK release uses one matching SeatLayer map version,
+exported as `seatLayerHostedWebVersion`, so an app on a given `seatlayer`
+version always shows the same map.
 
 Register the SDK's renderer origin, `https://cdn.seatlayer.io` (exported as
 `seatLayerMobileOrigin`), on the publishable key you use. For private,
