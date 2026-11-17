@@ -498,11 +498,9 @@ offers back the seats that are still free.
 
 ### Can I use my own payment provider?
 
-Yes. SeatLayer never processes payment inside the seat map. The app hands the
-`holdId` to your backend, and your backend charges through any payment
-provider you already use (Stripe, Adyen, Razorpay, or your own) before
-booking the hold through the
-[server-side checkout flow](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/).
+Yes. Nothing in the app takes a payment. Your server reads the held seats and
+their prices, charges through the provider you already use, and books the hold
+with a stable booking reference.
 
 ### Can I try the Flutter seat map without a SeatLayer account or API key?
 
