@@ -242,10 +242,9 @@ Slots: `map`, `header`, `legend`, `floorStrip`, `sectionNavigator`, `dockBar`,
 `accessibilityFilters`, `mapControls`, `selectionTray`, `cartSheet`,
 `checkoutBar`, `venue3D`, `seatViewChrome`.
 
-The test badge and the required attribution have no builder slot: colours and
-type follow your theme, but required chrome cannot be returned as an empty
-widget; a white-label entitlement turns attribution off, server-side. Organizer
-ticket categories are likewise never rebranded, because they mean a price.
+The test badge has no builder slot: its colours and type follow your theme, but
+it cannot be returned as an empty widget. Organizer ticket categories are never
+rebranded, because they mean a price.
 
 ## Build your own layout
 
@@ -420,7 +419,7 @@ Every widget below works standalone inside a `SeatLayerPickerScope`.
 | `SeatLayerPickerTablePrompt` / `…GeneralAdmissionPrompt` | Quantity prompts |
 | `SeatLayerPickerSectionNavigator` | Section list and stepping |
 | `SeatLayerPickerTestModeIndicator` | The one test-event badge |
-| `SeatLayerPickerAttribution` | `Powered by SeatLayer`, when required |
+| `SeatLayerPickerAttribution` | Draws nothing: buyers see no SeatLayer badge on any plan |
 
 The individual corner controls (`…ZoomInButton`, `…ZoomToFitButton`,
 `…ViewModeControl`, `…ColorblindButton`, `…OverviewButton`,
