@@ -121,9 +121,9 @@ SeatLayerConfiguration(
 
 Never ship a SeatLayer secret in the app binary.
 
-**Open faster.** Call `SeatLayerPicker.prewarm()` when the event screen appears
-so the picker opens without a delay. It is safe to call on every build; an
-unused prewarm is released after a few minutes or on memory pressure, and
+**Prepare the picker in advance (optional).** Call `SeatLayerPicker.prewarm()`
+when the event screen appears. It is safe to call on every build; an unused one
+is released after a few minutes or on memory pressure, and
 `SeatLayerPicker.cancelPrewarm()` releases it early.
 
 ```dart
