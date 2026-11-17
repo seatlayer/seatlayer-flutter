@@ -504,12 +504,10 @@ with a stable booking reference.
 
 ### Can I try the Flutter seat map without a SeatLayer account or API key?
 
-Yes. The repository's example app runs on a packaged offline fixture (no
-account, event key or backend needed) and exercises the real Flutter view,
-venue map, commands and event streams. The fixture lives with the example
-rather than in the published package, so it costs your app nothing.
-Create a free SeatLayer test event when you are ready to validate live
-inventory, holds, expiry, conflicts and checkout.
+Yes. In the repository's example app,
+`flutter run -t lib/offline_fixture_demo.dart` opens the seat map on a packaged
+sample venue with no account or key. The complete picker needs a test event.
+Test mode is free, with no time limit and no card, and it uses no credits.
 
 ### Can I restyle the picker without rebuilding it?
 
