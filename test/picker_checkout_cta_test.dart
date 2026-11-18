@@ -127,7 +127,7 @@ void main() {
     expect(_cta(state, seatCardOpen: true).label, 'Confirm your tickets');
   });
 
-  test('creating the hold narrates itself, with a spinner', () {
+  test('creating the hold narrates itself, in words', () {
     final cta = _cta(_state(busy: SeatLayerPickerBusyAction.creatingHold));
     expect(cta.label, 'Securing your seats…');
     expect(cta.busy, isTrue);
@@ -141,7 +141,7 @@ void main() {
     expect(cta.enabled, isFalse);
   });
 
-  testWidgets('only the hold being created draws a spinner', (tester) async {
+  testWidgets('the picker\'s busy readings draw no spinner', (tester) async {
     Future<void> pumpLabel(SeatLayerCheckoutCtaState cta) =>
         tester.pumpWidget(
           Directionality(
@@ -150,8 +150,32 @@ void main() {
           ),
         );
 
+    // Securing the seats is words alone, as the design draws it, and stays
+    // busy so the button stays down.
+    final securing = _cta(_state(busy: SeatLayerPickerBusyAction.creatingHold));
+    await pumpLabel(securing);
+    expect(find.text('Securing your seats…'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(securing.busy, isTrue);
+    expect(securing.enabled, isFalse);
+
+    // A seat card opening over the securing state keeps it words-only too.
     await pumpLabel(
-      _cta(_state(busy: SeatLayerPickerBusyAction.creatingHold)),
+      _cta(
+        _state(busy: SeatLayerPickerBusyAction.creatingHold),
+        seatCardOpen: true,
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    // A busy reading a host built itself keeps its spinner.
+    await pumpLabel(
+      const SeatLayerCheckoutCtaState(
+        label: 'Working',
+        enabled: false,
+        busy: true,
+        statesReason: true,
+      ),
     );
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
