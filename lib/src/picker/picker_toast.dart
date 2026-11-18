@@ -472,11 +472,10 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
           right: inset,
           bottom: widget.bottomInset +
               14 +
-              // The sheet handle stands proud of the band; the full-width
-              // band would otherwise run across it.
-              (explainer && widget.bottomInset > 0
-                  ? SeatLayerSizeTokens.sheetHandleOverhang
-                  : 0) +
+              // The cart's handle stands proud of whatever is under the map,
+              // in every composition; the full-width band would otherwise
+              // run across it.
+              (explainer ? SeatLayerSizeTokens.sheetHandleOverhang : 0) +
               (widget.lifted ? SeatLayerPickerToastLayer.cardLift : 0),
         ),
         child: Align(

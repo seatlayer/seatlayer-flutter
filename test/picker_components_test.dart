@@ -242,7 +242,8 @@ void main() {
       final rect = tester.getRect(band);
       expect(rect.left, 12);
       expect(rect.right, surface.width - 12);
-      expect(rect.bottom, surface.height - 14);
+      expect(rect.bottom, surface.height - 14 - 22,
+          reason: 'clear of the cart handle standing over the map foot');
       final box = tester.widget<Container>(
         find.descendant(of: band, matching: find.byType(Container)).first,
       );
@@ -260,7 +261,7 @@ void main() {
       expect(find.text(explained), findsNothing);
     });
 
-    testWidgets('clears the sheet handle above a bottom band', (tester) async {
+    testWidgets('clears the sheet handle above a dock band', (tester) async {
       final map = _FakeMapController();
       addTearDown(map.dispose);
       tester.view.physicalSize = surface;
