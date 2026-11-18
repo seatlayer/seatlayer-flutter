@@ -28,29 +28,24 @@ String _seatJustTakenByAnotherKo(String label) =>
 String _peekSecuredKo(int count, String total) =>
     '✓ $count석 확보 · $total. 아직 결제되지 않았어요';
 
-String _ticketCountKo(int count) => count == 1 ? '티켓 $count매' : '티켓 $count매';
+String _ticketCountKo(int count) => '티켓 $count매';
 
-String _findBestSeatsKo(int count) =>
-    count == 1 ? '추천 좌석 $count석 찾기' : '추천 좌석 $count석 찾기';
+String _findBestSeatsKo(int count) => '추천 좌석 $count석 찾기';
 
-String _reselectSeatsKo(int count) => count == 1 ? '다시 선택하기' : '다시 선택하기';
+String _reselectSeatsKo(int count) => '다시 선택하기';
 
-String _seatsFreeKo(int count) => count == 1 ? '$count석' : '$count석';
+String _seatsFreeKo(int count) => '$count석';
 
-String _seatsLeftInSectionKo(int count) =>
-    count == 1 ? '잔여 $count석' : '잔여 $count석';
+String _seatsLeftInSectionKo(int count) => '잔여 $count석';
 
-String _holdLapsedStillFreeKo(int count) => count == 1
-    ? '자리를 비운 사이 확보 시간이 끝났어요. 좌석은 아직 예매 가능해요.'
-    : '자리를 비운 사이 확보 시간이 끝났어요. 좌석은 아직 예매 가능해요.';
+String _holdLapsedStillFreeKo(int count) =>
+    '자리를 비운 사이 확보 시간이 끝났어요. 좌석은 아직 예매 가능해요.';
 
-String _holdLapsedSomeTakenKo(int count) => count == 1
-    ? '자리를 비운 사이 확보 시간이 끝났고, 그중 $count석은 이미 예매됐어요. 나머지 좌석은 아직 예매 가능해요.'
-    : '자리를 비운 사이 확보 시간이 끝났고, 그중 $count석은 이미 예매됐어요. 나머지 좌석은 아직 예매 가능해요.';
+String _holdLapsedSomeTakenKo(int count) =>
+    '자리를 비운 사이 확보 시간이 끝났고, 그중 $count석은 이미 예매됐어요. 나머지 좌석은 아직 예매 가능해요.';
 
-String _holdLapsedAllTakenKo(int count) => count == 1
-    ? '자리를 비운 사이 확보 시간이 끝났고, 좌석은 이미 예매됐어요.'
-    : '자리를 비운 사이 확보 시간이 끝났고, 좌석은 이미 예매됐어요.';
+String _holdLapsedAllTakenKo(int count) =>
+    '자리를 비운 사이 확보 시간이 끝났고, 좌석은 이미 예매됐어요.';
 
 String _continueWithTotalKo(String money) => '계속 \u00b7 $money';
 

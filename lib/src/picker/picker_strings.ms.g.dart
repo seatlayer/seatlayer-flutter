@@ -28,33 +28,24 @@ String _seatJustTakenByAnotherMs(String label) =>
 String _peekSecuredMs(int count, String total) =>
     '✓ $count ditahan · $total. Anda belum dicaj';
 
-String _ticketCountMs(int count) =>
-    count == 1 ? '$count tiket' : '$count tiket';
+String _ticketCountMs(int count) => '$count tiket';
 
-String _findBestSeatsMs(int count) => count == 1
-    ? 'Cari $count tempat duduk terbaik'
-    : 'Cari $count tempat duduk terbaik';
+String _findBestSeatsMs(int count) => 'Cari $count tempat duduk terbaik';
 
-String _reselectSeatsMs(int count) =>
-    count == 1 ? 'Pilih semula' : 'Pilih semula';
+String _reselectSeatsMs(int count) => 'Pilih semula';
 
-String _seatsFreeMs(int count) =>
-    count == 1 ? '$count tempat duduk' : '$count tempat duduk';
+String _seatsFreeMs(int count) => '$count tempat duduk';
 
-String _seatsLeftInSectionMs(int count) =>
-    count == 1 ? 'Tinggal $count tempat duduk' : 'Tinggal $count tempat duduk';
+String _seatsLeftInSectionMs(int count) => 'Tinggal $count tempat duduk';
 
-String _holdLapsedStillFreeMs(int count) => count == 1
-    ? 'Masa tahanan anda tamat semasa anda tiada. Tempat duduk anda masih kosong.'
-    : 'Masa tahanan anda tamat semasa anda tiada. Tempat duduk anda masih kosong.';
+String _holdLapsedStillFreeMs(int count) =>
+    'Masa tahanan anda tamat semasa anda tiada. Tempat duduk anda masih kosong.';
 
-String _holdLapsedSomeTakenMs(int count) => count == 1
-    ? 'Masa tahanan anda tamat semasa anda tiada, dan $count tempat duduk sudah diambil orang lain. Selebihnya masih kosong.'
-    : 'Masa tahanan anda tamat semasa anda tiada, dan $count tempat duduk sudah diambil orang lain. Selebihnya masih kosong.';
+String _holdLapsedSomeTakenMs(int count) =>
+    'Masa tahanan anda tamat semasa anda tiada, dan $count tempat duduk sudah diambil orang lain. Selebihnya masih kosong.';
 
-String _holdLapsedAllTakenMs(int count) => count == 1
-    ? 'Masa tahanan anda tamat semasa anda tiada, dan tempat duduk anda sudah diambil orang lain.'
-    : 'Masa tahanan anda tamat semasa anda tiada, dan tempat duduk anda sudah diambil orang lain.';
+String _holdLapsedAllTakenMs(int count) =>
+    'Masa tahanan anda tamat semasa anda tiada, dan tempat duduk anda sudah diambil orang lain.';
 
 String _continueWithTotalMs(String money) => 'Teruskan \u00b7 $money';
 

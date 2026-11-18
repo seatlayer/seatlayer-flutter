@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftFi(int count) => '$count jäljellä';
@@ -29,32 +30,57 @@ String _seatJustTakenByAnotherFi(String label) =>
 String _peekSecuredFi(int count, String total) =>
     '✓ $count varmistettu · $total. Emme veloita vielä';
 
-String _ticketCountFi(int count) =>
-    count == 1 ? '$count lippu' : '$count lippua';
+String _ticketCountFi(int count) => switch (pickerPluralCategory('fi', count)) {
+  PickerPluralCategory.one => '$count lippu',
+  _ => '$count lippua',
+};
 
 String _findBestSeatsFi(int count) =>
-    count == 1 ? 'Etsi $count paras paikka' : 'Etsi $count parasta paikkaa';
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one => 'Etsi $count paras paikka',
+      _ => 'Etsi $count parasta paikkaa',
+    };
 
 String _reselectSeatsFi(int count) =>
-    count == 1 ? 'Valitse se uudelleen' : 'Valitse ne uudelleen';
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one => 'Valitse se uudelleen',
+      _ => 'Valitse ne uudelleen',
+    };
 
-String _seatsFreeFi(int count) =>
-    count == 1 ? '$count paikka' : '$count paikkaa';
+String _seatsFreeFi(int count) => switch (pickerPluralCategory('fi', count)) {
+  PickerPluralCategory.one => '$count paikka',
+  _ => '$count paikkaa',
+};
 
 String _seatsLeftInSectionFi(int count) =>
-    count == 1 ? '$count paikka jäljellä' : '$count paikkaa jäljellä';
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one => '$count paikka jäljellä',
+      _ => '$count paikkaa jäljellä',
+    };
 
-String _holdLapsedStillFreeFi(int count) => count == 1
-    ? 'Varauksesi vanheni poissa ollessasi. Tämä paikka on yhä vapaana.'
-    : 'Varauksesi vanheni poissa ollessasi. Nämä paikat ovat yhä vapaana.';
+String _holdLapsedStillFreeFi(int count) =>
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one =>
+        'Varauksesi vanheni poissa ollessasi. Tämä paikka on yhä vapaana.',
+      _ => 'Varauksesi vanheni poissa ollessasi. Nämä paikat ovat yhä vapaana.',
+    };
 
-String _holdLapsedSomeTakenFi(int count) => count == 1
-    ? 'Varauksesi vanheni poissa ollessasi, ja $count näistä paikoista on jo varattu. Loput ovat yhä vapaana.'
-    : 'Varauksesi vanheni poissa ollessasi, ja $count näistä paikoista on jo varattu. Loput ovat yhä vapaana.';
+String _holdLapsedSomeTakenFi(int count) => switch (pickerPluralCategory(
+  'fi',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Varauksesi vanheni poissa ollessasi, ja $count näistä paikoista on jo varattu. Loput ovat yhä vapaana.',
+  _ =>
+    'Varauksesi vanheni poissa ollessasi, ja $count näistä paikoista on jo varattu. Loput ovat yhä vapaana.',
+};
 
-String _holdLapsedAllTakenFi(int count) => count == 1
-    ? 'Varauksesi vanheni poissa ollessasi, ja tämä paikka on jo varattu.'
-    : 'Varauksesi vanheni poissa ollessasi, ja nämä paikat on jo varattu.';
+String _holdLapsedAllTakenFi(int count) =>
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one =>
+        'Varauksesi vanheni poissa ollessasi, ja tämä paikka on jo varattu.',
+      _ => 'Varauksesi vanheni poissa ollessasi, ja nämä paikat on jo varattu.',
+    };
 
 String _continueWithTotalFi(String money) => 'Jatka \u00b7 $money';
 

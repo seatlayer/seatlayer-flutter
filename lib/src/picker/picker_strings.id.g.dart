@@ -28,30 +28,24 @@ String _seatJustTakenByAnotherId(String label) =>
 String _peekSecuredId(int count, String total) =>
     '✓ $count diamankan · $total. Anda belum ditagih';
 
-String _ticketCountId(int count) =>
-    count == 1 ? '$count tiket' : '$count tiket';
+String _ticketCountId(int count) => '$count tiket';
 
-String _findBestSeatsId(int count) =>
-    count == 1 ? 'Cari $count kursi terbaik' : 'Cari $count kursi terbaik';
+String _findBestSeatsId(int count) => 'Cari $count kursi terbaik';
 
-String _reselectSeatsId(int count) => count == 1 ? 'Pilih lagi' : 'Pilih lagi';
+String _reselectSeatsId(int count) => 'Pilih lagi';
 
-String _seatsFreeId(int count) => count == 1 ? '$count kursi' : '$count kursi';
+String _seatsFreeId(int count) => '$count kursi';
 
-String _seatsLeftInSectionId(int count) =>
-    count == 1 ? 'Sisa $count kursi' : 'Sisa $count kursi';
+String _seatsLeftInSectionId(int count) => 'Sisa $count kursi';
 
-String _holdLapsedStillFreeId(int count) => count == 1
-    ? 'Waktu tahan habis saat Anda tidak aktif. Kursi Anda masih kosong.'
-    : 'Waktu tahan habis saat Anda tidak aktif. Kursi Anda masih kosong.';
+String _holdLapsedStillFreeId(int count) =>
+    'Waktu tahan habis saat Anda tidak aktif. Kursi Anda masih kosong.';
 
-String _holdLapsedSomeTakenId(int count) => count == 1
-    ? 'Waktu tahan habis saat Anda tidak aktif, dan $count kursi sudah diambil orang lain. Sisanya masih kosong.'
-    : 'Waktu tahan habis saat Anda tidak aktif, dan $count kursi sudah diambil orang lain. Sisanya masih kosong.';
+String _holdLapsedSomeTakenId(int count) =>
+    'Waktu tahan habis saat Anda tidak aktif, dan $count kursi sudah diambil orang lain. Sisanya masih kosong.';
 
-String _holdLapsedAllTakenId(int count) => count == 1
-    ? 'Waktu tahan habis saat Anda tidak aktif, dan kursi Anda sudah diambil orang lain.'
-    : 'Waktu tahan habis saat Anda tidak aktif, dan kursi Anda sudah diambil orang lain.';
+String _holdLapsedAllTakenId(int count) =>
+    'Waktu tahan habis saat Anda tidak aktif, dan kursi Anda sudah diambil orang lain.';
 
 String _continueWithTotalId(String money) => 'Lanjut \u00b7 $money';
 

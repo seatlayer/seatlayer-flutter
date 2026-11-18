@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftHi(int count) => '$count बाकी';
@@ -29,31 +30,57 @@ String _seatJustTakenByAnotherHi(String label) =>
 String _peekSecuredHi(int count, String total) =>
     '✓ $count होल्ड · $total। अभी पैसे नहीं कटेंगे';
 
-String _ticketCountHi(int count) => count == 1 ? '$count टिकट' : '$count टिकट';
+String _ticketCountHi(int count) => switch (pickerPluralCategory('hi', count)) {
+  PickerPluralCategory.one => '$count टिकट',
+  _ => '$count टिकट',
+};
 
-String _findBestSeatsHi(int count) => count == 1
-    ? '$count सबसे अच्छी सीट खोजें'
-    : '$count सबसे अच्छी सीटें खोजें';
+String _findBestSeatsHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => '$count सबसे अच्छी सीट खोजें',
+      _ => '$count सबसे अच्छी सीटें खोजें',
+    };
 
 String _reselectSeatsHi(int count) =>
-    count == 1 ? 'इसे फिर से चुनें' : 'इन्हें फिर से चुनें';
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => 'इसे फिर से चुनें',
+      _ => 'इन्हें फिर से चुनें',
+    };
 
-String _seatsFreeHi(int count) => count == 1 ? '$count सीट' : '$count सीटें';
+String _seatsFreeHi(int count) => switch (pickerPluralCategory('hi', count)) {
+  PickerPluralCategory.one => '$count सीट',
+  _ => '$count सीटें',
+};
 
 String _seatsLeftInSectionHi(int count) =>
-    count == 1 ? '$count सीट बाकी' : '$count सीटें बाकी';
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => '$count सीट बाकी',
+      _ => '$count सीटें बाकी',
+    };
 
-String _holdLapsedStillFreeHi(int count) => count == 1
-    ? 'आपके दूर रहने पर होल्ड खत्म हो गया। वह सीट अब भी खाली है।'
-    : 'आपके दूर रहने पर होल्ड खत्म हो गया। वे सीटें अब भी खाली हैं।';
+String _holdLapsedStillFreeHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one =>
+        'आपके दूर रहने पर होल्ड खत्म हो गया। वह सीट अब भी खाली है।',
+      _ => 'आपके दूर रहने पर होल्ड खत्म हो गया। वे सीटें अब भी खाली हैं।',
+    };
 
-String _holdLapsedSomeTakenHi(int count) => count == 1
-    ? 'आपके दूर रहने पर होल्ड खत्म हो गया, और उनमें से $count सीट बुक हो चुकी है। बाकी अब भी खाली हैं।'
-    : 'आपके दूर रहने पर होल्ड खत्म हो गया, और उनमें से $count सीटें बुक हो चुकी हैं। बाकी अब भी खाली हैं।';
+String _holdLapsedSomeTakenHi(int count) => switch (pickerPluralCategory(
+  'hi',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'आपके दूर रहने पर होल्ड खत्म हो गया, और उनमें से $count सीट बुक हो चुकी है। बाकी अब भी खाली हैं।',
+  _ =>
+    'आपके दूर रहने पर होल्ड खत्म हो गया, और उनमें से $count सीटें बुक हो चुकी हैं। बाकी अब भी खाली हैं।',
+};
 
-String _holdLapsedAllTakenHi(int count) => count == 1
-    ? 'आपके दूर रहने पर होल्ड खत्म हो गया, और वह सीट बुक हो चुकी है।'
-    : 'आपके दूर रहने पर होल्ड खत्म हो गया, और वे सीटें बुक हो चुकी हैं।';
+String _holdLapsedAllTakenHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one =>
+        'आपके दूर रहने पर होल्ड खत्म हो गया, और वह सीट बुक हो चुकी है।',
+      _ => 'आपके दूर रहने पर होल्ड खत्म हो गया, और वे सीटें बुक हो चुकी हैं।',
+    };
 
 String _continueWithTotalHi(String money) => 'आगे बढ़ें \u00b7 $money';
 

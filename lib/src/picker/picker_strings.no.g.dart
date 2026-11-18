@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftNo(int count) => '$count igjen';
@@ -28,32 +29,62 @@ String _seatJustTakenByAnotherNo(String label) =>
 String _peekSecuredNo(int count, String total) =>
     '✓ $count sikret · $total. Du blir ikke belastet ennå';
 
-String _ticketCountNo(int count) =>
-    count == 1 ? '$count billett' : '$count billetter';
+String _ticketCountNo(int count) => switch (pickerPluralCategory('no', count)) {
+  PickerPluralCategory.one => '$count billett',
+  _ => '$count billetter',
+};
 
 String _findBestSeatsNo(int count) =>
-    count == 1 ? 'Finn $count beste plass' : 'Finn $count beste plasser';
+    switch (pickerPluralCategory('no', count)) {
+      PickerPluralCategory.one => 'Finn $count beste plass',
+      _ => 'Finn $count beste plasser',
+    };
 
 String _reselectSeatsNo(int count) =>
-    count == 1 ? 'Velg den på nytt' : 'Velg dem på nytt';
+    switch (pickerPluralCategory('no', count)) {
+      PickerPluralCategory.one => 'Velg den på nytt',
+      _ => 'Velg dem på nytt',
+    };
 
-String _seatsFreeNo(int count) =>
-    count == 1 ? '$count plass' : '$count plasser';
+String _seatsFreeNo(int count) => switch (pickerPluralCategory('no', count)) {
+  PickerPluralCategory.one => '$count plass',
+  _ => '$count plasser',
+};
 
 String _seatsLeftInSectionNo(int count) =>
-    count == 1 ? '$count plass igjen' : '$count plasser igjen';
+    switch (pickerPluralCategory('no', count)) {
+      PickerPluralCategory.one => '$count plass igjen',
+      _ => '$count plasser igjen',
+    };
 
-String _holdLapsedStillFreeNo(int count) => count == 1
-    ? 'Reservasjonen din utløp mens du var borte. Plassen er fortsatt ledig.'
-    : 'Reservasjonen din utløp mens du var borte. Plassene er fortsatt ledige.';
+String _holdLapsedStillFreeNo(int count) => switch (pickerPluralCategory(
+  'no',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Reservasjonen din utløp mens du var borte. Plassen er fortsatt ledig.',
+  _ =>
+    'Reservasjonen din utløp mens du var borte. Plassene er fortsatt ledige.',
+};
 
-String _holdLapsedSomeTakenNo(int count) => count == 1
-    ? 'Reservasjonen din utløp mens du var borte, og $count av plassene er blitt tatt. Resten er fortsatt ledige.'
-    : 'Reservasjonen din utløp mens du var borte, og $count av plassene er blitt tatt. Resten er fortsatt ledige.';
+String _holdLapsedSomeTakenNo(int count) => switch (pickerPluralCategory(
+  'no',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Reservasjonen din utløp mens du var borte, og $count av plassene er blitt tatt. Resten er fortsatt ledige.',
+  _ =>
+    'Reservasjonen din utløp mens du var borte, og $count av plassene er blitt tatt. Resten er fortsatt ledige.',
+};
 
-String _holdLapsedAllTakenNo(int count) => count == 1
-    ? 'Reservasjonen din utløp mens du var borte, og plassen er blitt tatt.'
-    : 'Reservasjonen din utløp mens du var borte, og plassene er blitt tatt.';
+String _holdLapsedAllTakenNo(int count) => switch (pickerPluralCategory(
+  'no',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Reservasjonen din utløp mens du var borte, og plassen er blitt tatt.',
+  _ => 'Reservasjonen din utløp mens du var borte, og plassene er blitt tatt.',
+};
 
 String _continueWithTotalNo(String money) => 'Fortsett \u00b7 $money';
 

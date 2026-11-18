@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftHe(int count) => 'נותרו $count';
@@ -28,31 +29,68 @@ String _seatJustTakenByAnotherHe(String label) =>
 String _peekSecuredHe(int count, String total) =>
     '✓ $count הובטחו · $total. עדיין לא תחויבו';
 
-String _ticketCountHe(int count) =>
-    count == 1 ? '$count כרטיס' : '$count כרטיסים';
+String _ticketCountHe(int count) => switch (pickerPluralCategory('he', count)) {
+  PickerPluralCategory.one => '$count כרטיס',
+  PickerPluralCategory.two => '$count כרטיסים',
+  _ => '$count כרטיסים',
+};
 
 String _findBestSeatsHe(int count) =>
-    count == 1 ? 'מצאו $count מושב הכי טוב' : 'מצאו $count מושבים הכי טובים';
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => 'מצאו $count מושב הכי טוב',
+      PickerPluralCategory.two => 'מצאו $count מושבים הכי טובים',
+      _ => 'מצאו $count מושבים הכי טובים',
+    };
 
 String _reselectSeatsHe(int count) =>
-    count == 1 ? 'בחר אותו שוב' : 'בחר אותם שוב';
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => 'בחר אותו שוב',
+      PickerPluralCategory.two => 'בחר אותם שוב',
+      _ => 'בחר אותם שוב',
+    };
 
-String _seatsFreeHe(int count) => count == 1 ? '$count מושב' : '$count מושבים';
+String _seatsFreeHe(int count) => switch (pickerPluralCategory('he', count)) {
+  PickerPluralCategory.one => '$count מושב',
+  PickerPluralCategory.two => '$count מושבים',
+  _ => '$count מושבים',
+};
 
 String _seatsLeftInSectionHe(int count) =>
-    count == 1 ? 'נותר $count מושב' : 'נותרו $count מושבים';
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => 'נותר $count מושב',
+      PickerPluralCategory.two => 'נותרו $count מושבים',
+      _ => 'נותרו $count מושבים',
+    };
 
-String _holdLapsedStillFreeHe(int count) => count == 1
-    ? 'ההזמנה שלך פגה בזמן שלא היית. המושב הזה עדיין פנוי.'
-    : 'ההזמנה שלך פגה בזמן שלא היית. המושבים האלה עדיין פנויים.';
+String _holdLapsedStillFreeHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one =>
+        'ההזמנה שלך פגה בזמן שלא היית. המושב הזה עדיין פנוי.',
+      PickerPluralCategory.two =>
+        'ההזמנה שלך פגה בזמן שלא היית. המושבים האלה עדיין פנויים.',
+      _ => 'ההזמנה שלך פגה בזמן שלא היית. המושבים האלה עדיין פנויים.',
+    };
 
-String _holdLapsedSomeTakenHe(int count) => count == 1
-    ? 'ההזמנה שלך פגה בזמן שלא היית, ו-$count מהמושבים האלה כבר נתפס. השאר עדיין פנויים.'
-    : 'ההזמנה שלך פגה בזמן שלא היית, ו-$count מהמושבים האלה כבר נתפסו. השאר עדיין פנויים.';
+String _holdLapsedSomeTakenHe(int count) => switch (pickerPluralCategory(
+  'he',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'ההזמנה שלך פגה בזמן שלא היית, ו-$count מהמושבים האלה כבר נתפס. השאר עדיין פנויים.',
+  PickerPluralCategory.two =>
+    'ההזמנה שלך פגה בזמן שלא היית, ו-$count מהמושבים האלה כבר נתפסו. השאר עדיין פנויים.',
+  _ =>
+    'ההזמנה שלך פגה בזמן שלא היית, ו-$count מהמושבים האלה כבר נתפסו. השאר עדיין פנויים.',
+};
 
-String _holdLapsedAllTakenHe(int count) => count == 1
-    ? 'ההזמנה שלך פגה בזמן שלא היית, והמושב הזה כבר נתפס.'
-    : 'ההזמנה שלך פגה בזמן שלא היית, והמושבים האלה כבר נתפסו.';
+String _holdLapsedAllTakenHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one =>
+        'ההזמנה שלך פגה בזמן שלא היית, והמושב הזה כבר נתפס.',
+      PickerPluralCategory.two =>
+        'ההזמנה שלך פגה בזמן שלא היית, והמושבים האלה כבר נתפסו.',
+      _ => 'ההזמנה שלך פגה בזמן שלא היית, והמושבים האלה כבר נתפסו.',
+    };
 
 String _continueWithTotalHe(String money) => 'המשך \u00b7 $money';
 

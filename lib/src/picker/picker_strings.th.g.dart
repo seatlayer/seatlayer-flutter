@@ -28,32 +28,24 @@ String _seatJustTakenByAnotherTh(String label) =>
 String _peekSecuredTh(int count, String total) =>
     '✓ กันไว้แล้ว $count · $total ยังไม่มีการตัดเงิน';
 
-String _ticketCountTh(int count) => count == 1 ? '$count ใบ' : '$count ใบ';
+String _ticketCountTh(int count) => '$count ใบ';
 
-String _findBestSeatsTh(int count) => count == 1
-    ? 'หาที่นั่งที่ดีที่สุด $count ที่'
-    : 'หาที่นั่งที่ดีที่สุด $count ที่';
+String _findBestSeatsTh(int count) => 'หาที่นั่งที่ดีที่สุด $count ที่';
 
-String _reselectSeatsTh(int count) =>
-    count == 1 ? 'เลือกอีกครั้ง' : 'เลือกอีกครั้ง';
+String _reselectSeatsTh(int count) => 'เลือกอีกครั้ง';
 
-String _seatsFreeTh(int count) =>
-    count == 1 ? '$count ที่นั่ง' : '$count ที่นั่ง';
+String _seatsFreeTh(int count) => '$count ที่นั่ง';
 
-String _seatsLeftInSectionTh(int count) =>
-    count == 1 ? 'เหลือ $count ที่นั่ง' : 'เหลือ $count ที่นั่ง';
+String _seatsLeftInSectionTh(int count) => 'เหลือ $count ที่นั่ง';
 
-String _holdLapsedStillFreeTh(int count) => count == 1
-    ? 'เวลากันที่นั่งหมดระหว่างที่คุณไม่อยู่ ที่นั่งที่คุณเลือกยังว่างอยู่'
-    : 'เวลากันที่นั่งหมดระหว่างที่คุณไม่อยู่ ที่นั่งที่คุณเลือกยังว่างอยู่';
+String _holdLapsedStillFreeTh(int count) =>
+    'เวลากันที่นั่งหมดระหว่างที่คุณไม่อยู่ ที่นั่งที่คุณเลือกยังว่างอยู่';
 
-String _holdLapsedSomeTakenTh(int count) => count == 1
-    ? 'เวลากันที่นั่งหมดระหว่างที่คุณไม่อยู่ และมีผู้อื่นจองไปแล้ว $count ที่ ที่เหลือยังว่างอยู่'
-    : 'เวลากันที่นั่งหมดระหว่างที่คุณไม่อยู่ และมีผู้อื่นจองไปแล้ว $count ที่ ที่เหลือยังว่างอยู่';
+String _holdLapsedSomeTakenTh(int count) =>
+    'เวลากันที่นั่งหมดระหว่างที่คุณไม่อยู่ และมีผู้อื่นจองไปแล้ว $count ที่ ที่เหลือยังว่างอยู่';
 
-String _holdLapsedAllTakenTh(int count) => count == 1
-    ? 'เวลากันที่นั่งหมดระหว่างที่คุณไม่อยู่ และที่นั่งที่คุณเลือกมีผู้อื่นจองไปแล้ว'
-    : 'เวลากันที่นั่งหมดระหว่างที่คุณไม่อยู่ และที่นั่งที่คุณเลือกมีผู้อื่นจองไปแล้ว';
+String _holdLapsedAllTakenTh(int count) =>
+    'เวลากันที่นั่งหมดระหว่างที่คุณไม่อยู่ และที่นั่งที่คุณเลือกมีผู้อื่นจองไปแล้ว';
 
 String _continueWithTotalTh(String money) => 'ดำเนินการต่อ \u00b7 $money';
 

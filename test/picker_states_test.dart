@@ -140,7 +140,7 @@ void main() {
       );
       expect(
         seatLayerAccessTelling(strings, 'something-new').title,
-        "We couldn't verify your access",
+        'We couldn’t verify your access',
       );
 
       // EVERY REASON HAS EXACTLY ONE ACTION. Two of these used to have none,
@@ -363,7 +363,7 @@ void main() {
       // The step was taken, and the card is gone with the toast in its place.
       expect(map.callsTo('picker.extendHold'), hasLength(1));
       expect(find.text('+5 min'), findsNothing);
-      expect(find.text('More time added — your seats are still held.'),
+      expect(find.text('More time added. Your seats are still held.'),
           findsOneWidget);
 
       // And the map behind heard nothing at all.
@@ -475,18 +475,18 @@ void main() {
       map.emit(pickerSnapshot(holdOwner: 'host'));
       await tester.pumpAndSettle();
 
-      expect(find.text("You're all set"), findsNothing);
+      expect(find.text('You’re all set'), findsNothing);
 
       await controller.checkout();
       await tester.pumpAndSettle();
       // The hand-off is a buyer on the way to pay, not a sale.
-      expect(find.text("You're all set"), findsNothing);
+      expect(find.text('You’re all set'), findsNothing);
 
       // The hold vanishes with no expiry announced: the seats sold.
       map.emit(pickerSnapshot(revision: 3));
       await tester.pumpAndSettle();
 
-      expect(find.text("You're all set"), findsOneWidget);
+      expect(find.text('You’re all set'), findsOneWidget);
       expect(
         find.text('2 tickets confirmed. A confirmation is on its way.'),
         findsOneWidget,
@@ -497,7 +497,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text("You're all set"),
+        find.text('You’re all set'),
         findsNothing,
         reason: 'the map is the way out, and the hold is unaffected',
       );
@@ -539,7 +539,7 @@ void main() {
       map.emit(pickerSnapshot(revision: 3));
       await tester.pumpAndSettle();
 
-      expect(find.text("You're all set"), findsNothing);
+      expect(find.text('You’re all set'), findsNothing);
       expect(controller.bookedHandoff, isNotNull,
           reason: 'the sale is still known; only the telling is the host\'s');
     });
@@ -583,7 +583,7 @@ void main() {
       map.emit(pickerSnapshot(revision: 3));
       await tester.pumpAndSettle();
 
-      expect(find.text("You're all set"), findsNothing);
+      expect(find.text('You’re all set'), findsNothing);
     });
   });
 

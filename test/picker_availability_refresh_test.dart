@@ -533,7 +533,7 @@ void main() {
     );
     expect(controller.holdLapse!.recovery, SeatLayerRecovery.partial);
     expect(controller.state.hold, isNull);
-    expect(find.text('Your seats were released.'), findsWidgets);
+    expect(find.text('Your seats were released'), findsWidgets);
   });
 
   testWidgets('a lifecycle reply that carries no read falls back to a refresh',

@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftAr(int count) => 'بقي $count';
@@ -28,31 +29,98 @@ String _seatJustTakenByAnotherAr(String label) =>
 String _peekSecuredAr(int count, String total) =>
     '✓ تم تأمين $count · $total. لن نخصم أي مبلغ بعد';
 
-String _ticketCountAr(int count) =>
-    count == 1 ? '$count تذكرة' : '$count تذكرة';
+String _ticketCountAr(int count) => switch (pickerPluralCategory('ar', count)) {
+  PickerPluralCategory.zero => '$count تذكرة',
+  PickerPluralCategory.one => '$count تذكرة',
+  PickerPluralCategory.two => '$count تذكرتان',
+  PickerPluralCategory.few => '$count تذاكر',
+  PickerPluralCategory.many => '$count تذكرة',
+  _ => '$count تذكرة',
+};
 
 String _findBestSeatsAr(int count) =>
-    count == 1 ? 'ابحث عن $count أفضل مقعد' : 'ابحث عن أفضل $count مقعد';
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => 'ابحث عن $count أفضل مقعد',
+      PickerPluralCategory.one => 'ابحث عن $count أفضل مقعد',
+      PickerPluralCategory.two => 'ابحث عن أفضل $count مقعدين',
+      PickerPluralCategory.few => 'ابحث عن أفضل $count مقاعد',
+      PickerPluralCategory.many => 'ابحث عن أفضل $count مقعدًا',
+      _ => 'ابحث عن أفضل $count مقعد',
+    };
 
 String _reselectSeatsAr(int count) =>
-    count == 1 ? 'اختره مرة أخرى' : 'اخترها مرة أخرى';
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => 'اخترها مرة أخرى',
+      PickerPluralCategory.one => 'اختره مرة أخرى',
+      PickerPluralCategory.two => 'اخترهما مرة أخرى',
+      PickerPluralCategory.few => 'اخترها مرة أخرى',
+      PickerPluralCategory.many => 'اخترها مرة أخرى',
+      _ => 'اخترها مرة أخرى',
+    };
 
-String _seatsFreeAr(int count) => count == 1 ? '$count مقعد' : '$count مقعد';
+String _seatsFreeAr(int count) => switch (pickerPluralCategory('ar', count)) {
+  PickerPluralCategory.zero => '$count مقعد',
+  PickerPluralCategory.one => '$count مقعد',
+  PickerPluralCategory.two => '$count مقعدان',
+  PickerPluralCategory.few => '$count مقاعد',
+  PickerPluralCategory.many => '$count مقعدًا',
+  _ => '$count مقعد',
+};
 
 String _seatsLeftInSectionAr(int count) =>
-    count == 1 ? 'بقي $count مقعد' : 'بقي $count مقعد';
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => 'بقي $count مقعد',
+      PickerPluralCategory.one => 'بقي $count مقعد',
+      PickerPluralCategory.two => 'بقي $count مقعدان',
+      PickerPluralCategory.few => 'بقيت $count مقاعد',
+      PickerPluralCategory.many => 'بقي $count مقعدًا',
+      _ => 'بقي $count مقعد',
+    };
 
-String _holdLapsedStillFreeAr(int count) => count == 1
-    ? 'انتهى حجزك أثناء غيابك. لا يزال ذلك المقعد متاحًا.'
-    : 'انتهى حجزك أثناء غيابك. لا تزال تلك المقاعد متاحة.';
+String _holdLapsedStillFreeAr(int count) =>
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero =>
+        'انتهى حجزك أثناء غيابك. لا تزال تلك المقاعد متاحة.',
+      PickerPluralCategory.one =>
+        'انتهى حجزك أثناء غيابك. لا يزال ذلك المقعد متاحًا.',
+      PickerPluralCategory.two =>
+        'انتهى حجزك أثناء غيابك. لا يزال هذان المقعدان متاحين.',
+      PickerPluralCategory.few =>
+        'انتهى حجزك أثناء غيابك. لا تزال تلك المقاعد متاحة.',
+      PickerPluralCategory.many =>
+        'انتهى حجزك أثناء غيابك. لا تزال تلك المقاعد متاحة.',
+      _ => 'انتهى حجزك أثناء غيابك. لا تزال تلك المقاعد متاحة.',
+    };
 
-String _holdLapsedSomeTakenAr(int count) => count == 1
-    ? 'انتهى حجزك أثناء غيابك، وتم حجز $count مقعد من تلك المقاعد. الباقي لا يزال متاحًا.'
-    : 'انتهى حجزك أثناء غيابك، وتم حجز $count مقعد من تلك المقاعد. الباقي لا يزال متاحًا.';
+String _holdLapsedSomeTakenAr(int count) => switch (pickerPluralCategory(
+  'ar',
+  count,
+)) {
+  PickerPluralCategory.zero =>
+    'انتهى حجزك أثناء غيابك، وتم حجز $count مقعد من تلك المقاعد. الباقي لا يزال متاحًا.',
+  PickerPluralCategory.one =>
+    'انتهى حجزك أثناء غيابك، وتم حجز $count مقعد من تلك المقاعد. الباقي لا يزال متاحًا.',
+  PickerPluralCategory.two =>
+    'انتهى حجزك أثناء غيابك، وتم حجز $count مقعدين من تلك المقاعد. الباقي لا يزال متاحًا.',
+  PickerPluralCategory.few =>
+    'انتهى حجزك أثناء غيابك، وتم حجز $count مقاعد من تلك المقاعد. الباقي لا يزال متاحًا.',
+  PickerPluralCategory.many =>
+    'انتهى حجزك أثناء غيابك، وتم حجز $count مقعدًا من تلك المقاعد. الباقي لا يزال متاحًا.',
+  _ =>
+    'انتهى حجزك أثناء غيابك، وتم حجز $count مقعد من تلك المقاعد. الباقي لا يزال متاحًا.',
+};
 
-String _holdLapsedAllTakenAr(int count) => count == 1
-    ? 'انتهى حجزك أثناء غيابك، وتم حجز ذلك المقعد.'
-    : 'انتهى حجزك أثناء غيابك، وتم حجز تلك المقاعد.';
+String _holdLapsedAllTakenAr(int count) => switch (pickerPluralCategory(
+  'ar',
+  count,
+)) {
+  PickerPluralCategory.zero => 'انتهى حجزك أثناء غيابك، وتم حجز تلك المقاعد.',
+  PickerPluralCategory.one => 'انتهى حجزك أثناء غيابك، وتم حجز ذلك المقعد.',
+  PickerPluralCategory.two => 'انتهى حجزك أثناء غيابك، وتم حجز هذين المقعدين.',
+  PickerPluralCategory.few => 'انتهى حجزك أثناء غيابك، وتم حجز تلك المقاعد.',
+  PickerPluralCategory.many => 'انتهى حجزك أثناء غيابك، وتم حجز تلك المقاعد.',
+  _ => 'انتهى حجزك أثناء غيابك، وتم حجز تلك المقاعد.',
+};
 
 String _continueWithTotalAr(String money) => 'متابعة \u00b7 $money';
 

@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftDe(int count) => '$count frei';
@@ -29,31 +30,63 @@ String _seatJustTakenByAnotherDe(String label) =>
 String _peekSecuredDe(int count, String total) =>
     '✓ $count gesichert · $total. Noch wird nichts abgebucht';
 
-String _ticketCountDe(int count) =>
-    count == 1 ? '$count Ticket' : '$count Tickets';
+String _ticketCountDe(int count) => switch (pickerPluralCategory('de', count)) {
+  PickerPluralCategory.one => '$count Ticket',
+  _ => '$count Tickets',
+};
 
 String _findBestSeatsDe(int count) =>
-    count == 1 ? '$count besten Platz finden' : '$count beste Plätze finden';
+    switch (pickerPluralCategory('de', count)) {
+      PickerPluralCategory.one => '$count besten Platz finden',
+      _ => '$count beste Plätze finden',
+    };
 
 String _reselectSeatsDe(int count) =>
-    count == 1 ? 'Erneut auswählen' : 'Erneut auswählen';
+    switch (pickerPluralCategory('de', count)) {
+      PickerPluralCategory.one => 'Erneut auswählen',
+      _ => 'Erneut auswählen',
+    };
 
-String _seatsFreeDe(int count) => count == 1 ? '$count Platz' : '$count Plätze';
+String _seatsFreeDe(int count) => switch (pickerPluralCategory('de', count)) {
+  PickerPluralCategory.one => '$count Platz',
+  _ => '$count Plätze',
+};
 
 String _seatsLeftInSectionDe(int count) =>
-    count == 1 ? '$count Platz verfügbar' : '$count Plätze verfügbar';
+    switch (pickerPluralCategory('de', count)) {
+      PickerPluralCategory.one => '$count Platz verfügbar',
+      _ => '$count Plätze verfügbar',
+    };
 
-String _holdLapsedStillFreeDe(int count) => count == 1
-    ? 'Ihre Reservierung ist abgelaufen, während Sie weg waren. Dieser Platz ist noch frei.'
-    : 'Ihre Reservierung ist abgelaufen, während Sie weg waren. Diese Plätze sind noch frei.';
+String _holdLapsedStillFreeDe(int count) => switch (pickerPluralCategory(
+  'de',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ihre Reservierung ist abgelaufen, während Sie weg waren. Dieser Platz ist noch frei.',
+  _ =>
+    'Ihre Reservierung ist abgelaufen, während Sie weg waren. Diese Plätze sind noch frei.',
+};
 
-String _holdLapsedSomeTakenDe(int count) => count == 1
-    ? 'Ihre Reservierung ist abgelaufen, während Sie weg waren, und $count dieser Plätze ist inzwischen vergeben. Die übrigen sind noch frei.'
-    : 'Ihre Reservierung ist abgelaufen, während Sie weg waren, und $count dieser Plätze sind inzwischen vergeben. Die übrigen sind noch frei.';
+String _holdLapsedSomeTakenDe(int count) => switch (pickerPluralCategory(
+  'de',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ihre Reservierung ist abgelaufen, während Sie weg waren, und $count dieser Plätze ist inzwischen vergeben. Die übrigen sind noch frei.',
+  _ =>
+    'Ihre Reservierung ist abgelaufen, während Sie weg waren, und $count dieser Plätze sind inzwischen vergeben. Die übrigen sind noch frei.',
+};
 
-String _holdLapsedAllTakenDe(int count) => count == 1
-    ? 'Ihre Reservierung ist abgelaufen, während Sie weg waren, und dieser Platz ist inzwischen vergeben.'
-    : 'Ihre Reservierung ist abgelaufen, während Sie weg waren, und diese Plätze sind inzwischen vergeben.';
+String _holdLapsedAllTakenDe(int count) => switch (pickerPluralCategory(
+  'de',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ihre Reservierung ist abgelaufen, während Sie weg waren, und dieser Platz ist inzwischen vergeben.',
+  _ =>
+    'Ihre Reservierung ist abgelaufen, während Sie weg waren, und diese Plätze sind inzwischen vergeben.',
+};
 
 String _continueWithTotalDe(String money) => 'Weiter \u00b7 $money';
 

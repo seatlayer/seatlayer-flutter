@@ -27,29 +27,22 @@ String _seatJustTakenByAnotherJa(String label) => '座席$labelは他のお客�
 String _peekSecuredJa(int count, String total) =>
     '✓ $count席確保 · $total。まだ請求はされません';
 
-String _ticketCountJa(int count) => count == 1 ? '$count枚' : '$count枚';
+String _ticketCountJa(int count) => '$count枚';
 
-String _findBestSeatsJa(int count) =>
-    count == 1 ? 'おすすめの$count席を探す' : 'おすすめの$count席を探す';
+String _findBestSeatsJa(int count) => 'おすすめの$count席を探す';
 
-String _reselectSeatsJa(int count) => count == 1 ? 'もう一度選ぶ' : 'もう一度選ぶ';
+String _reselectSeatsJa(int count) => 'もう一度選ぶ';
 
-String _seatsFreeJa(int count) => count == 1 ? '$count席' : '$count席';
+String _seatsFreeJa(int count) => '$count席';
 
-String _seatsLeftInSectionJa(int count) =>
-    count == 1 ? '残り$count席' : '残り$count席';
+String _seatsLeftInSectionJa(int count) => '残り$count席';
 
-String _holdLapsedStillFreeJa(int count) => count == 1
-    ? '離席中に確保の時間が切れました。その席はまだ空いています。'
-    : '離席中に確保の時間が切れました。その席はまだ空いています。';
+String _holdLapsedStillFreeJa(int count) => '離席中に確保の時間が切れました。その席はまだ空いています。';
 
-String _holdLapsedSomeTakenJa(int count) => count == 1
-    ? '離席中に確保の時間が切れ、そのうち $count 席はすでに他の方が確保しました。残りはまだ空いています。'
-    : '離席中に確保の時間が切れ、そのうち $count 席はすでに他の方が確保しました。残りはまだ空いています。';
+String _holdLapsedSomeTakenJa(int count) =>
+    '離席中に確保の時間が切れ、そのうち $count 席はすでに他の方が確保しました。残りはまだ空いています。';
 
-String _holdLapsedAllTakenJa(int count) => count == 1
-    ? '離席中に確保の時間が切れ、その席はすでに他の方が確保しました。'
-    : '離席中に確保の時間が切れ、その席はすでに他の方が確保しました。';
+String _holdLapsedAllTakenJa(int count) => '離席中に確保の時間が切れ、その席はすでに他の方が確保しました。';
 
 String _continueWithTotalJa(String money) => '次へ \u00b7 $money';
 

@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftFa(int count) => '$count باقی مانده';
@@ -28,31 +29,57 @@ String _seatJustTakenByAnotherFa(String label) =>
 String _peekSecuredFa(int count, String total) =>
     '✓ $count تثبیت شد · $total. هنوز مبلغی کسر نمی‌شود';
 
-String _ticketCountFa(int count) => count == 1 ? '$count بلیت' : '$count بلیت';
+String _ticketCountFa(int count) => switch (pickerPluralCategory('fa', count)) {
+  PickerPluralCategory.one => '$count بلیت',
+  _ => '$count بلیت',
+};
 
-String _findBestSeatsFa(int count) => count == 1
-    ? 'پیدا کردن $count بهترین صندلی'
-    : 'پیدا کردن $count صندلی برتر';
+String _findBestSeatsFa(int count) =>
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one => 'پیدا کردن $count بهترین صندلی',
+      _ => 'پیدا کردن $count صندلی برتر',
+    };
 
 String _reselectSeatsFa(int count) =>
-    count == 1 ? 'دوباره انتخابش کنید' : 'دوباره انتخابشان کنید';
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one => 'دوباره انتخابش کنید',
+      _ => 'دوباره انتخابشان کنید',
+    };
 
-String _seatsFreeFa(int count) => count == 1 ? '$count صندلی' : '$count صندلی';
+String _seatsFreeFa(int count) => switch (pickerPluralCategory('fa', count)) {
+  PickerPluralCategory.one => '$count صندلی',
+  _ => '$count صندلی',
+};
 
 String _seatsLeftInSectionFa(int count) =>
-    count == 1 ? '$count صندلی باقی مانده' : '$count صندلی باقی مانده';
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one => '$count صندلی باقی مانده',
+      _ => '$count صندلی باقی مانده',
+    };
 
-String _holdLapsedStillFreeFa(int count) => count == 1
-    ? 'رزرو شما در زمان نبودنتان منقضی شد. آن صندلی هنوز آزاد است.'
-    : 'رزرو شما در زمان نبودنتان منقضی شد. آن صندلی‌ها هنوز آزاد هستند.';
+String _holdLapsedStillFreeFa(int count) =>
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one =>
+        'رزرو شما در زمان نبودنتان منقضی شد. آن صندلی هنوز آزاد است.',
+      _ => 'رزرو شما در زمان نبودنتان منقضی شد. آن صندلی‌ها هنوز آزاد هستند.',
+    };
 
-String _holdLapsedSomeTakenFa(int count) => count == 1
-    ? 'رزرو شما در زمان نبودنتان منقضی شد و $count صندلی از آن‌ها گرفته شده است. بقیه هنوز آزاد هستند.'
-    : 'رزرو شما در زمان نبودنتان منقضی شد و $count صندلی از آن‌ها گرفته شده است. بقیه هنوز آزاد هستند.';
+String _holdLapsedSomeTakenFa(int count) => switch (pickerPluralCategory(
+  'fa',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'رزرو شما در زمان نبودنتان منقضی شد و $count صندلی از آن‌ها گرفته شده است. بقیه هنوز آزاد هستند.',
+  _ =>
+    'رزرو شما در زمان نبودنتان منقضی شد و $count صندلی از آن‌ها گرفته شده است. بقیه هنوز آزاد هستند.',
+};
 
-String _holdLapsedAllTakenFa(int count) => count == 1
-    ? 'رزرو شما در زمان نبودنتان منقضی شد و آن صندلی گرفته شده است.'
-    : 'رزرو شما در زمان نبودنتان منقضی شد و آن صندلی‌ها گرفته شده‌اند.';
+String _holdLapsedAllTakenFa(int count) =>
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one =>
+        'رزرو شما در زمان نبودنتان منقضی شد و آن صندلی گرفته شده است.',
+      _ => 'رزرو شما در زمان نبودنتان منقضی شد و آن صندلی‌ها گرفته شده‌اند.',
+    };
 
 String _continueWithTotalFa(String money) => 'ادامه \u00b7 $money';
 

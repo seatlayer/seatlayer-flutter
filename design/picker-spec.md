@@ -2113,7 +2113,7 @@ Capability `accessibility-focus-v1` gates all three. An older runtime applies
 the filter and leaves the camera where it was, so every control below is
 withheld from it rather than degraded.
 
-**Booked ("You're all set").** Never shown on the hand-off: a buyer on the way
+**Booked ("You’re all set").** Never shown on the hand-off: a buyer on the way
 to pay has not paid. It appears only when the handed-off hold settles to
 booked — the hold vanishes from the snapshot with no `hold.expired` announced
 first — which is the web picker's `detectBooked` rule. The expiry is read off
@@ -2525,7 +2525,13 @@ height and nothing is subtracted.
 
 **4.3 String overrides.** Every buyer-facing string in `strings` is overridable,
 individually, without replacing the set. Counted strings need one/other forms
-(and the plural categories the platform's own locale rules require). Access-need
+(and the plural categories the platform's own locale rules require). The
+shipped translations carry every form the runtime has (`zero`, `one`, `two`,
+`few`, `many`, `other`) and choose by the locale's CLDR category for the
+count, exactly as the runtime's `Intl.PluralRules` does; a form a dictionary
+lacks falls back to `other`. A port checks its rules against
+`test/fixtures/plural_categories.json`, the categories `Intl.PluralRules` gives
+every shipped locale for a fixed list of counts. Access-need
 names are overridable by need. The picker ships localized defaults; a host
 override always wins.
 

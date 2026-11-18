@@ -820,7 +820,7 @@ class SeatLayerPickerStrings {
   /// "Secure 2 more & checkout" — a hold that is about to grow.
   final String Function(int count) secureMoreAndCheckout;
 
-  /// "\u2713 3 secured \u00b7 \u20ac285 \u2014 you won't be charged yet".
+  /// "\u2713 3 secured \u00b7 \u20ac285. You won\u2019t be charged yet".
   ///
   /// The collapsed line for the moment between the hold landing and the host's
   /// checkout appearing. It says the money is safe before the buyer has to
@@ -861,7 +861,7 @@ class SeatLayerPickerStrings {
   /// promise one.
   final String soldOutCopy;
 
-  /// "Your hold expired — the seats were released. Pick again."
+  /// "Your hold expired and the seats were released. Pick again."
   ///
   /// The plain telling, used when a refresh cannot explain the lapse in more
   /// detail; [holdLapsedStillFree] and its siblings replace it when it can.
@@ -879,17 +879,17 @@ class SeatLayerPickerStrings {
   /// "Adding…" — the same button while the extension is in flight.
   final String addingEllipsis;
 
-  /// "More time added — your seats are still held."
+  /// "More time added. Your seats are still held."
   final String moreTimeAdded;
 
-  /// "Couldn't add more time — please head to checkout now."
+  /// "Couldn’t add more time. Please head to checkout now."
   final String couldNotAddMoreTime;
 
   /// "One or more seats were just taken. Please pick again." — a conflict the
   /// runtime could not attribute to one named seat.
   final String seatsJustTaken;
 
-  /// "You're all set" — the booked overlay's title.
+  /// "You’re all set" — the booked overlay's title.
   final String allSetTitle;
 
   /// "confirmed. A confirmation is on its way." — the rest of the sentence
@@ -899,7 +899,7 @@ class SeatLayerPickerStrings {
   /// "Back to map" — the way out of the booked overlay.
   final String backToMap;
 
-  /// "The seat map didn't load" — the failure card's title.
+  /// "The seat map didn’t load" — the failure card's title.
   final String mapDidNotLoad;
 
   /// "Check your connection and try again." — the line under it.
@@ -924,7 +924,7 @@ class SeatLayerPickerStrings {
   /// The sentence under [accessExpiredTitle].
   final String accessExpiredCopy;
 
-  /// "We couldn't verify your access" — every other access failure.
+  /// "We couldn’t verify your access" — every other access failure.
   final String accessUnverifiedTitle;
 
   /// The sentence under [accessUnverifiedTitle].

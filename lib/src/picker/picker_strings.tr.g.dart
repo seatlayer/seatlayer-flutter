@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftTr(int count) => '$count kaldı';
@@ -28,32 +29,57 @@ String _seatJustTakenByAnotherTr(String label) =>
 String _peekSecuredTr(int count, String total) =>
     '✓ $count güvenceye alındı · $total. Henüz ücret alınmayacak';
 
-String _ticketCountTr(int count) =>
-    count == 1 ? '$count bilet' : '$count bilet';
+String _ticketCountTr(int count) => switch (pickerPluralCategory('tr', count)) {
+  PickerPluralCategory.one => '$count bilet',
+  _ => '$count bilet',
+};
 
 String _findBestSeatsTr(int count) =>
-    count == 1 ? '$count en iyi koltuğu bul' : '$count en iyi koltuğu bul';
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one => '$count en iyi koltuğu bul',
+      _ => '$count en iyi koltuğu bul',
+    };
 
 String _reselectSeatsTr(int count) =>
-    count == 1 ? 'Onu tekrar seç' : 'Onları tekrar seç';
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one => 'Onu tekrar seç',
+      _ => 'Onları tekrar seç',
+    };
 
-String _seatsFreeTr(int count) =>
-    count == 1 ? '$count koltuk' : '$count koltuk';
+String _seatsFreeTr(int count) => switch (pickerPluralCategory('tr', count)) {
+  PickerPluralCategory.one => '$count koltuk',
+  _ => '$count koltuk',
+};
 
 String _seatsLeftInSectionTr(int count) =>
-    count == 1 ? '$count koltuk kaldı' : '$count koltuk kaldı';
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one => '$count koltuk kaldı',
+      _ => '$count koltuk kaldı',
+    };
 
-String _holdLapsedStillFreeTr(int count) => count == 1
-    ? 'Siz yokken rezervasyonunuz sona erdi. O koltuk hâlâ boş.'
-    : 'Siz yokken rezervasyonunuz sona erdi. O koltuklar hâlâ boş.';
+String _holdLapsedStillFreeTr(int count) =>
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one =>
+        'Siz yokken rezervasyonunuz sona erdi. O koltuk hâlâ boş.',
+      _ => 'Siz yokken rezervasyonunuz sona erdi. O koltuklar hâlâ boş.',
+    };
 
-String _holdLapsedSomeTakenTr(int count) => count == 1
-    ? 'Siz yokken rezervasyonunuz sona erdi ve o koltuklardan $count tanesi alındı. Geri kalanlar hâlâ boş.'
-    : 'Siz yokken rezervasyonunuz sona erdi ve o koltuklardan $count tanesi alındı. Geri kalanlar hâlâ boş.';
+String _holdLapsedSomeTakenTr(int count) => switch (pickerPluralCategory(
+  'tr',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Siz yokken rezervasyonunuz sona erdi ve o koltuklardan $count tanesi alındı. Geri kalanlar hâlâ boş.',
+  _ =>
+    'Siz yokken rezervasyonunuz sona erdi ve o koltuklardan $count tanesi alındı. Geri kalanlar hâlâ boş.',
+};
 
-String _holdLapsedAllTakenTr(int count) => count == 1
-    ? 'Siz yokken rezervasyonunuz sona erdi ve o koltuk alındı.'
-    : 'Siz yokken rezervasyonunuz sona erdi ve o koltuklar alındı.';
+String _holdLapsedAllTakenTr(int count) =>
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one =>
+        'Siz yokken rezervasyonunuz sona erdi ve o koltuk alındı.',
+      _ => 'Siz yokken rezervasyonunuz sona erdi ve o koltuklar alındı.',
+    };
 
 String _continueWithTotalTr(String money) => 'Devam \u00b7 $money';
 

@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftIt(int count) => 'Ne restano $count';
@@ -28,32 +29,74 @@ String _seatJustTakenByAnotherIt(String label) =>
 String _peekSecuredIt(int count, String total) =>
     '✓ $count bloccati · $total. Non ti addebiteremo ancora nulla';
 
-String _ticketCountIt(int count) =>
-    count == 1 ? '$count biglietto' : '$count biglietti';
+String _ticketCountIt(int count) => switch (pickerPluralCategory('it', count)) {
+  PickerPluralCategory.one => '$count biglietto',
+  PickerPluralCategory.many => '$count biglietti',
+  _ => '$count biglietti',
+};
 
-String _findBestSeatsIt(int count) => count == 1
-    ? 'Trova $count posto migliore'
-    : 'Trova i $count posti migliori';
+String _findBestSeatsIt(int count) =>
+    switch (pickerPluralCategory('it', count)) {
+      PickerPluralCategory.one => 'Trova $count posto migliore',
+      PickerPluralCategory.many => 'Trova i $count posti migliori',
+      _ => 'Trova i $count posti migliori',
+    };
 
 String _reselectSeatsIt(int count) =>
-    count == 1 ? 'Selezionalo di nuovo' : 'Selezionali di nuovo';
+    switch (pickerPluralCategory('it', count)) {
+      PickerPluralCategory.one => 'Selezionalo di nuovo',
+      PickerPluralCategory.many => 'Selezionali di nuovo',
+      _ => 'Selezionali di nuovo',
+    };
 
-String _seatsFreeIt(int count) => count == 1 ? '$count posto' : '$count posti';
+String _seatsFreeIt(int count) => switch (pickerPluralCategory('it', count)) {
+  PickerPluralCategory.one => '$count posto',
+  PickerPluralCategory.many => '$count posti',
+  _ => '$count posti',
+};
 
 String _seatsLeftInSectionIt(int count) =>
-    count == 1 ? 'Resta $count posto' : 'Restano $count posti';
+    switch (pickerPluralCategory('it', count)) {
+      PickerPluralCategory.one => 'Resta $count posto',
+      PickerPluralCategory.many => 'Restano $count posti',
+      _ => 'Restano $count posti',
+    };
 
-String _holdLapsedStillFreeIt(int count) => count == 1
-    ? 'La tua prenotazione è scaduta mentre eri via. Quel posto è ancora libero.'
-    : 'La tua prenotazione è scaduta mentre eri via. Quei posti sono ancora liberi.';
+String _holdLapsedStillFreeIt(int count) => switch (pickerPluralCategory(
+  'it',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'La tua prenotazione è scaduta mentre eri via. Quel posto è ancora libero.',
+  PickerPluralCategory.many =>
+    'La tua prenotazione è scaduta mentre eri via. Quei posti sono ancora liberi.',
+  _ =>
+    'La tua prenotazione è scaduta mentre eri via. Quei posti sono ancora liberi.',
+};
 
-String _holdLapsedSomeTakenIt(int count) => count == 1
-    ? 'La tua prenotazione è scaduta mentre eri via e $count di quei posti è stato occupato. Gli altri sono ancora liberi.'
-    : 'La tua prenotazione è scaduta mentre eri via e $count di quei posti sono stati occupati. Gli altri sono ancora liberi.';
+String _holdLapsedSomeTakenIt(int count) => switch (pickerPluralCategory(
+  'it',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'La tua prenotazione è scaduta mentre eri via e $count di quei posti è stato occupato. Gli altri sono ancora liberi.',
+  PickerPluralCategory.many =>
+    'La tua prenotazione è scaduta mentre eri via e $count di quei posti sono stati occupati. Gli altri sono ancora liberi.',
+  _ =>
+    'La tua prenotazione è scaduta mentre eri via e $count di quei posti sono stati occupati. Gli altri sono ancora liberi.',
+};
 
-String _holdLapsedAllTakenIt(int count) => count == 1
-    ? 'La tua prenotazione è scaduta mentre eri via e quel posto è stato occupato.'
-    : 'La tua prenotazione è scaduta mentre eri via e quei posti sono stati occupati.';
+String _holdLapsedAllTakenIt(int count) => switch (pickerPluralCategory(
+  'it',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'La tua prenotazione è scaduta mentre eri via e quel posto è stato occupato.',
+  PickerPluralCategory.many =>
+    'La tua prenotazione è scaduta mentre eri via e quei posti sono stati occupati.',
+  _ =>
+    'La tua prenotazione è scaduta mentre eri via e quei posti sono stati occupati.',
+};
 
 String _continueWithTotalIt(String money) => 'Continua \u00b7 $money';
 

@@ -2,6 +2,15 @@
 // dictionaries.
 //
 //   node tool/extract_runtime_locales.mjs <SeatLayer runtime locale directory>
+//   node tool/extract_runtime_locales.mjs --plural-categories [--check]
+//
+// The second form needs no runtime source: it rewrites (or, with --check,
+// compares) `test/fixtures/plural_categories.json`, the category
+// `Intl.PluralRules` gives each shipped locale for a fixed list of counts. The
+// runtime picks a counted sentence's form with `Intl.PluralRules`; the Dart
+// rules in `lib/src/picker/picker_plural_rules.dart` are tested against that
+// fixture so the two choose the same form for the same count. The first form
+// writes the fixture too.
 //
 // The runtime already ships a translated dictionary per locale, reviewed by
 // the same people who review the web picker's wording. Re-translating the same
@@ -189,9 +198,6 @@ const KEYS = {
   totalWord: 'picker.total',
 };
 
-const dir = process.argv[2];
-if (!dir) throw new Error('usage: node tool/extract_runtime_locales.mjs <locales dir>');
-
 /** One locale file, evaluated as a module with its type annotation removed. */
 async function readDictionary(file) {
   const code = fs
@@ -207,22 +213,113 @@ async function readDictionary(file) {
   }
 }
 
-const strings = {};
-for (const file of fs.readdirSync(dir).filter((name) => name.endsWith('.ts')).sort()) {
-  const dictionary = await readDictionary(path.join(dir, file));
-  const entry = {};
-  for (const [key, source] of Object.entries(KEYS)) {
-    if (typeof dictionary[source] === 'string') entry[key] = dictionary[source];
+const PLURAL_FORMS = ['zero', 'one', 'two', 'few', 'many', 'other'];
+
+/** The counts the plural fixture records: every case the rules distinguish. */
+const PLURAL_COUNTS = [
+  ...Array.from({ length: 201 }, (_, n) => n),
+  1000, 1001, 1011, 1021, 1111, 1000000, 1000001, 1000021, 2000000, 10000000,
+];
+
+const FIXTURE = 'test/fixtures/plural_categories.json';
+
+/** The fixture for [tags], as the file's text. */
+function pluralFixture(tags) {
+  const categories = {};
+  for (const tag of tags) {
+    const rules = new Intl.PluralRules(tag);
+    categories[tag] = PLURAL_COUNTS.map((count) => rules.select(count));
   }
-  strings[file.replace(/\.ts$/, '')] = entry;
+  // One line per locale: 43 lines a reviewer can read across, not ten
+  // thousand lines of one word each.
+  const text = (versions) =>
+    [
+      '{',
+      '  "source": "Intl.PluralRules, as the SeatLayer runtime selects counted sentences",',
+      ...Object.entries(versions).map(([key, value]) => `  ${JSON.stringify(key)}: ${JSON.stringify(value)},`),
+      `  "counts": ${JSON.stringify(PLURAL_COUNTS)},`,
+      '  "categories": {',
+      Object.entries(categories)
+        .map(([tag, list]) => `    ${JSON.stringify(tag)}: ${JSON.stringify(list)}`)
+        .join(',\n'),
+      '  }',
+      '}',
+      '',
+    ].join('\n');
+  return { categories, text };
 }
 
-fs.writeFileSync(
-  'design/locale_strings.json',
-  `${JSON.stringify(
-    { source: 'the SeatLayer runtime locale dictionaries', strings },
-    null,
-    2,
-  )}\n`,
-);
-process.stdout.write(`wrote design/locale_strings.json (${Object.keys(strings).length} locales)\n`);
+const versions = {
+  node: process.version,
+  icu: process.versions.icu,
+  cldr: process.versions.cldr,
+};
+
+function writePluralFixture(tags) {
+  fs.mkdirSync(path.dirname(FIXTURE), { recursive: true });
+  fs.writeFileSync(FIXTURE, pluralFixture(tags).text(versions));
+  process.stdout.write(`wrote ${FIXTURE} (${tags.length} locales)\n`);
+}
+
+if (process.argv[2] === '--plural-categories') {
+  const tags = Object.keys(
+    JSON.parse(fs.readFileSync('design/locale_strings.json', 'utf8')).strings,
+  ).sort();
+  if (process.argv.includes('--check')) {
+    // Only the categories are compared: the header names the Node and ICU
+    // that wrote the file, and a newer one that agrees is not a stale file.
+    const current = JSON.parse(fs.readFileSync(FIXTURE, 'utf8'));
+    const wanted = pluralFixture(tags).categories;
+    const same =
+      JSON.stringify(current.counts) === JSON.stringify(PLURAL_COUNTS) &&
+      JSON.stringify(current.categories) === JSON.stringify(wanted);
+    if (!same) {
+      process.stderr.write(
+        `${FIXTURE} is stale. Run \`node tool/extract_runtime_locales.mjs --plural-categories\`.\n`,
+      );
+      process.exit(1);
+    }
+    process.stdout.write(`${FIXTURE} is up to date\n`);
+  } else {
+    writePluralFixture(tags);
+  }
+} else {
+  const dir = process.argv[2];
+  if (!dir) {
+    throw new Error(
+      'usage: node tool/extract_runtime_locales.mjs <locales dir> | --plural-categories [--check]',
+    );
+  }
+
+  const strings = {};
+  for (const file of fs.readdirSync(dir).filter((name) => name.endsWith('.ts')).sort()) {
+    const dictionary = await readDictionary(path.join(dir, file));
+    const entry = {};
+    for (const [key, source] of Object.entries(KEYS)) {
+      if (typeof dictionary[source] === 'string') entry[key] = dictionary[source];
+      // A counted sentence: take every form the runtime has for it, not just
+      // the two English needs. Russian, Polish, Arabic and the rest choose
+      // between `few`, `many`, `two` and `zero` too.
+      if (key.endsWith('.other') && source.endsWith('.other')) {
+        const base = key.slice(0, -'.other'.length);
+        const sourceBase = source.slice(0, -'.other'.length);
+        for (const form of PLURAL_FORMS) {
+          const value = dictionary[`${sourceBase}.${form}`];
+          if (typeof value === 'string') entry[`${base}.${form}`] = value;
+        }
+      }
+    }
+    strings[file.replace(/\.ts$/, '')] = entry;
+  }
+
+  fs.writeFileSync(
+    'design/locale_strings.json',
+    `${JSON.stringify(
+      { source: 'the SeatLayer runtime locale dictionaries', strings },
+      null,
+      2,
+    )}\n`,
+  );
+  process.stdout.write(`wrote design/locale_strings.json (${Object.keys(strings).length} locales)\n`);
+  writePluralFixture(Object.keys(strings).sort());
+}

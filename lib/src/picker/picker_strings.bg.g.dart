@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftBg(int count) => 'Остават $count';
@@ -28,32 +29,62 @@ String _seatJustTakenByAnotherBg(String label) =>
 String _peekSecuredBg(int count, String total) =>
     '✓ $count запазени · $total. Още няма да ви таксуваме';
 
-String _ticketCountBg(int count) =>
-    count == 1 ? '$count билет' : '$count билета';
+String _ticketCountBg(int count) => switch (pickerPluralCategory('bg', count)) {
+  PickerPluralCategory.one => '$count билет',
+  _ => '$count билета',
+};
 
-String _findBestSeatsBg(int count) => count == 1
-    ? 'Намери $count най-добро място'
-    : 'Намери $count най-добри места';
+String _findBestSeatsBg(int count) =>
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => 'Намери $count най-добро място',
+      _ => 'Намери $count най-добри места',
+    };
 
 String _reselectSeatsBg(int count) =>
-    count == 1 ? 'Изберете го отново' : 'Изберете ги отново';
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => 'Изберете го отново',
+      _ => 'Изберете ги отново',
+    };
 
-String _seatsFreeBg(int count) => count == 1 ? '$count място' : '$count места';
+String _seatsFreeBg(int count) => switch (pickerPluralCategory('bg', count)) {
+  PickerPluralCategory.one => '$count място',
+  _ => '$count места',
+};
 
 String _seatsLeftInSectionBg(int count) =>
-    count == 1 ? 'Остава $count място' : 'Остават $count места';
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => 'Остава $count място',
+      _ => 'Остават $count места',
+    };
 
-String _holdLapsedStillFreeBg(int count) => count == 1
-    ? 'Резервацията ви изтече, докато ви нямаше. Това място все още е свободно.'
-    : 'Резервацията ви изтече, докато ви нямаше. Тези места все още са свободни.';
+String _holdLapsedStillFreeBg(int count) => switch (pickerPluralCategory(
+  'bg',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Резервацията ви изтече, докато ви нямаше. Това място все още е свободно.',
+  _ =>
+    'Резервацията ви изтече, докато ви нямаше. Тези места все още са свободни.',
+};
 
-String _holdLapsedSomeTakenBg(int count) => count == 1
-    ? 'Резервацията ви изтече, докато ви нямаше, и $count от тези места вече е заето. Останалите все още са свободни.'
-    : 'Резервацията ви изтече, докато ви нямаше, и $count от тези места вече са заети. Останалите все още са свободни.';
+String _holdLapsedSomeTakenBg(int count) => switch (pickerPluralCategory(
+  'bg',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Резервацията ви изтече, докато ви нямаше, и $count от тези места вече е заето. Останалите все още са свободни.',
+  _ =>
+    'Резервацията ви изтече, докато ви нямаше, и $count от тези места вече са заети. Останалите все още са свободни.',
+};
 
-String _holdLapsedAllTakenBg(int count) => count == 1
-    ? 'Резервацията ви изтече, докато ви нямаше, и това място вече е заето.'
-    : 'Резервацията ви изтече, докато ви нямаше, и тези места вече са заети.';
+String _holdLapsedAllTakenBg(int count) => switch (pickerPluralCategory(
+  'bg',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Резервацията ви изтече, докато ви нямаше, и това място вече е заето.',
+  _ => 'Резервацията ви изтече, докато ви нямаше, и тези места вече са заети.',
+};
 
 String _continueWithTotalBg(String money) => 'Продължи \u00b7 $money';
 

@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftEt(int count) => 'Jäänud $count';
@@ -28,31 +29,61 @@ String _seatJustTakenByAnotherEt(String label) =>
 String _peekSecuredEt(int count, String total) =>
     '✓ $count kindlustatud · $total. Veel ei võeta tasu';
 
-String _ticketCountEt(int count) =>
-    count == 1 ? '$count pilet' : '$count piletit';
+String _ticketCountEt(int count) => switch (pickerPluralCategory('et', count)) {
+  PickerPluralCategory.one => '$count pilet',
+  _ => '$count piletit',
+};
 
 String _findBestSeatsEt(int count) =>
-    count == 1 ? 'Leia $count parim koht' : 'Leia $count parimat kohta';
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => 'Leia $count parim koht',
+      _ => 'Leia $count parimat kohta',
+    };
 
 String _reselectSeatsEt(int count) =>
-    count == 1 ? 'Vali see uuesti' : 'Vali need uuesti';
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => 'Vali see uuesti',
+      _ => 'Vali need uuesti',
+    };
 
-String _seatsFreeEt(int count) => count == 1 ? '$count koht' : '$count kohta';
+String _seatsFreeEt(int count) => switch (pickerPluralCategory('et', count)) {
+  PickerPluralCategory.one => '$count koht',
+  _ => '$count kohta',
+};
 
 String _seatsLeftInSectionEt(int count) =>
-    count == 1 ? 'Jäänud $count koht' : 'Jäänud $count kohta';
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => 'Jäänud $count koht',
+      _ => 'Jäänud $count kohta',
+    };
 
-String _holdLapsedStillFreeEt(int count) => count == 1
-    ? 'Sinu broneering aegus, kui olid eemal. See koht on endiselt vaba.'
-    : 'Sinu broneering aegus, kui olid eemal. Need kohad on endiselt vabad.';
+String _holdLapsedStillFreeEt(int count) => switch (pickerPluralCategory(
+  'et',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Sinu broneering aegus, kui olid eemal. See koht on endiselt vaba.',
+  _ => 'Sinu broneering aegus, kui olid eemal. Need kohad on endiselt vabad.',
+};
 
-String _holdLapsedSomeTakenEt(int count) => count == 1
-    ? 'Sinu broneering aegus, kui olid eemal, ja $count neist kohtadest on juba hõivatud. Ülejäänud on endiselt vabad.'
-    : 'Sinu broneering aegus, kui olid eemal, ja $count neist kohtadest on juba hõivatud. Ülejäänud on endiselt vabad.';
+String _holdLapsedSomeTakenEt(int count) => switch (pickerPluralCategory(
+  'et',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Sinu broneering aegus, kui olid eemal, ja $count neist kohtadest on juba hõivatud. Ülejäänud on endiselt vabad.',
+  _ =>
+    'Sinu broneering aegus, kui olid eemal, ja $count neist kohtadest on juba hõivatud. Ülejäänud on endiselt vabad.',
+};
 
-String _holdLapsedAllTakenEt(int count) => count == 1
-    ? 'Sinu broneering aegus, kui olid eemal, ja see koht on juba hõivatud.'
-    : 'Sinu broneering aegus, kui olid eemal, ja need kohad on juba hõivatud.';
+String _holdLapsedAllTakenEt(int count) => switch (pickerPluralCategory(
+  'et',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Sinu broneering aegus, kui olid eemal, ja see koht on juba hõivatud.',
+  _ => 'Sinu broneering aegus, kui olid eemal, ja need kohad on juba hõivatud.',
+};
 
 String _continueWithTotalEt(String money) => 'Jätka \u00b7 $money';
 

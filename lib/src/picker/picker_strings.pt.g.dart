@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftPt(int count) => 'Restam $count';
@@ -28,33 +29,74 @@ String _seatJustTakenByAnotherPt(String label) =>
 String _peekSecuredPt(int count, String total) =>
     '✓ $count garantidos · $total. Ainda não vais ser cobrado';
 
-String _ticketCountPt(int count) =>
-    count == 1 ? '$count bilhete' : '$count bilhetes';
+String _ticketCountPt(int count) => switch (pickerPluralCategory('pt', count)) {
+  PickerPluralCategory.one => '$count bilhete',
+  PickerPluralCategory.many => '$count bilhetes',
+  _ => '$count bilhetes',
+};
 
-String _findBestSeatsPt(int count) => count == 1
-    ? 'Encontrar $count melhor lugar'
-    : 'Encontrar os $count melhores lugares';
+String _findBestSeatsPt(int count) =>
+    switch (pickerPluralCategory('pt', count)) {
+      PickerPluralCategory.one => 'Encontrar $count melhor lugar',
+      PickerPluralCategory.many => 'Encontrar os $count melhores lugares',
+      _ => 'Encontrar os $count melhores lugares',
+    };
 
 String _reselectSeatsPt(int count) =>
-    count == 1 ? 'Selecioná-lo novamente' : 'Selecioná-los novamente';
+    switch (pickerPluralCategory('pt', count)) {
+      PickerPluralCategory.one => 'Selecioná-lo novamente',
+      PickerPluralCategory.many => 'Selecioná-los novamente',
+      _ => 'Selecioná-los novamente',
+    };
 
-String _seatsFreePt(int count) =>
-    count == 1 ? '$count lugar' : '$count lugares';
+String _seatsFreePt(int count) => switch (pickerPluralCategory('pt', count)) {
+  PickerPluralCategory.one => '$count lugar',
+  PickerPluralCategory.many => '$count lugares',
+  _ => '$count lugares',
+};
 
 String _seatsLeftInSectionPt(int count) =>
-    count == 1 ? 'Resta $count lugar' : 'Restam $count lugares';
+    switch (pickerPluralCategory('pt', count)) {
+      PickerPluralCategory.one => 'Resta $count lugar',
+      PickerPluralCategory.many => 'Restam $count lugares',
+      _ => 'Restam $count lugares',
+    };
 
-String _holdLapsedStillFreePt(int count) => count == 1
-    ? 'A sua reserva expirou enquanto esteve ausente. Esse lugar continua livre.'
-    : 'A sua reserva expirou enquanto esteve ausente. Esses lugares continuam livres.';
+String _holdLapsedStillFreePt(int count) => switch (pickerPluralCategory(
+  'pt',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'A sua reserva expirou enquanto esteve ausente. Esse lugar continua livre.',
+  PickerPluralCategory.many =>
+    'A sua reserva expirou enquanto esteve ausente. Esses lugares continuam livres.',
+  _ =>
+    'A sua reserva expirou enquanto esteve ausente. Esses lugares continuam livres.',
+};
 
-String _holdLapsedSomeTakenPt(int count) => count == 1
-    ? 'A sua reserva expirou enquanto esteve ausente e $count desses lugares já foi ocupado. Os restantes continuam livres.'
-    : 'A sua reserva expirou enquanto esteve ausente e $count desses lugares já foram ocupados. Os restantes continuam livres.';
+String _holdLapsedSomeTakenPt(int count) => switch (pickerPluralCategory(
+  'pt',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'A sua reserva expirou enquanto esteve ausente e $count desses lugares já foi ocupado. Os restantes continuam livres.',
+  PickerPluralCategory.many =>
+    'A sua reserva expirou enquanto esteve ausente e $count desses lugares já foram ocupados. Os restantes continuam livres.',
+  _ =>
+    'A sua reserva expirou enquanto esteve ausente e $count desses lugares já foram ocupados. Os restantes continuam livres.',
+};
 
-String _holdLapsedAllTakenPt(int count) => count == 1
-    ? 'A sua reserva expirou enquanto esteve ausente e esse lugar já foi ocupado.'
-    : 'A sua reserva expirou enquanto esteve ausente e esses lugares já foram ocupados.';
+String _holdLapsedAllTakenPt(int count) => switch (pickerPluralCategory(
+  'pt',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'A sua reserva expirou enquanto esteve ausente e esse lugar já foi ocupado.',
+  PickerPluralCategory.many =>
+    'A sua reserva expirou enquanto esteve ausente e esses lugares já foram ocupados.',
+  _ =>
+    'A sua reserva expirou enquanto esteve ausente e esses lugares já foram ocupados.',
+};
 
 String _continueWithTotalPt(String money) => 'Continuar \u00b7 $money';
 

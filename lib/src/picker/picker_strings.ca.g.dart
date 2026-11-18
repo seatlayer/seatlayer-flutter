@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftCa(int count) => 'En queden $count';
@@ -28,33 +29,74 @@ String _seatJustTakenByAnotherCa(String label) =>
 String _peekSecuredCa(int count, String total) =>
     '✓ $count assegurats · $total. Encara no et cobrarem';
 
-String _ticketCountCa(int count) =>
-    count == 1 ? '$count entrada' : '$count entrades';
+String _ticketCountCa(int count) => switch (pickerPluralCategory('ca', count)) {
+  PickerPluralCategory.one => '$count entrada',
+  PickerPluralCategory.many => '$count entrades',
+  _ => '$count entrades',
+};
 
-String _findBestSeatsCa(int count) => count == 1
-    ? 'Busca $count millor seient'
-    : 'Busca els $count millors seients';
+String _findBestSeatsCa(int count) =>
+    switch (pickerPluralCategory('ca', count)) {
+      PickerPluralCategory.one => 'Busca $count millor seient',
+      PickerPluralCategory.many => 'Busca els $count millors seients',
+      _ => 'Busca els $count millors seients',
+    };
 
 String _reselectSeatsCa(int count) =>
-    count == 1 ? 'Tornar-la a seleccionar' : 'Tornar-les a seleccionar';
+    switch (pickerPluralCategory('ca', count)) {
+      PickerPluralCategory.one => 'Tornar-la a seleccionar',
+      PickerPluralCategory.many => 'Tornar-les a seleccionar',
+      _ => 'Tornar-les a seleccionar',
+    };
 
-String _seatsFreeCa(int count) =>
-    count == 1 ? '$count seient' : '$count seients';
+String _seatsFreeCa(int count) => switch (pickerPluralCategory('ca', count)) {
+  PickerPluralCategory.one => '$count seient',
+  PickerPluralCategory.many => '$count seients',
+  _ => '$count seients',
+};
 
 String _seatsLeftInSectionCa(int count) =>
-    count == 1 ? 'Queda $count seient' : 'Queden $count seients';
+    switch (pickerPluralCategory('ca', count)) {
+      PickerPluralCategory.one => 'Queda $count seient',
+      PickerPluralCategory.many => 'Queden $count seients',
+      _ => 'Queden $count seients',
+    };
 
-String _holdLapsedStillFreeCa(int count) => count == 1
-    ? 'La teva reserva ha caducat mentre eres fora. Aquesta plaça encara és lliure.'
-    : 'La teva reserva ha caducat mentre eres fora. Aquestes places encara són lliures.';
+String _holdLapsedStillFreeCa(int count) => switch (pickerPluralCategory(
+  'ca',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'La teva reserva ha caducat mentre eres fora. Aquesta plaça encara és lliure.',
+  PickerPluralCategory.many =>
+    'La teva reserva ha caducat mentre eres fora. Aquestes places encara són lliures.',
+  _ =>
+    'La teva reserva ha caducat mentre eres fora. Aquestes places encara són lliures.',
+};
 
-String _holdLapsedSomeTakenCa(int count) => count == 1
-    ? 'La teva reserva ha caducat mentre eres fora i $count d’aquestes places ja està ocupada. La resta encara són lliures.'
-    : 'La teva reserva ha caducat mentre eres fora i $count d’aquestes places ja estan ocupades. La resta encara són lliures.';
+String _holdLapsedSomeTakenCa(int count) => switch (pickerPluralCategory(
+  'ca',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'La teva reserva ha caducat mentre eres fora i $count d’aquestes places ja està ocupada. La resta encara són lliures.',
+  PickerPluralCategory.many =>
+    'La teva reserva ha caducat mentre eres fora i $count d’aquestes places ja estan ocupades. La resta encara són lliures.',
+  _ =>
+    'La teva reserva ha caducat mentre eres fora i $count d’aquestes places ja estan ocupades. La resta encara són lliures.',
+};
 
-String _holdLapsedAllTakenCa(int count) => count == 1
-    ? 'La teva reserva ha caducat mentre eres fora i aquesta plaça ja està ocupada.'
-    : 'La teva reserva ha caducat mentre eres fora i aquestes places ja estan ocupades.';
+String _holdLapsedAllTakenCa(int count) => switch (pickerPluralCategory(
+  'ca',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'La teva reserva ha caducat mentre eres fora i aquesta plaça ja està ocupada.',
+  PickerPluralCategory.many =>
+    'La teva reserva ha caducat mentre eres fora i aquestes places ja estan ocupades.',
+  _ =>
+    'La teva reserva ha caducat mentre eres fora i aquestes places ja estan ocupades.',
+};
 
 String _continueWithTotalCa(String money) => 'Continua \u00b7 $money';
 

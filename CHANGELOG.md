@@ -10,6 +10,8 @@
 - **Accessibility sheet:** the two map switches come first, and the provisions follow under a "Show seats for" heading.
 - **3D:** the rotate / move control is a labelled pair, "Rotate venue" and "Move venue", on every width.
 - **No English typed into the picker:** the wide seat card, the floor picker, the compact total, the error banner, the Map/3D and colour-blind controls and the attribution read `SeatLayerPickerStrings`. New fields: `orbitMode`, `panMode`, `showSeatsFor`, `dismissError`, `backToSeatMap`, `openInteractive3dVenue`, `floorWord`, `totalWord`, `ticketWord`. The wide seat card's button says "Add seat" for a seat, as the phone card does.
+- **Counted sentences in every language's own grammar:** Russian says "Осталось 5 мест" and "Осталось 21 место", and Arabic, Polish, Czech, Lithuanian, Welsh and the rest take every plural form the runtime has, chosen by the locale's own rule for the count.
+- **One English wording:** a few English defaults now say exactly what the runtime says ("More time added. Your seats are still held.", "Drag to rotate the venue", curly apostrophes).
 
 ## 0.12.0 (2026-09-25)
 

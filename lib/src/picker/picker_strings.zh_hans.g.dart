@@ -27,27 +27,22 @@ String _seatJustTakenByAnotherZhHans(String label) => '座位 $label 刚被另�
 String _peekSecuredZhHans(int count, String total) =>
     '✓ 已锁定 $count 个 · $total，暂不会扣款';
 
-String _ticketCountZhHans(int count) => count == 1 ? '$count 张票' : '$count 张票';
+String _ticketCountZhHans(int count) => '$count 张票';
 
-String _findBestSeatsZhHans(int count) =>
-    count == 1 ? '查找 $count 个最佳座位' : '查找 $count 个最佳座位';
+String _findBestSeatsZhHans(int count) => '查找 $count 个最佳座位';
 
-String _reselectSeatsZhHans(int count) => count == 1 ? '重新选择' : '重新选择';
+String _reselectSeatsZhHans(int count) => '重新选择';
 
-String _seatsFreeZhHans(int count) => count == 1 ? '$count 个座位' : '$count 个座位';
+String _seatsFreeZhHans(int count) => '$count 个座位';
 
-String _seatsLeftInSectionZhHans(int count) =>
-    count == 1 ? '剩余 $count 个座位' : '剩余 $count 个座位';
+String _seatsLeftInSectionZhHans(int count) => '剩余 $count 个座位';
 
-String _holdLapsedStillFreeZhHans(int count) =>
-    count == 1 ? '您离开期间，座位保留已到期。这些座位仍然可选。' : '您离开期间，座位保留已到期。这些座位仍然可选。';
+String _holdLapsedStillFreeZhHans(int count) => '您离开期间，座位保留已到期。这些座位仍然可选。';
 
-String _holdLapsedSomeTakenZhHans(int count) => count == 1
-    ? '您离开期间，座位保留已到期，其中 $count 个座位已被他人选走。其余仍然可选。'
-    : '您离开期间，座位保留已到期，其中 $count 个座位已被他人选走。其余仍然可选。';
+String _holdLapsedSomeTakenZhHans(int count) =>
+    '您离开期间，座位保留已到期，其中 $count 个座位已被他人选走。其余仍然可选。';
 
-String _holdLapsedAllTakenZhHans(int count) =>
-    count == 1 ? '您离开期间，座位保留已到期，这些座位已被他人选走。' : '您离开期间，座位保留已到期，这些座位已被他人选走。';
+String _holdLapsedAllTakenZhHans(int count) => '您离开期间，座位保留已到期，这些座位已被他人选走。';
 
 String _continueWithTotalZhHans(String money) => '继续 \u00b7 $money';
 

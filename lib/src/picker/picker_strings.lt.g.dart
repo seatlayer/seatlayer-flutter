@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftLt(int count) => 'Liko $count';
@@ -28,32 +29,83 @@ String _seatJustTakenByAnotherLt(String label) =>
 String _peekSecuredLt(int count, String total) =>
     '✓ $count užtikrinta · $total. Kol kas nieko nenuskaičiuosime';
 
-String _ticketCountLt(int count) =>
-    count == 1 ? '$count bilietas' : '$count bilietų';
+String _ticketCountLt(int count) => switch (pickerPluralCategory('lt', count)) {
+  PickerPluralCategory.one => '$count bilietas',
+  PickerPluralCategory.few => '$count bilietai',
+  PickerPluralCategory.many => '$count bilieto',
+  _ => '$count bilietų',
+};
 
-String _findBestSeatsLt(int count) => count == 1
-    ? 'Rasti $count geriausią vietą'
-    : 'Rasti $count geriausių vietų';
+String _findBestSeatsLt(int count) =>
+    switch (pickerPluralCategory('lt', count)) {
+      PickerPluralCategory.one => 'Rasti $count geriausią vietą',
+      PickerPluralCategory.few => 'Rasti $count geriausias vietas',
+      PickerPluralCategory.many => 'Rasti $count geriausios vietos',
+      _ => 'Rasti $count geriausių vietų',
+    };
 
 String _reselectSeatsLt(int count) =>
-    count == 1 ? 'Pasirinkti ją dar kartą' : 'Pasirinkti jas dar kartą';
+    switch (pickerPluralCategory('lt', count)) {
+      PickerPluralCategory.one => 'Pasirinkti ją dar kartą',
+      PickerPluralCategory.few => 'Pasirinkti jas dar kartą',
+      PickerPluralCategory.many => 'Pasirinkti jas dar kartą',
+      _ => 'Pasirinkti jas dar kartą',
+    };
 
-String _seatsFreeLt(int count) => count == 1 ? '$count vieta' : '$count vietų';
+String _seatsFreeLt(int count) => switch (pickerPluralCategory('lt', count)) {
+  PickerPluralCategory.one => '$count vieta',
+  PickerPluralCategory.few => '$count vietos',
+  PickerPluralCategory.many => '$count vietos',
+  _ => '$count vietų',
+};
 
 String _seatsLeftInSectionLt(int count) =>
-    count == 1 ? 'Liko $count vieta' : 'Liko $count vietų';
+    switch (pickerPluralCategory('lt', count)) {
+      PickerPluralCategory.one => 'Liko $count vieta',
+      PickerPluralCategory.few => 'Liko $count vietos',
+      PickerPluralCategory.many => 'Liko $count vietos',
+      _ => 'Liko $count vietų',
+    };
 
-String _holdLapsedStillFreeLt(int count) => count == 1
-    ? 'Jūsų rezervacija baigėsi, kol jūsų nebuvo. Ta vieta vis dar laisva.'
-    : 'Jūsų rezervacija baigėsi, kol jūsų nebuvo. Tos vietos vis dar laisvos.';
+String _holdLapsedStillFreeLt(int count) => switch (pickerPluralCategory(
+  'lt',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Jūsų rezervacija baigėsi, kol jūsų nebuvo. Ta vieta vis dar laisva.',
+  PickerPluralCategory.few =>
+    'Jūsų rezervacija baigėsi, kol jūsų nebuvo. Tos vietos vis dar laisvos.',
+  PickerPluralCategory.many =>
+    'Jūsų rezervacija baigėsi, kol jūsų nebuvo. Tos vietos vis dar laisvos.',
+  _ => 'Jūsų rezervacija baigėsi, kol jūsų nebuvo. Tos vietos vis dar laisvos.',
+};
 
-String _holdLapsedSomeTakenLt(int count) => count == 1
-    ? 'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir $count iš tų vietų jau užimta. Likusios vis dar laisvos.'
-    : 'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir $count iš tų vietų jau užimta. Likusios vis dar laisvos.';
+String _holdLapsedSomeTakenLt(int count) => switch (pickerPluralCategory(
+  'lt',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir $count iš tų vietų jau užimta. Likusios vis dar laisvos.',
+  PickerPluralCategory.few =>
+    'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir $count iš tų vietų jau užimtos. Likusios vis dar laisvos.',
+  PickerPluralCategory.many =>
+    'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir $count iš tų vietų jau užimtos. Likusios vis dar laisvos.',
+  _ =>
+    'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir $count iš tų vietų jau užimta. Likusios vis dar laisvos.',
+};
 
-String _holdLapsedAllTakenLt(int count) => count == 1
-    ? 'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir ta vieta jau užimta.'
-    : 'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir tos vietos jau užimtos.';
+String _holdLapsedAllTakenLt(int count) => switch (pickerPluralCategory(
+  'lt',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir ta vieta jau užimta.',
+  PickerPluralCategory.few =>
+    'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir tos vietos jau užimtos.',
+  PickerPluralCategory.many =>
+    'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir tos vietos jau užimtos.',
+  _ => 'Jūsų rezervacija baigėsi, kol jūsų nebuvo, ir tos vietos jau užimtos.',
+};
 
 String _continueWithTotalLt(String money) => 'Tęsti \u00b7 $money';
 
