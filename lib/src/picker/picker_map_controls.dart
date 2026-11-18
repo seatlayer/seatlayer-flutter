@@ -133,7 +133,9 @@ class _RailControls extends StatelessWidget {
     return AnimatedSize(
       duration: SeatLayerPickerMotion.of(context, SeatLayerPickerMotion.pop),
       curve: SeatLayerPickerMotion.easeEnter,
-      alignment: Alignment.topCenter,
+      // Anchored at its foot, so a control joining the top grows the column
+      // upward and moves nothing under the pointer.
+      alignment: Alignment.bottomCenter,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,

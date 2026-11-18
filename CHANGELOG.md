@@ -25,6 +25,9 @@
 - **Wide layout, loading:** until the first snapshot arrives, the side panel keeps its shape with grey placeholder bars, which pulse with the venue outline and stay still under reduced motion.
 - **Wide layout, accessibility options:** on wide layouts the display-options control opens its options in a popover next to it, so the map stays in view. The phone keeps the bottom sheet. A tap outside, Back or Escape closes it.
 - **3D Rotate / Move:** when the two labels don't fit (large text on a phone), each half shows an icon instead; the label stays as the tooltip and the screen-reader name.
+- **Wide layout, control column:** the map's control column now sits at the map's bottom end and grows upward.
+- **Wide layout, prices:** the side panel lists the prices, one row per ticket type with its colour, name and price. Each row filters the map like a phone chip does; sold-out prices are struck through. On wide layouts the default legend is now this list instead of the chip row.
+- **Wide layout, panel foot:** the panel ends like the phone's cart sheet: "No seats selected" (or the ticket count and total) above one full-width button, then the "Powered by SeatLayer" line. With an empty cart the button reads "Find best seats" and is disabled, since the best-seats card above is the way in. `SeatLayerPickerCheckoutBar` is still public but no longer the wide default.
 - **Right-to-left:** in Arabic, Hebrew, Persian and Kurdish the map's corners mirror with the reading direction: the round controls, the Map / 3D control and the 3D Rotate / Move pair stand on the left, the test badge and the floor picker on the right. The venue itself never mirrors.
 
 ## 0.12.0 (2026-09-25)

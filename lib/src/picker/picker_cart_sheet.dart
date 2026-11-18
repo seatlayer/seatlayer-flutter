@@ -750,6 +750,18 @@ class _SheetFoot extends StatelessWidget {
   }
 }
 
+/// The wide panel's summary line: the cart foot's own count and total.
+///
+/// Not exported: the wide layout draws it over its full-width button, as the
+/// phone's sheet does.
+class SeatLayerWideTotalLine extends StatelessWidget {
+  /// Creates the wide panel's summary line.
+  const SeatLayerWideTotalLine({super.key});
+
+  @override
+  Widget build(BuildContext context) => const _TotalLine(namesSeats: false);
+}
+
 /// What is in the cart, and what it comes to.
 ///
 /// "No seats selected" on an empty cart, `3 tickets` and the total once there
@@ -757,7 +769,11 @@ class _SheetFoot extends StatelessWidget {
 /// nothing to do about it, on the one line the buyer reads to find out what
 /// they are about to pay.
 class _TotalLine extends StatefulWidget {
-  const _TotalLine();
+  const _TotalLine({this.namesSeats = true});
+
+  /// Whether the folded sheet's muted line naming the seats is drawn. The
+  /// wide panel lists its cards above the foot, so it never names them twice.
+  final bool namesSeats;
 
   @override
   State<_TotalLine> createState() => _TotalLineState();
@@ -814,7 +830,7 @@ class _TotalLineState extends State<_TotalLine>
     // folded away: "2 tickets" alone told the buyer they had bought something
     // and not what, and the chevron above was the only way to find out.
     final collapsed = !controller.cartSheetExpanded;
-    final seats = collapsed && count > 0
+    final seats = widget.namesSeats && collapsed && count > 0
         ? controller.confirmedCartLines
             .map((line) => line.label.replaceAll('-', ' · '))
             .join(',  ')

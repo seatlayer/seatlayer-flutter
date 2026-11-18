@@ -8,12 +8,11 @@ import 'package:seatlayer/src/picker/picker_attribution.dart';
 import 'package:seatlayer/src/picker/picker_best_seats.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
-import 'package:seatlayer/src/picker/picker_legend.dart';
+import 'package:seatlayer/src/picker/picker_price_list.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_seat_confirmation.dart';
-import 'package:seatlayer/src/picker/picker_status_views.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_wide_panel.dart';
@@ -209,7 +208,7 @@ void main() {
         expect(
           _rect(tester, prices).bottom,
           lessThanOrEqualTo(
-            _rect(tester, find.byType(SeatLayerPriceLegend)).top + .5,
+            _rect(tester, find.byType(SeatLayerWidePriceList)).top + .5,
           ),
         );
         expect(
@@ -219,7 +218,7 @@ void main() {
           ),
         );
         expect(
-          _rect(tester, find.byType(SeatLayerPriceLegend)).bottom,
+          _rect(tester, find.byType(SeatLayerWidePriceList)).bottom,
           lessThanOrEqualTo(_rect(tester, seats).top + .5),
         );
         // In the panel's quiet ink, on either side.
@@ -268,7 +267,7 @@ void main() {
     testWidgets('the credit sits under the checkout bar', (tester) async {
       await _mount(tester, _layout(), pickerSnapshot());
 
-      final bar = _rect(tester, find.byType(SeatLayerPickerCheckoutBar));
+      final bar = _rect(tester, find.byType(SeatLayerWideCheckoutFoot));
       final credit = _rect(tester, find.byType(SeatLayerPickerAttribution));
       expect(credit.top, greaterThanOrEqualTo(bar.bottom - .5));
       // And the panel ends where the screen does: nothing hangs below it.
@@ -288,7 +287,7 @@ void main() {
       final button = _rect(
         tester,
         find.descendant(
-          of: find.byType(SeatLayerPickerCheckoutBar),
+          of: find.byType(SeatLayerWideCheckoutFoot),
           matching: find.byType(FilledButton),
         ),
       );

@@ -134,12 +134,13 @@ right in Arabic):
 Header   name over "date · venue"        sales-closed pill · HoldPill · close
 ┌ map surface ──────────────────────────┐┌ panel ───────────────────────┐
 │ TestModeBadge (top-start)              ││ "Ticket prices"   heading    │
-│ control column (top-end), top down:    ││ PriceLegend                  │
-│   Venue (only while a section is up)   ││ FloorStrip (multi-floor)     │
-│   ViewModeControl · 3D Rotate / Move   ││ "Your seats"      heading    │
-│   accessibility · `+` · `−`            ││ best-seats card              │
-│ floor selector (bottom-start)          ││ CartList (scrolls)           │
-│ seat card / prompts / status overlay   ││ checkout bar                 │
+│ seat card / prompts / status overlay   ││ price list (named rows)      │
+│ floor selector (bottom-start)          ││ FloorStrip (multi-floor)     │
+│ control column (bottom-end), top down: ││ "Your seats"      heading    │
+│   Venue (only while a section is up)   ││ best-seats card              │
+│   ViewModeControl · 3D Rotate / Move   ││ CartList (scrolls)           │
+│   accessibility · `+` · `−`            ││ summary line                 │
+│                                        ││ full-width checkout button   │
 └────────────────────────────────────────┘│ Powered by SeatLayer         │
                                           └──────────────────────────────┘
 ```
@@ -153,6 +154,15 @@ picker is still loading. `size.widePanelHeadingFontSize` at w700 in
 below. Drawn as given (never upper-cased in code) and exposed as headings to
 screen readers. The credit closes the panel, under the checkout bar, and the
 device's bottom inset is taken once, under the credit.
+
+**Wide price list** (`SeatLayerWidePriceList`, `picker_price_list.dart`, not
+exported): one row per for-sale category — colour disc, name, price at the end
+— each a filter toggle like a chip, sold out struck through and still a toggle,
+scrolling inside `size.widePriceListMaxHeight`. **Wide checkout foot**
+(`SeatLayerWideCheckoutFoot`): the cart foot's summary line over one
+full-width button on the checkout ladder; with an empty cart it reads
+`strings.findBestSeatsCta`, off. `SeatLayerPickerCheckoutBar` stays public but
+is no longer the drop-in layout's default.
 
 **Wide panel while loading** (`SeatLayerWidePanelLoading`, same file): until the
 first snapshot, the prices heading over three `color.*.divider` bars (70, 55,

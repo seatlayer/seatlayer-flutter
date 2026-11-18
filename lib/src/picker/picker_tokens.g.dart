@@ -179,6 +179,24 @@ abstract final class SeatLayerSizeTokens {
   /// `46`
   static const double widePanelPlaceholderButtonHeight = 46;
 
+  /// `40`
+  static const double widePriceRowHeight = 40;
+
+  /// `8`
+  static const double widePriceRowPadX = 8;
+
+  /// `10`
+  static const double widePriceDotSize = 10;
+
+  /// `8`
+  static const double widePriceDotGap = 8;
+
+  /// `13`
+  static const double widePriceFontSize = 13;
+
+  /// `220`
+  static const double widePriceListMaxHeight = 220;
+
   /// `320`
   static const double accessPopoverWidth = 320;
 
