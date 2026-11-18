@@ -696,7 +696,8 @@ class _SeatLayerPickerAdaptiveLayoutState
                                       child: floorStrip,
                                     ),
                                   sections,
-                                  SeatLayerWidePanelHeading(strings.yourSeats),
+                                  SeatLayerWidePanelHeading.seats(
+                                      strings.yourSeats),
                                   // The filter control used to be repeated here,
                                   // under the best-seats card, while a second copy
                                   // stood in the map's bottom-left corner. One

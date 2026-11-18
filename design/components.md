@@ -150,8 +150,8 @@ Header   name over "date · venue"        sales-closed pill · HoldPill · close
 and `strings.yourSeats` over the best-seats card and the cart, except while the
 picker is still loading. `size.widePanelHeadingFontSize` at w700 in
 `color.*.mutedText`, padded `size.widePanelPadX` at the sides,
-`size.widePanelHeadingPadTop` above and `size.widePanelHeadingPadBottom`
-below. Drawn as given (never upper-cased in code) and exposed as headings to
+`size.widePanelHeadingPadTop` above (`size.widePanelSeatsHeadingPadTop` above
+"Your seats") and `size.widePanelHeadingPadBottom` below. Drawn as given (never upper-cased in code) and exposed as headings to
 screen readers. The credit closes the panel, under the checkout bar, and the
 device's bottom inset is taken once, under the credit.
 

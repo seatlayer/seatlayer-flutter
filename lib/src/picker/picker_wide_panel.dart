@@ -26,18 +26,27 @@ import 'seat_layer_picker_theme.dart';
 /// reader can step from the prices to the buyer's seats.
 class SeatLayerWidePanelHeading extends StatelessWidget {
   /// Creates a panel heading reading [text].
-  const SeatLayerWidePanelHeading(this.text, {super.key});
+  const SeatLayerWidePanelHeading(this.text, {super.key})
+      : padTop = SeatLayerSizeTokens.widePanelHeadingPadTop;
+
+  /// The heading over the buyer's seats, which stands a little further from
+  /// the prices above it than the first heading does from the header.
+  const SeatLayerWidePanelHeading.seats(this.text, {super.key})
+      : padTop = SeatLayerSizeTokens.widePanelSeatsHeadingPadTop;
 
   /// The words, as the strings object gives them.
   final String text;
+
+  /// The air above the heading.
+  final double padTop;
 
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(
+      padding: EdgeInsetsDirectional.fromSTEB(
         SeatLayerSizeTokens.widePanelPadX,
-        SeatLayerSizeTokens.widePanelHeadingPadTop,
+        padTop,
         SeatLayerSizeTokens.widePanelPadX,
         SeatLayerSizeTokens.widePanelHeadingPadBottom,
       ),
