@@ -538,6 +538,8 @@ Test mode is free, with no time limit and no card, and it uses no credits.
 | Flutter | [`seatlayer`](https://pub.dev/packages/seatlayer) (this package) |
 | JavaScript | [`@seatlayer/js`](https://www.npmjs.com/package/@seatlayer/js) |
 | React | [`@seatlayer/react`](https://www.npmjs.com/package/@seatlayer/react) |
+| Vue | [`@seatlayer/vue`](https://www.npmjs.com/package/@seatlayer/vue) |
+| Angular | [`@seatlayer/angular`](https://www.npmjs.com/package/@seatlayer/angular) |
 | React Native | [`@seatlayer/react-native`](https://www.npmjs.com/package/@seatlayer/react-native) |
 | iOS | [`seatlayer-ios`](https://github.com/seatlayer/seatlayer-ios) |
 | Android | [`seatlayer-android`](https://github.com/seatlayer/seatlayer-android) |
