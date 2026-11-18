@@ -491,13 +491,6 @@ iOS and Android, on Flutter 3.19 or newer and Dart 3.4 or newer. For a web page,
 the SeatLayer web SDK shows the same charts in JavaScript, React, Vue or
 Angular.
 
-### How does seat booking work in a Flutter ticketing app?
-
-The app never books seats or processes payment directly. It selects inventory
-and creates a temporary hold. Send the opaque `holdId` to your trusted backend,
-calculate the charge from server-inspected hold items, process the order, and
-book with a stable `bookingRef`.
-
 ### How do temporary seat holds work?
 
 When a buyer goes to checkout, the SeatLayer picker holds the seats they picked
@@ -508,40 +501,12 @@ the picker checks with the server when the buyer returns, tells them once, and
 offers back the seats that are still free. With `SeatLayerView`, your code calls
 `hold()` itself.
 
-### Can I use my own payment provider?
-
-Yes. Nothing in the app takes a payment. Your server reads the held seats and
-their prices, charges through the provider you already use, and books the hold
-with a stable booking reference.
-
 ### Can I try the Flutter seat map without a SeatLayer account or API key?
 
 Yes. In the repository's example app,
 `flutter run -t lib/offline_fixture_demo.dart` opens the seat map on a packaged
 sample venue with no account or key. The complete picker needs a test event.
 Test mode is free, with no time limit and no card, and it uses no credits.
-
-### Can I restyle the picker without rebuilding it?
-
-Yes, at four levels that all keep the layout and the flow: a theme (or
-`SeatLayerPickerThemeData.fromColorScheme` for an app palette), a per-surface
-style slot and per-widget `style:`, the layout/chrome/strings options, and a
-builder slot that replaces one whole part while the rest stays. See
-[Customise the picker](https://docs.seatlayer.io/buyer-sdk/flutter/customise/).
-
-### Can I build a completely different seat-picker layout?
-
-Yes. `SeatLayerPickerScope` plus the composable widgets is a supported path, not
-an escape hatch: the drop-in is built from exactly those widgets, and you keep
-inventory, holds, snapshots and the checkout handoff. See
-[Build your own layout](https://docs.seatlayer.io/buyer-sdk/flutter/custom-layout/).
-
-### Does the Flutter seat map support light and dark mode?
-
-Yes, live. `SeatLayerThemeMode.auto` follows your app's theme first and the
-device second, and repaints the Flutter chrome and the drawn map together,
-without reloading, without losing the selection and without moving the camera.
-A `.light()` or `.dark()` preset pins one side deliberately.
 
 ## Continue your Flutter integration
 
