@@ -33,6 +33,7 @@ class SeatLayerCheckoutCtaState {
     required this.busy,
     required this.statesReason,
     this.findsBestSeats = false,
+    this.busyInWords = false,
   });
 
   /// The words on the button.
@@ -42,9 +43,9 @@ class SeatLayerCheckoutCtaState {
   final bool enabled;
 
   /// Whether something the buyer already asked for is in flight, so the
-  /// button stays down. The picker's own readings say so in words alone;
-  /// [SeatLayerCheckoutCtaLabel] draws a spinner only beside a busy reading a
-  /// host built itself.
+  /// button stays down. The picker's own readings say so in words alone
+  /// ([busyInWords]); [SeatLayerCheckoutCtaLabel] draws a spinner beside any
+  /// other busy reading.
   ///
   /// Only ever true while something the buyer already asked for is in flight —
   /// the hold being created, or the host's checkout opening.
@@ -63,6 +64,17 @@ class SeatLayerCheckoutCtaState {
   /// IS the sheet, so a full-width disabled button would be the largest thing
   /// on screen saying no.
   final bool findsBestSeats;
+
+  /// Whether a [busy] reading says what is in flight in its [label] alone,
+  /// so it is drawn without a spinner.
+  ///
+  /// True for the picker's own busy readings: "Securing your seats…" and
+  /// "Seats secured. Opening checkout…". A host that builds its own reading
+  /// from one of these (to change the words, say) carries it across to keep
+  /// the button spinner-free, and a host drawing its own button reads it to
+  /// draw the state the same way. Defaults to false, so a busy reading a host
+  /// builds itself keeps its spinner.
+  final bool busyInWords;
 }
 
 /// Resolve the checkout call to action for [state].
@@ -128,7 +140,7 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
       pendingCount: pendingCount,
       canOfferFind: canOfferFind,
     );
-    if (under is _BusyInWordsCtaState) return under;
+    if (under.busyInWords) return under;
     return SeatLayerCheckoutCtaState(
       label: under.label,
       enabled: false,
@@ -148,13 +160,13 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
   if (state.busyAction == SeatLayerPickerBusyAction.creatingHold) {
     // Words alone, like the handoff below: the sentence already says the
     // seats are being secured, and the button stays down while it does.
-    return _BusyInWordsCtaState(label: strings.securingSeats);
+    return _busyInWords(strings.securingSeats);
   }
   if (handoffInFlight) {
     // The seats are already held, so there is nothing left to wait on but
     // the host: the words say so, and a spinner beside them would say the
     // opposite. Still busy, so the button stays down until the host answers.
-    return _BusyInWordsCtaState(label: strings.seatsSecuredOpeningCheckout);
+    return _busyInWords(seatLayerCheckoutHandoffWords(strings));
   }
 
   // 5. A selection the event's own rules reject. Say what would fix it where
@@ -311,10 +323,14 @@ class _SeatLayerCheckoutCtaState extends State<SeatLayerCheckoutCta> {
 
 /// Work the buyer already asked for — the hold being secured, then the
 /// checkout opening on it: busy, in words alone.
-class _BusyInWordsCtaState extends SeatLayerCheckoutCtaState {
-  const _BusyInWordsCtaState({required super.label})
-      : super(enabled: false, busy: true, statesReason: true);
-}
+SeatLayerCheckoutCtaState _busyInWords(String label) =>
+    SeatLayerCheckoutCtaState(
+      label: label,
+      enabled: false,
+      busy: true,
+      statesReason: true,
+      busyInWords: true,
+    );
 
 /// The label of a resolved call to action.
 ///
@@ -345,7 +361,7 @@ class SeatLayerCheckoutCtaLabel extends StatelessWidget {
       softWrap: false,
       overflow: TextOverflow.ellipsis,
     );
-    if (!cta.busy || cta is _BusyInWordsCtaState) return text;
+    if (!cta.busy || cta.busyInWords) return text;
     // A row lays its non-flexible children out with an unbounded main axis, so
     // the ellipsis above never fires inside one: `Seats secured. Opening checkout…`
     // beside a spinner overran the sheet's own book button by 46 points for as

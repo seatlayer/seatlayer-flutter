@@ -43,32 +43,37 @@ class PickerExplainerToastCard extends StatelessWidget {
     const radius = BorderRadius.all(
       Radius.circular(SeatLayerRadiusTokens.explainerToast),
     );
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: palette.text,
-        borderRadius: radius,
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: pickerAlpha(const Color(0xFF000000), .5),
-            blurRadius: 30,
-            spreadRadius: -12,
-            offset: const Offset(0, 12),
+    // The band fills the width it is given; where none is given (a host
+    // drawing the card in its own [Row]) it sizes to its sentence instead of
+    // asking for an infinite width.
+    return LayoutBuilder(
+      builder: (context, constraints) => Container(
+        width: constraints.hasBoundedWidth ? double.infinity : null,
+        decoration: BoxDecoration(
+          color: palette.text,
+          borderRadius: radius,
+          boxShadow: <BoxShadow>[
+            BoxShadow(
+              color: pickerAlpha(const Color(0xFF000000), .5),
+              blurRadius: 30,
+              spreadRadius: -12,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.symmetric(
+          horizontal: SeatLayerSizeTokens.explainerToastPaddingX,
+          vertical: SeatLayerSizeTokens.explainerToastPaddingY,
+        ),
+        child: Text(
+          toast.message,
+          style: TextStyle(
+            color: palette.background,
+            fontSize: SeatLayerSizeTokens.explainerToastFontSize,
+            height: 1.35,
+            fontWeight: seatLayerBoldWeight(context, FontWeight.w500),
+            fontFamily: palette.fontFamily,
           ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: SeatLayerSizeTokens.explainerToastPaddingX,
-        vertical: SeatLayerSizeTokens.explainerToastPaddingY,
-      ),
-      child: Text(
-        toast.message,
-        style: TextStyle(
-          color: palette.background,
-          fontSize: SeatLayerSizeTokens.explainerToastFontSize,
-          height: 1.35,
-          fontWeight: seatLayerBoldWeight(context, FontWeight.w500),
-          fontFamily: palette.fontFamily,
         ),
       ),
     );
