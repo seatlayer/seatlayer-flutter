@@ -6,6 +6,7 @@
 // their label. These tests pin the ONE rule they now share, and above all its
 // precedence: two reasons are true at once far more often than not, and the
 // buyer must be told the one they can act on first.
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_checkout_cta.dart';
@@ -138,6 +139,32 @@ void main() {
     expect(cta.label, 'Seats secured. Opening checkout…');
     expect(cta.busy, isTrue);
     expect(cta.enabled, isFalse);
+  });
+
+  testWidgets('only the hold being created draws a spinner', (tester) async {
+    Future<void> pumpLabel(SeatLayerCheckoutCtaState cta) =>
+        tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(child: SeatLayerCheckoutCtaLabel(cta: cta)),
+          ),
+        );
+
+    await pumpLabel(
+      _cta(_state(busy: SeatLayerPickerBusyAction.creatingHold)),
+    );
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    // The seats are held by now: the words say so, with nothing spinning.
+    final handoff = _cta(_state(), handoffInFlight: true);
+    await pumpLabel(handoff);
+    expect(find.text('Seats secured. Opening checkout…'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(handoff.busy, isTrue);
+
+    // A seat card opening over the handoff keeps it words-only.
+    await pumpLabel(_cta(_state(), handoffInFlight: true, seatCardOpen: true));
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   test('a selection short of the required count asks for the difference', () {

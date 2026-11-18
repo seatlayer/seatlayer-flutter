@@ -17,6 +17,7 @@ import 'picker_a11y.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_strings.dart';
+import 'picker_toast_explainer.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -168,6 +169,10 @@ class SeatLayerPickerToastCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final toast = this.toast;
+    if (toast is PickerExplainerToast) {
+      return PickerExplainerToastCard(toast: toast, theme: theme);
+    }
     final palette = theme ?? seatLayerMapChromeThemeOf(context);
     final border = switch (toast.tone) {
       SeatLayerPickerToastTone.neutral => palette.divider,
@@ -449,6 +454,10 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
   Widget build(BuildContext context) {
     final toast = _queue?.current;
     _speak(toast);
+    // An explanation spans the map's foot at the map's own inset, and a tap
+    // on it is the buyer saying they have read it.
+    final explainer = toast is PickerExplainerToast;
+    final inset = explainer ? SeatLayerSizeTokens.mapAnchorInset : 14.0;
     final motion = SeatLayerPickerMotion.of(
       context,
       SeatLayerPickerMotion.enter,
@@ -456,13 +465,17 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
     return IgnorePointer(
       // The band never eats a tap; the action button inside it re-enables
       // itself, so a toast can be acted on without the map going deaf.
-      ignoring: toast?.hasAction != true,
+      ignoring: toast?.hasAction != true && !explainer,
       child: Padding(
         padding: EdgeInsets.only(
-          left: 14,
-          right: 14,
+          left: inset,
+          right: inset,
           bottom: widget.bottomInset +
               14 +
+              // The cart's handle stands proud of whatever is under the map,
+              // in every composition; the full-width band would otherwise
+              // run across it.
+              (explainer ? SeatLayerSizeTokens.sheetHandleOverhang : 0) +
               (widget.lifted ? SeatLayerPickerToastLayer.cardLift : 0),
         ),
         child: Align(
@@ -483,10 +496,19 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
             ),
             child: toast == null
                 ? const SizedBox.shrink()
-                : _NudgedToast(
-                    key: ValueKey<String>('${toast.tone}:${toast.message}'),
-                    toast: toast,
-                  ),
+                : explainer
+                    ? GestureDetector(
+                        key: ValueKey<String>('explainer:${toast.message}'),
+                        behavior: HitTestBehavior.opaque,
+                        onTap: _queue?.dismiss,
+                        child: _NudgedToast(toast: toast),
+                      )
+                    : _NudgedToast(
+                        key: ValueKey<String>(
+                          '${toast.tone}:${toast.message}',
+                        ),
+                        toast: toast,
+                      ),
           ),
         ),
       ),
