@@ -23,7 +23,7 @@
 - **Wide layout, header date:** new optional `SeatLayerPickerEventDetails.startsAtLabel`. When the snapshot carries it, the wide header's second line reads "date · venue". The picker never formats `startsAt` itself, because the device's time zone may not be the event's.
 - **Wide seat card:** the Section, Row and Seat labels are drawn as the strings give them, no longer upper-cased in code.
 - **Wide layout, loading:** until the first snapshot arrives, the side panel keeps its shape with grey placeholder bars, which pulse with the venue outline and stay still under reduced motion.
-- **Wide layout, accessibility options:** on wide layouts the display-options control opens its options in a popover next to it, so the map stays in view. The phone keeps the bottom sheet. A tap outside, Back or Escape closes it.
+- **Wide layout, accessibility options:** on wide layouts the display-options control opens its options in a popover next to it, so the map stays in view. The phone keeps the bottom sheet. A tap outside, Back or Escape closes it, and focus goes back to the control. Screen readers announce it as a dialog. It closes if the window is resized or rotated while open.
 - **3D Rotate / Move:** when the two labels don't fit (large text on a phone), each half shows an icon instead; the label stays as the tooltip and the screen-reader name.
 - **Wide layout, control column:** the map's control column now sits at the map's bottom end and grows upward.
 - **Wide layout, prices:** the side panel lists the prices, one row per ticket type with its colour, name and price. Each row filters the map like a phone chip does; sold-out prices are struck through. On wide layouts the default legend is now this list instead of the chip row.

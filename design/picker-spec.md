@@ -737,8 +737,13 @@ from the column, towards the map, so it mirrors in a right-to-left locale — it
 top level with the control's top; where that would run off the foot it is
 level with the control's bottom instead, and it is always held
 `size.accessPopoverMargin` inside the safe area. There is no scrim. It is modal:
-a tap outside, the system back gesture or Escape closes it with nothing, a
-pressed count closes it and starts the walk, exactly as on the sheet. It fades
+a tap outside, the system back gesture or Escape closes it with nothing (a tap
+outside never reaches the map), a pressed count closes it and starts the walk,
+exactly as on the sheet, and focus returns to the control. It is announced as
+a dialog (`SemanticsRole.dialog`, naming its route with
+`strings.accessibilityTitle`). It closes itself when the window changes size
+while it is open — a rotation or a split-screen resize moves the control, or
+takes the wide layout away — rather than pointing at where the control was. It fades
 in over `motion.duration.pop`, and appears at once under reduced motion. The
 phone keeps the bottom sheet.
 
