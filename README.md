@@ -38,6 +38,7 @@ Season tickets are in the web and server SDKs today, not in this SDK.
 Two-step shape: the buyer picks and holds seats in the client with your public key, then your server confirms the booking with your secret key while your platform keeps checkout and its own payment provider.
 
 More from SeatLayer:
+[SeatLayer iOS seat map SDK](https://github.com/seatlayer/seatlayer-ios) ·
 [SeatLayer Android seat map SDK](https://github.com/seatlayer/seatlayer-android) ·
 [SeatLayer React Native SDK](https://github.com/seatlayer/seatlayer-react-native) ·
 [SeatLayer AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
