@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_legend.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
+import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_strings.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 
@@ -123,6 +127,102 @@ void main() {
       map.callsTo('picker.setVenue3DNavigationMode').single.$2,
       <String, Object?>{'mode': 'pan'},
     );
+  });
+
+  group('the rotate / move pair', () {
+    Finder half(String hint) => find.byWidgetPredicate(
+          (widget) => widget is Semantics && widget.properties.hint == hint,
+        );
+
+    testWidgets('gives each half a full touch reach, even with short words',
+        (tester) async {
+      final map = FakePickerMap(bundle: _venueBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          const SeatLayerVenue3D(),
+          options: const SeatLayerPickerOptions(
+            strings: SeatLayerPickerStrings(orbitMode: 'R', panMode: 'M'),
+          ),
+        ),
+      );
+      map.emit(_seated());
+      await tester.pumpAndSettle();
+      const strings = SeatLayerPickerStrings();
+      for (final hint in <String>[strings.rotateVenue, strings.moveVenue]) {
+        final size = tester.getSize(half(hint).first);
+        expect(size.width, greaterThanOrEqualTo(44), reason: hint);
+        expect(size.height, greaterThanOrEqualTo(44), reason: hint);
+      }
+    });
+
+    testWidgets('grows with large text instead of clipping', (tester) async {
+      final map = FakePickerMap(bundle: _venueBundle());
+      addTearDown(map.dispose);
+      // Wide enough for both halves side by side at this size: this is about
+      // each half's height.
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(1400, 800);
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaler: const TextScaler.linear(3),
+              ),
+              child: const Center(
+                child: SeatLayerPicker3DNavigationModeButton(),
+              ),
+            ),
+          ),
+        ),
+      );
+      map.emit(_seated());
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final label = find.text('Rotate venue');
+      final pill = find.ancestor(
+        of: label,
+        matching: find.byType(AnimatedContainer),
+      );
+      // Three times the label's size, with nothing cut off its top or foot.
+      const tall = SeatLayerSizeTokens.immersiveNavChipFontSize * 3;
+      expect(tester.getSize(label).height, greaterThanOrEqualTo(tall));
+      expect(tester.getSize(pill.first).height, greaterThanOrEqualTo(tall));
+    });
+
+    testWidgets('says it is disabled while the picker is busy', (tester) async {
+      final semantics = tester.ensureSemantics();
+      final map = FakePickerMap(bundle: _venueBundle());
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(pickerHarness(map, const SeatLayerVenue3D()));
+      map.emit(_seated());
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSemantics(find.text('Move venue')),
+        isSemantics(isButton: true, hasEnabledState: true, isEnabled: true),
+      );
+
+      final gate = Completer<void>();
+      map.gate('picker.setVenue3DNavigationMode', gate);
+      await tester.tap(find.text('Move venue'));
+      await tester.pump();
+      for (final label in <String>['Rotate venue', 'Move venue']) {
+        expect(
+          tester.getSemantics(find.text(label)),
+          isSemantics(isButton: true, hasEnabledState: true, isEnabled: false),
+          reason: label,
+        );
+      }
+      gate.complete();
+      await tester.pumpAndSettle();
+      semantics.dispose();
+    });
   });
 
   testWidgets('the caption drops the section the row name repeats',
