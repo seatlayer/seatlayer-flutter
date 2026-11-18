@@ -18,6 +18,16 @@ String _fromPriceTr(String money) => '$money den itibaren';
 
 String _sightlineTr(String metres) => 'Sahneye ≈ $metres m';
 
+String _secureMoreAndCheckoutTr(int count) => '$count tane daha al ve öde';
+
+String _accessFreeCountTr(int count) => '$count boş';
+
+String _seatJustTakenByAnotherTr(String label) =>
+    '$label koltuğunu az önce başka bir alıcı aldı.';
+
+String _peekSecuredTr(int count, String total) =>
+    '✓ $count güvenceye alındı · $total. Henüz ücret alınmayacak';
+
 String _ticketCountTr(int count) =>
     count == 1 ? '$count bilet' : '$count bilet';
 
@@ -26,6 +36,24 @@ String _findBestSeatsTr(int count) =>
 
 String _reselectSeatsTr(int count) =>
     count == 1 ? 'Onu tekrar seç' : 'Onları tekrar seç';
+
+String _seatsFreeTr(int count) =>
+    count == 1 ? '$count koltuk' : '$count koltuk';
+
+String _seatsLeftInSectionTr(int count) =>
+    count == 1 ? '$count koltuk kaldı' : '$count koltuk kaldı';
+
+String _holdLapsedStillFreeTr(int count) => count == 1
+    ? 'Siz yokken rezervasyonunuz sona erdi. O koltuk hâlâ boş.'
+    : 'Siz yokken rezervasyonunuz sona erdi. O koltuklar hâlâ boş.';
+
+String _holdLapsedSomeTakenTr(int count) => count == 1
+    ? 'Siz yokken rezervasyonunuz sona erdi ve o koltuklardan $count tanesi alındı. Geri kalanlar hâlâ boş.'
+    : 'Siz yokken rezervasyonunuz sona erdi ve o koltuklardan $count tanesi alındı. Geri kalanlar hâlâ boş.';
+
+String _holdLapsedAllTakenTr(int count) => count == 1
+    ? 'Siz yokken rezervasyonunuz sona erdi ve o koltuk alındı.'
+    : 'Siz yokken rezervasyonunuz sona erdi ve o koltuklar alındı.';
 
 String _continueWithTotalTr(String money) => 'Devam \u00b7 $money';
 
@@ -74,6 +102,81 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   obstructedView: 'Engelli manzara',
   premiumSeat: 'Premium koltuk',
   continueWord: 'Devam',
+  allFloors: 'Tüm katlar',
+  previousSection: 'Önceki blok',
+  nextSection: 'Sonraki blok',
+  addSeat: 'Koltuk ekle',
+  added: 'Eklendi',
+  sectionWord: 'Blok',
+  rowWord: 'Sıra',
+  seatWord: 'Koltuk',
+  seeItIn3D: '3B olarak gör',
+  viewFromThisSeat: 'Bu koltuktan manzara',
+  allPrices: 'Tüm fiyatlar',
+  ticketType: 'Bilet türü',
+  tierCompanionGuidance: 'Bitişikteki tekerlekli sandalye yerini gerektirir',
+  findingBestSeats: 'En iyi koltuklar aranıyor…',
+  findSeats: 'Koltuk bul',
+  expandCart: 'Bilet panelini aç',
+  collapseCart: 'Bilet panelini daralt',
+  continueToCheckout: 'Ödemeye devam et',
+  secureMore: 'Daha fazla al',
+  selectSeats: 'Koltukları seç',
+  pickYourSeats: 'Koltuklarınızı seçin',
+  salesClosedPill: 'Satışlar kapalı',
+  salesClosedCta: 'Satışlar kapalı',
+  confirmOrCancelSeat: 'Bu koltuğu onaylayın veya iptal edin',
+  securingSeats: 'Koltuklarınız güvenceye alınıyor…',
+  openingCheckout: 'Güvenli ödeme açılıyor…',
+  testModeExplained:
+      'Buradaki rezervasyonlar gerçek değildir ve herhangi bir karttan ücret alınmayacak',
+  displayOptions: 'Görünüm seçenekleri',
+  companionSeatsNote: 'Yanlarındaki refakatçi yerleri seçilebilir kalır',
+  zoomIn: 'Yakınlaştır',
+  zoomOut: 'Uzaklaştır',
+  rotateVenue: 'Mekânı döndürmek için sürükleyin',
+  moveVenue: 'Mekânı taşımak için sürükleyin',
+  mapView: 'Plan',
+  flat2dMap: 'Düz 2B plan',
+  interactive3dVenueView: 'Etkileşimli 3B mekan görünümü',
+  venueView: 'Mekan görünümü',
+  holdLapsedTitle: 'Koltuklarınız serbest bırakıldı',
+  salesClosed: 'Satışlar kapalı',
+  salesClosedCopy: 'Bu etkinliğin bilet satışı sona erdi.',
+  salesClosedToast: 'Bu etkinlik için satışlar kapalı.',
+  soldOutEyebrow: 'Bu etkinlik',
+  soldOutTitle: 'Tükendi',
+  soldOutCopy: 'Bu etkinlik için şu anda müsait numaralı koltuk yok.',
+  holdExpired:
+      'Rezervasyonunuzun süresi doldu. Koltuklar serbest bırakıldı. Tekrar seçin.',
+  addingEllipsis: 'Ekleniyor…',
+  moreTimeAdded: 'Ek süre verildi. Koltuklarınız hâlâ rezerve.',
+  couldNotAddMoreTime: 'Ek süre verilemedi. Lütfen şimdi ödemeye geçin.',
+  seatsJustTaken:
+      'Bir veya daha fazla koltuk az önce alındı. Lütfen tekrar seçin.',
+  allSetTitle: 'Her şey hazır',
+  confirmedAndOnWay: 'onaylandı. Onay e-postası yolda.',
+  backToMap: 'Plana dön',
+  mapDidNotLoad: 'Koltuk planı yüklenemedi',
+  checkConnection: 'Bağlantınızı kontrol edip tekrar deneyin.',
+  accessPausedTitle: 'Bu koltuklar şu anda beklemede',
+  accessPausedCopy:
+      'Organizatör bu seçimi duraklattı. Birkaç dakika sonra tekrar deneyin.',
+  accessRevokedTitle: 'Bu erişim bağlantısı artık geçerli değil',
+  accessRevokedCopy:
+      'Bu koltukları almaya devam etmek için sizi buraya yönlendiren kişiden yeni bir bağlantı isteyin.',
+  accessUnverifiedTitle: 'Erişiminizi doğrulayamadık',
+  accessUnverifiedCopy:
+      'Müsait görünen her şeyi yine de satın alabilirsiniz. Geri kalanına erişim için sizi buraya yönlendiren kişiyle iletişime geçin.',
+  generalAdmission: 'Genel giriş',
+  numberOfGuests: 'Misafir sayısı',
+  chooseGuestsCopy:
+      'Kaç misafirin birlikte oturacağını seçin. Bu masa yalnızca sizin grubunuz için ayrılır.',
+  fewerGuests: 'Daha az misafir',
+  moreGuests: 'Daha çok misafir',
+  selectTable: 'Masayı seç',
+  updateTable: 'Masayı güncelle',
+  removeWord: 'Kaldır',
   accessNeeds: <String, String>{
     'wheelchair': 'Tekerlekli sandalye yeri',
     'companion': 'Refakatçi koltuğu',
@@ -93,8 +196,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   addMinutes: _addMinutesTr,
   fromPrice: _fromPriceTr,
   sightline: _sightlineTr,
+  secureMoreAndCheckout: _secureMoreAndCheckoutTr,
+  accessFreeCount: _accessFreeCountTr,
+  seatJustTakenByAnother: _seatJustTakenByAnotherTr,
+  peekSecured: _peekSecuredTr,
   ticketCount: _ticketCountTr,
   findBestSeats: _findBestSeatsTr,
   reselectSeats: _reselectSeatsTr,
+  seatsFree: _seatsFreeTr,
+  seatsLeftInSection: _seatsLeftInSectionTr,
+  holdLapsedStillFree: _holdLapsedStillFreeTr,
+  holdLapsedSomeTaken: _holdLapsedSomeTakenTr,
+  holdLapsedAllTaken: _holdLapsedAllTakenTr,
   continueWithTotal: _continueWithTotalTr,
 );

@@ -130,7 +130,7 @@ void main() {
           'an-accommodation-from-the-future',
           'cart'
         ]),
-        <String>['Mobility cart'],
+        <String>['Live captions'],
       );
     });
 

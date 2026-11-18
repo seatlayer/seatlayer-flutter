@@ -1,6 +1,6 @@
 // The native chrome speaks the languages the drawn map already speaks.
 //
-// The runtime ships a reviewed dictionary for thirty-seven locales, and the
+// The runtime ships a reviewed dictionary for forty-three locales, and the
 // map inside the WebView uses it. Until now the Flutter chrome around that map
 // was English whatever the host asked for, so a French buyer got a French seat
 // map under an English header. The defaults are generated from the runtime's
@@ -21,7 +21,7 @@ Map<String, Object?> _table() =>
 void main() {
   test('every locale the runtime translates has defaults here', () {
     final table = _table();
-    expect(table, hasLength(37));
+    expect(table, hasLength(43));
     expect(
       seatLayerPickerStringsByLocale.keys.toSet(),
       table.keys.toSet(),
@@ -134,6 +134,48 @@ void main() {
       japanese.ticketCount(1).replaceAll('1', '#'),
       japanese.ticketCount(6).replaceAll('6', '#'),
     );
+  });
+
+  test('the status, hold and table sentences are translated too', () {
+    const english = SeatLayerPickerStrings();
+    final german = SeatLayerPickerStrings.forLocale(const Locale('de'));
+    for (final pair in <(String, String)>[
+      (german.soldOutTitle, english.soldOutTitle),
+      (german.mapDidNotLoad, english.mapDidNotLoad),
+      (german.accessRevokedTitle, english.accessRevokedTitle),
+      (german.holdLapsedTitle, english.holdLapsedTitle),
+      (german.moreTimeAdded, english.moreTimeAdded),
+      (german.selectTable, english.selectTable),
+      (german.rotateVenue, english.rotateVenue),
+      (german.allFloors, english.allFloors),
+    ]) {
+      expect(pair.$1, isNot(pair.$2));
+    }
+    expect(german.soldOutTitle, 'Ausverkauft');
+    expect(german.holdLapsedSomeTaken(1), isNot(german.holdLapsedSomeTaken(3)));
+    expect(german.holdLapsedSomeTaken(3), contains('3'));
+    expect(german.seatsLeftInSection(4), contains('4'));
+    expect(german.seatJustTakenByAnother('B12'), contains('B12'));
+  });
+
+  test('a sentence with two figures fills both, in the order it writes them',
+      () {
+    final german = SeatLayerPickerStrings.forLocale(const Locale('de'));
+    expect(german.peekSecured(2, '€40'), '✓ 2 gesichert · €40. '
+        'Noch wird nichts abgebucht');
+    final japanese = SeatLayerPickerStrings.forLocale(const Locale('ja'));
+    expect(japanese.peekSecured(2, '¥4,000'), contains('2'));
+    expect(japanese.peekSecured(2, '¥4,000'), contains('¥4,000'));
+  });
+
+  test('the CART provision is named for captions in every language', () {
+    // The wire key `cart` is live captioning (its glyph is the CC mark). The
+    // English default once called it a mobility cart while every translation
+    // said captions; the two now name the same provision.
+    const english = SeatLayerPickerStrings();
+    expect(english.accessNeeds['cart'], 'Live captions');
+    final german = SeatLayerPickerStrings.forLocale(const Locale('de'));
+    expect(german.accessNeeds['cart'], 'Live-Untertitel');
   });
 
   test('every entry is still overridable', () {

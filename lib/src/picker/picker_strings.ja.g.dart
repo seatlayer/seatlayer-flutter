@@ -18,12 +18,38 @@ String _fromPriceJa(String money) => '$money〜';
 
 String _sightlineJa(String metres) => 'ステージまで約${metres}m';
 
+String _secureMoreAndCheckoutJa(int count) => 'あと$count席確保して決済へ';
+
+String _accessFreeCountJa(int count) => '空き $count';
+
+String _seatJustTakenByAnotherJa(String label) => '座席$labelは他のお客様が確保しました。';
+
+String _peekSecuredJa(int count, String total) =>
+    '✓ $count席確保 · $total。まだ請求はされません';
+
 String _ticketCountJa(int count) => count == 1 ? '$count枚' : '$count枚';
 
 String _findBestSeatsJa(int count) =>
     count == 1 ? 'おすすめの$count席を探す' : 'おすすめの$count席を探す';
 
 String _reselectSeatsJa(int count) => count == 1 ? 'もう一度選ぶ' : 'もう一度選ぶ';
+
+String _seatsFreeJa(int count) => count == 1 ? '$count席' : '$count席';
+
+String _seatsLeftInSectionJa(int count) =>
+    count == 1 ? '残り$count席' : '残り$count席';
+
+String _holdLapsedStillFreeJa(int count) => count == 1
+    ? '離席中に確保の時間が切れました。その席はまだ空いています。'
+    : '離席中に確保の時間が切れました。その席はまだ空いています。';
+
+String _holdLapsedSomeTakenJa(int count) => count == 1
+    ? '離席中に確保の時間が切れ、そのうち $count 席はすでに他の方が確保しました。残りはまだ空いています。'
+    : '離席中に確保の時間が切れ、そのうち $count 席はすでに他の方が確保しました。残りはまだ空いています。';
+
+String _holdLapsedAllTakenJa(int count) => count == 1
+    ? '離席中に確保の時間が切れ、その席はすでに他の方が確保しました。'
+    : '離席中に確保の時間が切れ、その席はすでに他の方が確保しました。';
 
 String _continueWithTotalJa(String money) => '次へ \u00b7 $money';
 
@@ -71,6 +97,75 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   obstructedView: '視界を遮るものあり',
   premiumSeat: 'プレミアム席',
   continueWord: '次へ',
+  allFloors: 'すべてのフロア',
+  previousSection: '前のブロック',
+  nextSection: '次のブロック',
+  addSeat: '席を追加',
+  added: '追加済み',
+  sectionWord: 'ブロック',
+  rowWord: '列',
+  seatWord: '座席',
+  seeItIn3D: '3Dで見る',
+  viewFromThisSeat: 'この席からの眺め',
+  allPrices: 'すべての価格',
+  ticketType: 'チケット種別',
+  tierCompanionGuidance: '隣接する車椅子スペースが必要です',
+  findingBestSeats: 'おすすめの席を探しています…',
+  findSeats: '席を探す',
+  expandCart: 'チケットパネルを開く',
+  collapseCart: 'チケットパネルを折りたたむ',
+  continueToCheckout: '決済に進む',
+  secureMore: 'さらに確保',
+  selectSeats: '座席を選択',
+  pickYourSeats: '座席をお選びください',
+  salesClosedPill: '販売終了',
+  salesClosedCta: '販売終了',
+  confirmOrCancelSeat: 'この座席を確定またはキャンセル',
+  securingSeats: '座席を確保しています…',
+  openingCheckout: '安全な決済画面を開いています…',
+  testModeExplained: 'こちらの予約は実際のものではなく、カードへの請求も発生しません',
+  displayOptions: '表示設定',
+  companionSeatsNote: '隣の同伴者スペースは引き続き選択できます',
+  zoomIn: '拡大',
+  zoomOut: '縮小',
+  rotateVenue: 'ドラッグして会場を回転',
+  moveVenue: 'ドラッグして会場を移動',
+  mapView: '座席図',
+  flat2dMap: '平面2Dマップ',
+  interactive3dVenueView: '操作できる3D会場ビュー',
+  venueView: '会場ビュー',
+  holdLapsedTitle: '座席の確保が解除されました',
+  salesClosed: '販売終了',
+  salesClosedCopy: 'このイベントのチケット販売は終了しました。',
+  salesClosedToast: 'このイベントの販売は終了しています。',
+  soldOutEyebrow: 'このイベント',
+  soldOutTitle: '完売',
+  soldOutCopy: 'このイベントでご利用いただける指定席は現在ありません。',
+  holdExpired: '確保の期限が切れ、座席は解放されました。もう一度お選びください。',
+  addingEllipsis: '追加しています…',
+  moreTimeAdded: '時間を延長しました。座席は確保されたままです。',
+  couldNotAddMoreTime: '時間を延長できませんでした。今すぐ決済にお進みください。',
+  seatsJustTaken: '1席以上が他のお客様に確保されました。もう一度お選びください。',
+  allSetTitle: '準備完了です',
+  confirmedAndOnWay: '確定しました。確認のご連絡をお送りします。',
+  backToMap: '座席図に戻る',
+  mapDidNotLoad: '座席図を読み込めませんでした',
+  checkConnection: '通信環境を確認して、もう一度お試しください。',
+  accessPausedTitle: 'これらの座席は現在保留中です',
+  accessPausedCopy: '主催者がこの選択を一時停止しています。数分後にもう一度お試しください。',
+  accessRevokedTitle: 'このアクセスリンクは無効になりました',
+  accessRevokedCopy: '引き続きこの座席を予約するには、このリンクを送った方に新しいリンクをご依頼ください。',
+  accessUnverifiedTitle: 'アクセス権を確認できませんでした',
+  accessUnverifiedCopy:
+      '「空席」と表示されているものは引き続きご購入いただけます。その他へのアクセスは、このリンクを送った方にお問い合わせください。',
+  generalAdmission: '自由席',
+  numberOfGuests: 'ご人数',
+  chooseGuestsCopy: '何名で同席するかをお選びください。このテーブルはお連れ様専用に確保されます。',
+  fewerGuests: '人数を減らす',
+  moreGuests: '人数を増やす',
+  selectTable: 'テーブルを選択',
+  updateTable: 'テーブルを更新',
+  removeWord: '削除',
   accessNeeds: <String, String>{
     'wheelchair': '車椅子スペース',
     'companion': '同伴者席',
@@ -90,8 +185,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   addMinutes: _addMinutesJa,
   fromPrice: _fromPriceJa,
   sightline: _sightlineJa,
+  secureMoreAndCheckout: _secureMoreAndCheckoutJa,
+  accessFreeCount: _accessFreeCountJa,
+  seatJustTakenByAnother: _seatJustTakenByAnotherJa,
+  peekSecured: _peekSecuredJa,
   ticketCount: _ticketCountJa,
   findBestSeats: _findBestSeatsJa,
   reselectSeats: _reselectSeatsJa,
+  seatsFree: _seatsFreeJa,
+  seatsLeftInSection: _seatsLeftInSectionJa,
+  holdLapsedStillFree: _holdLapsedStillFreeJa,
+  holdLapsedSomeTaken: _holdLapsedSomeTakenJa,
+  holdLapsedAllTaken: _holdLapsedAllTakenJa,
   continueWithTotal: _continueWithTotalJa,
 );

@@ -18,6 +18,16 @@ String _fromPriceEn(String money) => 'From $money';
 
 String _sightlineEn(String metres) => '≈ $metres m to stage';
 
+String _secureMoreAndCheckoutEn(int count) => 'Secure $count more & checkout';
+
+String _accessFreeCountEn(int count) => '$count free';
+
+String _seatJustTakenByAnotherEn(String label) =>
+    'Seat $label was just taken by another buyer.';
+
+String _peekSecuredEn(int count, String total) =>
+    '✓ $count secured · $total. You won’t be charged yet';
+
 String _ticketCountEn(int count) =>
     count == 1 ? '$count ticket' : '$count tickets';
 
@@ -26,6 +36,23 @@ String _findBestSeatsEn(int count) =>
 
 String _reselectSeatsEn(int count) =>
     count == 1 ? 'Select it again' : 'Select them again';
+
+String _seatsFreeEn(int count) => count == 1 ? '$count seat' : '$count seats';
+
+String _seatsLeftInSectionEn(int count) =>
+    count == 1 ? '$count seat left' : '$count seats left';
+
+String _holdLapsedStillFreeEn(int count) => count == 1
+    ? 'Your hold ended while you were away. That seat is still free.'
+    : 'Your hold ended while you were away. Those seats are still free.';
+
+String _holdLapsedSomeTakenEn(int count) => count == 1
+    ? 'Your hold ended while you were away, and $count of those seats has been taken. The rest are still free.'
+    : 'Your hold ended while you were away, and $count of those seats have been taken. The rest are still free.';
+
+String _holdLapsedAllTakenEn(int count) => count == 1
+    ? 'Your hold ended while you were away, and that seat has been taken.'
+    : 'Your hold ended while you were away, and those seats have been taken.';
 
 String _continueWithTotalEn(String money) => 'Continue \u00b7 $money';
 
@@ -74,6 +101,78 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   obstructedView: 'Obstructed view',
   premiumSeat: 'Premium seat',
   continueWord: 'Continue',
+  allFloors: 'All floors',
+  previousSection: 'Previous section',
+  nextSection: 'Next section',
+  addSeat: 'Add seat',
+  added: 'Added',
+  sectionWord: 'Section',
+  rowWord: 'Row',
+  seatWord: 'Seat',
+  seeItIn3D: 'See it in 3D',
+  viewFromThisSeat: 'View from this seat',
+  allPrices: 'All prices',
+  ticketType: 'Ticket type',
+  tierCompanionGuidance: 'Requires the adjacent wheelchair place',
+  findingBestSeats: 'Finding the best seats…',
+  findSeats: 'Find seats',
+  expandCart: 'Open ticket panel',
+  collapseCart: 'Collapse ticket panel',
+  continueToCheckout: 'Continue to checkout',
+  secureMore: 'Secure more',
+  selectSeats: 'Select seats',
+  pickYourSeats: 'Pick your seats',
+  salesClosedPill: 'Sales are closed',
+  salesClosedCta: 'Sales closed',
+  confirmOrCancelSeat: 'Confirm or cancel this seat',
+  securingSeats: 'Securing your seats…',
+  openingCheckout: 'Opening secure checkout…',
+  testModeExplained: 'Bookings here are not real and no card is charged',
+  displayOptions: 'Display options',
+  companionSeatsNote: 'Companion places beside them stay selectable',
+  zoomIn: 'Zoom in',
+  zoomOut: 'Zoom out',
+  rotateVenue: 'Drag to rotate the venue',
+  moveVenue: 'Drag to move the venue',
+  mapView: 'Map',
+  flat2dMap: 'Flat 2D map',
+  interactive3dVenueView: 'Interactive 3D venue view',
+  venueView: 'Venue view',
+  holdLapsedTitle: 'Your seats were released',
+  salesClosed: 'Sales are closed',
+  salesClosedCopy: 'Ticket sales for this event have ended.',
+  salesClosedToast: 'Sales are closed for this event.',
+  soldOutEyebrow: 'This event',
+  soldOutTitle: 'Sold out',
+  soldOutCopy: 'No reserved seats are currently available for this event.',
+  holdExpired: 'Your hold expired and the seats were released. Pick again.',
+  addingEllipsis: 'Adding…',
+  moreTimeAdded: 'More time added. Your seats are still held.',
+  couldNotAddMoreTime: 'Couldn’t add more time. Please head to checkout now.',
+  seatsJustTaken: 'One or more seats were just taken. Please pick again.',
+  allSetTitle: 'You’re all set',
+  confirmedAndOnWay: 'confirmed. A confirmation is on its way.',
+  backToMap: 'Back to map',
+  mapDidNotLoad: 'The seat map didn’t load',
+  checkConnection: 'Check your connection and try again.',
+  accessPausedTitle: 'These seats are on hold right now',
+  accessPausedCopy:
+      'The organizer has paused this selection. Try again in a few minutes.',
+  accessRevokedTitle: 'This access link is no longer active',
+  accessRevokedCopy:
+      'Ask whoever sent you here for a new link to keep booking these seats.',
+  accessUnverifiedTitle: 'We couldn’t verify your access',
+  accessUnverifiedCopy:
+      'You can still book anything shown as available. Contact whoever sent you here for access to the rest.',
+  generalAdmission: 'General admission',
+  numberOfGuests: 'Number of guests',
+  chooseGuestsCopy:
+      'Choose how many guests will sit together. This table is held exclusively for your party.',
+  fewerGuests: 'Fewer guests',
+  moreGuests: 'More guests',
+  selectTable: 'Select table',
+  updateTable: 'Update table',
+  removeWord: 'Remove',
   accessNeeds: <String, String>{
     'wheelchair': 'Wheelchair space',
     'companion': 'Companion seat',
@@ -93,8 +192,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   addMinutes: _addMinutesEn,
   fromPrice: _fromPriceEn,
   sightline: _sightlineEn,
+  secureMoreAndCheckout: _secureMoreAndCheckoutEn,
+  accessFreeCount: _accessFreeCountEn,
+  seatJustTakenByAnother: _seatJustTakenByAnotherEn,
+  peekSecured: _peekSecuredEn,
   ticketCount: _ticketCountEn,
   findBestSeats: _findBestSeatsEn,
   reselectSeats: _reselectSeatsEn,
+  seatsFree: _seatsFreeEn,
+  seatsLeftInSection: _seatsLeftInSectionEn,
+  holdLapsedStillFree: _holdLapsedStillFreeEn,
+  holdLapsedSomeTaken: _holdLapsedSomeTakenEn,
+  holdLapsedAllTaken: _holdLapsedAllTakenEn,
   continueWithTotal: _continueWithTotalEn,
 );

@@ -224,13 +224,12 @@ options: SeatLayerPickerOptions(
 ),
 ```
 
-Or take the thirty-seven translations SeatLayer already ships, from the same
+Or take the forty-three translations SeatLayer already ships, from the same
 reviewed dictionaries the drawn map uses:
 `strings: SeatLayerPickerStrings.forLocale(Localizations.localeOf(context))`.
 It resolves by language, and by script for Chinese; an untranslated locale (and
-any entry with no runtime wording, currently just `allFloors`) keeps its
-English default, and the result is an ordinary `SeatLayerPickerStrings` you can
-still override on top of.
+any entry with no runtime wording yet) keeps its English default, and the
+result is an ordinary `SeatLayerPickerStrings` you can still override on top of.
 
 **3D limit.** `SeatLayerPickerOptions(max3DSeats:)`: 3D opens for venues up to 60,000 seats; on a touch screen the default is 30,000 unless you set this option.
 

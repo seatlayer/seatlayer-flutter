@@ -18,6 +18,17 @@ String _fromPriceEl(String money) => 'Από $money';
 
 String _sightlineEl(String metres) => '≈ $metres m από τη σκηνή';
 
+String _secureMoreAndCheckoutEl(int count) =>
+    'Εξασφαλίστε $count ακόμη και πληρώστε';
+
+String _accessFreeCountEl(int count) => '$count ελεύθερες';
+
+String _seatJustTakenByAnotherEl(String label) =>
+    'Η θέση $label μόλις καταλήφθηκε από άλλον αγοραστή.';
+
+String _peekSecuredEl(int count, String total) =>
+    '✓ $count εξασφαλίστηκαν · $total. Δεν θα χρεωθείτε ακόμη';
+
 String _ticketCountEl(int count) =>
     count == 1 ? '$count εισιτήριο' : '$count εισιτήρια';
 
@@ -27,6 +38,23 @@ String _findBestSeatsEl(int count) => count == 1
 
 String _reselectSeatsEl(int count) =>
     count == 1 ? 'Επιλέξτε την ξανά' : 'Επιλέξτε τις ξανά';
+
+String _seatsFreeEl(int count) => count == 1 ? '$count θέση' : '$count θέσεις';
+
+String _seatsLeftInSectionEl(int count) =>
+    count == 1 ? 'Απομένει $count θέση' : 'Απομένουν $count θέσεις';
+
+String _holdLapsedStillFreeEl(int count) => count == 1
+    ? 'Η κράτησή σας έληξε όσο λείπατε. Αυτή η θέση είναι ακόμη ελεύθερη.'
+    : 'Η κράτησή σας έληξε όσο λείπατε. Αυτές οι θέσεις είναι ακόμη ελεύθερες.';
+
+String _holdLapsedSomeTakenEl(int count) => count == 1
+    ? 'Η κράτησή σας έληξε όσο λείπατε και $count από αυτές τις θέσεις έχει ήδη κρατηθεί. Οι υπόλοιπες είναι ακόμη ελεύθερες.'
+    : 'Η κράτησή σας έληξε όσο λείπατε και $count από αυτές τις θέσεις έχουν ήδη κρατηθεί. Οι υπόλοιπες είναι ακόμη ελεύθερες.';
+
+String _holdLapsedAllTakenEl(int count) => count == 1
+    ? 'Η κράτησή σας έληξε όσο λείπατε και αυτή η θέση έχει ήδη κρατηθεί.'
+    : 'Η κράτησή σας έληξε όσο λείπατε και αυτές οι θέσεις έχουν ήδη κρατηθεί.';
 
 String _continueWithTotalEl(String money) => 'Συνέχεια \u00b7 $money';
 
@@ -76,6 +104,82 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   obstructedView: 'Θέα με εμπόδιο',
   premiumSeat: 'Θέση premium',
   continueWord: 'Συνέχεια',
+  allFloors: 'Όλοι οι όροφοι',
+  previousSection: 'Προηγούμενο τμήμα',
+  nextSection: 'Επόμενο τμήμα',
+  addSeat: 'Προσθήκη θέσης',
+  added: 'Προστέθηκε',
+  sectionWord: 'Τμήμα',
+  rowWord: 'Σειρά',
+  seatWord: 'Θέση',
+  seeItIn3D: 'Δείτε το σε 3D',
+  viewFromThisSeat: 'Θέα από αυτή τη θέση',
+  allPrices: 'Όλες οι τιμές',
+  ticketType: 'Τύπος εισιτηρίου',
+  tierCompanionGuidance: 'Απαιτεί τη διπλανή θέση αναπηρικού αμαξιδίου',
+  findingBestSeats: 'Αναζήτηση των καλύτερων θέσεων…',
+  findSeats: 'Εύρεση θέσεων',
+  expandCart: 'Άνοιγμα πίνακα εισιτηρίων',
+  collapseCart: 'Σύμπτυξη πίνακα εισιτηρίων',
+  continueToCheckout: 'Συνέχεια στην πληρωμή',
+  secureMore: 'Εξασφαλίστε περισσότερες',
+  selectSeats: 'Επιλογή θέσεων',
+  pickYourSeats: 'Επιλέξτε τις θέσεις σας',
+  salesClosedPill: 'Οι πωλήσεις έκλεισαν',
+  salesClosedCta: 'Οι πωλήσεις έκλεισαν',
+  confirmOrCancelSeat: 'Επιβεβαιώστε ή ακυρώστε αυτή τη θέση',
+  securingSeats: 'Εξασφαλίζουμε τις θέσεις σας…',
+  openingCheckout: 'Άνοιγμα ασφαλούς πληρωμής…',
+  testModeExplained:
+      'Οι κρατήσεις εδώ δεν είναι πραγματικές και δεν χρεώνεται καμία κάρτα',
+  displayOptions: 'Επιλογές εμφάνισης',
+  companionSeatsNote: 'Οι διπλανές θέσεις συνοδού παραμένουν επιλέξιμες',
+  zoomIn: 'Μεγέθυνση',
+  zoomOut: 'Σμίκρυνση',
+  rotateVenue: 'Σύρετε για περιστροφή του χώρου',
+  moveVenue: 'Σύρετε για μετακίνηση του χώρου',
+  mapView: 'Χάρτης',
+  flat2dMap: 'Επίπεδος χάρτης 2D',
+  interactive3dVenueView: 'Διαδραστική προβολή 3D του χώρου',
+  venueView: 'Προβολή χώρου',
+  holdLapsedTitle: 'Οι θέσεις σας αποδεσμεύτηκαν',
+  salesClosed: 'Οι πωλήσεις έκλεισαν',
+  salesClosedCopy: 'Η πώληση εισιτηρίων για αυτή την εκδήλωση ολοκληρώθηκε.',
+  salesClosedToast: 'Οι πωλήσεις για αυτή την εκδήλωση έχουν κλείσει.',
+  soldOutEyebrow: 'Αυτή η εκδήλωση',
+  soldOutTitle: 'Εξαντλήθηκε',
+  soldOutCopy:
+      'Δεν υπάρχουν αυτή τη στιγμή διαθέσιμες αριθμημένες θέσεις για αυτή την εκδήλωση.',
+  holdExpired: 'Η κράτησή σας έληξε. Οι θέσεις αποδεσμεύτηκαν. Επιλέξτε ξανά.',
+  addingEllipsis: 'Προσθήκη…',
+  moreTimeAdded: 'Προστέθηκε χρόνος. Οι θέσεις σας παραμένουν δεσμευμένες.',
+  couldNotAddMoreTime:
+      'Δεν ήταν δυνατή η προσθήκη χρόνου. Προχωρήστε τώρα στην πληρωμή.',
+  seatsJustTaken:
+      'Μία ή περισσότερες θέσεις μόλις καταλήφθηκαν. Επιλέξτε ξανά.',
+  allSetTitle: 'Όλα έτοιμα',
+  confirmedAndOnWay: 'επιβεβαιώθηκε. Η επιβεβαίωση είναι καθ\' οδόν.',
+  backToMap: 'Επιστροφή στον χάρτη',
+  mapDidNotLoad: 'Ο χάρτης θέσεων δεν φορτώθηκε',
+  checkConnection: 'Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.',
+  accessPausedTitle: 'Αυτές οι θέσεις είναι δεσμευμένες αυτή τη στιγμή',
+  accessPausedCopy:
+      'Ο διοργανωτής έχει διακόψει προσωρινά αυτή την επιλογή. Δοκιμάστε ξανά σε λίγα λεπτά.',
+  accessRevokedTitle: 'Αυτός ο σύνδεσμος πρόσβασης δεν είναι πλέον ενεργός',
+  accessRevokedCopy:
+      'Ζητήστε από όποιον σας έστειλε εδώ έναν νέο σύνδεσμο για να συνεχίσετε να κρατάτε αυτές τις θέσεις.',
+  accessUnverifiedTitle: 'Δεν μπορέσαμε να επαληθεύσουμε την πρόσβασή σας',
+  accessUnverifiedCopy:
+      'Μπορείτε ακόμη να αγοράσετε ό,τι εμφανίζεται ως διαθέσιμο. Επικοινωνήστε με όποιον σας έστειλε εδώ για πρόσβαση στα υπόλοιπα.',
+  generalAdmission: 'Ελεύθερη είσοδος',
+  numberOfGuests: 'Αριθμός καλεσμένων',
+  chooseGuestsCopy:
+      'Επιλέξτε πόσοι καλεσμένοι θα καθίσουν μαζί. Αυτό το τραπέζι κρατείται αποκλειστικά για την παρέα σας.',
+  fewerGuests: 'Λιγότεροι καλεσμένοι',
+  moreGuests: 'Περισσότεροι καλεσμένοι',
+  selectTable: 'Επιλογή τραπεζιού',
+  updateTable: 'Ενημέρωση τραπεζιού',
+  removeWord: 'Αφαίρεση',
   accessNeeds: <String, String>{
     'wheelchair': 'Θέση αμαξιδίου',
     'companion': 'Θέση συνοδού',
@@ -95,8 +199,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   addMinutes: _addMinutesEl,
   fromPrice: _fromPriceEl,
   sightline: _sightlineEl,
+  secureMoreAndCheckout: _secureMoreAndCheckoutEl,
+  accessFreeCount: _accessFreeCountEl,
+  seatJustTakenByAnother: _seatJustTakenByAnotherEl,
+  peekSecured: _peekSecuredEl,
   ticketCount: _ticketCountEl,
   findBestSeats: _findBestSeatsEl,
   reselectSeats: _reselectSeatsEl,
+  seatsFree: _seatsFreeEl,
+  seatsLeftInSection: _seatsLeftInSectionEl,
+  holdLapsedStillFree: _holdLapsedStillFreeEl,
+  holdLapsedSomeTaken: _holdLapsedSomeTakenEl,
+  holdLapsedAllTaken: _holdLapsedAllTakenEl,
   continueWithTotal: _continueWithTotalEl,
 );

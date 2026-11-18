@@ -18,6 +18,16 @@ String _fromPriceIt(String money) => 'Da $money';
 
 String _sightlineIt(String metres) => '≈ $metres m dal palco';
 
+String _secureMoreAndCheckoutIt(int count) => 'Blocca altri $count e paga';
+
+String _accessFreeCountIt(int count) => '$count liberi';
+
+String _seatJustTakenByAnotherIt(String label) =>
+    'Il posto $label è stato appena preso da un altro acquirente.';
+
+String _peekSecuredIt(int count, String total) =>
+    '✓ $count bloccati · $total. Non ti addebiteremo ancora nulla';
+
 String _ticketCountIt(int count) =>
     count == 1 ? '$count biglietto' : '$count biglietti';
 
@@ -27,6 +37,23 @@ String _findBestSeatsIt(int count) => count == 1
 
 String _reselectSeatsIt(int count) =>
     count == 1 ? 'Selezionalo di nuovo' : 'Selezionali di nuovo';
+
+String _seatsFreeIt(int count) => count == 1 ? '$count posto' : '$count posti';
+
+String _seatsLeftInSectionIt(int count) =>
+    count == 1 ? 'Resta $count posto' : 'Restano $count posti';
+
+String _holdLapsedStillFreeIt(int count) => count == 1
+    ? 'La tua prenotazione è scaduta mentre eri via. Quel posto è ancora libero.'
+    : 'La tua prenotazione è scaduta mentre eri via. Quei posti sono ancora liberi.';
+
+String _holdLapsedSomeTakenIt(int count) => count == 1
+    ? 'La tua prenotazione è scaduta mentre eri via e $count di quei posti è stato occupato. Gli altri sono ancora liberi.'
+    : 'La tua prenotazione è scaduta mentre eri via e $count di quei posti sono stati occupati. Gli altri sono ancora liberi.';
+
+String _holdLapsedAllTakenIt(int count) => count == 1
+    ? 'La tua prenotazione è scaduta mentre eri via e quel posto è stato occupato.'
+    : 'La tua prenotazione è scaduta mentre eri via e quei posti sono stati occupati.';
 
 String _continueWithTotalIt(String money) => 'Continua \u00b7 $money';
 
@@ -76,6 +103,83 @@ const SeatLayerPickerStrings seatLayerPickerStringsIt = SeatLayerPickerStrings(
   obstructedView: 'Visuale ostruita',
   premiumSeat: 'Posto premium',
   continueWord: 'Continua',
+  allFloors: 'Tutti i piani',
+  previousSection: 'Settore precedente',
+  nextSection: 'Settore successivo',
+  addSeat: 'Aggiungi posto',
+  added: 'Aggiunto',
+  sectionWord: 'Settore',
+  rowWord: 'Fila',
+  seatWord: 'Posto',
+  seeItIn3D: 'Guardalo in 3D',
+  viewFromThisSeat: 'Visuale da questo posto',
+  allPrices: 'Tutti i prezzi',
+  ticketType: 'Tipo di biglietto',
+  tierCompanionGuidance: 'Richiede il posto per sedia a rotelle adiacente',
+  findingBestSeats: 'Ricerca dei posti migliori…',
+  findSeats: 'Trova posti',
+  expandCart: 'Apri il pannello biglietti',
+  collapseCart: 'Comprimi il pannello biglietti',
+  continueToCheckout: 'Vai al pagamento',
+  secureMore: 'Bloccane altri',
+  selectSeats: 'Seleziona i posti',
+  pickYourSeats: 'Scegli i tuoi posti',
+  salesClosedPill: 'Vendite chiuse',
+  salesClosedCta: 'Vendite chiuse',
+  confirmOrCancelSeat: 'Conferma o annulla questo posto',
+  securingSeats: 'Stiamo bloccando i tuoi posti…',
+  openingCheckout: 'Apertura del pagamento sicuro…',
+  testModeExplained:
+      'Le prenotazioni qui non sono reali e non addebitiamo alcuna carta',
+  displayOptions: 'Opzioni di visualizzazione',
+  companionSeatsNote:
+      'I posti per accompagnatore accanto restano selezionabili',
+  zoomIn: 'Ingrandisci',
+  zoomOut: 'Riduci',
+  rotateVenue: 'Trascina per ruotare la sede',
+  moveVenue: 'Trascina per spostare la sede',
+  mapView: 'Mappa',
+  flat2dMap: 'Mappa 2D piatta',
+  interactive3dVenueView: 'Vista 3D interattiva dell\'impianto',
+  venueView: 'Vista dell\'impianto',
+  holdLapsedTitle: 'I tuoi posti sono stati rilasciati',
+  salesClosed: 'Vendite chiuse',
+  salesClosedCopy: 'La vendita dei biglietti per questo evento è terminata.',
+  salesClosedToast: 'Le vendite per questo evento sono chiuse.',
+  soldOutEyebrow: 'Questo evento',
+  soldOutTitle: 'Esaurito',
+  soldOutCopy:
+      'Al momento non ci sono posti numerati disponibili per questo evento.',
+  holdExpired:
+      'La tua prenotazione è scaduta. I posti sono stati liberati. Scegli di nuovo.',
+  addingEllipsis: 'Aggiunta…',
+  moreTimeAdded: 'Tempo aggiuntivo aggiunto. I tuoi posti restano bloccati.',
+  couldNotAddMoreTime:
+      'Non è stato possibile aggiungere altro tempo. Vai subito al pagamento.',
+  seatsJustTaken: 'Uno o più posti sono stati appena presi. Scegli di nuovo.',
+  allSetTitle: 'È tutto pronto',
+  confirmedAndOnWay: 'confermato. La conferma è in arrivo.',
+  backToMap: 'Torna alla mappa',
+  mapDidNotLoad: 'La mappa dei posti non si è caricata',
+  checkConnection: 'Controlla la connessione e riprova.',
+  accessPausedTitle: 'Questi posti sono bloccati in questo momento',
+  accessPausedCopy:
+      'L\'organizzatore ha messo in pausa questa selezione. Riprova tra qualche minuto.',
+  accessRevokedTitle: 'Questo link di accesso non è più attivo',
+  accessRevokedCopy:
+      'Chiedi a chi ti ha mandato qui un nuovo link per continuare a prenotare questi posti.',
+  accessUnverifiedTitle: 'Non siamo riusciti a verificare il tuo accesso',
+  accessUnverifiedCopy:
+      'Puoi comunque prenotare tutto ciò che risulta disponibile. Contatta chi ti ha mandato qui per accedere al resto.',
+  generalAdmission: 'Ingresso libero',
+  numberOfGuests: 'Numero di ospiti',
+  chooseGuestsCopy:
+      'Scegli quanti ospiti siederanno insieme. Questo tavolo è riservato in esclusiva al tuo gruppo.',
+  fewerGuests: 'Meno ospiti',
+  moreGuests: 'Più ospiti',
+  selectTable: 'Seleziona il tavolo',
+  updateTable: 'Aggiorna il tavolo',
+  removeWord: 'Rimuovi',
   accessNeeds: <String, String>{
     'wheelchair': 'Spazio per sedia a rotelle',
     'companion': 'Posto per accompagnatore',
@@ -95,8 +199,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsIt = SeatLayerPickerStrings(
   addMinutes: _addMinutesIt,
   fromPrice: _fromPriceIt,
   sightline: _sightlineIt,
+  secureMoreAndCheckout: _secureMoreAndCheckoutIt,
+  accessFreeCount: _accessFreeCountIt,
+  seatJustTakenByAnother: _seatJustTakenByAnotherIt,
+  peekSecured: _peekSecuredIt,
   ticketCount: _ticketCountIt,
   findBestSeats: _findBestSeatsIt,
   reselectSeats: _reselectSeatsIt,
+  seatsFree: _seatsFreeIt,
+  seatsLeftInSection: _seatsLeftInSectionIt,
+  holdLapsedStillFree: _holdLapsedStillFreeIt,
+  holdLapsedSomeTaken: _holdLapsedSomeTakenIt,
+  holdLapsedAllTaken: _holdLapsedAllTakenIt,
   continueWithTotal: _continueWithTotalIt,
 );

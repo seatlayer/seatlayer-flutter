@@ -18,6 +18,16 @@ String _fromPriceCa(String money) => 'Des de $money';
 
 String _sightlineCa(String metres) => '≈ $metres m fins a l\'escenari';
 
+String _secureMoreAndCheckoutCa(int count) => 'Assegura\'n $count més i paga';
+
+String _accessFreeCountCa(int count) => '$count lliures';
+
+String _seatJustTakenByAnotherCa(String label) =>
+    'Un altre comprador acaba d\'agafar el seient $label.';
+
+String _peekSecuredCa(int count, String total) =>
+    '✓ $count assegurats · $total. Encara no et cobrarem';
+
 String _ticketCountCa(int count) =>
     count == 1 ? '$count entrada' : '$count entrades';
 
@@ -27,6 +37,24 @@ String _findBestSeatsCa(int count) => count == 1
 
 String _reselectSeatsCa(int count) =>
     count == 1 ? 'Tornar-la a seleccionar' : 'Tornar-les a seleccionar';
+
+String _seatsFreeCa(int count) =>
+    count == 1 ? '$count seient' : '$count seients';
+
+String _seatsLeftInSectionCa(int count) =>
+    count == 1 ? 'Queda $count seient' : 'Queden $count seients';
+
+String _holdLapsedStillFreeCa(int count) => count == 1
+    ? 'La teva reserva ha caducat mentre eres fora. Aquesta plaça encara és lliure.'
+    : 'La teva reserva ha caducat mentre eres fora. Aquestes places encara són lliures.';
+
+String _holdLapsedSomeTakenCa(int count) => count == 1
+    ? 'La teva reserva ha caducat mentre eres fora i $count d’aquestes places ja està ocupada. La resta encara són lliures.'
+    : 'La teva reserva ha caducat mentre eres fora i $count d’aquestes places ja estan ocupades. La resta encara són lliures.';
+
+String _holdLapsedAllTakenCa(int count) => count == 1
+    ? 'La teva reserva ha caducat mentre eres fora i aquesta plaça ja està ocupada.'
+    : 'La teva reserva ha caducat mentre eres fora i aquestes places ja estan ocupades.';
 
 String _continueWithTotalCa(String money) => 'Continua \u00b7 $money';
 
@@ -76,6 +104,83 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   obstructedView: 'Visibilitat obstruïda',
   premiumSeat: 'Seient prèmium',
   continueWord: 'Continua',
+  allFloors: 'Totes les plantes',
+  previousSection: 'Sector anterior',
+  nextSection: 'Sector següent',
+  addSeat: 'Afegeix seient',
+  added: 'Afegit',
+  sectionWord: 'Sector',
+  rowWord: 'Fila',
+  seatWord: 'Seient',
+  seeItIn3D: 'Mira-ho en 3D',
+  viewFromThisSeat: 'Vista des d\'aquest seient',
+  allPrices: 'Tots els preus',
+  ticketType: 'Tipus d’entrada',
+  tierCompanionGuidance: 'Requereix la plaça de cadira de rodes contigua',
+  findingBestSeats: 'Buscant els millors seients…',
+  findSeats: 'Busca seients',
+  expandCart: 'Obre el tauler d\'entrades',
+  collapseCart: 'Redueix el tauler d\'entrades',
+  continueToCheckout: 'Continua cap al pagament',
+  secureMore: 'Assegura\'n més',
+  selectSeats: 'Selecciona seients',
+  pickYourSeats: 'Tria els teus seients',
+  salesClosedPill: 'Venda tancada',
+  salesClosedCta: 'Venda tancada',
+  confirmOrCancelSeat: 'Confirma o cancel·la aquest seient',
+  securingSeats: 'Assegurant els teus seients…',
+  openingCheckout: 'Obrint el pagament segur…',
+  testModeExplained: 'Les reserves aquí no són reals i no es cobra cap targeta',
+  displayOptions: 'Opcions de visualització',
+  companionSeatsNote:
+      'Les places d’acompanyant del costat continuen sent seleccionables',
+  zoomIn: 'Amplia',
+  zoomOut: 'Redueix',
+  rotateVenue: 'Arrossega per girar el recinte',
+  moveVenue: 'Arrossega per moure el recinte',
+  mapView: 'Mapa',
+  flat2dMap: 'Mapa 2D pla',
+  interactive3dVenueView: 'Vista 3D interactiva del recinte',
+  venueView: 'Vista del recinte',
+  holdLapsedTitle: 'Els vostres seients s’han alliberat',
+  salesClosed: 'Venda tancada',
+  salesClosedCopy:
+      'La venda d\'entrades per a aquest esdeveniment ha finalitzat.',
+  salesClosedToast: 'La venda per a aquest esdeveniment està tancada.',
+  soldOutEyebrow: 'Aquest esdeveniment',
+  soldOutTitle: 'Esgotat',
+  soldOutCopy:
+      'Ara mateix no hi ha seients numerats disponibles per a aquest esdeveniment.',
+  holdExpired:
+      'La teva reserva ha caducat: els seients s\'han alliberat. Torna a triar.',
+  addingEllipsis: 'Afegint…',
+  moreTimeAdded:
+      'S\'ha afegit més temps: els teus seients continuen reservats.',
+  couldNotAddMoreTime: 'No s\'ha pogut afegir més temps: ves al pagament ara.',
+  seatsJustTaken: 'Un o més seients s\'acaben d\'ocupar. Torna a triar.',
+  allSetTitle: 'Ja ho tens tot a punt',
+  confirmedAndOnWay: 'confirmat. La confirmació ja està en camí.',
+  backToMap: 'Torna al mapa',
+  mapDidNotLoad: 'El mapa de seients no s\'ha carregat',
+  checkConnection: 'Comprova la connexió i torna-ho a provar.',
+  accessPausedTitle: 'Aquests seients estan bloquejats ara mateix',
+  accessPausedCopy:
+      'L\'organitzador ha pausat aquesta selecció. Torna-ho a provar d\'aquí a uns minuts.',
+  accessRevokedTitle: 'Aquest enllaç d\'accés ja no és actiu',
+  accessRevokedCopy:
+      'Demana un enllaç nou a qui te\'l va enviar per continuar reservant aquests seients.',
+  accessUnverifiedTitle: 'No hem pogut verificar el teu accés',
+  accessUnverifiedCopy:
+      'Encara pots comprar tot el que aparegui com a disponible. Contacta amb qui t\'ha enviat aquí per accedir a la resta.',
+  generalAdmission: 'Entrada general',
+  numberOfGuests: 'Nombre de convidats',
+  chooseGuestsCopy:
+      'Tria quants convidats seuran junts. Aquesta taula es reserva en exclusiva per al teu grup.',
+  fewerGuests: 'Menys convidats',
+  moreGuests: 'Més convidats',
+  selectTable: 'Selecciona la taula',
+  updateTable: 'Actualitza la taula',
+  removeWord: 'Treu',
   accessNeeds: <String, String>{
     'wheelchair': 'Espai per a cadira de rodes',
     'companion': 'Seient d’acompanyant',
@@ -95,8 +200,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   addMinutes: _addMinutesCa,
   fromPrice: _fromPriceCa,
   sightline: _sightlineCa,
+  secureMoreAndCheckout: _secureMoreAndCheckoutCa,
+  accessFreeCount: _accessFreeCountCa,
+  seatJustTakenByAnother: _seatJustTakenByAnotherCa,
+  peekSecured: _peekSecuredCa,
   ticketCount: _ticketCountCa,
   findBestSeats: _findBestSeatsCa,
   reselectSeats: _reselectSeatsCa,
+  seatsFree: _seatsFreeCa,
+  seatsLeftInSection: _seatsLeftInSectionCa,
+  holdLapsedStillFree: _holdLapsedStillFreeCa,
+  holdLapsedSomeTaken: _holdLapsedSomeTakenCa,
+  holdLapsedAllTaken: _holdLapsedAllTakenCa,
   continueWithTotal: _continueWithTotalCa,
 );

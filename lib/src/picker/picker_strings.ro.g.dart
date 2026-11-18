@@ -18,6 +18,16 @@ String _fromPriceRo(String money) => 'De la $money';
 
 String _sightlineRo(String metres) => '≈ $metres m până la scenă';
 
+String _secureMoreAndCheckoutRo(int count) => 'Asigură încă $count și plătește';
+
+String _accessFreeCountRo(int count) => '$count libere';
+
+String _seatJustTakenByAnotherRo(String label) =>
+    'Locul $label tocmai a fost luat de alt cumpărător.';
+
+String _peekSecuredRo(int count, String total) =>
+    '✓ $count asigurate · $total. Încă nu vei fi taxat';
+
 String _ticketCountRo(int count) =>
     count == 1 ? '$count bilet' : '$count de bilete';
 
@@ -27,6 +37,24 @@ String _findBestSeatsRo(int count) => count == 1
 
 String _reselectSeatsRo(int count) =>
     count == 1 ? 'Selectează-l din nou' : 'Selectează-le din nou';
+
+String _seatsFreeRo(int count) =>
+    count == 1 ? '$count loc' : '$count de locuri';
+
+String _seatsLeftInSectionRo(int count) =>
+    count == 1 ? 'A rămas $count loc' : 'Au rămas $count de locuri';
+
+String _holdLapsedStillFreeRo(int count) => count == 1
+    ? 'Rezervarea ta a expirat cât ai fost plecat. Locul este încă liber.'
+    : 'Rezervarea ta a expirat cât ai fost plecat. Locurile sunt încă libere.';
+
+String _holdLapsedSomeTakenRo(int count) => count == 1
+    ? 'Rezervarea ta a expirat cât ai fost plecat, iar $count dintre aceste locuri a fost deja ocupat. Restul sunt încă libere.'
+    : 'Rezervarea ta a expirat cât ai fost plecat, iar $count dintre aceste locuri au fost deja ocupate. Restul sunt încă libere.';
+
+String _holdLapsedAllTakenRo(int count) => count == 1
+    ? 'Rezervarea ta a expirat cât ai fost plecat, iar acest loc a fost deja ocupat.'
+    : 'Rezervarea ta a expirat cât ai fost plecat, iar aceste locuri au fost deja ocupate.';
 
 String _continueWithTotalRo(String money) => 'Continuă \u00b7 $money';
 
@@ -76,6 +104,83 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   obstructedView: 'Vizibilitate obstrucționată',
   premiumSeat: 'Loc premium',
   continueWord: 'Continuă',
+  allFloors: 'Toate etajele',
+  previousSection: 'Sectorul anterior',
+  nextSection: 'Sectorul următor',
+  addSeat: 'Adaugă loc',
+  added: 'Adăugat',
+  sectionWord: 'Sector',
+  rowWord: 'Rând',
+  seatWord: 'Loc',
+  seeItIn3D: 'Vezi în 3D',
+  viewFromThisSeat: 'Priveliștea de la acest loc',
+  allPrices: 'Toate prețurile',
+  ticketType: 'Tip de bilet',
+  tierCompanionGuidance: 'Necesită locul alăturat pentru scaun cu rotile',
+  findingBestSeats: 'Căutăm cele mai bune locuri…',
+  findSeats: 'Găsește locuri',
+  expandCart: 'Deschide panoul de bilete',
+  collapseCart: 'Restrânge panoul de bilete',
+  continueToCheckout: 'Continuă spre plată',
+  secureMore: 'Asigură mai multe',
+  selectSeats: 'Selectează locuri',
+  pickYourSeats: 'Alege-ți locurile',
+  salesClosedPill: 'Vânzările s-au închis',
+  salesClosedCta: 'Vânzările s-au închis',
+  confirmOrCancelSeat: 'Confirmă sau anulează acest loc',
+  securingSeats: 'Îți asigurăm locurile…',
+  openingCheckout: 'Deschidem plata securizată…',
+  testModeExplained:
+      'Rezervările de aici nu sunt reale și niciun card nu este taxat',
+  displayOptions: 'Opțiuni de afișare',
+  companionSeatsNote: 'Locurile alăturate pentru însoțitor rămân selectabile',
+  zoomIn: 'Mărește',
+  zoomOut: 'Micșorează',
+  rotateVenue: 'Trage pentru a roti locația',
+  moveVenue: 'Trage pentru a muta locația',
+  mapView: 'Hartă',
+  flat2dMap: 'Hartă 2D plată',
+  interactive3dVenueView: 'Vizualizare 3D interactivă a locației',
+  venueView: 'Vizualizarea locației',
+  holdLapsedTitle: 'Locurile tale au fost eliberate',
+  salesClosed: 'Vânzările s-au închis',
+  salesClosedCopy: 'Vânzarea biletelor pentru acest eveniment s-a încheiat.',
+  salesClosedToast: 'Vânzările pentru acest eveniment sunt închise.',
+  soldOutEyebrow: 'Acest eveniment',
+  soldOutTitle: 'Epuizat',
+  soldOutCopy:
+      'Momentan nu există locuri numerotate disponibile pentru acest eveniment.',
+  holdExpired:
+      'Rezervarea ta a expirat. Locurile au fost eliberate. Alege din nou.',
+  addingEllipsis: 'Se adaugă…',
+  moreTimeAdded:
+      'S-a adăugat timp. Locurile tale sunt în continuare rezervate.',
+  couldNotAddMoreTime: 'Nu am putut adăuga timp. Mergi acum la plată.',
+  seatsJustTaken:
+      'Unul sau mai multe locuri tocmai au fost luate. Alege din nou.',
+  allSetTitle: 'Totul e pregătit',
+  confirmedAndOnWay: 'confirmat. Confirmarea este pe drum.',
+  backToMap: 'Înapoi la hartă',
+  mapDidNotLoad: 'Harta locurilor nu s-a încărcat',
+  checkConnection: 'Verifică-ți conexiunea și încearcă din nou.',
+  accessPausedTitle: 'Aceste locuri sunt blocate momentan',
+  accessPausedCopy:
+      'Organizatorul a pus această selecție pe pauză. Încearcă din nou peste câteva minute.',
+  accessRevokedTitle: 'Acest link de acces nu mai este activ',
+  accessRevokedCopy:
+      'Cere un link nou persoanei care ți l-a trimis, ca să rezervi în continuare aceste locuri.',
+  accessUnverifiedTitle: 'Nu am putut verifica accesul tău',
+  accessUnverifiedCopy:
+      'Poți cumpăra în continuare tot ce apare ca disponibil. Contactează persoana care ți-a trimis linkul pentru acces la restul.',
+  generalAdmission: 'Acces general',
+  numberOfGuests: 'Numărul de invitați',
+  chooseGuestsCopy:
+      'Alege câți invitați stau împreună. Această masă este rezervată exclusiv pentru grupul tău.',
+  fewerGuests: 'Mai puțini invitați',
+  moreGuests: 'Mai mulți invitați',
+  selectTable: 'Selectează masa',
+  updateTable: 'Actualizează masa',
+  removeWord: 'Elimină',
   accessNeeds: <String, String>{
     'wheelchair': 'Spațiu pentru scaun cu rotile',
     'companion': 'Loc pentru însoțitor',
@@ -95,8 +200,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   addMinutes: _addMinutesRo,
   fromPrice: _fromPriceRo,
   sightline: _sightlineRo,
+  secureMoreAndCheckout: _secureMoreAndCheckoutRo,
+  accessFreeCount: _accessFreeCountRo,
+  seatJustTakenByAnother: _seatJustTakenByAnotherRo,
+  peekSecured: _peekSecuredRo,
   ticketCount: _ticketCountRo,
   findBestSeats: _findBestSeatsRo,
   reselectSeats: _reselectSeatsRo,
+  seatsFree: _seatsFreeRo,
+  seatsLeftInSection: _seatsLeftInSectionRo,
+  holdLapsedStillFree: _holdLapsedStillFreeRo,
+  holdLapsedSomeTaken: _holdLapsedSomeTakenRo,
+  holdLapsedAllTaken: _holdLapsedAllTakenRo,
   continueWithTotal: _continueWithTotalRo,
 );
