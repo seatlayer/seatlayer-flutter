@@ -69,15 +69,19 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
           children: <Widget>[
             _TestModeDot(color: theme.warning),
             const SizedBox(width: 7),
-            Text(
-              compact ? strings.testMode : strings.testModeLong,
-              style: TextStyle(
-                color: ink,
-                fontSize: SeatLayerSizeTokens.testChipFontSize,
-                fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
-                letterSpacing: SeatLayerSizeTokens.testChipFontSize * .01,
-                height: 1,
-                fontFamily: theme.fontFamily,
+            // The chip's [Semantics] carries the name once; the visible words
+            // stay out of the tree so a screen reader does not say them twice.
+            ExcludeSemantics(
+              child: Text(
+                compact ? strings.testMode : strings.testModeLong,
+                style: TextStyle(
+                  color: ink,
+                  fontSize: SeatLayerSizeTokens.testChipFontSize,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
+                  letterSpacing: SeatLayerSizeTokens.testChipFontSize * .01,
+                  height: 1,
+                  fontFamily: theme.fontFamily,
+                ),
               ),
             ),
           ],

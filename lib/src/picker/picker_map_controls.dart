@@ -630,11 +630,12 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
     final strings = SeatLayerPickerScope.stringsOf(context);
     final busy = controller.state.isBusy;
     Widget segment(SeatLayer3DNavigationMode mode, String label, String hint) {
-      final selected =
-          (mode == SeatLayer3DNavigationMode.move) == moving;
+      final selected = (mode == SeatLayer3DNavigationMode.move) == moving;
       return Semantics(
         button: true,
         selected: selected,
+        // A press while the picker is busy does nothing, so it is said so.
+        enabled: !busy,
         hint: hint,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -642,8 +643,10 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
               ? null
               : () => ignorePickerAction(controller.set3DNavigationMode(mode)),
           child: ConstrainedBox(
-            // The pair is drawn small, but each half keeps a full touch reach.
+            // The pair is drawn small, but each half keeps a full touch reach
+            // both ways, whatever its words measure.
             constraints: const BoxConstraints(
+              minWidth: SeatLayerSizeTokens.minimumHitTarget,
               minHeight: SeatLayerSizeTokens.minimumHitTarget,
             ),
             child: Center(
@@ -653,7 +656,11 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
                   context,
                   SeatLayerPickerMotion.crossfade,
                 ),
-                height: SeatLayerSizeTokens.immersiveModeSegmentHeight,
+                // At least the token tall, and taller with large text rather
+                // than clipping the label.
+                constraints: const BoxConstraints(
+                  minHeight: SeatLayerSizeTokens.immersiveModeSegmentHeight,
+                ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: SeatLayerSizeTokens.immersiveModeSegmentPaddingX,
                 ),
