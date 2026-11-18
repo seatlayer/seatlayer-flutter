@@ -1884,7 +1884,8 @@ Label ladder, in priority order:
    with no card up** and is simply disabled, and it offers no finder either.
    The card is the question; the footer says nothing about it, so the buyer's
    cart still reads as their cart underneath.
-4. securing → disabled, spinner, `strings.securingSeats`
+4. securing → disabled, **no spinner** (words only, as the design draws it),
+   `strings.securingSeats`; still busy, so the button stays down
 5. opening checkout → disabled, **no spinner** (words only; the seats are held),
    `strings.seatsSecuredOpeningCheckout`; still busy, so the button stays down
    (the hold has succeeded by now, so the sentence says so; `strings.openingCheckout`
