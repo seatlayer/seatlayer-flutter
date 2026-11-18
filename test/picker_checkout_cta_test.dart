@@ -246,6 +246,13 @@ void main() {
       );
     });
 
+    test('are the German sentence for an untouched German locale', () {
+      expect(
+        handoff(SeatLayerPickerStrings.forLocale(const Locale('de'))),
+        'Plätze gesichert. Checkout wird geöffnet…',
+      );
+    });
+
     test('leave the field itself as given', () {
       const strings = SeatLayerPickerStrings();
       expect(strings.openingCheckout, 'Opening secure checkout…');
