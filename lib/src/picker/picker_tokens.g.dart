@@ -795,6 +795,9 @@ abstract final class SeatLayerOpacityTokens {
   /// `0.18`
   static const double warnPillWash = 0.18;
 
+  /// `0.55`
+  static const double legendSoldOut = 0.55;
+
   /// `0.38`
   static const double confirmScrim = 0.38;
 

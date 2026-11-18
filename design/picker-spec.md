@@ -371,13 +371,19 @@ way. It is deliberately **not a chip**: it filters nothing, so it wears no
 pill, no hairline and no press target, and it is not a toggle to assistive
 technology.
 
-**Sold out.** A sold-out category keeps its chip, disabled and struck through —
-removing it would silently rewrite the price ladder the buyer was reading.
-An **absent** availability figure means *unknown*, never zero, and is never
-struck.
+**Sold out.** A sold-out category keeps its chip, struck through, at
+`opacity.legendSoldOut`, its dot in `color.*.mutedText` (the grey the map paints
+on a seat nobody can take) — removing it would silently rewrite the price ladder
+the buyer was reading. It **stays a toggle**: a tap switches the filter on and
+off like any other chip, so a buyer who pinned it can switch it off from the
+chip they switched it on with. Selected, it takes the accent ground at full
+strength and keeps the strike. Its accessible name ends with
+`strings.soldOutTitle`. Only a runtime that advertises
+`category-availability-v1` reports `free`, and only there is `free: 0` sold out:
+an **absent** figure means *unknown*, never zero, and is never struck.
 
-**States.** idle / selected / sold out / disabled; empty (the band is not
-drawn); over the immersive scene (not drawn).
+**States.** idle / selected / sold out (struck, still a toggle) / selected and
+sold out; empty (the band is not drawn); over the immersive scene (not drawn).
 
 **Motion.** On first reveal the chips stagger in on `motion.duration.stagger`
 between children, each on `motion.curve.easeEnter`. Filtering does not re-animate
@@ -389,9 +395,10 @@ a single group named for ticket prices.
 
 **Snapshot.** `categories[]` (`key`, `label`, `color`, `priceMin`, `priceMax`,
 `available`, `notForSale`), `map.categoryFilter`, `event.currency`. Live free
-counts are the runtime's `category-availability-v1` reporting; a count of zero is
-treated as *not reported* rather than as sold out, because a figure the buyer
-cannot trust is worse than no figure.
+counts are the runtime's `category-availability-v1` reporting, sent per category
+only once it is counted (`free`); `available`, which reads zero before counts
+arrive, is never taken as sold out, because a figure the buyer cannot trust is
+worse than no figure.
 
 **Command.** `picker.setCategoryFilter { keys, focus }` — the first press
 filters and drills in, the second clears.
@@ -2595,10 +2602,10 @@ credentials off the device. Capability `hold-ownership-v1`, and
 These are designed but cannot be built until the runtime reports the data. Do
 not fake them, and do not design around their absence as if it were permanent.
 
-- **Previous-price and sold-out chips on the price rail.** The web rail strikes
-  a previous price and keeps a sold-out category's chip disabled. Natively this
-  needs a per-category previous price and a trustworthy free count that
-  distinguishes *zero* from *not reported*; today a zero is read as unknown.
+- **Previous prices on the price rail.** The web rail strikes a previous
+  price. Natively this needs a per-category previous price, which the snapshot
+  does not carry. (The sold-out half is built: `free`, under
+  `category-availability-v1`, separates *zero* from *not reported*; §3.2.)
 - **Held versus pending counts for `Secure more`.** `strings.secureMoreAndCheckout`
   needs how many of the buyer's tickets are already held and how many are still
   pending. Until the split is reported the label falls back to

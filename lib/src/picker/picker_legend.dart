@@ -72,6 +72,12 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
     if (categories.isEmpty) return const SizedBox.shrink();
     final currency = state.snapshot?.currency ?? 'USD';
     final active = state.snapshot?.map.categoryFilter ?? const <String>{};
+    // A zero is believed only from a runtime that says it counts: without
+    // `category-availability-v1` an absent or zero figure means "not known
+    // yet", and striking a price the buyer can still book would lie.
+    final countsSeats = controller.mapController.bundleInfo
+            ?.supportsCapability('category-availability-v1') ==
+        true;
     final direction = Directionality.of(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final chipStyle =
@@ -102,6 +108,7 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
         }
         final category = categories[index];
         final selected = active.contains(category.key);
+        final soldOut = countsSeats && category.free == 0;
         // A spread cannot fit a chip, so it becomes a floor: "€30+" is honest
         // and short, and the exact range is one tap away in the list. A
         // category with no configured price is a real chart state, and a chip
@@ -121,10 +128,13 @@ class _SeatLayerPriceLegendState extends State<SeatLayerPriceLegend> {
                   : '${category.label} · $amount',
           color: pickerColor(category.color) ?? theme.accent,
           selected: selected,
+          soldOut: soldOut,
           compact: compact,
           theme: theme,
-          semanticsLabel:
-              amount == null ? category.label : '${category.label} — $amount',
+          semanticsLabel: <String>[
+            amount == null ? category.label : '${category.label} — $amount',
+            if (soldOut) strings.soldOutTitle,
+          ].join(', '),
           // `focus` on BOTH directions. Turning a band on flies to its seats;
           // turning it off is "show me everything" and must answer with the
           // whole venue. Clearing without focus left the buyer inside the
@@ -262,6 +272,7 @@ class _LegendChip extends StatelessWidget {
     required this.label,
     required this.color,
     required this.selected,
+    this.soldOut = false,
     required this.compact,
     required this.semanticsLabel,
     required this.theme,
@@ -274,6 +285,11 @@ class _LegendChip extends StatelessWidget {
   /// The category's colour, or null for a chip that names no category.
   final Color? color;
   final bool selected;
+
+  /// Every seat at this price is gone. The chip stays, struck through and
+  /// quieter, and stays a toggle: a buyer who pinned it must be able to
+  /// switch the filter off from the chip they switched it on with.
+  final bool soldOut;
   final bool compact;
   final String semanticsLabel;
   final SeatLayerResolvedPickerTheme theme;
@@ -293,7 +309,14 @@ class _LegendChip extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onPressed,
-        child: Center(child: _ink(context, chipStyle)),
+        child: Center(
+          child: soldOut && !selected
+              ? Opacity(
+                  opacity: SeatLayerOpacityTokens.legendSoldOut,
+                  child: _ink(context, chipStyle),
+                )
+              : _ink(context, chipStyle),
+        ),
       ),
     );
   }
@@ -332,7 +355,9 @@ class _LegendChip extends StatelessWidget {
               children: [
                 if (color != null) ...[
                   _CategoryDot(
-                    color: color!,
+                    // A sold-out price keys the grey the map paints on a seat
+                    // nobody can take, not a colour there is nothing left of.
+                    color: soldOut ? theme.mutedText : color!,
                     theme: theme,
                     selected: selected,
                     size: compact
@@ -346,6 +371,8 @@ class _LegendChip extends StatelessWidget {
                     label,
                     style: TextStyle(
                       color: selected ? theme.onAccent : theme.text,
+                      decoration: soldOut ? TextDecoration.lineThrough : null,
+                      decorationColor: selected ? theme.onAccent : theme.text,
                       fontSize: compact ? theme.layout.legendChipFontSize : 12,
                       // The way out is the one chip that is a word rather than
                       // a number, so it is set a little lighter than the

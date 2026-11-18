@@ -12,6 +12,7 @@
 - **No English typed into the picker:** the wide seat card, the floor picker, the compact total, the error banner, the Map/3D and colour-blind controls and the attribution read `SeatLayerPickerStrings`. New fields: `orbitMode`, `panMode`, `showSeatsFor`, `dismissError`, `backToSeatMap`, `openInteractive3dVenue`, `floorWord`, `totalWord`, `ticketWord`. The wide seat card's button says "Add seat" for a seat, as the phone card does.
 - **Counted sentences in every language's own grammar:** Russian says "Осталось 5 мест" and "Осталось 21 место", and Arabic, Polish, Czech, Lithuanian, Welsh and the rest take every plural form the runtime has, chosen by the locale's own rule for the count.
 - **One English wording:** a few English defaults now say exactly what the runtime says ("More time added. Your seats are still held.", "Drag to rotate the venue", curly apostrophes).
+- **Sold-out prices:** a price with no seats left stays on the price rail, struck through and greyed, and is still a toggle, so a buyer who pinned it can switch the filter off. Only a runtime that counts seats per category is believed at zero.
 
 ## 0.12.0 (2026-09-25)
 
