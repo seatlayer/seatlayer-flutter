@@ -106,12 +106,14 @@ right-to-left locale.
 Header   brand · name over "date · venue" · sales-closed pill · hold pill · close
 ┌ map surface ──────────────────────────┐┌ panel ───────────────────────┐
 │ top-start  test chip                   ││ strings.ticketPrices heading │
-│ top-end    control column, top down:   ││ price legend                 │
-│              Venue (section framed)    ││ floor strip (multi-floor)    │
-│              Map | 3D · Rotate / Move  ││ strings.yourSeats heading    │
-│              ♿ · + · −                 ││ best-seats card              │
-│ bottom-start floor selector            ││ cart list (scrolls)          │
-│ seat card / prompts / status overlays  ││ action error · checkout bar  │
+│ seat card / prompts / status overlays  ││ price list (named rows)      │
+│ bottom-start floor selector            ││ floor strip (multi-floor)    │
+│ bottom-end control column, top down:   ││ strings.yourSeats heading    │
+│              Venue (section framed)    ││ best-seats card              │
+│              Map | 3D · Rotate / Move  ││ cart list (scrolls)          │
+│              ♿ · + · −                 ││ action error                 │
+│                                        ││ summary line                 │
+│                                        ││ full-width checkout button   │
 └────────────────────────────────────────┘│ Powered by SeatLayer         │
                                           └──────────────────────────────┘
 ```
@@ -125,7 +127,24 @@ Header   brand · name over "date · venue" · sales-closed pill · hold pill ·
   `size.widePanelHeadingPadBottom` below, start-aligned. **Drawn as given**: no
   port upper-cases them in code, which breaks Turkish. Each is exposed to
   assistive technology as a heading.
-- **The credit closes the panel**, under the checkout bar, end-aligned. The
+- **The control column stands at the map's bottom end**, `size.mapAnchorInset`
+  from both edges, and grows upward: the way back joins its top, so nothing
+  below it moves.
+- **The prices are a list**, one row per for-sale category (§3.2, wide).
+- **The foot is the phone sheet's foot**: the summary line —
+  `strings.noSeatsSelected`, or `strings.ticketCount(n)` with the total at the
+  end — `size.footTotalGap` over one full-width button at
+  `size.checkoutButtonHeight`, padded `size.widePanelPadX` at the sides, 8
+  above and 12 below. The button follows the checkout button's label ladder
+  (§3.10) with
+  `strings.holdAndCheckout` as its label, and `strings.continueToCheckout` once
+  the seats are held. With an empty cart it reads `strings.findBestSeatsCta`
+  and is **off** — the best-seats card above it is the way to seats — but only
+  where that card can exist, the gate the phone's button uses
+  (`enableBestAvailable` and not `readOnly`); otherwise it reads
+  `strings.selectSeats`, off. The state comes from the ladder's own
+  find-best-seats flag, never from comparing label text.
+- **The credit closes the panel**, under the checkout button, end-aligned. The
   bottom safe inset is taken once, under the credit, not between the button and
   the credit.
 - **The header's second line** is `event.startsAtLabel` and `event.venue`,
@@ -362,6 +381,24 @@ beneath. It is not floated over the map: on a busy chart the seat numbers read
 through the gaps, and the last chip clipped under the Map/3D control. Inside it,
 one horizontally scrolling row of chips, indented by the rail's own 10 pt of
 horizontal margin (12 on wide).
+
+**On the wide composition the prices are a list, not a rail.** The panel has
+the room to name every price, so under the `strings.ticketPrices` heading each
+for-sale category is a row: a disc of its colour at `size.widePriceDotSize`,
+`size.widePriceDotGap`, its name (`size.widePriceFontSize`, w600, one line,
+ellipsized, flexible), `size.widePriceDotGap`, and its price at the end
+(`size.widePriceFontSize`, w800, tabular figures; a spread is written as its
+floor with `+`, as on a chip). Rows are at least `size.widePriceRowHeight`
+tall, padded `size.widePriceRowPadX`, so the words line up with the headings at
+`size.widePanelPadX`. A row is the chip's toggle: pressed, the map shows only
+that category (with focus); pressed again, everything. The selected row takes
+the accent at 9 per cent behind it, at `radius.control`, and its words in the
+accent's readable ink. A sold-out price is struck through, its words in
+`color.*.mutedText`, its disc at `opacity.legendSoldOut`, and it stays a toggle.
+The list scrolls inside `size.widePriceListMaxHeight`, so a long one never
+pushes the buyer's seats out of the panel. The phone's grey "not available"
+key is not part of the list. Accessible name: the chip's (name — price, and
+`strings.soldOutTitle` when sold out), as a button with its selected state.
 
 The band takes the **map chrome's** palette, so it darkens with the 3D scene,
 and it is not drawn at all while the immersive scene is up.
@@ -632,7 +669,8 @@ beside the sheet asking about a seat reads as clutter, and none of them may be
 pressed while it asks. It fades — it is not unmounted — so nothing else on the
 map moves.
 
-**The wide composition's column**, top to bottom: the way back to the venue
+**The wide composition's column** stands at the map's bottom end and grows
+upward. Top to bottom: the way back to the venue
 while a section is framed, the Map | 3D control, the 3D Rotate / Move pair while
 the scene is up, the same ♿ disc, then `+` and `−`. The way back joins the top
 and leaves again, so it never moves a control below it. The standalone
@@ -699,8 +737,13 @@ from the column, towards the map, so it mirrors in a right-to-left locale — it
 top level with the control's top; where that would run off the foot it is
 level with the control's bottom instead, and it is always held
 `size.accessPopoverMargin` inside the safe area. There is no scrim. It is modal:
-a tap outside, the system back gesture or Escape closes it with nothing, a
-pressed count closes it and starts the walk, exactly as on the sheet. It fades
+a tap outside, the system back gesture or Escape closes it with nothing (a tap
+outside never reaches the map), a pressed count closes it and starts the walk,
+exactly as on the sheet, and focus returns to the control. It is announced as
+a dialog (`SemanticsRole.dialog`, naming its route with
+`strings.accessibilityTitle`). It closes itself when the window changes size
+while it is open — a rotation or a split-screen resize moves the control, or
+takes the wide layout away — rather than pointing at where the control was. It fades
 in over `motion.duration.pop`, and appears at once under reduced motion. The
 phone keeps the bottom sheet.
 

@@ -134,12 +134,13 @@ right in Arabic):
 Header   name over "date · venue"        sales-closed pill · HoldPill · close
 ┌ map surface ──────────────────────────┐┌ panel ───────────────────────┐
 │ TestModeBadge (top-start)              ││ "Ticket prices"   heading    │
-│ control column (top-end), top down:    ││ PriceLegend                  │
-│   Venue (only while a section is up)   ││ FloorStrip (multi-floor)     │
-│   ViewModeControl · 3D Rotate / Move   ││ "Your seats"      heading    │
-│   accessibility · `+` · `−`            ││ best-seats card              │
-│ floor selector (bottom-start)          ││ CartList (scrolls)           │
-│ seat card / prompts / status overlay   ││ checkout bar                 │
+│ seat card / prompts / status overlay   ││ price list (named rows)      │
+│ floor selector (bottom-start)          ││ FloorStrip (multi-floor)     │
+│ control column (bottom-end), top down: ││ "Your seats"      heading    │
+│   Venue (only while a section is up)   ││ best-seats card              │
+│   ViewModeControl · 3D Rotate / Move   ││ CartList (scrolls)           │
+│   accessibility · `+` · `−`            ││ summary line                 │
+│                                        ││ full-width checkout button   │
 └────────────────────────────────────────┘│ Powered by SeatLayer         │
                                           └──────────────────────────────┘
 ```
@@ -153,6 +154,17 @@ picker is still loading. `size.widePanelHeadingFontSize` at w700 in
 "Your seats") and `size.widePanelHeadingPadBottom` below. Drawn as given (never upper-cased in code) and exposed as headings to
 screen readers. The credit closes the panel, under the checkout bar, and the
 device's bottom inset is taken once, under the credit.
+
+**Wide price list** (`SeatLayerWidePriceList`, `picker_price_list.dart`, not
+exported): one row per for-sale category — colour disc, name, price at the end
+— each a filter toggle like a chip, sold out struck through and still a toggle,
+scrolling inside `size.widePriceListMaxHeight`. **Wide checkout foot**
+(`SeatLayerWideCheckoutFoot`): the cart foot's summary line over one
+full-width button on the checkout ladder; with an empty cart it reads
+`strings.findBestSeatsCta`, off, where a best-seats card can exist
+(`enableBestAvailable`, not `readOnly`), and `strings.selectSeats`, off,
+elsewhere. `SeatLayerPickerCheckoutBar` stays public but
+is no longer the drop-in layout's default.
 
 **Wide panel while loading** (`SeatLayerWidePanelLoading`, same file): until the
 first snapshot, the prices heading over three `color.*.divider` bars (70, 55,
@@ -735,7 +747,7 @@ specification. Names, slots and files:
 | `SeatLayerPickerExtendHoldPrompt` | one named `+5 min` step, once per hold, dismissable; **phone: off by default**, host opt-in via `SeatLayerPickerChromeOptions(showExtendHoldPrompt: true)`; wide keeps it | §3.13.8 |
 | `SeatLayerPickerBookedOverlay` | — | §3.13.10 |
 | `SeatLayerPickerGeneralAdmissionPrompt` / `…TablePrompt` | — | §3.13.11–12 |
-| `SeatLayerPickerAccessibilityFilters` | — | §3.5, §4.10 — in the map's control column, above `+`, on both widths; switches apply on change, no apply step, the sheet stays open; opening it clears a pending seat card; the sheet is bounded to `size.accessSheetMaxHeightFraction` (floor `size.accessSheetMinHeight`) and scrolls inside it. In the wide column the same content opens as a popover beside the control (`picker_accessibility_popover.dart`): `size.accessPopoverWidth` wide, on its start side `size.accessPopoverGap` away, top-aligned with it, no scrim, closed by a tap outside, Back or Escape. Rows are a FIXED 50 high, closed by a hairline of `color.*.divider` at 35 per cent, and read **icon cell (`size.accessRowIconCell`) · `size.accessRowGap` · label (flexible, ellipsized) · ⓘ in a 36 column where the row has a note · count in a 68 column · `size.accessRowSwitchGap` · drawn switch**. The whole line toggles. The count is `N free` on a quiet ground of `color.*.text` at 6 per cent, tappable to jump where the runtime supports it; a sold-out provision stays, named and disabled, reading `0`. The two map switches (hide limited view, colourblind-friendly) come first; the provisions follow under a `strings.showSeatsFor` heading, drawn as given (written in capitals, never upper-cased in code); the labelled form (`compact: false`) reads `strings.activeFilters(n)` while filters are on |
+| `SeatLayerPickerAccessibilityFilters` | — | §3.5, §4.10 — in the map's control column, above `+`, on both widths; switches apply on change, no apply step, the sheet stays open; opening it clears a pending seat card; the sheet is bounded to `size.accessSheetMaxHeightFraction` (floor `size.accessSheetMinHeight`) and scrolls inside it. In the wide column the same content opens as a popover beside the control (`picker_accessibility_popover.dart`): `size.accessPopoverWidth` wide, on its start side `size.accessPopoverGap` away, top-aligned with it, no scrim, closed by a tap outside (which never reaches the map), Back or Escape, focus back on the control; announced as a dialog; it closes itself if the window changes size while open. Rows are a FIXED 50 high, closed by a hairline of `color.*.divider` at 35 per cent, and read **icon cell (`size.accessRowIconCell`) · `size.accessRowGap` · label (flexible, ellipsized) · ⓘ in a 36 column where the row has a note · count in a 68 column · `size.accessRowSwitchGap` · drawn switch**. The whole line toggles. The count is `N free` on a quiet ground of `color.*.text` at 6 per cent, tappable to jump where the runtime supports it; a sold-out provision stays, named and disabled, reading `0`. The two map switches (hide limited view, colourblind-friendly) come first; the provisions follow under a `strings.showSeatsFor` heading, drawn as given (written in capitals, never upper-cased in code); the labelled form (`compact: false`) reads `strings.activeFilters(n)` while filters are on |
 | `SeatLayerPickerAccessibleStepper` | — | §3.4.1 |
 | `SeatLayerSeatViewChrome` | `seatViewChromeStyle` | §3.15 |
 | `SeatLayerPickerAttribution` | — | §3.10.3 |

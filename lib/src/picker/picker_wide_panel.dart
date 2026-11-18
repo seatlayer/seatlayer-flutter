@@ -9,8 +9,14 @@ library;
 import 'package:flutter/material.dart';
 
 import 'picker_a11y.dart';
+import 'picker_cart_sheet.dart';
+import 'picker_checkout_cta.dart';
+import 'picker_internal.dart';
 import 'picker_motion.dart';
+import 'picker_options.dart';
+import 'picker_styles.dart';
 import 'picker_tokens.g.dart';
+import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
 /// A heading in the wide panel — "Ticket prices", "Your seats".
@@ -244,6 +250,89 @@ class _SeatLayerWidePanelLoadingState extends State<SeatLayerWidePanelLoading>
           ),
         ),
       ],
+    );
+  }
+}
+
+/// The wide panel's checkout: the summary line over one full-width button.
+///
+/// The phone sheet's foot, standing in the panel: "No seats selected", or the
+/// count and the total, and under it the one button that holds the seats and
+/// hands them to checkout. With an empty cart, where the panel has a
+/// best-seats card, the button names the way to seats — "Find best seats" —
+/// but is drawn off: the card above it is the door, and a second live copy of
+/// it here would be the same question asked twice. Where there is no card
+/// (best seats switched off, or a read-only picker) it says "Select seats",
+/// as the phone's button does.
+class SeatLayerWideCheckoutFoot extends StatelessWidget {
+  /// Creates the wide checkout foot.
+  const SeatLayerWideCheckoutFoot({super.key, required this.onCheckout});
+
+  /// Receives the hold once the runtime has created it.
+  final SeatLayerCheckoutCallback onCheckout;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = SeatLayerPickerScope.controllerOf(context);
+    final options = SeatLayerPickerScope.optionsOf(context);
+    final theme = seatLayerPickerThemeOf(context);
+    return Material(
+      color: theme.surface,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            SeatLayerSizeTokens.widePanelPadX,
+            8,
+            SeatLayerSizeTokens.widePanelPadX,
+            12,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              const SeatLayerWideTotalLine(),
+              const SizedBox(height: SeatLayerSizeTokens.footTotalGap),
+              SeatLayerCheckoutCta(
+                label: (context) =>
+                    SeatLayerPickerScope.stringsOf(context).holdAndCheckout,
+                ticketCount: controller.confirmedTicketCount,
+                // The gate the phone's button uses: the way to seats is
+                // offered only where the best-seats card can exist.
+                canOfferFind: options.enableBestAvailable && !options.readOnly,
+                onPressed: () => checkoutThroughHost(controller, onCheckout),
+                builder: (context, cta, onPressed) {
+                  return FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: theme.accent,
+                      foregroundColor: theme.onAccent,
+                      disabledBackgroundColor: pickerAlpha(theme.text, .08),
+                      disabledForegroundColor: pickerAlpha(theme.text, .55),
+                      minimumSize:
+                          Size.fromHeight(theme.layout.checkoutButtonHeight),
+                      textStyle: TextStyle(
+                        fontSize: 14,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w800),
+                        fontFamily: theme.fontFamily,
+                      ),
+                    )
+                        .merge(theme.styles.resolvedContinueButtonStyle)
+                        .merge(seatLayerButtonShape(theme.buttonRadius)),
+                    // Offered by the ladder, drawn off: the card above is the
+                    // live way to seats.
+                    onPressed: cta.findsBestSeats ? null : onPressed,
+                    child: SeatLayerCheckoutCtaLabel(
+                      cta: cta,
+                      color: theme.onAccent,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

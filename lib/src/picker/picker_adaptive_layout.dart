@@ -25,6 +25,7 @@ import 'picker_header.dart';
 import 'picker_legend.dart';
 import 'picker_map_controls.dart';
 import 'picker_venue_3d.dart';
+import 'picker_price_list.dart';
 import 'picker_wide_panel.dart';
 import 'picker_dock_bar.dart';
 import 'picker_floor_strip.dart';
@@ -268,7 +269,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                 context,
                 widget.builders.legend ?? widget.builders.priceRail,
                 chrome.showPriceRail
-                    ? SeatLayerPriceLegend(compact: !wide)
+                    ? (wide
+                        ? const SeatLayerWidePriceList()
+                        : const SeatLayerPriceLegend(compact: true))
                     : const SizedBox.shrink(),
               );
         // The panel names the prices only while there are prices under it.
@@ -326,7 +329,7 @@ class _SeatLayerPickerAdaptiveLayoutState
           context,
           widget.builders.checkoutBar,
           wide
-              ? SeatLayerPickerCheckoutBar(onCheckout: widget.onCheckout)
+              ? SeatLayerWideCheckoutFoot(onCheckout: widget.onCheckout)
               : SeatLayerBookButton(onCheckout: widget.onCheckout),
         );
         final sheet = _part(
@@ -613,8 +616,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                                 start: _mapInset,
                                 child:
                                     SeatLayerMapChromeRegion(child: testBadge)),
+                            // The column stands at the map's bottom end.
                             PositionedDirectional(
-                                top: _mapInset,
+                                bottom: _mapInset,
                                 end: _mapInset,
                                 child:
                                     SeatLayerMapChromeRegion(child: controls)),

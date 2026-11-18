@@ -13,7 +13,6 @@ import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
-import 'package:seatlayer/src/picker/picker_status_views.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_venue_3d.dart';
@@ -121,7 +120,7 @@ void main() {
         expect(find.byType(SeatLayerWidePanelLoading), findsOneWidget);
         expect(find.text('Ticket prices'), findsOneWidget);
         expect(find.text('Your seats'), findsNothing);
-        expect(find.byType(SeatLayerPickerCheckoutBar), findsNothing);
+        expect(find.byType(SeatLayerWideCheckoutFoot), findsNothing);
         final theme = seatLayerPickerThemeOf(
           tester.element(find.byType(SeatLayerWidePanelLoading)),
         );
@@ -168,7 +167,7 @@ void main() {
 
       expect(find.byType(SeatLayerWidePanelLoading), findsNothing);
       expect(find.text('Your seats'), findsOneWidget);
-      expect(find.byType(SeatLayerPickerCheckoutBar), findsOneWidget);
+      expect(find.byType(SeatLayerWideCheckoutFoot), findsOneWidget);
     });
 
     testWidgets('breathes with the venue outline', (tester) async {
