@@ -56,6 +56,14 @@ Future<FakePickerMap> _mount(
 double _centreX(WidgetTester tester, Finder finder) =>
     tester.getCenter(finder.first).dx;
 
+/// Whether [icon] is drawn flipped about its vertical axis, the way [Icon]
+/// draws a glyph that follows reading direction in a right-to-left context.
+bool _mirrored(WidgetTester tester, Finder icon) => tester
+    .widgetList<Transform>(
+      find.descendant(of: icon, matching: find.byType(Transform)),
+    )
+    .any((transform) => transform.transform.storage[0] < 0);
+
 void main() {
   final half = phoneSize.width / 2;
 
@@ -84,6 +92,44 @@ void main() {
       await _mount(tester, direction, const SeatLayerVenue3D(), snapshot);
       final pair = _centreX(tester, find.text('Rotate venue'));
       expect(pair > half, !rtl, reason: 'Rotate venue at x=$pair');
+    });
+
+    testWidgets('the 3D back pill points to the start edge in ${direction.name}',
+        (tester) async {
+      final snapshot = snapshotWithTicketCount(1, revision: 3);
+      final seat = ((snapshot['selection']! as Map<String, Object?>)['seats']!
+              as List<Object?>)
+          .first! as Map<String, Object?>;
+      final map = snapshot['map']! as Map<String, Object?>;
+      map['buyerView'] = 'venue3d';
+      map['view3dTargetSeatId'] = seat['id'];
+      map['view3dTargetSeat'] = seat;
+      await _mount(tester, direction, const SeatLayerVenue3D(), snapshot);
+      final label = find.text('Back to venue');
+      expect(label, findsOneWidget);
+      final pill = _centreX(tester, label);
+      expect(pill < half, !rtl, reason: 'back pill at x=$pill');
+      final chevron = find.descendant(
+        of: find.ancestor(of: label, matching: find.byType(Row)).first,
+        matching: find.byIcon(Icons.chevron_left_rounded),
+      );
+      expect(chevron, findsOneWidget);
+      // "Back" points at the edge the pill stands on: left in LTR, right in
+      // RTL, where the glyph is drawn mirrored.
+      expect(_mirrored(tester, chevron), rtl);
+    });
+
+    testWidgets('the way-back control points to the start edge in '
+        '${direction.name}', (tester) async {
+      await _mount(
+        tester,
+        direction,
+        const Center(child: SeatLayerPickerOverviewButton()),
+        pickerSnapshot(withSelection: false),
+      );
+      final arrow = find.byIcon(Icons.arrow_back_rounded);
+      expect(arrow, findsOneWidget);
+      expect(_mirrored(tester, arrow), rtl);
     });
   }
 }
