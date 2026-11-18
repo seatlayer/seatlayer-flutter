@@ -251,6 +251,9 @@ class SeatLayerPickerStrings {
           : 'zh-Hans';
     }
     yield language;
+    // Norwegian Bokmål devices report `nb`; the runtime's Norwegian
+    // dictionary is Bokmål, filed under the macrolanguage `no`.
+    if (language == 'nb') yield 'no';
   }
 
   /// Tooltip on the header's dismiss control.

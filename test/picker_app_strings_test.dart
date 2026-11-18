@@ -193,4 +193,21 @@ void main() {
   test('no locale has a filters sentence yet, so all draw English', () {
     expect(_strings('de').activeFilters(2), '2 filters');
   });
+
+  test('Norwegian Bokmål devices get the Norwegian strings', () {
+    final norwegian = SeatLayerPickerStrings.forLocale(const Locale('no'));
+    expect(norwegian.sectionWord,
+        isNot(const SeatLayerPickerStrings().sectionWord));
+    expect(
+        norwegian.orbitMode, isNot(const SeatLayerPickerStrings().orbitMode));
+    for (final locale in <Locale>[
+      const Locale('nb'),
+      const Locale('nb', 'NO')
+    ]) {
+      final strings = SeatLayerPickerStrings.forLocale(locale);
+      // One shared runtime string and one app string.
+      expect(strings.sectionWord, norwegian.sectionWord, reason: '$locale');
+      expect(strings.orbitMode, norwegian.orbitMode, reason: '$locale');
+    }
+  });
 }
