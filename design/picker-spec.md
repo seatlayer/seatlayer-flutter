@@ -468,6 +468,8 @@ amber as the floor allows rather than driving to maximum contrast.
 explainer toast (§3.12): through the one toast queue, announced once, gone after
 `motion.durationOutsideBudget.toastDwell` or on a tap on the toast. Nothing else
 reacts to the tap. The chip is exposed as a button named `strings.testModeLong`.
+A layout composed without `SeatLayerPickerToastLayer` has no band to show it
+on, so there the tap shows the same sentence as a tooltip under the chip.
 
 **Placement.** The map's top-left corner in both 2D and 3D, at
 `size.mapAnchorInset`. It steps down by the back pill's height plus
@@ -1882,7 +1884,8 @@ Label ladder, in priority order:
    with no card up** and is simply disabled, and it offers no finder either.
    The card is the question; the footer says nothing about it, so the buyer's
    cart still reads as their cart underneath.
-4. securing → disabled, spinner, `strings.securingSeats`
+4. securing → disabled, **no spinner** (words only, as the design draws it),
+   `strings.securingSeats`; still busy, so the button stays down
 5. opening checkout → disabled, **no spinner** (words only; the seats are held),
    `strings.seatsSecuredOpeningCheckout`; still busy, so the button stays down
    (the hold has succeeded by now, so the sentence says so; `strings.openingCheckout`

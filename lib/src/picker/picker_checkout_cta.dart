@@ -42,8 +42,9 @@ class SeatLayerCheckoutCtaState {
   final bool enabled;
 
   /// Whether something the buyer already asked for is in flight, so the
-  /// button stays down. While the hold is being created it also carries a
-  /// spinner beside [label].
+  /// button stays down. The picker's own readings say so in words alone;
+  /// [SeatLayerCheckoutCtaLabel] draws a spinner only beside a busy reading a
+  /// host built itself.
   ///
   /// Only ever true while something the buyer already asked for is in flight —
   /// the hold being created, or the host's checkout opening.
@@ -127,7 +128,7 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
       pendingCount: pendingCount,
       canOfferFind: canOfferFind,
     );
-    if (under is _HandoffCtaState) return under;
+    if (under is _BusyInWordsCtaState) return under;
     return SeatLayerCheckoutCtaState(
       label: under.label,
       enabled: false,
@@ -145,13 +146,15 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
   //    the button stays down through it: a second press buys nothing and
   //    reads as a failure.
   if (state.busyAction == SeatLayerPickerBusyAction.creatingHold) {
-    return reason(strings.securingSeats, busy: true);
+    // Words alone, like the handoff below: the sentence already says the
+    // seats are being secured, and the button stays down while it does.
+    return _BusyInWordsCtaState(label: strings.securingSeats);
   }
   if (handoffInFlight) {
     // The seats are already held, so there is nothing left to wait on but
     // the host: the words say so, and a spinner beside them would say the
     // opposite. Still busy, so the button stays down until the host answers.
-    return _HandoffCtaState(label: strings.seatsSecuredOpeningCheckout);
+    return _BusyInWordsCtaState(label: strings.seatsSecuredOpeningCheckout);
   }
 
   // 5. A selection the event's own rules reject. Say what would fix it where
@@ -306,17 +309,18 @@ class _SeatLayerCheckoutCtaState extends State<SeatLayerCheckoutCta> {
   }
 }
 
-/// The checkout opening on seats that are already secured: busy, in words
-/// alone.
-class _HandoffCtaState extends SeatLayerCheckoutCtaState {
-  const _HandoffCtaState({required super.label})
+/// Work the buyer already asked for — the hold being secured, then the
+/// checkout opening on it: busy, in words alone.
+class _BusyInWordsCtaState extends SeatLayerCheckoutCtaState {
+  const _BusyInWordsCtaState({required super.label})
       : super(enabled: false, busy: true, statesReason: true);
 }
 
-/// The label, with a spinner beside it while the hold is being created.
+/// The label of a resolved call to action.
 ///
-/// Shared so the three buttons narrate a hold the same way. The spinner takes
-/// the button's own foreground colour, and the label ellipsizes rather than
+/// Shared so the three buttons narrate a hold the same way. The picker's own
+/// busy readings are words alone; a busy reading a host built itself keeps a
+/// spinner beside its label, in the button's own foreground colour, and the label ellipsizes rather than
 /// wrapping: a reason is longer than "Continue", and a call to action that
 /// grows a second line moves everything under it.
 class SeatLayerCheckoutCtaLabel extends StatelessWidget {
@@ -341,7 +345,7 @@ class SeatLayerCheckoutCtaLabel extends StatelessWidget {
       softWrap: false,
       overflow: TextOverflow.ellipsis,
     );
-    if (!cta.busy || cta is _HandoffCtaState) return text;
+    if (!cta.busy || cta is _BusyInWordsCtaState) return text;
     // A row lays its non-flexible children out with an unbounded main axis, so
     // the ellipsis above never fires inside one: `Seats secured. Opening checkout…`
     // beside a spinner overran the sheet's own book button by 46 points for as
