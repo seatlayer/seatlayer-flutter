@@ -43,42 +43,6 @@ More from SeatLayer:
 [SeatLayer React Native SDK](https://github.com/seatlayer/seatlayer-react-native) ·
 [SeatLayer AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
 
-## Scale evidence
-
-Benchmarked on public 100,000-, 150,000- and 200,000-seat venue fixtures on 15 September 2026: 200,000 seats chart-ready in 1.95 s, desktop, local production build. Tested at 10,000 simulated concurrent buyers on one 12,000-seat event (18 September 2026): engine-side hold latency p99 9 ms, zero server errors. Method, fixtures and run files: https://github.com/seatlayer/seatlayer-performance. Live 200,000-seat stadium demo: https://app.seatlayer.io/demo/play/century-stadium-200k.
-
-## Works as a native picker
-
-**Every piece of chrome is a Flutter widget.** The header, price rail, floor strip, section dock, seat confirm card,
-cart sheet, checkout button and the captions over the 3D scene and the seat-view
-panorama are all Dart: drawn in your palette, laid out by Flutter, replaceable
-one at a time. The seat map itself (seats, labels, sections, the 3D scene and
-the view from a seat) is the SeatLayer map from the web, shown inside your app.
-It leaves the tooltip, test badge and buttons to your Flutter widgets, so
-nothing is drawn twice.
-
-Three ways in, and they are a ladder: each level keeps what the one below gave
-you. Level 2 is not an escape hatch and level 3 is not a rewrite: the drop-in is
-built from exactly the widgets level 3 hands you.
-
-| | You want | You write | You keep |
-| --- | --- | --- | --- |
-| **1** | The whole buyer flow, now | `SeatLayerPicker(…)` | Everything below |
-| **2** | It, in your brand and your words | A theme, a style slot, an option, a builder | The layout, the flow, the holds |
-| **3** | Your own screen | `SeatLayerPickerScope` + the widgets | Inventory, holds, snapshots, checkout |
-
-```mermaid
-flowchart TD
-  A["SeatLayerConfiguration<br/>event + publishable key"] --> B{"How much<br/>do you own?"}
-  B -->|"Nothing"| C["SeatLayerPicker"]
-  B -->|"The look"| D["theme · style slots<br/>options · builders"]
-  B -->|"The screen"| E["SeatLayerPickerScope<br/>+ the widgets"]
-  C --> F["onCheckout(handoff)"]
-  D --> F
-  E --> F
-  F --> G["Your backend inspects<br/>and books the hold"]
-```
-
 ## Quick start
 
 ```bash
@@ -185,6 +149,38 @@ availability inside the runtime, and that answer is always applied: the
 runtime has already released a hold that ran out, so discarding what it reports
 would leave the buyer with an emptied cart and no explanation. Use
 `announceHoldLapse: false` when what you want is silence.
+
+## Works as a native picker
+
+**Every piece of chrome is a Flutter widget.** The header, price rail, floor strip, section dock, seat confirm card,
+cart sheet, checkout button and the captions over the 3D scene and the seat-view
+panorama are all Dart: drawn in your palette, laid out by Flutter, replaceable
+one at a time. The seat map itself (seats, labels, sections, the 3D scene and
+the view from a seat) is the SeatLayer map from the web, shown inside your app.
+It leaves the tooltip, test badge and buttons to your Flutter widgets, so
+nothing is drawn twice.
+
+Three ways in, and they are a ladder: each level keeps what the one below gave
+you. Level 2 is not an escape hatch and level 3 is not a rewrite: the drop-in is
+built from exactly the widgets level 3 hands you.
+
+| | You want | You write | You keep |
+| --- | --- | --- | --- |
+| **1** | The whole buyer flow, now | `SeatLayerPicker(…)` | Everything below |
+| **2** | It, in your brand and your words | A theme, a style slot, an option, a builder | The layout, the flow, the holds |
+| **3** | Your own screen | `SeatLayerPickerScope` + the widgets | Inventory, holds, snapshots, checkout |
+
+```mermaid
+flowchart TD
+  A["SeatLayerConfiguration<br/>event + publishable key"] --> B{"How much<br/>do you own?"}
+  B -->|"Nothing"| C["SeatLayerPicker"]
+  B -->|"The look"| D["theme · style slots<br/>options · builders"]
+  B -->|"The screen"| E["SeatLayerPickerScope<br/>+ the widgets"]
+  C --> F["onCheckout(handoff)"]
+  D --> F
+  E --> F
+  F --> G["Your backend inspects<br/>and books the hold"]
+```
 
 ## Customise the picker
 
@@ -589,6 +585,10 @@ flutter test --tags golden        # recorded and enforced on macOS
 dart run tool/gen_tokens.dart     # after editing design/tokens.json
 dart pub publish --dry-run
 ```
+
+## Scale evidence
+
+Benchmarked on public 100,000-, 150,000- and 200,000-seat venue fixtures on 15 September 2026: 200,000 seats chart-ready in 1.95 s, desktop, local production build. Tested at 10,000 simulated concurrent buyers on one 12,000-seat event (18 September 2026): engine-side hold latency p99 9 ms, zero server errors. Method, fixtures and run files: https://github.com/seatlayer/seatlayer-performance. Live 200,000-seat stadium demo: https://app.seatlayer.io/demo/play/century-stadium-200k.
 
 ## License
 
