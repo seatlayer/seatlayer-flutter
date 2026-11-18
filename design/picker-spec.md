@@ -1889,7 +1889,10 @@ Label ladder, in priority order:
 5. opening checkout → disabled, **no spinner** (words only; the seats are held),
    `strings.seatsSecuredOpeningCheckout`; still busy, so the button stays down
    (the hold has succeeded by now, so the sentence says so; `strings.openingCheckout`
-   stays a public string for a host that composes its own button)
+   stays a public string for a host that composes its own button). Strings
+   built with `openingCheckout` and without `seatsSecuredOpeningCheckout` draw
+   `openingCheckout` here, so a host's earlier wording for this state still
+   shows.
    Both readings carry `busyInWords: true`, so a host that rebuilds one or
    draws its own button can tell them apart; a busy reading without it draws a
    spinner beside its label.

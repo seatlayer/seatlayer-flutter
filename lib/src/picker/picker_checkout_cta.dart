@@ -166,7 +166,7 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
     // The seats are already held, so there is nothing left to wait on but
     // the host: the words say so, and a spinner beside them would say the
     // opposite. Still busy, so the button stays down until the host answers.
-    return _busyInWords(strings.seatsSecuredOpeningCheckout);
+    return _busyInWords(seatLayerCheckoutHandoffWords(strings));
   }
 
   // 5. A selection the event's own rules reject. Say what would fix it where

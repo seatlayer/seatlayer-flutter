@@ -80,8 +80,7 @@ class SeatLayerPickerStrings {
     this.findBestSeatsCta = SeatLayerStringTokens.findBestSeatsCta,
     this.pickYourSeats = SeatLayerStringTokens.pickYourSeats,
     this.salesClosedPill = SeatLayerStringTokens.salesClosedPill,
-    this.seatsSecuredOpeningCheckout =
-        SeatLayerStringTokens.seatsSecuredOpeningCheckout,
+    String? seatsSecuredOpeningCheckout,
     this.secureMoreAndCheckout = _defaultSecureMoreAndCheckout,
     this.peekSecured = _defaultPeekSecured,
     this.continueWord = SeatLayerStringTokens.continueWord,
@@ -89,7 +88,7 @@ class SeatLayerPickerStrings {
     this.confirmOrCancelSeat = SeatLayerStringTokens.confirmOrCancelSeat,
     this.confirmYourTickets = SeatLayerStringTokens.confirmYourTickets,
     this.securingSeats = SeatLayerStringTokens.securingSeats,
-    this.openingCheckout = SeatLayerStringTokens.openingCheckout,
+    String? openingCheckout,
     this.adjustSelection = SeatLayerStringTokens.adjustSelection,
     this.chooseMore = _defaultChooseMore,
     this.removeTickets = _defaultRemoveTickets,
@@ -202,7 +201,14 @@ class SeatLayerPickerStrings {
     this.venueMapHint = SeatLayerStringTokens.venueMapHint,
     this.holdMinutesLeft = _defaultHoldMinutesLeft,
     this.holdSecondsLeft = _defaultHoldSecondsLeft,
-  });
+  })  : seatsSecuredOpeningCheckout = seatsSecuredOpeningCheckout ??
+            SeatLayerStringTokens.seatsSecuredOpeningCheckout,
+        openingCheckout =
+            openingCheckout ?? SeatLayerStringTokens.openingCheckout,
+        // Wording a host gave for the hand-off before the second sentence
+        // existed still wins, unless it gave that sentence too.
+        _handoffKeepsOpeningCheckout =
+            openingCheckout != null && seatsSecuredOpeningCheckout == null;
 
   /// The defaults for [locale], falling back to English.
   ///
@@ -501,6 +507,10 @@ class SeatLayerPickerStrings {
   ///
   /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
   /// its English wording in every locale until one exists.
+  ///
+  /// A strings object built with [openingCheckout] and without this one draws
+  /// [openingCheckout] in that state instead, so wording set for the hand-off
+  /// before this sentence existed keeps showing.
   final String seatsSecuredOpeningCheckout;
 
   /// The wide layout's call to action, beside a total it does not repeat.
@@ -536,6 +546,8 @@ class SeatLayerPickerStrings {
   /// host's screen is up, because a second press would buy nothing and read as
   /// a failure.
   final String openingCheckout;
+
+  final bool _handoffKeepsOpeningCheckout;
 
   /// The call to action on a selection the event's own rules reject, where
   /// nothing more specific can be said than that it has to change.
@@ -1140,3 +1152,12 @@ class SeatLayerPickerStrings {
           : SeatLayerStringTokens.holdSecondsLeftOther)
       .replaceAll('{count}', '$count');
 }
+
+/// The words on the book button while the host's checkout opens.
+///
+/// [SeatLayerPickerStrings.seatsSecuredOpeningCheckout], unless the strings
+/// were built with [SeatLayerPickerStrings.openingCheckout] and without it.
+String seatLayerCheckoutHandoffWords(SeatLayerPickerStrings strings) =>
+    strings._handoffKeepsOpeningCheckout
+        ? strings.openingCheckout
+        : strings.seatsSecuredOpeningCheckout;
