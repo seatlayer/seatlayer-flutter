@@ -41,6 +41,8 @@ String _chooseMoreSl(int count) => 'Izberi še $count';
 String _seatsHeldForNeedMoreTimeSl(String time) =>
     'Vaši sedeži so rezervirani še $time. Potrebujete več časa?';
 
+String _accessNeedWithCountSl(String need, int count) => '$need · $count';
+
 String _ticketCountSl(int count) => switch (pickerPluralCategory('sl', count)) {
   PickerPluralCategory.one => '$count vstopnica',
   PickerPluralCategory.two => '$count vstopnici',
@@ -180,6 +182,29 @@ String _seatsNotRecoveredSl(int count) =>
       _ => 'Rezervacije za $count sedežev ni bilo mogoče obnoviti',
     };
 
+String _activeFiltersSl(int count) =>
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one => '$count filter',
+      PickerPluralCategory.two => '$count filtra',
+      PickerPluralCategory.few => '$count filtri',
+      _ => '$count filtrov',
+    };
+
+String _accessibilityFiltersActiveSl(int count) =>
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one => '$count aktiven filter dostopnosti',
+      PickerPluralCategory.two => '$count aktivna filtra dostopnosti',
+      PickerPluralCategory.few => '$count aktivni filtri dostopnosti',
+      _ => '$count aktivnih filtrov dostopnosti',
+    };
+
+String _onlyLeftSl(int count) => switch (pickerPluralCategory('sl', count)) {
+  PickerPluralCategory.one => 'Ostal $count sedež',
+  PickerPluralCategory.two => 'Ostala $count sedeža',
+  PickerPluralCategory.few => 'Ostali $count sedeži',
+  _ => 'Ostalo $count sedežev',
+};
+
 String _continueWithTotalSl(String money) => 'Nadaljuj \u00b7 $money';
 
 /// The `sl` defaults for the native picker chrome.
@@ -308,6 +333,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   removeWord: 'Odstrani',
   floorWord: 'Nadstropje',
   totalWord: 'Skupaj',
+  adjustSelection: 'Prilagodi izbiro sedežev',
   chooseSeats: 'Izberite sedeže',
   chooseTickets: 'Izberite vstopnice',
   placeWord: 'MESTO',
@@ -342,6 +368,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
       'Za nadaljevanje znova naložite načrt sedežev. Sedeži, ki so že v vaši košarici, ostanejo rezervirani, dokler se časovnik ne izteče.',
   dismissError: 'Zapri obvestilo o napaki',
   testModeLong: 'Testni način · nič se ne rezervira',
+  seatRemoved: 'Vstopnica odstranjena',
+  reloadSeatMap: 'Znova naloži načrt sedežev',
   accessNeeds: <String, String>{
     'wheelchair': 'Mesto za voziček',
     'companion': 'Spremljevalni sedež',
@@ -370,6 +398,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsSl,
   chooseMore: _chooseMoreSl,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeSl,
+  accessNeedWithCount: _accessNeedWithCountSl,
   ticketCount: _ticketCountSl,
   findBestSeats: _findBestSeatsSl,
   reselectSeats: _reselectSeatsSl,
@@ -385,5 +414,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftSl,
   holdLapsedBody: _holdLapsedBodySl,
   seatsNotRecovered: _seatsNotRecoveredSl,
+  activeFilters: _activeFiltersSl,
+  accessibilityFiltersActive: _accessibilityFiltersActiveSl,
+  onlyLeft: _onlyLeftSl,
   continueWithTotal: _continueWithTotalSl,
 );

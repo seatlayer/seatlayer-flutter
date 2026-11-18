@@ -37,6 +37,8 @@ String _chooseMoreJa(int count) => 'あと$count席選択';
 
 String _seatsHeldForNeedMoreTimeJa(String time) => '座席の確保は残り$timeです。時間を延長しますか？';
 
+String _accessNeedWithCountJa(String need, int count) => '$need・$count';
+
 String _ticketCountJa(int count) => '$count枚';
 
 String _findBestSeatsJa(int count) => 'おすすめの$count席を探す';
@@ -67,6 +69,12 @@ String _holdSecondsLeftJa(int count) => '残り$count秒';
 String _holdLapsedBodyJa(int count) => '座席は$count分間確保されていました。';
 
 String _seatsNotRecoveredJa(int count) => '$count席を再確保できませんでした';
+
+String _activeFiltersJa(int count) => '絞り込み$count件';
+
+String _accessibilityFiltersActiveJa(int count) => 'バリアフリーの絞り込みを$count件適用中';
+
+String _onlyLeftJa(int count) => '残り$count席';
 
 String _continueWithTotalJa(String money) => '次へ \u00b7 $money';
 
@@ -188,6 +196,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   removeWord: '削除',
   floorWord: 'フロア',
   totalWord: '合計',
+  adjustSelection: '座席の選択を調整',
   chooseSeats: '座席を選ぶ',
   chooseTickets: 'チケットを選ぶ',
   placeWord: 'スペース',
@@ -220,6 +229,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   accessExpiredCopy: '続けるには座席図を再読み込みしてください。カートに入っている座席は、タイマーが終わるまで確保されたままです。',
   dismissError: 'エラーを閉じる',
   testModeLong: 'テストモード · 予約は発生しません',
+  seatRemoved: 'チケットを外しました',
+  reloadSeatMap: '座席図を再読み込み',
   accessNeeds: <String, String>{
     'wheelchair': '車椅子スペース',
     'companion': '同伴者席',
@@ -248,6 +259,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsJa,
   chooseMore: _chooseMoreJa,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeJa,
+  accessNeedWithCount: _accessNeedWithCountJa,
   ticketCount: _ticketCountJa,
   findBestSeats: _findBestSeatsJa,
   reselectSeats: _reselectSeatsJa,
@@ -263,5 +275,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftJa,
   holdLapsedBody: _holdLapsedBodyJa,
   seatsNotRecovered: _seatsNotRecoveredJa,
+  activeFilters: _activeFiltersJa,
+  accessibilityFiltersActive: _accessibilityFiltersActiveJa,
+  onlyLeft: _onlyLeftJa,
   continueWithTotal: _continueWithTotalJa,
 );

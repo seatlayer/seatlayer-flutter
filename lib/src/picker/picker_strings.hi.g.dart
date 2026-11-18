@@ -41,6 +41,8 @@ String _chooseMoreHi(int count) => '$count और चुनें';
 String _seatsHeldForNeedMoreTimeHi(String time) =>
     'आपकी सीटें $time के लिए होल्ड हैं। और समय चाहिए?';
 
+String _accessNeedWithCountHi(String need, int count) => '$need · $count';
+
 String _ticketCountHi(int count) => switch (pickerPluralCategory('hi', count)) {
   PickerPluralCategory.one => '$count टिकट',
   _ => '$count टिकट',
@@ -134,6 +136,23 @@ String _seatsNotRecoveredHi(int count) =>
       PickerPluralCategory.one => '$count सीट वापस नहीं मिल सकी',
       _ => '$count सीटें वापस नहीं मिल सकीं',
     };
+
+String _activeFiltersHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => '$count फ़िल्टर',
+      _ => '$count फ़िल्टर',
+    };
+
+String _accessibilityFiltersActiveHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => '$count सुलभता फ़िल्टर चालू है',
+      _ => '$count सुलभता फ़िल्टर चालू हैं',
+    };
+
+String _onlyLeftHi(int count) => switch (pickerPluralCategory('hi', count)) {
+  PickerPluralCategory.one => '$count सीट बाकी',
+  _ => '$count सीटें बाकी',
+};
 
 String _continueWithTotalHi(String money) => 'आगे बढ़ें \u00b7 $money';
 
@@ -261,6 +280,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   removeWord: 'हटाएँ',
   floorWord: 'फ़्लोर',
   totalWord: 'कुल',
+  adjustSelection: 'सीट चयन बदलें',
   chooseSeats: 'अपनी सीटें चुनें',
   chooseTickets: 'टिकट चुनें',
   placeWord: 'स्थान',
@@ -295,6 +315,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
       'जारी रखने के लिए सीट मैप दोबारा लोड करें। आपकी कार्ट में पहले से रखी सीटें टाइमर खत्म होने तक होल्ड पर रहेंगी।',
   dismissError: 'एरर बंद करें',
   testModeLong: 'टेस्ट मोड · कुछ भी बुक नहीं होगा',
+  seatRemoved: 'टिकट हटाया गया',
+  reloadSeatMap: 'सीट मैप दोबारा लोड करें',
   accessNeeds: <String, String>{
     'wheelchair': 'व्हीलचेयर स्थान',
     'companion': 'साथी सीट',
@@ -323,6 +345,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsHi,
   chooseMore: _chooseMoreHi,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeHi,
+  accessNeedWithCount: _accessNeedWithCountHi,
   ticketCount: _ticketCountHi,
   findBestSeats: _findBestSeatsHi,
   reselectSeats: _reselectSeatsHi,
@@ -338,5 +361,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftHi,
   holdLapsedBody: _holdLapsedBodyHi,
   seatsNotRecovered: _seatsNotRecoveredHi,
+  activeFilters: _activeFiltersHi,
+  accessibilityFiltersActive: _accessibilityFiltersActiveHi,
+  onlyLeft: _onlyLeftHi,
   continueWithTotal: _continueWithTotalHi,
 );

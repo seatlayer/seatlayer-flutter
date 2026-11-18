@@ -41,6 +41,8 @@ String _chooseMoreSr(int count) => 'Изабери још $count';
 String _seatsHeldForNeedMoreTimeSr(String time) =>
     'Ваша места су резервисана још $time. Треба вам више времена?';
 
+String _accessNeedWithCountSr(String need, int count) => '$need · $count';
+
 String _ticketCountSr(int count) => switch (pickerPluralCategory('sr', count)) {
   PickerPluralCategory.one => '$count улазница',
   PickerPluralCategory.few => '$count улазнице',
@@ -158,6 +160,26 @@ String _seatsNotRecoveredSr(int count) =>
       PickerPluralCategory.few => '$count места нису могла да се врате',
       _ => '$count места није могло да се врати',
     };
+
+String _activeFiltersSr(int count) =>
+    switch (pickerPluralCategory('sr', count)) {
+      PickerPluralCategory.one => '$count филтер',
+      PickerPluralCategory.few => '$count филтера',
+      _ => '$count филтера',
+    };
+
+String _accessibilityFiltersActiveSr(int count) =>
+    switch (pickerPluralCategory('sr', count)) {
+      PickerPluralCategory.one => '$count активан филтер приступачности',
+      PickerPluralCategory.few => '$count активна филтера приступачности',
+      _ => '$count активних филтера приступачности',
+    };
+
+String _onlyLeftSr(int count) => switch (pickerPluralCategory('sr', count)) {
+  PickerPluralCategory.one => 'Преостало $count место',
+  PickerPluralCategory.few => 'Преостала $count места',
+  _ => 'Преостало $count места',
+};
 
 String _continueWithTotalSr(String money) => 'Настави \u00b7 $money';
 
@@ -284,6 +306,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
   removeWord: 'Уклони',
   floorWord: 'Спрат',
   totalWord: 'Укупно',
+  adjustSelection: 'Прилагоди избор места',
   chooseSeats: 'Изаберите своја места',
   chooseTickets: 'Изаберите улазнице',
   placeWord: 'МЕСТО',
@@ -318,6 +341,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
       'Поново учитајте план места да бисте наставили. Места која су већ у вашој корпи остају резервисана док тајмер не истекне.',
   dismissError: 'Затвори обавештење о грешци',
   testModeLong: 'Тест режим · ништа се не резервише',
+  seatRemoved: 'Улазница уклоњена',
+  reloadSeatMap: 'Поново учитај план места',
   accessNeeds: <String, String>{
     'wheelchair': 'Место за колица',
     'companion': 'Место за пратњу',
@@ -346,6 +371,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsSr,
   chooseMore: _chooseMoreSr,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeSr,
+  accessNeedWithCount: _accessNeedWithCountSr,
   ticketCount: _ticketCountSr,
   findBestSeats: _findBestSeatsSr,
   reselectSeats: _reselectSeatsSr,
@@ -361,5 +387,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftSr,
   holdLapsedBody: _holdLapsedBodySr,
   seatsNotRecovered: _seatsNotRecoveredSr,
+  activeFilters: _activeFiltersSr,
+  accessibilityFiltersActive: _accessibilityFiltersActiveSr,
+  onlyLeft: _onlyLeftSr,
   continueWithTotal: _continueWithTotalSr,
 );

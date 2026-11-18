@@ -41,6 +41,8 @@ String _chooseMoreCy(int count) => 'Dewisa $count arall';
 String _seatsHeldForNeedMoreTimeCy(String time) =>
     'Mae dy seddi wedi’u cadw am $time. Angen mwy o amser?';
 
+String _accessNeedWithCountCy(String need, int count) => '$need · $count';
+
 String _ticketCountCy(int count) => switch (pickerPluralCategory('cy', count)) {
   PickerPluralCategory.zero => '$count tocyn',
   PickerPluralCategory.one => '$count tocyn',
@@ -213,6 +215,35 @@ String _seatsNotRecoveredCy(int count) =>
       _ => 'Nid oedd modd adfer $count o seddi',
     };
 
+String _activeFiltersCy(int count) =>
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => '$count hidlydd',
+      PickerPluralCategory.one => '$count hidlydd',
+      PickerPluralCategory.two => '$count hidlydd',
+      PickerPluralCategory.few => '$count hidlydd',
+      PickerPluralCategory.many => '$count hidlydd',
+      _ => '$count o hidlyddion',
+    };
+
+String _accessibilityFiltersActiveCy(int count) =>
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => '$count hidlydd hygyrchedd ar waith',
+      PickerPluralCategory.one => '$count hidlydd hygyrchedd ar waith',
+      PickerPluralCategory.two => '$count hidlydd hygyrchedd ar waith',
+      PickerPluralCategory.few => '$count hidlydd hygyrchedd ar waith',
+      PickerPluralCategory.many => '$count hidlydd hygyrchedd ar waith',
+      _ => '$count o hidlyddion hygyrchedd ar waith',
+    };
+
+String _onlyLeftCy(int count) => switch (pickerPluralCategory('cy', count)) {
+  PickerPluralCategory.zero => '$count sedd ar ôl',
+  PickerPluralCategory.one => '$count sedd ar ôl',
+  PickerPluralCategory.two => '$count sedd ar ôl',
+  PickerPluralCategory.few => '$count sedd ar ôl',
+  PickerPluralCategory.many => '$count sedd ar ôl',
+  _ => '$count o seddi ar ôl',
+};
+
 String _continueWithTotalCy(String money) => 'Parhau \u00b7 $money';
 
 /// The `cy` defaults for the native picker chrome.
@@ -344,6 +375,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   removeWord: 'Tynnu',
   floorWord: 'Llawr',
   totalWord: 'Cyfanswm',
+  adjustSelection: 'Addasu\'r dewis seddi',
   chooseSeats: 'Dewisa dy seddi',
   chooseTickets: 'Dewisa docynnau',
   placeWord: 'LLE',
@@ -378,6 +410,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
       'Ail-lwytha’r map seddi i barhau. Mae seddi sydd eisoes yn dy fasged yn aros wedi’u cadw nes i’r amserydd ddod i ben.',
   dismissError: 'Cau’r gwall',
   testModeLong: 'Modd profi · dim byd yn cael ei archebu',
+  seatRemoved: 'Tynnwyd y tocyn',
+  reloadSeatMap: 'Ail-lwytho’r map seddi',
   accessNeeds: <String, String>{
     'wheelchair': 'Lle cadair olwyn',
     'companion': 'Sedd cydymaith',
@@ -406,6 +440,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsCy,
   chooseMore: _chooseMoreCy,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeCy,
+  accessNeedWithCount: _accessNeedWithCountCy,
   ticketCount: _ticketCountCy,
   findBestSeats: _findBestSeatsCy,
   reselectSeats: _reselectSeatsCy,
@@ -421,5 +456,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftCy,
   holdLapsedBody: _holdLapsedBodyCy,
   seatsNotRecovered: _seatsNotRecoveredCy,
+  activeFilters: _activeFiltersCy,
+  accessibilityFiltersActive: _accessibilityFiltersActiveCy,
+  onlyLeft: _onlyLeftCy,
   continueWithTotal: _continueWithTotalCy,
 );

@@ -41,6 +41,8 @@ String _chooseMoreLt(int count) => 'Pasirinkite dar $count';
 String _seatsHeldForNeedMoreTimeLt(String time) =>
     'Jūsų vietos rezervuotos dar $time. Reikia daugiau laiko?';
 
+String _accessNeedWithCountLt(String need, int count) => '$need · $count';
+
 String _ticketCountLt(int count) => switch (pickerPluralCategory('lt', count)) {
   PickerPluralCategory.one => '$count bilietas',
   PickerPluralCategory.few => '$count bilietai',
@@ -175,6 +177,29 @@ String _seatsNotRecoveredLt(int count) =>
       _ => '$count vietų nepavyko atkurti',
     };
 
+String _activeFiltersLt(int count) =>
+    switch (pickerPluralCategory('lt', count)) {
+      PickerPluralCategory.one => '$count filtras',
+      PickerPluralCategory.few => '$count filtrai',
+      PickerPluralCategory.many => '$count filtro',
+      _ => '$count filtrų',
+    };
+
+String _accessibilityFiltersActiveLt(int count) =>
+    switch (pickerPluralCategory('lt', count)) {
+      PickerPluralCategory.one => '$count prieinamumo filtras įjungtas',
+      PickerPluralCategory.few => '$count prieinamumo filtrai įjungti',
+      PickerPluralCategory.many => '$count prieinamumo filtro įjungta',
+      _ => '$count prieinamumo filtrų įjungta',
+    };
+
+String _onlyLeftLt(int count) => switch (pickerPluralCategory('lt', count)) {
+  PickerPluralCategory.one => 'Liko $count vieta',
+  PickerPluralCategory.few => 'Liko $count vietos',
+  PickerPluralCategory.many => 'Liko $count vietos',
+  _ => 'Liko $count vietų',
+};
+
 String _continueWithTotalLt(String money) => 'Tęsti \u00b7 $money';
 
 /// The `lt` defaults for the native picker chrome.
@@ -300,6 +325,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   removeWord: 'Pašalinti',
   floorWord: 'Aukštas',
   totalWord: 'Iš viso',
+  adjustSelection: 'Koreguoti vietų pasirinkimą',
   chooseSeats: 'Pasirinkite savo vietas',
   chooseTickets: 'Pasirinkite bilietus',
   placeWord: 'VIETA',
@@ -334,6 +360,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
       'Norėdami tęsti, iš naujo įkelkite vietų planą. Vietos, kurios jau yra krepšelyje, lieka rezervuotos, kol baigsis laikmatis.',
   dismissError: 'Uždaryti klaidos pranešimą',
   testModeLong: 'Bandymo režimas · nieko nerezervuojama',
+  seatRemoved: 'Bilietas pašalintas',
+  reloadSeatMap: 'Iš naujo įkelti vietų planą',
   accessNeeds: <String, String>{
     'wheelchair': 'Vieta vežimėliui',
     'companion': 'Palydovo vieta',
@@ -362,6 +390,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsLt,
   chooseMore: _chooseMoreLt,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeLt,
+  accessNeedWithCount: _accessNeedWithCountLt,
   ticketCount: _ticketCountLt,
   findBestSeats: _findBestSeatsLt,
   reselectSeats: _reselectSeatsLt,
@@ -377,5 +406,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftLt,
   holdLapsedBody: _holdLapsedBodyLt,
   seatsNotRecovered: _seatsNotRecoveredLt,
+  activeFilters: _activeFiltersLt,
+  accessibilityFiltersActive: _accessibilityFiltersActiveLt,
+  onlyLeft: _onlyLeftLt,
   continueWithTotal: _continueWithTotalLt,
 );

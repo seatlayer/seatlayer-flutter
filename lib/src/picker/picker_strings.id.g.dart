@@ -40,6 +40,8 @@ String _chooseMoreId(int count) => 'Pilih $count lagi';
 String _seatsHeldForNeedMoreTimeId(String time) =>
     'Kursi Anda ditahan selama $time. Butuh waktu lebih?';
 
+String _accessNeedWithCountId(String need, int count) => '$need · $count';
+
 String _ticketCountId(int count) => '$count tiket';
 
 String _findBestSeatsId(int count) => 'Cari $count kursi terbaik';
@@ -74,6 +76,13 @@ String _holdLapsedBodyId(int count) =>
 
 String _seatsNotRecoveredId(int count) =>
     '$count kursi tidak bisa ditahan kembali';
+
+String _activeFiltersId(int count) => '$count filter';
+
+String _accessibilityFiltersActiveId(int count) =>
+    '$count filter aksesibilitas aktif';
+
+String _onlyLeftId(int count) => 'Sisa $count kursi';
 
 String _continueWithTotalId(String money) => 'Lanjut \u00b7 $money';
 
@@ -204,6 +213,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   removeWord: 'Hapus',
   floorWord: 'Lantai',
   totalWord: 'Total',
+  adjustSelection: 'Ubah pilihan kursi',
   chooseSeats: 'Pilih kursi Anda',
   chooseTickets: 'Pilih tiket',
   placeWord: 'TEMPAT',
@@ -238,6 +248,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
       'Muat ulang denah kursi untuk melanjutkan. Kursi yang sudah ada di keranjang Anda tetap ditahan sampai waktu habis.',
   dismissError: 'Tutup pesan kesalahan',
   testModeLong: 'Mode uji · tidak memesan apa pun',
+  seatRemoved: 'Tiket dihapus',
+  reloadSeatMap: 'Muat ulang denah kursi',
   accessNeeds: <String, String>{
     'wheelchair': 'Tempat kursi roda',
     'companion': 'Kursi pendamping',
@@ -266,6 +278,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsId,
   chooseMore: _chooseMoreId,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeId,
+  accessNeedWithCount: _accessNeedWithCountId,
   ticketCount: _ticketCountId,
   findBestSeats: _findBestSeatsId,
   reselectSeats: _reselectSeatsId,
@@ -281,5 +294,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftId,
   holdLapsedBody: _holdLapsedBodyId,
   seatsNotRecovered: _seatsNotRecoveredId,
+  activeFilters: _activeFiltersId,
+  accessibilityFiltersActive: _accessibilityFiltersActiveId,
+  onlyLeft: _onlyLeftId,
   continueWithTotal: _continueWithTotalId,
 );

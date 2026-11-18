@@ -41,6 +41,8 @@ String _chooseMoreRo(int count) => 'Alege încă $count';
 String _seatsHeldForNeedMoreTimeRo(String time) =>
     'Locurile tale sunt rezervate încă $time. Ai nevoie de mai mult timp?';
 
+String _accessNeedWithCountRo(String need, int count) => '$need · $count';
+
 String _ticketCountRo(int count) => switch (pickerPluralCategory('ro', count)) {
   PickerPluralCategory.one => '$count bilet',
   PickerPluralCategory.few => '$count bilete',
@@ -157,6 +159,26 @@ String _seatsNotRecoveredRo(int count) =>
       PickerPluralCategory.few => '$count locuri nu au putut fi recuperate',
       _ => '$count de locuri nu au putut fi recuperate',
     };
+
+String _activeFiltersRo(int count) =>
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => '$count filtru',
+      PickerPluralCategory.few => '$count filtre',
+      _ => '$count de filtre',
+    };
+
+String _accessibilityFiltersActiveRo(int count) =>
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => '$count filtru de accesibilitate activ',
+      PickerPluralCategory.few => '$count filtre de accesibilitate active',
+      _ => '$count de filtre de accesibilitate active',
+    };
+
+String _onlyLeftRo(int count) => switch (pickerPluralCategory('ro', count)) {
+  PickerPluralCategory.one => 'A rămas $count loc',
+  PickerPluralCategory.few => 'Au rămas $count locuri',
+  _ => 'Au rămas $count de locuri',
+};
 
 String _continueWithTotalRo(String money) => 'Continuă \u00b7 $money';
 
@@ -288,6 +310,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   removeWord: 'Elimină',
   floorWord: 'Etaj',
   totalWord: 'Total',
+  adjustSelection: 'Ajustează selecția locurilor',
   chooseSeats: 'Alege-ți locurile',
   chooseTickets: 'Alege bilete',
   placeWord: 'LOC',
@@ -322,6 +345,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
       'Reîncarcă harta locurilor ca să continui. Locurile deja aflate în coșul tău rămân rezervate până expiră cronometrul.',
   dismissError: 'Închide eroarea',
   testModeLong: 'Mod de testare · nu se rezervă nimic',
+  seatRemoved: 'Bilet eliminat',
+  reloadSeatMap: 'Reîncarcă harta locurilor',
   accessNeeds: <String, String>{
     'wheelchair': 'Spațiu pentru scaun cu rotile',
     'companion': 'Loc pentru însoțitor',
@@ -350,6 +375,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsRo,
   chooseMore: _chooseMoreRo,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeRo,
+  accessNeedWithCount: _accessNeedWithCountRo,
   ticketCount: _ticketCountRo,
   findBestSeats: _findBestSeatsRo,
   reselectSeats: _reselectSeatsRo,
@@ -365,5 +391,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftRo,
   holdLapsedBody: _holdLapsedBodyRo,
   seatsNotRecovered: _seatsNotRecoveredRo,
+  activeFilters: _activeFiltersRo,
+  accessibilityFiltersActive: _accessibilityFiltersActiveRo,
+  onlyLeft: _onlyLeftRo,
   continueWithTotal: _continueWithTotalRo,
 );

@@ -39,6 +39,8 @@ String _chooseMoreKo(int count) => '$count석 더 선택';
 String _seatsHeldForNeedMoreTimeKo(String time) =>
     '좌석이 $time 동안 확보돼 있어요. 시간이 더 필요하세요?';
 
+String _accessNeedWithCountKo(String need, int count) => '$need · $count';
+
 String _ticketCountKo(int count) => '티켓 $count매';
 
 String _findBestSeatsKo(int count) => '추천 좌석 $count석 찾기';
@@ -71,6 +73,12 @@ String _holdSecondsLeftKo(int count) => '$count초 남음';
 String _holdLapsedBodyKo(int count) => '좌석이 $count분 동안 확보돼 있었어요.';
 
 String _seatsNotRecoveredKo(int count) => '$count석은 다시 확보하지 못했어요';
+
+String _activeFiltersKo(int count) => '필터 $count개';
+
+String _accessibilityFiltersActiveKo(int count) => '접근성 필터 $count개 사용 중';
+
+String _onlyLeftKo(int count) => '잔여 $count석';
 
 String _continueWithTotalKo(String money) => '계속 \u00b7 $money';
 
@@ -192,6 +200,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   removeWord: '삭제',
   floorWord: '층',
   totalWord: '합계',
+  adjustSelection: '좌석 선택 조정',
   chooseSeats: '좌석 선택',
   chooseTickets: '티켓 선택',
   placeWord: '자리',
@@ -226,6 +235,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
       '계속하려면 좌석 배치도를 새로고침해 주세요. 장바구니에 담긴 좌석은 타이머가 끝날 때까지 확보돼 있어요.',
   dismissError: '오류 닫기',
   testModeLong: '테스트 모드 · 실제 예매 없음',
+  seatRemoved: '티켓 삭제됨',
+  reloadSeatMap: '좌석 배치도 새로고침',
   accessNeeds: <String, String>{
     'wheelchair': '휠체어석',
     'companion': '동반자석',
@@ -254,6 +265,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsKo,
   chooseMore: _chooseMoreKo,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeKo,
+  accessNeedWithCount: _accessNeedWithCountKo,
   ticketCount: _ticketCountKo,
   findBestSeats: _findBestSeatsKo,
   reselectSeats: _reselectSeatsKo,
@@ -269,5 +281,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftKo,
   holdLapsedBody: _holdLapsedBodyKo,
   seatsNotRecovered: _seatsNotRecoveredKo,
+  activeFilters: _activeFiltersKo,
+  accessibilityFiltersActive: _accessibilityFiltersActiveKo,
+  onlyLeft: _onlyLeftKo,
   continueWithTotal: _continueWithTotalKo,
 );

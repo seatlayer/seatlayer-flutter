@@ -1321,8 +1321,8 @@ same card over flat glass, which is a correct state, not a degraded one.
    price into the card's edge. The **legend** carries the count, where a buyer
    comparing categories is actually looking, and the dock carries the focused
    section's. `strings.seatsLeft` therefore has no confirm-card caller;
-   `strings.onlyLeft` remains available to a host that wants a scarcity
-   telling of its own somewhere else.
+   `strings.onlyLeft` ("8 seats left") remains available to a host that
+   wants a scarcity telling of its own somewhere else.
 3. **Photo strip**, height `size.confirmPhotoHeight`, full-bleed inside the
    card's corner, drawn **only where the seat names an authored photograph**
    (`selection[].seatViewThumb`, capability `seat-view-thumbnail-v1`); a
@@ -2698,9 +2698,12 @@ are `ticketCount`, `seatsFree`, `seatsLeftInSection`, `findBestSeats`,
 `reselectSeats`, `holdLapsedStillFree`, `holdLapsedSomeTaken`,
 `holdLapsedAllTaken`, `removeTickets`, `holdMinutesLeft`, `holdSecondsLeft`,
 `holdLapsedBody`, `seatsNotRecovered`, `accessibleSections`, `placesAvailable`,
-`activeFilters` and `accessibilityFiltersActive`. Sentences only an app draws come from the runtime's app
-strings, with every category its locale's rule produces; a sentence no source
-translates yet (`activeFilters`, `accessibilityFiltersActive`) draws English in every locale. The
+`activeFilters`, `accessibilityFiltersActive` and `onlyLeft`. Sentences only an app draws come from the runtime's app
+strings, with every category its locale's rule produces; a sentence a locale's
+source does not carry yet (today `backToSeatMap`) draws English there. `onlyLeft`
+is the same counted sentence as `seatsLeftInSection` ("8 seats left"), and
+`accessNeedWithCount` joins the need and its count with the locale's own pair
+separator ("Wheelchair · 2"; Japanese "・"). The
 shipped translations carry every form the runtime has (`zero`, `one`, `two`,
 `few`, `many`, `other`) and choose by the locale's CLDR category for the
 count, exactly as the runtime's `Intl.PluralRules` does; a form a dictionary

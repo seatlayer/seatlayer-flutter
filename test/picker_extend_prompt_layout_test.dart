@@ -10,8 +10,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
+import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_states.dart';
+import 'package:seatlayer/src/picker/picker_strings.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
@@ -95,6 +97,30 @@ void main() {
 
     expect(find.byType(SeatLayerPickerExtendHoldPrompt), findsOneWidget);
     expect(find.text('+5 min'), findsOneWidget);
+  });
+
+  testWidgets('the button names the minutes in the buyer\'s language',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    _useWideSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        _layout(),
+        options: SeatLayerPickerOptions(
+          strings: SeatLayerPickerStrings.forLocale(const Locale('de')),
+        ),
+      ),
+    );
+    map.emit(_expiringSnapshot(48));
+    await pumpToRest(tester);
+
+    // One tap asks for seatLayerHoldExtendStep, and the button says so.
+    expect(seatLayerHoldExtendStep, const Duration(minutes: 5));
+    expect(find.text('+5 Min.'), findsOneWidget);
+    expect(find.text('+5 min'), findsNothing);
   });
 
   test('the resolved default is off on the phone and on when wide', () {

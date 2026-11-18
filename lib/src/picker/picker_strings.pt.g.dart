@@ -41,6 +41,8 @@ String _chooseMorePt(int count) => 'Escolhe mais $count';
 String _seatsHeldForNeedMoreTimePt(String time) =>
     'Os teus lugares estão reservados durante $time. Precisas de mais tempo?';
 
+String _accessNeedWithCountPt(String need, int count) => '$need · $count';
+
 String _ticketCountPt(int count) => switch (pickerPluralCategory('pt', count)) {
   PickerPluralCategory.one => '$count bilhete',
   PickerPluralCategory.many => '$count bilhetes',
@@ -162,6 +164,26 @@ String _seatsNotRecoveredPt(int count) => switch (pickerPluralCategory(
   PickerPluralCategory.one => '$count lugar não pôde ser recuperado',
   PickerPluralCategory.many => '$count de lugares não puderam ser recuperados',
   _ => '$count lugares não puderam ser recuperados',
+};
+
+String _activeFiltersPt(int count) =>
+    switch (pickerPluralCategory('pt', count)) {
+      PickerPluralCategory.one => '$count filtro',
+      PickerPluralCategory.many => '$count de filtros',
+      _ => '$count filtros',
+    };
+
+String _accessibilityFiltersActivePt(int count) =>
+    switch (pickerPluralCategory('pt', count)) {
+      PickerPluralCategory.one => '$count filtro de acessibilidade ativo',
+      PickerPluralCategory.many => '$count de filtros de acessibilidade ativos',
+      _ => '$count filtros de acessibilidade ativos',
+    };
+
+String _onlyLeftPt(int count) => switch (pickerPluralCategory('pt', count)) {
+  PickerPluralCategory.one => 'Resta $count lugar',
+  PickerPluralCategory.many => 'Restam $count lugares',
+  _ => 'Restam $count lugares',
 };
 
 String _continueWithTotalPt(String money) => 'Continuar \u00b7 $money';
@@ -294,6 +316,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsPt = SeatLayerPickerStrings(
   removeWord: 'Remover',
   floorWord: 'Piso',
   totalWord: 'Total',
+  adjustSelection: 'Ajustar a seleção de lugares',
   chooseSeats: 'Escolhe os teus lugares',
   chooseTickets: 'Escolhe bilhetes',
   placeWord: 'LUGAR',
@@ -328,6 +351,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsPt = SeatLayerPickerStrings(
       'Recarrega o mapa de lugares para continuar. Os lugares que já estão no teu carrinho continuam reservados até o temporizador terminar.',
   dismissError: 'Fechar o erro',
   testModeLong: 'Modo de teste · não reserva nada',
+  seatRemoved: 'Bilhete removido',
+  reloadSeatMap: 'Recarregar o mapa de lugares',
   accessNeeds: <String, String>{
     'wheelchair': 'Espaço para cadeira de rodas',
     'companion': 'Lugar de acompanhante',
@@ -356,6 +381,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsPt = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsPt,
   chooseMore: _chooseMorePt,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimePt,
+  accessNeedWithCount: _accessNeedWithCountPt,
   ticketCount: _ticketCountPt,
   findBestSeats: _findBestSeatsPt,
   reselectSeats: _reselectSeatsPt,
@@ -371,5 +397,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsPt = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftPt,
   holdLapsedBody: _holdLapsedBodyPt,
   seatsNotRecovered: _seatsNotRecoveredPt,
+  activeFilters: _activeFiltersPt,
+  accessibilityFiltersActive: _accessibilityFiltersActivePt,
+  onlyLeft: _onlyLeftPt,
   continueWithTotal: _continueWithTotalPt,
 );

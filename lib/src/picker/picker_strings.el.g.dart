@@ -42,6 +42,8 @@ String _chooseMoreEl(int count) => 'Επιλέξτε $count ακόμη';
 String _seatsHeldForNeedMoreTimeEl(String time) =>
     'Οι θέσεις σας είναι δεσμευμένες για $time. Χρειάζεστε περισσότερο χρόνο;';
 
+String _accessNeedWithCountEl(String need, int count) => '$need · $count';
+
 String _ticketCountEl(int count) => switch (pickerPluralCategory('el', count)) {
   PickerPluralCategory.one => '$count εισιτήριο',
   _ => '$count εισιτήρια',
@@ -141,6 +143,23 @@ String _seatsNotRecoveredEl(int count) =>
       PickerPluralCategory.one => '$count θέση δεν ήταν δυνατό να ανακτηθεί',
       _ => '$count θέσεις δεν ήταν δυνατό να ανακτηθούν',
     };
+
+String _activeFiltersEl(int count) =>
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => '$count φίλτρο',
+      _ => '$count φίλτρα',
+    };
+
+String _accessibilityFiltersActiveEl(int count) =>
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => '$count ενεργό φίλτρο προσβασιμότητας',
+      _ => '$count ενεργά φίλτρα προσβασιμότητας',
+    };
+
+String _onlyLeftEl(int count) => switch (pickerPluralCategory('el', count)) {
+  PickerPluralCategory.one => 'Απομένει $count θέση',
+  _ => 'Απομένουν $count θέσεις',
+};
 
 String _continueWithTotalEl(String money) => 'Συνέχεια \u00b7 $money';
 
@@ -271,6 +290,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   removeWord: 'Αφαίρεση',
   floorWord: 'Όροφος',
   totalWord: 'Σύνολο',
+  adjustSelection: 'Προσαρμογή επιλογής θέσεων',
   chooseSeats: 'Επιλέξτε τις θέσεις σας',
   chooseTickets: 'Επιλέξτε εισιτήρια',
   placeWord: 'ΘΕΣΗ',
@@ -306,6 +326,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
       'Φορτώστε ξανά τον χάρτη θέσεων για να συνεχίσετε. Οι θέσεις που είναι ήδη στο καλάθι σας παραμένουν δεσμευμένες μέχρι να μηδενιστεί το χρονόμετρο.',
   dismissError: 'Κλείσιμο σφάλματος',
   testModeLong: 'Δοκιμαστική λειτουργία · καμία πραγματική κράτηση',
+  seatRemoved: 'Το εισιτήριο αφαιρέθηκε',
+  reloadSeatMap: 'Επαναφόρτωση χάρτη θέσεων',
   accessNeeds: <String, String>{
     'wheelchair': 'Θέση αμαξιδίου',
     'companion': 'Θέση συνοδού',
@@ -334,6 +356,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsEl,
   chooseMore: _chooseMoreEl,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeEl,
+  accessNeedWithCount: _accessNeedWithCountEl,
   ticketCount: _ticketCountEl,
   findBestSeats: _findBestSeatsEl,
   reselectSeats: _reselectSeatsEl,
@@ -349,5 +372,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftEl,
   holdLapsedBody: _holdLapsedBodyEl,
   seatsNotRecovered: _seatsNotRecoveredEl,
+  activeFilters: _activeFiltersEl,
+  accessibilityFiltersActive: _accessibilityFiltersActiveEl,
+  onlyLeft: _onlyLeftEl,
   continueWithTotal: _continueWithTotalEl,
 );

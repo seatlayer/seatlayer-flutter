@@ -570,8 +570,7 @@ class SeatLayerPickerStrings {
   /// The call to action on a selection the event's own rules reject, where
   /// nothing more specific can be said than that it has to change.
   ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
+  /// "Adjust seat selection", in the runtime dictionary's own wording.
   final String adjustSelection;
 
   /// Required SeatLayer attribution.
@@ -620,15 +619,13 @@ class SeatLayerPickerStrings {
   /// "2 filters" — the label of the wide accessibility control while any
   /// filter is on.
   ///
-  /// No runtime dictionary carries this sentence yet, so every locale draws
-  /// the English default until one does; a host can override it.
+  /// Counted: every locale draws its own plural form; a host can override it.
   final String Function(int count) activeFilters;
 
   /// "2 accessibility filters active" — the tooltip and accessible name of
   /// the round accessibility control while any filter is on.
   ///
-  /// No runtime dictionary carries this sentence yet, so every locale draws
-  /// the English default until one does; a host can override it.
+  /// Counted: every locale draws its own plural form; a host can override it.
   final String Function(int count) accessibilityFiltersActive;
 
   /// The accessible name of the sheet's count chip, which starts the tour.
@@ -681,6 +678,9 @@ class SeatLayerPickerStrings {
   final String dismissError;
 
   /// The Map/3D disc's name while the 3D scene is up.
+  ///
+  /// Taken from the runtime dictionary where it carries this sentence; a
+  /// locale whose dictionary does not yet draws the English default.
   final String backToSeatMap;
 
   /// The Map/3D disc's name while the flat map is up.
@@ -825,13 +825,13 @@ class SeatLayerPickerStrings {
 
   /// "99 seats left" — the same count with the word it is counting, which is
   /// what the dock says while it has the width for it.
-  ///
-  /// The SeatLayer runtime's dictionary carries the short form only, so this
-  /// one keeps its English wording in every locale until one exists.
   final String Function(int count) seatsLeftInSection;
 
-  /// "Only 8 left" — the same count, once it is small enough to be a reason
+  /// "8 seats left" — the same count, once it is small enough to be a reason
   /// to decide now rather than a fact about the section.
+  ///
+  /// Counted, in the same words as [seatsLeftInSection]: the count says what
+  /// it counts in every locale.
   final String Function(int count) onlyLeft;
 
   /// "74 seats" — a section with nothing sold yet.
@@ -1141,8 +1141,11 @@ class SeatLayerPickerStrings {
         SeatLayerStringTokens.seatsLeftInSectionOther,
       );
 
-  static String _defaultOnlyLeft(int count) =>
-      SeatLayerStringTokens.onlyLeft.replaceAll('{count}', '$count');
+  static String _defaultOnlyLeft(int count) => _english(
+        count,
+        SeatLayerStringTokens.onlyLeftOne,
+        SeatLayerStringTokens.onlyLeftOther,
+      );
 
   static String _defaultSeatsFree(int count) =>
       _english(count, '{count} seat', '{count} seats');

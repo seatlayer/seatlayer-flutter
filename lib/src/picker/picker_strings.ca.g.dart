@@ -41,6 +41,8 @@ String _chooseMoreCa(int count) => 'Tria’n $count més';
 String _seatsHeldForNeedMoreTimeCa(String time) =>
     'Els teus seients estan reservats durant $time. Necessites més temps?';
 
+String _accessNeedWithCountCa(String need, int count) => '$need · $count';
+
 String _ticketCountCa(int count) => switch (pickerPluralCategory('ca', count)) {
   PickerPluralCategory.one => '$count entrada',
   PickerPluralCategory.many => '$count entrades',
@@ -160,6 +162,26 @@ String _seatsNotRecoveredCa(int count) =>
       PickerPluralCategory.many => '$count de seients no s’han pogut recuperar',
       _ => '$count seients no s’han pogut recuperar',
     };
+
+String _activeFiltersCa(int count) =>
+    switch (pickerPluralCategory('ca', count)) {
+      PickerPluralCategory.one => '$count filtre',
+      PickerPluralCategory.many => '$count de filtres',
+      _ => '$count filtres',
+    };
+
+String _accessibilityFiltersActiveCa(int count) =>
+    switch (pickerPluralCategory('ca', count)) {
+      PickerPluralCategory.one => '$count filtre d’accessibilitat actiu',
+      PickerPluralCategory.many => '$count de filtres d’accessibilitat actius',
+      _ => '$count filtres d’accessibilitat actius',
+    };
+
+String _onlyLeftCa(int count) => switch (pickerPluralCategory('ca', count)) {
+  PickerPluralCategory.one => 'Queda $count seient',
+  PickerPluralCategory.many => 'Queden $count seients',
+  _ => 'Queden $count seients',
+};
 
 String _continueWithTotalCa(String money) => 'Continua \u00b7 $money';
 
@@ -291,6 +313,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   removeWord: 'Treu',
   floorWord: 'Planta',
   totalWord: 'Total',
+  adjustSelection: 'Ajusta la selecció de seients',
   chooseSeats: 'Tria els teus seients',
   chooseTickets: 'Tria entrades',
   placeWord: 'PLAÇA',
@@ -325,6 +348,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
       'Torna a carregar el mapa de seients per continuar. Els seients que ja són a la teva cistella continuen reservats fins que s’acabi el temporitzador.',
   dismissError: 'Descarta l’error',
   testModeLong: 'Mode de prova · no reserva res',
+  seatRemoved: 'S’ha tret l’entrada',
+  reloadSeatMap: 'Torna a carregar el mapa de seients',
   accessNeeds: <String, String>{
     'wheelchair': 'Espai per a cadira de rodes',
     'companion': 'Seient d’acompanyant',
@@ -353,6 +378,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsCa,
   chooseMore: _chooseMoreCa,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeCa,
+  accessNeedWithCount: _accessNeedWithCountCa,
   ticketCount: _ticketCountCa,
   findBestSeats: _findBestSeatsCa,
   reselectSeats: _reselectSeatsCa,
@@ -368,5 +394,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftCa,
   holdLapsedBody: _holdLapsedBodyCa,
   seatsNotRecovered: _seatsNotRecoveredCa,
+  activeFilters: _activeFiltersCa,
+  accessibilityFiltersActive: _accessibilityFiltersActiveCa,
+  onlyLeft: _onlyLeftCa,
   continueWithTotal: _continueWithTotalCa,
 );

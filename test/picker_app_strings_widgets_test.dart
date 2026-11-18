@@ -220,4 +220,13 @@ void main() {
       '2 accessibility filters active',
     );
   });
+
+  testWidgets('the filters sentences are drawn in the buyer\'s language',
+      (tester) async {
+    await openSheet(tester, 'pl', filter: <String>['wheelchair']);
+    expect(find.byTooltip('1 aktywny filtr dostępności'), findsOneWidget);
+    await openSheet(tester, 'pl',
+        compact: false, filter: <String>['wheelchair']);
+    expect(find.text('1 filtr'), findsOneWidget);
+  });
 }

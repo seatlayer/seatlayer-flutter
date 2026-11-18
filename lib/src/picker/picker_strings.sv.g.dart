@@ -41,6 +41,8 @@ String _chooseMoreSv(int count) => 'Välj $count till';
 String _seatsHeldForNeedMoreTimeSv(String time) =>
     'Dina platser är reserverade i $time. Behöver du mer tid?';
 
+String _accessNeedWithCountSv(String need, int count) => '$need · $count';
+
 String _ticketCountSv(int count) => switch (pickerPluralCategory('sv', count)) {
   PickerPluralCategory.one => '$count biljett',
   _ => '$count biljetter',
@@ -139,6 +141,23 @@ String _seatsNotRecoveredSv(int count) =>
       PickerPluralCategory.one => '$count plats kunde inte reserveras igen',
       _ => '$count platser kunde inte reserveras igen',
     };
+
+String _activeFiltersSv(int count) =>
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => '$count filter',
+      _ => '$count filter',
+    };
+
+String _accessibilityFiltersActiveSv(int count) =>
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => '$count tillgänglighetsfilter är aktivt',
+      _ => '$count tillgänglighetsfilter är aktiva',
+    };
+
+String _onlyLeftSv(int count) => switch (pickerPluralCategory('sv', count)) {
+  PickerPluralCategory.one => '$count plats kvar',
+  _ => '$count platser kvar',
+};
 
 String _continueWithTotalSv(String money) => 'Fortsätt \u00b7 $money';
 
@@ -266,6 +285,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   removeWord: 'Ta bort',
   floorWord: 'Våning',
   totalWord: 'Totalt',
+  adjustSelection: 'Justera platsvalet',
   chooseSeats: 'Välj dina platser',
   chooseTickets: 'Välj biljetter',
   placeWord: 'PLATS',
@@ -300,6 +320,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
       'Ladda om platskartan för att fortsätta. Platser som redan ligger i din varukorg förblir reserverade tills tiden går ut.',
   dismissError: 'Stäng felmeddelandet',
   testModeLong: 'Testläge · inget bokas',
+  seatRemoved: 'Biljett borttagen',
+  reloadSeatMap: 'Ladda om platskartan',
   accessNeeds: <String, String>{
     'wheelchair': 'Rullstolsplats',
     'companion': 'Ledsagarplats',
@@ -328,6 +350,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsSv,
   chooseMore: _chooseMoreSv,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeSv,
+  accessNeedWithCount: _accessNeedWithCountSv,
   ticketCount: _ticketCountSv,
   findBestSeats: _findBestSeatsSv,
   reselectSeats: _reselectSeatsSv,
@@ -343,5 +366,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftSv,
   holdLapsedBody: _holdLapsedBodySv,
   seatsNotRecovered: _seatsNotRecoveredSv,
+  activeFilters: _activeFiltersSv,
+  accessibilityFiltersActive: _accessibilityFiltersActiveSv,
+  onlyLeft: _onlyLeftSv,
   continueWithTotal: _continueWithTotalSv,
 );

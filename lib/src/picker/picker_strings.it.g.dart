@@ -41,6 +41,8 @@ String _chooseMoreIt(int count) => 'Scegline altri $count';
 String _seatsHeldForNeedMoreTimeIt(String time) =>
     'I tuoi posti sono bloccati per $time. Ti serve più tempo?';
 
+String _accessNeedWithCountIt(String need, int count) => '$need · $count';
+
 String _ticketCountIt(int count) => switch (pickerPluralCategory('it', count)) {
   PickerPluralCategory.one => '$count biglietto',
   PickerPluralCategory.many => '$count biglietti',
@@ -158,6 +160,26 @@ String _seatsNotRecoveredIt(int count) =>
       PickerPluralCategory.many => '$count di posti non sono stati recuperati',
       _ => '$count posti non sono stati recuperati',
     };
+
+String _activeFiltersIt(int count) =>
+    switch (pickerPluralCategory('it', count)) {
+      PickerPluralCategory.one => '$count filtro',
+      PickerPluralCategory.many => '$count di filtri',
+      _ => '$count filtri',
+    };
+
+String _accessibilityFiltersActiveIt(int count) =>
+    switch (pickerPluralCategory('it', count)) {
+      PickerPluralCategory.one => '$count filtro di accessibilità attivo',
+      PickerPluralCategory.many => '$count di filtri di accessibilità attivi',
+      _ => '$count filtri di accessibilità attivi',
+    };
+
+String _onlyLeftIt(int count) => switch (pickerPluralCategory('it', count)) {
+  PickerPluralCategory.one => 'Resta $count posto',
+  PickerPluralCategory.many => 'Restano $count posti',
+  _ => 'Restano $count posti',
+};
 
 String _continueWithTotalIt(String money) => 'Continua \u00b7 $money';
 
@@ -289,6 +311,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsIt = SeatLayerPickerStrings(
   removeWord: 'Rimuovi',
   floorWord: 'Piano',
   totalWord: 'Totale',
+  adjustSelection: 'Modifica la selezione dei posti',
   chooseSeats: 'Scegli i tuoi posti',
   chooseTickets: 'Scegli i biglietti',
   placeWord: 'POSTO',
@@ -323,6 +346,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsIt = SeatLayerPickerStrings(
       'Ricarica la mappa dei posti per continuare. I posti già nel tuo carrello restano bloccati fino allo scadere del timer.',
   dismissError: 'Chiudi il messaggio di errore',
   testModeLong: 'Modalità test · nessuna prenotazione reale',
+  seatRemoved: 'Biglietto rimosso',
+  reloadSeatMap: 'Ricarica la mappa dei posti',
   accessNeeds: <String, String>{
     'wheelchair': 'Spazio per sedia a rotelle',
     'companion': 'Posto per accompagnatore',
@@ -351,6 +376,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsIt = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsIt,
   chooseMore: _chooseMoreIt,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeIt,
+  accessNeedWithCount: _accessNeedWithCountIt,
   ticketCount: _ticketCountIt,
   findBestSeats: _findBestSeatsIt,
   reselectSeats: _reselectSeatsIt,
@@ -366,5 +392,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsIt = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftIt,
   holdLapsedBody: _holdLapsedBodyIt,
   seatsNotRecovered: _seatsNotRecoveredIt,
+  activeFilters: _activeFiltersIt,
+  accessibilityFiltersActive: _accessibilityFiltersActiveIt,
+  onlyLeft: _onlyLeftIt,
   continueWithTotal: _continueWithTotalIt,
 );

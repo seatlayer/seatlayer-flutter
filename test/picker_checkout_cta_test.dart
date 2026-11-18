@@ -327,7 +327,7 @@ void main() {
       ),
       canCheckout: false,
     );
-    expect(cta.label, 'Adjust your selection');
+    expect(cta.label, 'Adjust seat selection');
     expect(cta.statesReason, isTrue);
   });
 

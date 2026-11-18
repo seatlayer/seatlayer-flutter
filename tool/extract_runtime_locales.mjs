@@ -113,6 +113,14 @@ const KEYS = {
   'findBestSeats.other': 'picker.findBestSeatsCount.other',
   'reselectSeats.one': 'picker.holdLapsedSelectAgain.one',
   'reselectSeats.other': 'picker.holdLapsedSelectAgain.other',
+  // The scarcity count says what it counts, in the dictionary's own counted
+  // sentence ("86 seats left"), the same one `seatsLeftInSection` takes.
+  'onlyLeft.one': 'picker.seatsLeftInSection.one',
+  'onlyLeft.other': 'picker.seatsLeftInSection.other',
+  // Two facts joined with the locale's own separator: "Wheelchair · 2".
+  // `{need}` fills `{first}` and `{count}` fills `{second}`; Japanese joins
+  // them with "・".
+  accessNeedWithCount: 'picker.releasedPair',
 
   // Sentences the native chrome prints that the runtime already words the
   // same way. Matched on meaning, not on key names: where the runtime's
@@ -206,6 +214,11 @@ const KEYS = {
   removeWord: 'picker.gaRemove',
   floorWord: 'picker.floor',
   totalWord: 'picker.total',
+  adjustSelection: 'picker.adjustSeatSelection',
+  // Not in every runtime dictionary yet. A key a dictionary lacks is skipped
+  // like any other, so the package keeps its English default for it until the
+  // runtime's dictionaries carry it, and the next extraction then takes it.
+  backToSeatMap: 'picker.backToSeatMap',
 };
 
 /**
@@ -257,6 +270,10 @@ const APP_KEYS = {
   accessExpiredTitle: 'accessExpiredTitle',
   accessExpiredCopy: 'accessExpiredCopy',
   dismissError: 'dismissError',
+  activeFilters: 'activeFilters',
+  accessibilityFiltersActive: 'accessibilityFiltersActive',
+  seatRemoved: 'seatRemoved',
+  reloadSeatMap: 'reloadSeatMap',
   // The app badge's own short word, in sentence case as drawn; the shared
   // `picker.testMode` is the web's capitals.
   testMode: 'testMode',

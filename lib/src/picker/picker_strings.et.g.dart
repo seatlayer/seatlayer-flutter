@@ -41,6 +41,8 @@ String _chooseMoreEt(int count) => 'Vali veel $count';
 String _seatsHeldForNeedMoreTimeEt(String time) =>
     'Sinu kohad on broneeritud veel $time. Vajad rohkem aega?';
 
+String _accessNeedWithCountEt(String need, int count) => '$need · $count';
+
 String _ticketCountEt(int count) => switch (pickerPluralCategory('et', count)) {
   PickerPluralCategory.one => '$count pilet',
   _ => '$count piletit',
@@ -138,6 +140,23 @@ String _seatsNotRecoveredEt(int count) =>
       PickerPluralCategory.one => '$count kohta ei õnnestunud taastada',
       _ => '$count kohta ei õnnestunud taastada',
     };
+
+String _activeFiltersEt(int count) =>
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => '$count filter',
+      _ => '$count filtrit',
+    };
+
+String _accessibilityFiltersActiveEt(int count) =>
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => '$count ligipääsetavusfilter on sees',
+      _ => '$count ligipääsetavusfiltrit on sees',
+    };
+
+String _onlyLeftEt(int count) => switch (pickerPluralCategory('et', count)) {
+  PickerPluralCategory.one => 'Jäänud $count koht',
+  _ => 'Jäänud $count kohta',
+};
 
 String _continueWithTotalEt(String money) => 'Jätka \u00b7 $money';
 
@@ -263,6 +282,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   removeWord: 'Eemalda',
   floorWord: 'Korrus',
   totalWord: 'Kokku',
+  adjustSelection: 'Kohanda kohtade valikut',
   chooseSeats: 'Vali oma kohad',
   chooseTickets: 'Vali piletid',
   placeWord: 'KOHT',
@@ -297,6 +317,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
       'Jätkamiseks laadi istekohtade plaan uuesti. Ostukorvis olevad kohad jäävad broneerituks, kuni taimer lõpeb.',
   dismissError: 'Sulge veateade',
   testModeLong: 'Testrežiim · midagi ei broneerita',
+  seatRemoved: 'Pilet eemaldatud',
+  reloadSeatMap: 'Laadi istekohtade plaan uuesti',
   accessNeeds: <String, String>{
     'wheelchair': 'Ratastoolikoht',
     'companion': 'Saatjakoht',
@@ -325,6 +347,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsEt,
   chooseMore: _chooseMoreEt,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeEt,
+  accessNeedWithCount: _accessNeedWithCountEt,
   ticketCount: _ticketCountEt,
   findBestSeats: _findBestSeatsEt,
   reselectSeats: _reselectSeatsEt,
@@ -340,5 +363,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftEt,
   holdLapsedBody: _holdLapsedBodyEt,
   seatsNotRecovered: _seatsNotRecoveredEt,
+  activeFilters: _activeFiltersEt,
+  accessibilityFiltersActive: _accessibilityFiltersActiveEt,
+  onlyLeft: _onlyLeftEt,
   continueWithTotal: _continueWithTotalEt,
 );
