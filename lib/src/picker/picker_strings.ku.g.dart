@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftKu(int count) => '$count mayî';
@@ -29,31 +30,61 @@ String _seatJustTakenByAnotherKu(String label) =>
 String _peekSecuredKu(int count, String total) =>
     '✓ $count hatin piştrastkirin · $total. Hîn tu pere nayê girtin';
 
-String _ticketCountKu(int count) =>
-    count == 1 ? '$count bilêt' : '$count bilêt';
+String _ticketCountKu(int count) => switch (pickerPluralCategory('ku', count)) {
+  PickerPluralCategory.one => '$count bilêt',
+  _ => '$count bilêt',
+};
 
 String _findBestSeatsKu(int count) =>
-    count == 1 ? '$count cihê herî baş bibîne' : '$count cihên herî baş bibîne';
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => '$count cihê herî baş bibîne',
+      _ => '$count cihên herî baş bibîne',
+    };
 
 String _reselectSeatsKu(int count) =>
-    count == 1 ? 'Wî dîsa hilbijêre' : 'Wan dîsa hilbijêre';
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => 'Wî dîsa hilbijêre',
+      _ => 'Wan dîsa hilbijêre',
+    };
 
-String _seatsFreeKu(int count) => count == 1 ? '$count cih' : '$count cih';
+String _seatsFreeKu(int count) => switch (pickerPluralCategory('ku', count)) {
+  PickerPluralCategory.one => '$count cih',
+  _ => '$count cih',
+};
 
 String _seatsLeftInSectionKu(int count) =>
-    count == 1 ? '$count cih maye' : '$count cih mane';
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => '$count cih maye',
+      _ => '$count cih mane',
+    };
 
-String _holdLapsedStillFreeKu(int count) => count == 1
-    ? 'Dema tu ne li vir bûyî rezervasyona te qediya. Ew cih hîn jî vala ye.'
-    : 'Dema tu ne li vir bûyî rezervasyona te qediya. Ew cih hîn jî vala ne.';
+String _holdLapsedStillFreeKu(int count) => switch (pickerPluralCategory(
+  'ku',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Dema tu ne li vir bûyî rezervasyona te qediya. Ew cih hîn jî vala ye.',
+  _ => 'Dema tu ne li vir bûyî rezervasyona te qediya. Ew cih hîn jî vala ne.',
+};
 
-String _holdLapsedSomeTakenKu(int count) => count == 1
-    ? 'Dema tu ne li vir bûyî rezervasyona te qediya û $count ji van cihan hatiye girtin. Yên mayî hîn jî vala ne.'
-    : 'Dema tu ne li vir bûyî rezervasyona te qediya û $count ji van cihan hatine girtin. Yên mayî hîn jî vala ne.';
+String _holdLapsedSomeTakenKu(int count) => switch (pickerPluralCategory(
+  'ku',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Dema tu ne li vir bûyî rezervasyona te qediya û $count ji van cihan hatiye girtin. Yên mayî hîn jî vala ne.',
+  _ =>
+    'Dema tu ne li vir bûyî rezervasyona te qediya û $count ji van cihan hatine girtin. Yên mayî hîn jî vala ne.',
+};
 
-String _holdLapsedAllTakenKu(int count) => count == 1
-    ? 'Dema tu ne li vir bûyî rezervasyona te qediya û ew cih hatiye girtin.'
-    : 'Dema tu ne li vir bûyî rezervasyona te qediya û ew cih hatine girtin.';
+String _holdLapsedAllTakenKu(int count) => switch (pickerPluralCategory(
+  'ku',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Dema tu ne li vir bûyî rezervasyona te qediya û ew cih hatiye girtin.',
+  _ => 'Dema tu ne li vir bûyî rezervasyona te qediya û ew cih hatine girtin.',
+};
 
 String _continueWithTotalKu(String money) => 'Berdewam bike \u00b7 $money';
 

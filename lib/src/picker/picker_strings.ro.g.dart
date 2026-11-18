@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftRo(int count) => 'Au rămas $count';
@@ -28,33 +29,73 @@ String _seatJustTakenByAnotherRo(String label) =>
 String _peekSecuredRo(int count, String total) =>
     '✓ $count asigurate · $total. Încă nu vei fi taxat';
 
-String _ticketCountRo(int count) =>
-    count == 1 ? '$count bilet' : '$count de bilete';
+String _ticketCountRo(int count) => switch (pickerPluralCategory('ro', count)) {
+  PickerPluralCategory.one => '$count bilet',
+  PickerPluralCategory.few => '$count bilete',
+  _ => '$count de bilete',
+};
 
-String _findBestSeatsRo(int count) => count == 1
-    ? 'Găsește $count cel mai bun loc'
-    : 'Găsește cele mai bune $count de locuri';
+String _findBestSeatsRo(int count) =>
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => 'Găsește $count cel mai bun loc',
+      PickerPluralCategory.few => 'Găsește cele mai bune $count locuri',
+      _ => 'Găsește cele mai bune $count de locuri',
+    };
 
 String _reselectSeatsRo(int count) =>
-    count == 1 ? 'Selectează-l din nou' : 'Selectează-le din nou';
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => 'Selectează-l din nou',
+      PickerPluralCategory.few => 'Selectează-le din nou',
+      _ => 'Selectează-le din nou',
+    };
 
-String _seatsFreeRo(int count) =>
-    count == 1 ? '$count loc' : '$count de locuri';
+String _seatsFreeRo(int count) => switch (pickerPluralCategory('ro', count)) {
+  PickerPluralCategory.one => '$count loc',
+  PickerPluralCategory.few => '$count locuri',
+  _ => '$count de locuri',
+};
 
 String _seatsLeftInSectionRo(int count) =>
-    count == 1 ? 'A rămas $count loc' : 'Au rămas $count de locuri';
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => 'A rămas $count loc',
+      PickerPluralCategory.few => 'Au rămas $count locuri',
+      _ => 'Au rămas $count de locuri',
+    };
 
-String _holdLapsedStillFreeRo(int count) => count == 1
-    ? 'Rezervarea ta a expirat cât ai fost plecat. Locul este încă liber.'
-    : 'Rezervarea ta a expirat cât ai fost plecat. Locurile sunt încă libere.';
+String _holdLapsedStillFreeRo(int count) => switch (pickerPluralCategory(
+  'ro',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Rezervarea ta a expirat cât ai fost plecat. Locul este încă liber.',
+  PickerPluralCategory.few =>
+    'Rezervarea ta a expirat cât ai fost plecat. Locurile sunt încă libere.',
+  _ => 'Rezervarea ta a expirat cât ai fost plecat. Locurile sunt încă libere.',
+};
 
-String _holdLapsedSomeTakenRo(int count) => count == 1
-    ? 'Rezervarea ta a expirat cât ai fost plecat, iar $count dintre aceste locuri a fost deja ocupat. Restul sunt încă libere.'
-    : 'Rezervarea ta a expirat cât ai fost plecat, iar $count dintre aceste locuri au fost deja ocupate. Restul sunt încă libere.';
+String _holdLapsedSomeTakenRo(int count) => switch (pickerPluralCategory(
+  'ro',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Rezervarea ta a expirat cât ai fost plecat, iar $count dintre aceste locuri a fost deja ocupat. Restul sunt încă libere.',
+  PickerPluralCategory.few =>
+    'Rezervarea ta a expirat cât ai fost plecat, iar $count dintre aceste locuri au fost deja ocupate. Restul sunt încă libere.',
+  _ =>
+    'Rezervarea ta a expirat cât ai fost plecat, iar $count dintre aceste locuri au fost deja ocupate. Restul sunt încă libere.',
+};
 
-String _holdLapsedAllTakenRo(int count) => count == 1
-    ? 'Rezervarea ta a expirat cât ai fost plecat, iar acest loc a fost deja ocupat.'
-    : 'Rezervarea ta a expirat cât ai fost plecat, iar aceste locuri au fost deja ocupate.';
+String _holdLapsedAllTakenRo(int count) => switch (pickerPluralCategory(
+  'ro',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Rezervarea ta a expirat cât ai fost plecat, iar acest loc a fost deja ocupat.',
+  PickerPluralCategory.few =>
+    'Rezervarea ta a expirat cât ai fost plecat, iar aceste locuri au fost deja ocupate.',
+  _ =>
+    'Rezervarea ta a expirat cât ai fost plecat, iar aceste locuri au fost deja ocupate.',
+};
 
 String _continueWithTotalRo(String money) => 'Continuă \u00b7 $money';
 

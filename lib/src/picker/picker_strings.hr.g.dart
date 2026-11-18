@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftHr(int count) => 'Preostalo $count';
@@ -28,33 +29,74 @@ String _seatJustTakenByAnotherHr(String label) =>
 String _peekSecuredHr(int count, String total) =>
     '✓ $count osigurano · $total. Još vas nećemo teretiti';
 
-String _ticketCountHr(int count) =>
-    count == 1 ? '$count ulaznica' : '$count ulaznica';
+String _ticketCountHr(int count) => switch (pickerPluralCategory('hr', count)) {
+  PickerPluralCategory.one => '$count ulaznica',
+  PickerPluralCategory.few => '$count ulaznice',
+  _ => '$count ulaznica',
+};
 
-String _findBestSeatsHr(int count) => count == 1
-    ? 'Pronađi $count najbolje mjesto'
-    : 'Pronađi $count najboljih mjesta';
+String _findBestSeatsHr(int count) =>
+    switch (pickerPluralCategory('hr', count)) {
+      PickerPluralCategory.one => 'Pronađi $count najbolje mjesto',
+      PickerPluralCategory.few => 'Pronađi $count najbolja mjesta',
+      _ => 'Pronađi $count najboljih mjesta',
+    };
 
 String _reselectSeatsHr(int count) =>
-    count == 1 ? 'Ponovno ga odaberite' : 'Ponovno ih odaberite';
+    switch (pickerPluralCategory('hr', count)) {
+      PickerPluralCategory.one => 'Ponovno ga odaberite',
+      PickerPluralCategory.few => 'Ponovno ih odaberite',
+      _ => 'Ponovno ih odaberite',
+    };
 
-String _seatsFreeHr(int count) =>
-    count == 1 ? '$count mjesto' : '$count mjesta';
+String _seatsFreeHr(int count) => switch (pickerPluralCategory('hr', count)) {
+  PickerPluralCategory.one => '$count mjesto',
+  PickerPluralCategory.few => '$count mjesta',
+  _ => '$count mjesta',
+};
 
 String _seatsLeftInSectionHr(int count) =>
-    count == 1 ? 'Preostalo $count mjesto' : 'Preostalo $count mjesta';
+    switch (pickerPluralCategory('hr', count)) {
+      PickerPluralCategory.one => 'Preostalo $count mjesto',
+      PickerPluralCategory.few => 'Preostala $count mjesta',
+      _ => 'Preostalo $count mjesta',
+    };
 
-String _holdLapsedStillFreeHr(int count) => count == 1
-    ? 'Vaša je rezervacija istekla dok vas nije bilo. To je mjesto i dalje slobodno.'
-    : 'Vaša je rezervacija istekla dok vas nije bilo. Ta su mjesta i dalje slobodna.';
+String _holdLapsedStillFreeHr(int count) => switch (pickerPluralCategory(
+  'hr',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaša je rezervacija istekla dok vas nije bilo. To je mjesto i dalje slobodno.',
+  PickerPluralCategory.few =>
+    'Vaša je rezervacija istekla dok vas nije bilo. Ta su mjesta i dalje slobodna.',
+  _ =>
+    'Vaša je rezervacija istekla dok vas nije bilo. Ta su mjesta i dalje slobodna.',
+};
 
-String _holdLapsedSomeTakenHr(int count) => count == 1
-    ? 'Vaša je rezervacija istekla dok vas nije bilo, a $count od tih mjesta je već zauzeto. Ostala su i dalje slobodna.'
-    : 'Vaša je rezervacija istekla dok vas nije bilo, a $count od tih mjesta je već zauzeto. Ostala su i dalje slobodna.';
+String _holdLapsedSomeTakenHr(int count) => switch (pickerPluralCategory(
+  'hr',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaša je rezervacija istekla dok vas nije bilo, a $count od tih mjesta je već zauzeto. Ostala su i dalje slobodna.',
+  PickerPluralCategory.few =>
+    'Vaša je rezervacija istekla dok vas nije bilo, a $count od tih mjesta su već zauzeta. Ostala su i dalje slobodna.',
+  _ =>
+    'Vaša je rezervacija istekla dok vas nije bilo, a $count od tih mjesta je već zauzeto. Ostala su i dalje slobodna.',
+};
 
-String _holdLapsedAllTakenHr(int count) => count == 1
-    ? 'Vaša je rezervacija istekla dok vas nije bilo, a to je mjesto već zauzeto.'
-    : 'Vaša je rezervacija istekla dok vas nije bilo, a ta su mjesta već zauzeta.';
+String _holdLapsedAllTakenHr(int count) => switch (pickerPluralCategory(
+  'hr',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaša je rezervacija istekla dok vas nije bilo, a to je mjesto već zauzeto.',
+  PickerPluralCategory.few =>
+    'Vaša je rezervacija istekla dok vas nije bilo, a ta su mjesta već zauzeta.',
+  _ =>
+    'Vaša je rezervacija istekla dok vas nije bilo, a ta su mjesta već zauzeta.',
+};
 
 String _continueWithTotalHr(String money) => 'Nastavi \u00b7 $money';
 

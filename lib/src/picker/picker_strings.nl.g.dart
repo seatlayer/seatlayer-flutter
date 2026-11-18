@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftNl(int count) => 'Nog $count';
@@ -29,32 +30,63 @@ String _seatJustTakenByAnotherNl(String label) =>
 String _peekSecuredNl(int count, String total) =>
     '✓ $count vastgelegd · $total. Je betaalt nu nog niets';
 
-String _ticketCountNl(int count) =>
-    count == 1 ? '$count ticket' : '$count tickets';
+String _ticketCountNl(int count) => switch (pickerPluralCategory('nl', count)) {
+  PickerPluralCategory.one => '$count ticket',
+  _ => '$count tickets',
+};
 
 String _findBestSeatsNl(int count) =>
-    count == 1 ? 'Zoek $count beste plaats' : 'Zoek $count beste plaatsen';
+    switch (pickerPluralCategory('nl', count)) {
+      PickerPluralCategory.one => 'Zoek $count beste plaats',
+      _ => 'Zoek $count beste plaatsen',
+    };
 
 String _reselectSeatsNl(int count) =>
-    count == 1 ? 'Opnieuw selecteren' : 'Opnieuw selecteren';
+    switch (pickerPluralCategory('nl', count)) {
+      PickerPluralCategory.one => 'Opnieuw selecteren',
+      _ => 'Opnieuw selecteren',
+    };
 
-String _seatsFreeNl(int count) =>
-    count == 1 ? '$count plaats' : '$count plaatsen';
+String _seatsFreeNl(int count) => switch (pickerPluralCategory('nl', count)) {
+  PickerPluralCategory.one => '$count plaats',
+  _ => '$count plaatsen',
+};
 
 String _seatsLeftInSectionNl(int count) =>
-    count == 1 ? 'Nog $count plaats' : 'Nog $count plaatsen';
+    switch (pickerPluralCategory('nl', count)) {
+      PickerPluralCategory.one => 'Nog $count plaats',
+      _ => 'Nog $count plaatsen',
+    };
 
-String _holdLapsedStillFreeNl(int count) => count == 1
-    ? 'Je reservering is verlopen terwijl je weg was. Die plaats is nog vrij.'
-    : 'Je reservering is verlopen terwijl je weg was. Die plaatsen zijn nog vrij.';
+String _holdLapsedStillFreeNl(int count) => switch (pickerPluralCategory(
+  'nl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Je reservering is verlopen terwijl je weg was. Die plaats is nog vrij.',
+  _ =>
+    'Je reservering is verlopen terwijl je weg was. Die plaatsen zijn nog vrij.',
+};
 
-String _holdLapsedSomeTakenNl(int count) => count == 1
-    ? 'Je reservering is verlopen terwijl je weg was en $count van die plaatsen is inmiddels bezet. De rest is nog vrij.'
-    : 'Je reservering is verlopen terwijl je weg was en $count van die plaatsen zijn inmiddels bezet. De rest is nog vrij.';
+String _holdLapsedSomeTakenNl(int count) => switch (pickerPluralCategory(
+  'nl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Je reservering is verlopen terwijl je weg was en $count van die plaatsen is inmiddels bezet. De rest is nog vrij.',
+  _ =>
+    'Je reservering is verlopen terwijl je weg was en $count van die plaatsen zijn inmiddels bezet. De rest is nog vrij.',
+};
 
-String _holdLapsedAllTakenNl(int count) => count == 1
-    ? 'Je reservering is verlopen terwijl je weg was en die plaats is inmiddels bezet.'
-    : 'Je reservering is verlopen terwijl je weg was en die plaatsen zijn inmiddels bezet.';
+String _holdLapsedAllTakenNl(int count) => switch (pickerPluralCategory(
+  'nl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Je reservering is verlopen terwijl je weg was en die plaats is inmiddels bezet.',
+  _ =>
+    'Je reservering is verlopen terwijl je weg was en die plaatsen zijn inmiddels bezet.',
+};
 
 String _continueWithTotalNl(String money) => 'Doorgaan \u00b7 $money';
 

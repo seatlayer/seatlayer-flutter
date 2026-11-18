@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftLv(int count) => 'Atlicis $count';
@@ -28,31 +29,74 @@ String _seatJustTakenByAnotherLv(String label) =>
 String _peekSecuredLv(int count, String total) =>
     '✓ $count nodrošinātas · $total. Vēl nekas netiks norakstīts';
 
-String _ticketCountLv(int count) =>
-    count == 1 ? '$count biļete' : '$count biļetes';
+String _ticketCountLv(int count) => switch (pickerPluralCategory('lv', count)) {
+  PickerPluralCategory.zero => '$count biļešu',
+  PickerPluralCategory.one => '$count biļete',
+  _ => '$count biļetes',
+};
 
 String _findBestSeatsLv(int count) =>
-    count == 1 ? 'Atrast $count labāko vietu' : 'Atrast $count labākās vietas';
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => 'Atrast $count labāko vietu',
+      PickerPluralCategory.one => 'Atrast $count labāko vietu',
+      _ => 'Atrast $count labākās vietas',
+    };
 
 String _reselectSeatsLv(int count) =>
-    count == 1 ? 'Izvēlēties to vēlreiz' : 'Izvēlēties tās vēlreiz';
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => 'Izvēlēties tās vēlreiz',
+      PickerPluralCategory.one => 'Izvēlēties to vēlreiz',
+      _ => 'Izvēlēties tās vēlreiz',
+    };
 
-String _seatsFreeLv(int count) => count == 1 ? '$count vieta' : '$count vietas';
+String _seatsFreeLv(int count) => switch (pickerPluralCategory('lv', count)) {
+  PickerPluralCategory.zero => '$count vietu',
+  PickerPluralCategory.one => '$count vieta',
+  _ => '$count vietas',
+};
 
 String _seatsLeftInSectionLv(int count) =>
-    count == 1 ? 'Atlikusi $count vieta' : 'Atlikušas $count vietas';
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => 'Atlikušas $count vietu',
+      PickerPluralCategory.one => 'Atlikusi $count vieta',
+      _ => 'Atlikušas $count vietas',
+    };
 
-String _holdLapsedStillFreeLv(int count) => count == 1
-    ? 'Tavs rezervējums beidzās, kamēr biji prom. Šī vieta joprojām ir brīva.'
-    : 'Tavs rezervējums beidzās, kamēr biji prom. Šīs vietas joprojām ir brīvas.';
+String _holdLapsedStillFreeLv(int count) => switch (pickerPluralCategory(
+  'lv',
+  count,
+)) {
+  PickerPluralCategory.zero =>
+    'Tavs rezervējums beidzās, kamēr biji prom. Šīs vietas joprojām ir brīvas.',
+  PickerPluralCategory.one =>
+    'Tavs rezervējums beidzās, kamēr biji prom. Šī vieta joprojām ir brīva.',
+  _ =>
+    'Tavs rezervējums beidzās, kamēr biji prom. Šīs vietas joprojām ir brīvas.',
+};
 
-String _holdLapsedSomeTakenLv(int count) => count == 1
-    ? 'Tavs rezervējums beidzās, kamēr biji prom, un $count no šīm vietām jau ir aizņemta. Pārējās joprojām ir brīvas.'
-    : 'Tavs rezervējums beidzās, kamēr biji prom, un $count no šīm vietām jau ir aizņemtas. Pārējās joprojām ir brīvas.';
+String _holdLapsedSomeTakenLv(int count) => switch (pickerPluralCategory(
+  'lv',
+  count,
+)) {
+  PickerPluralCategory.zero =>
+    'Tavs rezervējums beidzās, kamēr biji prom, un $count no šīm vietām jau ir aizņemtas. Pārējās joprojām ir brīvas.',
+  PickerPluralCategory.one =>
+    'Tavs rezervējums beidzās, kamēr biji prom, un $count no šīm vietām jau ir aizņemta. Pārējās joprojām ir brīvas.',
+  _ =>
+    'Tavs rezervējums beidzās, kamēr biji prom, un $count no šīm vietām jau ir aizņemtas. Pārējās joprojām ir brīvas.',
+};
 
-String _holdLapsedAllTakenLv(int count) => count == 1
-    ? 'Tavs rezervējums beidzās, kamēr biji prom, un šī vieta jau ir aizņemta.'
-    : 'Tavs rezervējums beidzās, kamēr biji prom, un šīs vietas jau ir aizņemtas.';
+String _holdLapsedAllTakenLv(int count) => switch (pickerPluralCategory(
+  'lv',
+  count,
+)) {
+  PickerPluralCategory.zero =>
+    'Tavs rezervējums beidzās, kamēr biji prom, un šīs vietas jau ir aizņemtas.',
+  PickerPluralCategory.one =>
+    'Tavs rezervējums beidzās, kamēr biji prom, un šī vieta jau ir aizņemta.',
+  _ =>
+    'Tavs rezervējums beidzās, kamēr biji prom, un šīs vietas jau ir aizņemtas.',
+};
 
 String _continueWithTotalLv(String money) => 'Turpināt \u00b7 $money';
 

@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftBe(int count) => 'Засталося $count';
@@ -29,31 +30,85 @@ String _seatJustTakenByAnotherBe(String label) =>
 String _peekSecuredBe(int count, String total) =>
     '✓ $count замацавана · $total. Спісання пакуль не будзе';
 
-String _ticketCountBe(int count) =>
-    count == 1 ? '$count білет' : '$count білета';
+String _ticketCountBe(int count) => switch (pickerPluralCategory('be', count)) {
+  PickerPluralCategory.one => '$count білет',
+  PickerPluralCategory.few => '$count білеты',
+  PickerPluralCategory.many => '$count білетаў',
+  _ => '$count білета',
+};
 
 String _findBestSeatsBe(int count) =>
-    count == 1 ? 'Знайсці $count лепшае месца' : 'Знайсці $count лепшага месца';
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => 'Знайсці $count лепшае месца',
+      PickerPluralCategory.few => 'Знайсці $count лепшыя месцы',
+      PickerPluralCategory.many => 'Знайсці $count лепшых месцаў',
+      _ => 'Знайсці $count лепшага месца',
+    };
 
 String _reselectSeatsBe(int count) =>
-    count == 1 ? 'Выбраць яго зноў' : 'Выбраць іх зноў';
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => 'Выбраць яго зноў',
+      PickerPluralCategory.few => 'Выбраць іх зноў',
+      PickerPluralCategory.many => 'Выбраць іх зноў',
+      _ => 'Выбраць іх зноў',
+    };
 
-String _seatsFreeBe(int count) => count == 1 ? '$count месца' : '$count месца';
+String _seatsFreeBe(int count) => switch (pickerPluralCategory('be', count)) {
+  PickerPluralCategory.one => '$count месца',
+  PickerPluralCategory.few => '$count месцы',
+  PickerPluralCategory.many => '$count месцаў',
+  _ => '$count месца',
+};
 
 String _seatsLeftInSectionBe(int count) =>
-    count == 1 ? 'Засталося $count месца' : 'Засталося $count месца';
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => 'Засталося $count месца',
+      PickerPluralCategory.few => 'Засталося $count месцы',
+      PickerPluralCategory.many => 'Засталося $count месцаў',
+      _ => 'Засталося $count месца',
+    };
 
-String _holdLapsedStillFreeBe(int count) => count == 1
-    ? 'Ваша браніраванне скончылася, пакуль вас не было. Гэтае месца яшчэ вольнае.'
-    : 'Ваша браніраванне скончылася, пакуль вас не было. Гэтыя месцы яшчэ вольныя.';
+String _holdLapsedStillFreeBe(int count) => switch (pickerPluralCategory(
+  'be',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ваша браніраванне скончылася, пакуль вас не было. Гэтае месца яшчэ вольнае.',
+  PickerPluralCategory.few =>
+    'Ваша браніраванне скончылася, пакуль вас не было. Гэтыя месцы яшчэ вольныя.',
+  PickerPluralCategory.many =>
+    'Ваша браніраванне скончылася, пакуль вас не было. Гэтыя месцы яшчэ вольныя.',
+  _ =>
+    'Ваша браніраванне скончылася, пакуль вас не было. Гэтыя месцы яшчэ вольныя.',
+};
 
-String _holdLapsedSomeTakenBe(int count) => count == 1
-    ? 'Ваша браніраванне скончылася, пакуль вас не было, і $count з гэтых месцаў ужо занятае. Астатнія яшчэ вольныя.'
-    : 'Ваша браніраванне скончылася, пакуль вас не было, і $count з гэтых месцаў ужо занятыя. Астатнія яшчэ вольныя.';
+String _holdLapsedSomeTakenBe(int count) => switch (pickerPluralCategory(
+  'be',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ваша браніраванне скончылася, пакуль вас не было, і $count з гэтых месцаў ужо занятае. Астатнія яшчэ вольныя.',
+  PickerPluralCategory.few =>
+    'Ваша браніраванне скончылася, пакуль вас не было, і $count з гэтых месцаў ужо занятыя. Астатнія яшчэ вольныя.',
+  PickerPluralCategory.many =>
+    'Ваша браніраванне скончылася, пакуль вас не было, і $count з гэтых месцаў ужо занятыя. Астатнія яшчэ вольныя.',
+  _ =>
+    'Ваша браніраванне скончылася, пакуль вас не было, і $count з гэтых месцаў ужо занятыя. Астатнія яшчэ вольныя.',
+};
 
-String _holdLapsedAllTakenBe(int count) => count == 1
-    ? 'Ваша браніраванне скончылася, пакуль вас не было, і гэтае месца ўжо занятае.'
-    : 'Ваша браніраванне скончылася, пакуль вас не было, і гэтыя месцы ўжо занятыя.';
+String _holdLapsedAllTakenBe(int count) => switch (pickerPluralCategory(
+  'be',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ваша браніраванне скончылася, пакуль вас не было, і гэтае месца ўжо занятае.',
+  PickerPluralCategory.few =>
+    'Ваша браніраванне скончылася, пакуль вас не было, і гэтыя месцы ўжо занятыя.',
+  PickerPluralCategory.many =>
+    'Ваша браніраванне скончылася, пакуль вас не было, і гэтыя месцы ўжо занятыя.',
+  _ =>
+    'Ваша браніраванне скончылася, пакуль вас не было, і гэтыя месцы ўжо занятыя.',
+};
 
 String _continueWithTotalBe(String money) => 'Працягнуць \u00b7 $money';
 

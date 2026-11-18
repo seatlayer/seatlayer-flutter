@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftSk(int count) => 'Zostáva $count';
@@ -28,32 +29,85 @@ String _seatJustTakenByAnotherSk(String label) =>
 String _peekSecuredSk(int count, String total) =>
     '✓ $count zaistených · $total. Zatiaľ vám nič nestrhneme';
 
-String _ticketCountSk(int count) =>
-    count == 1 ? '$count vstupenka' : '$count vstupeniek';
+String _ticketCountSk(int count) => switch (pickerPluralCategory('sk', count)) {
+  PickerPluralCategory.one => '$count vstupenka',
+  PickerPluralCategory.few => '$count vstupenky',
+  PickerPluralCategory.many => '$count vstupenky',
+  _ => '$count vstupeniek',
+};
 
-String _findBestSeatsSk(int count) => count == 1
-    ? 'Nájsť $count najlepšie miesto'
-    : 'Nájsť $count najlepších miest';
+String _findBestSeatsSk(int count) =>
+    switch (pickerPluralCategory('sk', count)) {
+      PickerPluralCategory.one => 'Nájsť $count najlepšie miesto',
+      PickerPluralCategory.few => 'Nájsť $count najlepšie miesta',
+      PickerPluralCategory.many => 'Nájsť $count najlepšieho miesta',
+      _ => 'Nájsť $count najlepších miest',
+    };
 
 String _reselectSeatsSk(int count) =>
-    count == 1 ? 'Vybrať ho znova' : 'Vybrať ich znova';
+    switch (pickerPluralCategory('sk', count)) {
+      PickerPluralCategory.one => 'Vybrať ho znova',
+      PickerPluralCategory.few => 'Vybrať ich znova',
+      PickerPluralCategory.many => 'Vybrať ich znova',
+      _ => 'Vybrať ich znova',
+    };
 
-String _seatsFreeSk(int count) => count == 1 ? '$count miesto' : '$count miest';
+String _seatsFreeSk(int count) => switch (pickerPluralCategory('sk', count)) {
+  PickerPluralCategory.one => '$count miesto',
+  PickerPluralCategory.few => '$count miesta',
+  PickerPluralCategory.many => '$count miesta',
+  _ => '$count miest',
+};
 
 String _seatsLeftInSectionSk(int count) =>
-    count == 1 ? 'Zostáva $count miesto' : 'Zostáva $count miest';
+    switch (pickerPluralCategory('sk', count)) {
+      PickerPluralCategory.one => 'Zostáva $count miesto',
+      PickerPluralCategory.few => 'Zostávajú $count miesta',
+      PickerPluralCategory.many => 'Zostáva $count miesta',
+      _ => 'Zostáva $count miest',
+    };
 
-String _holdLapsedStillFreeSk(int count) => count == 1
-    ? 'Vaša rezervácia vypršala, kým ste boli preč. Toto miesto je stále voľné.'
-    : 'Vaša rezervácia vypršala, kým ste boli preč. Tieto miesta sú stále voľné.';
+String _holdLapsedStillFreeSk(int count) => switch (pickerPluralCategory(
+  'sk',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaša rezervácia vypršala, kým ste boli preč. Toto miesto je stále voľné.',
+  PickerPluralCategory.few =>
+    'Vaša rezervácia vypršala, kým ste boli preč. Tieto miesta sú stále voľné.',
+  PickerPluralCategory.many =>
+    'Vaša rezervácia vypršala, kým ste boli preč. Tieto miesta sú stále voľné.',
+  _ =>
+    'Vaša rezervácia vypršala, kým ste boli preč. Tieto miesta sú stále voľné.',
+};
 
-String _holdLapsedSomeTakenSk(int count) => count == 1
-    ? 'Vaša rezervácia vypršala, kým ste boli preč, a $count z týchto miest je už obsadené. Zvyšok je stále voľný.'
-    : 'Vaša rezervácia vypršala, kým ste boli preč, a $count z týchto miest je už obsadených. Zvyšok je stále voľný.';
+String _holdLapsedSomeTakenSk(int count) => switch (pickerPluralCategory(
+  'sk',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaša rezervácia vypršala, kým ste boli preč, a $count z týchto miest je už obsadené. Zvyšok je stále voľný.',
+  PickerPluralCategory.few =>
+    'Vaša rezervácia vypršala, kým ste boli preč, a $count z týchto miest sú už obsadené. Zvyšok je stále voľný.',
+  PickerPluralCategory.many =>
+    'Vaša rezervácia vypršala, kým ste boli preč, a $count z týchto miest je už obsadených. Zvyšok je stále voľný.',
+  _ =>
+    'Vaša rezervácia vypršala, kým ste boli preč, a $count z týchto miest je už obsadených. Zvyšok je stále voľný.',
+};
 
-String _holdLapsedAllTakenSk(int count) => count == 1
-    ? 'Vaša rezervácia vypršala, kým ste boli preč, a toto miesto je už obsadené.'
-    : 'Vaša rezervácia vypršala, kým ste boli preč, a tieto miesta sú už obsadené.';
+String _holdLapsedAllTakenSk(int count) => switch (pickerPluralCategory(
+  'sk',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaša rezervácia vypršala, kým ste boli preč, a toto miesto je už obsadené.',
+  PickerPluralCategory.few =>
+    'Vaša rezervácia vypršala, kým ste boli preč, a tieto miesta sú už obsadené.',
+  PickerPluralCategory.many =>
+    'Vaša rezervácia vypršala, kým ste boli preč, a tieto miesta sú už obsadené.',
+  _ =>
+    'Vaša rezervácia vypršala, kým ste boli preč, a tieto miesta sú už obsadené.',
+};
 
 String _continueWithTotalSk(String money) => 'Pokračovať \u00b7 $money';
 

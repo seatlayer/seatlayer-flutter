@@ -28,29 +28,24 @@ String _seatJustTakenByAnotherVi(String label) =>
 String _peekSecuredVi(int count, String total) =>
     '✓ Đã giữ $count · $total. Bạn chưa bị trừ tiền';
 
-String _ticketCountVi(int count) => count == 1 ? '$count vé' : '$count vé';
+String _ticketCountVi(int count) => '$count vé';
 
-String _findBestSeatsVi(int count) =>
-    count == 1 ? 'Tìm $count ghế tốt nhất' : 'Tìm $count ghế tốt nhất';
+String _findBestSeatsVi(int count) => 'Tìm $count ghế tốt nhất';
 
-String _reselectSeatsVi(int count) => count == 1 ? 'Chọn lại' : 'Chọn lại';
+String _reselectSeatsVi(int count) => 'Chọn lại';
 
-String _seatsFreeVi(int count) => count == 1 ? '$count ghế' : '$count ghế';
+String _seatsFreeVi(int count) => '$count ghế';
 
-String _seatsLeftInSectionVi(int count) =>
-    count == 1 ? 'Còn $count ghế' : 'Còn $count ghế';
+String _seatsLeftInSectionVi(int count) => 'Còn $count ghế';
 
-String _holdLapsedStillFreeVi(int count) => count == 1
-    ? 'Thời gian giữ ghế đã hết khi bạn rời đi. Ghế bạn chọn vẫn còn trống.'
-    : 'Thời gian giữ ghế đã hết khi bạn rời đi. Ghế bạn chọn vẫn còn trống.';
+String _holdLapsedStillFreeVi(int count) =>
+    'Thời gian giữ ghế đã hết khi bạn rời đi. Ghế bạn chọn vẫn còn trống.';
 
-String _holdLapsedSomeTakenVi(int count) => count == 1
-    ? 'Thời gian giữ ghế đã hết khi bạn rời đi, và $count ghế trong số đó đã có người đặt. Các ghế còn lại vẫn trống.'
-    : 'Thời gian giữ ghế đã hết khi bạn rời đi, và $count ghế trong số đó đã có người đặt. Các ghế còn lại vẫn trống.';
+String _holdLapsedSomeTakenVi(int count) =>
+    'Thời gian giữ ghế đã hết khi bạn rời đi, và $count ghế trong số đó đã có người đặt. Các ghế còn lại vẫn trống.';
 
-String _holdLapsedAllTakenVi(int count) => count == 1
-    ? 'Thời gian giữ ghế đã hết khi bạn rời đi, và ghế bạn chọn đã có người đặt.'
-    : 'Thời gian giữ ghế đã hết khi bạn rời đi, và ghế bạn chọn đã có người đặt.';
+String _holdLapsedAllTakenVi(int count) =>
+    'Thời gian giữ ghế đã hết khi bạn rời đi, và ghế bạn chọn đã có người đặt.';
 
 String _continueWithTotalVi(String money) => 'Tiếp tục \u00b7 $money';
 

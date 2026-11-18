@@ -88,7 +88,7 @@ void main() {
 
     await _lapse(tester, map);
 
-    expect(find.text('Your seats were released.'), findsWidgets);
+    expect(find.text('Your seats were released'), findsWidgets);
     expect(find.text('They were held for 15 minutes.'), findsOneWidget);
     expect(find.text('Select them again'), findsOneWidget);
     expect(
@@ -161,7 +161,7 @@ void main() {
 
     await _lapse(tester, map);
 
-    expect(find.text('Your seats were released.'), findsWidgets);
+    expect(find.text('Your seats were released'), findsWidgets);
     expect(
       find.text('Select them again'),
       findsNothing,
@@ -170,7 +170,7 @@ void main() {
 
     await tester.tap(find.byIcon(Icons.close_rounded));
     await pumpToRest(tester);
-    expect(find.text('Your seats were released.'), findsNothing);
+    expect(find.text('Your seats were released'), findsNothing);
   });
 
   testWidgets('a hold that is still good says nothing at all', (tester) async {
@@ -186,7 +186,7 @@ void main() {
 
     final controller = await _lapse(tester, map);
 
-    expect(find.text('Your seats were released.'), findsNothing);
+    expect(find.text('Your seats were released'), findsNothing);
     expect(seatLayerPickerToasts(controller).current, isNull);
     expect(controller.state.hold, isNotNull);
     expect(controller.state.selection, hasLength(3));
@@ -206,7 +206,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Your seats were released.'), findsNothing);
+    expect(find.text('Your seats were released'), findsNothing);
     expect(seatLayerPickerToasts(controller).current, isNull);
     expect(controller.holdLapse, isNotNull);
   });

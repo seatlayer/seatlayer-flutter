@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftPl(int count) => 'Zostało $count';
@@ -29,33 +30,85 @@ String _seatJustTakenByAnotherPl(String label) =>
 String _peekSecuredPl(int count, String total) =>
     '✓ $count zabezpieczone · $total. Jeszcze nic nie pobierzemy';
 
-String _ticketCountPl(int count) =>
-    count == 1 ? '$count bilet' : '$count biletu';
+String _ticketCountPl(int count) => switch (pickerPluralCategory('pl', count)) {
+  PickerPluralCategory.one => '$count bilet',
+  PickerPluralCategory.few => '$count bilety',
+  PickerPluralCategory.many => '$count biletów',
+  _ => '$count biletu',
+};
 
-String _findBestSeatsPl(int count) => count == 1
-    ? 'Znajdź $count najlepsze miejsce'
-    : 'Znajdź $count najlepszego miejsca';
+String _findBestSeatsPl(int count) =>
+    switch (pickerPluralCategory('pl', count)) {
+      PickerPluralCategory.one => 'Znajdź $count najlepsze miejsce',
+      PickerPluralCategory.few => 'Znajdź $count najlepsze miejsca',
+      PickerPluralCategory.many => 'Znajdź $count najlepszych miejsc',
+      _ => 'Znajdź $count najlepszego miejsca',
+    };
 
 String _reselectSeatsPl(int count) =>
-    count == 1 ? 'Wybierz je ponownie' : 'Wybierz je ponownie';
+    switch (pickerPluralCategory('pl', count)) {
+      PickerPluralCategory.one => 'Wybierz je ponownie',
+      PickerPluralCategory.few => 'Wybierz je ponownie',
+      PickerPluralCategory.many => 'Wybierz je ponownie',
+      _ => 'Wybierz je ponownie',
+    };
 
-String _seatsFreePl(int count) =>
-    count == 1 ? '$count miejsce' : '$count miejsca';
+String _seatsFreePl(int count) => switch (pickerPluralCategory('pl', count)) {
+  PickerPluralCategory.one => '$count miejsce',
+  PickerPluralCategory.few => '$count miejsca',
+  PickerPluralCategory.many => '$count miejsc',
+  _ => '$count miejsca',
+};
 
 String _seatsLeftInSectionPl(int count) =>
-    count == 1 ? 'Zostało $count miejsce' : 'Zostało $count miejsca';
+    switch (pickerPluralCategory('pl', count)) {
+      PickerPluralCategory.one => 'Zostało $count miejsce',
+      PickerPluralCategory.few => 'Zostały $count miejsca',
+      PickerPluralCategory.many => 'Zostało $count miejsc',
+      _ => 'Zostało $count miejsca',
+    };
 
-String _holdLapsedStillFreePl(int count) => count == 1
-    ? 'Twoja rezerwacja wygasła podczas Twojej nieobecności. To miejsce jest nadal wolne.'
-    : 'Twoja rezerwacja wygasła podczas Twojej nieobecności. Te miejsca są nadal wolne.';
+String _holdLapsedStillFreePl(int count) => switch (pickerPluralCategory(
+  'pl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności. To miejsce jest nadal wolne.',
+  PickerPluralCategory.few =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności. Te miejsca są nadal wolne.',
+  PickerPluralCategory.many =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności. Te miejsca są nadal wolne.',
+  _ =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności. Te miejsca są nadal wolne.',
+};
 
-String _holdLapsedSomeTakenPl(int count) => count == 1
-    ? 'Twoja rezerwacja wygasła podczas Twojej nieobecności, a $count z tych miejsc zostało już zajęte. Pozostałe są nadal wolne.'
-    : 'Twoja rezerwacja wygasła podczas Twojej nieobecności, a $count z tych miejsc zostało już zajętych. Pozostałe są nadal wolne.';
+String _holdLapsedSomeTakenPl(int count) => switch (pickerPluralCategory(
+  'pl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności, a $count z tych miejsc zostało już zajęte. Pozostałe są nadal wolne.',
+  PickerPluralCategory.few =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności, a $count z tych miejsc zostały już zajęte. Pozostałe są nadal wolne.',
+  PickerPluralCategory.many =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności, a $count z tych miejsc zostało już zajętych. Pozostałe są nadal wolne.',
+  _ =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności, a $count z tych miejsc zostało już zajętych. Pozostałe są nadal wolne.',
+};
 
-String _holdLapsedAllTakenPl(int count) => count == 1
-    ? 'Twoja rezerwacja wygasła podczas Twojej nieobecności, a to miejsce zostało już zajęte.'
-    : 'Twoja rezerwacja wygasła podczas Twojej nieobecności, a te miejsca zostały już zajęte.';
+String _holdLapsedAllTakenPl(int count) => switch (pickerPluralCategory(
+  'pl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności, a to miejsce zostało już zajęte.',
+  PickerPluralCategory.few =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności, a te miejsca zostały już zajęte.',
+  PickerPluralCategory.many =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności, a te miejsca zostały już zajęte.',
+  _ =>
+    'Twoja rezerwacja wygasła podczas Twojej nieobecności, a te miejsca zostały już zajęte.',
+};
 
 String _continueWithTotalPl(String money) => 'Dalej \u00b7 $money';
 

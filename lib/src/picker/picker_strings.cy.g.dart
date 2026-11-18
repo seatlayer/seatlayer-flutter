@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftCy(int count) => '$count ar ôl';
@@ -28,32 +29,107 @@ String _seatJustTakenByAnotherCy(String label) =>
 String _peekSecuredCy(int count, String total) =>
     '✓ $count wedi\'u sicrhau · $total. Ni chodir tâl arnat eto';
 
-String _ticketCountCy(int count) =>
-    count == 1 ? '$count tocyn' : '$count o docynnau';
+String _ticketCountCy(int count) => switch (pickerPluralCategory('cy', count)) {
+  PickerPluralCategory.zero => '$count tocyn',
+  PickerPluralCategory.one => '$count tocyn',
+  PickerPluralCategory.two => '$count docyn',
+  PickerPluralCategory.few => '$count tocyn',
+  PickerPluralCategory.many => '$count thocyn',
+  _ => '$count o docynnau',
+};
 
-String _findBestSeatsCy(int count) => count == 1
-    ? 'Dod o hyd i\'r $count sedd orau'
-    : 'Dod o hyd i\'r $count o seddi gorau';
+String _findBestSeatsCy(int count) =>
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => 'Dod o hyd i\'r $count sedd orau',
+      PickerPluralCategory.one => 'Dod o hyd i\'r $count sedd orau',
+      PickerPluralCategory.two => 'Dod o hyd i\'r $count sedd orau',
+      PickerPluralCategory.few => 'Dod o hyd i\'r $count sedd orau',
+      PickerPluralCategory.many => 'Dod o hyd i\'r $count sedd orau',
+      _ => 'Dod o hyd i\'r $count o seddi gorau',
+    };
 
 String _reselectSeatsCy(int count) =>
-    count == 1 ? 'Dewisa hi eto' : 'Dewisa nhw eto';
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => 'Dewisa nhw eto',
+      PickerPluralCategory.one => 'Dewisa hi eto',
+      PickerPluralCategory.two => 'Dewisa nhw eto',
+      PickerPluralCategory.few => 'Dewisa nhw eto',
+      PickerPluralCategory.many => 'Dewisa nhw eto',
+      _ => 'Dewisa nhw eto',
+    };
 
-String _seatsFreeCy(int count) => count == 1 ? '$count sedd' : '$count o seddi';
+String _seatsFreeCy(int count) => switch (pickerPluralCategory('cy', count)) {
+  PickerPluralCategory.zero => '$count sedd',
+  PickerPluralCategory.one => '$count sedd',
+  PickerPluralCategory.two => '$count sedd',
+  PickerPluralCategory.few => '$count sedd',
+  PickerPluralCategory.many => '$count sedd',
+  _ => '$count o seddi',
+};
 
 String _seatsLeftInSectionCy(int count) =>
-    count == 1 ? '$count sedd ar ôl' : '$count o seddi ar ôl';
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => '$count sedd ar ôl',
+      PickerPluralCategory.one => '$count sedd ar ôl',
+      PickerPluralCategory.two => '$count sedd ar ôl',
+      PickerPluralCategory.few => '$count sedd ar ôl',
+      PickerPluralCategory.many => '$count sedd ar ôl',
+      _ => '$count o seddi ar ôl',
+    };
 
-String _holdLapsedStillFreeCy(int count) => count == 1
-    ? 'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd. Mae’r sedd honno’n dal ar gael.'
-    : 'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd. Mae’r seddi hynny’n dal ar gael.';
+String _holdLapsedStillFreeCy(int count) => switch (pickerPluralCategory(
+  'cy',
+  count,
+)) {
+  PickerPluralCategory.zero =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd. Mae’r seddi hynny’n dal ar gael.',
+  PickerPluralCategory.one =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd. Mae’r sedd honno’n dal ar gael.',
+  PickerPluralCategory.two =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd. Mae’r seddi hynny’n dal ar gael.',
+  PickerPluralCategory.few =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd. Mae’r seddi hynny’n dal ar gael.',
+  PickerPluralCategory.many =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd. Mae’r seddi hynny’n dal ar gael.',
+  _ =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd. Mae’r seddi hynny’n dal ar gael.',
+};
 
-String _holdLapsedSomeTakenCy(int count) => count == 1
-    ? 'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae $count sedd o’r rheini wedi’i chymryd. Mae’r gweddill yn dal ar gael.'
-    : 'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae $count o’r seddi hynny wedi’u cymryd. Mae’r gweddill yn dal ar gael.';
+String _holdLapsedSomeTakenCy(int count) => switch (pickerPluralCategory(
+  'cy',
+  count,
+)) {
+  PickerPluralCategory.zero =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae $count sedd o’r rheini wedi’u cymryd. Mae’r gweddill yn dal ar gael.',
+  PickerPluralCategory.one =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae $count sedd o’r rheini wedi’i chymryd. Mae’r gweddill yn dal ar gael.',
+  PickerPluralCategory.two =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae $count sedd o’r rheini wedi’u cymryd. Mae’r gweddill yn dal ar gael.',
+  PickerPluralCategory.few =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae $count sedd o’r rheini wedi’u cymryd. Mae’r gweddill yn dal ar gael.',
+  PickerPluralCategory.many =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae $count sedd o’r rheini wedi’u cymryd. Mae’r gweddill yn dal ar gael.',
+  _ =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae $count o’r seddi hynny wedi’u cymryd. Mae’r gweddill yn dal ar gael.',
+};
 
-String _holdLapsedAllTakenCy(int count) => count == 1
-    ? 'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae’r sedd honno wedi’i chymryd.'
-    : 'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae’r seddi hynny wedi’u cymryd.';
+String _holdLapsedAllTakenCy(int count) => switch (pickerPluralCategory(
+  'cy',
+  count,
+)) {
+  PickerPluralCategory.zero =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae’r seddi hynny wedi’u cymryd.',
+  PickerPluralCategory.one =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae’r sedd honno wedi’i chymryd.',
+  PickerPluralCategory.two =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae’r seddi hynny wedi’u cymryd.',
+  PickerPluralCategory.few =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae’r seddi hynny wedi’u cymryd.',
+  PickerPluralCategory.many =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae’r seddi hynny wedi’u cymryd.',
+  _ =>
+    'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae’r seddi hynny wedi’u cymryd.',
+};
 
 String _continueWithTotalCy(String money) => 'Parhau \u00b7 $money';
 

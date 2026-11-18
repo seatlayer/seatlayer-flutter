@@ -1,6 +1,6 @@
 {
   "$schema": "https://seatlayer.io/schema/picker-design-source-lock-1.json",
   "version": 1,
-  "tokensSha256": "58e0277d853446d2a11414e13201c034d7fff689a2acc1a8afc45b59aecd2149",
-  "localeStringsSha256": "332f48a5d58eeb8a28525c90892383ad3c886636ddb513cfdaed31217ecbef26"
+  "tokensSha256": "92ed94f518f97c983a199478dd82984ac5c5b60b51b49add4d0298020cd4fab1",
+  "localeStringsSha256": "e216fe0b8464f88c88fae3580de422fad72dc1975f21508605db78ed340b55ef"
 }

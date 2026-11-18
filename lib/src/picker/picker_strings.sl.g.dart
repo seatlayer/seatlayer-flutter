@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftSl(int count) => 'Ostalo $count';
@@ -28,33 +29,85 @@ String _seatJustTakenByAnotherSl(String label) =>
 String _peekSecuredSl(int count, String total) =>
     '✓ $count zagotovljenih · $total. Zdaj še ne bomo bremenili';
 
-String _ticketCountSl(int count) =>
-    count == 1 ? '$count vstopnica' : '$count vstopnic';
+String _ticketCountSl(int count) => switch (pickerPluralCategory('sl', count)) {
+  PickerPluralCategory.one => '$count vstopnica',
+  PickerPluralCategory.two => '$count vstopnici',
+  PickerPluralCategory.few => '$count vstopnice',
+  _ => '$count vstopnic',
+};
 
-String _findBestSeatsSl(int count) => count == 1
-    ? 'Poišči $count najboljši sedež'
-    : 'Poišči $count najboljših sedežev';
+String _findBestSeatsSl(int count) =>
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one => 'Poišči $count najboljši sedež',
+      PickerPluralCategory.two => 'Poišči $count najboljša sedeža',
+      PickerPluralCategory.few => 'Poišči $count najboljše sedeže',
+      _ => 'Poišči $count najboljših sedežev',
+    };
 
 String _reselectSeatsSl(int count) =>
-    count == 1 ? 'Znova ga izberite' : 'Znova jih izberite';
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one => 'Znova ga izberite',
+      PickerPluralCategory.two => 'Znova ju izberite',
+      PickerPluralCategory.few => 'Znova jih izberite',
+      _ => 'Znova jih izberite',
+    };
 
-String _seatsFreeSl(int count) =>
-    count == 1 ? '$count sedež' : '$count sedežev';
+String _seatsFreeSl(int count) => switch (pickerPluralCategory('sl', count)) {
+  PickerPluralCategory.one => '$count sedež',
+  PickerPluralCategory.two => '$count sedeža',
+  PickerPluralCategory.few => '$count sedeži',
+  _ => '$count sedežev',
+};
 
 String _seatsLeftInSectionSl(int count) =>
-    count == 1 ? 'Ostal $count sedež' : 'Ostalo $count sedežev';
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one => 'Ostal $count sedež',
+      PickerPluralCategory.two => 'Ostala $count sedeža',
+      PickerPluralCategory.few => 'Ostali $count sedeži',
+      _ => 'Ostalo $count sedežev',
+    };
 
-String _holdLapsedStillFreeSl(int count) => count == 1
-    ? 'Vaša rezervacija je potekla, medtem ko vas ni bilo. Ta sedež je še vedno prost.'
-    : 'Vaša rezervacija je potekla, medtem ko vas ni bilo. Ti sedeži so še vedno prosti.';
+String _holdLapsedStillFreeSl(int count) => switch (pickerPluralCategory(
+  'sl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo. Ta sedež je še vedno prost.',
+  PickerPluralCategory.two =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo. Ta sedeža sta še vedno prosta.',
+  PickerPluralCategory.few =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo. Ti sedeži so še vedno prosti.',
+  _ =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo. Ti sedeži so še vedno prosti.',
+};
 
-String _holdLapsedSomeTakenSl(int count) => count == 1
-    ? 'Vaša rezervacija je potekla, medtem ko vas ni bilo, in $count teh sedežev je že zaseden. Ostali so še vedno prosti.'
-    : 'Vaša rezervacija je potekla, medtem ko vas ni bilo, in $count teh sedežev je že zasedenih. Ostali so še vedno prosti.';
+String _holdLapsedSomeTakenSl(int count) => switch (pickerPluralCategory(
+  'sl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo, in $count teh sedežev je že zaseden. Ostali so še vedno prosti.',
+  PickerPluralCategory.two =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo, in $count teh sedežev sta že zasedena. Ostali so še vedno prosti.',
+  PickerPluralCategory.few =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo, in $count teh sedežev so že zasedeni. Ostali so še vedno prosti.',
+  _ =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo, in $count teh sedežev je že zasedenih. Ostali so še vedno prosti.',
+};
 
-String _holdLapsedAllTakenSl(int count) => count == 1
-    ? 'Vaša rezervacija je potekla, medtem ko vas ni bilo, in ta sedež je že zaseden.'
-    : 'Vaša rezervacija je potekla, medtem ko vas ni bilo, in ti sedeži so že zasedeni.';
+String _holdLapsedAllTakenSl(int count) => switch (pickerPluralCategory(
+  'sl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo, in ta sedež je že zaseden.',
+  PickerPluralCategory.two =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo, in ta sedeža sta že zasedena.',
+  PickerPluralCategory.few =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo, in ti sedeži so že zasedeni.',
+  _ =>
+    'Vaša rezervacija je potekla, medtem ko vas ni bilo, in ti sedeži so že zasedeni.',
+};
 
 String _continueWithTotalSl(String money) => 'Nadaljuj \u00b7 $money';
 

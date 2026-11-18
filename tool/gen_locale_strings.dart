@@ -201,6 +201,10 @@ const List<_Slot> _countSlot = <_Slot>[
   (parameter: 'count', type: 'int', placeholder: '{count}'),
 ];
 
+/// The plural categories a counted string may carry besides `other`, in the
+/// order the generated `switch` lists them.
+const List<String> _pluralForms = <String>['zero', 'one', 'two', 'few', 'many'];
+
 /// Strings with a singular and a plural form.
 const List<String> _plurals = <String>[
   'ticketCount',
@@ -223,7 +227,7 @@ void main(List<String> args) {
   final wanted = <String, String>{};
   for (final locale in locales) {
     wanted[_pathFor(locale)] = _formatted(
-        _renderLocale(locale, (table[locale]! as Map<String, Object?>)));
+        renderLocale(locale, (table[locale]! as Map<String, Object?>)));
   }
   wanted[_indexFile] = _formatted(_renderIndex(locales));
 
@@ -282,10 +286,21 @@ String _identifier(String locale) => locale
     .map((part) => part[0].toUpperCase() + part.substring(1).toLowerCase())
     .join();
 
-String _renderLocale(String locale, Map<String, Object?> values) {
+/// Whether any counted string in [values] has a form besides `other`, and so
+/// has a category to choose by.
+bool _usesPluralRules(Map<String, Object?> values) => _plurals.any(
+      (field) => _pluralForms.any((form) => values['$field.$form'] != null),
+    );
+
+/// The generated Dart for one locale's [values]. Public for its test.
+String renderLocale(String locale, Map<String, Object?> values) {
   final buffer = StringBuffer()
     ..writeln(_header(locale))
-    ..writeln("import 'picker_strings.dart';")
+    ..writeln(
+      _usesPluralRules(values)
+          ? "import 'picker_plural_rules.dart';\nimport 'picker_strings.dart';"
+          : "import 'picker_strings.dart';",
+    )
     ..writeln();
 
   final suffix = _identifier(locale);
@@ -307,17 +322,35 @@ String _renderLocale(String locale, Map<String, Object?> values) {
   for (final field in _plurals) {
     final other = values['$field.other'] as String?;
     if (other == null) continue;
-    // A locale with no `one` category — Japanese, Chinese, Korean — uses the
-    // same form for both, which is the whole point of it having no `one`.
-    final one = (values['$field.one'] as String?) ?? other;
     final name = '_$field$suffix';
     functions[field] = name;
+    // Every form the runtime has for this locale, chosen the way the runtime
+    // chooses it: by the locale's own plural category. A form the locale's
+    // dictionary lacks falls to `other`, as the runtime's `tCount` does. A
+    // locale with only `other` (Japanese, Chinese, Korean…) needs no choice.
+    final forms = <String, String>{
+      for (final form in _pluralForms)
+        if (values['$field.$form'] case final String value) form: value,
+    };
+    if (forms.isEmpty) {
+      buffer
+        ..writeln(
+          'String $name(int count) => ${_template(other, _countSlot)};',
+        )
+        ..writeln();
+      continue;
+    }
     buffer
-      ..writeln(
-        'String $name(int count) => count == 1\n'
-        '    ? ${_template(one, _countSlot)}\n'
-        '    : ${_template(other, _countSlot)};',
-      )
+      ..writeln('String $name(int count) =>')
+      ..writeln("    switch (pickerPluralCategory('$locale', count)) {");
+    forms.forEach((form, value) {
+      buffer.writeln(
+        '      PickerPluralCategory.$form => ${_template(value, _countSlot)},',
+      );
+    });
+    buffer
+      ..writeln('      _ => ${_template(other, _countSlot)},')
+      ..writeln('    };')
       ..writeln();
   }
 
@@ -328,7 +361,7 @@ String _renderLocale(String locale, Map<String, Object?> values) {
     buffer
       ..writeln(
         'String $name$suffix(String money) => '
-        "'${_escape(continueWord)} \\u00b7 \$money';",
+        "'${escapeDartString(continueWord)} \\u00b7 \$money';",
       )
       ..writeln();
   }
@@ -342,7 +375,7 @@ String _renderLocale(String locale, Map<String, Object?> values) {
   for (final field in _plainFields) {
     final value = values[field] as String?;
     if (value == null) continue;
-    buffer.writeln("  $field: '${_escape(value)}',");
+    buffer.writeln("  $field: '${escapeDartString(value)}',");
   }
   final needs = <String, String>{
     for (final key in _accessNeedKeys)
@@ -352,7 +385,7 @@ String _renderLocale(String locale, Map<String, Object?> values) {
   if (needs.isNotEmpty) {
     buffer.writeln('  accessNeeds: <String, String>{');
     needs.forEach((key, value) {
-      buffer.writeln("    '$key': '${_escape(value)}',");
+      buffer.writeln("    '$key': '${escapeDartString(value)}',");
     });
     buffer.writeln('  },');
   }
@@ -409,8 +442,8 @@ final RegExp _identifierPart = RegExp(r'[A-Za-z0-9_]');
 /// [value] as a Dart string with each slot's placeholder replaced by its
 /// parameter.
 String _template(String value, List<_Slot> slots) {
-  final escaped = _escape(value);
-  // `_escape` turns a literal `$` into `\$`, so the only `$` this can
+  final escaped = escapeDartString(value);
+  // `escapeDartString` turns a literal `$` into `\$`, so the only `$` this can
   // introduce is the interpolation being asked for. Braces go on only where
   // the next character would otherwise join the name: Japanese writes the
   // unit straight after the figure ("約{m}m"), where a bare `$metres` parses
@@ -444,10 +477,16 @@ String _template(String value, List<_Slot> slots) {
   return "'$buffer'";
 }
 
-String _escape(String value) => value
+/// [value] as the inside of a single-quoted Dart string literal.
+///
+/// A line break is written as its escape: a raw one ends the literal, and
+/// `dart format` then fails on the whole generated file.
+String escapeDartString(String value) => value
     .replaceAll(r'\', r'\\')
     .replaceAll(r'$', r'\$')
-    .replaceAll("'", r"\'");
+    .replaceAll("'", r"\'")
+    .replaceAll('\r', r'\r')
+    .replaceAll('\n', r'\n');
 
 /// [source] as `dart format` would write it.
 String _formatted(String source) {

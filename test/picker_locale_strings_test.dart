@@ -42,8 +42,16 @@ void main() {
     final generated = File(
       'lib/src/picker/picker_strings.de.g.dart',
     ).readAsStringSync();
+    // Matched as a named argument, not as a substring: `salesClosed` is
+    // inside `salesClosedPill`, and a substring found the one for the other.
     final missing = german.keys
-        .where((key) => !generated.contains(key.split('.').first))
+        .where(
+          (key) => !RegExp(
+            // A long value goes on the next line, after `field:`.
+            '^  ${RegExp.escape(key.split('.').first)}:\\s',
+            multiLine: true,
+          ).hasMatch(generated),
+        )
         .toList(growable: false)
       ..sort();
     expect(
@@ -53,6 +61,65 @@ void main() {
           'A placeholder string must also be declared in the generator\'s '
           'formatter table.',
     );
+  });
+
+  test('every mapping points at the same sentence in English', () {
+    // A key mapped to the wrong runtime sentence stays green everywhere else:
+    // pointing `zoomIn` at `picker.zoomOut` just translates the wrong words.
+    // English is where that shows, because the runtime's English for a key
+    // must be this package's English for the field it fills.
+    final tokens = (jsonDecode(File('design/tokens.json').readAsStringSync())
+        as Map<String, Object?>)['strings']! as Map<String, Object?>;
+    final english = _table()['en']! as Map<String, Object?>;
+    String normal(String value) => value
+        .toLowerCase()
+        .replaceAll(RegExp(r'\{[a-z]+\}'), '{}')
+        .replaceAll(RegExp(r'\b(the|a|an)\b'), '')
+        .replaceAll(RegExp(r'[^a-z0-9{}]+'), ' ')
+        .trim();
+    String token(String key) {
+      if (key.startsWith('accessNeeds.')) {
+        final need = key.substring('accessNeeds.'.length);
+        return 'access${need.split('-').map((part) => part[0].toUpperCase() + part.substring(1)).join()}';
+      }
+      final parts = key.split('.');
+      return parts.length == 1
+          ? key
+          : '${parts[0]}${parts[1][0].toUpperCase()}${parts[1].substring(1)}';
+    }
+
+    // Mapped on purpose to a runtime sentence in other words. Each is a
+    // decision recorded in the extractor; a new entry here needs one too.
+    const deliberate = <String>{
+      'close', // the runtime's bare "Close"; the native name says what closes
+      'recentre', // one action, worded for the native 3D deck
+      'accessibility', // the runtime menu's name, worded for the native sheet
+      'accessibilityTitle',
+      'fitVenue', // the runtime retired "Fit venue"; both say the same act
+      'errorMessage', // the runtime's newer wording of the same failure
+      // The short provision names (`picker.accessShort.*`): the native names
+      // are the ones drawn in the accessibility sheet's design.
+      'accessNeeds.wheelchair',
+      'accessNeeds.companion',
+      'accessNeeds.semi-ambulatory',
+      'accessNeeds.designated-aisle',
+      'accessNeeds.hearing',
+      'accessNeeds.sign-language',
+      'accessNeeds.plus-size',
+      'accessNeeds.lift-armrest',
+    };
+    final plural = RegExp(r'\.(zero|two|few|many)$');
+    final wrong = <String>[];
+    for (final MapEntry(:key, :value) in english.entries) {
+      if (deliberate.contains(key) || plural.hasMatch(key)) continue;
+      final mine = tokens[token(key)];
+      if (mine is! String) {
+        wrong.add('$key: no English default named ${token(key)}');
+      } else if (normal(mine) != normal(value! as String)) {
+        wrong.add('$key: "$mine" here, "$value" in the runtime');
+      }
+    }
+    expect(wrong, isEmpty, reason: wrong.join('\n'));
   });
 
   test('a language code resolves to its own wording', () {
@@ -161,7 +228,9 @@ void main() {
   test('a sentence with two figures fills both, in the order it writes them',
       () {
     final german = SeatLayerPickerStrings.forLocale(const Locale('de'));
-    expect(german.peekSecured(2, '€40'), '✓ 2 gesichert · €40. '
+    expect(
+        german.peekSecured(2, '€40'),
+        '✓ 2 gesichert · €40. '
         'Noch wird nichts abgebucht');
     final japanese = SeatLayerPickerStrings.forLocale(const Locale('ja'));
     expect(japanese.peekSecured(2, '¥4,000'), contains('2'));

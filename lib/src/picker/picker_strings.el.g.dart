@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftEl(int count) => 'Απομένουν $count';
@@ -29,32 +30,63 @@ String _seatJustTakenByAnotherEl(String label) =>
 String _peekSecuredEl(int count, String total) =>
     '✓ $count εξασφαλίστηκαν · $total. Δεν θα χρεωθείτε ακόμη';
 
-String _ticketCountEl(int count) =>
-    count == 1 ? '$count εισιτήριο' : '$count εισιτήρια';
+String _ticketCountEl(int count) => switch (pickerPluralCategory('el', count)) {
+  PickerPluralCategory.one => '$count εισιτήριο',
+  _ => '$count εισιτήρια',
+};
 
-String _findBestSeatsEl(int count) => count == 1
-    ? 'Βρείτε $count καλύτερη θέση'
-    : 'Βρείτε τις $count καλύτερες θέσεις';
+String _findBestSeatsEl(int count) =>
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => 'Βρείτε $count καλύτερη θέση',
+      _ => 'Βρείτε τις $count καλύτερες θέσεις',
+    };
 
 String _reselectSeatsEl(int count) =>
-    count == 1 ? 'Επιλέξτε την ξανά' : 'Επιλέξτε τις ξανά';
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => 'Επιλέξτε την ξανά',
+      _ => 'Επιλέξτε τις ξανά',
+    };
 
-String _seatsFreeEl(int count) => count == 1 ? '$count θέση' : '$count θέσεις';
+String _seatsFreeEl(int count) => switch (pickerPluralCategory('el', count)) {
+  PickerPluralCategory.one => '$count θέση',
+  _ => '$count θέσεις',
+};
 
 String _seatsLeftInSectionEl(int count) =>
-    count == 1 ? 'Απομένει $count θέση' : 'Απομένουν $count θέσεις';
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => 'Απομένει $count θέση',
+      _ => 'Απομένουν $count θέσεις',
+    };
 
-String _holdLapsedStillFreeEl(int count) => count == 1
-    ? 'Η κράτησή σας έληξε όσο λείπατε. Αυτή η θέση είναι ακόμη ελεύθερη.'
-    : 'Η κράτησή σας έληξε όσο λείπατε. Αυτές οι θέσεις είναι ακόμη ελεύθερες.';
+String _holdLapsedStillFreeEl(int count) => switch (pickerPluralCategory(
+  'el',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Η κράτησή σας έληξε όσο λείπατε. Αυτή η θέση είναι ακόμη ελεύθερη.',
+  _ =>
+    'Η κράτησή σας έληξε όσο λείπατε. Αυτές οι θέσεις είναι ακόμη ελεύθερες.',
+};
 
-String _holdLapsedSomeTakenEl(int count) => count == 1
-    ? 'Η κράτησή σας έληξε όσο λείπατε και $count από αυτές τις θέσεις έχει ήδη κρατηθεί. Οι υπόλοιπες είναι ακόμη ελεύθερες.'
-    : 'Η κράτησή σας έληξε όσο λείπατε και $count από αυτές τις θέσεις έχουν ήδη κρατηθεί. Οι υπόλοιπες είναι ακόμη ελεύθερες.';
+String _holdLapsedSomeTakenEl(int count) => switch (pickerPluralCategory(
+  'el',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Η κράτησή σας έληξε όσο λείπατε και $count από αυτές τις θέσεις έχει ήδη κρατηθεί. Οι υπόλοιπες είναι ακόμη ελεύθερες.',
+  _ =>
+    'Η κράτησή σας έληξε όσο λείπατε και $count από αυτές τις θέσεις έχουν ήδη κρατηθεί. Οι υπόλοιπες είναι ακόμη ελεύθερες.',
+};
 
-String _holdLapsedAllTakenEl(int count) => count == 1
-    ? 'Η κράτησή σας έληξε όσο λείπατε και αυτή η θέση έχει ήδη κρατηθεί.'
-    : 'Η κράτησή σας έληξε όσο λείπατε και αυτές οι θέσεις έχουν ήδη κρατηθεί.';
+String _holdLapsedAllTakenEl(int count) => switch (pickerPluralCategory(
+  'el',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Η κράτησή σας έληξε όσο λείπατε και αυτή η θέση έχει ήδη κρατηθεί.',
+  _ =>
+    'Η κράτησή σας έληξε όσο λείπατε και αυτές οι θέσεις έχουν ήδη κρατηθεί.',
+};
 
 String _continueWithTotalEl(String money) => 'Συνέχεια \u00b7 $money';
 

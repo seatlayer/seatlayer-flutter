@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftSv(int count) => '$count kvar';
@@ -28,32 +29,62 @@ String _seatJustTakenByAnotherSv(String label) =>
 String _peekSecuredSv(int count, String total) =>
     '✓ $count säkrade · $total. Du debiteras inte än';
 
-String _ticketCountSv(int count) =>
-    count == 1 ? '$count biljett' : '$count biljetter';
+String _ticketCountSv(int count) => switch (pickerPluralCategory('sv', count)) {
+  PickerPluralCategory.one => '$count biljett',
+  _ => '$count biljetter',
+};
 
 String _findBestSeatsSv(int count) =>
-    count == 1 ? 'Hitta $count bästa plats' : 'Hitta $count bästa platser';
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => 'Hitta $count bästa plats',
+      _ => 'Hitta $count bästa platser',
+    };
 
 String _reselectSeatsSv(int count) =>
-    count == 1 ? 'Välj den igen' : 'Välj dem igen';
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => 'Välj den igen',
+      _ => 'Välj dem igen',
+    };
 
-String _seatsFreeSv(int count) =>
-    count == 1 ? '$count plats' : '$count platser';
+String _seatsFreeSv(int count) => switch (pickerPluralCategory('sv', count)) {
+  PickerPluralCategory.one => '$count plats',
+  _ => '$count platser',
+};
 
 String _seatsLeftInSectionSv(int count) =>
-    count == 1 ? '$count plats kvar' : '$count platser kvar';
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => '$count plats kvar',
+      _ => '$count platser kvar',
+    };
 
-String _holdLapsedStillFreeSv(int count) => count == 1
-    ? 'Din reservation gick ut medan du var borta. Platsen är fortfarande ledig.'
-    : 'Din reservation gick ut medan du var borta. Platserna är fortfarande lediga.';
+String _holdLapsedStillFreeSv(int count) => switch (pickerPluralCategory(
+  'sv',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Din reservation gick ut medan du var borta. Platsen är fortfarande ledig.',
+  _ =>
+    'Din reservation gick ut medan du var borta. Platserna är fortfarande lediga.',
+};
 
-String _holdLapsedSomeTakenSv(int count) => count == 1
-    ? 'Din reservation gick ut medan du var borta och $count av platserna har tagits. Resten är fortfarande lediga.'
-    : 'Din reservation gick ut medan du var borta och $count av platserna har tagits. Resten är fortfarande lediga.';
+String _holdLapsedSomeTakenSv(int count) => switch (pickerPluralCategory(
+  'sv',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Din reservation gick ut medan du var borta och $count av platserna har tagits. Resten är fortfarande lediga.',
+  _ =>
+    'Din reservation gick ut medan du var borta och $count av platserna har tagits. Resten är fortfarande lediga.',
+};
 
-String _holdLapsedAllTakenSv(int count) => count == 1
-    ? 'Din reservation gick ut medan du var borta och platsen har tagits.'
-    : 'Din reservation gick ut medan du var borta och platserna har tagits.';
+String _holdLapsedAllTakenSv(int count) => switch (pickerPluralCategory(
+  'sv',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Din reservation gick ut medan du var borta och platsen har tagits.',
+  _ => 'Din reservation gick ut medan du var borta och platserna har tagits.',
+};
 
 String _continueWithTotalSv(String money) => 'Fortsätt \u00b7 $money';
 

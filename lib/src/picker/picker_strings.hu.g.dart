@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftHu(int count) => '$count maradt';
@@ -28,31 +29,59 @@ String _seatJustTakenByAnotherHu(String label) =>
 String _peekSecuredHu(int count, String total) =>
     '✓ $count rögzítve · $total. Még nem terhelünk meg';
 
-String _ticketCountHu(int count) => count == 1 ? '$count jegy' : '$count jegy';
+String _ticketCountHu(int count) => switch (pickerPluralCategory('hu', count)) {
+  PickerPluralCategory.one => '$count jegy',
+  _ => '$count jegy',
+};
 
-String _findBestSeatsHu(int count) => count == 1
-    ? '$count legjobb hely keresése'
-    : '$count legjobb hely keresése';
+String _findBestSeatsHu(int count) =>
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => '$count legjobb hely keresése',
+      _ => '$count legjobb hely keresése',
+    };
 
 String _reselectSeatsHu(int count) =>
-    count == 1 ? 'Válassza ki újra' : 'Válassza ki őket újra';
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => 'Válassza ki újra',
+      _ => 'Válassza ki őket újra',
+    };
 
-String _seatsFreeHu(int count) => count == 1 ? '$count hely' : '$count hely';
+String _seatsFreeHu(int count) => switch (pickerPluralCategory('hu', count)) {
+  PickerPluralCategory.one => '$count hely',
+  _ => '$count hely',
+};
 
 String _seatsLeftInSectionHu(int count) =>
-    count == 1 ? '$count hely maradt' : '$count hely maradt';
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => '$count hely maradt',
+      _ => '$count hely maradt',
+    };
 
-String _holdLapsedStillFreeHu(int count) => count == 1
-    ? 'A foglalása lejárt, amíg távol volt. Ez a hely még szabad.'
-    : 'A foglalása lejárt, amíg távol volt. Ezek a helyek még szabadok.';
+String _holdLapsedStillFreeHu(int count) =>
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one =>
+        'A foglalása lejárt, amíg távol volt. Ez a hely még szabad.',
+      _ => 'A foglalása lejárt, amíg távol volt. Ezek a helyek még szabadok.',
+    };
 
-String _holdLapsedSomeTakenHu(int count) => count == 1
-    ? 'A foglalása lejárt, amíg távol volt, és ezek közül $count hely már elkelt. A többi még szabad.'
-    : 'A foglalása lejárt, amíg távol volt, és ezek közül $count hely már elkelt. A többi még szabad.';
+String _holdLapsedSomeTakenHu(int count) => switch (pickerPluralCategory(
+  'hu',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'A foglalása lejárt, amíg távol volt, és ezek közül $count hely már elkelt. A többi még szabad.',
+  _ =>
+    'A foglalása lejárt, amíg távol volt, és ezek közül $count hely már elkelt. A többi még szabad.',
+};
 
-String _holdLapsedAllTakenHu(int count) => count == 1
-    ? 'A foglalása lejárt, amíg távol volt, és ez a hely már elkelt.'
-    : 'A foglalása lejárt, amíg távol volt, és ezek a helyek már elkeltek.';
+String _holdLapsedAllTakenHu(int count) => switch (pickerPluralCategory(
+  'hu',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'A foglalása lejárt, amíg távol volt, és ez a hely már elkelt.',
+  _ => 'A foglalása lejárt, amíg távol volt, és ezek a helyek már elkeltek.',
+};
 
 String _continueWithTotalHu(String money) => 'Tovább \u00b7 $money';
 

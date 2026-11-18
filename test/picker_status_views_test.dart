@@ -74,7 +74,7 @@ void main() {
     expect(tester.takeException(), isNull);
     // Title, what went wrong, and what to do about it — the failure card says
     // three things, and the host's own sentence is the middle one.
-    expect(find.text("The seat map didn't load"), findsOneWidget);
+    expect(find.text('The seat map didn’t load'), findsOneWidget);
     expect(find.text('Your session could not be started.'), findsOneWidget);
     expect(find.text('Check your connection and try again.'), findsOneWidget);
     await tester.tap(find.text('Try again'));

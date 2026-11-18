@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftRu(int count) => 'Осталось $count';
@@ -28,31 +29,79 @@ String _seatJustTakenByAnotherRu(String label) =>
 String _peekSecuredRu(int count, String total) =>
     '✓ $count закреплено · $total. Списания пока не будет';
 
-String _ticketCountRu(int count) =>
-    count == 1 ? '$count билет' : '$count билета';
+String _ticketCountRu(int count) => switch (pickerPluralCategory('ru', count)) {
+  PickerPluralCategory.one => '$count билет',
+  PickerPluralCategory.few => '$count билета',
+  PickerPluralCategory.many => '$count билетов',
+  _ => '$count билета',
+};
 
 String _findBestSeatsRu(int count) =>
-    count == 1 ? 'Найти $count лучшее место' : 'Найти $count лучших места';
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one => 'Найти $count лучшее место',
+      PickerPluralCategory.few => 'Найти $count лучших места',
+      PickerPluralCategory.many => 'Найти $count лучших мест',
+      _ => 'Найти $count лучших места',
+    };
 
 String _reselectSeatsRu(int count) =>
-    count == 1 ? 'Выбрать его снова' : 'Выбрать их снова';
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one => 'Выбрать его снова',
+      PickerPluralCategory.few => 'Выбрать их снова',
+      PickerPluralCategory.many => 'Выбрать их снова',
+      _ => 'Выбрать их снова',
+    };
 
-String _seatsFreeRu(int count) => count == 1 ? '$count место' : '$count места';
+String _seatsFreeRu(int count) => switch (pickerPluralCategory('ru', count)) {
+  PickerPluralCategory.one => '$count место',
+  PickerPluralCategory.few => '$count места',
+  PickerPluralCategory.many => '$count мест',
+  _ => '$count места',
+};
 
 String _seatsLeftInSectionRu(int count) =>
-    count == 1 ? 'Осталось $count место' : 'Осталось $count места';
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one => 'Осталось $count место',
+      PickerPluralCategory.few => 'Осталось $count места',
+      PickerPluralCategory.many => 'Осталось $count мест',
+      _ => 'Осталось $count места',
+    };
 
-String _holdLapsedStillFreeRu(int count) => count == 1
-    ? 'Ваша бронь истекла, пока вас не было. Это место всё ещё свободно.'
-    : 'Ваша бронь истекла, пока вас не было. Эти места всё ещё свободны.';
+String _holdLapsedStillFreeRu(int count) =>
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one =>
+        'Ваша бронь истекла, пока вас не было. Это место всё ещё свободно.',
+      PickerPluralCategory.few =>
+        'Ваша бронь истекла, пока вас не было. Эти места всё ещё свободны.',
+      PickerPluralCategory.many =>
+        'Ваша бронь истекла, пока вас не было. Эти места всё ещё свободны.',
+      _ => 'Ваша бронь истекла, пока вас не было. Эти места всё ещё свободны.',
+    };
 
-String _holdLapsedSomeTakenRu(int count) => count == 1
-    ? 'Ваша бронь истекла, пока вас не было, и $count из этих мест уже занято. Остальные всё ещё свободны.'
-    : 'Ваша бронь истекла, пока вас не было, и $count из этих мест уже занято. Остальные всё ещё свободны.';
+String _holdLapsedSomeTakenRu(int count) => switch (pickerPluralCategory(
+  'ru',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ваша бронь истекла, пока вас не было, и $count из этих мест уже занято. Остальные всё ещё свободны.',
+  PickerPluralCategory.few =>
+    'Ваша бронь истекла, пока вас не было, и $count из этих мест уже заняты. Остальные всё ещё свободны.',
+  PickerPluralCategory.many =>
+    'Ваша бронь истекла, пока вас не было, и $count из этих мест уже занято. Остальные всё ещё свободны.',
+  _ =>
+    'Ваша бронь истекла, пока вас не было, и $count из этих мест уже занято. Остальные всё ещё свободны.',
+};
 
-String _holdLapsedAllTakenRu(int count) => count == 1
-    ? 'Ваша бронь истекла, пока вас не было, и это место уже занято.'
-    : 'Ваша бронь истекла, пока вас не было, и эти места уже заняты.';
+String _holdLapsedAllTakenRu(int count) =>
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one =>
+        'Ваша бронь истекла, пока вас не было, и это место уже занято.',
+      PickerPluralCategory.few =>
+        'Ваша бронь истекла, пока вас не было, и эти места уже заняты.',
+      PickerPluralCategory.many =>
+        'Ваша бронь истекла, пока вас не было, и эти места уже заняты.',
+      _ => 'Ваша бронь истекла, пока вас не было, и эти места уже заняты.',
+    };
 
 String _continueWithTotalRu(String money) => 'Продолжить \u00b7 $money';
 

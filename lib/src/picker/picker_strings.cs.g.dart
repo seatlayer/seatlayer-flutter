@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftCs(int count) => 'Zbývá $count';
@@ -29,31 +30,85 @@ String _seatJustTakenByAnotherCs(String label) =>
 String _peekSecuredCs(int count, String total) =>
     '✓ $count zajištěno · $total. Zatím vám nic nestrhneme';
 
-String _ticketCountCs(int count) =>
-    count == 1 ? '$count vstupenka' : '$count vstupenek';
+String _ticketCountCs(int count) => switch (pickerPluralCategory('cs', count)) {
+  PickerPluralCategory.one => '$count vstupenka',
+  PickerPluralCategory.few => '$count vstupenky',
+  PickerPluralCategory.many => '$count vstupenky',
+  _ => '$count vstupenek',
+};
 
 String _findBestSeatsCs(int count) =>
-    count == 1 ? 'Najít $count nejlepší místo' : 'Najít $count nejlepších míst';
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => 'Najít $count nejlepší místo',
+      PickerPluralCategory.few => 'Najít $count nejlepší místa',
+      PickerPluralCategory.many => 'Najít $count nejlepšího místa',
+      _ => 'Najít $count nejlepších míst',
+    };
 
 String _reselectSeatsCs(int count) =>
-    count == 1 ? 'Vybrat ho znovu' : 'Vybrat je znovu';
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => 'Vybrat ho znovu',
+      PickerPluralCategory.few => 'Vybrat je znovu',
+      PickerPluralCategory.many => 'Vybrat je znovu',
+      _ => 'Vybrat je znovu',
+    };
 
-String _seatsFreeCs(int count) => count == 1 ? '$count místo' : '$count míst';
+String _seatsFreeCs(int count) => switch (pickerPluralCategory('cs', count)) {
+  PickerPluralCategory.one => '$count místo',
+  PickerPluralCategory.few => '$count místa',
+  PickerPluralCategory.many => '$count místa',
+  _ => '$count míst',
+};
 
 String _seatsLeftInSectionCs(int count) =>
-    count == 1 ? 'Zbývá $count místo' : 'Zbývá $count míst';
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => 'Zbývá $count místo',
+      PickerPluralCategory.few => 'Zbývají $count místa',
+      PickerPluralCategory.many => 'Zbývá $count místa',
+      _ => 'Zbývá $count míst',
+    };
 
-String _holdLapsedStillFreeCs(int count) => count == 1
-    ? 'Vaše rezervace vypršela, zatímco jste byli pryč. Toto místo je stále volné.'
-    : 'Vaše rezervace vypršela, zatímco jste byli pryč. Tato místa jsou stále volná.';
+String _holdLapsedStillFreeCs(int count) => switch (pickerPluralCategory(
+  'cs',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč. Toto místo je stále volné.',
+  PickerPluralCategory.few =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč. Tato místa jsou stále volná.',
+  PickerPluralCategory.many =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč. Tato místa jsou stále volná.',
+  _ =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč. Tato místa jsou stále volná.',
+};
 
-String _holdLapsedSomeTakenCs(int count) => count == 1
-    ? 'Vaše rezervace vypršela, zatímco jste byli pryč, a $count z těchto míst je již obsazené. Zbytek je stále volný.'
-    : 'Vaše rezervace vypršela, zatímco jste byli pryč, a $count z těchto míst je již obsazeno. Zbytek je stále volný.';
+String _holdLapsedSomeTakenCs(int count) => switch (pickerPluralCategory(
+  'cs',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč, a $count z těchto míst je již obsazené. Zbytek je stále volný.',
+  PickerPluralCategory.few =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč, a $count z těchto míst jsou již obsazená. Zbytek je stále volný.',
+  PickerPluralCategory.many =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč, a $count z těchto míst je již obsazeno. Zbytek je stále volný.',
+  _ =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč, a $count z těchto míst je již obsazeno. Zbytek je stále volný.',
+};
 
-String _holdLapsedAllTakenCs(int count) => count == 1
-    ? 'Vaše rezervace vypršela, zatímco jste byli pryč, a toto místo je již obsazené.'
-    : 'Vaše rezervace vypršela, zatímco jste byli pryč, a tato místa jsou již obsazená.';
+String _holdLapsedAllTakenCs(int count) => switch (pickerPluralCategory(
+  'cs',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč, a toto místo je již obsazené.',
+  PickerPluralCategory.few =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč, a tato místa jsou již obsazená.',
+  PickerPluralCategory.many =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč, a tato místa jsou již obsazená.',
+  _ =>
+    'Vaše rezervace vypršela, zatímco jste byli pryč, a tato místa jsou již obsazená.',
+};
 
 String _continueWithTotalCs(String money) => 'Pokračovat \u00b7 $money';
 

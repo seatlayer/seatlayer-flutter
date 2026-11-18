@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftSr(int count) => 'Преостало $count';
@@ -28,32 +29,74 @@ String _seatJustTakenByAnotherSr(String label) =>
 String _peekSecuredSr(int count, String total) =>
     '✓ $count обезбеђено · $total. Још вас нећемо теретити';
 
-String _ticketCountSr(int count) =>
-    count == 1 ? '$count улазница' : '$count улазница';
+String _ticketCountSr(int count) => switch (pickerPluralCategory('sr', count)) {
+  PickerPluralCategory.one => '$count улазница',
+  PickerPluralCategory.few => '$count улазнице',
+  _ => '$count улазница',
+};
 
-String _findBestSeatsSr(int count) => count == 1
-    ? 'Пронађи $count најбоље место'
-    : 'Пронађи $count најбољих места';
+String _findBestSeatsSr(int count) =>
+    switch (pickerPluralCategory('sr', count)) {
+      PickerPluralCategory.one => 'Пронађи $count најбоље место',
+      PickerPluralCategory.few => 'Пронађи $count најбоља места',
+      _ => 'Пронађи $count најбољих места',
+    };
 
 String _reselectSeatsSr(int count) =>
-    count == 1 ? 'Изаберите га поново' : 'Изаберите их поново';
+    switch (pickerPluralCategory('sr', count)) {
+      PickerPluralCategory.one => 'Изаберите га поново',
+      PickerPluralCategory.few => 'Изаберите их поново',
+      _ => 'Изаберите их поново',
+    };
 
-String _seatsFreeSr(int count) => count == 1 ? '$count место' : '$count места';
+String _seatsFreeSr(int count) => switch (pickerPluralCategory('sr', count)) {
+  PickerPluralCategory.one => '$count место',
+  PickerPluralCategory.few => '$count места',
+  _ => '$count места',
+};
 
 String _seatsLeftInSectionSr(int count) =>
-    count == 1 ? 'Преостало $count место' : 'Преостало $count места';
+    switch (pickerPluralCategory('sr', count)) {
+      PickerPluralCategory.one => 'Преостало $count место',
+      PickerPluralCategory.few => 'Преостала $count места',
+      _ => 'Преостало $count места',
+    };
 
-String _holdLapsedStillFreeSr(int count) => count == 1
-    ? 'Ваша резервација је истекла док вас није било. То место је и даље слободно.'
-    : 'Ваша резервација је истекла док вас није било. Та места су и даље слободна.';
+String _holdLapsedStillFreeSr(int count) => switch (pickerPluralCategory(
+  'sr',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ваша резервација је истекла док вас није било. То место је и даље слободно.',
+  PickerPluralCategory.few =>
+    'Ваша резервација је истекла док вас није било. Та места су и даље слободна.',
+  _ =>
+    'Ваша резервација је истекла док вас није било. Та места су и даље слободна.',
+};
 
-String _holdLapsedSomeTakenSr(int count) => count == 1
-    ? 'Ваша резервација је истекла док вас није било, а $count тих места је већ заузето. Остала су и даље слободна.'
-    : 'Ваша резервација је истекла док вас није било, а $count тих места је већ заузето. Остала су и даље слободна.';
+String _holdLapsedSomeTakenSr(int count) => switch (pickerPluralCategory(
+  'sr',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ваша резервација је истекла док вас није било, а $count тих места је већ заузето. Остала су и даље слободна.',
+  PickerPluralCategory.few =>
+    'Ваша резервација је истекла док вас није било, а $count тих места су већ заузета. Остала су и даље слободна.',
+  _ =>
+    'Ваша резервација је истекла док вас није било, а $count тих места је већ заузето. Остала су и даље слободна.',
+};
 
-String _holdLapsedAllTakenSr(int count) => count == 1
-    ? 'Ваша резервација је истекла док вас није било, а то место је већ заузето.'
-    : 'Ваша резервација је истекла док вас није било, а та места су већ заузета.';
+String _holdLapsedAllTakenSr(int count) => switch (pickerPluralCategory(
+  'sr',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ваша резервација је истекла док вас није било, а то место је већ заузето.',
+  PickerPluralCategory.few =>
+    'Ваша резервација је истекла док вас није било, а та места су већ заузета.',
+  _ =>
+    'Ваша резервација је истекла док вас није било, а та места су већ заузета.',
+};
 
 String _continueWithTotalSr(String money) => 'Настави \u00b7 $money';
 

@@ -184,9 +184,9 @@ abstract final class SeatLayerStringTokens {
   /// Sales are closed
   static const String salesClosedPill = 'Sales are closed';
 
-  /// ✓ {count} secured · {total} — you won't be charged yet
+  /// ✓ {count} secured · {total}. You won’t be charged yet
   static const String peekSecured =
-      '✓ {count} secured · {total} — you won\'t be charged yet';
+      '✓ {count} secured · {total}. You won’t be charged yet';
 
   /// Seats secured. Opening checkout…
   static const String seatsSecuredOpeningCheckout =
@@ -332,8 +332,8 @@ abstract final class SeatLayerStringTokens {
   /// {need} · {count}
   static const String accessNeedWithCount = '{need} · {count}';
 
-  /// Your seats were released.
-  static const String holdLapsedTitle = 'Your seats were released.';
+  /// Your seats were released
+  static const String holdLapsedTitle = 'Your seats were released';
 
   /// They were held for {n} minutes.
   static const String holdLapsedBody = 'They were held for {n} minutes.';
@@ -423,9 +423,9 @@ abstract final class SeatLayerStringTokens {
   /// Select a ticket type
   static const String selectTicketTier = 'Select a ticket type';
 
-  /// Requires the adjacent wheelchair place.
+  /// Requires the adjacent wheelchair place
   static const String tierCompanionGuidance =
-      'Requires the adjacent wheelchair place.';
+      'Requires the adjacent wheelchair place';
 
   /// {count} places currently available
   static const String placesAvailable = '{count} places currently available';
@@ -454,8 +454,8 @@ abstract final class SeatLayerStringTokens {
   /// +{count} more
   static const String moreCount = '+{count} more';
 
-  /// Drag to move venue
-  static const String moveVenue = 'Drag to move venue';
+  /// Drag to move the venue
+  static const String moveVenue = 'Drag to move the venue';
 
   /// Place {place}
   static const String placeNumberIdentity = 'Place {place}';
@@ -511,8 +511,8 @@ abstract final class SeatLayerStringTokens {
   /// Row {row}
   static const String rowIdentity = 'Row {row}';
 
-  /// Drag to rotate venue
-  static const String rotateVenue = 'Drag to rotate venue';
+  /// Drag to rotate the venue
+  static const String rotateVenue = 'Drag to rotate the venue';
 
   /// Seat {seat}
   static const String seatNumberIdentity = 'Seat {seat}';
@@ -537,9 +537,9 @@ abstract final class SeatLayerStringTokens {
   static const String soldOutCopy =
       'No reserved seats are currently available for this event.';
 
-  /// Your hold expired — the seats were released. Pick again.
+  /// Your hold expired and the seats were released. Pick again.
   static const String holdExpired =
-      'Your hold expired — the seats were released. Pick again.';
+      'Your hold expired and the seats were released. Pick again.';
 
   /// Your hold ended while you were away. That seat is still free.
   static const String holdLapsedStillFreeOne =
@@ -575,13 +575,13 @@ abstract final class SeatLayerStringTokens {
   /// Adding…
   static const String addingEllipsis = 'Adding…';
 
-  /// More time added — your seats are still held.
+  /// More time added. Your seats are still held.
   static const String moreTimeAdded =
-      'More time added — your seats are still held.';
+      'More time added. Your seats are still held.';
 
-  /// Couldn't add more time — please head to checkout now.
+  /// Couldn’t add more time. Please head to checkout now.
   static const String couldNotAddMoreTime =
-      'Couldn\'t add more time — please head to checkout now.';
+      'Couldn’t add more time. Please head to checkout now.';
 
   /// Seat {label} was just taken by another buyer.
   static const String seatJustTakenByAnother =
@@ -591,8 +591,8 @@ abstract final class SeatLayerStringTokens {
   static const String seatsJustTaken =
       'One or more seats were just taken. Please pick again.';
 
-  /// You're all set
-  static const String allSetTitle = 'You\'re all set';
+  /// You’re all set
+  static const String allSetTitle = 'You’re all set';
 
   /// confirmed. A confirmation is on its way.
   static const String confirmedAndOnWay =
@@ -601,8 +601,8 @@ abstract final class SeatLayerStringTokens {
   /// Back to map
   static const String backToMap = 'Back to map';
 
-  /// The seat map didn't load
-  static const String mapDidNotLoad = 'The seat map didn\'t load';
+  /// The seat map didn’t load
+  static const String mapDidNotLoad = 'The seat map didn’t load';
 
   /// Check your connection and try again.
   static const String checkConnection = 'Check your connection and try again.';
@@ -629,8 +629,8 @@ abstract final class SeatLayerStringTokens {
   static const String accessExpiredCopy =
       'Reload the seat map to continue. Seats already in your cart stay held until the timer ends.';
 
-  /// We couldn't verify your access
-  static const String accessUnverifiedTitle = 'We couldn\'t verify your access';
+  /// We couldn’t verify your access
+  static const String accessUnverifiedTitle = 'We couldn’t verify your access';
 
   /// You can still book anything shown as available. Contact whoever sent you here for access to the rest.
   static const String accessUnverifiedCopy =

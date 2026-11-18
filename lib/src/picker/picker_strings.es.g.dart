@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftEs(int count) => '$count libres';
@@ -28,33 +29,70 @@ String _seatJustTakenByAnotherEs(String label) =>
 String _peekSecuredEs(int count, String total) =>
     '✓ $count asegurados · $total. Aún no se te cobrará nada';
 
-String _ticketCountEs(int count) =>
-    count == 1 ? '$count entrada' : '$count entradas';
+String _ticketCountEs(int count) => switch (pickerPluralCategory('es', count)) {
+  PickerPluralCategory.one => '$count entrada',
+  PickerPluralCategory.many => '$count entradas',
+  _ => '$count entradas',
+};
 
-String _findBestSeatsEs(int count) => count == 1
-    ? 'Buscar $count mejor asiento'
-    : 'Buscar $count mejores asientos';
+String _findBestSeatsEs(int count) =>
+    switch (pickerPluralCategory('es', count)) {
+      PickerPluralCategory.one => 'Buscar $count mejor asiento',
+      PickerPluralCategory.many => 'Buscar $count mejores asientos',
+      _ => 'Buscar $count mejores asientos',
+    };
 
 String _reselectSeatsEs(int count) =>
-    count == 1 ? 'Seleccionarla de nuevo' : 'Seleccionarlas de nuevo';
+    switch (pickerPluralCategory('es', count)) {
+      PickerPluralCategory.one => 'Seleccionarla de nuevo',
+      PickerPluralCategory.many => 'Seleccionarlas de nuevo',
+      _ => 'Seleccionarlas de nuevo',
+    };
 
-String _seatsFreeEs(int count) =>
-    count == 1 ? '$count asiento' : '$count asientos';
+String _seatsFreeEs(int count) => switch (pickerPluralCategory('es', count)) {
+  PickerPluralCategory.one => '$count asiento',
+  PickerPluralCategory.many => '$count asientos',
+  _ => '$count asientos',
+};
 
 String _seatsLeftInSectionEs(int count) =>
-    count == 1 ? '$count asiento disponible' : '$count asientos disponibles';
+    switch (pickerPluralCategory('es', count)) {
+      PickerPluralCategory.one => '$count asiento disponible',
+      PickerPluralCategory.many => '$count asientos disponibles',
+      _ => '$count asientos disponibles',
+    };
 
-String _holdLapsedStillFreeEs(int count) => count == 1
-    ? 'Tu reserva caducó mientras no estabas. Esa plaza sigue libre.'
-    : 'Tu reserva caducó mientras no estabas. Esas plazas siguen libres.';
+String _holdLapsedStillFreeEs(int count) =>
+    switch (pickerPluralCategory('es', count)) {
+      PickerPluralCategory.one =>
+        'Tu reserva caducó mientras no estabas. Esa plaza sigue libre.',
+      PickerPluralCategory.many =>
+        'Tu reserva caducó mientras no estabas. Esas plazas siguen libres.',
+      _ => 'Tu reserva caducó mientras no estabas. Esas plazas siguen libres.',
+    };
 
-String _holdLapsedSomeTakenEs(int count) => count == 1
-    ? 'Tu reserva caducó mientras no estabas y $count de esas plazas ya está ocupada. El resto siguen libres.'
-    : 'Tu reserva caducó mientras no estabas y $count de esas plazas ya están ocupadas. El resto siguen libres.';
+String _holdLapsedSomeTakenEs(int count) => switch (pickerPluralCategory(
+  'es',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Tu reserva caducó mientras no estabas y $count de esas plazas ya está ocupada. El resto siguen libres.',
+  PickerPluralCategory.many =>
+    'Tu reserva caducó mientras no estabas y $count de esas plazas ya están ocupadas. El resto siguen libres.',
+  _ =>
+    'Tu reserva caducó mientras no estabas y $count de esas plazas ya están ocupadas. El resto siguen libres.',
+};
 
-String _holdLapsedAllTakenEs(int count) => count == 1
-    ? 'Tu reserva caducó mientras no estabas y esa plaza ya está ocupada.'
-    : 'Tu reserva caducó mientras no estabas y esas plazas ya están ocupadas.';
+String _holdLapsedAllTakenEs(int count) => switch (pickerPluralCategory(
+  'es',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Tu reserva caducó mientras no estabas y esa plaza ya está ocupada.',
+  PickerPluralCategory.many =>
+    'Tu reserva caducó mientras no estabas y esas plazas ya están ocupadas.',
+  _ => 'Tu reserva caducó mientras no estabas y esas plazas ya están ocupadas.',
+};
 
 String _continueWithTotalEs(String money) => 'Continuar \u00b7 $money';
 

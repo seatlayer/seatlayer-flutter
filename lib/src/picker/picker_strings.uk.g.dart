@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftUk(int count) => 'Залишилося $count';
@@ -28,32 +29,83 @@ String _seatJustTakenByAnotherUk(String label) =>
 String _peekSecuredUk(int count, String total) =>
     '✓ $count закріплено · $total. Списання поки не буде';
 
-String _ticketCountUk(int count) =>
-    count == 1 ? '$count квиток' : '$count квитка';
+String _ticketCountUk(int count) => switch (pickerPluralCategory('uk', count)) {
+  PickerPluralCategory.one => '$count квиток',
+  PickerPluralCategory.few => '$count квитки',
+  PickerPluralCategory.many => '$count квитків',
+  _ => '$count квитка',
+};
 
-String _findBestSeatsUk(int count) => count == 1
-    ? 'Знайти $count найкраще місце'
-    : 'Знайти $count найкращого місця';
+String _findBestSeatsUk(int count) =>
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => 'Знайти $count найкраще місце',
+      PickerPluralCategory.few => 'Знайти $count найкращі місця',
+      PickerPluralCategory.many => 'Знайти $count найкращих місць',
+      _ => 'Знайти $count найкращого місця',
+    };
 
 String _reselectSeatsUk(int count) =>
-    count == 1 ? 'Вибрати його знову' : 'Вибрати їх знову';
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => 'Вибрати його знову',
+      PickerPluralCategory.few => 'Вибрати їх знову',
+      PickerPluralCategory.many => 'Вибрати їх знову',
+      _ => 'Вибрати їх знову',
+    };
 
-String _seatsFreeUk(int count) => count == 1 ? '$count місце' : '$count місця';
+String _seatsFreeUk(int count) => switch (pickerPluralCategory('uk', count)) {
+  PickerPluralCategory.one => '$count місце',
+  PickerPluralCategory.few => '$count місця',
+  PickerPluralCategory.many => '$count місць',
+  _ => '$count місця',
+};
 
 String _seatsLeftInSectionUk(int count) =>
-    count == 1 ? 'Залишилося $count місце' : 'Залишилося $count місця';
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => 'Залишилося $count місце',
+      PickerPluralCategory.few => 'Залишилося $count місця',
+      PickerPluralCategory.many => 'Залишилося $count місць',
+      _ => 'Залишилося $count місця',
+    };
 
-String _holdLapsedStillFreeUk(int count) => count == 1
-    ? 'Ваше бронювання завершилося, поки вас не було. Це місце досі вільне.'
-    : 'Ваше бронювання завершилося, поки вас не було. Ці місця досі вільні.';
+String _holdLapsedStillFreeUk(int count) => switch (pickerPluralCategory(
+  'uk',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ваше бронювання завершилося, поки вас не було. Це місце досі вільне.',
+  PickerPluralCategory.few =>
+    'Ваше бронювання завершилося, поки вас не було. Ці місця досі вільні.',
+  PickerPluralCategory.many =>
+    'Ваше бронювання завершилося, поки вас не було. Ці місця досі вільні.',
+  _ => 'Ваше бронювання завершилося, поки вас не було. Ці місця досі вільні.',
+};
 
-String _holdLapsedSomeTakenUk(int count) => count == 1
-    ? 'Ваше бронювання завершилося, поки вас не було, і $count із цих місць уже зайнято. Решта досі вільні.'
-    : 'Ваше бронювання завершилося, поки вас не було, і $count із цих місць уже зайнято. Решта досі вільні.';
+String _holdLapsedSomeTakenUk(int count) => switch (pickerPluralCategory(
+  'uk',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ваше бронювання завершилося, поки вас не було, і $count із цих місць уже зайнято. Решта досі вільні.',
+  PickerPluralCategory.few =>
+    'Ваше бронювання завершилося, поки вас не було, і $count із цих місць уже зайняті. Решта досі вільні.',
+  PickerPluralCategory.many =>
+    'Ваше бронювання завершилося, поки вас не було, і $count із цих місць уже зайнято. Решта досі вільні.',
+  _ =>
+    'Ваше бронювання завершилося, поки вас не було, і $count із цих місць уже зайнято. Решта досі вільні.',
+};
 
-String _holdLapsedAllTakenUk(int count) => count == 1
-    ? 'Ваше бронювання завершилося, поки вас не було, і це місце вже зайнято.'
-    : 'Ваше бронювання завершилося, поки вас не було, і ці місця вже зайнято.';
+String _holdLapsedAllTakenUk(int count) => switch (pickerPluralCategory(
+  'uk',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Ваше бронювання завершилося, поки вас не було, і це місце вже зайнято.',
+  PickerPluralCategory.few =>
+    'Ваше бронювання завершилося, поки вас не було, і ці місця вже зайнято.',
+  PickerPluralCategory.many =>
+    'Ваше бронювання завершилося, поки вас не було, і ці місця вже зайнято.',
+  _ => 'Ваше бронювання завершилося, поки вас не було, і ці місця вже зайнято.',
+};
 
 String _continueWithTotalUk(String money) => 'Продовжити \u00b7 $money';
 

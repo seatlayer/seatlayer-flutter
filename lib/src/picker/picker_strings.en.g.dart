@@ -6,6 +6,7 @@
 // The wording is the SeatLayer runtime's own, so the drawn map and the native
 // chrome around it say the same things in the same words.
 
+import 'picker_plural_rules.dart';
 import 'picker_strings.dart';
 
 String _seatsLeftEn(int count) => '$count left';
@@ -28,31 +29,59 @@ String _seatJustTakenByAnotherEn(String label) =>
 String _peekSecuredEn(int count, String total) =>
     '✓ $count secured · $total. You won’t be charged yet';
 
-String _ticketCountEn(int count) =>
-    count == 1 ? '$count ticket' : '$count tickets';
+String _ticketCountEn(int count) => switch (pickerPluralCategory('en', count)) {
+  PickerPluralCategory.one => '$count ticket',
+  _ => '$count tickets',
+};
 
 String _findBestSeatsEn(int count) =>
-    count == 1 ? 'Find $count best seat' : 'Find $count best seats';
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => 'Find $count best seat',
+      _ => 'Find $count best seats',
+    };
 
 String _reselectSeatsEn(int count) =>
-    count == 1 ? 'Select it again' : 'Select them again';
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => 'Select it again',
+      _ => 'Select them again',
+    };
 
-String _seatsFreeEn(int count) => count == 1 ? '$count seat' : '$count seats';
+String _seatsFreeEn(int count) => switch (pickerPluralCategory('en', count)) {
+  PickerPluralCategory.one => '$count seat',
+  _ => '$count seats',
+};
 
 String _seatsLeftInSectionEn(int count) =>
-    count == 1 ? '$count seat left' : '$count seats left';
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => '$count seat left',
+      _ => '$count seats left',
+    };
 
-String _holdLapsedStillFreeEn(int count) => count == 1
-    ? 'Your hold ended while you were away. That seat is still free.'
-    : 'Your hold ended while you were away. Those seats are still free.';
+String _holdLapsedStillFreeEn(int count) =>
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one =>
+        'Your hold ended while you were away. That seat is still free.',
+      _ => 'Your hold ended while you were away. Those seats are still free.',
+    };
 
-String _holdLapsedSomeTakenEn(int count) => count == 1
-    ? 'Your hold ended while you were away, and $count of those seats has been taken. The rest are still free.'
-    : 'Your hold ended while you were away, and $count of those seats have been taken. The rest are still free.';
+String _holdLapsedSomeTakenEn(int count) => switch (pickerPluralCategory(
+  'en',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Your hold ended while you were away, and $count of those seats has been taken. The rest are still free.',
+  _ =>
+    'Your hold ended while you were away, and $count of those seats have been taken. The rest are still free.',
+};
 
-String _holdLapsedAllTakenEn(int count) => count == 1
-    ? 'Your hold ended while you were away, and that seat has been taken.'
-    : 'Your hold ended while you were away, and those seats have been taken.';
+String _holdLapsedAllTakenEn(int count) => switch (pickerPluralCategory(
+  'en',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Your hold ended while you were away, and that seat has been taken.',
+  _ => 'Your hold ended while you were away, and those seats have been taken.',
+};
 
 String _continueWithTotalEn(String money) => 'Continue \u00b7 $money';
 
