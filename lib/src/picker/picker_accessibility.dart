@@ -206,9 +206,17 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // The picker's own title, not the host's: a host title style
+                // is a different size and weight in every app it lands in.
                 Text(
                   strings.accessibilityTitle,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: TextStyle(
+                    color: theme.text,
+                    fontSize: SeatLayerSizeTokens.accessSheetTitleFontSize,
+                    height: 1.2,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
+                    fontFamily: theme.fontFamily,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 if (available.limited)
@@ -263,7 +271,8 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                           context,
                           FontWeight.w700,
                         ),
-                        letterSpacing: .6,
+                        letterSpacing: 11 *
+                            SeatLayerSizeTokens.accessGroupHeadingTracking,
                         fontFamily: theme.fontFamily,
                       ),
                     ),

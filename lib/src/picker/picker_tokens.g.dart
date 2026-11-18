@@ -653,8 +653,23 @@ abstract final class SeatLayerSizeTokens {
   /// `15`
   static const double accessNoteIconSize = 15;
 
+  /// `17`
+  static const double accessSheetTitleFontSize = 17;
+
+  /// `0.1`
+  static const double accessGroupHeadingTracking = 0.1;
+
   /// `232`
   static const double toastCardLift = 232;
+
+  /// `13.5`
+  static const double explainerToastFontSize = 13.5;
+
+  /// `14`
+  static const double explainerToastPaddingX = 14;
+
+  /// `12`
+  static const double explainerToastPaddingY = 12;
 
   /// `56`
   static const double confirmScrimClearRadius = 56;
@@ -731,6 +746,9 @@ abstract final class SeatLayerRadiusTokens {
 
   /// `999`
   static const double pill = 999;
+
+  /// `14`
+  static const double explainerToast = 14;
 }
 
 /// Material elevations.
