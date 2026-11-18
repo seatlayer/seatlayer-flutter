@@ -24,6 +24,10 @@ enum PickerPluralCategory { zero, one, two, few, many, other }
 /// It is looked up whole, then by its language, the way
 /// `SeatLayerPickerStrings.forLocale` falls back. A language with no rule
 /// here counts as English does: one and other.
+///
+/// `pt-PT` has no rule of its own and follows `pt`, as its strings follow the
+/// `pt` dictionary: a count of 0 takes `one` there ("0 bilhete"), where
+/// `Intl.PluralRules('pt-PT')` would say `other`.
 @internal
 PickerPluralCategory pickerPluralCategory(String tag, int count) {
   final rule = _rules[tag] ?? _rules[tag.split(RegExp('[-_]')).first];

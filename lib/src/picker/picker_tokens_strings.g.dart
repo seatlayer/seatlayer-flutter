@@ -226,6 +226,12 @@ abstract final class SeatLayerStringTokens {
   /// Accessibility and view filters
   static const String accessibility = 'Accessibility and view filters';
 
+  /// {count} filter
+  static const String activeFiltersOne = '{count} filter';
+
+  /// {count} filters
+  static const String activeFiltersOther = '{count} filters';
+
   /// Display options
   static const String displayOptions = 'Display options';
 
@@ -237,6 +243,12 @@ abstract final class SeatLayerStringTokens {
 
   /// {count} sections
   static const String accessibleSections = '{count} sections';
+
+  /// {count} section
+  static const String accessibleSectionsOne = '{count} section';
+
+  /// {count} sections
+  static const String accessibleSectionsOther = '{count} sections';
 
   /// Jump to the first section
   static const String accessJumpFirstSection = 'Jump to the first section';
@@ -338,6 +350,13 @@ abstract final class SeatLayerStringTokens {
   /// They were held for {n} minutes.
   static const String holdLapsedBody = 'They were held for {n} minutes.';
 
+  /// They were held for {count} minute.
+  static const String holdLapsedBodyOne = 'They were held for {count} minute.';
+
+  /// They were held for {count} minutes.
+  static const String holdLapsedBodyOther =
+      'They were held for {count} minutes.';
+
   /// Select it again
   static const String reselectSeatsOne = 'Select it again';
 
@@ -346,6 +365,12 @@ abstract final class SeatLayerStringTokens {
 
   /// {n} could not be recovered
   static const String seatsNotRecovered = '{n} could not be recovered';
+
+  /// {count} could not be recovered
+  static const String seatsNotRecoveredOne = '{count} could not be recovered';
+
+  /// {count} could not be recovered
+  static const String seatsNotRecoveredOther = '{count} could not be recovered';
 
   /// Your seats are already in checkout
   static const String holdInCheckoutTitle =
@@ -380,8 +405,8 @@ abstract final class SeatLayerStringTokens {
   /// Move venue
   static const String panMode = 'Move venue';
 
-  /// Show seats for
-  static const String showSeatsFor = 'Show seats for';
+  /// SHOW SEATS FOR
+  static const String showSeatsFor = 'SHOW SEATS FOR';
 
   /// Dismiss error
   static const String dismissError = 'Dismiss error';
@@ -429,6 +454,13 @@ abstract final class SeatLayerStringTokens {
 
   /// {count} places currently available
   static const String placesAvailable = '{count} places currently available';
+
+  /// {count} place currently available
+  static const String placesAvailableOne = '{count} place currently available';
+
+  /// {count} places currently available
+  static const String placesAvailableOther =
+      '{count} places currently available';
 
   /// Continue · {money}
   static const String continueWithTotal = 'Continue · {money}';
