@@ -360,7 +360,11 @@ class SeatLayerPickerLoadingView extends StatelessWidget {
 const Size _silhouetteBox = Size(200, 140);
 
 /// One breath of the loading silhouette, in and out.
-const Duration _silhouetteBreath = Duration(milliseconds: 1600);
+///
+/// The wide panel's placeholder bars breathe on the same token, so the two
+/// halves of a loading tablet move together.
+const Duration _silhouetteBreath =
+    Duration(milliseconds: SeatLayerMotionTokens.loadingBreath);
 
 /// A venue in outline, breathing, while the real one is on its way.
 ///

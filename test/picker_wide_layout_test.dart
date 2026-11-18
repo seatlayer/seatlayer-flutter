@@ -273,7 +273,11 @@ void main() {
       await tester.pumpWidget(pickerHarness(map, _layout()));
       await tester.pump();
 
-      expect(find.byType(SeatLayerWidePanelHeading), findsNothing);
+      // The loading panel keeps only the prices heading over its bars.
+      expect(find.byType(SeatLayerWidePanelHeading), findsOneWidget);
+      expect(find.text('Ticket prices'), findsOneWidget);
+      expect(find.text('Your seats'), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
     });
 
     testWidgets('the credit sits under the checkout bar', (tester) async {

@@ -102,27 +102,38 @@ class SeatLayerVenue3D extends StatelessWidget {
             ? const SizedBox.expand()
             : Stack(
                 children: <Widget>[
-                  if (targeted)
-                    PositionedDirectional(
-                      top: topInset,
-                      start: _anchorInset,
-                      child: _BackPill(
-                        label: strings.backToVenue,
-                        onPressed: state.isBusy
-                            ? null
-                            : onBackToVenue ??
-                                () => ignorePickerAction(
-                                      controller.setBuyerView(
-                                        SeatLayerBuyerView.venue3D,
-                                        resetView: true,
-                                      ),
-                                    ),
+                  // One row across the scene's top: the way back at the
+                  // start, the Rotate / Move pair at the end, and the pair
+                  // given only the room the way back leaves it.
+                  Positioned.fill(
+                    child: CustomMultiChildLayout(
+                      delegate: _SceneTopRowLayout(
+                        top: topInset,
+                        textDirection: Directionality.of(context),
                       ),
+                      children: <Widget>[
+                        if (targeted)
+                          LayoutId(
+                            id: _SceneTopSlot.back,
+                            child: _BackPill(
+                              label: strings.backToVenue,
+                              onPressed: state.isBusy
+                                  ? null
+                                  : onBackToVenue ??
+                                      () => ignorePickerAction(
+                                            controller.setBuyerView(
+                                              SeatLayerBuyerView.venue3D,
+                                              resetView: true,
+                                            ),
+                                          ),
+                            ),
+                          ),
+                        LayoutId(
+                          id: _SceneTopSlot.pair,
+                          child: const SeatLayerPicker3DNavigationModeButton(),
+                        ),
+                      ],
                     ),
-                  PositionedDirectional(
-                    top: topInset,
-                    end: _anchorInset,
-                    child: const SeatLayerPicker3DNavigationModeButton(),
                   ),
                   Positioned(
                     left: 0,
@@ -135,6 +146,56 @@ class SeatLayerVenue3D extends StatelessWidget {
       ),
     );
   }
+}
+
+enum _SceneTopSlot { back, pair }
+
+/// The scene's top row: the back pill at the start edge, at its own width,
+/// and the Rotate / Move pair at the end edge in whatever room is left.
+///
+/// The pair used to be laid out with no bound at all, so at a large text size
+/// it ran off a phone's edge. Bounded, it draws its glyphs instead of its
+/// words when the words do not fit — and never narrower than its two glyph
+/// halves, so it cannot be squeezed out of existence.
+class _SceneTopRowLayout extends MultiChildLayoutDelegate {
+  _SceneTopRowLayout({required this.top, required this.textDirection});
+
+  final double top;
+  final TextDirection textDirection;
+
+  static const double _pairFloor = 2 * SeatLayerSizeTokens.minimumHitTarget +
+      2 * SeatLayerSizeTokens.immersiveModePairPadding;
+
+  @override
+  void performLayout(Size size) {
+    final rtl = textDirection == TextDirection.rtl;
+    var taken = 0.0;
+    if (hasChild(_SceneTopSlot.back)) {
+      final back = layoutChild(_SceneTopSlot.back, const BoxConstraints());
+      positionChild(
+        _SceneTopSlot.back,
+        Offset(
+            rtl ? size.width - _anchorInset - back.width : _anchorInset, top),
+      );
+      taken = back.width + SeatLayerSizeTokens.mapAnchorGap;
+    }
+    if (hasChild(_SceneTopSlot.pair)) {
+      final room = size.width - 2 * _anchorInset - taken;
+      final pair = layoutChild(
+        _SceneTopSlot.pair,
+        BoxConstraints(maxWidth: room < _pairFloor ? _pairFloor : room),
+      );
+      positionChild(
+        _SceneTopSlot.pair,
+        Offset(
+            rtl ? _anchorInset : size.width - _anchorInset - pair.width, top),
+      );
+    }
+  }
+
+  @override
+  bool shouldRelayout(_SceneTopRowLayout oldDelegate) =>
+      top != oldDelegate.top || textDirection != oldDelegate.textDirection;
 }
 
 class _SeatDeck extends StatelessWidget {

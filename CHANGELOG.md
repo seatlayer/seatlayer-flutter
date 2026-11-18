@@ -22,6 +22,9 @@
 - **Wide layout, panel:** "Ticket prices" and "Your seats" headings, from the new `SeatLayerPickerStrings.ticketPrices` and `SeatLayerPickerStrings.yourSeats` (translated in all 43 locales). The "Powered by SeatLayer" line now sits under the checkout bar, and the panel's divider follows the reading direction.
 - **Wide layout, header date:** new optional `SeatLayerPickerEventDetails.startsAtLabel`. When the snapshot carries it, the wide header's second line reads "date · venue". The picker never formats `startsAt` itself, because the device's time zone may not be the event's.
 - **Wide seat card:** the Section, Row and Seat labels are drawn as the strings give them, no longer upper-cased in code.
+- **Wide layout, loading:** until the first snapshot arrives, the side panel keeps its shape with grey placeholder bars, which pulse with the venue outline and stay still under reduced motion.
+- **Wide layout, accessibility options:** on wide layouts the display-options control opens its options in a popover next to it, so the map stays in view. The phone keeps the bottom sheet. A tap outside, Back or Escape closes it.
+- **3D Rotate / Move:** when the two labels don't fit (large text on a phone), each half shows an icon instead; the label stays as the tooltip and the screen-reader name.
 - **Right-to-left:** in Arabic, Hebrew, Persian and Kurdish the map's corners mirror with the reading direction: the round controls, the Map / 3D control and the 3D Rotate / Move pair stand on the left, the test badge and the floor picker on the right. The venue itself never mirrors.
 
 ## 0.12.0 (2026-09-25)

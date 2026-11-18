@@ -9,6 +9,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'picker_a11y.dart';
+import 'picker_motion.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_theme.dart';
 
@@ -107,4 +108,142 @@ class SeatLayerWidePanelFoot extends StatelessWidget {
           ),
         ],
       );
+}
+
+/// The panel while the first snapshot is on its way.
+///
+/// It keeps the shape it is about to have — the prices heading, three grey
+/// bars where the prices will be, and a bar and a button-sized block at the
+/// foot — so nothing in the panel jumps when the prices land. The bars
+/// breathe with the venue silhouette on the map beside them, and stand still
+/// for a viewer who asked for less movement. They say nothing to a screen
+/// reader: the map's loading surface already announces the load.
+class SeatLayerWidePanelLoading extends StatefulWidget {
+  /// Creates the placeholder panel under the [ticketPrices] heading.
+  const SeatLayerWidePanelLoading({super.key, required this.ticketPrices});
+
+  /// The heading drawn above the bars, as the strings object gives it.
+  final String ticketPrices;
+
+  /// Each price bar's share of the panel's inner width, top to bottom.
+  static const List<double> priceBarFractions = <double>[.70, .55, .62];
+
+  /// The foot's summary bar, as a share of the panel's inner width.
+  static const double footBarFraction = .40;
+
+  @override
+  State<SeatLayerWidePanelLoading> createState() =>
+      _SeatLayerWidePanelLoadingState();
+}
+
+class _SeatLayerWidePanelLoadingState extends State<SeatLayerWidePanelLoading>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _breath = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: SeatLayerMotionTokens.loadingBreath),
+    value: 1,
+  );
+
+  // The silhouette's own curve and depth, so the two breathe as one.
+  late final Animation<double> _opacity = _breath
+      .drive(CurveTween(curve: Curves.easeInOut))
+      .drive(Tween<double>(begin: .55, end: 1));
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (SeatLayerPickerMotion.reduced(context)) {
+      _breath.stop();
+      _breath.value = 1;
+      return;
+    }
+    if (!_breath.isAnimating) _breath.repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _breath.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = seatLayerPickerThemeOf(context);
+    Widget bar(double fraction) => FractionallySizedBox(
+          widthFactor: fraction,
+          alignment: AlignmentDirectional.centerStart,
+          child: Container(
+            height: SeatLayerSizeTokens.widePanelPlaceholderBarHeight,
+            decoration: BoxDecoration(
+              color: theme.divider,
+              borderRadius: BorderRadius.circular(
+                SeatLayerSizeTokens.widePanelPlaceholderBarHeight / 2,
+              ),
+            ),
+          ),
+        );
+    const gap =
+        SizedBox(height: SeatLayerSizeTokens.widePanelPlaceholderBarGap);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        SeatLayerWidePanelHeading(widget.ticketPrices),
+        ExcludeSemantics(
+          child: FadeTransition(
+            opacity: _opacity,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: SeatLayerSizeTokens.widePanelPadX,
+                vertical: 4,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  for (final (index, fraction) in SeatLayerWidePanelLoading
+                      .priceBarFractions.indexed) ...[
+                    if (index > 0) gap,
+                    bar(fraction),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+        const Spacer(),
+        ExcludeSemantics(
+          child: FadeTransition(
+            opacity: _opacity,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  SeatLayerSizeTokens.widePanelPadX,
+                  8,
+                  SeatLayerSizeTokens.widePanelPadX,
+                  12,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    bar(SeatLayerWidePanelLoading.footBarFraction),
+                    gap,
+                    Container(
+                      height:
+                          SeatLayerSizeTokens.widePanelPlaceholderButtonHeight,
+                      decoration: BoxDecoration(
+                        color: theme.divider,
+                        borderRadius: BorderRadius.circular(
+                          SeatLayerRadiusTokens.peekButton,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

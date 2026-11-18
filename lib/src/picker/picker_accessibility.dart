@@ -5,6 +5,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'picker_accessibility_focus.dart';
+import 'picker_accessibility_popover.dart';
 import 'picker_blocked_regions.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
@@ -192,6 +193,9 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
       await controller.setColorblindSafe(next);
     }
 
+    // In the wide control column the options open beside the control, as a
+    // popover; a bottom sheet there would cover the map they act on.
+    final popover = SeatLayerAccessPopoverAnchor.of(context);
     // The sheet body is built INSIDE the scope and handed to the route, so the
     // route's builder — which runs under the Navigator overlay, above the
     // scope — still gets the picker's controller, strings and palette.
@@ -199,8 +203,21 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
       context,
       StatefulBuilder(
         builder: (context, setSheetState) => SafeArea(
+          // The popover stands clear of every edge; the sheet keeps the
+          // insets it always had.
+          top: !popover,
+          left: !popover,
+          right: !popover,
+          bottom: !popover,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            padding: popover
+                ? const EdgeInsets.fromLTRB(
+                    SeatLayerSizeTokens.accessPopoverPadX,
+                    SeatLayerSizeTokens.accessPopoverPadTop,
+                    SeatLayerSizeTokens.accessPopoverPadX,
+                    SeatLayerSizeTokens.accessPopoverPadBottom,
+                  )
+                : const EdgeInsets.fromLTRB(20, 0, 20, 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -357,25 +374,36 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
     // thing the sheet hands back is the provision a pressed count asked to
     // walk, if any. Drag-down and the scrim close it with nothing, which is
     // exactly right — there is nothing left to apply.
+    final maxHeight = _sheetMaxHeight(MediaQuery.sizeOf(context).height);
     final jumpTo = await SeatLayerBlockedRegionScope.coverWhile(
       context,
-      () => showModalBottomSheet<String>(
-        context: context,
-        isScrollControlled: true,
-        showDragHandle: true,
-        backgroundColor: theme.surface,
-        // BOUNDED, AND IT SCROLLS INSIDE THE BOUND. A chart carrying the whole
-        // vocabulary gives this sheet twelve accommodation rows plus the
-        // limited-view and colourblind switches, and an unbounded scroll-
-        // controlled sheet answers that by taking the entire screen — the map
-        // the buyer is filtering disappears behind the filter. The bound is a
-        // fraction of the room that exists, floored so a short phone still
-        // gets a window worth scrolling rather than a sliver.
-        constraints: BoxConstraints(
-          maxHeight: _sheetMaxHeight(MediaQuery.sizeOf(context).height),
-        ),
-        builder: (_) => body,
-      ),
+      () => popover
+          ? showSeatLayerAccessPopover<String>(
+              context: context,
+              maxHeight: maxHeight,
+              surface: theme.surface,
+              divider: theme.divider,
+              label: strings.accessibilityTitle,
+              barrierLabel: strings.close,
+              child: body,
+            )
+          : showModalBottomSheet<String>(
+              context: context,
+              isScrollControlled: true,
+              showDragHandle: true,
+              backgroundColor: theme.surface,
+              // BOUNDED, AND IT SCROLLS INSIDE THE BOUND. A chart carrying
+              // the whole vocabulary gives this sheet twelve accommodation
+              // rows plus the limited-view and colourblind switches, and an
+              // unbounded scroll-controlled sheet answers that by taking the
+              // entire screen — the map the buyer is filtering disappears
+              // behind the filter. The bound is a fraction of the room that
+              // exists, floored so a short phone still gets a window worth
+              // scrolling rather than a sliver. The popover takes the same
+              // bound.
+              constraints: BoxConstraints(maxHeight: maxHeight),
+              builder: (_) => body,
+            ),
     );
     if (jumpTo == null) return;
     // A pressed count turns its own provision on, then starts a walk over that

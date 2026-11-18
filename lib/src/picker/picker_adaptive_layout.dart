@@ -672,39 +672,47 @@ class _SeatLayerPickerAdaptiveLayoutState
                             start: BorderSide(color: resolved.divider),
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            if (pricesUp)
-                              SeatLayerWidePanelHeading(strings.ticketPrices),
-                            prices,
-                            // Beside the map rather than on it, so the wide
-                            // layout reports no band for it.
-                            if (floorStripUp)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: floorStrip,
+                        // Until the first snapshot the panel holds its shape
+                        // in grey bars rather than standing empty.
+                        child: state.phase == SeatLayerPickerPhase.initializing
+                            ? SeatLayerWidePanelLoading(
+                                ticketPrices: strings.ticketPrices,
+                              )
+                            : Column(
+                                children: [
+                                  if (pricesUp)
+                                    SeatLayerWidePanelHeading(
+                                        strings.ticketPrices),
+                                  prices,
+                                  // Beside the map rather than on it, so the wide
+                                  // layout reports no band for it.
+                                  if (floorStripUp)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      child: floorStrip,
+                                    ),
+                                  sections,
+                                  SeatLayerWidePanelHeading.seats(
+                                      strings.yourSeats),
+                                  // The filter control used to be repeated here,
+                                  // under the best-seats card, while a second copy
+                                  // stood in the map's bottom-left corner. One
+                                  // control, in the map's column.
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                                    child: best,
+                                  ),
+                                  Expanded(
+                                      child:
+                                          SingleChildScrollView(child: tray)),
+                                  actionError,
+                                  SeatLayerWidePanelFoot(
+                                    checkout: checkout,
+                                    attribution: attribution,
+                                  ),
+                                ],
                               ),
-                            sections,
-                            if (state.phase !=
-                                SeatLayerPickerPhase.initializing)
-                              SeatLayerWidePanelHeading.seats(
-                                  strings.yourSeats),
-                            // The filter control used to be repeated here,
-                            // under the best-seats card, while a second copy
-                            // stood in the map's bottom-left corner. One
-                            // control, in the map's column.
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                              child: best,
-                            ),
-                            Expanded(child: SingleChildScrollView(child: tray)),
-                            actionError,
-                            SeatLayerWidePanelFoot(
-                              checkout: checkout,
-                              attribution: attribution,
-                            ),
-                          ],
-                        ),
                       ),
                     ],
                   ),

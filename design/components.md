@@ -154,6 +154,14 @@ picker is still loading. `size.widePanelHeadingFontSize` at w700 in
 screen readers. The credit closes the panel, under the checkout bar, and the
 device's bottom inset is taken once, under the credit.
 
+**Wide panel while loading** (`SeatLayerWidePanelLoading`, same file): until the
+first snapshot, the prices heading over three `color.*.divider` bars (70, 55,
+62 per cent wide, `size.widePanelPlaceholderBarHeight`, `size.widePanelPlaceholderBarGap`
+apart) and, at the foot, a 40 per cent bar over a
+`size.widePanelPlaceholderButtonHeight` block at `radius.peekButton`. They
+breathe with the venue silhouette over `motion.durationOutsideBudget.loadingBreath`
+and stand still under reduced motion; hidden from screen readers.
+
 ---
 
 ## Header
@@ -668,7 +676,10 @@ sheet merges `continueButtonStyle` over it) · **Instance override** `style:`
   `color.dark.immersiveGlass`, its border and ink, blurred by
   `size.immersiveGlassBlur`; captions use the deeper caption glass. Every piece
   is a pill. Top-left `‹ Back to venue` (`size.immersiveBackPillHeight`), drawn
-  only while the buyer is sitting in an exact seat. Bottom: a caption chip
+  only while the buyer is sitting in an exact seat. Top-right the Rotate / Move
+  pair, in the room the back pill leaves it; where its words do not fit at the
+  buyer's text size it draws two glyphs at `size.immersiveModeIconSize`, each
+  still named and tooltipped with its words. Bottom: a caption chip
   naming the seat, then `‹` previous seat, `Open venue 360°`, `›` next seat, and
   recentre, as chips of `size.immersiveNavChipHeight`.
 - **Motion** `motion.duration.immersive`.
@@ -724,7 +735,7 @@ specification. Names, slots and files:
 | `SeatLayerPickerExtendHoldPrompt` | one named `+5 min` step, once per hold, dismissable; **phone: off by default**, host opt-in via `SeatLayerPickerChromeOptions(showExtendHoldPrompt: true)`; wide keeps it | §3.13.8 |
 | `SeatLayerPickerBookedOverlay` | — | §3.13.10 |
 | `SeatLayerPickerGeneralAdmissionPrompt` / `…TablePrompt` | — | §3.13.11–12 |
-| `SeatLayerPickerAccessibilityFilters` | — | §3.5, §4.10 — the head of the map's control column on both widths; switches apply on change, no apply step, the sheet stays open; opening it clears a pending seat card; the sheet is bounded to `size.accessSheetMaxHeightFraction` (floor `size.accessSheetMinHeight`) and scrolls inside it. Rows are a FIXED 50 high, closed by a hairline of `color.*.divider` at 35 per cent, and read **icon cell (`size.accessRowIconCell`) · `size.accessRowGap` · label (flexible, ellipsized) · ⓘ in a 36 column where the row has a note · count in a 68 column · `size.accessRowSwitchGap` · drawn switch**. The whole line toggles. The count is `N free` on a quiet ground of `color.*.text` at 6 per cent, tappable to jump where the runtime supports it; a sold-out provision stays, named and disabled, reading `0`. The two map switches (hide limited view, colourblind-friendly) come first; the provisions follow under a `strings.showSeatsFor` heading, drawn as given (written in capitals, never upper-cased in code); the labelled form (`compact: false`) reads `strings.activeFilters(n)` while filters are on |
+| `SeatLayerPickerAccessibilityFilters` | — | §3.5, §4.10 — in the map's control column, above `+`, on both widths; switches apply on change, no apply step, the sheet stays open; opening it clears a pending seat card; the sheet is bounded to `size.accessSheetMaxHeightFraction` (floor `size.accessSheetMinHeight`) and scrolls inside it. In the wide column the same content opens as a popover beside the control (`picker_accessibility_popover.dart`): `size.accessPopoverWidth` wide, on its start side `size.accessPopoverGap` away, top-aligned with it, no scrim, closed by a tap outside, Back or Escape. Rows are a FIXED 50 high, closed by a hairline of `color.*.divider` at 35 per cent, and read **icon cell (`size.accessRowIconCell`) · `size.accessRowGap` · label (flexible, ellipsized) · ⓘ in a 36 column where the row has a note · count in a 68 column · `size.accessRowSwitchGap` · drawn switch**. The whole line toggles. The count is `N free` on a quiet ground of `color.*.text` at 6 per cent, tappable to jump where the runtime supports it; a sold-out provision stays, named and disabled, reading `0`. The two map switches (hide limited view, colourblind-friendly) come first; the provisions follow under a `strings.showSeatsFor` heading, drawn as given (written in capitals, never upper-cased in code); the labelled form (`compact: false`) reads `strings.activeFilters(n)` while filters are on |
 | `SeatLayerPickerAccessibleStepper` | — | §3.4.1 |
 | `SeatLayerSeatViewChrome` | `seatViewChromeStyle` | §3.15 |
 | `SeatLayerPickerAttribution` | — | §3.10.3 |
