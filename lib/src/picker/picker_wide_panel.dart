@@ -258,10 +258,12 @@ class _SeatLayerWidePanelLoadingState extends State<SeatLayerWidePanelLoading>
 ///
 /// The phone sheet's foot, standing in the panel: "No seats selected", or the
 /// count and the total, and under it the one button that holds the seats and
-/// hands them to checkout. With an empty cart the button names the way to
-/// seats — "Find best seats" — but is drawn off: the best-seats card above it
-/// is the door, and a second live copy of it here would be the same question
-/// asked twice.
+/// hands them to checkout. With an empty cart, where the panel has a
+/// best-seats card, the button names the way to seats — "Find best seats" —
+/// but is drawn off: the card above it is the door, and a second live copy of
+/// it here would be the same question asked twice. Where there is no card
+/// (best seats switched off, or a read-only picker) it says "Select seats",
+/// as the phone's button does.
 class SeatLayerWideCheckoutFoot extends StatelessWidget {
   /// Creates the wide checkout foot.
   const SeatLayerWideCheckoutFoot({super.key, required this.onCheckout});
@@ -272,8 +274,8 @@ class SeatLayerWideCheckoutFoot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
+    final options = SeatLayerPickerScope.optionsOf(context);
     final theme = seatLayerPickerThemeOf(context);
-    final strings = SeatLayerPickerScope.stringsOf(context);
     return Material(
       color: theme.surface,
       child: SafeArea(
@@ -295,20 +297,11 @@ class SeatLayerWideCheckoutFoot extends StatelessWidget {
                 label: (context) =>
                     SeatLayerPickerScope.stringsOf(context).holdAndCheckout,
                 ticketCount: controller.confirmedTicketCount,
+                // The gate the phone's button uses: the way to seats is
+                // offered only where the best-seats card can exist.
+                canOfferFind: options.enableBestAvailable && !options.readOnly,
                 onPressed: () => checkoutThroughHost(controller, onCheckout),
                 builder: (context, cta, onPressed) {
-                  // The ladder's empty-cart reason ("Select seats") is said
-                  // here as the way to seats, still off.
-                  final shown = cta.statesReason &&
-                          !cta.enabled &&
-                          cta.label == strings.selectSeats
-                      ? SeatLayerCheckoutCtaState(
-                          label: strings.findBestSeatsCta,
-                          enabled: false,
-                          busy: false,
-                          statesReason: true,
-                        )
-                      : cta;
                   return FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: theme.accent,
@@ -326,9 +319,11 @@ class SeatLayerWideCheckoutFoot extends StatelessWidget {
                     )
                         .merge(theme.styles.resolvedContinueButtonStyle)
                         .merge(seatLayerButtonShape(theme.buttonRadius)),
-                    onPressed: shown.enabled ? onPressed : null,
+                    // Offered by the ladder, drawn off: the card above is the
+                    // live way to seats.
+                    onPressed: cta.findsBestSeats ? null : onPressed,
                     child: SeatLayerCheckoutCtaLabel(
-                      cta: shown,
+                      cta: cta,
                       color: theme.onAccent,
                     ),
                   );

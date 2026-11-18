@@ -138,8 +138,12 @@ Header   brand · name over "date · venue" · sales-closed pill · hold pill ·
   above and 12 below. The button follows the checkout button's label ladder
   (§3.10) with
   `strings.holdAndCheckout` as its label, and `strings.continueToCheckout` once
-  the seats are held; with an empty cart it reads `strings.findBestSeatsCta`
-  and is **off** — the best-seats card above it is the way to seats.
+  the seats are held. With an empty cart it reads `strings.findBestSeatsCta`
+  and is **off** — the best-seats card above it is the way to seats — but only
+  where that card can exist, the gate the phone's button uses
+  (`enableBestAvailable` and not `readOnly`); otherwise it reads
+  `strings.selectSeats`, off. The state comes from the ladder's own
+  find-best-seats flag, never from comparing label text.
 - **The credit closes the panel**, under the checkout button, end-aligned. The
   bottom safe inset is taken once, under the credit, not between the button and
   the credit.

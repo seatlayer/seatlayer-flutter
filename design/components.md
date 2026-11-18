@@ -161,7 +161,9 @@ exported): one row per for-sale category — colour disc, name, price at the end
 scrolling inside `size.widePriceListMaxHeight`. **Wide checkout foot**
 (`SeatLayerWideCheckoutFoot`): the cart foot's summary line over one
 full-width button on the checkout ladder; with an empty cart it reads
-`strings.findBestSeatsCta`, off. `SeatLayerPickerCheckoutBar` stays public but
+`strings.findBestSeatsCta`, off, where a best-seats card can exist
+(`enableBestAvailable`, not `readOnly`), and `strings.selectSeats`, off,
+elsewhere. `SeatLayerPickerCheckoutBar` stays public but
 is no longer the drop-in layout's default.
 
 **Wide panel while loading** (`SeatLayerWidePanelLoading`, same file): until the

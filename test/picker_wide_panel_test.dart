@@ -346,6 +346,30 @@ void main() {
       );
     });
 
+    for (final (name, options) in <(String, SeatLayerPickerOptions)>[
+      (
+        'best seats switched off',
+        const SeatLayerPickerOptions(enableBestAvailable: false),
+      ),
+      ('a read-only picker', const SeatLayerPickerOptions(readOnly: true)),
+    ]) {
+      testWidgets('empty, with $name: "Select seats", off', (tester) async {
+        await _mount(
+          tester,
+          pickerSnapshot(withSelection: false),
+          options: options,
+        );
+
+        // No best-seats card to point at, so no way to seats is named.
+        expect(
+          find.descendant(of: button(), matching: find.text('Select seats')),
+          findsOneWidget,
+        );
+        expect(find.text('Find best seats'), findsNothing);
+        expect(tester.widget<FilledButton>(button()).onPressed, isNull);
+      });
+    }
+
     testWidgets('with seats held: the count and total over the checkout',
         (tester) async {
       await _mount(tester, pickerSnapshot(holdOwner: 'picker'));
