@@ -141,14 +141,8 @@ It is optional: without it the lifecycle trigger still works and nothing
 complains. `SeatLayerPickerOptions(refreshOnResume: false)` turns both triggers
 off, and `announceHoldLapse: false` keeps the refresh but leaves the lapse
 message to you; `onHoldExpired` fires either way. Call
-`controller.refreshAvailability()` yourself from a composed layout.
-
-`refreshOnResume: false` stops the SDK *asking* for a read; it does not make it
-ignore one the runtime volunteers. Coming to the foreground re-reads
-availability inside the runtime, and that answer is always applied: the
-runtime has already released a hold that ran out, so discarding what it reports
-would leave the buyer with an emptied cart and no explanation. Use
-`announceHoldLapse: false` when what you want is silence.
+`controller.refreshAvailability()` yourself from a composed layout. Details:
+[lifecycle and recovery](https://docs.seatlayer.io/buyer-sdk/flutter/lifecycle-and-recovery/#control-automatic-behavior).
 
 ## Works as a native picker
 
