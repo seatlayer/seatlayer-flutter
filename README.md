@@ -451,6 +451,16 @@ are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Frequently asked questions
 
+### Is there a Flutter SDK for seat selection in a ticketing app?
+
+Yes. The `seatlayer` package gives Flutter apps on iOS and Android a ready-made
+seat picker: live availability, seat selection, best available, holds with a
+countdown, a cart, 3D and the view from a seat for venues up to 60,000 seats,
+and a checkout hand-off to your backend. Every control is a Flutter widget you
+can restyle or replace, and the seat map itself is the SeatLayer map from the
+web, shown inside your app. You pay only for sold seats, with 100 free every
+month, and the same charts run on the web, iOS, Android and React Native.
+
 ### How do I add a seat map to a Flutter app?
 
 Add the [`seatlayer` package](https://pub.dev/packages/seatlayer) and place a
@@ -468,6 +478,13 @@ section dock, seat card, cart sheet and checkout button, drawn in your palette
 and replaceable one at a time. The seat map itself is the SeatLayer map from the
 web, shown inside your app, so a seat, its price and its 3D view (for venues up
 to 60,000 seats) are the same on Flutter, iOS, Android and the web.
+
+### How much does the SeatLayer Flutter SDK cost?
+
+Building and testing is free: test mode has no time limit, needs no card and
+uses no credits. Live, you pay per sold seat: the first 100 sold seats each
+month are free, then 10 cents down to 5 cents a seat, with no subscription, and
+credits you buy never expire.
 
 ### Which Flutter platforms are supported?
 
