@@ -1,4 +1,4 @@
-# SeatLayer Flutter Seat Map SDK for Reserved Seating
+# SeatLayer SDK for Flutter: seat map and seat picker for iOS and Android
 
 [![CI](https://github.com/seatlayer/seatlayer-flutter/actions/workflows/ci.yml/badge.svg)](https://github.com/seatlayer/seatlayer-flutter/actions/workflows/ci.yml)
 [![pub package](https://img.shields.io/pub/v/seatlayer.svg)](https://pub.dev/packages/seatlayer)
