@@ -135,6 +135,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsMs = SeatLayerPickerStrings(
   seeItIn3D: 'Lihat dalam 3D',
   viewFromThisSeat: 'Pandangan dari tempat duduk ini',
   allPrices: 'Semua harga',
+  ticketPrices: 'Harga tiket',
+  yourSeats: 'Tempat duduk anda',
   ticketType: 'Jenis tiket',
   tierCompanionGuidance: 'Mesti bersama ruang kerusi roda di sebelahnya',
   findingBestSeats: 'Mencari tempat duduk terbaik…',

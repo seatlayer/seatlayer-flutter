@@ -127,6 +127,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       seeItIn3D: '用 3D 查看',
       viewFromThisSeat: '该座位的视野',
       allPrices: '所有价格',
+      ticketPrices: '票价',
+      yourSeats: '您的座位',
       ticketType: '票种',
       tierCompanionGuidance: '需要相邻的轮椅席位',
       findingBestSeats: '正在查找最佳座位…',

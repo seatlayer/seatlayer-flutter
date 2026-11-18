@@ -221,6 +221,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   seeItIn3D: 'Mira-ho en 3D',
   viewFromThisSeat: 'Vista des d\'aquest seient',
   allPrices: 'Tots els preus',
+  ticketPrices: 'Preus de les entrades',
+  yourSeats: 'Els teus seients',
   ticketType: 'Tipus d’entrada',
   tierCompanionGuidance: 'Requereix la plaça de cadira de rodes contigua',
   findingBestSeats: 'Buscant els millors seients…',

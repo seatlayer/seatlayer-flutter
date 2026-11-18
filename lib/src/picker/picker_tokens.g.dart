@@ -155,6 +155,21 @@ abstract final class SeatLayerSizeTokens {
   /// `840`
   static const double wideBreakpoint = 840;
 
+  /// `360`
+  static const double widePanelWidth = 360;
+
+  /// `16`
+  static const double widePanelPadX = 16;
+
+  /// `11`
+  static const double widePanelHeadingFontSize = 11;
+
+  /// `14`
+  static const double widePanelHeadingPadTop = 14;
+
+  /// `4`
+  static const double widePanelHeadingPadBottom = 4;
+
   /// `38`
   static const double headerHeight = 38;
 

@@ -198,6 +198,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   seeItIn3D: 'Vaata 3D-s',
   viewFromThisSeat: 'Vaade sellelt kohalt',
   allPrices: 'Kõik hinnad',
+  ticketPrices: 'Piletihinnad',
+  yourSeats: 'Sinu kohad',
   ticketType: 'Piletitüüp',
   tierCompanionGuidance: 'Nõuab kõrvalasuvat ratastoolikohta',
   findingBestSeats: 'Otsime parimaid kohti…',

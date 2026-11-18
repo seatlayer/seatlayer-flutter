@@ -126,6 +126,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   seeItIn3D: '3Dで見る',
   viewFromThisSeat: 'この席からの眺め',
   allPrices: 'すべての価格',
+  ticketPrices: 'チケット価格',
+  yourSeats: 'あなたの座席',
   ticketType: 'チケット種別',
   tierCompanionGuidance: '隣接する車椅子スペースが必要です',
   findingBestSeats: 'おすすめの席を探しています…',

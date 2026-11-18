@@ -127,6 +127,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       seeItIn3D: '以 3D 檢視',
       viewFromThisSeat: '該座位的視野',
       allPrices: '所有價格',
+      ticketPrices: '票價',
+      yourSeats: '您的座位',
       ticketType: '票種',
       tierCompanionGuidance: '需要相鄰的輪椅席位',
       findingBestSeats: '正在尋找最佳座位…',

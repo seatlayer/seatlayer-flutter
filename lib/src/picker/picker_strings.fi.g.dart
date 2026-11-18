@@ -196,6 +196,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   seeItIn3D: 'Katso 3D:nä',
   viewFromThisSeat: 'Näkymä tältä paikalta',
   allPrices: 'Kaikki hinnat',
+  ticketPrices: 'Lippujen hinnat',
+  yourSeats: 'Paikkasi',
   ticketType: 'Lipputyyppi',
   tierCompanionGuidance: 'Vaatii viereisen pyörätuolipaikan',
   findingBestSeats: 'Etsitään parhaita paikkoja…',

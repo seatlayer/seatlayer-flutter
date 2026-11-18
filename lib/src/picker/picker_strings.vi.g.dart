@@ -132,6 +132,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   seeItIn3D: 'Xem bằng 3D',
   viewFromThisSeat: 'Tầm nhìn từ ghế này',
   allPrices: 'Tất cả mức giá',
+  ticketPrices: 'Giá vé',
+  yourSeats: 'Ghế của bạn',
   ticketType: 'Loại vé',
   tierCompanionGuidance: 'Cần đặt kèm chỗ dành cho xe lăn bên cạnh',
   findingBestSeats: 'Đang tìm ghế tốt nhất…',

@@ -234,6 +234,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   seeItIn3D: 'Peržiūrėti 3D',
   viewFromThisSeat: 'Vaizdas iš šios vietos',
   allPrices: 'Visos kainos',
+  ticketPrices: 'Bilietų kainos',
+  yourSeats: 'Jūsų vietos',
   ticketType: 'Bilieto tipas',
   tierCompanionGuidance: 'Reikalinga gretima vieta vežimėliui',
   findingBestSeats: 'Ieškome geriausių vietų…',

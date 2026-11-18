@@ -130,6 +130,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   seeItIn3D: '3D로 보기',
   viewFromThisSeat: '이 좌석 시야',
   allPrices: '전체 가격',
+  ticketPrices: '티켓 가격',
+  yourSeats: '내 좌석',
   ticketType: '티켓 종류',
   tierCompanionGuidance: '옆 휠체어석과 함께 예매해야 해요',
   findingBestSeats: '추천 좌석을 찾는 중…',

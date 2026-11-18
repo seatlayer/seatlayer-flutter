@@ -17,6 +17,11 @@
 - **Counted sentences in every language's own grammar:** Russian says "Осталось 5 мест" and "Осталось 21 место", and Arabic, Polish, Czech, Lithuanian, Welsh and the rest take every plural form the runtime has, chosen by the locale's own rule for the count.
 - **One English wording:** a few English defaults now say exactly what the runtime says ("More time added. Your seats are still held.", "Drag to rotate the venue", curly apostrophes).
 - **Sold-out prices:** a price with no seats left stays on the price rail, struck through and greyed, and is still a toggle, so a buyer who pinned it can switch the filter off. Only a runtime that counts seats per category is believed at zero.
+- **Wide layout, colour-blind control (behaviour change):** the standalone colour-blind toggle is no longer drawn by default on wide layouts; the palette stays a switch in the display options, as on the phone. Set `SeatLayerPickerChromeOptions(showColorblindControl: true)` to keep the toggle; it is drawn last in the map's control column.
+- **Wide layout, control order:** the map's control column now reads, top to bottom, the way back to the venue (only while a section fills the map), Map / 3D, the 3D Rotate / Move pair (in 3D), display options, `+` and `−`. Tests that find these controls by position will see the new order.
+- **Wide layout, panel:** "Ticket prices" and "Your seats" headings, from the new `SeatLayerPickerStrings.ticketPrices` and `SeatLayerPickerStrings.yourSeats` (translated in all 43 locales). The "Powered by SeatLayer" line now sits under the checkout bar, and the panel's divider follows the reading direction.
+- **Wide layout, header date:** new optional `SeatLayerPickerEventDetails.startsAtLabel`. When the snapshot carries it, the wide header's second line reads "date · venue". The picker never formats `startsAt` itself, because the device's time zone may not be the event's.
+- **Wide seat card:** the Section, Row and Seat labels are drawn as the strings give them, no longer upper-cased in code.
 - **Right-to-left:** in Arabic, Hebrew, Persian and Kurdish the map's corners mirror with the reading direction: the round controls, the Map / 3D control and the 3D Rotate / Move pair stand on the left, the test badge and the floor picker on the right. The venue itself never mirrors.
 
 ## 0.12.0 (2026-09-25)

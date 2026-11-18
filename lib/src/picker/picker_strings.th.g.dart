@@ -131,6 +131,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   seeItIn3D: 'ดูแบบ 3D',
   viewFromThisSeat: 'มุมมองจากที่นั่งนี้',
   allPrices: 'ทุกราคา',
+  ticketPrices: 'ราคาบัตร',
+  yourSeats: 'ที่นั่งของคุณ',
   ticketType: 'ประเภทบัตร',
   tierCompanionGuidance: 'ต้องจองคู่กับที่สำหรับรถเข็นที่อยู่ติดกัน',
   findingBestSeats: 'กำลังหาที่นั่งที่ดีที่สุด…',

@@ -96,6 +96,40 @@ compact composition unless a row says otherwise; the wide composition moves the
 cart into a side pane and the Map/3D control into the corner-control stack, and
 otherwise reuses the same components.
 
+**The wide composition.** The header spans the width; under it the map and a
+side panel `size.widePanelWidth` wide share a row. The panel stands at the end
+edge, on `color.*.surface`, with a `color.*.divider` hairline on its **start**
+edge — the edge that meets the map, so the hairline mirrors with the panel in a
+right-to-left locale.
+
+```
+Header   brand · name over "date · venue" · sales-closed pill · hold pill · close
+┌ map surface ──────────────────────────┐┌ panel ───────────────────────┐
+│ top-start  test chip                   ││ strings.ticketPrices heading │
+│ top-end    control column, top down:   ││ price legend                 │
+│              Venue (section framed)    ││ floor strip (multi-floor)    │
+│              Map | 3D · Rotate / Move  ││ strings.yourSeats heading    │
+│              ♿ · + · −                 ││ best-seats card              │
+│ bottom-start floor selector            ││ cart list (scrolls)          │
+│ seat card / prompts / status overlays  ││ action error · checkout bar  │
+└────────────────────────────────────────┘│ Powered by SeatLayer         │
+                                          └──────────────────────────────┘
+```
+
+- **Panel headings.** `strings.ticketPrices` over the price legend, drawn only
+  while the chart has a for-sale category; `strings.yourSeats` over the
+  best-seats card and the cart, drawn in every phase but the first load.
+  `size.widePanelHeadingFontSize` at w700 in `color.*.mutedText`, padded
+  `size.widePanelPadX` at both sides, `size.widePanelHeadingPadTop` above and
+  `size.widePanelHeadingPadBottom` below, start-aligned. **Drawn as given**: no
+  port upper-cases them in code, which breaks Turkish. Each is exposed to
+  assistive technology as a heading.
+- **The credit closes the panel**, under the checkout bar, end-aligned. The
+  bottom safe inset is taken once, under the credit, not between the button and
+  the credit.
+- **The header's second line** is `event.startsAtLabel` and `event.venue`,
+  joined by ` · ` (§3.1).
+
 ### 2.2 The compact column
 
 ```
@@ -264,6 +298,16 @@ the first letter of the brand or event name in `color.*.onAccent`. Centre: the
 event name at `size.headerNameFontSize` w700, one line, ellipsized. Right, in
 order: the hold pill, the sales-closed pill, the close ring.
 
+**The wide header's second line.** Under the name (16, w800), one line at 12 in
+`color.*.mutedText`, ellipsized: `event.startsAtLabel`, then `event.venue`,
+joined by ` · ` — "Sat 15 Aug · 15:00 · Wrenmoor Park". Either part may be
+absent, and with neither there is no second line. **The date comes only from
+`event.startsAtLabel`**, which the runtime writes in the event's own time zone
+and the picker's language. `event.startsAt` is an instant: a port never formats
+it on the device, because the device's zone is not the venue's, and a buyer
+abroad would read a wrong hour, which is worse than none. The phone header
+stays one line and draws no date.
+
 The venue-and-date meta line is **not drawn** on a phone. The event name alone
 is the identity.
 
@@ -302,7 +346,8 @@ runs out. The first snapshot of a session fires none of them
 countdown updates politely, not assertively — it must not interrupt a screen
 reader every second; announce it on the minute and on the expiring transition.
 
-**Snapshot.** `event.name`, `event.venue`, `event.salesClosed`, `branding.logoUrl`,
+**Snapshot.** `event.name`, `event.venue`, `event.startsAtLabel` (optional
+string; absent until the runtime sends it), `event.salesClosed`, `branding.logoUrl`,
 `branding.brandName`, `hold.active`, `hold.expiresAt`, `hold.owner`.
 
 ### 3.2 Price rail, chips and All prices
@@ -586,8 +631,13 @@ beside the sheet asking about a seat reads as clutter, and none of them may be
 pressed while it asks. It fades — it is not unmounted — so nothing else on the
 map moves.
 
-**The wide composition** draws the same ♿ disc at the head, then `+` and `−`,
-and **no fit control of its own** (2026-09-06). It carried a plain fit-to-screen
+**The wide composition's column**, top to bottom: the way back to the venue
+while a section is framed, the Map | 3D control, the 3D Rotate / Move pair while
+the scene is up, the same ♿ disc, then `+` and `−`. The way back joins the top
+and leaves again, so it never moves a control below it. The standalone
+colourblind toggle is **off by default on both widths** — the palette is a
+switch in the accessibility sheet — and `showColorblindControl: true` adds it
+last, under `−`. The column has **no fit control of its own** (2026-09-06). It carried a plain fit-to-screen
 button until then; two ways to frame the same flat venue on one composition is
 one too many, and the one that went is the one a pinch already does. The
 immersive scene keeps its own Fit chip (§3.14), which frames a camera rather
@@ -596,8 +646,8 @@ than a map, and says `strings.fitWholeVenue` like the phone's disc.
 it back in a composition of its own.
 
 Back-to-overview is a different question and keeps its own condition: it renders
-only while a section is actually framed — top-left on the phone, in the column
-on the wide layout.
+only while a section is actually framed — top-left on the phone, at the head of
+the column on the wide layout.
 
 **Dock lift.** Only where a host has opted into a section dock. While one is
 mounted and neither a seat card nor the immersive scene is up, the three bottom
@@ -1179,7 +1229,9 @@ same card over flat glass, which is a correct state, not a degraded one.
    section prefix stripped**, or the card reads `Stalls D · Row Stalls D C`.
    The eyebrows are drawn upper-cased, but the card's spoken lines say the
    English place word as "Place", not the locale's capitals "PLACE", which a
-   screen reader may spell out.
+   screen reader may spell out. **The wide layout's tap card**
+   (`SeatLayerPickerSeatConfirmation`) draws its eyebrows **as given** — "Section",
+   "Row", "Seat" — and never upper-cases them in code.
 2. **Category band**, minimum height `size.confirmBandHeight`. Ground is the
    **category colour itself, full bleed** — no dot, no tint, no leading rail:
    a nine-point disc beside an eleven-per-cent wash said the colour twice and

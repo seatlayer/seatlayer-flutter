@@ -87,10 +87,10 @@ class SeatLayerPickerPricing {
 /// hosts that build their own layout.
 ///
 /// The nullable controls default to *auto*, which is per control: the map's
-/// zoom discs are drawn on both layouts, while the back-to-overview control,
-/// the standalone colourblind toggle, the dock bar and the extend-hold card
-/// are wide-only — the phone's accessibility sheet and its own header already
-/// carry those. Set one explicitly to override that.
+/// zoom discs are drawn on both layouts, the back-to-overview control and the
+/// extend-hold card are wide-only — the phone's own header already carries
+/// those — and the standalone colourblind toggle and the dock bar are off on
+/// both. Set one explicitly to override that.
 @immutable
 class SeatLayerPickerChromeOptions {
   /// Creates a chrome visibility set. Defaults are the approved phone UX.
@@ -174,8 +174,11 @@ class SeatLayerPickerChromeOptions {
   /// Whether the Map/3D control renders on a 3D-capable event.
   final bool showViewModeControl;
 
-  /// Whether a standalone colourblind toggle renders. Auto: wide only, since
-  /// the phone keeps it inside the accessibility sheet.
+  /// Whether a standalone colourblind toggle renders. Auto: off on every
+  /// width, since the palette is a switch inside the display options.
+  ///
+  /// `true` adds the toggle at the foot of the map's control column, below
+  /// `+` and `−`. Until the wide layout's default changed it was on there.
   final bool? showColorblindControl;
 
   /// Whether the accessibility filter control renders.
@@ -258,8 +261,11 @@ class SeatLayerPickerChromeOptions {
       showZoomToFitControl ?? true;
 
   /// Resolve [showColorblindControl] for a layout.
+  ///
+  /// The same answer either way: the display options carry the palette on
+  /// both widths, so the toggle is drawn only where a host asks for it.
   bool colorblindControlFor({required bool phone}) =>
-      showColorblindControl ?? !phone;
+      showColorblindControl ?? false;
 
   /// Resolve [showDockBar] for a layout.
   bool dockBarFor({required bool phone}) => showDockBar ?? false;

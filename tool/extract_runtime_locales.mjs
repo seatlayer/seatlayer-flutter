@@ -131,6 +131,8 @@ const KEYS = {
   seeItIn3D: 'picker.seeItIn3d',
   viewFromThisSeat: 'picker.viewFromThisSeat',
   allPrices: 'picker.allPrices',
+  ticketPrices: 'picker.ticketPrices',
+  yourSeats: 'picker.yourSeats',
   ticketType: 'picker.ticketType',
   tierCompanionGuidance: 'picker.companionRequiresWheelchair',
   findingBestSeats: 'picker.findingBestSeats',

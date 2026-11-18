@@ -279,12 +279,12 @@ void main() {
     expect(find.byType(SeatLayerPickerZoomOutButton), findsOneWidget);
   });
 
-  group('the ♿ disc heads the column', () {
+  group('the ♿ disc stands above the zoom discs', () {
     // It used to stand alone in the map's bottom-left corner (one control
     // facing a stack of them, in the corner the floor selector owns) and read
-    // as something the layout had forgotten. It is the top
-    // disc of the right-hand column now, on BOTH layouts, because who can sit
-    // where is an earlier question than how close the camera is.
+    // as something the layout had forgotten. It is in the column now, above
+    // `+`, on BOTH layouts: the phone's column starts with it, and the wide
+    // column puts the way back and Map | 3D above it.
     testWidgets('on the phone, above `+` and off the opposite corner',
         (tester) async {
       final map = FakePickerMap(bundle: _colorblindBundle());

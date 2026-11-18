@@ -194,6 +194,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   seeItIn3D: '3D में देखें',
   viewFromThisSeat: 'इस सीट से व्यू',
   allPrices: 'सभी कीमतें',
+  ticketPrices: 'टिकट की कीमतें',
+  yourSeats: 'आपकी सीटें',
   ticketType: 'टिकट टाइप',
   tierCompanionGuidance: 'बगल वाला व्हीलचेयर स्थान भी लेना ज़रूरी है',
   findingBestSeats: 'सबसे अच्छी सीटें खोज रहे हैं…',

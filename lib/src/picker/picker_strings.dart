@@ -49,6 +49,8 @@ class SeatLayerPickerStrings {
     this.anyTicketType = SeatLayerStringTokens.anyTicketType,
     this.anyVenueZone = SeatLayerStringTokens.anyVenueZone,
     this.allPrices = SeatLayerStringTokens.allPrices,
+    this.ticketPrices = SeatLayerStringTokens.ticketPrices,
+    this.yourSeats = SeatLayerStringTokens.yourSeats,
     this.ticketType = SeatLayerStringTokens.ticketType,
     this.tierCompanionGuidance = SeatLayerStringTokens.tierCompanionGuidance,
     this.premiumSeat = SeatLayerStringTokens.premiumSeat,
@@ -421,6 +423,16 @@ class SeatLayerPickerStrings {
   /// it is off, because a phone-width rail has no room for a chip that says
   /// what is already true.
   final String allPrices;
+
+  /// The wide panel's heading over the price list.
+  ///
+  /// Drawn as given, never upper-cased in code.
+  final String ticketPrices;
+
+  /// The wide panel's heading over the buyer's seats and the best-seats card.
+  ///
+  /// Drawn as given, never upper-cased in code.
+  final String yourSeats;
 
   /// Best-seats category selector name.
   final String ticketType;

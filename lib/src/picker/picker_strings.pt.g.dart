@@ -224,6 +224,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsPt = SeatLayerPickerStrings(
   seeItIn3D: 'Ver em 3D',
   viewFromThisSeat: 'Vista deste lugar',
   allPrices: 'Todos os preços',
+  ticketPrices: 'Preços dos bilhetes',
+  yourSeats: 'Os teus lugares',
   ticketType: 'Tipo de bilhete',
   tierCompanionGuidance: 'Requer o lugar adjacente para cadeira de rodas',
   findingBestSeats: 'A procurar os melhores lugares…',

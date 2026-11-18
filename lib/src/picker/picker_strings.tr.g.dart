@@ -194,6 +194,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   seeItIn3D: '3B olarak gör',
   viewFromThisSeat: 'Bu koltuktan manzara',
   allPrices: 'Tüm fiyatlar',
+  ticketPrices: 'Bilet fiyatları',
+  yourSeats: 'Koltuklarınız',
   ticketType: 'Bilet türü',
   tierCompanionGuidance: 'Bitişikteki tekerlekli sandalye yerini gerektirir',
   findingBestSeats: 'En iyi koltuklar aranıyor…',

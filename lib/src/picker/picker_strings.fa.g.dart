@@ -196,6 +196,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   seeItIn3D: 'دیدن به‌صورت سه‌بعدی',
   viewFromThisSeat: 'دید از این صندلی',
   allPrices: 'همهٔ قیمت‌ها',
+  ticketPrices: 'قیمت بلیت‌ها',
+  yourSeats: 'صندلی‌های شما',
   ticketType: 'نوع بلیت',
   tierCompanionGuidance: 'به جایگاه ویلچر مجاور نیاز دارد',
   findingBestSeats: 'در حال یافتن بهترین صندلی‌ها…',

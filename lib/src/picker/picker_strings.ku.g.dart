@@ -200,6 +200,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   seeItIn3D: 'Bi 3D bibîne',
   viewFromThisSeat: 'Dîmen ji vî cihî',
   allPrices: 'Hemû biha',
+  ticketPrices: 'Bihayên bilêtan',
+  yourSeats: 'Cihên te',
   ticketType: 'Cureya bilêtê',
   tierCompanionGuidance: 'Cihê kursiya teker ya cîran hewce ye',
   findingBestSeats: 'Cihên herî baş têne lêgerîn…',

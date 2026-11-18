@@ -220,6 +220,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEs = SeatLayerPickerStrings(
   seeItIn3D: 'Verlo en 3D',
   viewFromThisSeat: 'Vista desde este asiento',
   allPrices: 'Todos los precios',
+  ticketPrices: 'Precios de entradas',
+  yourSeats: 'Tus asientos',
   ticketType: 'Tipo de entrada',
   tierCompanionGuidance: 'Requiere la plaza accesible contigua',
   findingBestSeats: 'Buscando los mejores asientos…',

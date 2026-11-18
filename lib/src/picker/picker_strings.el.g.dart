@@ -202,6 +202,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   seeItIn3D: 'Δείτε το σε 3D',
   viewFromThisSeat: 'Θέα από αυτή τη θέση',
   allPrices: 'Όλες οι τιμές',
+  ticketPrices: 'Τιμές εισιτηρίων',
+  yourSeats: 'Οι θέσεις σας',
   ticketType: 'Τύπος εισιτηρίου',
   tierCompanionGuidance: 'Απαιτεί τη διπλανή θέση αναπηρικού αμαξιδίου',
   findingBestSeats: 'Αναζήτηση των καλύτερων θέσεων…',

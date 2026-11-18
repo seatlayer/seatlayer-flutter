@@ -137,25 +137,30 @@ class _RailControls extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: <Widget>[
-          // FIRST IN THE COLUMN, above `+`, on this layout too: a control
-          // about who can sit where does not belong below the controls about
-          // how close the camera is.
-          if (chrome.showAccessibilityControl)
-            owner.accessibilityControl ??
-                const SeatLayerPickerAccessibilityFilters(compact: true),
+          // TOP TO BOTTOM: the way back, what kind of map, what it shows, how
+          // close. The way back to the whole venue joins the top only while a
+          // section fills the map, so it never pushes the others down under a
+          // pointer already on its way to them; Map | 3D heads the column
+          // otherwise; then display options, then `+` and `−`.
           if (chrome.overviewControlFor(phone: false) &&
               map?.focusedSection != null)
             const SeatLayerPickerOverviewButton(),
-          if (chrome.zoomControlsFor(phone: false)) ...<Widget>[
-            const SeatLayerPickerZoomInButton(),
-            const SeatLayerPickerZoomOutButton(),
-          ],
           if (chrome.showViewModeControl &&
               options.enable3D &&
               state.snapshot?.capabilities.contains('venue3d') == true)
             const SeatLayerPickerViewModeButton(),
           if (map?.isVenue3D == true)
             const SeatLayerPicker3DNavigationModeButton(),
+          if (chrome.showAccessibilityControl)
+            owner.accessibilityControl ??
+                const SeatLayerPickerAccessibilityFilters(compact: true),
+          if (chrome.zoomControlsFor(phone: false)) ...<Widget>[
+            const SeatLayerPickerZoomInButton(),
+            const SeatLayerPickerZoomOutButton(),
+          ],
+          // Only where the host asks for it: the colour-blind palette is a
+          // switch in the display options already, and a second copy here
+          // was the same choice twice.
           if (chrome.colorblindControlFor(phone: false))
             const SeatLayerPickerColorblindButton(),
         ]
