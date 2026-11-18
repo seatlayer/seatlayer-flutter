@@ -222,6 +222,21 @@ void main() {
           _rect(tester, find.byType(SeatLayerPriceLegend)).bottom,
           lessThanOrEqualTo(_rect(tester, seats).top + .5),
         );
+        // The seats heading stands a little further from what is above it.
+        for (final (label, air) in <(String, double)>[
+          ('Ticket prices', SeatLayerSizeTokens.widePanelHeadingPadTop),
+          ('Your seats', SeatLayerSizeTokens.widePanelSeatsHeadingPadTop),
+        ]) {
+          final heading = find.ancestor(
+            of: find.text(label),
+            matching: find.byType(SeatLayerWidePanelHeading),
+          );
+          expect(
+            _rect(tester, find.text(label)).top - _rect(tester, heading).top,
+            closeTo(air, .5),
+            reason: label,
+          );
+        }
         // In the panel's quiet ink, on either side.
         final theme = seatLayerPickerThemeOf(tester.element(prices));
         expect(tester.widget<Text>(prices).style!.color, theme.mutedText);
