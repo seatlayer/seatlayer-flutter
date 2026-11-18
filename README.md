@@ -505,7 +505,8 @@ for that buyer for a set time, which you can change per event, so no other buyer
 can take them. A hold that is never booked lapses on its own, and
 `onHoldExpired` tells your app. If it lapses while the app is in the background,
 the picker checks with the server when the buyer returns, tells them once, and
-offers back the seats that are still free.
+offers back the seats that are still free. With `SeatLayerView`, your code calls
+`hold()` itself.
 
 ### Can I use my own payment provider?
 
