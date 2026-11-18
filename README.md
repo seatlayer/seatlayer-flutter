@@ -463,13 +463,12 @@ month, and the same charts run on the web, iOS, Android and React Native.
 
 ### How do I add a seat map to a Flutter app?
 
-Add the [`seatlayer` package](https://pub.dev/packages/seatlayer) and place a
-`SeatLayerPicker` with your event key on a route. That is the whole buyer flow:
-map, filters, seat confirmation, cart, holds and the checkout handoff. The quick
-start above is complete; the
-[Flutter seat-map integration guide](https://docs.seatlayer.io/buyer-sdk/flutter/)
-covers lifecycle, commands and events in depth. `SeatLayerView` remains for an
-app that wants only the raw map and owns every control itself.
+Run `flutter pub add seatlayer` and place a `SeatLayerPicker` with your event
+key on a route. That one widget is the whole buyer flow: the live seat map,
+price and accessibility filters, seat confirmation, cart, holds with a
+countdown, best available, 3D and the view from a seat for venues up to 60,000
+seats, and the checkout hand-off. `SeatLayerView` remains for an app that wants
+only the map and draws every control itself.
 
 ### What is native in the SeatLayer Flutter SDK?
 
