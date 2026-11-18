@@ -399,9 +399,6 @@ class SeatLayerPickerStrings {
   /// Drawn as the rail's first chip while a filter is on, and gone again once
   /// it is off, because a phone-width rail has no room for a chip that says
   /// what is already true.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String allPrices;
 
   /// Best-seats category selector name.
@@ -434,33 +431,21 @@ class SeatLayerPickerStrings {
   final String closestGroupChosenInstantly;
 
   /// What the best-seats action says while it is searching.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String findingBestSeats;
 
   /// The collapsed cart's shortcut into the best-seats form.
   ///
   /// Two words, because it sits on a pill beside the cheapest price on a
   /// phone-width bar.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String findSeats;
 
   /// Collapses an expanded dense ticket list.
   final String showLess;
 
   /// The collapsed cart sheet's chevron, which opens it.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String expandCart;
 
   /// The same chevron once the sheet is open.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String collapseCart;
 
   /// Action reversing a ticket removal.
@@ -472,24 +457,15 @@ class SeatLayerPickerStrings {
   /// The same call to action once a hold already exists and nothing is
   /// pending: the seats are secured, so the button offers the till rather
   /// than offering to secure them again.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String continueToCheckout;
 
   /// The collapsed pill's wording while a hold exists and more seats are
   /// still waiting to join it.
   ///
   /// Two words, because it shares a 44 pt pill with the total.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String secureMore;
 
   /// The footer call to action with an empty cart: the one thing left to do.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String selectSeats;
 
   /// The foot's total line while the cart is empty.
@@ -503,18 +479,12 @@ class SeatLayerPickerStrings {
   final String findBestSeatsCta;
 
   /// The empty peek line where the chart has no price to quote.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String pickYourSeats;
 
   /// The collapsed peek line on an event that has stopped selling.
   ///
   /// A sentence rather than the footer's two words, because the peek line is
   /// prose where the footer is a button.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String salesClosedPill;
 
   /// The collapsed peek line while checkout is opening and prices are hidden.
@@ -524,9 +494,6 @@ class SeatLayerPickerStrings {
   final String seatsSecuredOpeningCheckout;
 
   /// The wide layout's call to action, beside a total it does not repeat.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String continueWord;
 
   /// The call to action on an event that is no longer selling.
@@ -535,18 +502,12 @@ class SeatLayerPickerStrings {
   /// own label whenever it cannot be pressed. A grey button that says
   /// "Hold seats & checkout" states only that nothing will happen; these say
   /// why, so the buyer knows what to do about it.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String salesClosedCta;
 
   /// The call to action while a seat's confirm card is still unanswered.
   ///
   /// The seat is already in the runtime's selection, so the button would
   /// otherwise look live behind a card that is still asking about it.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String confirmOrCancelSeat;
 
   /// The same sentence for a table or general-admission quantity prompt, where
@@ -557,9 +518,6 @@ class SeatLayerPickerStrings {
   final String confirmYourTickets;
 
   /// The call to action while the runtime is creating the hold.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String securingSeats;
 
   /// The call to action while the host is opening its checkout.
@@ -567,9 +525,6 @@ class SeatLayerPickerStrings {
   /// The hold exists and has been handed over; the button stays down until the
   /// host's screen is up, because a second press would buy nothing and read as
   /// a failure.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String openingCheckout;
 
   /// The call to action on a selection the event's own rules reject, where
@@ -599,22 +554,13 @@ class SeatLayerPickerStrings {
 
   /// The same control's name on a chart that authors no access provisions at
   /// all, where the only thing behind it is how the map is drawn.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String displayOptions;
 
   /// The note under a wheelchair row on a chart that also authors companion
   /// places, so a buyer knows the seat beside them is still theirs to take.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String companionSeatsNote;
 
   /// "12 free" — how many seats with this provision are still available.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String Function(int count) accessFreeCount;
 
   /// "2 of 6" — where the accessible-section tour has got to.
@@ -654,16 +600,10 @@ class SeatLayerPickerStrings {
 
   /// Tooltip on the zoom-in map control, which a phone only draws when the
   /// host asks for the pair back: pinch is the gesture.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String zoomIn;
 
   /// Tooltip on the zoom-out map control, which a phone draws once the map is
   /// deep enough to have somewhere to come back from.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String zoomOut;
 
   /// Tooltip on the 3D navigation-mode control while one finger rotates the
@@ -828,9 +768,6 @@ class SeatLayerPickerStrings {
   final String Function(int count) moreCount;
 
   /// "Secure 2 more & checkout" — a hold that is about to grow.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String Function(int count) secureMoreAndCheckout;
 
   /// "\u2713 3 secured \u00b7 \u20ac285 \u2014 you won't be charged yet".
@@ -838,9 +775,6 @@ class SeatLayerPickerStrings {
   /// The collapsed line for the moment between the hold landing and the host's
   /// checkout appearing. It says the money is safe before the buyer has to
   /// trust a screen they have not seen yet.
-  ///
-  /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
-  /// its English wording in every locale until one exists.
   final String Function(int count, String total) peekSecured;
 
   /// "14:59", read out as a remaining hold time.
