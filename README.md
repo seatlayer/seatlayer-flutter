@@ -452,19 +452,8 @@ included. Private buyer tokens stay in memory and never enter a snapshot. See
 [the picker architecture](doc/mobile-picker-architecture.md) for the layers,
 ownership rules and validation gates.
 
-## Design system
-
-The picker's colours, sizes, radii, elevations, type scale, motion table, haptic
-cues and default strings live in one platform-neutral file,
-[`design/tokens.json`](design/tokens.json); the catalogue describing every widget
-in terms of those tokens is [`design/components.md`](design/components.md),
-written so a Swift, Kotlin or React Native engineer can reproduce the design.
-
-`lib/src/picker/picker_tokens.g.dart` is **generated** from that JSON by
-`dart run tool/gen_tokens.dart` (`--check` fails if it is stale) and must not be
-hand-edited. The presets, `SeatLayerPickerLayout`, `SeatLayerPickerMotion`, the
-haptic map and `SeatLayerPickerStrings` all read the file, and
-`design_tokens_test.dart` asserts them against it, so the two cannot drift.
+The design tokens behind these widgets, and how to build and test the package,
+are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Frequently asked questions
 
@@ -574,17 +563,6 @@ A `.light()` or `.dark()` preset pins one side deliberately.
 | iOS | [`seatlayer-ios`](https://github.com/seatlayer/seatlayer-ios) |
 | Android | [`seatlayer-android`](https://github.com/seatlayer/seatlayer-android) |
 | Server SDKs | [Node.js, Python, PHP, Ruby, .NET, Java, and Go](https://docs.seatlayer.io/server-sdk/install/) |
-
-## Development
-
-```bash
-flutter pub get
-flutter analyze
-flutter test
-flutter test --tags golden        # recorded and enforced on macOS
-dart run tool/gen_tokens.dart     # after editing design/tokens.json
-dart pub publish --dry-run
-```
 
 ## Scale evidence
 
