@@ -30,6 +30,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { appStringsProblems } from './app_strings_checks.mjs';
+
 /** Flutter string key -> the runtime dictionary key it is taken from. */
 const KEYS = {
   close: 'picker.close',
@@ -259,6 +261,15 @@ const APP_KEYS = {
   testModeLong: 'testModeLong',
 };
 
+/**
+ * App strings keys deliberately not taken. Each one says why.
+ */
+const IGNORED_APP_KEYS = [
+  // The app's own screen-reader name for its test event; the picker names its
+  // test badge with `testModeLong` instead.
+  'testEventSemantics',
+];
+
 /** One locale file, evaluated as a module with its type annotation removed. */
 async function readDictionary(file) {
   const code = fs
@@ -353,8 +364,25 @@ if (process.argv[2] === '--plural-categories') {
     );
   }
 
+  const runtimeFiles = fs.readdirSync(dir).filter((name) => name.endsWith('.ts')).sort();
+  const appFiles = {};
+  for (const name of fs.readdirSync(appDir).filter((file) => file.endsWith('.json'))) {
+    appFiles[name.replace(/\.json$/, '')] = JSON.parse(fs.readFileSync(path.join(appDir, name), 'utf8'));
+  }
+  // Every gap fails here, named, rather than leaving English in a locale.
+  const problems = appStringsProblems({
+    runtimeLocales: runtimeFiles.map((file) => file.replace(/\.ts$/, '')),
+    appFiles,
+    sourceKeys: Object.values(APP_KEYS),
+    ignoredKeys: IGNORED_APP_KEYS,
+    pluralForms: PLURAL_FORMS,
+  });
+  if (problems.length > 0) {
+    throw new Error(`the app strings do not match the runtime locales:\n  ${problems.join('\n  ')}`);
+  }
+
   const strings = {};
-  for (const file of fs.readdirSync(dir).filter((name) => name.endsWith('.ts')).sort()) {
+  for (const file of runtimeFiles) {
     const dictionary = await readDictionary(path.join(dir, file));
     const entry = {};
     for (const [key, source] of Object.entries(KEYS)) {
@@ -372,9 +400,8 @@ if (process.argv[2] === '--plural-categories') {
       }
     }
     const locale = file.replace(/\.ts$/, '');
-    const appFile = path.join(appDir, `${locale}.json`);
-    if (fs.existsSync(appFile)) {
-      const app = JSON.parse(fs.readFileSync(appFile, 'utf8'));
+    const app = appFiles[locale];
+    {
       for (const [key, source] of Object.entries(APP_KEYS)) {
         if (typeof app[source] === 'string') {
           entry[key] = app[source];
