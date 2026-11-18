@@ -1177,6 +1177,9 @@ same card over flat glass, which is a correct state, not a degraded one.
    `strings.rowWord`, `strings.seatWord`, `strings.placeWord` — the row eyebrow
    follows the object's own word (Row, Table, Booth). **Print the row with its
    section prefix stripped**, or the card reads `Stalls D · Row Stalls D C`.
+   The eyebrows are drawn upper-cased, but the card's spoken lines say the
+   English place word as "Place", not the locale's capitals "PLACE", which a
+   screen reader may spell out.
 2. **Category band**, minimum height `size.confirmBandHeight`. Ground is the
    **category colour itself, full bleed** — no dot, no tint, no leading rail:
    a nine-point disc beside an eleven-per-cent wash said the colour twice and

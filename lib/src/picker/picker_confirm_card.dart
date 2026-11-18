@@ -296,7 +296,8 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
       if (seat.rowLabel?.trim().isNotEmpty ?? false)
         '${_IdentityGrid._rowWord(seat, strings)} '
             '${seat.rowLabel!.trim()}',
-      '${_IdentityGrid._seatWord(seat, strings)} ${seat.buyerFacingLabel}',
+      '${seatLayerSpokenWord(_IdentityGrid._seatWord(seat, strings))} '
+          '${seat.buyerFacingLabel}',
       if (category != null) category.label,
       if (selectedPrice != null)
         pickerMoney(context, selectedPrice, selectedCurrency),

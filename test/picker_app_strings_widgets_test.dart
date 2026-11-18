@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_checkout_cta.dart';
+import 'package:seatlayer/src/picker/picker_confirm_card.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
@@ -177,6 +178,36 @@ void main() {
         compact: false, filter: <String>['wheelchair']);
     expect(find.text('1 filter'), findsOneWidget);
     expect(find.text('1 filters'), findsNothing);
+  });
+
+  testWidgets('the seat card says a booth\'s place word in normal case',
+      (tester) async {
+    final semantics = tester.ensureSemantics();
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerConfirmCard(), options: _options('en')),
+    );
+    final snapshot = pickerSnapshot();
+    final selection = Map<String, Object?>.from(
+      snapshot['selection']! as Map<String, Object?>,
+    );
+    selection['seats'] = (selection['seats']! as List<Object?>)
+        .map((item) => <String, Object?>{
+              ...item! as Map<String, Object?>,
+              'objectType': 'booth',
+            })
+        .toList();
+    map.emit(<String, Object?>{...snapshot, 'selection': selection});
+    await pumpToRest(tester);
+    expect(_strings('en').placeWord, 'PLACE');
+    // Drawn as the locale writes it...
+    expect(find.text('PLACE'), findsOneWidget);
+    // ...and spoken in normal case.
+    expect(find.bySemanticsLabel(RegExp(r'\bPlace 1\b')), findsWidgets);
+    expect(find.bySemanticsLabel(RegExp('PLACE')), findsNothing);
+    semantics.dispose();
   });
 
   testWidgets('the round control names its filters with a plural form',

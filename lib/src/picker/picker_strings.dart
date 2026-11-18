@@ -1222,3 +1222,14 @@ String seatLayerCheckoutHandoffWords(SeatLayerPickerStrings strings) =>
     strings._handoffKeepsOpeningCheckout
         ? strings.openingCheckout
         : strings.seatsSecuredOpeningCheckout;
+
+/// [word] as a screen reader should say it.
+///
+/// The English locale writes "PLACE" in capitals because the seat card draws
+/// its cell headings upper-cased; a screen reader given the capitals may read
+/// them out letter by letter, so the English word is spoken in the default's
+/// own case. Any other word is spoken as written.
+String seatLayerSpokenWord(String word) =>
+    word == SeatLayerStringTokens.placeWord.toUpperCase()
+        ? SeatLayerStringTokens.placeWord
+        : word;

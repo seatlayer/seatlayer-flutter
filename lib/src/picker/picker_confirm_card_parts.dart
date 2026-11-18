@@ -85,7 +85,8 @@ class _IdentityGrid extends StatelessWidget {
       label: strings.seatIdentity(<String>[
         if (hasSection) section,
         if (row.isNotEmpty) '$rowWord $row',
-        '$seatWord $number',
+        // Drawn upper-cased either way; spoken in the word's own case.
+        '${seatLayerSpokenWord(seatWord)} $number',
       ]),
       child: ExcludeSemantics(
         child: DecoratedBox(
