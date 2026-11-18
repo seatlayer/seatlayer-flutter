@@ -613,7 +613,10 @@ floating disc, ink `color.*.text`, glyph drawn at 21, with a soft shadow. With
 filters on, the ink turns to the accent and the disc carries a badge with the
 number of active provisions. Where a host draws the control as a labelled
 button instead (`compact: false`), the label reads `strings.activeFilters(n)`
-("1 filter", "2 filters") while any filter is on. The **same disc on both compositions**: it
+("1 filter", "2 filters") while any filter is on. The round disc's tooltip
+and accessible name with filters on is
+`strings.accessibilityFiltersActive(n)` ("1 accessibility filter active",
+"2 accessibility filters active"). The **same disc on both compositions**: it
 floats on the map either way, so the wide side does not get a labelled button
 of its own, and the wide panel no longer repeats the control under the
 best-seats card. The glyph is **drawn**, never an emoji: a
@@ -2550,10 +2553,10 @@ plural rule as every other locale, never by `count == 1`. The counted strings
 are `ticketCount`, `seatsFree`, `seatsLeftInSection`, `findBestSeats`,
 `reselectSeats`, `holdLapsedStillFree`, `holdLapsedSomeTaken`,
 `holdLapsedAllTaken`, `removeTickets`, `holdMinutesLeft`, `holdSecondsLeft`,
-`holdLapsedBody`, `seatsNotRecovered`, `accessibleSections`, `placesAvailable`
-and `activeFilters`. Sentences only an app draws come from the runtime's app
+`holdLapsedBody`, `seatsNotRecovered`, `accessibleSections`, `placesAvailable`,
+`activeFilters` and `accessibilityFiltersActive`. Sentences only an app draws come from the runtime's app
 strings, with every category its locale's rule produces; a sentence no source
-translates yet (`activeFilters`) draws English in every locale. The
+translates yet (`activeFilters`, `accessibilityFiltersActive`) draws English in every locale. The
 shipped translations carry every form the runtime has (`zero`, `one`, `two`,
 `few`, `many`, `other`) and choose by the locale's CLDR category for the
 count, exactly as the runtime's `Intl.PluralRules` does; a form a dictionary

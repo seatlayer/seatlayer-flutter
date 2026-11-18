@@ -79,7 +79,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
           child: IconButton(
             tooltip: activeCount == 0
                 ? name
-                : '$activeCount accessibility filters active',
+                : strings.accessibilityFiltersActive(activeCount),
             visualDensity: VisualDensity.compact,
             padding: EdgeInsets.zero,
             constraints: BoxConstraints.tightFor(width: size, height: size),

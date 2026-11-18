@@ -232,6 +232,14 @@ abstract final class SeatLayerStringTokens {
   /// {count} filters
   static const String activeFiltersOther = '{count} filters';
 
+  /// {count} accessibility filter active
+  static const String accessibilityFiltersActiveOne =
+      '{count} accessibility filter active';
+
+  /// {count} accessibility filters active
+  static const String accessibilityFiltersActiveOther =
+      '{count} accessibility filters active';
+
   /// Display options
   static const String displayOptions = 'Display options';
 

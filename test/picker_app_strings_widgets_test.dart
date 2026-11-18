@@ -178,4 +178,15 @@ void main() {
     expect(find.text('1 filter'), findsOneWidget);
     expect(find.text('1 filters'), findsNothing);
   });
+
+  testWidgets('the round control names its filters with a plural form',
+      (tester) async {
+    await openSheet(tester, 'en', filter: <String>['wheelchair']);
+    expect(find.byTooltip('1 accessibility filter active'), findsOneWidget);
+    expect(find.byTooltip('1 accessibility filters active'), findsNothing);
+    expect(
+      const SeatLayerPickerStrings().accessibilityFiltersActive(2),
+      '2 accessibility filters active',
+    );
+  });
 }

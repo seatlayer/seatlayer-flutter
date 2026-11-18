@@ -104,6 +104,7 @@ class SeatLayerPickerStrings {
     this.accessibleStep = _defaultAccessibleStep,
     this.accessibleSections = _defaultAccessibleSections,
     this.activeFilters = _defaultActiveFilters,
+    this.accessibilityFiltersActive = _defaultAccessibilityFiltersActive,
     this.accessJumpFirstSection = SeatLayerStringTokens.accessJumpFirstSection,
     this.accessJumpNextSection = SeatLayerStringTokens.accessJumpNextSection,
     this.fitVenue = SeatLayerStringTokens.fitVenue,
@@ -608,6 +609,13 @@ class SeatLayerPickerStrings {
   /// the English default until one does; a host can override it.
   final String Function(int count) activeFilters;
 
+  /// "2 accessibility filters active" — the tooltip and accessible name of
+  /// the round accessibility control while any filter is on.
+  ///
+  /// No runtime dictionary carries this sentence yet, so every locale draws
+  /// the English default until one does; a host can override it.
+  final String Function(int count) accessibilityFiltersActive;
+
   /// The accessible name of the sheet's count chip, which starts the tour.
   ///
   /// Native-only, for the same reason as [accessibleStep].
@@ -1067,6 +1075,12 @@ class SeatLayerPickerStrings {
         count,
         SeatLayerStringTokens.activeFiltersOne,
         SeatLayerStringTokens.activeFiltersOther,
+      );
+
+  static String _defaultAccessibilityFiltersActive(int count) => _english(
+        count,
+        SeatLayerStringTokens.accessibilityFiltersActiveOne,
+        SeatLayerStringTokens.accessibilityFiltersActiveOther,
       );
 
   static String _defaultAccessNeedWithCount(String need, int count) =>
