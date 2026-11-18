@@ -120,7 +120,8 @@ Header   brand · name over "date · venue" · sales-closed pill · hold pill ·
   while the chart has a for-sale category; `strings.yourSeats` over the
   best-seats card and the cart, drawn in every phase but the first load.
   `size.widePanelHeadingFontSize` at w700 in `color.*.mutedText`, padded
-  `size.widePanelPadX` at both sides, `size.widePanelHeadingPadTop` above and
+  `size.widePanelPadX` at both sides, `size.widePanelHeadingPadTop` above
+  (`size.widePanelSeatsHeadingPadTop` above the seats heading) and
   `size.widePanelHeadingPadBottom` below, start-aligned. **Drawn as given**: no
   port upper-cases them in code, which breaks Turkish. Each is exposed to
   assistive technology as a heading.

@@ -167,6 +167,9 @@ abstract final class SeatLayerSizeTokens {
   /// `14`
   static const double widePanelHeadingPadTop = 14;
 
+  /// `16`
+  static const double widePanelSeatsHeadingPadTop = 16;
+
   /// `4`
   static const double widePanelHeadingPadBottom = 4;
 
