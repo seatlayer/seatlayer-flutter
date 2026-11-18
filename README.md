@@ -466,7 +466,8 @@ app that wants only the raw map and owns every control itself.
 Every control around the seat map is a Flutter widget: the header, price rail,
 section dock, seat card, cart sheet and checkout button, drawn in your palette
 and replaceable one at a time. The seat map itself is the SeatLayer map from the
-web, shown inside your app, so a seat, its price and its 3D view are the same on Flutter, iOS, Android and the web. 3D is offered for venues up to 30,000 seats on phones and 60,000 on desktop by default; set `max3DSeats` to change it.
+web, shown inside your app, so a seat, its price and its 3D view (for venues up
+to 60,000 seats) are the same on Flutter, iOS, Android and the web.
 
 ### Which Flutter platforms are supported?
 
@@ -542,7 +543,8 @@ A `.light()` or `.dark()` preset pins one side deliberately.
   when choosing between Flutter, React Native, and the native iOS and Android
   packages.
 - [See how the 3D seat map works](https://seatlayer.io/3d-seat-map/): the 3D
-  venue and the view from each seat, built from the same chart, on every plan. 3D is offered for venues up to 30,000 seats on phones and 60,000 on desktop by default; set `max3DSeats` to change it.
+  venue and the view from each seat, built from the same chart, on every plan,
+  for venues up to 60,000 seats.
 - [Point AI coding agents at the SeatLayer docs index](https://docs.seatlayer.io/llms.txt)
   (`llms.txt`) for an agent-readable map of the documentation.
 
