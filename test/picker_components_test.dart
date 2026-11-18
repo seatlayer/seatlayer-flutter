@@ -381,6 +381,31 @@ void main() {
     semantics.dispose();
   });
 
+  for (final compact in <bool>[true, false]) {
+    testWidgets(
+        'the ${compact ? 'compact' : 'wide'} test badge says its name once, '
+        'with the explanation as its tooltip', (tester) async {
+      final map = _FakeMapController();
+      addTearDown(map.dispose);
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _app(
+          map,
+          Center(child: SeatLayerPickerTestModeIndicator(compact: compact)),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await tester.pump();
+      final badge = find.byType(SeatLayerPickerTestModeIndicator);
+      final strings = SeatLayerPickerScope.stringsOf(tester.element(badge));
+      final data = tester.getSemantics(badge).getSemanticsData();
+      expect(data.label, strings.testModeLong);
+      expect(data.tooltip, strings.testModeExplained);
+      expect(data.hint, isEmpty);
+      semantics.dispose();
+    });
+  }
+
   testWidgets('section navigator exposes a reliable native focus action',
       (tester) async {
     final map = _FakeMapController();
