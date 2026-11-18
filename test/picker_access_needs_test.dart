@@ -565,6 +565,27 @@ void main() {
         lessThan(headingY));
     expect(tester.getTopLeft(find.text('Wheelchair')).dy,
         greaterThan(headingY));
+    final headingStyle = tester.widget<Text>(heading).style!;
+    expect(headingStyle.fontSize, 11);
+    expect(headingStyle.letterSpacing, closeTo(1.1, 1e-9),
+        reason: 'the heading is tracked at .1em, as designed');
+  });
+
+  testWidgets('the sheet title is the picker\'s own type, not the host\'s',
+      (tester) async {
+    final map = FakePickerMap(bundle: _accessBundle(limited: true));
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+    final snapshot = pickerSnapshot(
+      accessNeeds: <Object?>[accessNeed('wheelchair', 4)],
+    );
+    (snapshot['features']! as Map<String, Object?>)['limitedViewFilter'] = true;
+    await _openSheet(tester, map, snapshot);
+
+    final title = tester.widget<Text>(find.text('Accessibility and view'));
+    expect(title.style!.fontSize, 17);
+    expect(title.style!.fontWeight, FontWeight.w800);
+    expect(title.style!.height, 1.2);
   });
 
   testWidgets('each row wears the drawing its own provision carries', (

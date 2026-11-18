@@ -16,6 +16,8 @@ import 'seat_layer_picker_scope.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_theme.dart';
 import 'picker_a11y.dart';
+import 'picker_toast.dart';
+import 'picker_toast_explainer.dart';
 
 class SeatLayerPickerTestModeIndicator extends StatelessWidget {
   /// Creates the test-event badge.
@@ -82,13 +84,18 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
         ),
       ),
     );
+    final controller = SeatLayerPickerScope.controllerOf(context);
     return Semantics(
       label: strings.testModeLong,
-      child: Tooltip(
-        message: strings.testModeExplained,
-        // A tap says what test mode means. A long press is a gesture nobody
-        // tries on a status chip, so the explanation went unread.
-        triggerMode: TooltipTriggerMode.tap,
+      button: true,
+      child: GestureDetector(
+        // A tap says what test mode means, in the map's toast band. A long
+        // press is a gesture nobody tries on a status chip, so the
+        // explanation went unread.
+        behavior: HitTestBehavior.opaque,
+        onTap: () => seatLayerPickerToasts(controller).show(
+          PickerExplainerToast(strings.testModeExplained),
+        ),
         // The same chip at every width: an environment flag that changes shape
         // with the layout reads as two different states of the event.
         child: SizedBox(height: compactHeight, child: pill),
