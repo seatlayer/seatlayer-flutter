@@ -1,0 +1,35 @@
+name: Record goldens
+
+# Re-records the reference images on the host that compares them.
+#
+# Goldens are compared on macOS by the `goldens` job in ci.yml, and a machine
+# that is not that host rasterises glyph edges differently, so an image
+# recorded anywhere else fails the comparison. Run this against a branch whose
+# change moves an image, download the `goldens` artifact, and commit only the
+# images that change explains. The workflow never commits or pushes.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  record:
+    # Same runner image and Flutter version as ci.yml's `goldens` job, so the
+    # recorded and the compared images come from one environment.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.44.0
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter test --tags golden --update-goldens
+      - uses: actions/upload-artifact@v4
+        with:
+          name: goldens
+          path: test/goldens
+          if-no-files-found: error
