@@ -18,6 +18,16 @@ String _fromPriceNo(String money) => 'Fra $money';
 
 String _sightlineNo(String metres) => '≈ $metres m til scenen';
 
+String _secureMoreAndCheckoutNo(int count) => 'Sikre $count til og betal';
+
+String _accessFreeCountNo(int count) => '$count ledige';
+
+String _seatJustTakenByAnotherNo(String label) =>
+    'Plass $label ble nettopp tatt av en annen kjøper.';
+
+String _peekSecuredNo(int count, String total) =>
+    '✓ $count sikret · $total. Du blir ikke belastet ennå';
+
 String _ticketCountNo(int count) =>
     count == 1 ? '$count billett' : '$count billetter';
 
@@ -26,6 +36,24 @@ String _findBestSeatsNo(int count) =>
 
 String _reselectSeatsNo(int count) =>
     count == 1 ? 'Velg den på nytt' : 'Velg dem på nytt';
+
+String _seatsFreeNo(int count) =>
+    count == 1 ? '$count plass' : '$count plasser';
+
+String _seatsLeftInSectionNo(int count) =>
+    count == 1 ? '$count plass igjen' : '$count plasser igjen';
+
+String _holdLapsedStillFreeNo(int count) => count == 1
+    ? 'Reservasjonen din utløp mens du var borte. Plassen er fortsatt ledig.'
+    : 'Reservasjonen din utløp mens du var borte. Plassene er fortsatt ledige.';
+
+String _holdLapsedSomeTakenNo(int count) => count == 1
+    ? 'Reservasjonen din utløp mens du var borte, og $count av plassene er blitt tatt. Resten er fortsatt ledige.'
+    : 'Reservasjonen din utløp mens du var borte, og $count av plassene er blitt tatt. Resten er fortsatt ledige.';
+
+String _holdLapsedAllTakenNo(int count) => count == 1
+    ? 'Reservasjonen din utløp mens du var borte, og plassen er blitt tatt.'
+    : 'Reservasjonen din utløp mens du var borte, og plassene er blitt tatt.';
 
 String _continueWithTotalNo(String money) => 'Fortsett \u00b7 $money';
 
@@ -74,6 +102,81 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   obstructedView: 'Blokkert sikt',
   premiumSeat: 'Premiumplass',
   continueWord: 'Fortsett',
+  allFloors: 'Alle etasjer',
+  previousSection: 'Forrige seksjon',
+  nextSection: 'Neste seksjon',
+  addSeat: 'Legg til plass',
+  added: 'Lagt til',
+  sectionWord: 'Seksjon',
+  rowWord: 'Rad',
+  seatWord: 'Plass',
+  seeItIn3D: 'Se den i 3D',
+  viewFromThisSeat: 'Utsikt fra denne plassen',
+  allPrices: 'Alle priser',
+  ticketType: 'Billettype',
+  tierCompanionGuidance: 'Krever den tilstøtende rullestolplassen',
+  findingBestSeats: 'Finner de beste plassene…',
+  findSeats: 'Finn plasser',
+  expandCart: 'Åpne billettpanelet',
+  collapseCart: 'Slå sammen billettpanelet',
+  continueToCheckout: 'Fortsett til betaling',
+  secureMore: 'Sikre flere',
+  selectSeats: 'Velg plasser',
+  pickYourSeats: 'Velg plassene dine',
+  salesClosedPill: 'Salget er stengt',
+  salesClosedCta: 'Salget er stengt',
+  confirmOrCancelSeat: 'Bekreft eller avbryt denne plassen',
+  securingSeats: 'Sikrer plassene dine…',
+  openingCheckout: 'Åpner sikker betaling…',
+  testModeExplained:
+      'Bestillinger her er ikke ekte, og ingen kort blir belastet',
+  displayOptions: 'Visningsalternativer',
+  companionSeatsNote: 'Ledsagerplassene ved siden av kan fortsatt velges',
+  zoomIn: 'Zoom inn',
+  zoomOut: 'Zoom ut',
+  rotateVenue: 'Dra for å rotere stedet',
+  moveVenue: 'Dra for å flytte stedet',
+  mapView: 'Kart',
+  flat2dMap: 'Flatt 2D-kart',
+  interactive3dVenueView: 'Interaktiv 3D-visning av arenaen',
+  venueView: 'Arenavisning',
+  holdLapsedTitle: 'Plassene dine ble frigitt',
+  salesClosed: 'Salget er stengt',
+  salesClosedCopy: 'Billettsalget til dette arrangementet er avsluttet.',
+  salesClosedToast: 'Salget til dette arrangementet er stengt.',
+  soldOutEyebrow: 'Dette arrangementet',
+  soldOutTitle: 'Utsolgt',
+  soldOutCopy:
+      'Det er ingen nummererte plasser ledige til dette arrangementet akkurat nå.',
+  holdExpired:
+      'Reservasjonen din har utløpt. Plassene ble frigitt. Velg på nytt.',
+  addingEllipsis: 'Legger til…',
+  moreTimeAdded: 'Mer tid lagt til. Plassene dine er fortsatt reservert.',
+  couldNotAddMoreTime: 'Kunne ikke legge til mer tid. Gå til betaling nå.',
+  seatsJustTaken: 'Én eller flere plasser ble nettopp tatt. Velg på nytt.',
+  allSetTitle: 'Da er alt klart',
+  confirmedAndOnWay: 'bekreftet. En bekreftelse er på vei.',
+  backToMap: 'Tilbake til kartet',
+  mapDidNotLoad: 'Setekartet ble ikke lastet',
+  checkConnection: 'Sjekk tilkoblingen og prøv igjen.',
+  accessPausedTitle: 'Disse plassene er sperret akkurat nå',
+  accessPausedCopy:
+      'Arrangøren har satt dette utvalget på pause. Prøv igjen om noen minutter.',
+  accessRevokedTitle: 'Denne tilgangslenken er ikke lenger aktiv',
+  accessRevokedCopy:
+      'Be den som sendte deg hit om en ny lenke for å fortsette å bestille disse plassene.',
+  accessUnverifiedTitle: 'Vi klarte ikke å bekrefte tilgangen din',
+  accessUnverifiedCopy:
+      'Du kan fortsatt bestille alt som vises som ledig. Kontakt den som sendte deg hit for tilgang til resten.',
+  generalAdmission: 'Fri plassering',
+  numberOfGuests: 'Antall gjester',
+  chooseGuestsCopy:
+      'Velg hvor mange gjester som skal sitte sammen. Bordet reserveres utelukkende for selskapet ditt.',
+  fewerGuests: 'Færre gjester',
+  moreGuests: 'Flere gjester',
+  selectTable: 'Velg bord',
+  updateTable: 'Oppdater bordet',
+  removeWord: 'Fjern',
   accessNeeds: <String, String>{
     'wheelchair': 'Rullestolplass',
     'companion': 'Ledsagerplass',
@@ -93,8 +196,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   addMinutes: _addMinutesNo,
   fromPrice: _fromPriceNo,
   sightline: _sightlineNo,
+  secureMoreAndCheckout: _secureMoreAndCheckoutNo,
+  accessFreeCount: _accessFreeCountNo,
+  seatJustTakenByAnother: _seatJustTakenByAnotherNo,
+  peekSecured: _peekSecuredNo,
   ticketCount: _ticketCountNo,
   findBestSeats: _findBestSeatsNo,
   reselectSeats: _reselectSeatsNo,
+  seatsFree: _seatsFreeNo,
+  seatsLeftInSection: _seatsLeftInSectionNo,
+  holdLapsedStillFree: _holdLapsedStillFreeNo,
+  holdLapsedSomeTaken: _holdLapsedSomeTakenNo,
+  holdLapsedAllTaken: _holdLapsedAllTakenNo,
   continueWithTotal: _continueWithTotalNo,
 );

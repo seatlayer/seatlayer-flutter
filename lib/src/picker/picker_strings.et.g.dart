@@ -18,6 +18,16 @@ String _fromPriceEt(String money) => 'Alates $money';
 
 String _sightlineEt(String metres) => '≈ $metres m laval';
 
+String _secureMoreAndCheckoutEt(int count) => 'Kindlusta veel $count ja maksa';
+
+String _accessFreeCountEt(int count) => '$count vaba';
+
+String _seatJustTakenByAnotherEt(String label) =>
+    'Koha $label võttis just teine ostja.';
+
+String _peekSecuredEt(int count, String total) =>
+    '✓ $count kindlustatud · $total. Veel ei võeta tasu';
+
 String _ticketCountEt(int count) =>
     count == 1 ? '$count pilet' : '$count piletit';
 
@@ -26,6 +36,23 @@ String _findBestSeatsEt(int count) =>
 
 String _reselectSeatsEt(int count) =>
     count == 1 ? 'Vali see uuesti' : 'Vali need uuesti';
+
+String _seatsFreeEt(int count) => count == 1 ? '$count koht' : '$count kohta';
+
+String _seatsLeftInSectionEt(int count) =>
+    count == 1 ? 'Jäänud $count koht' : 'Jäänud $count kohta';
+
+String _holdLapsedStillFreeEt(int count) => count == 1
+    ? 'Sinu broneering aegus, kui olid eemal. See koht on endiselt vaba.'
+    : 'Sinu broneering aegus, kui olid eemal. Need kohad on endiselt vabad.';
+
+String _holdLapsedSomeTakenEt(int count) => count == 1
+    ? 'Sinu broneering aegus, kui olid eemal, ja $count neist kohtadest on juba hõivatud. Ülejäänud on endiselt vabad.'
+    : 'Sinu broneering aegus, kui olid eemal, ja $count neist kohtadest on juba hõivatud. Ülejäänud on endiselt vabad.';
+
+String _holdLapsedAllTakenEt(int count) => count == 1
+    ? 'Sinu broneering aegus, kui olid eemal, ja see koht on juba hõivatud.'
+    : 'Sinu broneering aegus, kui olid eemal, ja need kohad on juba hõivatud.';
 
 String _continueWithTotalEt(String money) => 'Jätka \u00b7 $money';
 
@@ -74,6 +101,78 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   obstructedView: 'Varjatud vaade',
   premiumSeat: 'Premium-koht',
   continueWord: 'Jätka',
+  allFloors: 'Kõik korrused',
+  previousSection: 'Eelmine sektor',
+  nextSection: 'Järgmine sektor',
+  addSeat: 'Lisa koht',
+  added: 'Lisatud',
+  sectionWord: 'Sektor',
+  rowWord: 'Rida',
+  seatWord: 'Koht',
+  seeItIn3D: 'Vaata 3D-s',
+  viewFromThisSeat: 'Vaade sellelt kohalt',
+  allPrices: 'Kõik hinnad',
+  ticketType: 'Piletitüüp',
+  tierCompanionGuidance: 'Nõuab kõrvalasuvat ratastoolikohta',
+  findingBestSeats: 'Otsime parimaid kohti…',
+  findSeats: 'Otsi kohti',
+  expandCart: 'Ava piletipaneel',
+  collapseCart: 'Ahenda piletipaneel',
+  continueToCheckout: 'Jätka maksmisega',
+  secureMore: 'Kindlusta rohkem',
+  selectSeats: 'Vali kohad',
+  pickYourSeats: 'Vali oma kohad',
+  salesClosedPill: 'Müük on suletud',
+  salesClosedCta: 'Müük on suletud',
+  confirmOrCancelSeat: 'Kinnita või tühista see koht',
+  securingSeats: 'Kindlustame sinu kohti…',
+  openingCheckout: 'Avame turvalise makse…',
+  testModeExplained: 'Broneeringud siin ei ole päris ja kaarti ei debiteerita',
+  displayOptions: 'Kuvamise valikud',
+  companionSeatsNote: 'Kõrvalasuvad saatjakohad jäävad valitavaks',
+  zoomIn: 'Suurenda',
+  zoomOut: 'Vähenda',
+  rotateVenue: 'Lohista toimumiskoha pööramiseks',
+  moveVenue: 'Lohista toimumiskoha liigutamiseks',
+  mapView: 'Plaan',
+  flat2dMap: 'Lame 2D-plaan',
+  interactive3dVenueView: 'Interaktiivne 3D-vaade kohast',
+  venueView: 'Koha vaade',
+  holdLapsedTitle: 'Teie kohad vabastati',
+  salesClosed: 'Müük on suletud',
+  salesClosedCopy: 'Selle sündmuse piletimüük on lõppenud.',
+  salesClosedToast: 'Selle sündmuse müük on suletud.',
+  soldOutEyebrow: 'See sündmus',
+  soldOutTitle: 'Välja müüdud',
+  soldOutCopy: 'Selle sündmuse jaoks pole praegu vabu nummerdatud kohti.',
+  holdExpired: 'Sinu broneering aegus. Kohad vabastati. Vali uuesti.',
+  addingEllipsis: 'Lisame…',
+  moreTimeAdded: 'Aega lisati. Sinu kohad on endiselt broneeritud.',
+  couldNotAddMoreTime: 'Aega ei õnnestunud lisada. Mine kohe maksma.',
+  seatsJustTaken: 'Üks või mitu kohta võeti just ära. Palun vali uuesti.',
+  allSetTitle: 'Kõik on valmis',
+  confirmedAndOnWay: 'kinnitatud. Kinnitus on teel.',
+  backToMap: 'Tagasi plaanile',
+  mapDidNotLoad: 'Istekohtade plaan ei laadinud',
+  checkConnection: 'Kontrolli ühendust ja proovi uuesti.',
+  accessPausedTitle: 'Need kohad on praegu broneeritud',
+  accessPausedCopy:
+      'Korraldaja on selle valiku peatanud. Proovi mõne minuti pärast uuesti.',
+  accessRevokedTitle: 'See juurdepääsulink ei ole enam aktiivne',
+  accessRevokedCopy:
+      'Küsi uus link sellelt, kes selle sulle saatis, et neid kohti edasi broneerida.',
+  accessUnverifiedTitle: 'Me ei suutnud sinu juurdepääsu kinnitada',
+  accessUnverifiedCopy:
+      'Saad endiselt osta kõike, mis on kuvatud saadaolevana. Ülejäänule juurdepääsuks võta ühendust sellega, kes sind siia saatis.',
+  generalAdmission: 'Vaba sissepääs',
+  numberOfGuests: 'Külaliste arv',
+  chooseGuestsCopy:
+      'Vali, mitu külalist koos istub. See laud broneeritakse ainult sinu seltskonnale.',
+  fewerGuests: 'Vähem külalisi',
+  moreGuests: 'Rohkem külalisi',
+  selectTable: 'Vali laud',
+  updateTable: 'Uuenda lauda',
+  removeWord: 'Eemalda',
   accessNeeds: <String, String>{
     'wheelchair': 'Ratastoolikoht',
     'companion': 'Saatjakoht',
@@ -93,8 +192,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   addMinutes: _addMinutesEt,
   fromPrice: _fromPriceEt,
   sightline: _sightlineEt,
+  secureMoreAndCheckout: _secureMoreAndCheckoutEt,
+  accessFreeCount: _accessFreeCountEt,
+  seatJustTakenByAnother: _seatJustTakenByAnotherEt,
+  peekSecured: _peekSecuredEt,
   ticketCount: _ticketCountEt,
   findBestSeats: _findBestSeatsEt,
   reselectSeats: _reselectSeatsEt,
+  seatsFree: _seatsFreeEt,
+  seatsLeftInSection: _seatsLeftInSectionEt,
+  holdLapsedStillFree: _holdLapsedStillFreeEt,
+  holdLapsedSomeTaken: _holdLapsedSomeTakenEt,
+  holdLapsedAllTaken: _holdLapsedAllTakenEt,
   continueWithTotal: _continueWithTotalEt,
 );

@@ -18,6 +18,16 @@ String _fromPriceLv(String money) => 'No $money';
 
 String _sightlineLv(String metres) => '≈ $metres m līdz skatuvei';
 
+String _secureMoreAndCheckoutLv(int count) => 'Nodrošināt vēl $count un maksāt';
+
+String _accessFreeCountLv(int count) => '$count brīvas';
+
+String _seatJustTakenByAnotherLv(String label) =>
+    'Vietu $label tikko aizņēma cits pircējs.';
+
+String _peekSecuredLv(int count, String total) =>
+    '✓ $count nodrošinātas · $total. Vēl nekas netiks norakstīts';
+
 String _ticketCountLv(int count) =>
     count == 1 ? '$count biļete' : '$count biļetes';
 
@@ -26,6 +36,23 @@ String _findBestSeatsLv(int count) =>
 
 String _reselectSeatsLv(int count) =>
     count == 1 ? 'Izvēlēties to vēlreiz' : 'Izvēlēties tās vēlreiz';
+
+String _seatsFreeLv(int count) => count == 1 ? '$count vieta' : '$count vietas';
+
+String _seatsLeftInSectionLv(int count) =>
+    count == 1 ? 'Atlikusi $count vieta' : 'Atlikušas $count vietas';
+
+String _holdLapsedStillFreeLv(int count) => count == 1
+    ? 'Tavs rezervējums beidzās, kamēr biji prom. Šī vieta joprojām ir brīva.'
+    : 'Tavs rezervējums beidzās, kamēr biji prom. Šīs vietas joprojām ir brīvas.';
+
+String _holdLapsedSomeTakenLv(int count) => count == 1
+    ? 'Tavs rezervējums beidzās, kamēr biji prom, un $count no šīm vietām jau ir aizņemta. Pārējās joprojām ir brīvas.'
+    : 'Tavs rezervējums beidzās, kamēr biji prom, un $count no šīm vietām jau ir aizņemtas. Pārējās joprojām ir brīvas.';
+
+String _holdLapsedAllTakenLv(int count) => count == 1
+    ? 'Tavs rezervējums beidzās, kamēr biji prom, un šī vieta jau ir aizņemta.'
+    : 'Tavs rezervējums beidzās, kamēr biji prom, un šīs vietas jau ir aizņemtas.';
 
 String _continueWithTotalLv(String money) => 'Turpināt \u00b7 $money';
 
@@ -74,6 +101,82 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   obstructedView: 'Aizsegts skats',
   premiumSeat: 'Premium vieta',
   continueWord: 'Turpināt',
+  allFloors: 'Visi stāvi',
+  previousSection: 'Iepriekšējais sektors',
+  nextSection: 'Nākamais sektors',
+  addSeat: 'Pievienot vietu',
+  added: 'Pievienots',
+  sectionWord: 'Sektors',
+  rowWord: 'Rinda',
+  seatWord: 'Vieta',
+  seeItIn3D: 'Skatīt 3D',
+  viewFromThisSeat: 'Skats no šīs vietas',
+  allPrices: 'Visas cenas',
+  ticketType: 'Biļetes veids',
+  tierCompanionGuidance: 'Nepieciešama blakus esošā ratiņkrēsla vieta',
+  findingBestSeats: 'Meklējam labākās vietas…',
+  findSeats: 'Atrast vietas',
+  expandCart: 'Atvērt biļešu paneli',
+  collapseCart: 'Sakļaut biļešu paneli',
+  continueToCheckout: 'Turpināt uz maksājumu',
+  secureMore: 'Nodrošināt vairāk',
+  selectSeats: 'Izvēlēties vietas',
+  pickYourSeats: 'Izvēlieties savas vietas',
+  salesClosedPill: 'Pārdošana slēgta',
+  salesClosedCta: 'Pārdošana slēgta',
+  confirmOrCancelSeat: 'Apstipriniet vai atceliet šo vietu',
+  securingSeats: 'Nodrošinām jūsu vietas…',
+  openingCheckout: 'Atveram drošo maksājumu…',
+  testModeExplained:
+      'Rezervācijas šeit nav īstas, un neviena karte netiek apmaksāta',
+  displayOptions: 'Attēlojuma iestatījumi',
+  companionSeatsNote: 'Blakus esošās pavadoņa vietas paliek izvēlamas',
+  zoomIn: 'Tuvināt',
+  zoomOut: 'Tālināt',
+  rotateVenue: 'Velciet, lai pagrieztu norises vietu',
+  moveVenue: 'Velciet, lai pārvietotu norises vietu',
+  mapView: 'Plāns',
+  flat2dMap: 'Plakans 2D plāns',
+  interactive3dVenueView: 'Interaktīvs norises vietas 3D skats',
+  venueView: 'Norises vietas skats',
+  holdLapsedTitle: 'Jūsu vietas tika atbrīvotas',
+  salesClosed: 'Pārdošana slēgta',
+  salesClosedCopy: 'Biļešu pārdošana šim pasākumam ir beigusies.',
+  salesClosedToast: 'Pārdošana šim pasākumam ir slēgta.',
+  soldOutEyebrow: 'Šis pasākums',
+  soldOutTitle: 'Izpārdots',
+  soldOutCopy: 'Šim pasākumam pašlaik nav pieejamu numurētu vietu.',
+  holdExpired:
+      'Jūsu rezervācija beidzās. Vietas tika atbrīvotas. Izvēlieties no jauna.',
+  addingEllipsis: 'Pievienojam…',
+  moreTimeAdded: 'Pievienots laiks. Jūsu vietas joprojām ir rezervētas.',
+  couldNotAddMoreTime:
+      'Neizdevās pievienot laiku. Dodieties uz maksājumu tagad.',
+  seatsJustTaken:
+      'Viena vai vairākas vietas tikko tika aizņemtas. Izvēlieties no jauna.',
+  allSetTitle: 'Viss ir gatavs',
+  confirmedAndOnWay: 'apstiprināts. Apstiprinājums jau ceļā.',
+  backToMap: 'Atpakaļ uz plānu',
+  mapDidNotLoad: 'Vietu plāns neielādējās',
+  checkConnection: 'Pārbaudiet savienojumu un mēģiniet vēlreiz.',
+  accessPausedTitle: 'Šīs vietas pašlaik ir rezervētas',
+  accessPausedCopy:
+      'Organizators ir apturējis šo izvēli. Mēģiniet vēlreiz pēc dažām minūtēm.',
+  accessRevokedTitle: 'Šī piekļuves saite vairs nav aktīva',
+  accessRevokedCopy:
+      'Palūdziet jaunu saiti tam, kas to jums nosūtīja, lai turpinātu rezervēt šīs vietas.',
+  accessUnverifiedTitle: 'Neizdevās pārbaudīt jūsu piekļuvi',
+  accessUnverifiedCopy:
+      'Joprojām varat iegādāties visu, kas rādīts kā pieejams. Par piekļuvi pārējam sazinieties ar to, kas jums nosūtīja saiti.',
+  generalAdmission: 'Brīva ieeja',
+  numberOfGuests: 'Viesu skaits',
+  chooseGuestsCopy:
+      'Izvēlieties, cik viesu sēdēs kopā. Šis galds tiek rezervēts tikai jūsu kompānijai.',
+  fewerGuests: 'Mazāk viesu',
+  moreGuests: 'Vairāk viesu',
+  selectTable: 'Izvēlēties galdu',
+  updateTable: 'Atjaunināt galdu',
+  removeWord: 'Noņemt',
   accessNeeds: <String, String>{
     'wheelchair': 'Ratiņkrēsla vieta',
     'companion': 'Pavadoņa vieta',
@@ -93,8 +196,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   addMinutes: _addMinutesLv,
   fromPrice: _fromPriceLv,
   sightline: _sightlineLv,
+  secureMoreAndCheckout: _secureMoreAndCheckoutLv,
+  accessFreeCount: _accessFreeCountLv,
+  seatJustTakenByAnother: _seatJustTakenByAnotherLv,
+  peekSecured: _peekSecuredLv,
   ticketCount: _ticketCountLv,
   findBestSeats: _findBestSeatsLv,
   reselectSeats: _reselectSeatsLv,
+  seatsFree: _seatsFreeLv,
+  seatsLeftInSection: _seatsLeftInSectionLv,
+  holdLapsedStillFree: _holdLapsedStillFreeLv,
+  holdLapsedSomeTaken: _holdLapsedSomeTakenLv,
+  holdLapsedAllTaken: _holdLapsedAllTakenLv,
   continueWithTotal: _continueWithTotalLv,
 );

@@ -199,7 +199,7 @@ class SeatLayerPickerStrings {
   ///
   /// The wording comes from the SeatLayer runtime's own dictionaries, so the
   /// drawn map and the native chrome around it say the same things in the same
-  /// words. Thirty-seven locales are translated; anything else, and any single
+  /// words. Forty-three locales are translated; anything else, and any single
   /// string the runtime has no equivalent for, keeps the English default.
   ///
   /// This is a starting point, never a ceiling: the result is an ordinary

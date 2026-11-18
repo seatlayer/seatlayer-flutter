@@ -23,13 +23,17 @@ import 'picker_strings.fa.g.dart';
 import 'picker_strings.fi.g.dart';
 import 'picker_strings.fr.g.dart';
 import 'picker_strings.he.g.dart';
+import 'picker_strings.hi.g.dart';
 import 'picker_strings.hr.g.dart';
 import 'picker_strings.hu.g.dart';
+import 'picker_strings.id.g.dart';
 import 'picker_strings.it.g.dart';
 import 'picker_strings.ja.g.dart';
+import 'picker_strings.ko.g.dart';
 import 'picker_strings.ku.g.dart';
 import 'picker_strings.lt.g.dart';
 import 'picker_strings.lv.g.dart';
+import 'picker_strings.ms.g.dart';
 import 'picker_strings.nl.g.dart';
 import 'picker_strings.no.g.dart';
 import 'picker_strings.pl.g.dart';
@@ -40,8 +44,10 @@ import 'picker_strings.sk.g.dart';
 import 'picker_strings.sl.g.dart';
 import 'picker_strings.sr.g.dart';
 import 'picker_strings.sv.g.dart';
+import 'picker_strings.th.g.dart';
 import 'picker_strings.tr.g.dart';
 import 'picker_strings.uk.g.dart';
+import 'picker_strings.vi.g.dart';
 import 'picker_strings.zh_hans.g.dart';
 import 'picker_strings.zh_hant.g.dart';
 
@@ -67,13 +73,17 @@ const Map<String, SeatLayerPickerStrings> seatLayerPickerStringsByLocale =
       'fi': seatLayerPickerStringsFi,
       'fr': seatLayerPickerStringsFr,
       'he': seatLayerPickerStringsHe,
+      'hi': seatLayerPickerStringsHi,
       'hr': seatLayerPickerStringsHr,
       'hu': seatLayerPickerStringsHu,
+      'id': seatLayerPickerStringsId,
       'it': seatLayerPickerStringsIt,
       'ja': seatLayerPickerStringsJa,
+      'ko': seatLayerPickerStringsKo,
       'ku': seatLayerPickerStringsKu,
       'lt': seatLayerPickerStringsLt,
       'lv': seatLayerPickerStringsLv,
+      'ms': seatLayerPickerStringsMs,
       'nl': seatLayerPickerStringsNl,
       'no': seatLayerPickerStringsNo,
       'pl': seatLayerPickerStringsPl,
@@ -84,8 +94,10 @@ const Map<String, SeatLayerPickerStrings> seatLayerPickerStringsByLocale =
       'sl': seatLayerPickerStringsSl,
       'sr': seatLayerPickerStringsSr,
       'sv': seatLayerPickerStringsSv,
+      'th': seatLayerPickerStringsTh,
       'tr': seatLayerPickerStringsTr,
       'uk': seatLayerPickerStringsUk,
+      'vi': seatLayerPickerStringsVi,
       'zh-Hans': seatLayerPickerStringsZhHans,
       'zh-Hant': seatLayerPickerStringsZhHant,
     };

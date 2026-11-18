@@ -9,7 +9,7 @@
 // one index the resolver reads.
 //
 // Why generated and not hand-written: the runtime already ships a reviewed
-// translation of these sentences for thirty-seven locales. Writing them again
+// translation of these sentences for forty-three locales. Writing them again
 // on this side would be the same words drifting in two places.
 import 'dart:convert';
 import 'dart:io';
@@ -67,6 +67,74 @@ const List<String> _plainFields = <String>[
   // access panel all print it alone — so it has to be emitted here too, or
   // every locale but English says "Continue" under a translated map.
   'continueWord',
+  'allFloors',
+  'previousSection',
+  'nextSection',
+  'addSeat',
+  'added',
+  'sectionWord',
+  'rowWord',
+  'seatWord',
+  'seeItIn3D',
+  'viewFromThisSeat',
+  'allPrices',
+  'ticketType',
+  'tierCompanionGuidance',
+  'findingBestSeats',
+  'findSeats',
+  'expandCart',
+  'collapseCart',
+  'continueToCheckout',
+  'secureMore',
+  'selectSeats',
+  'pickYourSeats',
+  'salesClosedPill',
+  'salesClosedCta',
+  'confirmOrCancelSeat',
+  'securingSeats',
+  'openingCheckout',
+  'testModeExplained',
+  'displayOptions',
+  'companionSeatsNote',
+  'zoomIn',
+  'zoomOut',
+  'rotateVenue',
+  'moveVenue',
+  'mapView',
+  'flat2dMap',
+  'interactive3dVenueView',
+  'venueView',
+  'holdLapsedTitle',
+  'salesClosed',
+  'salesClosedCopy',
+  'salesClosedToast',
+  'soldOutEyebrow',
+  'soldOutTitle',
+  'soldOutCopy',
+  'holdExpired',
+  'addingEllipsis',
+  'moreTimeAdded',
+  'couldNotAddMoreTime',
+  'seatsJustTaken',
+  'allSetTitle',
+  'confirmedAndOnWay',
+  'backToMap',
+  'mapDidNotLoad',
+  'checkConnection',
+  'accessPausedTitle',
+  'accessPausedCopy',
+  'accessRevokedTitle',
+  'accessRevokedCopy',
+  'accessUnverifiedTitle',
+  'accessUnverifiedCopy',
+  'generalAdmission',
+  'numberOfGuests',
+  'chooseGuestsCopy',
+  'fewerGuests',
+  'moreGuests',
+  'selectTable',
+  'updateTable',
+  'removeWord',
 ];
 
 /// The wire keys of the twelve accommodations, whose translated names are
@@ -90,23 +158,57 @@ const List<String> _accessNeedKeys = <String>[
   'lift-armrest',
 ];
 
-/// Strings the runtime writes with one placeholder, and the Dart parameter
-/// that fills it.
-const Map<String, ({String parameter, String type, String placeholder})>
-    _interpolated =
-    <String, ({String parameter, String type, String placeholder})>{
-  'seatsLeft': (parameter: 'count', type: 'int', placeholder: '{count}'),
-  'moreCount': (parameter: 'count', type: 'int', placeholder: '{count}'),
-  'addMinutes': (parameter: 'minutes', type: 'int', placeholder: '{count}'),
-  'fromPrice': (parameter: 'money', type: 'String', placeholder: '{price}'),
-  'sightline': (parameter: 'metres', type: 'String', placeholder: '{m}'),
+/// One placeholder in a runtime sentence, and the Dart parameter that fills it.
+typedef _Slot = ({String parameter, String type, String placeholder});
+
+/// Strings the runtime writes with placeholders, and the Dart parameters that
+/// fill them, in the order the Dart signature takes them.
+const Map<String, List<_Slot>> _interpolated = <String, List<_Slot>>{
+  'seatsLeft': <_Slot>[
+    (parameter: 'count', type: 'int', placeholder: '{count}'),
+  ],
+  'moreCount': <_Slot>[
+    (parameter: 'count', type: 'int', placeholder: '{count}'),
+  ],
+  'addMinutes': <_Slot>[
+    (parameter: 'minutes', type: 'int', placeholder: '{count}'),
+  ],
+  'fromPrice': <_Slot>[
+    (parameter: 'money', type: 'String', placeholder: '{price}'),
+  ],
+  'sightline': <_Slot>[
+    (parameter: 'metres', type: 'String', placeholder: '{m}'),
+  ],
+  'secureMoreAndCheckout': <_Slot>[
+    (parameter: 'count', type: 'int', placeholder: '{count}'),
+  ],
+  'accessFreeCount': <_Slot>[
+    (parameter: 'count', type: 'int', placeholder: '{count}'),
+  ],
+  'seatJustTakenByAnother': <_Slot>[
+    (parameter: 'label', type: 'String', placeholder: '{label}'),
+  ],
+  'peekSecured': <_Slot>[
+    (parameter: 'count', type: 'int', placeholder: '{count}'),
+    (parameter: 'total', type: 'String', placeholder: '{total}'),
+  ],
 };
+
+/// The slot every counted string fills.
+const List<_Slot> _countSlot = <_Slot>[
+  (parameter: 'count', type: 'int', placeholder: '{count}'),
+];
 
 /// Strings with a singular and a plural form.
 const List<String> _plurals = <String>[
   'ticketCount',
   'findBestSeats',
   'reselectSeats',
+  'seatsFree',
+  'seatsLeftInSection',
+  'holdLapsedStillFree',
+  'holdLapsedSomeTaken',
+  'holdLapsedAllTaken',
 ];
 
 void main(List<String> args) {
@@ -194,8 +296,8 @@ String _renderLocale(String locale, Map<String, Object?> values) {
     functions[entry.key] = name;
     buffer
       ..writeln(
-        'String $name(${entry.value.type} ${entry.value.parameter}) => '
-        '${_template(value, entry.value.placeholder, entry.value.parameter)};',
+        'String $name(${_parameters(entry.value)}) => '
+        '${_template(value, entry.value)};',
       )
       ..writeln();
   }
@@ -211,8 +313,8 @@ String _renderLocale(String locale, Map<String, Object?> values) {
     buffer
       ..writeln(
         'String $name(int count) => count == 1\n'
-        '    ? ${_template(one, '{count}', 'count')}\n'
-        '    : ${_template(other, '{count}', 'count')};',
+        '    ? ${_template(one, _countSlot)}\n'
+        '    : ${_template(other, _countSlot)};',
       )
       ..writeln();
   }
@@ -295,26 +397,42 @@ String _header(String subject) => '''
 // chrome around it say the same things in the same words.
 ''';
 
+/// The Dart parameter list for [slots]: `int count, String total`.
+String _parameters(List<_Slot> slots) =>
+    slots.map((slot) => '${slot.type} ${slot.parameter}').join(', ');
+
 /// Characters that would be read as part of an interpolated name.
 final RegExp _identifierPart = RegExp(r'[A-Za-z0-9_]');
 
-/// [value] as a Dart string with [placeholder] replaced by [parameter].
-String _template(String value, String placeholder, String parameter) {
+/// [value] as a Dart string with each slot's placeholder replaced by its
+/// parameter.
+String _template(String value, List<_Slot> slots) {
   final escaped = _escape(value);
   // `_escape` turns a literal `$` into `\$`, so the only `$` this can
   // introduce is the interpolation being asked for. Braces go on only where
   // the next character would otherwise join the name: Japanese writes the
   // unit straight after the figure ("約{m}m"), where a bare `$metres` parses
   // as an identifier called `metresm`. Bracing everything instead would be
-  // simpler and would trip `unnecessary_brace_in_string_interps` on the other
-  // thirty-six locales.
+  // simpler and would trip `unnecessary_brace_in_string_interps` on every
+  // other locale.
   final buffer = StringBuffer();
   var rest = escaped;
   while (true) {
-    final at = rest.indexOf(placeholder);
-    if (at < 0) break;
-    final after = at + placeholder.length;
+    // The earliest placeholder left, whichever slot it fills: a translation
+    // is free to put the figures in another order than English does.
+    _Slot? next;
+    var at = -1;
+    for (final slot in slots) {
+      final index = rest.indexOf(slot.placeholder);
+      if (index >= 0 && (at < 0 || index < at)) {
+        at = index;
+        next = slot;
+      }
+    }
+    if (next == null) break;
+    final after = at + next.placeholder.length;
     final joins = after < rest.length && _identifierPart.hasMatch(rest[after]);
+    final parameter = next.parameter;
     buffer
       ..write(rest.substring(0, at))
       ..write(joins ? '\${$parameter}' : '\$$parameter');

@@ -311,8 +311,8 @@ abstract final class SeatLayerStringTokens {
   /// Hearing support
   static const String accessHearing = 'Hearing support';
 
-  /// Mobility cart
-  static const String accessCart = 'Mobility cart';
+  /// Live captions
+  static const String accessCart = 'Live captions';
 
   /// Sign language view
   static const String accessSignLanguage = 'Sign language view';

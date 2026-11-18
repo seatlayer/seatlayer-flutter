@@ -684,8 +684,10 @@ The names are the SHORT ones. The runtime's own taxonomy labels
 (`picker.access.*`) are written for a seat popup, where "Designated aisle /
 transfer seat" is the honest length; every place this SDK prints a provision is
 a single line in a narrow column. The English defaults in `design/tokens.json`
-have always been short, and the locale extractor takes the other thirty-six
-from `picker.accessShort.*` so they agree.
+have always been short, and the locale extractor takes every other locale
+from `picker.accessShort.*` so they agree. The wire key `cart` is the CART
+live-caption provision (its glyph is the CC mark), so its English name is
+"Live captions"; it is not a mobility vehicle.
 
 Row anatomy, leading to trailing, at **one fixed height of 50 for every row on
 the sheet** — a sheet whose rows breathe differently reads as three lists in a

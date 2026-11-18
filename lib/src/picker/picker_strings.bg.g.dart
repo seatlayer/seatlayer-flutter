@@ -18,6 +18,16 @@ String _fromPriceBg(String money) => 'От $money';
 
 String _sightlineBg(String metres) => '≈ $metres м до сцената';
 
+String _secureMoreAndCheckoutBg(int count) => 'Запази още $count и плати';
+
+String _accessFreeCountBg(int count) => 'Свободни: $count';
+
+String _seatJustTakenByAnotherBg(String label) =>
+    'Място $label току-що беше заето от друг купувач.';
+
+String _peekSecuredBg(int count, String total) =>
+    '✓ $count запазени · $total. Още няма да ви таксуваме';
+
 String _ticketCountBg(int count) =>
     count == 1 ? '$count билет' : '$count билета';
 
@@ -27,6 +37,23 @@ String _findBestSeatsBg(int count) => count == 1
 
 String _reselectSeatsBg(int count) =>
     count == 1 ? 'Изберете го отново' : 'Изберете ги отново';
+
+String _seatsFreeBg(int count) => count == 1 ? '$count място' : '$count места';
+
+String _seatsLeftInSectionBg(int count) =>
+    count == 1 ? 'Остава $count място' : 'Остават $count места';
+
+String _holdLapsedStillFreeBg(int count) => count == 1
+    ? 'Резервацията ви изтече, докато ви нямаше. Това място все още е свободно.'
+    : 'Резервацията ви изтече, докато ви нямаше. Тези места все още са свободни.';
+
+String _holdLapsedSomeTakenBg(int count) => count == 1
+    ? 'Резервацията ви изтече, докато ви нямаше, и $count от тези места вече е заето. Останалите все още са свободни.'
+    : 'Резервацията ви изтече, докато ви нямаше, и $count от тези места вече са заети. Останалите все още са свободни.';
+
+String _holdLapsedAllTakenBg(int count) => count == 1
+    ? 'Резервацията ви изтече, докато ви нямаше, и това място вече е заето.'
+    : 'Резервацията ви изтече, докато ви нямаше, и тези места вече са заети.';
 
 String _continueWithTotalBg(String money) => 'Продължи \u00b7 $money';
 
@@ -75,6 +102,80 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   obstructedView: 'Закрита видимост',
   premiumSeat: 'Премиум място',
   continueWord: 'Продължи',
+  allFloors: 'Всички етажи',
+  previousSection: 'Предишен сектор',
+  nextSection: 'Следващ сектор',
+  addSeat: 'Добави място',
+  added: 'Добавено',
+  sectionWord: 'Сектор',
+  rowWord: 'Ред',
+  seatWord: 'Място',
+  seeItIn3D: 'Виж в 3D',
+  viewFromThisSeat: 'Гледка от това място',
+  allPrices: 'Всички цени',
+  ticketType: 'Вид билет',
+  tierCompanionGuidance: 'Изисква съседното място за инвалидна количка',
+  findingBestSeats: 'Търсим най-добрите места…',
+  findSeats: 'Намери места',
+  expandCart: 'Отвори панела с билети',
+  collapseCart: 'Свий панела с билети',
+  continueToCheckout: 'Продължи към плащане',
+  secureMore: 'Запази още',
+  selectSeats: 'Избери места',
+  pickYourSeats: 'Изберете местата си',
+  salesClosedPill: 'Продажбите са затворени',
+  salesClosedCta: 'Продажбите са затворени',
+  confirmOrCancelSeat: 'Потвърдете или откажете това място',
+  securingSeats: 'Запазваме местата ви…',
+  openingCheckout: 'Отваряме защитено плащане…',
+  testModeExplained: 'Резервациите тук не са истински и не се таксува карта',
+  displayOptions: 'Опции за показване',
+  companionSeatsNote: 'Съседните места за придружител остават избираеми',
+  zoomIn: 'Приближи',
+  zoomOut: 'Отдалечи',
+  rotateVenue: 'Плъзнете, за да завъртите мястото',
+  moveVenue: 'Плъзнете, за да преместите мястото',
+  mapView: 'План',
+  flat2dMap: 'Плосък 2D план',
+  interactive3dVenueView: 'Интерактивен 3D изглед на обекта',
+  venueView: 'Изглед на обекта',
+  holdLapsedTitle: 'Местата ви бяха освободени',
+  salesClosed: 'Продажбите са затворени',
+  salesClosedCopy: 'Продажбата на билети за това събитие приключи.',
+  salesClosedToast: 'Продажбите за това събитие са затворени.',
+  soldOutEyebrow: 'Това събитие',
+  soldOutTitle: 'Изчерпано',
+  soldOutCopy: 'В момента няма свободни номерирани места за това събитие.',
+  holdExpired:
+      'Резервацията ви изтече. Местата бяха освободени. Изберете отново.',
+  addingEllipsis: 'Добавяне…',
+  moreTimeAdded: 'Добавено е още време. Местата ви са все още резервирани.',
+  couldNotAddMoreTime:
+      'Не можахме да добавим време. Преминете към плащане сега.',
+  seatsJustTaken: 'Едно или повече места току-що бяха заети. Изберете отново.',
+  allSetTitle: 'Всичко е готово',
+  confirmedAndOnWay: 'потвърдено. Потвърждението пътува към вас.',
+  backToMap: 'Назад към плана',
+  mapDidNotLoad: 'Планът на местата не се зареди',
+  checkConnection: 'Проверете връзката си и опитайте отново.',
+  accessPausedTitle: 'Тези места са блокирани в момента',
+  accessPausedCopy:
+      'Организаторът е поставил този избор на пауза. Опитайте отново след няколко минути.',
+  accessRevokedTitle: 'Тази връзка за достъп вече не е активна',
+  accessRevokedCopy:
+      'Поискайте нова връзка от този, който ви я изпрати, за да продължите да резервирате тези места.',
+  accessUnverifiedTitle: 'Не успяхме да потвърдим достъпа ви',
+  accessUnverifiedCopy:
+      'Все още можете да купите всичко, показано като налично. За достъп до останалото се свържете с този, който ви изпрати връзката.',
+  generalAdmission: 'Свободен вход',
+  numberOfGuests: 'Брой гости',
+  chooseGuestsCopy:
+      'Изберете колко гости ще седят заедно. Тази маса се запазва само за вашата компания.',
+  fewerGuests: 'По-малко гости',
+  moreGuests: 'Повече гости',
+  selectTable: 'Избери маса',
+  updateTable: 'Обнови масата',
+  removeWord: 'Премахни',
   accessNeeds: <String, String>{
     'wheelchair': 'Място за количка',
     'companion': 'Място за придружител',
@@ -94,8 +195,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   addMinutes: _addMinutesBg,
   fromPrice: _fromPriceBg,
   sightline: _sightlineBg,
+  secureMoreAndCheckout: _secureMoreAndCheckoutBg,
+  accessFreeCount: _accessFreeCountBg,
+  seatJustTakenByAnother: _seatJustTakenByAnotherBg,
+  peekSecured: _peekSecuredBg,
   ticketCount: _ticketCountBg,
   findBestSeats: _findBestSeatsBg,
   reselectSeats: _reselectSeatsBg,
+  seatsFree: _seatsFreeBg,
+  seatsLeftInSection: _seatsLeftInSectionBg,
+  holdLapsedStillFree: _holdLapsedStillFreeBg,
+  holdLapsedSomeTaken: _holdLapsedSomeTakenBg,
+  holdLapsedAllTaken: _holdLapsedAllTakenBg,
   continueWithTotal: _continueWithTotalBg,
 );
