@@ -179,12 +179,28 @@ void main() {
     );
     expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
+    // The picker's readings say they are words-only in public, so a host that
+    // rebuilds one with its own label keeps it spinner-free.
+    expect(securing.busyInWords, isTrue);
+    await pumpLabel(
+      SeatLayerCheckoutCtaState(
+        label: 'Holding your seats',
+        enabled: securing.enabled,
+        busy: securing.busy,
+        statesReason: securing.statesReason,
+        busyInWords: securing.busyInWords,
+      ),
+    );
+    expect(find.text('Holding your seats'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
     // The seats are held by now: the words say so, with nothing spinning.
     final handoff = _cta(_state(), handoffInFlight: true);
     await pumpLabel(handoff);
     expect(find.text('Seats secured. Opening checkout…'), findsOneWidget);
     expect(find.byType(CircularProgressIndicator), findsNothing);
     expect(handoff.busy, isTrue);
+    expect(handoff.busyInWords, isTrue);
 
     // A seat card opening over the handoff keeps it words-only.
     await pumpLabel(_cta(_state(), handoffInFlight: true, seatCardOpen: true));
