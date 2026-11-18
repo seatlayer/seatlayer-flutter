@@ -406,6 +406,47 @@ void main() {
     });
   }
 
+  group('the explanation band', () {
+    const toast = PickerExplainerToast('Bookings here are not real');
+
+    testWidgets('sizes to its sentence inside a host row', (tester) async {
+      final map = _FakeMapController();
+      addTearDown(map.dispose);
+      await tester.pumpWidget(
+        _app(
+          map,
+          const Row(
+            children: <Widget>[SeatLayerPickerToastCard(toast: toast)],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      final card = find.byType(PickerExplainerToastCard);
+      expect(card, findsOneWidget);
+      expect(
+        tester.getSize(card).width,
+        lessThan(tester.getSize(find.byType(Row)).width),
+      );
+    });
+
+    testWidgets('fills a width it is given', (tester) async {
+      final map = _FakeMapController();
+      addTearDown(map.dispose);
+      await tester.pumpWidget(
+        _app(
+          map,
+          const Center(
+            child: SizedBox(
+              width: 300,
+              child: SeatLayerPickerToastCard(toast: toast),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(PickerExplainerToastCard)).width, 300);
+    });
+  });
+
   testWidgets('section navigator exposes a reliable native focus action',
       (tester) async {
     final map = _FakeMapController();
