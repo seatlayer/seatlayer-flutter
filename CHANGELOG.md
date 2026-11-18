@@ -7,9 +7,13 @@
 - **Checkout button:** once the seats are held, the second busy state reads "Seats secured. Opening checkout…". If you set `openingCheckout` and not `seatsSecuredOpeningCheckout`, your `openingCheckout` wording is still drawn there.
 - **Checkout button:** new `SeatLayerCheckoutCtaState.busyInWords` (default false) marks the picker's own busy readings, which are drawn without a spinner; carry it across when you rebuild a reading with your own label.
 - **Test mode:** a tap on the test badge explains it; its screen-reader name is "Test mode · books nothing".
-- **Accessibility sheet:** the two map switches come first, and the provisions follow under a "Show seats for" heading.
+- **Accessibility sheet:** the two map switches come first, and the provisions follow under a "SHOW SEATS FOR" heading. The heading is drawn as written: the English default is now in capitals, and a host's own `showSeatsFor` is no longer upper-cased.
+- **Accessibility control:** new `SeatLayerPickerStrings.activeFilters` labels the wide control ("1 filter", "2 filters") and new `SeatLayerPickerStrings.accessibilityFiltersActive` is the round control's tooltip ("1 accessibility filter active"). Both are English in every locale until a translation exists.
 - **3D:** the rotate / move control is a labelled pair, "Rotate venue" and "Move venue", on every width.
 - **No English typed into the picker:** the wide seat card, the floor picker, the compact total, the error banner, the Map/3D and colour-blind controls and the attribution read `SeatLayerPickerStrings`. New fields: `orbitMode`, `panMode`, `showSeatsFor`, `dismissError`, `backToSeatMap`, `openInteractive3dVenue`, `floorWord`, `totalWord`, `ticketWord`. The wide seat card's button says "Add seat" for a seat, as the phone card does.
+- **English plural forms:** the English defaults of the counted sentences choose their one / other form by the English plural rule, the same path every other locale takes.
+- **Norwegian Bokmål:** `forLocale` resolves `nb` and `nb-NO` to the Norwegian strings; they used to fall back to English.
+- **Seat card:** the screen-reader line says the English place word as "Place" rather than the drawn capitals.
 - **Counted sentences in every language's own grammar:** Russian says "Осталось 5 мест" and "Осталось 21 место", and Arabic, Polish, Czech, Lithuanian, Welsh and the rest take every plural form the runtime has, chosen by the locale's own rule for the count.
 - **One English wording:** a few English defaults now say exactly what the runtime says ("More time added. Your seats are still held.", "Drag to rotate the venue", curly apostrophes).
 - **Sold-out prices:** a price with no seats left stays on the price rail, struck through and greyed, and is still a toggle, so a buyer who pinned it can switch the filter off. Only a runtime that counts seats per category is believed at zero.
