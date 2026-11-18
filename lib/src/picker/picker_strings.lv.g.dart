@@ -177,6 +177,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   selectTable: 'Izvēlēties galdu',
   updateTable: 'Atjaunināt galdu',
   removeWord: 'Noņemt',
+  floorWord: 'Stāvs',
+  totalWord: 'Kopā',
   accessNeeds: <String, String>{
     'wheelchair': 'Ratiņkrēsla vieta',
     'companion': 'Pavadoņa vieta',

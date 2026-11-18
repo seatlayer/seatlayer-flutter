@@ -173,6 +173,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   selectTable: 'เลือกโต๊ะ',
   updateTable: 'อัปเดตโต๊ะ',
   removeWord: 'นำออก',
+  floorWord: 'ชั้น',
+  totalWord: 'รวม',
   accessNeeds: <String, String>{
     'wheelchair': 'ที่สำหรับรถเข็น',
     'companion': 'ที่นั่งผู้ติดตาม',

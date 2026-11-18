@@ -380,6 +380,27 @@ abstract final class SeatLayerStringTokens {
   /// Move venue
   static const String panMode = 'Move venue';
 
+  /// Show seats for
+  static const String showSeatsFor = 'Show seats for';
+
+  /// Dismiss error
+  static const String dismissError = 'Dismiss error';
+
+  /// Back to seat map
+  static const String backToSeatMap = 'Back to seat map';
+
+  /// Open interactive 3D venue
+  static const String openInteractive3dVenue = 'Open interactive 3D venue';
+
+  /// Floor
+  static const String floorWord = 'Floor';
+
+  /// Total
+  static const String totalWord = 'Total';
+
+  /// Ticket
+  static const String ticketWord = 'Ticket';
+
   /// General admission
   static const String generalAdmission = 'General admission';
 

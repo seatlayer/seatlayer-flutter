@@ -176,6 +176,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   selectTable: 'Asztal kiválasztása',
   updateTable: 'Asztal frissítése',
   removeWord: 'Eltávolítás',
+  floorWord: 'Emelet',
+  totalWord: 'Összesen',
   accessNeeds: <String, String>{
     'wheelchair': 'Kerekesszékes hely',
     'companion': 'Kísérőhely',

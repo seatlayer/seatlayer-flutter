@@ -135,7 +135,7 @@ void main() {
 
   test('the host opening its checkout narrates itself too', () {
     final cta = _cta(_state(), handoffInFlight: true);
-    expect(cta.label, 'Opening secure checkout…');
+    expect(cta.label, 'Seats secured. Opening checkout…');
     expect(cta.busy, isTrue);
     expect(cta.enabled, isFalse);
   });

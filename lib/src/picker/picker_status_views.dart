@@ -83,9 +83,12 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
       ),
     );
     return Semantics(
-      label: 'Test event. No real inventory will be booked.',
+      label: strings.testModeLong,
       child: Tooltip(
         message: strings.testModeExplained,
+        // A tap says what test mode means. A long press is a gesture nobody
+        // tries on a status chip, so the explanation went unread.
+        triggerMode: TooltipTriggerMode.tap,
         // The same chip at every width: an environment flag that changes shape
         // with the layout reads as two different states of the event.
         child: SizedBox(height: compactHeight, child: pill),
@@ -149,7 +152,7 @@ class SeatLayerPickerFloorSelector extends StatelessWidget {
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
             value: state.snapshot?.map.floorId,
-            hint: const Text('Floor'),
+            hint: Text(SeatLayerPickerScope.stringsOf(context).floorWord),
             items: floors
                 .map(
                   (floor) => DropdownMenuItem<String>(
@@ -199,7 +202,7 @@ class SeatLayerPickerCheckoutBar extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Total',
+                      SeatLayerPickerScope.stringsOf(context).totalWord,
                       style: TextStyle(color: theme.mutedText, fontSize: 11),
                     ),
                     Text(

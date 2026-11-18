@@ -546,6 +546,27 @@ void main() {
     );
   });
 
+  testWidgets('the provisions sit under their own heading, after the map '
+      'switches', (tester) async {
+    final map = FakePickerMap(bundle: _accessBundle(limited: true));
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+    final snapshot = pickerSnapshot(
+      accessNeeds: <Object?>[accessNeed('wheelchair', 4)],
+    );
+    (snapshot['features']! as Map<String, Object?>)['limitedViewFilter'] = true;
+    await _openSheet(tester, map, snapshot);
+
+    final heading = find.text('SHOW SEATS FOR');
+    expect(heading, findsOneWidget);
+    expect(find.text('VIEW'), findsNothing);
+    final headingY = tester.getTopLeft(heading).dy;
+    expect(tester.getTopLeft(find.text('Hide limited-view seats')).dy,
+        lessThan(headingY));
+    expect(tester.getTopLeft(find.text('Wheelchair')).dy,
+        greaterThan(headingY));
+  });
+
   testWidgets('each row wears the drawing its own provision carries', (
     tester,
   ) async {
@@ -567,16 +588,16 @@ void main() {
         .map((icon) => icon.iconKey)
         .toList(growable: false);
     expect(keys, <String>[
-      // One drawing per provision — every row used to wear the same
-      // wheelchair, which said nothing about which provision it was.
-      'wheelchair',
-      'hearing',
-      // The switch that hides limited-view seats wears the mark those seats
-      // carry…
+      // The two map switches come first. The one that hides limited-view
+      // seats wears the mark those seats carry…
       'restrictedView',
       // …and the colour row wears a contrast disc, because it recolours the
       // map rather than choosing seats.
       'contrast',
+      // Then one drawing per provision — every row used to wear the same
+      // wheelchair, which said nothing about which provision it was.
+      'wheelchair',
+      'hearing',
     ]);
   });
 

@@ -181,6 +181,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   selectTable: 'Dewis bwrdd',
   updateTable: 'Diweddaru\'r bwrdd',
   removeWord: 'Tynnu',
+  floorWord: 'Llawr',
+  totalWord: 'Cyfanswm',
   accessNeeds: <String, String>{
     'wheelchair': 'Lle cadair olwyn',
     'companion': 'Sedd cydymaith',

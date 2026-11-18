@@ -111,6 +111,15 @@ class SeatLayerPickerStrings {
     this.zoomOut = SeatLayerStringTokens.zoomOut,
     this.rotateVenue = SeatLayerStringTokens.rotateVenue,
     this.moveVenue = SeatLayerStringTokens.moveVenue,
+    this.orbitMode = SeatLayerStringTokens.orbitMode,
+    this.panMode = SeatLayerStringTokens.panMode,
+    this.showSeatsFor = SeatLayerStringTokens.showSeatsFor,
+    this.dismissError = SeatLayerStringTokens.dismissError,
+    this.backToSeatMap = SeatLayerStringTokens.backToSeatMap,
+    this.openInteractive3dVenue = SeatLayerStringTokens.openInteractive3dVenue,
+    this.floorWord = SeatLayerStringTokens.floorWord,
+    this.totalWord = SeatLayerStringTokens.totalWord,
+    this.ticketWord = SeatLayerStringTokens.ticketWord,
     this.mapView = SeatLayerStringTokens.mapView,
     this.flat2dMap = SeatLayerStringTokens.flat2dMap,
     this.interactive3dVenueView = SeatLayerStringTokens.interactive3dVenueView,
@@ -487,7 +496,8 @@ class SeatLayerPickerStrings {
   /// prose where the footer is a button.
   final String salesClosedPill;
 
-  /// The collapsed peek line while checkout is opening and prices are hidden.
+  /// The book button's second busy state: the hold has succeeded and the
+  /// host's checkout is opening.
   ///
   /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
   /// its English wording in every locale until one exists.
@@ -612,6 +622,34 @@ class SeatLayerPickerStrings {
 
   /// The same control's tooltip while one finger moves the venue instead.
   final String moveVenue;
+
+  /// The rotate half of the 3D scene's labelled Rotate / Move pair.
+  final String orbitMode;
+
+  /// The move half of the 3D scene's labelled Rotate / Move pair.
+  final String panMode;
+
+  /// The heading over the access provisions in the accessibility sheet,
+  /// drawn in capitals like every group heading.
+  final String showSeatsFor;
+
+  /// The accessible name of the close control on an error banner.
+  final String dismissError;
+
+  /// The Map/3D disc's name while the 3D scene is up.
+  final String backToSeatMap;
+
+  /// The Map/3D disc's name while the flat map is up.
+  final String openInteractive3dVenue;
+
+  /// The floor picker's hint before a floor is chosen.
+  final String floorWord;
+
+  /// The word over the amount in the compact total.
+  final String totalWord;
+
+  /// The wide seat card's price band where the seat names no category.
+  final String ticketWord;
 
   /// Label of the map half of the Map/3D control.
   final String mapView;

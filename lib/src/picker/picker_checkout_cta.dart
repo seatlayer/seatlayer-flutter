@@ -144,7 +144,9 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
   if (state.busyAction == SeatLayerPickerBusyAction.creatingHold) {
     return reason(strings.securingSeats, busy: true);
   }
-  if (handoffInFlight) return reason(strings.openingCheckout, busy: true);
+  if (handoffInFlight) {
+    return reason(strings.seatsSecuredOpeningCheckout, busy: true);
+  }
 
   // 5. A selection the event's own rules reject. Say what would fix it where
   //    the runtime gave a number to say it with, and fall back to the general
@@ -328,7 +330,7 @@ class SeatLayerCheckoutCtaLabel extends StatelessWidget {
     );
     if (!cta.busy) return text;
     // A row lays its non-flexible children out with an unbounded main axis, so
-    // the ellipsis above never fires inside one: `Opening secure checkout…`
+    // the ellipsis above never fires inside one: `Seats secured. Opening checkout…`
     // beside a spinner overran the sheet's own book button by 46 points for as
     // long as the host took to answer. The label is made flexible exactly where
     // there is a width to be flexible within — a flex child cannot be measured

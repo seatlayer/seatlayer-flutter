@@ -96,7 +96,8 @@ void main() {
     );
     expect(find.text('Back to venue'), findsOneWidget);
     expect(find.text('View from here'), findsOneWidget);
-    expect(find.byTooltip('Drag to rotate venue'), findsOneWidget);
+    expect(find.text('Rotate venue'), findsOneWidget);
+    expect(find.text('Move venue'), findsOneWidget);
   });
 
   testWidgets('the phone exposes the exact-gated rotate and move mode',
@@ -109,7 +110,13 @@ void main() {
     map.emit(_seated());
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byTooltip('Drag to rotate venue'));
+    // The selected half is the gesture already in use: pressing it again
+    // sends nothing.
+    await tester.tap(find.text('Rotate venue'));
+    await tester.pump();
+    expect(map.callsTo('picker.setVenue3DNavigationMode'), isEmpty);
+
+    await tester.tap(find.text('Move venue'));
     await tester.pump();
 
     expect(

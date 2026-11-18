@@ -137,6 +137,9 @@ abstract final class SeatLayerDarkTokens {
   /// `#EEF3FB`
   static const Color immersiveCaptionInk = Color(0xFFEEF3FB);
 
+  /// `#2EFFFFFF`
+  static const Color immersiveModeSelected = Color(0x2EFFFFFF);
+
   /// `#556278`
   static const Color chrome = Color(0xFF556278);
 
@@ -580,6 +583,15 @@ abstract final class SeatLayerSizeTokens {
 
   /// `32`
   static const double immersiveNavCloseSize = 32;
+
+  /// `3`
+  static const double immersiveModePairPadding = 3;
+
+  /// `28`
+  static const double immersiveModeSegmentHeight = 28;
+
+  /// `10`
+  static const double immersiveModeSegmentPaddingX = 10;
 
   /// `11.5`
   static const double immersiveCaptionFontSize = 11.5;

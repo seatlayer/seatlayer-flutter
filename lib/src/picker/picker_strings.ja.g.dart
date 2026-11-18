@@ -166,6 +166,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   selectTable: 'テーブルを選択',
   updateTable: 'テーブルを更新',
   removeWord: '削除',
+  floorWord: 'フロア',
+  totalWord: '合計',
   accessNeeds: <String, String>{
     'wheelchair': '車椅子スペース',
     'companion': '同伴者席',

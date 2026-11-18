@@ -148,7 +148,9 @@
       "moreGuests": "ضيوف أكثر",
       "selectTable": "اختيار الطاولة",
       "updateTable": "تحديث الطاولة",
-      "removeWord": "إزالة"
+      "removeWord": "إزالة",
+      "floorWord": "الطابق",
+      "totalWord": "الإجمالي"
     },
     "be": {
       "close": "Закрыць",
@@ -297,7 +299,9 @@
       "moreGuests": "Больш гасцей",
       "selectTable": "Выбраць стол",
       "updateTable": "Абнавіць стол",
-      "removeWord": "Прыбраць"
+      "removeWord": "Прыбраць",
+      "floorWord": "Паверх",
+      "totalWord": "Разам"
     },
     "bg": {
       "close": "Затвори",
@@ -446,7 +450,9 @@
       "moreGuests": "Повече гости",
       "selectTable": "Избери маса",
       "updateTable": "Обнови масата",
-      "removeWord": "Премахни"
+      "removeWord": "Премахни",
+      "floorWord": "Етаж",
+      "totalWord": "Общо"
     },
     "ca": {
       "close": "Tanca",
@@ -595,7 +601,9 @@
       "moreGuests": "Més convidats",
       "selectTable": "Selecciona la taula",
       "updateTable": "Actualitza la taula",
-      "removeWord": "Treu"
+      "removeWord": "Treu",
+      "floorWord": "Planta",
+      "totalWord": "Total"
     },
     "cs": {
       "close": "Zavřít",
@@ -744,7 +752,9 @@
       "moreGuests": "Více hostů",
       "selectTable": "Vybrat stůl",
       "updateTable": "Aktualizovat stůl",
-      "removeWord": "Odebrat"
+      "removeWord": "Odebrat",
+      "floorWord": "Patro",
+      "totalWord": "Celkem"
     },
     "cy": {
       "close": "Cau",
@@ -893,7 +903,9 @@
       "moreGuests": "Mwy o westeion",
       "selectTable": "Dewis bwrdd",
       "updateTable": "Diweddaru'r bwrdd",
-      "removeWord": "Tynnu"
+      "removeWord": "Tynnu",
+      "floorWord": "Llawr",
+      "totalWord": "Cyfanswm"
     },
     "da": {
       "close": "Luk",
@@ -1042,7 +1054,9 @@
       "moreGuests": "Flere gæster",
       "selectTable": "Vælg bord",
       "updateTable": "Opdater bordet",
-      "removeWord": "Fjern"
+      "removeWord": "Fjern",
+      "floorWord": "Etage",
+      "totalWord": "I alt"
     },
     "de": {
       "close": "Schließen",
@@ -1191,7 +1205,9 @@
       "moreGuests": "Mehr Gäste",
       "selectTable": "Tisch auswählen",
       "updateTable": "Tisch aktualisieren",
-      "removeWord": "Entfernen"
+      "removeWord": "Entfernen",
+      "floorWord": "Etage",
+      "totalWord": "Gesamt"
     },
     "el": {
       "close": "Κλείσιμο",
@@ -1340,7 +1356,9 @@
       "moreGuests": "Περισσότεροι καλεσμένοι",
       "selectTable": "Επιλογή τραπεζιού",
       "updateTable": "Ενημέρωση τραπεζιού",
-      "removeWord": "Αφαίρεση"
+      "removeWord": "Αφαίρεση",
+      "floorWord": "Όροφος",
+      "totalWord": "Σύνολο"
     },
     "en": {
       "close": "Close",
@@ -1489,7 +1507,9 @@
       "moreGuests": "More guests",
       "selectTable": "Select table",
       "updateTable": "Update table",
-      "removeWord": "Remove"
+      "removeWord": "Remove",
+      "floorWord": "Floor",
+      "totalWord": "Total"
     },
     "es": {
       "close": "Cerrar",
@@ -1638,7 +1658,9 @@
       "moreGuests": "Más invitados",
       "selectTable": "Seleccionar mesa",
       "updateTable": "Actualizar mesa",
-      "removeWord": "Quitar"
+      "removeWord": "Quitar",
+      "floorWord": "Piso",
+      "totalWord": "Total"
     },
     "et": {
       "close": "Sulge",
@@ -1787,7 +1809,9 @@
       "moreGuests": "Rohkem külalisi",
       "selectTable": "Vali laud",
       "updateTable": "Uuenda lauda",
-      "removeWord": "Eemalda"
+      "removeWord": "Eemalda",
+      "floorWord": "Korrus",
+      "totalWord": "Kokku"
     },
     "fa": {
       "close": "بستن",
@@ -1936,7 +1960,9 @@
       "moreGuests": "مهمان بیشتر",
       "selectTable": "انتخاب میز",
       "updateTable": "به‌روزرسانی میز",
-      "removeWord": "حذف"
+      "removeWord": "حذف",
+      "floorWord": "طبقه",
+      "totalWord": "جمع کل"
     },
     "fi": {
       "close": "Sulje",
@@ -2085,7 +2111,9 @@
       "moreGuests": "Enemmän vieraita",
       "selectTable": "Valitse pöytä",
       "updateTable": "Päivitä pöytä",
-      "removeWord": "Poista"
+      "removeWord": "Poista",
+      "floorWord": "Kerros",
+      "totalWord": "Yhteensä"
     },
     "fr": {
       "close": "Fermer",
@@ -2234,7 +2262,9 @@
       "moreGuests": "Plus d’invités",
       "selectTable": "Sélectionner la table",
       "updateTable": "Mettre à jour la table",
-      "removeWord": "Retirer"
+      "removeWord": "Retirer",
+      "floorWord": "Étage",
+      "totalWord": "Total"
     },
     "he": {
       "close": "סגירה",
@@ -2383,7 +2413,9 @@
       "moreGuests": "יותר אורחים",
       "selectTable": "בחירת שולחן",
       "updateTable": "עדכון השולחן",
-      "removeWord": "הסרה"
+      "removeWord": "הסרה",
+      "floorWord": "קומה",
+      "totalWord": "סה״כ"
     },
     "hi": {
       "close": "बंद करें",
@@ -2532,7 +2564,9 @@
       "moreGuests": "ज़्यादा मेहमान",
       "selectTable": "टेबल चुनें",
       "updateTable": "टेबल अपडेट करें",
-      "removeWord": "हटाएँ"
+      "removeWord": "हटाएँ",
+      "floorWord": "फ़्लोर",
+      "totalWord": "कुल"
     },
     "hr": {
       "close": "Zatvori",
@@ -2681,7 +2715,9 @@
       "moreGuests": "Više gostiju",
       "selectTable": "Odaberi stol",
       "updateTable": "Ažuriraj stol",
-      "removeWord": "Ukloni"
+      "removeWord": "Ukloni",
+      "floorWord": "Kat",
+      "totalWord": "Ukupno"
     },
     "hu": {
       "close": "Bezárás",
@@ -2830,7 +2866,9 @@
       "moreGuests": "Több vendég",
       "selectTable": "Asztal kiválasztása",
       "updateTable": "Asztal frissítése",
-      "removeWord": "Eltávolítás"
+      "removeWord": "Eltávolítás",
+      "floorWord": "Emelet",
+      "totalWord": "Összesen"
     },
     "id": {
       "close": "Tutup",
@@ -2971,7 +3009,9 @@
       "moreGuests": "Tambah tamu",
       "selectTable": "Pilih meja",
       "updateTable": "Perbarui meja",
-      "removeWord": "Hapus"
+      "removeWord": "Hapus",
+      "floorWord": "Lantai",
+      "totalWord": "Total"
     },
     "it": {
       "close": "Chiudi",
@@ -3120,7 +3160,9 @@
       "moreGuests": "Più ospiti",
       "selectTable": "Seleziona il tavolo",
       "updateTable": "Aggiorna il tavolo",
-      "removeWord": "Rimuovi"
+      "removeWord": "Rimuovi",
+      "floorWord": "Piano",
+      "totalWord": "Totale"
     },
     "ja": {
       "close": "閉じる",
@@ -3261,7 +3303,9 @@
       "moreGuests": "人数を増やす",
       "selectTable": "テーブルを選択",
       "updateTable": "テーブルを更新",
-      "removeWord": "削除"
+      "removeWord": "削除",
+      "floorWord": "フロア",
+      "totalWord": "合計"
     },
     "ko": {
       "close": "닫기",
@@ -3402,7 +3446,9 @@
       "moreGuests": "인원 늘리기",
       "selectTable": "테이블 선택",
       "updateTable": "테이블 변경",
-      "removeWord": "삭제"
+      "removeWord": "삭제",
+      "floorWord": "층",
+      "totalWord": "합계"
     },
     "ku": {
       "close": "Bigire",
@@ -3551,7 +3597,9 @@
       "moreGuests": "Mêvanên zêdetir",
       "selectTable": "Maseyê hilbijêre",
       "updateTable": "Maseyê nû bike",
-      "removeWord": "Rake"
+      "removeWord": "Rake",
+      "floorWord": "Qat",
+      "totalWord": "Tevahî"
     },
     "lt": {
       "close": "Uždaryti",
@@ -3700,7 +3748,9 @@
       "moreGuests": "Daugiau svečių",
       "selectTable": "Pasirinkti stalą",
       "updateTable": "Atnaujinti stalą",
-      "removeWord": "Pašalinti"
+      "removeWord": "Pašalinti",
+      "floorWord": "Aukštas",
+      "totalWord": "Iš viso"
     },
     "lv": {
       "close": "Aizvērt",
@@ -3849,7 +3899,9 @@
       "moreGuests": "Vairāk viesu",
       "selectTable": "Izvēlēties galdu",
       "updateTable": "Atjaunināt galdu",
-      "removeWord": "Noņemt"
+      "removeWord": "Noņemt",
+      "floorWord": "Stāvs",
+      "totalWord": "Kopā"
     },
     "ms": {
       "close": "Tutup",
@@ -3990,7 +4042,9 @@
       "moreGuests": "Tambah tetamu",
       "selectTable": "Pilih meja",
       "updateTable": "Kemas kini meja",
-      "removeWord": "Buang"
+      "removeWord": "Buang",
+      "floorWord": "Tingkat",
+      "totalWord": "Jumlah"
     },
     "nl": {
       "close": "Sluiten",
@@ -4139,7 +4193,9 @@
       "moreGuests": "Meer gasten",
       "selectTable": "Tafel selecteren",
       "updateTable": "Tafel bijwerken",
-      "removeWord": "Verwijderen"
+      "removeWord": "Verwijderen",
+      "floorWord": "Verdieping",
+      "totalWord": "Totaal"
     },
     "no": {
       "close": "Lukk",
@@ -4288,7 +4344,9 @@
       "moreGuests": "Flere gjester",
       "selectTable": "Velg bord",
       "updateTable": "Oppdater bordet",
-      "removeWord": "Fjern"
+      "removeWord": "Fjern",
+      "floorWord": "Etasje",
+      "totalWord": "Totalt"
     },
     "pl": {
       "close": "Zamknij",
@@ -4437,7 +4495,9 @@
       "moreGuests": "Więcej gości",
       "selectTable": "Wybierz stolik",
       "updateTable": "Zaktualizuj stolik",
-      "removeWord": "Usuń"
+      "removeWord": "Usuń",
+      "floorWord": "Piętro",
+      "totalWord": "Razem"
     },
     "pt": {
       "close": "Fechar",
@@ -4586,7 +4646,9 @@
       "moreGuests": "Mais convidados",
       "selectTable": "Selecionar mesa",
       "updateTable": "Atualizar mesa",
-      "removeWord": "Remover"
+      "removeWord": "Remover",
+      "floorWord": "Piso",
+      "totalWord": "Total"
     },
     "ro": {
       "close": "Închide",
@@ -4735,7 +4797,9 @@
       "moreGuests": "Mai mulți invitați",
       "selectTable": "Selectează masa",
       "updateTable": "Actualizează masa",
-      "removeWord": "Elimină"
+      "removeWord": "Elimină",
+      "floorWord": "Etaj",
+      "totalWord": "Total"
     },
     "ru": {
       "close": "Закрыть",
@@ -4884,7 +4948,9 @@
       "moreGuests": "Больше гостей",
       "selectTable": "Выбрать стол",
       "updateTable": "Обновить стол",
-      "removeWord": "Убрать"
+      "removeWord": "Убрать",
+      "floorWord": "Этаж",
+      "totalWord": "Итого"
     },
     "sk": {
       "close": "Zavrieť",
@@ -5033,7 +5099,9 @@
       "moreGuests": "Viac hostí",
       "selectTable": "Vybrať stôl",
       "updateTable": "Aktualizovať stôl",
-      "removeWord": "Odobrať"
+      "removeWord": "Odobrať",
+      "floorWord": "Poschodie",
+      "totalWord": "Spolu"
     },
     "sl": {
       "close": "Zapri",
@@ -5182,7 +5250,9 @@
       "moreGuests": "Več gostov",
       "selectTable": "Izberi mizo",
       "updateTable": "Posodobi mizo",
-      "removeWord": "Odstrani"
+      "removeWord": "Odstrani",
+      "floorWord": "Nadstropje",
+      "totalWord": "Skupaj"
     },
     "sr": {
       "close": "Затвори",
@@ -5331,7 +5401,9 @@
       "moreGuests": "Више гостију",
       "selectTable": "Изабери сто",
       "updateTable": "Ажурирај сто",
-      "removeWord": "Уклони"
+      "removeWord": "Уклони",
+      "floorWord": "Спрат",
+      "totalWord": "Укупно"
     },
     "sv": {
       "close": "Stäng",
@@ -5480,7 +5552,9 @@
       "moreGuests": "Fler gäster",
       "selectTable": "Välj bord",
       "updateTable": "Uppdatera bordet",
-      "removeWord": "Ta bort"
+      "removeWord": "Ta bort",
+      "floorWord": "Våning",
+      "totalWord": "Totalt"
     },
     "th": {
       "close": "ปิด",
@@ -5621,7 +5695,9 @@
       "moreGuests": "เพิ่มจำนวนแขก",
       "selectTable": "เลือกโต๊ะ",
       "updateTable": "อัปเดตโต๊ะ",
-      "removeWord": "นำออก"
+      "removeWord": "นำออก",
+      "floorWord": "ชั้น",
+      "totalWord": "รวม"
     },
     "tr": {
       "close": "Kapat",
@@ -5770,7 +5846,9 @@
       "moreGuests": "Daha çok misafir",
       "selectTable": "Masayı seç",
       "updateTable": "Masayı güncelle",
-      "removeWord": "Kaldır"
+      "removeWord": "Kaldır",
+      "floorWord": "Kat",
+      "totalWord": "Toplam"
     },
     "uk": {
       "close": "Закрити",
@@ -5919,7 +5997,9 @@
       "moreGuests": "Більше гостей",
       "selectTable": "Обрати стіл",
       "updateTable": "Оновити стіл",
-      "removeWord": "Прибрати"
+      "removeWord": "Прибрати",
+      "floorWord": "Поверх",
+      "totalWord": "Разом"
     },
     "vi": {
       "close": "Đóng",
@@ -6060,7 +6140,9 @@
       "moreGuests": "Thêm khách",
       "selectTable": "Chọn bàn",
       "updateTable": "Cập nhật bàn",
-      "removeWord": "Bỏ"
+      "removeWord": "Bỏ",
+      "floorWord": "Tầng",
+      "totalWord": "Tổng cộng"
     },
     "zh-Hans": {
       "close": "关闭",
@@ -6201,7 +6283,9 @@
       "moreGuests": "增加宾客",
       "selectTable": "选择餐桌",
       "updateTable": "更新餐桌",
-      "removeWord": "移除"
+      "removeWord": "移除",
+      "floorWord": "楼层",
+      "totalWord": "合计"
     },
     "zh-Hant": {
       "close": "關閉",
@@ -6342,7 +6426,9 @@
       "moreGuests": "增加賓客",
       "selectTable": "選擇桌位",
       "updateTable": "更新桌位",
-      "removeWord": "移除"
+      "removeWord": "移除",
+      "floorWord": "樓層",
+      "totalWord": "合計"
     }
   }
 }

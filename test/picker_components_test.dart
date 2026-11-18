@@ -195,6 +195,45 @@ void main() {
     expect(find.text('Powered by SeatLayer'), findsNothing);
   });
 
+  testWidgets('a tap on the test badge says what test mode means',
+      (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    await tester.pumpWidget(
+      _app(map, const Center(child: SeatLayerPickerTestModeIndicator())),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+    const explained = 'Bookings here are not real and no card is charged';
+    expect(find.text(explained), findsNothing);
+
+    await tester.tap(find.byType(SeatLayerPickerTestModeIndicator));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text(explained), findsOneWidget);
+
+    // The tooltip's own timer closes it again.
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    expect(find.text(explained), findsNothing);
+  });
+
+  testWidgets('the test badge is named by its long sentence', (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _app(map, const Center(child: SeatLayerPickerTestModeIndicator())),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+    expect(
+      find.bySemanticsLabel(RegExp('Test mode · books nothing')),
+      findsWidgets,
+    );
+    expect(find.bySemanticsLabel(RegExp('No real inventory')), findsNothing);
+    semantics.dispose();
+  });
+
   testWidgets('section navigator exposes a reliable native focus action',
       (tester) async {
     final map = _FakeMapController();
@@ -250,7 +289,7 @@ void main() {
     expect(find.text('Standard'), findsOneWidget);
     expect(find.text('€25'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
-    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
     expect(find.text('View from here'), findsOneWidget);
     expect(find.text('See it in 3D'), findsOneWidget);
 
@@ -290,7 +329,7 @@ void main() {
       find.widgetWithText(OutlinedButton, 'Cancel'),
     );
     final selectButton = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Select'),
+      find.widgetWithText(FilledButton, 'Add seat'),
     );
     expect(
       cancelButton.style?.foregroundColor?.resolve(<WidgetState>{}),
@@ -301,7 +340,7 @@ void main() {
       const Color(0xFFE54558),
     );
 
-    await tester.tap(find.text('Select'));
+    await tester.tap(find.text('Add seat'));
     await tester.pump();
     expect(confirmed, isTrue);
   });
@@ -325,7 +364,7 @@ void main() {
     expect(find.text('€100'), findsOneWidget);
     expect(find.text('€60'), findsNWidgets(2));
 
-    await tester.tap(find.text('Select'));
+    await tester.tap(find.text('Add seat'));
     await tester.pump();
     expect(
       map.calls.where((call) => call.$1 == 'picker.setSeatTier').single.$2,
@@ -399,14 +438,14 @@ void main() {
 
     // The card continues to absorb the originating iOS gesture while the
     // WebView mounts its modal; otherwise that tap can select another seat.
-    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
 
     ready.complete();
     await pumpToRest(tester);
 
     // A completed custom callback is not proof that an immersive surface is
     // mounted; the card only stands down for runtime-reported panorama/3D.
-    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
   });
 
   testWidgets(

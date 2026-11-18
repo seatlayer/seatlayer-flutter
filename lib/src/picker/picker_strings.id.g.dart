@@ -177,6 +177,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   selectTable: 'Pilih meja',
   updateTable: 'Perbarui meja',
   removeWord: 'Hapus',
+  floorWord: 'Lantai',
+  totalWord: 'Total',
   accessNeeds: <String, String>{
     'wheelchair': 'Tempat kursi roda',
     'companion': 'Kursi pendamping',

@@ -135,6 +135,8 @@ const List<String> _plainFields = <String>[
   'selectTable',
   'updateTable',
   'removeWord',
+  'floorWord',
+  'totalWord',
 ];
 
 /// The wire keys of the twelve accommodations, whose translated names are

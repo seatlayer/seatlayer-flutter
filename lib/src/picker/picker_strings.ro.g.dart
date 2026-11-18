@@ -181,6 +181,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   selectTable: 'Selectează masa',
   updateTable: 'Actualizează masa',
   removeWord: 'Elimină',
+  floorWord: 'Etaj',
+  totalWord: 'Total',
   accessNeeds: <String, String>{
     'wheelchair': 'Spațiu pentru scaun cu rotile',
     'companion': 'Loc pentru însoțitor',

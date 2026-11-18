@@ -180,6 +180,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   selectTable: 'Επιλογή τραπεζιού',
   updateTable: 'Ενημέρωση τραπεζιού',
   removeWord: 'Αφαίρεση',
+  floorWord: 'Όροφος',
+  totalWord: 'Σύνολο',
   accessNeeds: <String, String>{
     'wheelchair': 'Θέση αμαξιδίου',
     'companion': 'Θέση συνοδού',

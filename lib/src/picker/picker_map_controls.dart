@@ -595,7 +595,9 @@ class SeatLayerPickerViewModeButton extends StatelessWidget {
     if (!available) return const SizedBox.shrink();
     return _ControlButton(
       icon: is3D ? Icons.map_outlined : Icons.view_in_ar_rounded,
-      tooltip: is3D ? 'Back to seat map' : 'Open interactive 3D venue',
+      tooltip: is3D
+          ? SeatLayerPickerScope.stringsOf(context).backToSeatMap
+          : SeatLayerPickerScope.stringsOf(context).openInteractive3dVenue,
       active: is3D,
       onPressed: controller.state.isBusy
           ? null
@@ -626,35 +628,85 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
     }
     final moving = map!.view3DNavigationMode == SeatLayer3DNavigationMode.move;
     final strings = SeatLayerPickerScope.stringsOf(context);
-    final onPressed = controller.state.isBusy
-        ? null
-        : () => ignorePickerAction(
-              controller.set3DNavigationMode(
-                moving
-                    ? SeatLayer3DNavigationMode.rotate
-                    : SeatLayer3DNavigationMode.move,
+    final busy = controller.state.isBusy;
+    Widget segment(SeatLayer3DNavigationMode mode, String label, String hint) {
+      final selected =
+          (mode == SeatLayer3DNavigationMode.move) == moving;
+      return Semantics(
+        button: true,
+        selected: selected,
+        hint: hint,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: busy || selected
+              ? null
+              : () => ignorePickerAction(controller.set3DNavigationMode(mode)),
+          child: ConstrainedBox(
+            // The pair is drawn small, but each half keeps a full touch reach.
+            constraints: const BoxConstraints(
+              minHeight: SeatLayerSizeTokens.minimumHitTarget,
+            ),
+            child: Center(
+              widthFactor: 1,
+              child: AnimatedContainer(
+                duration: SeatLayerPickerMotion.of(
+                  context,
+                  SeatLayerPickerMotion.crossfade,
+                ),
+                height: SeatLayerSizeTokens.immersiveModeSegmentHeight,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: SeatLayerSizeTokens.immersiveModeSegmentPaddingX,
+                ),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: selected
+                      ? SeatLayerDarkTokens.immersiveModeSelected
+                      : const Color(0x00000000),
+                  borderRadius:
+                      BorderRadius.circular(SeatLayerRadiusTokens.pill),
+                ),
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    color: busy
+                        ? pickerAlpha(SeatLayerDarkTokens.immersiveGlassInk, .6)
+                        : SeatLayerDarkTokens.immersiveGlassInk,
+                    fontSize: SeatLayerSizeTokens.immersiveNavChipFontSize,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
+                    height: 1,
+                  ),
+                ),
               ),
-            );
-    // This control only ever exists over the rendered venue, so it wears the
+            ),
+          ),
+        ),
+      );
+    }
+
+    // One labelled pair, the selected half filled: an icon that flipped
+    // between two drawings never said which gesture a drag would make. This
+    // control only ever exists over the rendered venue, so it wears the
     // scene's glass rather than the picker's own surface.
     return seatLayerImmersiveGlass(
-      circular: true,
-      child: IconButton(
-        tooltip: moving ? strings.moveVenue : strings.rotateVenue,
-        onPressed: onPressed,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints.tightFor(
-          width: SeatLayerSizeTokens.immersiveNavCloseSize,
-          height: SeatLayerSizeTokens.immersiveNavCloseSize,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SeatLayerSizeTokens.immersiveModePairPadding,
         ),
-        style: const ButtonStyle(
-          backgroundColor: WidgetStatePropertyAll<Color>(Color(0x00000000)),
-        ),
-        color: SeatLayerDarkTokens.immersiveGlassInk,
-        disabledColor: pickerAlpha(SeatLayerDarkTokens.immersiveGlassInk, .6),
-        icon: Icon(
-          moving ? Icons.open_with_rounded : Icons.threesixty_rounded,
-          size: SeatLayerSizeTokens.immersiveBackIconSize + 3,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            segment(
+              SeatLayer3DNavigationMode.rotate,
+              strings.orbitMode,
+              strings.rotateVenue,
+            ),
+            segment(
+              SeatLayer3DNavigationMode.move,
+              strings.panMode,
+              strings.moveVenue,
+            ),
+          ],
         ),
       ),
     );
@@ -675,7 +727,7 @@ class SeatLayerPickerColorblindButton extends StatelessWidget {
     final active = controller.state.snapshot?.map.colorblindSafe ?? false;
     return _ControlButton(
       icon: Icons.visibility_rounded,
-      tooltip: 'Colorblind-safe colors',
+      tooltip: SeatLayerPickerScope.stringsOf(context).colorblindSafe,
       active: active,
       onPressed: () => controller.setColorblindSafe(!active),
     );
