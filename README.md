@@ -12,16 +12,6 @@ Flutter widgets for live availability, best-available seats, and temporary
 holds, then confirm bookings on your trusted backend. SeatLayer is seating chart
 and reserved-seat ticketing software built for venues up to stadium scale.
 
-[SeatLayer Flutter package on pub.dev](https://pub.dev/packages/seatlayer) ·
-[Flutter seat-map documentation](https://docs.seatlayer.io/buyer-sdk/flutter/) ·
-[Customize the Flutter seat picker](https://docs.seatlayer.io/buyer-sdk/flutter/customise/) ·
-[SeatLayer SDK and API overview](https://seatlayer.io/developers/) ·
-[Buyer seat-map demo (web)](https://app.seatlayer.io/demo/play/grand-theatre) ·
-[All live demos](https://seatlayer.io/demo/) ·
-[SeatLayer Android seat map SDK](https://github.com/seatlayer/seatlayer-android) ·
-[SeatLayer React Native SDK](https://github.com/seatlayer/seatlayer-react-native) ·
-[SeatLayer AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
-
 ![Seat map picker running in a Flutter app: venue overview, section dock, seat confirmation, ticket list and the 3D venue view](https://raw.githubusercontent.com/seatlayer/seatlayer-flutter/main/doc/media/picker-flow.gif)
 
 ## What SeatLayer is
@@ -37,13 +27,20 @@ view from each seat (3D for venues up to 60,000 seats; the 2D map benchmarked at
 
 Season tickets are in the web and server SDKs today, not in this SDK.
 
-> **Latest release:** see the version on [pub.dev](https://pub.dev/packages/seatlayer).
-> Pin it in `pubspec.yaml` and test your event, checkout hand-off and target
-> devices before release.
+## Try it
+
+- [Buyer seat-map demo](https://app.seatlayer.io/demo/play/grand-theatre) in your browser, no account needed · [All live demos](https://seatlayer.io/demo/)
+- [Quickstart](https://docs.seatlayer.io/start/quickstart/): your first event and keys
+- [Flutter seat-map documentation](https://docs.seatlayer.io/buyer-sdk/flutter/) · [Customize the Flutter seat picker](https://docs.seatlayer.io/buyer-sdk/flutter/customise/) · [Holds and checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/) · [SDK catalog](https://docs.seatlayer.io/sdk-catalog.json)
+- [SeatLayer Flutter package on pub.dev](https://pub.dev/packages/seatlayer) · [SeatLayer SDK and API overview](https://seatlayer.io/developers/)
+- [Pricing](https://seatlayer.io/pricing/): test mode is free; live, the first 100 sold seats each month are free, then 10¢ down to 5¢ per sold seat, with no subscription, and purchased credits never expire.
 
 Two-step shape: the buyer picks and holds seats in the client with your public key, then your server confirms the booking with your secret key while your platform keeps checkout and its own payment provider.
 
-**Start here:** [Quickstart](https://docs.seatlayer.io/start/quickstart/) · [Holds and checkout](https://docs.seatlayer.io/buyer-sdk/holds-and-checkout/) · [Flutter guide](https://docs.seatlayer.io/buyer-sdk/flutter/) · [SDK catalog](https://docs.seatlayer.io/sdk-catalog.json) · [Pricing](https://seatlayer.io/pricing/): test mode is free; live, the first 100 sold seats each month are free, then 10¢ down to 5¢ per sold seat, with no subscription, and purchased credits never expire.
+More from SeatLayer:
+[SeatLayer Android seat map SDK](https://github.com/seatlayer/seatlayer-android) ·
+[SeatLayer React Native SDK](https://github.com/seatlayer/seatlayer-react-native) ·
+[SeatLayer AI Toolkit](https://github.com/seatlayer/seatlayer-ai-toolkit)
 
 ## Scale evidence
 
@@ -86,6 +83,10 @@ flowchart TD
 ```bash
 flutter pub add seatlayer
 ```
+
+> **Latest release:** see the version on [pub.dev](https://pub.dev/packages/seatlayer).
+> Pin it in `pubspec.yaml` and test your event, checkout hand-off and target
+> devices before release.
 
 ```dart
 import 'package:seatlayer/seatlayer.dart';
