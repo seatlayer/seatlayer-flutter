@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherEs(String label) =>
 String _peekSecuredEs(int count, String total) =>
     '✓ $count asegurados · $total. Aún no se te cobrará nada';
 
+String _venueMapEs(String venue) => 'Mapa de asientos de $venue';
+
+String _accessibleStepEs(int index, int total) => '$index de $total';
+
+String _chooseMinMaxGuestsEs(int min, int max) =>
+    'Elige entre $min y $max invitados.';
+
+String _chooseMoreEs(int count) => 'Elige $count más';
+
+String _seatsHeldForNeedMoreTimeEs(String time) =>
+    'Tus asientos están retenidos durante $time. ¿Necesitas más tiempo?';
+
 String _ticketCountEs(int count) => switch (pickerPluralCategory('es', count)) {
   PickerPluralCategory.one => '$count entrada',
   PickerPluralCategory.many => '$count entradas',
@@ -94,6 +106,60 @@ String _holdLapsedAllTakenEs(int count) => switch (pickerPluralCategory(
   _ => 'Tu reserva caducó mientras no estabas y esas plazas ya están ocupadas.',
 };
 
+String _accessibleSectionsEs(int count) =>
+    switch (pickerPluralCategory('es', count)) {
+      PickerPluralCategory.one => '$count sección',
+      PickerPluralCategory.many => '$count de secciones',
+      _ => '$count secciones',
+    };
+
+String _placesAvailableEs(int count) => switch (pickerPluralCategory(
+  'es',
+  count,
+)) {
+  PickerPluralCategory.one => '$count plaza disponible en este momento',
+  PickerPluralCategory.many => '$count de plazas disponibles en este momento',
+  _ => '$count plazas disponibles en este momento',
+};
+
+String _removeTicketsEs(int count) =>
+    switch (pickerPluralCategory('es', count)) {
+      PickerPluralCategory.one => 'Quitar $count entrada',
+      PickerPluralCategory.many => 'Quitar $count de entradas',
+      _ => 'Quitar $count entradas',
+    };
+
+String _holdMinutesLeftEs(int count) =>
+    switch (pickerPluralCategory('es', count)) {
+      PickerPluralCategory.one => 'Queda $count minuto',
+      PickerPluralCategory.many => 'Quedan $count de minutos',
+      _ => 'Quedan $count minutos',
+    };
+
+String _holdSecondsLeftEs(int count) =>
+    switch (pickerPluralCategory('es', count)) {
+      PickerPluralCategory.one => 'Queda $count segundo',
+      PickerPluralCategory.many => 'Quedan $count de segundos',
+      _ => 'Quedan $count segundos',
+    };
+
+String _holdLapsedBodyEs(int count) =>
+    switch (pickerPluralCategory('es', count)) {
+      PickerPluralCategory.one => 'Estuvieron retenidos durante $count minuto.',
+      PickerPluralCategory.many =>
+        'Estuvieron retenidos durante $count de minutos.',
+      _ => 'Estuvieron retenidos durante $count minutos.',
+    };
+
+String _seatsNotRecoveredEs(int count) => switch (pickerPluralCategory(
+  'es',
+  count,
+)) {
+  PickerPluralCategory.one => '$count asiento no se pudo recuperar',
+  PickerPluralCategory.many => '$count de asientos no se pudieron recuperar',
+  _ => '$count asientos no se pudieron recuperar',
+};
+
 String _continueWithTotalEs(String money) => 'Continuar \u00b7 $money';
 
 /// The `es` defaults for the native picker chrome.
@@ -117,7 +183,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEs = SeatLayerPickerStrings(
   undo: 'Deshacer',
   holdAndCheckout: 'Retener asientos y pagar',
   poweredBy: 'Con la tecnología de SeatLayer',
-  testMode: 'MODO DE PRUEBA',
+  testMode: 'Modo de prueba',
   accessibility: 'Opciones de accesibilidad y color',
   accessibilityTitle: 'Opciones de accesibilidad y color',
   fitVenue: 'Mostrar todo el recinto',
@@ -138,6 +204,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEs = SeatLayerPickerStrings(
   hideLimitedView: 'Ocultar asientos con visibilidad limitada',
   colorblindSafe: 'Colores para daltónicos',
   notAvailable: 'No disponible',
+  viewGroupTitle: 'VISTA',
   restrictedView: 'Visibilidad restringida',
   obstructedView: 'Visibilidad obstruida',
   premiumSeat: 'Asiento premium',
@@ -220,6 +287,41 @@ const SeatLayerPickerStrings seatLayerPickerStringsEs = SeatLayerPickerStrings(
   removeWord: 'Quitar',
   floorWord: 'Piso',
   totalWord: 'Total',
+  chooseSeats: 'Elige tus asientos',
+  chooseTickets: 'Elige entradas',
+  placeWord: 'PLAZA',
+  ticketWord: 'Entrada',
+  passport: 'Ficha del asiento',
+  venue3D: '3D',
+  venueZone: 'Zona del recinto',
+  venueMapHint:
+      'Los asientos se eligen con los controles alrededor del mapa: la barra de precios encima, los controles de sección debajo y el panel de entradas al pie.',
+  previousSeat: 'Asiento anterior',
+  nextSeat: 'Asiento siguiente',
+  orbitMode: 'Girar recinto',
+  panMode: 'Mover recinto',
+  openInteractive3dVenue: 'Abrir el recinto 3D interactivo',
+  showSeatsFor: 'MOSTRAR ASIENTOS PARA',
+  accessJumpFirstSection: 'Ir a la primera sección',
+  accessJumpNextSection: 'Ir a la sección siguiente',
+  fewerTickets: 'Menos entradas',
+  moreTickets: 'Más entradas',
+  addTickets: 'Añadir entradas',
+  noSelectableSeats:
+      'No hay asientos seleccionables disponibles en este momento.',
+  confirmYourTickets: 'Confirma tus entradas',
+  seatsSecuredOpeningCheckout: 'Asientos asegurados. Abriendo el pago…',
+  holdInCheckoutTitle: 'Tus asientos ya están en el pago',
+  holdInCheckoutBody:
+      'Termina el pago para conservarlos. Para elegir otros asientos, libera primero estos — vuelven a estar a la venta.',
+  releaseAndChangeSeats: 'Liberar y cambiar asientos',
+  holdAlreadyHeldTitle: 'Tus asientos ya están retenidos',
+  holdAlreadyHeldBody: 'Continúa al pago para conservarlos.',
+  accessExpiredTitle: 'Tu sesión de asientos ha caducado',
+  accessExpiredCopy:
+      'Recarga el mapa de asientos para continuar. Los asientos que ya están en tu carrito siguen retenidos hasta que termine el temporizador.',
+  dismissError: 'Cerrar mensaje de error',
+  testModeLong: 'Modo de prueba · no reserva nada',
   accessNeeds: <String, String>{
     'wheelchair': 'Espacio para silla de ruedas',
     'companion': 'Asiento de acompañante',
@@ -243,6 +345,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsEs = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountEs,
   seatJustTakenByAnother: _seatJustTakenByAnotherEs,
   peekSecured: _peekSecuredEs,
+  venueMap: _venueMapEs,
+  accessibleStep: _accessibleStepEs,
+  chooseMinMaxGuests: _chooseMinMaxGuestsEs,
+  chooseMore: _chooseMoreEs,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeEs,
   ticketCount: _ticketCountEs,
   findBestSeats: _findBestSeatsEs,
   reselectSeats: _reselectSeatsEs,
@@ -251,5 +358,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsEs = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeEs,
   holdLapsedSomeTaken: _holdLapsedSomeTakenEs,
   holdLapsedAllTaken: _holdLapsedAllTakenEs,
+  accessibleSections: _accessibleSectionsEs,
+  placesAvailable: _placesAvailableEs,
+  removeTickets: _removeTicketsEs,
+  holdMinutesLeft: _holdMinutesLeftEs,
+  holdSecondsLeft: _holdSecondsLeftEs,
+  holdLapsedBody: _holdLapsedBodyEs,
+  seatsNotRecovered: _seatsNotRecoveredEs,
   continueWithTotal: _continueWithTotalEs,
 );

@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherHu(String label) =>
 String _peekSecuredHu(int count, String total) =>
     '✓ $count rögzítve · $total. Még nem terhelünk meg';
 
+String _venueMapHu(String venue) => '$venue ülésterve';
+
+String _accessibleStepHu(int index, int total) => '$index / $total';
+
+String _chooseMinMaxGuestsHu(int min, int max) =>
+    'Válassz $min és $max közötti vendégszámot.';
+
+String _chooseMoreHu(int count) => 'Válassz még $count darabot';
+
+String _seatsHeldForNeedMoreTimeHu(String time) =>
+    'A helyeidet még $time ideig fenntartjuk. Több idő kell?';
+
 String _ticketCountHu(int count) => switch (pickerPluralCategory('hu', count)) {
   PickerPluralCategory.one => '$count jegy',
   _ => '$count jegy',
@@ -83,6 +95,48 @@ String _holdLapsedAllTakenHu(int count) => switch (pickerPluralCategory(
   _ => 'A foglalása lejárt, amíg távol volt, és ezek a helyek már elkeltek.',
 };
 
+String _accessibleSectionsHu(int count) =>
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => '$count szektor',
+      _ => '$count szektor',
+    };
+
+String _placesAvailableHu(int count) =>
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => 'Jelenleg $count hely érhető el',
+      _ => 'Jelenleg $count hely érhető el',
+    };
+
+String _removeTicketsHu(int count) =>
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => '$count jegy eltávolítása',
+      _ => '$count jegy eltávolítása',
+    };
+
+String _holdMinutesLeftHu(int count) =>
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => '$count perc van hátra',
+      _ => '$count perc van hátra',
+    };
+
+String _holdSecondsLeftHu(int count) =>
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => '$count másodperc van hátra',
+      _ => '$count másodperc van hátra',
+    };
+
+String _holdLapsedBodyHu(int count) =>
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => '$count percig voltak lefoglalva.',
+      _ => '$count percig voltak lefoglalva.',
+    };
+
+String _seatsNotRecoveredHu(int count) =>
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => '$count helyet nem sikerült visszaszerezni',
+      _ => '$count helyet nem sikerült visszaszerezni',
+    };
+
 String _continueWithTotalHu(String money) => 'Tovább \u00b7 $money';
 
 /// The `hu` defaults for the native picker chrome.
@@ -106,7 +160,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   undo: 'Visszavonás',
   holdAndCheckout: 'Helyek foglalása és fizetés',
   poweredBy: 'SeatLayer technológiával',
-  testMode: 'TESZTÜZEMMÓD',
+  testMode: 'Tesztüzemmód',
   accessibility: 'Akadálymentesítési és színbeállítások',
   accessibilityTitle: 'Akadálymentesítési és színbeállítások',
   fitVenue: 'Teljes helyszín megjelenítése',
@@ -127,6 +181,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   hideLimitedView: 'Korlátozott kilátású helyek elrejtése',
   colorblindSafe: 'Színvakbarát színek',
   notAvailable: 'Nem elérhető',
+  viewGroupTitle: 'NÉZET',
   restrictedView: 'Korlátozott kilátás',
   obstructedView: 'Takart kilátás',
   premiumSeat: 'Prémium hely',
@@ -207,6 +262,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   removeWord: 'Eltávolítás',
   floorWord: 'Emelet',
   totalWord: 'Összesen',
+  chooseSeats: 'Válaszd ki a helyeidet',
+  chooseTickets: 'Válassz jegyeket',
+  placeWord: 'HELY',
+  ticketWord: 'Jegy',
+  passport: 'Hely adatlapja',
+  venue3D: '3D',
+  venueZone: 'Helyszínzóna',
+  venueMapHint:
+      'A helyeket az ülésterv körüli vezérlőkkel lehet kiválasztani: fölötte az ársáv, alatta a szektorvezérlők, legalul pedig a jegypanel.',
+  previousSeat: 'Előző hely',
+  nextSeat: 'Következő hely',
+  orbitMode: 'Helyszín forgatása',
+  panMode: 'Helyszín mozgatása',
+  openInteractive3dVenue: 'Interaktív 3D helyszín megnyitása',
+  showSeatsFor: 'HELYEK MEGJELENÍTÉSE A KÖVETKEZŐKHÖZ',
+  accessJumpFirstSection: 'Ugrás az első szektorra',
+  accessJumpNextSection: 'Ugrás a következő szektorra',
+  fewerTickets: 'Kevesebb jegy',
+  moreTickets: 'Több jegy',
+  addTickets: 'Jegyek hozzáadása',
+  noSelectableSeats: 'Jelenleg nincs választható szabad hely.',
+  confirmYourTickets: 'Erősítsd meg a jegyeidet',
+  seatsSecuredOpeningCheckout: 'Helyek rögzítve. Fizetés megnyitása…',
+  holdInCheckoutTitle: 'A helyeid már a fizetésnél vannak',
+  holdInCheckoutBody:
+      'Fejezd be a fizetést, hogy megtartsd őket. Ha más helyeket választanál, előbb szabadítsd fel ezeket — visszakerülnek az eladásba.',
+  releaseAndChangeSeats: 'Felszabadítás és helycsere',
+  holdAlreadyHeldTitle: 'A helyeid már le vannak foglalva',
+  holdAlreadyHeldBody: 'Lépj tovább a fizetéshez, hogy megtartsd őket.',
+  accessExpiredTitle: 'A helyválasztási munkameneted lejárt',
+  accessExpiredCopy:
+      'A folytatáshoz töltsd be újra az üléstervet. A kosaradban lévő helyek az időzítő lejártáig lefoglalva maradnak.',
+  dismissError: 'Hiba bezárása',
+  testModeLong: 'Tesztüzemmód · nem foglal semmit',
   accessNeeds: <String, String>{
     'wheelchair': 'Kerekesszékes hely',
     'companion': 'Kísérőhely',
@@ -230,6 +319,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountHu,
   seatJustTakenByAnother: _seatJustTakenByAnotherHu,
   peekSecured: _peekSecuredHu,
+  venueMap: _venueMapHu,
+  accessibleStep: _accessibleStepHu,
+  chooseMinMaxGuests: _chooseMinMaxGuestsHu,
+  chooseMore: _chooseMoreHu,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeHu,
   ticketCount: _ticketCountHu,
   findBestSeats: _findBestSeatsHu,
   reselectSeats: _reselectSeatsHu,
@@ -238,5 +332,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeHu,
   holdLapsedSomeTaken: _holdLapsedSomeTakenHu,
   holdLapsedAllTaken: _holdLapsedAllTakenHu,
+  accessibleSections: _accessibleSectionsHu,
+  placesAvailable: _placesAvailableHu,
+  removeTickets: _removeTicketsHu,
+  holdMinutesLeft: _holdMinutesLeftHu,
+  holdSecondsLeft: _holdSecondsLeftHu,
+  holdLapsedBody: _holdLapsedBodyHu,
+  seatsNotRecovered: _seatsNotRecoveredHu,
   continueWithTotal: _continueWithTotalHu,
 );

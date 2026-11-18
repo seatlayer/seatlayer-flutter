@@ -27,6 +27,16 @@ String _seatJustTakenByAnotherZhHant(String label) => '座位 $label 剛被另�
 String _peekSecuredZhHant(int count, String total) =>
     '✓ 已鎖定 $count 個 · $total，暫不會扣款';
 
+String _venueMapZhHant(String venue) => '$venue座位圖';
+
+String _accessibleStepZhHant(int index, int total) => '第 $index 個，共 $total 個';
+
+String _chooseMinMaxGuestsZhHant(int min, int max) => '請選擇 $min–$max 位賓客。';
+
+String _chooseMoreZhHant(int count) => '再選 $count 個';
+
+String _seatsHeldForNeedMoreTimeZhHant(String time) => '您的座位將保留 $time。需要更多時間嗎？';
+
 String _ticketCountZhHant(int count) => '$count 張票';
 
 String _findBestSeatsZhHant(int count) => '尋找 $count 個最佳座位';
@@ -43,6 +53,20 @@ String _holdLapsedSomeTakenZhHant(int count) =>
     '您離開期間，座位保留已到期，其中 $count 個座位已被他人選走。其餘仍然可選。';
 
 String _holdLapsedAllTakenZhHant(int count) => '您離開期間，座位保留已到期，這些座位已被他人選走。';
+
+String _accessibleSectionsZhHant(int count) => '$count 個分區';
+
+String _placesAvailableZhHant(int count) => '目前有 $count 個席位可選';
+
+String _removeTicketsZhHant(int count) => '移除 $count 張票';
+
+String _holdMinutesLeftZhHant(int count) => '剩餘 $count 分鐘';
+
+String _holdSecondsLeftZhHant(int count) => '剩餘 $count 秒';
+
+String _holdLapsedBodyZhHant(int count) => '這些座位曾為您保留 $count 分鐘。';
+
+String _seatsNotRecoveredZhHant(int count) => '$count 個座位未能重新鎖定';
 
 String _continueWithTotalZhHant(String money) => '繼續 \u00b7 $money';
 
@@ -87,6 +111,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       hideLimitedView: '隱藏視野受限的座位',
       colorblindSafe: '色盲友善配色',
       notAvailable: '不可用',
+      viewGroupTitle: '檢視',
       restrictedView: '視野受限',
       obstructedView: '視野被遮蔽',
       premiumSeat: '尊榮座位',
@@ -161,6 +186,37 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       removeWord: '移除',
       floorWord: '樓層',
       totalWord: '合計',
+      chooseSeats: '選擇座位',
+      chooseTickets: '選擇門票',
+      placeWord: '席位',
+      ticketWord: '票券',
+      passport: '座位檔案',
+      venue3D: '3D',
+      venueZone: '場館區域',
+      venueMapHint: '請使用座位圖周圍的控制項選位：上方的價格列、下方的分區控制項，以及底部的票券面板。',
+      previousSeat: '上一個座位',
+      nextSeat: '下一個座位',
+      orbitMode: '旋轉場館',
+      panMode: '移動場館',
+      openInteractive3dVenue: '開啟可互動的 3D 場館',
+      showSeatsFor: '顯示符合以下需求的座位',
+      accessJumpFirstSection: '跳至第一個分區',
+      accessJumpNextSection: '跳至下一個分區',
+      fewerTickets: '減少票數',
+      moreTickets: '增加票數',
+      addTickets: '新增門票',
+      noSelectableSeats: '目前沒有可選座位。',
+      confirmYourTickets: '確認您的門票',
+      seatsSecuredOpeningCheckout: '座位已鎖定。正在開啟結帳…',
+      holdInCheckoutTitle: '您的座位已在結帳中',
+      holdInCheckoutBody: '完成結帳即可保留座位。如需選擇其他座位，請先釋出這些座位，它們將重新開放販售。',
+      releaseAndChangeSeats: '釋出並更換座位',
+      holdAlreadyHeldTitle: '您的座位已為您保留',
+      holdAlreadyHeldBody: '繼續結帳即可保留座位。',
+      accessExpiredTitle: '您的選位工作階段已過期',
+      accessExpiredCopy: '請重新整理座位圖以繼續。購物車中的座位會一直為您保留，直到計時結束。',
+      dismissError: '關閉錯誤訊息',
+      testModeLong: '測試模式 · 不會產生預訂',
       accessNeeds: <String, String>{
         'wheelchair': '輪椅席位',
         'companion': '陪同席位',
@@ -184,6 +240,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       accessFreeCount: _accessFreeCountZhHant,
       seatJustTakenByAnother: _seatJustTakenByAnotherZhHant,
       peekSecured: _peekSecuredZhHant,
+      venueMap: _venueMapZhHant,
+      accessibleStep: _accessibleStepZhHant,
+      chooseMinMaxGuests: _chooseMinMaxGuestsZhHant,
+      chooseMore: _chooseMoreZhHant,
+      seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeZhHant,
       ticketCount: _ticketCountZhHant,
       findBestSeats: _findBestSeatsZhHant,
       reselectSeats: _reselectSeatsZhHant,
@@ -192,5 +253,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       holdLapsedStillFree: _holdLapsedStillFreeZhHant,
       holdLapsedSomeTaken: _holdLapsedSomeTakenZhHant,
       holdLapsedAllTaken: _holdLapsedAllTakenZhHant,
+      accessibleSections: _accessibleSectionsZhHant,
+      placesAvailable: _placesAvailableZhHant,
+      removeTickets: _removeTicketsZhHant,
+      holdMinutesLeft: _holdMinutesLeftZhHant,
+      holdSecondsLeft: _holdSecondsLeftZhHant,
+      holdLapsedBody: _holdLapsedBodyZhHant,
+      seatsNotRecovered: _seatsNotRecoveredZhHant,
       continueWithTotal: _continueWithTotalZhHant,
     );

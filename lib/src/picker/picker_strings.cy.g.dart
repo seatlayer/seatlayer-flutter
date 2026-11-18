@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherCy(String label) =>
 String _peekSecuredCy(int count, String total) =>
     '✓ $count wedi\'u sicrhau · $total. Ni chodir tâl arnat eto';
 
+String _venueMapCy(String venue) => 'Map seddi $venue';
+
+String _accessibleStepCy(int index, int total) => '$index o $total';
+
+String _chooseMinMaxGuestsCy(int min, int max) =>
+    'Dewisa rhwng $min a $max o westeion.';
+
+String _chooseMoreCy(int count) => 'Dewisa $count arall';
+
+String _seatsHeldForNeedMoreTimeCy(String time) =>
+    'Mae dy seddi wedi’u cadw am $time. Angen mwy o amser?';
+
 String _ticketCountCy(int count) => switch (pickerPluralCategory('cy', count)) {
   PickerPluralCategory.zero => '$count tocyn',
   PickerPluralCategory.one => '$count tocyn',
@@ -131,6 +143,76 @@ String _holdLapsedAllTakenCy(int count) => switch (pickerPluralCategory(
     'Daeth dy gadw dros dro i ben tra oeddet ti i ffwrdd, ac mae’r seddi hynny wedi’u cymryd.',
 };
 
+String _accessibleSectionsCy(int count) =>
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => '$count adran',
+      PickerPluralCategory.one => '$count adran',
+      PickerPluralCategory.two => '$count adran',
+      PickerPluralCategory.few => '$count adran',
+      PickerPluralCategory.many => '$count adran',
+      _ => '$count o adrannau',
+    };
+
+String _placesAvailableCy(int count) =>
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => '$count lle ar gael ar hyn o bryd',
+      PickerPluralCategory.one => '$count lle ar gael ar hyn o bryd',
+      PickerPluralCategory.two => '$count le ar gael ar hyn o bryd',
+      PickerPluralCategory.few => '$count lle ar gael ar hyn o bryd',
+      PickerPluralCategory.many => '$count lle ar gael ar hyn o bryd',
+      _ => '$count o leoedd ar gael ar hyn o bryd',
+    };
+
+String _removeTicketsCy(int count) =>
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => 'Tynnu $count tocyn',
+      PickerPluralCategory.one => 'Tynnu $count tocyn',
+      PickerPluralCategory.two => 'Tynnu $count docyn',
+      PickerPluralCategory.few => 'Tynnu $count thocyn',
+      PickerPluralCategory.many => 'Tynnu $count thocyn',
+      _ => 'Tynnu $count o docynnau',
+    };
+
+String _holdMinutesLeftCy(int count) =>
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => '$count munud ar ôl',
+      PickerPluralCategory.one => '$count funud ar ôl',
+      PickerPluralCategory.two => '$count funud ar ôl',
+      PickerPluralCategory.few => '$count munud ar ôl',
+      PickerPluralCategory.many => '$count munud ar ôl',
+      _ => '$count munud ar ôl',
+    };
+
+String _holdSecondsLeftCy(int count) =>
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => '$count eiliad ar ôl',
+      PickerPluralCategory.one => '$count eiliad ar ôl',
+      PickerPluralCategory.two => '$count eiliad ar ôl',
+      PickerPluralCategory.few => '$count eiliad ar ôl',
+      PickerPluralCategory.many => '$count eiliad ar ôl',
+      _ => '$count eiliad ar ôl',
+    };
+
+String _holdLapsedBodyCy(int count) =>
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => 'Roedden nhw wedi’u cadw am $count munud.',
+      PickerPluralCategory.one => 'Roedden nhw wedi’u cadw am $count funud.',
+      PickerPluralCategory.two => 'Roedden nhw wedi’u cadw am $count funud.',
+      PickerPluralCategory.few => 'Roedden nhw wedi’u cadw am $count munud.',
+      PickerPluralCategory.many => 'Roedden nhw wedi’u cadw am $count munud.',
+      _ => 'Roedden nhw wedi’u cadw am $count munud.',
+    };
+
+String _seatsNotRecoveredCy(int count) =>
+    switch (pickerPluralCategory('cy', count)) {
+      PickerPluralCategory.zero => 'Nid oedd modd adfer $count sedd',
+      PickerPluralCategory.one => 'Nid oedd modd adfer $count sedd',
+      PickerPluralCategory.two => 'Nid oedd modd adfer $count sedd',
+      PickerPluralCategory.few => 'Nid oedd modd adfer $count sedd',
+      PickerPluralCategory.many => 'Nid oedd modd adfer $count sedd',
+      _ => 'Nid oedd modd adfer $count o seddi',
+    };
+
 String _continueWithTotalCy(String money) => 'Parhau \u00b7 $money';
 
 /// The `cy` defaults for the native picker chrome.
@@ -154,7 +236,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   undo: 'Dadwneud',
   holdAndCheckout: 'Cadw seddi a thalu',
   poweredBy: 'Wedi\'i bweru gan SeatLayer',
-  testMode: 'MODD PROFI',
+  testMode: 'Modd profi',
   accessibility: 'Opsiynau hygyrchedd a lliw',
   accessibilityTitle: 'Opsiynau hygyrchedd a lliw',
   fitVenue: 'Dangos y lleoliad cyfan',
@@ -175,6 +257,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   hideLimitedView: 'Cuddio seddi â golygfa gyfyngedig',
   colorblindSafe: 'Lliwiau sy\'n gyfeillgar i ddallineb lliw',
   notAvailable: 'Ddim ar gael',
+  viewGroupTitle: 'GOLWG',
   restrictedView: 'Golygfa gyfyngedig',
   obstructedView: 'Golygfa wedi\'i rhwystro',
   premiumSeat: 'Sedd premiwm',
@@ -259,6 +342,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   removeWord: 'Tynnu',
   floorWord: 'Llawr',
   totalWord: 'Cyfanswm',
+  chooseSeats: 'Dewisa dy seddi',
+  chooseTickets: 'Dewisa docynnau',
+  placeWord: 'LLE',
+  ticketWord: 'Tocyn',
+  passport: 'Proffil y sedd',
+  venue3D: '3D',
+  venueZone: 'Parth y lleoliad',
+  venueMapHint:
+      'Mae seddi’n cael eu dewis gyda’r rheolyddion o amgylch y map: y rheilen brisiau uwch ei ben, rheolyddion yr adrannau oddi tano, a’r panel tocynnau ar y gwaelod.',
+  previousSeat: 'Sedd flaenorol',
+  nextSeat: 'Sedd nesaf',
+  orbitMode: 'Cylchdroi’r lleoliad',
+  panMode: 'Symud y lleoliad',
+  openInteractive3dVenue: 'Agor golwg 3D rhyngweithiol o’r lleoliad',
+  showSeatsFor: 'DANGOS SEDDI AR GYFER',
+  accessJumpFirstSection: 'Neidio i’r adran gyntaf',
+  accessJumpNextSection: 'Neidio i’r adran nesaf',
+  fewerTickets: 'Llai o docynnau',
+  moreTickets: 'Mwy o docynnau',
+  addTickets: 'Ychwanegu tocynnau',
+  noSelectableSeats: 'Does dim seddi y gellir eu dewis ar gael ar hyn o bryd.',
+  confirmYourTickets: 'Cadarnha dy docynnau',
+  seatsSecuredOpeningCheckout: 'Seddi wedi’u sicrhau. Yn agor y taliad…',
+  holdInCheckoutTitle: 'Mae dy seddi eisoes yn y taliad',
+  holdInCheckoutBody:
+      'Gorffen talu i’w cadw. I ddewis seddi gwahanol, rhyddha’r rhain yn gyntaf — byddan nhw’n mynd yn ôl ar werth.',
+  releaseAndChangeSeats: 'Rhyddhau a newid seddi',
+  holdAlreadyHeldTitle: 'Mae dy seddi eisoes wedi’u cadw',
+  holdAlreadyHeldBody: 'Dos ymlaen i’r taliad i’w cadw.',
+  accessExpiredTitle: 'Mae dy sesiwn seddi wedi dod i ben',
+  accessExpiredCopy:
+      'Ail-lwytha’r map seddi i barhau. Mae seddi sydd eisoes yn dy fasged yn aros wedi’u cadw nes i’r amserydd ddod i ben.',
+  dismissError: 'Cau’r gwall',
+  testModeLong: 'Modd profi · dim byd yn cael ei archebu',
   accessNeeds: <String, String>{
     'wheelchair': 'Lle cadair olwyn',
     'companion': 'Sedd cydymaith',
@@ -282,6 +399,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountCy,
   seatJustTakenByAnother: _seatJustTakenByAnotherCy,
   peekSecured: _peekSecuredCy,
+  venueMap: _venueMapCy,
+  accessibleStep: _accessibleStepCy,
+  chooseMinMaxGuests: _chooseMinMaxGuestsCy,
+  chooseMore: _chooseMoreCy,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeCy,
   ticketCount: _ticketCountCy,
   findBestSeats: _findBestSeatsCy,
   reselectSeats: _reselectSeatsCy,
@@ -290,5 +412,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeCy,
   holdLapsedSomeTaken: _holdLapsedSomeTakenCy,
   holdLapsedAllTaken: _holdLapsedAllTakenCy,
+  accessibleSections: _accessibleSectionsCy,
+  placesAvailable: _placesAvailableCy,
+  removeTickets: _removeTicketsCy,
+  holdMinutesLeft: _holdMinutesLeftCy,
+  holdSecondsLeft: _holdSecondsLeftCy,
+  holdLapsedBody: _holdLapsedBodyCy,
+  seatsNotRecovered: _seatsNotRecoveredCy,
   continueWithTotal: _continueWithTotalCy,
 );

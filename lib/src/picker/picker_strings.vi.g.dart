@@ -28,6 +28,18 @@ String _seatJustTakenByAnotherVi(String label) =>
 String _peekSecuredVi(int count, String total) =>
     '✓ Đã giữ $count · $total. Bạn chưa bị trừ tiền';
 
+String _venueMapVi(String venue) => 'Sơ đồ ghế $venue';
+
+String _accessibleStepVi(int index, int total) => '$index trên $total';
+
+String _chooseMinMaxGuestsVi(int min, int max) =>
+    'Chọn từ $min đến $max khách.';
+
+String _chooseMoreVi(int count) => 'Chọn thêm $count';
+
+String _seatsHeldForNeedMoreTimeVi(String time) =>
+    'Ghế của bạn được giữ trong $time. Cần thêm thời gian?';
+
 String _ticketCountVi(int count) => '$count vé';
 
 String _findBestSeatsVi(int count) => 'Tìm $count ghế tốt nhất';
@@ -46,6 +58,20 @@ String _holdLapsedSomeTakenVi(int count) =>
 
 String _holdLapsedAllTakenVi(int count) =>
     'Thời gian giữ ghế đã hết khi bạn rời đi, và ghế bạn chọn đã có người đặt.';
+
+String _accessibleSectionsVi(int count) => '$count khu';
+
+String _placesAvailableVi(int count) => 'Hiện còn $count chỗ trống';
+
+String _removeTicketsVi(int count) => 'Bỏ $count vé';
+
+String _holdMinutesLeftVi(int count) => 'Còn $count phút';
+
+String _holdSecondsLeftVi(int count) => 'Còn $count giây';
+
+String _holdLapsedBodyVi(int count) => 'Các ghế đã được giữ trong $count phút.';
+
+String _seatsNotRecoveredVi(int count) => 'Không giữ lại được $count ghế';
 
 String _continueWithTotalVi(String money) => 'Tiếp tục \u00b7 $money';
 
@@ -70,7 +96,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   undo: 'Hoàn tác',
   holdAndCheckout: 'Giữ ghế & thanh toán',
   poweredBy: 'Vận hành bởi SeatLayer',
-  testMode: 'CHẾ ĐỘ THỬ',
+  testMode: 'Chế độ thử',
   accessibility: 'Tùy chọn hỗ trợ tiếp cận và màu sắc',
   accessibilityTitle: 'Tùy chọn hỗ trợ tiếp cận và màu sắc',
   fitVenue: 'Hiện toàn bộ địa điểm',
@@ -90,6 +116,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   hideLimitedView: 'Ẩn ghế tầm nhìn hạn chế',
   colorblindSafe: 'Màu cho người mù màu',
   notAvailable: 'Không khả dụng',
+  viewGroupTitle: 'XEM',
   restrictedView: 'Tầm nhìn hạn chế',
   obstructedView: 'Tầm nhìn bị che khuất',
   premiumSeat: 'Ghế cao cấp',
@@ -171,6 +198,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   removeWord: 'Bỏ',
   floorWord: 'Tầng',
   totalWord: 'Tổng cộng',
+  chooseSeats: 'Chọn ghế của bạn',
+  chooseTickets: 'Chọn vé',
+  placeWord: 'CHỖ',
+  ticketWord: 'Vé',
+  passport: 'Hồ sơ ghế',
+  venue3D: '3D',
+  venueZone: 'Khu vực địa điểm',
+  venueMapHint:
+      'Bạn chọn ghế bằng các nút điều khiển quanh sơ đồ: thanh giá ở phía trên, các nút điều khiển khu ở phía dưới và bảng vé ở cuối màn hình.',
+  previousSeat: 'Ghế trước đó',
+  nextSeat: 'Ghế tiếp theo',
+  orbitMode: 'Xoay địa điểm',
+  panMode: 'Di chuyển địa điểm',
+  openInteractive3dVenue: 'Mở chế độ xem 3D tương tác của địa điểm',
+  showSeatsFor: 'HIỆN GHẾ CHO',
+  accessJumpFirstSection: 'Chuyển đến khu đầu tiên',
+  accessJumpNextSection: 'Chuyển đến khu tiếp theo',
+  fewerTickets: 'Giảm số vé',
+  moreTickets: 'Tăng số vé',
+  addTickets: 'Thêm vé',
+  noSelectableSeats: 'Hiện không có ghế nào có thể chọn.',
+  confirmYourTickets: 'Xác nhận vé của bạn',
+  seatsSecuredOpeningCheckout: 'Đã giữ ghế. Đang mở trang thanh toán…',
+  holdInCheckoutTitle: 'Ghế của bạn đã ở bước thanh toán',
+  holdInCheckoutBody:
+      'Hãy hoàn tất thanh toán để giữ ghế. Để chọn ghế khác, hãy bỏ giữ các ghế này trước — chúng sẽ được mở bán lại.',
+  releaseAndChangeSeats: 'Bỏ giữ và đổi ghế',
+  holdAlreadyHeldTitle: 'Ghế của bạn đã được giữ',
+  holdAlreadyHeldBody: 'Hãy tiếp tục thanh toán để giữ ghế.',
+  accessExpiredTitle: 'Phiên chọn ghế của bạn đã hết hạn',
+  accessExpiredCopy:
+      'Tải lại sơ đồ ghế để tiếp tục. Các ghế đã có trong giỏ của bạn vẫn được giữ đến khi hết giờ.',
+  dismissError: 'Đóng thông báo lỗi',
+  testModeLong: 'Chế độ thử · không đặt vé thật',
   accessNeeds: <String, String>{
     'wheelchair': 'Chỗ xe lăn',
     'companion': 'Ghế người đi kèm',
@@ -194,6 +255,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountVi,
   seatJustTakenByAnother: _seatJustTakenByAnotherVi,
   peekSecured: _peekSecuredVi,
+  venueMap: _venueMapVi,
+  accessibleStep: _accessibleStepVi,
+  chooseMinMaxGuests: _chooseMinMaxGuestsVi,
+  chooseMore: _chooseMoreVi,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeVi,
   ticketCount: _ticketCountVi,
   findBestSeats: _findBestSeatsVi,
   reselectSeats: _reselectSeatsVi,
@@ -202,5 +268,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeVi,
   holdLapsedSomeTaken: _holdLapsedSomeTakenVi,
   holdLapsedAllTaken: _holdLapsedAllTakenVi,
+  accessibleSections: _accessibleSectionsVi,
+  placesAvailable: _placesAvailableVi,
+  removeTickets: _removeTicketsVi,
+  holdMinutesLeft: _holdMinutesLeftVi,
+  holdSecondsLeft: _holdSecondsLeftVi,
+  holdLapsedBody: _holdLapsedBodyVi,
+  seatsNotRecovered: _seatsNotRecoveredVi,
   continueWithTotal: _continueWithTotalVi,
 );

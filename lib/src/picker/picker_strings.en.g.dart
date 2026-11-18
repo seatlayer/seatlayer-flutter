@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherEn(String label) =>
 String _peekSecuredEn(int count, String total) =>
     '✓ $count secured · $total. You won’t be charged yet';
 
+String _venueMapEn(String venue) => '$venue seat map';
+
+String _accessibleStepEn(int index, int total) => '$index of $total';
+
+String _chooseMinMaxGuestsEn(int min, int max) =>
+    'Choose between $min and $max guests.';
+
+String _chooseMoreEn(int count) => 'Choose $count more';
+
+String _seatsHeldForNeedMoreTimeEn(String time) =>
+    'Your seats are held for $time. Need more time?';
+
 String _ticketCountEn(int count) => switch (pickerPluralCategory('en', count)) {
   PickerPluralCategory.one => '$count ticket',
   _ => '$count tickets',
@@ -83,6 +95,48 @@ String _holdLapsedAllTakenEn(int count) => switch (pickerPluralCategory(
   _ => 'Your hold ended while you were away, and those seats have been taken.',
 };
 
+String _accessibleSectionsEn(int count) =>
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => '$count section',
+      _ => '$count sections',
+    };
+
+String _placesAvailableEn(int count) =>
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => '$count place currently available',
+      _ => '$count places currently available',
+    };
+
+String _removeTicketsEn(int count) =>
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => 'Remove $count ticket',
+      _ => 'Remove $count tickets',
+    };
+
+String _holdMinutesLeftEn(int count) =>
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => '$count minute left',
+      _ => '$count minutes left',
+    };
+
+String _holdSecondsLeftEn(int count) =>
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => '$count second left',
+      _ => '$count seconds left',
+    };
+
+String _holdLapsedBodyEn(int count) =>
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => 'They were held for $count minute.',
+      _ => 'They were held for $count minutes.',
+    };
+
+String _seatsNotRecoveredEn(int count) =>
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => '$count could not be recovered',
+      _ => '$count could not be recovered',
+    };
+
 String _continueWithTotalEn(String money) => 'Continue \u00b7 $money';
 
 /// The `en` defaults for the native picker chrome.
@@ -106,7 +160,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   undo: 'Undo',
   holdAndCheckout: 'Hold seats & checkout',
   poweredBy: 'Powered by SeatLayer',
-  testMode: 'TEST MODE',
+  testMode: 'Test mode',
   accessibility: 'Accessibility and colour options',
   accessibilityTitle: 'Accessibility and colour options',
   fitVenue: 'Show whole venue',
@@ -126,6 +180,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   hideLimitedView: 'Hide limited-view seats',
   colorblindSafe: 'Colourblind-friendly colours',
   notAvailable: 'Not available',
+  viewGroupTitle: 'VIEW',
   restrictedView: 'Restricted view',
   obstructedView: 'Obstructed view',
   premiumSeat: 'Premium seat',
@@ -204,6 +259,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   removeWord: 'Remove',
   floorWord: 'Floor',
   totalWord: 'Total',
+  chooseSeats: 'Choose your seats',
+  chooseTickets: 'Choose tickets',
+  placeWord: 'PLACE',
+  ticketWord: 'Ticket',
+  passport: 'Passport',
+  venue3D: '3D',
+  venueZone: 'Venue zone',
+  venueMapHint:
+      'Seats are picked with the controls around the map: the price rail above it, the section controls below it, and the ticket panel at the foot.',
+  previousSeat: 'Previous seat',
+  nextSeat: 'Next seat',
+  orbitMode: 'Rotate venue',
+  panMode: 'Move venue',
+  openInteractive3dVenue: 'Open interactive 3D venue',
+  showSeatsFor: 'SHOW SEATS FOR',
+  accessJumpFirstSection: 'Jump to the first section',
+  accessJumpNextSection: 'Jump to the next section',
+  fewerTickets: 'Fewer tickets',
+  moreTickets: 'More tickets',
+  addTickets: 'Add tickets',
+  noSelectableSeats: 'No selectable seats are currently available.',
+  confirmYourTickets: 'Confirm your tickets',
+  seatsSecuredOpeningCheckout: 'Seats secured. Opening checkout…',
+  holdInCheckoutTitle: 'Your seats are already in checkout',
+  holdInCheckoutBody:
+      'Finish checkout to keep them. To pick different seats, release these first — they go back on sale.',
+  releaseAndChangeSeats: 'Release and change seats',
+  holdAlreadyHeldTitle: 'Your seats are already held',
+  holdAlreadyHeldBody: 'Continue to checkout to keep them.',
+  accessExpiredTitle: 'Your seat session has expired',
+  accessExpiredCopy:
+      'Reload the seat map to continue. Seats already in your cart stay held until the timer ends.',
+  dismissError: 'Dismiss error',
+  testModeLong: 'Test mode · books nothing',
   accessNeeds: <String, String>{
     'wheelchair': 'Wheelchair space',
     'companion': 'Companion seat',
@@ -227,6 +316,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountEn,
   seatJustTakenByAnother: _seatJustTakenByAnotherEn,
   peekSecured: _peekSecuredEn,
+  venueMap: _venueMapEn,
+  accessibleStep: _accessibleStepEn,
+  chooseMinMaxGuests: _chooseMinMaxGuestsEn,
+  chooseMore: _chooseMoreEn,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeEn,
   ticketCount: _ticketCountEn,
   findBestSeats: _findBestSeatsEn,
   reselectSeats: _reselectSeatsEn,
@@ -235,5 +329,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeEn,
   holdLapsedSomeTaken: _holdLapsedSomeTakenEn,
   holdLapsedAllTaken: _holdLapsedAllTakenEn,
+  accessibleSections: _accessibleSectionsEn,
+  placesAvailable: _placesAvailableEn,
+  removeTickets: _removeTicketsEn,
+  holdMinutesLeft: _holdMinutesLeftEn,
+  holdSecondsLeft: _holdSecondsLeftEn,
+  holdLapsedBody: _holdLapsedBodyEn,
+  seatsNotRecovered: _seatsNotRecoveredEn,
   continueWithTotal: _continueWithTotalEn,
 );

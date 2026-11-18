@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherHe(String label) =>
 String _peekSecuredHe(int count, String total) =>
     '✓ $count הובטחו · $total. עדיין לא תחויבו';
 
+String _venueMapHe(String venue) => 'מפת המושבים של $venue';
+
+String _accessibleStepHe(int index, int total) => '$index מתוך $total';
+
+String _chooseMinMaxGuestsHe(int min, int max) =>
+    'בחרו בין $min ל-$max אורחים.';
+
+String _chooseMoreHe(int count) => 'בחרו עוד $count';
+
+String _seatsHeldForNeedMoreTimeHe(String time) =>
+    'המושבים שלכם מוחזקים למשך $time. צריכים עוד זמן?';
+
 String _ticketCountHe(int count) => switch (pickerPluralCategory('he', count)) {
   PickerPluralCategory.one => '$count כרטיס',
   PickerPluralCategory.two => '$count כרטיסים',
@@ -92,6 +104,55 @@ String _holdLapsedAllTakenHe(int count) =>
       _ => 'ההזמנה שלך פגה בזמן שלא היית, והמושבים האלה כבר נתפסו.',
     };
 
+String _accessibleSectionsHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => '$count גוש',
+      PickerPluralCategory.two => '$count גושים',
+      _ => '$count גושים',
+    };
+
+String _placesAvailableHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => '$count מקום זמין כרגע',
+      PickerPluralCategory.two => '$count מקומות זמינים כרגע',
+      _ => '$count מקומות זמינים כרגע',
+    };
+
+String _removeTicketsHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => 'הסרת $count כרטיס',
+      PickerPluralCategory.two => 'הסרת $count כרטיסים',
+      _ => 'הסרת $count כרטיסים',
+    };
+
+String _holdMinutesLeftHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => 'נותרה $count דקה',
+      PickerPluralCategory.two => 'נותרו $count דקות',
+      _ => 'נותרו $count דקות',
+    };
+
+String _holdSecondsLeftHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => 'נותרה $count שנייה',
+      PickerPluralCategory.two => 'נותרו $count שניות',
+      _ => 'נותרו $count שניות',
+    };
+
+String _holdLapsedBodyHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => 'הם הוחזקו למשך $count דקה.',
+      PickerPluralCategory.two => 'הם הוחזקו למשך $count דקות.',
+      _ => 'הם הוחזקו למשך $count דקות.',
+    };
+
+String _seatsNotRecoveredHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => 'לא ניתן היה לשחזר $count מושב',
+      PickerPluralCategory.two => 'לא ניתן היה לשחזר $count מושבים',
+      _ => 'לא ניתן היה לשחזר $count מושבים',
+    };
+
 String _continueWithTotalHe(String money) => 'המשך \u00b7 $money';
 
 /// The `he` defaults for the native picker chrome.
@@ -135,6 +196,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   hideLimitedView: 'הסתרת מושבים עם נוף מוגבל',
   colorblindSafe: 'צבעים ידידותיים לעיוורי צבעים',
   notAvailable: 'לא זמין',
+  viewGroupTitle: 'תצוגה',
   restrictedView: 'נוף מוגבל',
   obstructedView: 'נוף חסום',
   premiumSeat: 'מושב פרימיום',
@@ -212,6 +274,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   removeWord: 'הסרה',
   floorWord: 'קומה',
   totalWord: 'סה״כ',
+  chooseSeats: 'בחרו את המושבים שלכם',
+  chooseTickets: 'בחרו כרטיסים',
+  placeWord: 'מקום',
+  ticketWord: 'כרטיס',
+  passport: 'פרופיל המושב',
+  venue3D: '3D',
+  venueZone: 'אזור במתחם',
+  venueMapHint:
+      'בוחרים מושבים בעזרת הפקדים שסביב המפה: פס המחירים מעליה, פקדי הגושים מתחתיה וחלונית הכרטיסים בתחתית.',
+  previousSeat: 'המושב הקודם',
+  nextSeat: 'המושב הבא',
+  orbitMode: 'סיבוב המתחם',
+  panMode: 'הזזת המתחם',
+  openInteractive3dVenue: 'פתיחת תצוגת תלת־ממד אינטראקטיבית של המתחם',
+  showSeatsFor: 'הצגת מושבים עבור',
+  accessJumpFirstSection: 'מעבר לגוש הראשון',
+  accessJumpNextSection: 'מעבר לגוש הבא',
+  fewerTickets: 'פחות כרטיסים',
+  moreTickets: 'יותר כרטיסים',
+  addTickets: 'הוספת כרטיסים',
+  noSelectableSeats: 'אין כרגע מושבים זמינים לבחירה.',
+  confirmYourTickets: 'אשרו את הכרטיסים שלכם',
+  seatsSecuredOpeningCheckout: 'המושבים הובטחו. פותחים את התשלום…',
+  holdInCheckoutTitle: 'המושבים שלכם כבר בתשלום',
+  holdInCheckoutBody:
+      'השלימו את התשלום כדי לשמור עליהם. כדי לבחור מושבים אחרים, שחררו קודם את אלה — הם יחזרו למכירה.',
+  releaseAndChangeSeats: 'שחרור והחלפת מושבים',
+  holdAlreadyHeldTitle: 'המושבים שלכם כבר מוחזקים',
+  holdAlreadyHeldBody: 'המשיכו לתשלום כדי לשמור עליהם.',
+  accessExpiredTitle: 'פג תוקף סשן המושבים שלכם',
+  accessExpiredCopy:
+      'טענו מחדש את מפת המושבים כדי להמשיך. מושבים שכבר בעגלה שלכם נשארים מוחזקים עד שהטיימר מסתיים.',
+  dismissError: 'סגירת השגיאה',
+  testModeLong: 'מצב בדיקה · שום דבר לא מוזמן',
   accessNeeds: <String, String>{
     'wheelchair': 'מקום לכיסא גלגלים',
     'companion': 'מושב מלווה',
@@ -235,6 +331,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountHe,
   seatJustTakenByAnother: _seatJustTakenByAnotherHe,
   peekSecured: _peekSecuredHe,
+  venueMap: _venueMapHe,
+  accessibleStep: _accessibleStepHe,
+  chooseMinMaxGuests: _chooseMinMaxGuestsHe,
+  chooseMore: _chooseMoreHe,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeHe,
   ticketCount: _ticketCountHe,
   findBestSeats: _findBestSeatsHe,
   reselectSeats: _reselectSeatsHe,
@@ -243,5 +344,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeHe,
   holdLapsedSomeTaken: _holdLapsedSomeTakenHe,
   holdLapsedAllTaken: _holdLapsedAllTakenHe,
+  accessibleSections: _accessibleSectionsHe,
+  placesAvailable: _placesAvailableHe,
+  removeTickets: _removeTicketsHe,
+  holdMinutesLeft: _holdMinutesLeftHe,
+  holdSecondsLeft: _holdSecondsLeftHe,
+  holdLapsedBody: _holdLapsedBodyHe,
+  seatsNotRecovered: _seatsNotRecoveredHe,
   continueWithTotal: _continueWithTotalHe,
 );

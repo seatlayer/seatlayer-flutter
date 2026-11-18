@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherUk(String label) =>
 String _peekSecuredUk(int count, String total) =>
     '✓ $count закріплено · $total. Списання поки не буде';
 
+String _venueMapUk(String venue) => '$venue: схема місць';
+
+String _accessibleStepUk(int index, int total) => '$index з $total';
+
+String _chooseMinMaxGuestsUk(int min, int max) =>
+    'Оберіть від $min до $max гостей.';
+
+String _chooseMoreUk(int count) => 'Оберіть ще $count';
+
+String _seatsHeldForNeedMoreTimeUk(String time) =>
+    'Ваші місця утримуються ще $time. Потрібно більше часу?';
+
 String _ticketCountUk(int count) => switch (pickerPluralCategory('uk', count)) {
   PickerPluralCategory.one => '$count квиток',
   PickerPluralCategory.few => '$count квитки',
@@ -107,6 +119,62 @@ String _holdLapsedAllTakenUk(int count) => switch (pickerPluralCategory(
   _ => 'Ваше бронювання завершилося, поки вас не було, і ці місця вже зайнято.',
 };
 
+String _accessibleSectionsUk(int count) =>
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => '$count сектор',
+      PickerPluralCategory.few => '$count сектори',
+      PickerPluralCategory.many => '$count секторів',
+      _ => '$count сектора',
+    };
+
+String _placesAvailableUk(int count) =>
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => 'Зараз доступно $count місце',
+      PickerPluralCategory.few => 'Зараз доступно $count місця',
+      PickerPluralCategory.many => 'Зараз доступно $count місць',
+      _ => 'Зараз доступно $count місця',
+    };
+
+String _removeTicketsUk(int count) =>
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => 'Видалити $count квиток',
+      PickerPluralCategory.few => 'Видалити $count квитки',
+      PickerPluralCategory.many => 'Видалити $count квитків',
+      _ => 'Видалити $count квитка',
+    };
+
+String _holdMinutesLeftUk(int count) =>
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => 'Залишилася $count хвилина',
+      PickerPluralCategory.few => 'Залишилося $count хвилини',
+      PickerPluralCategory.many => 'Залишилося $count хвилин',
+      _ => 'Залишилося $count хвилини',
+    };
+
+String _holdSecondsLeftUk(int count) =>
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => 'Залишилася $count секунда',
+      PickerPluralCategory.few => 'Залишилося $count секунди',
+      PickerPluralCategory.many => 'Залишилося $count секунд',
+      _ => 'Залишилося $count секунди',
+    };
+
+String _holdLapsedBodyUk(int count) =>
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => 'Їх утримували $count хвилину.',
+      PickerPluralCategory.few => 'Їх утримували $count хвилини.',
+      PickerPluralCategory.many => 'Їх утримували $count хвилин.',
+      _ => 'Їх утримували $count хвилини.',
+    };
+
+String _seatsNotRecoveredUk(int count) =>
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => '$count місце не вдалося повернути',
+      PickerPluralCategory.few => '$count місця не вдалося повернути',
+      PickerPluralCategory.many => '$count місць не вдалося повернути',
+      _ => '$count місця не вдалося повернути',
+    };
+
 String _continueWithTotalUk(String money) => 'Продовжити \u00b7 $money';
 
 /// The `uk` defaults for the native picker chrome.
@@ -130,7 +198,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   undo: 'Скасувати',
   holdAndCheckout: 'Забронювати місця та оплатити',
   poweredBy: 'Працює на SeatLayer',
-  testMode: 'ТЕСТОВИЙ РЕЖИМ',
+  testMode: 'Тестовий режим',
   accessibility: 'Доступність і кольори',
   accessibilityTitle: 'Доступність і кольори',
   fitVenue: 'Показати весь майданчик',
@@ -150,6 +218,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   hideLimitedView: 'Сховати місця з обмеженим оглядом',
   colorblindSafe: 'Кольори для дальтоніків',
   notAvailable: 'Недоступно',
+  viewGroupTitle: 'ВИД',
   restrictedView: 'Обмежений огляд',
   obstructedView: 'Огляд перекрито',
   premiumSeat: 'Преміальне місце',
@@ -228,6 +297,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   removeWord: 'Прибрати',
   floorWord: 'Поверх',
   totalWord: 'Разом',
+  chooseSeats: 'Оберіть свої місця',
+  chooseTickets: 'Оберіть квитки',
+  placeWord: 'МІСЦЕ',
+  ticketWord: 'Квиток',
+  passport: 'Картка місця',
+  venue3D: '3D',
+  venueZone: 'Зона майданчика',
+  venueMapHint:
+      'Місця обирають за допомогою елементів керування навколо схеми: смуга цін над нею, керування секторами під нею і панель квитків унизу.',
+  previousSeat: 'Попереднє місце',
+  nextSeat: 'Наступне місце',
+  orbitMode: 'Обернути майданчик',
+  panMode: 'Перемістити майданчик',
+  openInteractive3dVenue: 'Відкрити інтерактивний 3D-вид майданчика',
+  showSeatsFor: 'ПОКАЗАТИ МІСЦЯ:',
+  accessJumpFirstSection: 'Перейти до першого сектора',
+  accessJumpNextSection: 'Перейти до наступного сектора',
+  fewerTickets: 'Менше квитків',
+  moreTickets: 'Більше квитків',
+  addTickets: 'Додати квитки',
+  noSelectableSeats: 'Зараз немає місць, доступних для вибору.',
+  confirmYourTickets: 'Підтвердьте свої квитки',
+  seatsSecuredOpeningCheckout: 'Місця закріплено. Відкриваємо оплату…',
+  holdInCheckoutTitle: 'Ваші місця вже в процесі оплати',
+  holdInCheckoutBody:
+      'Завершіть оплату, щоб зберегти їх. Щоб обрати інші місця, спершу звільніть ці — вони повернуться в продаж.',
+  releaseAndChangeSeats: 'Звільнити й змінити місця',
+  holdAlreadyHeldTitle: 'Ваші місця вже утримуються за вами',
+  holdAlreadyHeldBody: 'Перейдіть до оплати, щоб зберегти їх.',
+  accessExpiredTitle: 'Ваш сеанс вибору місць завершився',
+  accessExpiredCopy:
+      'Оновіть схему місць, щоб продовжити. Місця, які вже в кошику, залишаються за вами, доки не скінчиться таймер.',
+  dismissError: 'Закрити повідомлення про помилку',
+  testModeLong: 'Тестовий режим · нічого не бронюється',
   accessNeeds: <String, String>{
     'wheelchair': 'Місце для візка',
     'companion': 'Місце для супроводу',
@@ -251,6 +354,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountUk,
   seatJustTakenByAnother: _seatJustTakenByAnotherUk,
   peekSecured: _peekSecuredUk,
+  venueMap: _venueMapUk,
+  accessibleStep: _accessibleStepUk,
+  chooseMinMaxGuests: _chooseMinMaxGuestsUk,
+  chooseMore: _chooseMoreUk,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeUk,
   ticketCount: _ticketCountUk,
   findBestSeats: _findBestSeatsUk,
   reselectSeats: _reselectSeatsUk,
@@ -259,5 +367,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeUk,
   holdLapsedSomeTaken: _holdLapsedSomeTakenUk,
   holdLapsedAllTaken: _holdLapsedAllTakenUk,
+  accessibleSections: _accessibleSectionsUk,
+  placesAvailable: _placesAvailableUk,
+  removeTickets: _removeTicketsUk,
+  holdMinutesLeft: _holdMinutesLeftUk,
+  holdSecondsLeft: _holdSecondsLeftUk,
+  holdLapsedBody: _holdLapsedBodyUk,
+  seatsNotRecovered: _seatsNotRecoveredUk,
   continueWithTotal: _continueWithTotalUk,
 );

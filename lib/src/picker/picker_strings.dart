@@ -2,6 +2,7 @@ import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart';
 
+import 'picker_plural_rules.dart';
 import 'picker_strings_locales.g.dart';
 import 'picker_tokens.g.dart';
 
@@ -102,6 +103,8 @@ class SeatLayerPickerStrings {
     this.accessFreeCount = _defaultAccessFreeCount,
     this.accessibleStep = _defaultAccessibleStep,
     this.accessibleSections = _defaultAccessibleSections,
+    this.activeFilters = _defaultActiveFilters,
+    this.accessibilityFiltersActive = _defaultAccessibilityFiltersActive,
     this.accessJumpFirstSection = SeatLayerStringTokens.accessJumpFirstSection,
     this.accessJumpNextSection = SeatLayerStringTokens.accessJumpNextSection,
     this.fitVenue = SeatLayerStringTokens.fitVenue,
@@ -248,6 +251,9 @@ class SeatLayerPickerStrings {
           : 'zh-Hans';
     }
     yield language;
+    // Norwegian Bokmål devices report `nb`; the runtime's Norwegian
+    // dictionary is Bokmål, filed under the macrolanguage `no`.
+    if (language == 'nb') yield 'no';
   }
 
   /// Tooltip on the header's dismiss control.
@@ -598,6 +604,20 @@ class SeatLayerPickerStrings {
   ///
   /// Native-only, for the same reason as [accessibleStep].
   final String Function(int count) accessibleSections;
+
+  /// "2 filters" — the label of the wide accessibility control while any
+  /// filter is on.
+  ///
+  /// No runtime dictionary carries this sentence yet, so every locale draws
+  /// the English default until one does; a host can override it.
+  final String Function(int count) activeFilters;
+
+  /// "2 accessibility filters active" — the tooltip and accessible name of
+  /// the round accessibility control while any filter is on.
+  ///
+  /// No runtime dictionary carries this sentence yet, so every locale draws
+  /// the English default until one does; a host can override it.
+  final String Function(int count) accessibilityFiltersActive;
 
   /// The accessible name of the sheet's count chip, which starts the tour.
   ///
@@ -1026,12 +1046,20 @@ class SeatLayerPickerStrings {
   /// its English wording in every locale until one exists.
   final String Function(int count) holdSecondsLeft;
 
-  /// The four sentences below take a value, so unlike every other default
-  /// they cannot be one `SeatLayerStringTokens` constant used as-is. Three
-  /// substitute a number into one sentence; the fourth picks between two
-  /// sentences on it. The wording still lives in `design/tokens.json` — the
-  /// other SDK ports read the same sentences — and only the choosing happens
-  /// here.
+  /// The sentences below take a value, so unlike every other default they
+  /// cannot be one `SeatLayerStringTokens` constant used as-is. Some
+  /// substitute a number into one sentence; the counted ones pick a form by
+  /// the English plural rule, the same `pickerPluralCategory` path every
+  /// translated locale chooses by. The wording still lives in
+  /// `design/tokens.json` — the other SDK ports read the same sentences — and
+  /// only the choosing happens here.
+  static String _english(int count, String one, String other) =>
+      (pickerPluralCategory('en', count) == PickerPluralCategory.one
+              ? one
+              : other)
+          .replaceAll('{count}', '$count')
+          .replaceAll('{n}', '$count');
+
   static String _defaultAccessFreeCount(int count) =>
       SeatLayerStringTokens.accessFreeCount.replaceAll('{count}', '$count');
 
@@ -1040,56 +1068,82 @@ class SeatLayerPickerStrings {
           .replaceAll('{index}', '$index')
           .replaceAll('{total}', '$total');
 
-  static String _defaultAccessibleSections(int count) =>
-      SeatLayerStringTokens.accessibleSections.replaceAll('{count}', '$count');
+  static String _defaultAccessibleSections(int count) => _english(
+        count,
+        SeatLayerStringTokens.accessibleSectionsOne,
+        SeatLayerStringTokens.accessibleSectionsOther,
+      );
+
+  static String _defaultActiveFilters(int count) => _english(
+        count,
+        SeatLayerStringTokens.activeFiltersOne,
+        SeatLayerStringTokens.activeFiltersOther,
+      );
+
+  static String _defaultAccessibilityFiltersActive(int count) => _english(
+        count,
+        SeatLayerStringTokens.accessibilityFiltersActiveOne,
+        SeatLayerStringTokens.accessibilityFiltersActiveOther,
+      );
 
   static String _defaultAccessNeedWithCount(String need, int count) =>
       SeatLayerStringTokens.accessNeedWithCount
           .replaceAll('{need}', need)
           .replaceAll('{count}', '$count');
 
-  static String _defaultHoldLapsedBody(int minutes) =>
-      SeatLayerStringTokens.holdLapsedBody.replaceAll('{n}', '$minutes');
+  static String _defaultHoldLapsedBody(int count) => _english(
+        count,
+        SeatLayerStringTokens.holdLapsedBodyOne,
+        SeatLayerStringTokens.holdLapsedBodyOther,
+      );
 
-  static String _defaultSeatsNotRecovered(int count) =>
-      SeatLayerStringTokens.seatsNotRecovered.replaceAll('{n}', '$count');
+  static String _defaultSeatsNotRecovered(int count) => _english(
+        count,
+        SeatLayerStringTokens.seatsNotRecoveredOne,
+        SeatLayerStringTokens.seatsNotRecoveredOther,
+      );
 
-  static String _defaultReselectSeats(int count) => count == 1
-      ? SeatLayerStringTokens.reselectSeatsOne
-      : SeatLayerStringTokens.reselectSeatsOther;
+  static String _defaultReselectSeats(int count) => _english(
+        count,
+        SeatLayerStringTokens.reselectSeatsOne,
+        SeatLayerStringTokens.reselectSeatsOther,
+      );
 
   static String _defaultTicketCount(int count) =>
-      count == 1 ? '1 ticket' : '$count tickets';
+      _english(count, '{count} ticket', '{count} tickets');
 
   static String _defaultChooseMore(int count) =>
       SeatLayerStringTokens.chooseMore.replaceAll('{count}', '$count');
 
-  static String _defaultRemoveTickets(int count) => (count == 1
-          ? SeatLayerStringTokens.removeTicketsOne
-          : SeatLayerStringTokens.removeTicketsOther)
-      .replaceAll('{count}', '$count');
+  static String _defaultRemoveTickets(int count) => _english(
+        count,
+        SeatLayerStringTokens.removeTicketsOne,
+        SeatLayerStringTokens.removeTicketsOther,
+      );
 
   static String _defaultSeatsLeft(int count) => '$count left';
 
-  static String _defaultSeatsLeftInSection(int count) => (count == 1
-          ? SeatLayerStringTokens.seatsLeftInSectionOne
-          : SeatLayerStringTokens.seatsLeftInSectionOther)
-      .replaceAll('{count}', '$count');
+  static String _defaultSeatsLeftInSection(int count) => _english(
+        count,
+        SeatLayerStringTokens.seatsLeftInSectionOne,
+        SeatLayerStringTokens.seatsLeftInSectionOther,
+      );
 
   static String _defaultOnlyLeft(int count) =>
       SeatLayerStringTokens.onlyLeft.replaceAll('{count}', '$count');
 
   static String _defaultSeatsFree(int count) =>
-      count == 1 ? '1 seat' : '$count seats';
+      _english(count, '{count} seat', '{count} seats');
 
   static String _defaultFromPrice(String money) => 'From $money';
 
   static String _defaultContinueWithTotal(String money) => 'Continue · $money';
 
-  static String _defaultFindBestSeats(int count) => (count == 1
-          ? SeatLayerStringTokens.findBestSeatsOne
-          : SeatLayerStringTokens.findBestSeatsOther)
-      .replaceAll('{count}', '$count');
+  static String _defaultFindBestSeats(int count) => _english(
+        count,
+        SeatLayerStringTokens.findBestSeatsOne,
+        SeatLayerStringTokens.findBestSeatsOther,
+      );
 
   static String _defaultMoreCount(int count) => '+$count more';
 
@@ -1112,18 +1166,23 @@ class SeatLayerPickerStrings {
   static String _defaultSightline(String metres) =>
       SeatLayerStringTokens.sightline.replaceAll('{m}', metres);
 
-  static String _defaultHoldLapsedStillFree(int count) => count == 1
-      ? SeatLayerStringTokens.holdLapsedStillFreeOne
-      : SeatLayerStringTokens.holdLapsedStillFreeOther;
+  static String _defaultHoldLapsedStillFree(int count) => _english(
+        count,
+        SeatLayerStringTokens.holdLapsedStillFreeOne,
+        SeatLayerStringTokens.holdLapsedStillFreeOther,
+      );
 
-  static String _defaultHoldLapsedSomeTaken(int count) => (count == 1
-          ? SeatLayerStringTokens.holdLapsedSomeTakenOne
-          : SeatLayerStringTokens.holdLapsedSomeTakenOther)
-      .replaceAll('{count}', '$count');
+  static String _defaultHoldLapsedSomeTaken(int count) => _english(
+        count,
+        SeatLayerStringTokens.holdLapsedSomeTakenOne,
+        SeatLayerStringTokens.holdLapsedSomeTakenOther,
+      );
 
-  static String _defaultHoldLapsedAllTaken(int count) => count == 1
-      ? SeatLayerStringTokens.holdLapsedAllTakenOne
-      : SeatLayerStringTokens.holdLapsedAllTakenOther;
+  static String _defaultHoldLapsedAllTaken(int count) => _english(
+        count,
+        SeatLayerStringTokens.holdLapsedAllTakenOne,
+        SeatLayerStringTokens.holdLapsedAllTakenOther,
+      );
 
   static String _defaultSeatsHeldForNeedMoreTime(String time) =>
       SeatLayerStringTokens.seatsHeldForNeedMoreTime.replaceAll('{time}', time);
@@ -1136,21 +1195,26 @@ class SeatLayerPickerStrings {
           .replaceAll('{min}', '$min')
           .replaceAll('{max}', '$max');
 
-  static String _defaultPlacesAvailable(int count) =>
-      SeatLayerStringTokens.placesAvailable.replaceAll('{count}', '$count');
+  static String _defaultPlacesAvailable(int count) => _english(
+        count,
+        SeatLayerStringTokens.placesAvailableOne,
+        SeatLayerStringTokens.placesAvailableOther,
+      );
 
   static String _defaultVenueMap(String venue) =>
       SeatLayerStringTokens.venueMap.replaceAll('{venue}', venue);
 
-  static String _defaultHoldMinutesLeft(int count) => (count == 1
-          ? SeatLayerStringTokens.holdMinutesLeftOne
-          : SeatLayerStringTokens.holdMinutesLeftOther)
-      .replaceAll('{count}', '$count');
+  static String _defaultHoldMinutesLeft(int count) => _english(
+        count,
+        SeatLayerStringTokens.holdMinutesLeftOne,
+        SeatLayerStringTokens.holdMinutesLeftOther,
+      );
 
-  static String _defaultHoldSecondsLeft(int count) => (count == 1
-          ? SeatLayerStringTokens.holdSecondsLeftOne
-          : SeatLayerStringTokens.holdSecondsLeftOther)
-      .replaceAll('{count}', '$count');
+  static String _defaultHoldSecondsLeft(int count) => _english(
+        count,
+        SeatLayerStringTokens.holdSecondsLeftOne,
+        SeatLayerStringTokens.holdSecondsLeftOther,
+      );
 }
 
 /// The words on the book button while the host's checkout opens.
@@ -1161,3 +1225,14 @@ String seatLayerCheckoutHandoffWords(SeatLayerPickerStrings strings) =>
     strings._handoffKeepsOpeningCheckout
         ? strings.openingCheckout
         : strings.seatsSecuredOpeningCheckout;
+
+/// [word] as a screen reader should say it.
+///
+/// The English locale writes "PLACE" in capitals because the seat card draws
+/// its cell headings upper-cased; a screen reader given the capitals may read
+/// them out letter by letter, so the English word is spoken in the default's
+/// own case. Any other word is spoken as written.
+String seatLayerSpokenWord(String word) =>
+    word == SeatLayerStringTokens.placeWord.toUpperCase()
+        ? SeatLayerStringTokens.placeWord
+        : word;

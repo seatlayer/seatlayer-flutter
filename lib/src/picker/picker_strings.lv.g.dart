@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherLv(String label) =>
 String _peekSecuredLv(int count, String total) =>
     '✓ $count nodrošinātas · $total. Vēl nekas netiks norakstīts';
 
+String _venueMapLv(String venue) => 'Vietu plāns: $venue';
+
+String _accessibleStepLv(int index, int total) => '$index no $total';
+
+String _chooseMinMaxGuestsLv(int min, int max) =>
+    'Izvēlieties no $min līdz $max viesiem.';
+
+String _chooseMoreLv(int count) => 'Izvēlēties vēl $count';
+
+String _seatsHeldForNeedMoreTimeLv(String time) =>
+    'Jūsu vietas rezervētas vēl $time. Vai nepieciešams vairāk laika?';
+
 String _ticketCountLv(int count) => switch (pickerPluralCategory('lv', count)) {
   PickerPluralCategory.zero => '$count biļešu',
   PickerPluralCategory.one => '$count biļete',
@@ -98,6 +110,55 @@ String _holdLapsedAllTakenLv(int count) => switch (pickerPluralCategory(
     'Tavs rezervējums beidzās, kamēr biji prom, un šīs vietas jau ir aizņemtas.',
 };
 
+String _accessibleSectionsLv(int count) =>
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => '$count sektori',
+      PickerPluralCategory.one => '$count sektors',
+      _ => '$count sektori',
+    };
+
+String _placesAvailableLv(int count) =>
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => 'Pašlaik pieejamas $count vietas',
+      PickerPluralCategory.one => 'Pašlaik pieejama $count vieta',
+      _ => 'Pašlaik pieejamas $count vietas',
+    };
+
+String _removeTicketsLv(int count) =>
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => 'Noņemt $count biļetes',
+      PickerPluralCategory.one => 'Noņemt $count biļeti',
+      _ => 'Noņemt $count biļetes',
+    };
+
+String _holdMinutesLeftLv(int count) =>
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => 'Atlikušas $count minūtes',
+      PickerPluralCategory.one => 'Atlikusi $count minūte',
+      _ => 'Atlikušas $count minūtes',
+    };
+
+String _holdSecondsLeftLv(int count) =>
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => 'Atlikušas $count sekundes',
+      PickerPluralCategory.one => 'Atlikusi $count sekunde',
+      _ => 'Atlikušas $count sekundes',
+    };
+
+String _holdLapsedBodyLv(int count) =>
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => 'Tās bija rezervētas uz $count minūtēm.',
+      PickerPluralCategory.one => 'Tās bija rezervētas uz $count minūti.',
+      _ => 'Tās bija rezervētas uz $count minūtēm.',
+    };
+
+String _seatsNotRecoveredLv(int count) =>
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => '$count vietas neizdevās atgūt',
+      PickerPluralCategory.one => '$count vietu neizdevās atgūt',
+      _ => '$count vietas neizdevās atgūt',
+    };
+
 String _continueWithTotalLv(String money) => 'Turpināt \u00b7 $money';
 
 /// The `lv` defaults for the native picker chrome.
@@ -121,7 +182,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   undo: 'Atsaukt',
   holdAndCheckout: 'Rezervēt vietas un maksāt',
   poweredBy: 'Darbojas ar SeatLayer',
-  testMode: 'TESTA REŽĪMS',
+  testMode: 'Testa režīms',
   accessibility: 'Pieejamības un krāsu iestatījumi',
   accessibilityTitle: 'Pieejamības un krāsu iestatījumi',
   fitVenue: 'Rādīt visu norises vietu',
@@ -141,6 +202,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   hideLimitedView: 'Paslēpt vietas ar ierobežotu skatu',
   colorblindSafe: 'Daltoniķiem draudzīgas krāsas',
   notAvailable: 'Nav pieejams',
+  viewGroupTitle: 'SKATS',
   restrictedView: 'Ierobežots skats',
   obstructedView: 'Aizsegts skats',
   premiumSeat: 'Premium vieta',
@@ -223,6 +285,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   removeWord: 'Noņemt',
   floorWord: 'Stāvs',
   totalWord: 'Kopā',
+  chooseSeats: 'Izvēlieties savas vietas',
+  chooseTickets: 'Izvēlieties biļetes',
+  placeWord: 'VIETA',
+  ticketWord: 'Biļete',
+  passport: 'Vietas profils',
+  venue3D: '3D',
+  venueZone: 'Norises vietas zona',
+  venueMapHint:
+      'Vietas izvēlas ar vadīklām ap plānu: cenu joslu virs tā, sektoru vadīklām zem tā un biļešu paneli apakšā.',
+  previousSeat: 'Iepriekšējā vieta',
+  nextSeat: 'Nākamā vieta',
+  orbitMode: 'Pagriezt norises vietu',
+  panMode: 'Pārvietot norises vietu',
+  openInteractive3dVenue: 'Atvērt interaktīvu norises vietas 3D skatu',
+  showSeatsFor: 'RĀDĪT PIEMĒROTĀS VIETAS',
+  accessJumpFirstSection: 'Pāriet uz pirmo sektoru',
+  accessJumpNextSection: 'Pāriet uz nākamo sektoru',
+  fewerTickets: 'Mazāk biļešu',
+  moreTickets: 'Vairāk biļešu',
+  addTickets: 'Pievienot biļetes',
+  noSelectableSeats: 'Pašlaik nav pieejamu vietu, ko izvēlēties.',
+  confirmYourTickets: 'Apstiprināt biļetes',
+  seatsSecuredOpeningCheckout: 'Vietas nodrošinātas. Atveram maksājumu…',
+  holdInCheckoutTitle: 'Jūsu vietas jau ir maksājuma procesā',
+  holdInCheckoutBody:
+      'Pabeidziet maksājumu, lai tās paturētu. Lai izvēlētos citas vietas, vispirms atbrīvojiet šīs — tās atgriezīsies pārdošanā.',
+  releaseAndChangeSeats: 'Atbrīvot un mainīt vietas',
+  holdAlreadyHeldTitle: 'Jūsu vietas jau ir rezervētas',
+  holdAlreadyHeldBody: 'Turpiniet uz maksājumu, lai tās paturētu.',
+  accessExpiredTitle: 'Jūsu vietu izvēles sesija ir beigusies',
+  accessExpiredCopy:
+      'Pārlādējiet vietu plānu, lai turpinātu. Vietas, kas jau ir jūsu grozā, paliek rezervētas, līdz beidzas taimeris.',
+  dismissError: 'Aizvērt kļūdas paziņojumu',
+  testModeLong: 'Testa režīms · nekas netiek rezervēts',
   accessNeeds: <String, String>{
     'wheelchair': 'Ratiņkrēsla vieta',
     'companion': 'Pavadoņa vieta',
@@ -246,6 +342,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountLv,
   seatJustTakenByAnother: _seatJustTakenByAnotherLv,
   peekSecured: _peekSecuredLv,
+  venueMap: _venueMapLv,
+  accessibleStep: _accessibleStepLv,
+  chooseMinMaxGuests: _chooseMinMaxGuestsLv,
+  chooseMore: _chooseMoreLv,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeLv,
   ticketCount: _ticketCountLv,
   findBestSeats: _findBestSeatsLv,
   reselectSeats: _reselectSeatsLv,
@@ -254,5 +355,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeLv,
   holdLapsedSomeTaken: _holdLapsedSomeTakenLv,
   holdLapsedAllTaken: _holdLapsedAllTakenLv,
+  accessibleSections: _accessibleSectionsLv,
+  placesAvailable: _placesAvailableLv,
+  removeTickets: _removeTicketsLv,
+  holdMinutesLeft: _holdMinutesLeftLv,
+  holdSecondsLeft: _holdSecondsLeftLv,
+  holdLapsedBody: _holdLapsedBodyLv,
+  seatsNotRecovered: _seatsNotRecoveredLv,
   continueWithTotal: _continueWithTotalLv,
 );

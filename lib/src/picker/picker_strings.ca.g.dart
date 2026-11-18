@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherCa(String label) =>
 String _peekSecuredCa(int count, String total) =>
     '✓ $count assegurats · $total. Encara no et cobrarem';
 
+String _venueMapCa(String venue) => 'Mapa de seients de $venue';
+
+String _accessibleStepCa(int index, int total) => '$index de $total';
+
+String _chooseMinMaxGuestsCa(int min, int max) =>
+    'Tria entre $min i $max convidats.';
+
+String _chooseMoreCa(int count) => 'Tria’n $count més';
+
+String _seatsHeldForNeedMoreTimeCa(String time) =>
+    'Els teus seients estan reservats durant $time. Necessites més temps?';
+
 String _ticketCountCa(int count) => switch (pickerPluralCategory('ca', count)) {
   PickerPluralCategory.one => '$count entrada',
   PickerPluralCategory.many => '$count entrades',
@@ -98,6 +110,57 @@ String _holdLapsedAllTakenCa(int count) => switch (pickerPluralCategory(
     'La teva reserva ha caducat mentre eres fora i aquestes places ja estan ocupades.',
 };
 
+String _accessibleSectionsCa(int count) =>
+    switch (pickerPluralCategory('ca', count)) {
+      PickerPluralCategory.one => '$count sector',
+      PickerPluralCategory.many => '$count de sectors',
+      _ => '$count sectors',
+    };
+
+String _placesAvailableCa(int count) =>
+    switch (pickerPluralCategory('ca', count)) {
+      PickerPluralCategory.one => '$count plaça disponible ara mateix',
+      PickerPluralCategory.many => '$count de places disponibles ara mateix',
+      _ => '$count places disponibles ara mateix',
+    };
+
+String _removeTicketsCa(int count) =>
+    switch (pickerPluralCategory('ca', count)) {
+      PickerPluralCategory.one => 'Treu $count entrada',
+      PickerPluralCategory.many => 'Treu $count d’entrades',
+      _ => 'Treu $count entrades',
+    };
+
+String _holdMinutesLeftCa(int count) =>
+    switch (pickerPluralCategory('ca', count)) {
+      PickerPluralCategory.one => 'Queda $count minut',
+      PickerPluralCategory.many => 'Queden $count de minuts',
+      _ => 'Queden $count minuts',
+    };
+
+String _holdSecondsLeftCa(int count) =>
+    switch (pickerPluralCategory('ca', count)) {
+      PickerPluralCategory.one => 'Queda $count segon',
+      PickerPluralCategory.many => 'Queden $count de segons',
+      _ => 'Queden $count segons',
+    };
+
+String _holdLapsedBodyCa(int count) => switch (pickerPluralCategory(
+  'ca',
+  count,
+)) {
+  PickerPluralCategory.one => 'Van estar reservats durant $count minut.',
+  PickerPluralCategory.many => 'Van estar reservats durant $count de minuts.',
+  _ => 'Van estar reservats durant $count minuts.',
+};
+
+String _seatsNotRecoveredCa(int count) =>
+    switch (pickerPluralCategory('ca', count)) {
+      PickerPluralCategory.one => '$count seient no s’ha pogut recuperar',
+      PickerPluralCategory.many => '$count de seients no s’han pogut recuperar',
+      _ => '$count seients no s’han pogut recuperar',
+    };
+
 String _continueWithTotalCa(String money) => 'Continua \u00b7 $money';
 
 /// The `ca` defaults for the native picker chrome.
@@ -121,7 +184,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   undo: 'Desfés',
   holdAndCheckout: 'Reserva els seients i paga',
   poweredBy: 'Amb la tecnologia de SeatLayer',
-  testMode: 'MODE DE PROVA',
+  testMode: 'Mode de prova',
   accessibility: 'Opcions d’accessibilitat i color',
   accessibilityTitle: 'Opcions d’accessibilitat i color',
   fitVenue: 'Mostra tot el recinte',
@@ -142,6 +205,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   hideLimitedView: 'Amaga els seients amb visibilitat limitada',
   colorblindSafe: 'Colors adaptats al daltonisme',
   notAvailable: 'No disponible',
+  viewGroupTitle: 'VISTA',
   restrictedView: 'Visibilitat limitada',
   obstructedView: 'Visibilitat obstruïda',
   premiumSeat: 'Seient prèmium',
@@ -225,6 +289,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   removeWord: 'Treu',
   floorWord: 'Planta',
   totalWord: 'Total',
+  chooseSeats: 'Tria els teus seients',
+  chooseTickets: 'Tria entrades',
+  placeWord: 'PLAÇA',
+  ticketWord: 'Entrada',
+  passport: 'Fitxa del seient',
+  venue3D: '3D',
+  venueZone: 'Zona del recinte',
+  venueMapHint:
+      'Els seients es trien amb els controls al voltant del mapa: la barra de preus a sobre, els controls de sector a sota i el tauler d’entrades al peu.',
+  previousSeat: 'Seient anterior',
+  nextSeat: 'Seient següent',
+  orbitMode: 'Gira el recinte',
+  panMode: 'Mou el recinte',
+  openInteractive3dVenue: 'Obre el recinte 3D interactiu',
+  showSeatsFor: 'MOSTRA SEIENTS PER A',
+  accessJumpFirstSection: 'Ves al primer sector',
+  accessJumpNextSection: 'Ves al sector següent',
+  fewerTickets: 'Menys entrades',
+  moreTickets: 'Més entrades',
+  addTickets: 'Afegeix entrades',
+  noSelectableSeats: 'Ara mateix no hi ha cap seient seleccionable disponible.',
+  confirmYourTickets: 'Confirma les teves entrades',
+  seatsSecuredOpeningCheckout: 'Seients assegurats. Obrint el pagament…',
+  holdInCheckoutTitle: 'Els teus seients ja són al pagament',
+  holdInCheckoutBody:
+      'Acaba el pagament per conservar-los. Per triar altres seients, allibera primer aquests — tornen a la venda.',
+  releaseAndChangeSeats: 'Allibera i canvia els seients',
+  holdAlreadyHeldTitle: 'Els teus seients ja estan reservats',
+  holdAlreadyHeldBody: 'Continua cap al pagament per conservar-los.',
+  accessExpiredTitle: 'La teva sessió de seients ha caducat',
+  accessExpiredCopy:
+      'Torna a carregar el mapa de seients per continuar. Els seients que ja són a la teva cistella continuen reservats fins que s’acabi el temporitzador.',
+  dismissError: 'Descarta l’error',
+  testModeLong: 'Mode de prova · no reserva res',
   accessNeeds: <String, String>{
     'wheelchair': 'Espai per a cadira de rodes',
     'companion': 'Seient d’acompanyant',
@@ -248,6 +346,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountCa,
   seatJustTakenByAnother: _seatJustTakenByAnotherCa,
   peekSecured: _peekSecuredCa,
+  venueMap: _venueMapCa,
+  accessibleStep: _accessibleStepCa,
+  chooseMinMaxGuests: _chooseMinMaxGuestsCa,
+  chooseMore: _chooseMoreCa,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeCa,
   ticketCount: _ticketCountCa,
   findBestSeats: _findBestSeatsCa,
   reselectSeats: _reselectSeatsCa,
@@ -256,5 +359,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeCa,
   holdLapsedSomeTaken: _holdLapsedSomeTakenCa,
   holdLapsedAllTaken: _holdLapsedAllTakenCa,
+  accessibleSections: _accessibleSectionsCa,
+  placesAvailable: _placesAvailableCa,
+  removeTickets: _removeTicketsCa,
+  holdMinutesLeft: _holdMinutesLeftCa,
+  holdSecondsLeft: _holdSecondsLeftCa,
+  holdLapsedBody: _holdLapsedBodyCa,
+  seatsNotRecovered: _seatsNotRecoveredCa,
   continueWithTotal: _continueWithTotalCa,
 );

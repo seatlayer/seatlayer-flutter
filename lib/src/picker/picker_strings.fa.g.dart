@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherFa(String label) =>
 String _peekSecuredFa(int count, String total) =>
     '✓ $count تثبیت شد · $total. هنوز مبلغی کسر نمی‌شود';
 
+String _venueMapFa(String venue) => 'نقشهٔ صندلی‌های $venue';
+
+String _accessibleStepFa(int index, int total) => '$index از $total';
+
+String _chooseMinMaxGuestsFa(int min, int max) =>
+    'بین $min تا $max مهمان انتخاب کنید.';
+
+String _chooseMoreFa(int count) => '$count تای دیگر انتخاب کنید';
+
+String _seatsHeldForNeedMoreTimeFa(String time) =>
+    'صندلی‌های شما برای $time نگه داشته شده‌اند. زمان بیشتری لازم دارید؟';
+
 String _ticketCountFa(int count) => switch (pickerPluralCategory('fa', count)) {
   PickerPluralCategory.one => '$count بلیت',
   _ => '$count بلیت',
@@ -81,6 +93,50 @@ String _holdLapsedAllTakenFa(int count) =>
       _ => 'رزرو شما در زمان نبودنتان منقضی شد و آن صندلی‌ها گرفته شده‌اند.',
     };
 
+String _accessibleSectionsFa(int count) =>
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one => '$count بخش',
+      _ => '$count بخش',
+    };
+
+String _placesAvailableFa(int count) =>
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one => '$count جایگاه هم‌اکنون در دسترس است',
+      _ => '$count جایگاه هم‌اکنون در دسترس است',
+    };
+
+String _removeTicketsFa(int count) =>
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one => 'حذف $count بلیت',
+      _ => 'حذف $count بلیت',
+    };
+
+String _holdMinutesLeftFa(int count) =>
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one => '$count دقیقه باقی مانده',
+      _ => '$count دقیقه باقی مانده',
+    };
+
+String _holdSecondsLeftFa(int count) =>
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one => '$count ثانیه باقی مانده',
+      _ => '$count ثانیه باقی مانده',
+    };
+
+String _holdLapsedBodyFa(int count) => switch (pickerPluralCategory(
+  'fa',
+  count,
+)) {
+  PickerPluralCategory.one => 'این صندلی‌ها $count دقیقه نگه داشته شده بودند.',
+  _ => 'این صندلی‌ها $count دقیقه نگه داشته شده بودند.',
+};
+
+String _seatsNotRecoveredFa(int count) =>
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one => '$count صندلی بازیابی نشد',
+      _ => '$count صندلی بازیابی نشد',
+    };
+
 String _continueWithTotalFa(String money) => 'ادامه \u00b7 $money';
 
 /// The `fa` defaults for the native picker chrome.
@@ -124,6 +180,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   hideLimitedView: 'پنهان کردن صندلی‌های با دید محدود',
   colorblindSafe: 'رنگ‌های مناسب کوررنگی',
   notAvailable: 'در دسترس نیست',
+  viewGroupTitle: 'نمایش',
   restrictedView: 'دید محدود',
   obstructedView: 'دید مسدود',
   premiumSeat: 'صندلی ویژه',
@@ -204,6 +261,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   removeWord: 'حذف',
   floorWord: 'طبقه',
   totalWord: 'جمع کل',
+  chooseSeats: 'صندلی‌های خود را انتخاب کنید',
+  chooseTickets: 'بلیت‌ها را انتخاب کنید',
+  placeWord: 'جایگاه',
+  ticketWord: 'بلیت',
+  passport: 'مشخصات صندلی',
+  venue3D: '3D',
+  venueZone: 'منطقهٔ سالن',
+  venueMapHint:
+      'صندلی‌ها با کنترل‌های اطراف نقشه انتخاب می‌شوند: نوار قیمت بالای آن، کنترل‌های بخش زیر آن، و پنل بلیت در پایین.',
+  previousSeat: 'صندلی قبلی',
+  nextSeat: 'صندلی بعدی',
+  orbitMode: 'چرخاندن سالن',
+  panMode: 'جابه‌جایی سالن',
+  openInteractive3dVenue: 'باز کردن نمای سه‌بعدی تعاملی سالن',
+  showSeatsFor: 'نمایش صندلی‌ها برای',
+  accessJumpFirstSection: 'رفتن به بخش اول',
+  accessJumpNextSection: 'رفتن به بخش بعدی',
+  fewerTickets: 'بلیت کمتر',
+  moreTickets: 'بلیت بیشتر',
+  addTickets: 'افزودن بلیت',
+  noSelectableSeats: 'در حال حاضر هیچ صندلی قابل انتخابی در دسترس نیست.',
+  confirmYourTickets: 'بلیت‌های خود را تأیید کنید',
+  seatsSecuredOpeningCheckout: 'صندلی‌ها تثبیت شدند. در حال باز کردن پرداخت…',
+  holdInCheckoutTitle: 'صندلی‌های شما از قبل در مرحلهٔ پرداخت هستند',
+  holdInCheckoutBody:
+      'برای حفظ آن‌ها پرداخت را تمام کنید. برای انتخاب صندلی‌های دیگر، اول این‌ها را آزاد کنید — دوباره برای فروش گذاشته می‌شوند.',
+  releaseAndChangeSeats: 'آزاد کردن و تغییر صندلی‌ها',
+  holdAlreadyHeldTitle: 'صندلی‌های شما از قبل نگه داشته شده‌اند',
+  holdAlreadyHeldBody: 'برای حفظ آن‌ها به پرداخت ادامه دهید.',
+  accessExpiredTitle: 'نشست انتخاب صندلی شما منقضی شد',
+  accessExpiredCopy:
+      'برای ادامه، نقشهٔ صندلی‌ها را دوباره بارگذاری کنید. صندلی‌هایی که در سبد شما هستند تا پایان زمان‌سنج نگه داشته می‌شوند.',
+  dismissError: 'بستن خطا',
+  testModeLong: 'حالت آزمایشی · چیزی رزرو نمی‌شود',
   accessNeeds: <String, String>{
     'wheelchair': 'جایگاه ویلچر',
     'companion': 'صندلی همراه',
@@ -227,6 +318,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountFa,
   seatJustTakenByAnother: _seatJustTakenByAnotherFa,
   peekSecured: _peekSecuredFa,
+  venueMap: _venueMapFa,
+  accessibleStep: _accessibleStepFa,
+  chooseMinMaxGuests: _chooseMinMaxGuestsFa,
+  chooseMore: _chooseMoreFa,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeFa,
   ticketCount: _ticketCountFa,
   findBestSeats: _findBestSeatsFa,
   reselectSeats: _reselectSeatsFa,
@@ -235,5 +331,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeFa,
   holdLapsedSomeTaken: _holdLapsedSomeTakenFa,
   holdLapsedAllTaken: _holdLapsedAllTakenFa,
+  accessibleSections: _accessibleSectionsFa,
+  placesAvailable: _placesAvailableFa,
+  removeTickets: _removeTicketsFa,
+  holdMinutesLeft: _holdMinutesLeftFa,
+  holdSecondsLeft: _holdSecondsLeftFa,
+  holdLapsedBody: _holdLapsedBodyFa,
+  seatsNotRecovered: _seatsNotRecoveredFa,
   continueWithTotal: _continueWithTotalFa,
 );

@@ -30,6 +30,18 @@ String _seatJustTakenByAnotherEl(String label) =>
 String _peekSecuredEl(int count, String total) =>
     '✓ $count εξασφαλίστηκαν · $total. Δεν θα χρεωθείτε ακόμη';
 
+String _venueMapEl(String venue) => 'Χάρτης θέσεων για $venue';
+
+String _accessibleStepEl(int index, int total) => '$index από $total';
+
+String _chooseMinMaxGuestsEl(int min, int max) =>
+    'Επιλέξτε από $min έως $max καλεσμένους.';
+
+String _chooseMoreEl(int count) => 'Επιλέξτε $count ακόμη';
+
+String _seatsHeldForNeedMoreTimeEl(String time) =>
+    'Οι θέσεις σας είναι δεσμευμένες για $time. Χρειάζεστε περισσότερο χρόνο;';
+
 String _ticketCountEl(int count) => switch (pickerPluralCategory('el', count)) {
   PickerPluralCategory.one => '$count εισιτήριο',
   _ => '$count εισιτήρια',
@@ -88,6 +100,48 @@ String _holdLapsedAllTakenEl(int count) => switch (pickerPluralCategory(
     'Η κράτησή σας έληξε όσο λείπατε και αυτές οι θέσεις έχουν ήδη κρατηθεί.',
 };
 
+String _accessibleSectionsEl(int count) =>
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => '$count τμήμα',
+      _ => '$count τμήματα',
+    };
+
+String _placesAvailableEl(int count) =>
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => '$count θέση διαθέσιμη αυτή τη στιγμή',
+      _ => '$count θέσεις διαθέσιμες αυτή τη στιγμή',
+    };
+
+String _removeTicketsEl(int count) =>
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => 'Αφαίρεση $count εισιτηρίου',
+      _ => 'Αφαίρεση $count εισιτηρίων',
+    };
+
+String _holdMinutesLeftEl(int count) =>
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => 'Απομένει $count λεπτό',
+      _ => 'Απομένουν $count λεπτά',
+    };
+
+String _holdSecondsLeftEl(int count) =>
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => 'Απομένει $count δευτερόλεπτο',
+      _ => 'Απομένουν $count δευτερόλεπτα',
+    };
+
+String _holdLapsedBodyEl(int count) =>
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => 'Ήταν δεσμευμένες για $count λεπτό.',
+      _ => 'Ήταν δεσμευμένες για $count λεπτά.',
+    };
+
+String _seatsNotRecoveredEl(int count) =>
+    switch (pickerPluralCategory('el', count)) {
+      PickerPluralCategory.one => '$count θέση δεν ήταν δυνατό να ανακτηθεί',
+      _ => '$count θέσεις δεν ήταν δυνατό να ανακτηθούν',
+    };
+
 String _continueWithTotalEl(String money) => 'Συνέχεια \u00b7 $money';
 
 /// The `el` defaults for the native picker chrome.
@@ -111,7 +165,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   undo: 'Αναίρεση',
   holdAndCheckout: 'Κράτηση θέσεων και πληρωμή',
   poweredBy: 'Με την υποστήριξη του SeatLayer',
-  testMode: 'ΔΟΚΙΜΑΣΤΙΚΗ ΛΕΙΤΟΥΡΓΙΑ',
+  testMode: 'Δοκιμαστική λειτουργία',
   accessibility: 'Επιλογές προσβασιμότητας και χρωμάτων',
   accessibilityTitle: 'Επιλογές προσβασιμότητας και χρωμάτων',
   fitVenue: 'Εμφάνιση όλου του χώρου',
@@ -132,6 +186,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   hideLimitedView: 'Απόκρυψη θέσεων με περιορισμένη θέα',
   colorblindSafe: 'Χρώματα φιλικά προς την αχρωματοψία',
   notAvailable: 'Μη διαθέσιμο',
+  viewGroupTitle: 'ΠΡΟΒΟΛΗ',
   restrictedView: 'Περιορισμένη θέα',
   obstructedView: 'Θέα με εμπόδιο',
   premiumSeat: 'Θέση premium',
@@ -214,6 +269,41 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   removeWord: 'Αφαίρεση',
   floorWord: 'Όροφος',
   totalWord: 'Σύνολο',
+  chooseSeats: 'Επιλέξτε τις θέσεις σας',
+  chooseTickets: 'Επιλέξτε εισιτήρια',
+  placeWord: 'ΘΕΣΗ',
+  ticketWord: 'Εισιτήριο',
+  passport: 'Προφίλ θέσης',
+  venue3D: '3D',
+  venueZone: 'Ζώνη χώρου',
+  venueMapHint:
+      'Οι θέσεις επιλέγονται με τα στοιχεία ελέγχου γύρω από τον χάρτη: τη γραμμή τιμών από πάνω, τα στοιχεία ελέγχου τμημάτων από κάτω και τον πίνακα εισιτηρίων στο κάτω μέρος.',
+  previousSeat: 'Προηγούμενη θέση',
+  nextSeat: 'Επόμενη θέση',
+  orbitMode: 'Περιστροφή χώρου',
+  panMode: 'Μετακίνηση χώρου',
+  openInteractive3dVenue: 'Άνοιγμα διαδραστικού χώρου 3D',
+  showSeatsFor: 'ΕΜΦΑΝΙΣΗ ΘΕΣΕΩΝ ΓΙΑ',
+  accessJumpFirstSection: 'Μετάβαση στο πρώτο τμήμα',
+  accessJumpNextSection: 'Μετάβαση στο επόμενο τμήμα',
+  fewerTickets: 'Λιγότερα εισιτήρια',
+  moreTickets: 'Περισσότερα εισιτήρια',
+  addTickets: 'Προσθήκη εισιτηρίων',
+  noSelectableSeats:
+      'Δεν υπάρχουν διαθέσιμες θέσεις για επιλογή αυτή τη στιγμή.',
+  confirmYourTickets: 'Επιβεβαιώστε τα εισιτήριά σας',
+  seatsSecuredOpeningCheckout: 'Οι θέσεις εξασφαλίστηκαν. Άνοιγμα πληρωμής…',
+  holdInCheckoutTitle: 'Οι θέσεις σας βρίσκονται ήδη στην πληρωμή',
+  holdInCheckoutBody:
+      'Ολοκληρώστε την πληρωμή για να τις κρατήσετε. Για να επιλέξετε άλλες θέσεις, αποδεσμεύστε πρώτα αυτές — επιστρέφουν προς πώληση.',
+  releaseAndChangeSeats: 'Αποδέσμευση και αλλαγή θέσεων',
+  holdAlreadyHeldTitle: 'Οι θέσεις σας είναι ήδη δεσμευμένες',
+  holdAlreadyHeldBody: 'Συνεχίστε στην πληρωμή για να τις κρατήσετε.',
+  accessExpiredTitle: 'Η συνεδρία επιλογής θέσεων έληξε',
+  accessExpiredCopy:
+      'Φορτώστε ξανά τον χάρτη θέσεων για να συνεχίσετε. Οι θέσεις που είναι ήδη στο καλάθι σας παραμένουν δεσμευμένες μέχρι να μηδενιστεί το χρονόμετρο.',
+  dismissError: 'Κλείσιμο σφάλματος',
+  testModeLong: 'Δοκιμαστική λειτουργία · καμία πραγματική κράτηση',
   accessNeeds: <String, String>{
     'wheelchair': 'Θέση αμαξιδίου',
     'companion': 'Θέση συνοδού',
@@ -237,6 +327,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountEl,
   seatJustTakenByAnother: _seatJustTakenByAnotherEl,
   peekSecured: _peekSecuredEl,
+  venueMap: _venueMapEl,
+  accessibleStep: _accessibleStepEl,
+  chooseMinMaxGuests: _chooseMinMaxGuestsEl,
+  chooseMore: _chooseMoreEl,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeEl,
   ticketCount: _ticketCountEl,
   findBestSeats: _findBestSeatsEl,
   reselectSeats: _reselectSeatsEl,
@@ -245,5 +340,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeEl,
   holdLapsedSomeTaken: _holdLapsedSomeTakenEl,
   holdLapsedAllTaken: _holdLapsedAllTakenEl,
+  accessibleSections: _accessibleSectionsEl,
+  placesAvailable: _placesAvailableEl,
+  removeTickets: _removeTicketsEl,
+  holdMinutesLeft: _holdMinutesLeftEl,
+  holdSecondsLeft: _holdSecondsLeftEl,
+  holdLapsedBody: _holdLapsedBodyEl,
+  seatsNotRecovered: _seatsNotRecoveredEl,
   continueWithTotal: _continueWithTotalEl,
 );

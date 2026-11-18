@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherSl(String label) =>
 String _peekSecuredSl(int count, String total) =>
     '✓ $count zagotovljenih · $total. Zdaj še ne bomo bremenili';
 
+String _venueMapSl(String venue) => 'Načrt sedežev – $venue';
+
+String _accessibleStepSl(int index, int total) => '$index od $total';
+
+String _chooseMinMaxGuestsSl(int min, int max) =>
+    'Izberite od $min do $max gostov.';
+
+String _chooseMoreSl(int count) => 'Izberi še $count';
+
+String _seatsHeldForNeedMoreTimeSl(String time) =>
+    'Vaši sedeži so rezervirani še $time. Potrebujete več časa?';
+
 String _ticketCountSl(int count) => switch (pickerPluralCategory('sl', count)) {
   PickerPluralCategory.one => '$count vstopnica',
   PickerPluralCategory.two => '$count vstopnici',
@@ -109,6 +121,65 @@ String _holdLapsedAllTakenSl(int count) => switch (pickerPluralCategory(
     'Vaša rezervacija je potekla, medtem ko vas ni bilo, in ti sedeži so že zasedeni.',
 };
 
+String _accessibleSectionsSl(int count) =>
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one => '$count sektor',
+      PickerPluralCategory.two => '$count sektorja',
+      PickerPluralCategory.few => '$count sektorji',
+      _ => '$count sektorjev',
+    };
+
+String _placesAvailableSl(int count) =>
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one => 'Trenutno je na voljo $count mesto',
+      PickerPluralCategory.two => 'Trenutno sta na voljo $count mesti',
+      PickerPluralCategory.few => 'Trenutno so na voljo $count mesta',
+      _ => 'Trenutno je na voljo $count mest',
+    };
+
+String _removeTicketsSl(int count) =>
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one => 'Odstrani $count vstopnico',
+      PickerPluralCategory.two => 'Odstrani $count vstopnici',
+      PickerPluralCategory.few => 'Odstrani $count vstopnice',
+      _ => 'Odstrani $count vstopnic',
+    };
+
+String _holdMinutesLeftSl(int count) =>
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one => 'Preostala je $count minuta',
+      PickerPluralCategory.two => 'Preostali sta $count minuti',
+      PickerPluralCategory.few => 'Preostale so $count minute',
+      _ => 'Preostalo je $count minut',
+    };
+
+String _holdSecondsLeftSl(int count) =>
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one => 'Preostala je $count sekunda',
+      PickerPluralCategory.two => 'Preostali sta $count sekundi',
+      PickerPluralCategory.few => 'Preostale so $count sekunde',
+      _ => 'Preostalo je $count sekund',
+    };
+
+String _holdLapsedBodySl(int count) =>
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one => 'Rezervirani so bili $count minuto.',
+      PickerPluralCategory.two => 'Rezervirani so bili $count minuti.',
+      PickerPluralCategory.few => 'Rezervirani so bili $count minute.',
+      _ => 'Rezervirani so bili $count minut.',
+    };
+
+String _seatsNotRecoveredSl(int count) =>
+    switch (pickerPluralCategory('sl', count)) {
+      PickerPluralCategory.one =>
+        'Rezervacije za $count sedež ni bilo mogoče obnoviti',
+      PickerPluralCategory.two =>
+        'Rezervacije za $count sedeža ni bilo mogoče obnoviti',
+      PickerPluralCategory.few =>
+        'Rezervacije za $count sedeže ni bilo mogoče obnoviti',
+      _ => 'Rezervacije za $count sedežev ni bilo mogoče obnoviti',
+    };
+
 String _continueWithTotalSl(String money) => 'Nadaljuj \u00b7 $money';
 
 /// The `sl` defaults for the native picker chrome.
@@ -132,7 +203,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   undo: 'Razveljavi',
   holdAndCheckout: 'Rezerviraj sedeže in plačaj',
   poweredBy: 'Poganja SeatLayer',
-  testMode: 'TESTNI NAČIN',
+  testMode: 'Testni način',
   accessibility: 'Dostopnost in barve',
   accessibilityTitle: 'Dostopnost in barve',
   fitVenue: 'Prikaži celotno prizorišče',
@@ -152,6 +223,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   hideLimitedView: 'Skrij sedeže z omejenim pogledom',
   colorblindSafe: 'Barve, prijazne barvni slepoti',
   notAvailable: 'Ni na voljo',
+  viewGroupTitle: 'POGLED',
   restrictedView: 'Omejen pogled',
   obstructedView: 'Zakrit pogled',
   premiumSeat: 'Premium sedež',
@@ -234,6 +306,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   removeWord: 'Odstrani',
   floorWord: 'Nadstropje',
   totalWord: 'Skupaj',
+  chooseSeats: 'Izberite sedeže',
+  chooseTickets: 'Izberite vstopnice',
+  placeWord: 'MESTO',
+  ticketWord: 'Vstopnica',
+  passport: 'Profil sedeža',
+  venue3D: '3D',
+  venueZone: 'Območje prizorišča',
+  venueMapHint:
+      'Sedeže izberete s kontrolniki okoli načrta: s pasom cen nad njim, s kontrolniki sektorjev pod njim in s ploščo z vstopnicami na dnu.',
+  previousSeat: 'Prejšnji sedež',
+  nextSeat: 'Naslednji sedež',
+  orbitMode: 'Zavrti prizorišče',
+  panMode: 'Premakni prizorišče',
+  openInteractive3dVenue: 'Odpri interaktivni 3D-pogled prizorišča',
+  showSeatsFor: 'PRIKAŽI SEDEŽE ZA',
+  accessJumpFirstSection: 'Pojdi na prvi sektor',
+  accessJumpNextSection: 'Pojdi na naslednji sektor',
+  fewerTickets: 'Manj vstopnic',
+  moreTickets: 'Več vstopnic',
+  addTickets: 'Dodaj vstopnice',
+  noSelectableSeats: 'Trenutno ni na voljo nobenega sedeža za izbiro.',
+  confirmYourTickets: 'Potrdi vstopnice',
+  seatsSecuredOpeningCheckout: 'Sedeži so zagotovljeni. Odpiramo plačilo…',
+  holdInCheckoutTitle: 'Plačilo vaših sedežev že poteka',
+  holdInCheckoutBody:
+      'Dokončajte plačilo, da jih obdržite. Če želite izbrati druge sedeže, najprej sprostite te — vrnejo se v prodajo.',
+  releaseAndChangeSeats: 'Sprosti in zamenjaj sedeže',
+  holdAlreadyHeldTitle: 'Vaši sedeži so že rezervirani',
+  holdAlreadyHeldBody: 'Nadaljujte na plačilo, da jih obdržite.',
+  accessExpiredTitle: 'Vaša seja izbire sedežev je potekla',
+  accessExpiredCopy:
+      'Za nadaljevanje znova naložite načrt sedežev. Sedeži, ki so že v vaši košarici, ostanejo rezervirani, dokler se časovnik ne izteče.',
+  dismissError: 'Zapri obvestilo o napaki',
+  testModeLong: 'Testni način · nič se ne rezervira',
   accessNeeds: <String, String>{
     'wheelchair': 'Mesto za voziček',
     'companion': 'Spremljevalni sedež',
@@ -257,6 +363,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountSl,
   seatJustTakenByAnother: _seatJustTakenByAnotherSl,
   peekSecured: _peekSecuredSl,
+  venueMap: _venueMapSl,
+  accessibleStep: _accessibleStepSl,
+  chooseMinMaxGuests: _chooseMinMaxGuestsSl,
+  chooseMore: _chooseMoreSl,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeSl,
   ticketCount: _ticketCountSl,
   findBestSeats: _findBestSeatsSl,
   reselectSeats: _reselectSeatsSl,
@@ -265,5 +376,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeSl,
   holdLapsedSomeTaken: _holdLapsedSomeTakenSl,
   holdLapsedAllTaken: _holdLapsedAllTakenSl,
+  accessibleSections: _accessibleSectionsSl,
+  placesAvailable: _placesAvailableSl,
+  removeTickets: _removeTicketsSl,
+  holdMinutesLeft: _holdMinutesLeftSl,
+  holdSecondsLeft: _holdSecondsLeftSl,
+  holdLapsedBody: _holdLapsedBodySl,
+  seatsNotRecovered: _seatsNotRecoveredSl,
   continueWithTotal: _continueWithTotalSl,
 );

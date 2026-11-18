@@ -611,7 +611,12 @@ A circle of `size.accessibilityControlSize` at `radius.pill`, taking the same
 `color.*.chrome` ground and `color.*.chromeLine` hairline as every other
 floating disc, ink `color.*.text`, glyph drawn at 21, with a soft shadow. With
 filters on, the ink turns to the accent and the disc carries a badge with the
-number of active provisions. The **same disc on both compositions**: it
+number of active provisions. Where a host draws the control as a labelled
+button instead (`compact: false`), the label reads `strings.activeFilters(n)`
+("1 filter", "2 filters") while any filter is on. The round disc's tooltip
+and accessible name with filters on is
+`strings.accessibilityFiltersActive(n)` ("1 accessibility filter active",
+"2 accessibility filters active"). The **same disc on both compositions**: it
 floats on the map either way, so the wide side does not get a labelled button
 of its own, and the wide panel no longer repeats the control under the
 best-seats card. The glyph is **drawn**, never an emoji: a
@@ -639,7 +644,10 @@ switch rows:
   than on seats: `strings.hideLimitedView`, only where some seat is restricted
   or obstructed, and `strings.colorblindSafe`. Neither of them reserves a count
   column.
-- then, **under a group heading** `strings.showSeatsFor` in capitals — 11 /
+- then, **under a group heading** `strings.showSeatsFor`, drawn exactly as
+  given — the string is written in capitals by its translator (English
+  `SHOW SEATS FOR`), and no port upper-cases it in code, which breaks Turkish,
+  Greek and Lithuanian — 11 /
   w700 in `color.*.mutedText`, letter-spaced `size.accessGroupHeadingTracking`
   em (1.1 at 11), inset 8 with 18 above (0 when
   no map switch is drawn) and 4 below — the provisions (next bullet). The
@@ -1169,6 +1177,9 @@ same card over flat glass, which is a correct state, not a degraded one.
    `strings.rowWord`, `strings.seatWord`, `strings.placeWord` — the row eyebrow
    follows the object's own word (Row, Table, Booth). **Print the row with its
    section prefix stripped**, or the card reads `Stalls D · Row Stalls D C`.
+   The eyebrows are drawn upper-cased, but the card's spoken lines say the
+   English place word as "Place", not the locale's capitals "PLACE", which a
+   screen reader may spell out.
 2. **Category band**, minimum height `size.confirmBandHeight`. Ground is the
    **category colour itself, full bleed** — no dot, no tint, no leading rail:
    a nine-point disc beside an eleven-per-cent wash said the colour twice and
@@ -2539,7 +2550,16 @@ height and nothing is subtracted.
 
 **4.3 String overrides.** Every buyer-facing string in `strings` is overridable,
 individually, without replacing the set. Counted strings need one/other forms
-(and the plural categories the platform's own locale rules require). The
+(and the plural categories the platform's own locale rules require); the
+English defaults choose between their `…One` and `…Other` tokens by the same
+plural rule as every other locale, never by `count == 1`. The counted strings
+are `ticketCount`, `seatsFree`, `seatsLeftInSection`, `findBestSeats`,
+`reselectSeats`, `holdLapsedStillFree`, `holdLapsedSomeTaken`,
+`holdLapsedAllTaken`, `removeTickets`, `holdMinutesLeft`, `holdSecondsLeft`,
+`holdLapsedBody`, `seatsNotRecovered`, `accessibleSections`, `placesAvailable`,
+`activeFilters` and `accessibilityFiltersActive`. Sentences only an app draws come from the runtime's app
+strings, with every category its locale's rule produces; a sentence no source
+translates yet (`activeFilters`, `accessibilityFiltersActive`) draws English in every locale. The
 shipped translations carry every form the runtime has (`zero`, `one`, `two`,
 `few`, `many`, `other`) and choose by the locale's CLDR category for the
 count, exactly as the runtime's `Intl.PluralRules` does; a form a dictionary

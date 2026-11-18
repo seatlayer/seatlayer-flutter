@@ -1,7 +1,7 @@
 // Rebuilds `design/locale_strings.json` from the SeatLayer runtime's own
 // dictionaries.
 //
-//   node tool/extract_runtime_locales.mjs <SeatLayer runtime locale directory>
+//   node tool/extract_runtime_locales.mjs <SeatLayer runtime locale directory> <app strings locale directory>
 //   node tool/extract_runtime_locales.mjs --plural-categories [--check]
 //
 // The second form needs no runtime source: it rewrites (or, with --check,
@@ -18,11 +18,19 @@
 // there — but through a file committed HERE, because a generator that reaches
 // outside the package could not be checked by this package's own test suite.
 //
+// The second directory is the runtime's app strings: sentences only the app
+// SDKs draw, one flat JSON object per locale, with counted sentences written
+// as `<key>.<category>` families (see `APP_KEYS` below). Where both sources
+// word the same string, the app strings win: they are written as the app
+// picker draws them.
+//
 // Only the keys the native chrome actually renders are extracted. A Flutter
 // string with no equivalent on the runtime side is simply absent, and keeps
 // its English default at runtime.
 import fs from 'node:fs';
 import path from 'node:path';
+
+import { appStringsProblems } from './app_strings_checks.mjs';
 
 /** Flutter string key -> the runtime dictionary key it is taken from. */
 const KEYS = {
@@ -198,6 +206,70 @@ const KEYS = {
   totalWord: 'picker.total',
 };
 
+/**
+ * Flutter string key -> the app strings key it is taken from. A counted
+ * sentence is named by its family; every category the locale's file has for
+ * it is taken.
+ */
+const APP_KEYS = {
+  chooseSeats: 'chooseSeats',
+  chooseTickets: 'chooseTickets',
+  placeWord: 'placeWord',
+  ticketWord: 'ticketWord',
+  passport: 'passport',
+  venue3D: 'venue3D',
+  venueZone: 'venueZone',
+  venueMap: 'venueMap',
+  venueMapHint: 'venueMapHint',
+  previousSeat: 'previousSeat',
+  nextSeat: 'nextSeat',
+  orbitMode: 'orbitMode',
+  panMode: 'panMode',
+  openInteractive3dVenue: 'openInteractive3dVenue',
+  viewGroupTitle: 'viewGroupTitle',
+  showSeatsFor: 'showSeatsFor',
+  accessibleStep: 'accessibleStep',
+  accessibleSections: 'accessibleSections',
+  accessJumpFirstSection: 'accessJumpFirstSection',
+  accessJumpNextSection: 'accessJumpNextSection',
+  fewerTickets: 'fewerTickets',
+  moreTickets: 'moreTickets',
+  addTickets: 'addTickets',
+  placesAvailable: 'placesAvailable',
+  chooseMinMaxGuests: 'chooseMinMaxGuests',
+  noSelectableSeats: 'noSelectableSeats',
+  chooseMore: 'chooseMore',
+  removeTickets: 'removeTickets',
+  confirmYourTickets: 'confirmYourTickets',
+  seatsSecuredOpeningCheckout: 'seatsSecuredOpeningCheckout',
+  seatsHeldForNeedMoreTime: 'seatsHeldForNeedMoreTime',
+  holdMinutesLeft: 'holdMinutesLeft',
+  holdSecondsLeft: 'holdSecondsLeft',
+  holdLapsedBody: 'holdLapsedBody',
+  seatsNotRecovered: 'seatsNotRecovered',
+  holdInCheckoutTitle: 'holdInCheckoutTitle',
+  holdInCheckoutBody: 'holdInCheckoutBody',
+  releaseAndChangeSeats: 'releaseAndChangeSeats',
+  holdAlreadyHeldTitle: 'holdAlreadyHeldTitle',
+  holdAlreadyHeldBody: 'holdAlreadyHeldBody',
+  accessExpiredTitle: 'accessExpiredTitle',
+  accessExpiredCopy: 'accessExpiredCopy',
+  dismissError: 'dismissError',
+  // The app badge's own short word, in sentence case as drawn; the shared
+  // `picker.testMode` is the web's capitals.
+  testMode: 'testMode',
+  testModeLong: 'testModeLong',
+};
+
+/**
+ * App strings keys deliberately not taken. Each one says why.
+ */
+const IGNORED_APP_KEYS = [
+  // The app's own screen-reader name for its test event; the picker names its
+  // test badge with `testModeLong` instead.
+  'testEventSemantics',
+];
+
 /** One locale file, evaluated as a module with its type annotation removed. */
 async function readDictionary(file) {
   const code = fs
@@ -285,14 +357,32 @@ if (process.argv[2] === '--plural-categories') {
   }
 } else {
   const dir = process.argv[2];
-  if (!dir) {
+  const appDir = process.argv[3];
+  if (!dir || !appDir) {
     throw new Error(
-      'usage: node tool/extract_runtime_locales.mjs <locales dir> | --plural-categories [--check]',
+      'usage: node tool/extract_runtime_locales.mjs <locales dir> <app strings locales dir> | --plural-categories [--check]',
     );
   }
 
+  const runtimeFiles = fs.readdirSync(dir).filter((name) => name.endsWith('.ts')).sort();
+  const appFiles = {};
+  for (const name of fs.readdirSync(appDir).filter((file) => file.endsWith('.json'))) {
+    appFiles[name.replace(/\.json$/, '')] = JSON.parse(fs.readFileSync(path.join(appDir, name), 'utf8'));
+  }
+  // Every gap fails here, named, rather than leaving English in a locale.
+  const problems = appStringsProblems({
+    runtimeLocales: runtimeFiles.map((file) => file.replace(/\.ts$/, '')),
+    appFiles,
+    sourceKeys: Object.values(APP_KEYS),
+    ignoredKeys: IGNORED_APP_KEYS,
+    pluralForms: PLURAL_FORMS,
+  });
+  if (problems.length > 0) {
+    throw new Error(`the app strings do not match the runtime locales:\n  ${problems.join('\n  ')}`);
+  }
+
   const strings = {};
-  for (const file of fs.readdirSync(dir).filter((name) => name.endsWith('.ts')).sort()) {
+  for (const file of runtimeFiles) {
     const dictionary = await readDictionary(path.join(dir, file));
     const entry = {};
     for (const [key, source] of Object.entries(KEYS)) {
@@ -309,13 +399,35 @@ if (process.argv[2] === '--plural-categories') {
         }
       }
     }
-    strings[file.replace(/\.ts$/, '')] = entry;
+    const locale = file.replace(/\.ts$/, '');
+    const app = appFiles[locale];
+    {
+      for (const [key, source] of Object.entries(APP_KEYS)) {
+        if (typeof app[source] === 'string') {
+          entry[key] = app[source];
+          continue;
+        }
+        let counted = false;
+        for (const form of PLURAL_FORMS) {
+          const value = app[`${source}.${form}`];
+          if (typeof value !== 'string') continue;
+          if (!counted) {
+            // The app strings replace the whole family, never mix with it.
+            for (const stale of PLURAL_FORMS) delete entry[`${key}.${stale}`];
+            delete entry[key];
+            counted = true;
+          }
+          entry[`${key}.${form}`] = value;
+        }
+      }
+    }
+    strings[locale] = entry;
   }
 
   fs.writeFileSync(
     'design/locale_strings.json',
     `${JSON.stringify(
-      { source: 'the SeatLayer runtime locale dictionaries', strings },
+      { source: 'the SeatLayer runtime locale dictionaries and app strings', strings },
       null,
       2,
     )}\n`,

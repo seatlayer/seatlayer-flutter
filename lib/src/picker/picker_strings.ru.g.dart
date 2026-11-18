@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherRu(String label) =>
 String _peekSecuredRu(int count, String total) =>
     '✓ $count закреплено · $total. Списания пока не будет';
 
+String _venueMapRu(String venue) => '$venue: схема мест';
+
+String _accessibleStepRu(int index, int total) => '$index из $total';
+
+String _chooseMinMaxGuestsRu(int min, int max) =>
+    'Выберите от $min до $max гостей.';
+
+String _chooseMoreRu(int count) => 'Выберите ещё $count';
+
+String _seatsHeldForNeedMoreTimeRu(String time) =>
+    'Ваши места удерживаются ещё $time. Нужно больше времени?';
+
 String _ticketCountRu(int count) => switch (pickerPluralCategory('ru', count)) {
   PickerPluralCategory.one => '$count билет',
   PickerPluralCategory.few => '$count билета',
@@ -103,6 +115,62 @@ String _holdLapsedAllTakenRu(int count) =>
       _ => 'Ваша бронь истекла, пока вас не было, и эти места уже заняты.',
     };
 
+String _accessibleSectionsRu(int count) =>
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one => '$count сектор',
+      PickerPluralCategory.few => '$count сектора',
+      PickerPluralCategory.many => '$count секторов',
+      _ => '$count сектора',
+    };
+
+String _placesAvailableRu(int count) =>
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one => 'Сейчас доступно $count место',
+      PickerPluralCategory.few => 'Сейчас доступно $count места',
+      PickerPluralCategory.many => 'Сейчас доступно $count мест',
+      _ => 'Сейчас доступно $count места',
+    };
+
+String _removeTicketsRu(int count) =>
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one => 'Удалить $count билет',
+      PickerPluralCategory.few => 'Удалить $count билета',
+      PickerPluralCategory.many => 'Удалить $count билетов',
+      _ => 'Удалить $count билета',
+    };
+
+String _holdMinutesLeftRu(int count) =>
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one => 'Осталась $count минута',
+      PickerPluralCategory.few => 'Осталось $count минуты',
+      PickerPluralCategory.many => 'Осталось $count минут',
+      _ => 'Осталось $count минуты',
+    };
+
+String _holdSecondsLeftRu(int count) =>
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one => 'Осталась $count секунда',
+      PickerPluralCategory.few => 'Осталось $count секунды',
+      PickerPluralCategory.many => 'Осталось $count секунд',
+      _ => 'Осталось $count секунды',
+    };
+
+String _holdLapsedBodyRu(int count) =>
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one => 'Они удерживались $count минуту.',
+      PickerPluralCategory.few => 'Они удерживались $count минуты.',
+      PickerPluralCategory.many => 'Они удерживались $count минут.',
+      _ => 'Они удерживались $count минуты.',
+    };
+
+String _seatsNotRecoveredRu(int count) =>
+    switch (pickerPluralCategory('ru', count)) {
+      PickerPluralCategory.one => '$count место не удалось вернуть',
+      PickerPluralCategory.few => '$count места не удалось вернуть',
+      PickerPluralCategory.many => '$count мест не удалось вернуть',
+      _ => '$count места не удалось вернуть',
+    };
+
 String _continueWithTotalRu(String money) => 'Продолжить \u00b7 $money';
 
 /// The `ru` defaults for the native picker chrome.
@@ -126,7 +194,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRu = SeatLayerPickerStrings(
   undo: 'Отменить',
   holdAndCheckout: 'Забронировать места и оплатить',
   poweredBy: 'Работает на SeatLayer',
-  testMode: 'ТЕСТОВЫЙ РЕЖИМ',
+  testMode: 'Тестовый режим',
   accessibility: 'Доступность и цвета',
   accessibilityTitle: 'Доступность и цвета',
   fitVenue: 'Показать всю площадку',
@@ -146,6 +214,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRu = SeatLayerPickerStrings(
   hideLimitedView: 'Скрыть места с ограниченным обзором',
   colorblindSafe: 'Цвета для дальтоников',
   notAvailable: 'Недоступно',
+  viewGroupTitle: 'ВИД',
   restrictedView: 'Ограниченный обзор',
   obstructedView: 'Обзор перекрыт',
   premiumSeat: 'Премиальное место',
@@ -225,6 +294,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsRu = SeatLayerPickerStrings(
   removeWord: 'Убрать',
   floorWord: 'Этаж',
   totalWord: 'Итого',
+  chooseSeats: 'Выберите свои места',
+  chooseTickets: 'Выберите билеты',
+  placeWord: 'МЕСТО',
+  ticketWord: 'Билет',
+  passport: 'Карточка места',
+  venue3D: '3D',
+  venueZone: 'Зона площадки',
+  venueMapHint:
+      'Места выбираются с помощью элементов управления вокруг схемы: полоса цен над ней, управление секторами под ней и панель билетов внизу.',
+  previousSeat: 'Предыдущее место',
+  nextSeat: 'Следующее место',
+  orbitMode: 'Повернуть площадку',
+  panMode: 'Переместить площадку',
+  openInteractive3dVenue: 'Открыть интерактивный 3D-вид площадки',
+  showSeatsFor: 'ПОКАЗАТЬ МЕСТА:',
+  accessJumpFirstSection: 'Перейти к первому сектору',
+  accessJumpNextSection: 'Перейти к следующему сектору',
+  fewerTickets: 'Меньше билетов',
+  moreTickets: 'Больше билетов',
+  addTickets: 'Добавить билеты',
+  noSelectableSeats: 'Сейчас нет мест, доступных для выбора.',
+  confirmYourTickets: 'Подтвердите свои билеты',
+  seatsSecuredOpeningCheckout: 'Места закреплены. Открываем оплату…',
+  holdInCheckoutTitle: 'Ваши места уже в процессе оплаты',
+  holdInCheckoutBody:
+      'Завершите оплату, чтобы сохранить их. Чтобы выбрать другие места, сначала освободите эти — они вернутся в продажу.',
+  releaseAndChangeSeats: 'Освободить и сменить места',
+  holdAlreadyHeldTitle: 'Ваши места уже удерживаются',
+  holdAlreadyHeldBody: 'Перейдите к оплате, чтобы сохранить их.',
+  accessExpiredTitle: 'Ваш сеанс выбора мест истёк',
+  accessExpiredCopy:
+      'Обновите схему мест, чтобы продолжить. Места, которые уже в корзине, остаются за вами, пока не закончится таймер.',
+  dismissError: 'Закрыть сообщение об ошибке',
+  testModeLong: 'Тестовый режим · ничего не бронируется',
   accessNeeds: <String, String>{
     'wheelchair': 'Место для коляски',
     'companion': 'Место сопровождающего',
@@ -248,6 +351,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsRu = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountRu,
   seatJustTakenByAnother: _seatJustTakenByAnotherRu,
   peekSecured: _peekSecuredRu,
+  venueMap: _venueMapRu,
+  accessibleStep: _accessibleStepRu,
+  chooseMinMaxGuests: _chooseMinMaxGuestsRu,
+  chooseMore: _chooseMoreRu,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeRu,
   ticketCount: _ticketCountRu,
   findBestSeats: _findBestSeatsRu,
   reselectSeats: _reselectSeatsRu,
@@ -256,5 +364,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsRu = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeRu,
   holdLapsedSomeTaken: _holdLapsedSomeTakenRu,
   holdLapsedAllTaken: _holdLapsedAllTakenRu,
+  accessibleSections: _accessibleSectionsRu,
+  placesAvailable: _placesAvailableRu,
+  removeTickets: _removeTicketsRu,
+  holdMinutesLeft: _holdMinutesLeftRu,
+  holdSecondsLeft: _holdSecondsLeftRu,
+  holdLapsedBody: _holdLapsedBodyRu,
+  seatsNotRecovered: _seatsNotRecoveredRu,
   continueWithTotal: _continueWithTotalRu,
 );

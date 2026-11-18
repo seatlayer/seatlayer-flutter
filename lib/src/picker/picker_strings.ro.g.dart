@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherRo(String label) =>
 String _peekSecuredRo(int count, String total) =>
     '✓ $count asigurate · $total. Încă nu vei fi taxat';
 
+String _venueMapRo(String venue) => 'Harta locurilor – $venue';
+
+String _accessibleStepRo(int index, int total) => '$index din $total';
+
+String _chooseMinMaxGuestsRo(int min, int max) =>
+    'Alege un număr de invitați între $min și $max.';
+
+String _chooseMoreRo(int count) => 'Alege încă $count';
+
+String _seatsHeldForNeedMoreTimeRo(String time) =>
+    'Locurile tale sunt rezervate încă $time. Ai nevoie de mai mult timp?';
+
 String _ticketCountRo(int count) => switch (pickerPluralCategory('ro', count)) {
   PickerPluralCategory.one => '$count bilet',
   PickerPluralCategory.few => '$count bilete',
@@ -97,6 +109,55 @@ String _holdLapsedAllTakenRo(int count) => switch (pickerPluralCategory(
     'Rezervarea ta a expirat cât ai fost plecat, iar aceste locuri au fost deja ocupate.',
 };
 
+String _accessibleSectionsRo(int count) =>
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => '$count sector',
+      PickerPluralCategory.few => '$count sectoare',
+      _ => '$count de sectoare',
+    };
+
+String _placesAvailableRo(int count) =>
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => 'Momentan este disponibil $count loc',
+      PickerPluralCategory.few => 'Momentan sunt disponibile $count locuri',
+      _ => 'Momentan sunt disponibile $count de locuri',
+    };
+
+String _removeTicketsRo(int count) =>
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => 'Elimină $count bilet',
+      PickerPluralCategory.few => 'Elimină $count bilete',
+      _ => 'Elimină $count de bilete',
+    };
+
+String _holdMinutesLeftRo(int count) =>
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => 'A mai rămas $count minut',
+      PickerPluralCategory.few => 'Au mai rămas $count minute',
+      _ => 'Au mai rămas $count de minute',
+    };
+
+String _holdSecondsLeftRo(int count) =>
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => 'A mai rămas $count secundă',
+      PickerPluralCategory.few => 'Au mai rămas $count secunde',
+      _ => 'Au mai rămas $count de secunde',
+    };
+
+String _holdLapsedBodyRo(int count) =>
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => 'Au fost rezervate timp de $count minut.',
+      PickerPluralCategory.few => 'Au fost rezervate timp de $count minute.',
+      _ => 'Au fost rezervate timp de $count de minute.',
+    };
+
+String _seatsNotRecoveredRo(int count) =>
+    switch (pickerPluralCategory('ro', count)) {
+      PickerPluralCategory.one => '$count loc nu a putut fi recuperat',
+      PickerPluralCategory.few => '$count locuri nu au putut fi recuperate',
+      _ => '$count de locuri nu au putut fi recuperate',
+    };
+
 String _continueWithTotalRo(String money) => 'Continuă \u00b7 $money';
 
 /// The `ro` defaults for the native picker chrome.
@@ -120,7 +181,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   undo: 'Anulează',
   holdAndCheckout: 'Rezervă locurile și plătește',
   poweredBy: 'Susținut de SeatLayer',
-  testMode: 'MOD DE TESTARE',
+  testMode: 'Mod de testare',
   accessibility: 'Opțiuni de accesibilitate și culoare',
   accessibilityTitle: 'Opțiuni de accesibilitate și culoare',
   fitVenue: 'Afișează întreaga locație',
@@ -141,6 +202,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   hideLimitedView: 'Ascunde locurile cu vizibilitate limitată',
   colorblindSafe: 'Culori potrivite pentru daltonism',
   notAvailable: 'Indisponibil',
+  viewGroupTitle: 'AFIȘARE',
   restrictedView: 'Vizibilitate limitată',
   obstructedView: 'Vizibilitate obstrucționată',
   premiumSeat: 'Loc premium',
@@ -224,6 +286,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   removeWord: 'Elimină',
   floorWord: 'Etaj',
   totalWord: 'Total',
+  chooseSeats: 'Alege-ți locurile',
+  chooseTickets: 'Alege bilete',
+  placeWord: 'LOC',
+  ticketWord: 'Bilet',
+  passport: 'Fișa locului',
+  venue3D: '3D',
+  venueZone: 'Zona locației',
+  venueMapHint:
+      'Locurile se aleg cu comenzile din jurul hărții: bara de prețuri deasupra, comenzile pentru sectoare dedesubt și panoul de bilete în partea de jos.',
+  previousSeat: 'Locul anterior',
+  nextSeat: 'Locul următor',
+  orbitMode: 'Rotește locația',
+  panMode: 'Mută locația',
+  openInteractive3dVenue: 'Deschide vizualizarea 3D interactivă a locației',
+  showSeatsFor: 'ARATĂ LOCURI PENTRU',
+  accessJumpFirstSection: 'Sari la primul sector',
+  accessJumpNextSection: 'Sari la sectorul următor',
+  fewerTickets: 'Mai puține bilete',
+  moreTickets: 'Mai multe bilete',
+  addTickets: 'Adaugă bilete',
+  noSelectableSeats: 'Momentan nu există locuri disponibile pentru selectare.',
+  confirmYourTickets: 'Confirmă biletele',
+  seatsSecuredOpeningCheckout: 'Locuri asigurate. Deschidem plata…',
+  holdInCheckoutTitle: 'Locurile tale sunt deja în curs de plată',
+  holdInCheckoutBody:
+      'Finalizează plata ca să le păstrezi. Ca să alegi alte locuri, eliberează-le mai întâi pe acestea — revin la vânzare.',
+  releaseAndChangeSeats: 'Eliberează și schimbă locurile',
+  holdAlreadyHeldTitle: 'Locurile tale sunt deja rezervate',
+  holdAlreadyHeldBody: 'Continuă spre plată ca să le păstrezi.',
+  accessExpiredTitle: 'Sesiunea ta de alegere a locurilor a expirat',
+  accessExpiredCopy:
+      'Reîncarcă harta locurilor ca să continui. Locurile deja aflate în coșul tău rămân rezervate până expiră cronometrul.',
+  dismissError: 'Închide eroarea',
+  testModeLong: 'Mod de testare · nu se rezervă nimic',
   accessNeeds: <String, String>{
     'wheelchair': 'Spațiu pentru scaun cu rotile',
     'companion': 'Loc pentru însoțitor',
@@ -247,6 +343,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountRo,
   seatJustTakenByAnother: _seatJustTakenByAnotherRo,
   peekSecured: _peekSecuredRo,
+  venueMap: _venueMapRo,
+  accessibleStep: _accessibleStepRo,
+  chooseMinMaxGuests: _chooseMinMaxGuestsRo,
+  chooseMore: _chooseMoreRo,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeRo,
   ticketCount: _ticketCountRo,
   findBestSeats: _findBestSeatsRo,
   reselectSeats: _reselectSeatsRo,
@@ -255,5 +356,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeRo,
   holdLapsedSomeTaken: _holdLapsedSomeTakenRo,
   holdLapsedAllTaken: _holdLapsedAllTakenRo,
+  accessibleSections: _accessibleSectionsRo,
+  placesAvailable: _placesAvailableRo,
+  removeTickets: _removeTicketsRo,
+  holdMinutesLeft: _holdMinutesLeftRo,
+  holdSecondsLeft: _holdSecondsLeftRo,
+  holdLapsedBody: _holdLapsedBodyRo,
+  seatsNotRecovered: _seatsNotRecoveredRo,
   continueWithTotal: _continueWithTotalRo,
 );

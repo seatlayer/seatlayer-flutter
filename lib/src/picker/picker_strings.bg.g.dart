@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherBg(String label) =>
 String _peekSecuredBg(int count, String total) =>
     '✓ $count запазени · $total. Още няма да ви таксуваме';
 
+String _venueMapBg(String venue) => 'План на местата – $venue';
+
+String _accessibleStepBg(int index, int total) => '$index от $total';
+
+String _chooseMinMaxGuestsBg(int min, int max) =>
+    'Изберете между $min и $max гости.';
+
+String _chooseMoreBg(int count) => 'Избери още $count';
+
+String _seatsHeldForNeedMoreTimeBg(String time) =>
+    'Местата ви са запазени за още $time. Нужно ли ви е повече време?';
+
 String _ticketCountBg(int count) => switch (pickerPluralCategory('bg', count)) {
   PickerPluralCategory.one => '$count билет',
   _ => '$count билета',
@@ -86,6 +98,48 @@ String _holdLapsedAllTakenBg(int count) => switch (pickerPluralCategory(
   _ => 'Резервацията ви изтече, докато ви нямаше, и тези места вече са заети.',
 };
 
+String _accessibleSectionsBg(int count) =>
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => '$count сектор',
+      _ => '$count сектора',
+    };
+
+String _placesAvailableBg(int count) =>
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => 'В момента е налично $count място',
+      _ => 'В момента са налични $count места',
+    };
+
+String _removeTicketsBg(int count) =>
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => 'Премахни $count билет',
+      _ => 'Премахни $count билета',
+    };
+
+String _holdMinutesLeftBg(int count) =>
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => 'Остава $count минута',
+      _ => 'Остават $count минути',
+    };
+
+String _holdSecondsLeftBg(int count) =>
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => 'Остава $count секунда',
+      _ => 'Остават $count секунди',
+    };
+
+String _holdLapsedBodyBg(int count) =>
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => 'Бяха запазени за $count минута.',
+      _ => 'Бяха запазени за $count минути.',
+    };
+
+String _seatsNotRecoveredBg(int count) =>
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => '$count място не можа да бъде възстановено',
+      _ => '$count места не можаха да бъдат възстановени',
+    };
+
 String _continueWithTotalBg(String money) => 'Продължи \u00b7 $money';
 
 /// The `bg` defaults for the native picker chrome.
@@ -109,7 +163,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   undo: 'Отмени',
   holdAndCheckout: 'Запази местата и плати',
   poweredBy: 'С технологията на SeatLayer',
-  testMode: 'ТЕСТОВ РЕЖИМ',
+  testMode: 'Тестов режим',
   accessibility: 'Достъпност и цветове',
   accessibilityTitle: 'Достъпност и цветове',
   fitVenue: 'Покажи цялото място',
@@ -129,6 +183,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   hideLimitedView: 'Скрий местата с ограничена видимост',
   colorblindSafe: 'Цветове за далтонисти',
   notAvailable: 'Не е налично',
+  viewGroupTitle: 'ИЗГЛЕД',
   restrictedView: 'Ограничена видимост',
   obstructedView: 'Закрита видимост',
   premiumSeat: 'Премиум място',
@@ -209,6 +264,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   removeWord: 'Премахни',
   floorWord: 'Етаж',
   totalWord: 'Общо',
+  chooseSeats: 'Изберете местата си',
+  chooseTickets: 'Изберете билети',
+  placeWord: 'МЯСТО',
+  ticketWord: 'Билет',
+  passport: 'Профил на мястото',
+  venue3D: '3D',
+  venueZone: 'Зона на обекта',
+  venueMapHint:
+      'Местата се избират с контролите около плана: лентата с цени над него, контролите за секторите под него и панелът с билети най-долу.',
+  previousSeat: 'Предишно място',
+  nextSeat: 'Следващо място',
+  orbitMode: 'Завърти залата',
+  panMode: 'Премести залата',
+  openInteractive3dVenue: 'Отвори интерактивния 3D изглед на обекта',
+  showSeatsFor: 'ПОКАЖИ МЕСТА ЗА',
+  accessJumpFirstSection: 'Към първия сектор',
+  accessJumpNextSection: 'Към следващия сектор',
+  fewerTickets: 'По-малко билети',
+  moreTickets: 'Повече билети',
+  addTickets: 'Добави билети',
+  noSelectableSeats: 'В момента няма налични места за избор.',
+  confirmYourTickets: 'Потвърди билетите си',
+  seatsSecuredOpeningCheckout: 'Местата са запазени. Отваряме плащането…',
+  holdInCheckoutTitle: 'Местата ви вече са в процес на плащане',
+  holdInCheckoutBody:
+      'Завършете плащането, за да ги запазите. За да изберете други места, първо освободете тези — те се връщат в продажба.',
+  releaseAndChangeSeats: 'Освободи и смени местата',
+  holdAlreadyHeldTitle: 'Местата ви вече са запазени',
+  holdAlreadyHeldBody: 'Продължете към плащане, за да ги запазите.',
+  accessExpiredTitle: 'Сесията ви за избор на места изтече',
+  accessExpiredCopy:
+      'Презаредете плана на местата, за да продължите. Местата, които вече са в количката ви, остават запазени, докато таймерът изтече.',
+  dismissError: 'Затвори съобщението за грешка',
+  testModeLong: 'Тестов режим · нищо не се резервира',
   accessNeeds: <String, String>{
     'wheelchair': 'Място за количка',
     'companion': 'Място за придружител',
@@ -232,6 +321,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountBg,
   seatJustTakenByAnother: _seatJustTakenByAnotherBg,
   peekSecured: _peekSecuredBg,
+  venueMap: _venueMapBg,
+  accessibleStep: _accessibleStepBg,
+  chooseMinMaxGuests: _chooseMinMaxGuestsBg,
+  chooseMore: _chooseMoreBg,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeBg,
   ticketCount: _ticketCountBg,
   findBestSeats: _findBestSeatsBg,
   reselectSeats: _reselectSeatsBg,
@@ -240,5 +334,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeBg,
   holdLapsedSomeTaken: _holdLapsedSomeTakenBg,
   holdLapsedAllTaken: _holdLapsedAllTakenBg,
+  accessibleSections: _accessibleSectionsBg,
+  placesAvailable: _placesAvailableBg,
+  removeTickets: _removeTicketsBg,
+  holdMinutesLeft: _holdMinutesLeftBg,
+  holdSecondsLeft: _holdSecondsLeftBg,
+  holdLapsedBody: _holdLapsedBodyBg,
+  seatsNotRecovered: _seatsNotRecoveredBg,
   continueWithTotal: _continueWithTotalBg,
 );

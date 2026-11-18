@@ -30,6 +30,18 @@ String _seatJustTakenByAnotherNl(String label) =>
 String _peekSecuredNl(int count, String total) =>
     '✓ $count vastgelegd · $total. Je betaalt nu nog niets';
 
+String _venueMapNl(String venue) => 'Zaalplattegrond van $venue';
+
+String _accessibleStepNl(int index, int total) => '$index van $total';
+
+String _chooseMinMaxGuestsNl(int min, int max) =>
+    'Kies tussen $min en $max gasten.';
+
+String _chooseMoreNl(int count) => 'Nog $count kiezen';
+
+String _seatsHeldForNeedMoreTimeNl(String time) =>
+    'Je plaatsen worden nog $time voor je vastgehouden. Meer tijd nodig?';
+
 String _ticketCountNl(int count) => switch (pickerPluralCategory('nl', count)) {
   PickerPluralCategory.one => '$count ticket',
   _ => '$count tickets',
@@ -88,6 +100,51 @@ String _holdLapsedAllTakenNl(int count) => switch (pickerPluralCategory(
     'Je reservering is verlopen terwijl je weg was en die plaatsen zijn inmiddels bezet.',
 };
 
+String _accessibleSectionsNl(int count) =>
+    switch (pickerPluralCategory('nl', count)) {
+      PickerPluralCategory.one => '$count vak',
+      _ => '$count vakken',
+    };
+
+String _placesAvailableNl(int count) =>
+    switch (pickerPluralCategory('nl', count)) {
+      PickerPluralCategory.one => '$count plaats nu beschikbaar',
+      _ => '$count plaatsen nu beschikbaar',
+    };
+
+String _removeTicketsNl(int count) =>
+    switch (pickerPluralCategory('nl', count)) {
+      PickerPluralCategory.one => '$count ticket verwijderen',
+      _ => '$count tickets verwijderen',
+    };
+
+String _holdMinutesLeftNl(int count) =>
+    switch (pickerPluralCategory('nl', count)) {
+      PickerPluralCategory.one => 'Nog $count minuut',
+      _ => 'Nog $count minuten',
+    };
+
+String _holdSecondsLeftNl(int count) =>
+    switch (pickerPluralCategory('nl', count)) {
+      PickerPluralCategory.one => 'Nog $count seconde',
+      _ => 'Nog $count seconden',
+    };
+
+String _holdLapsedBodyNl(int count) => switch (pickerPluralCategory(
+  'nl',
+  count,
+)) {
+  PickerPluralCategory.one => 'Ze werden $count minuut voor je vastgehouden.',
+  _ => 'Ze werden $count minuten voor je vastgehouden.',
+};
+
+String _seatsNotRecoveredNl(int count) =>
+    switch (pickerPluralCategory('nl', count)) {
+      PickerPluralCategory.one =>
+        '$count plaats kon niet opnieuw worden vastgelegd',
+      _ => '$count plaatsen konden niet opnieuw worden vastgelegd',
+    };
+
 String _continueWithTotalNl(String money) => 'Doorgaan \u00b7 $money';
 
 /// The `nl` defaults for the native picker chrome.
@@ -111,7 +168,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   undo: 'Ongedaan maken',
   holdAndCheckout: 'Plaatsen vastleggen & afrekenen',
   poweredBy: 'Mogelijk gemaakt door SeatLayer',
-  testMode: 'TESTMODUS',
+  testMode: 'Testmodus',
   accessibility: 'Toegankelijkheid en kleuren',
   accessibilityTitle: 'Toegankelijkheid en kleuren',
   fitVenue: 'Hele locatie tonen',
@@ -132,6 +189,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   hideLimitedView: 'Plaatsen met beperkt zicht verbergen',
   colorblindSafe: 'Kleurenblindvriendelijke kleuren',
   notAvailable: 'Niet beschikbaar',
+  viewGroupTitle: 'WEERGAVE',
   restrictedView: 'Beperkt zicht',
   obstructedView: 'Belemmerd zicht',
   premiumSeat: 'Premium plaats',
@@ -214,6 +272,41 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   removeWord: 'Verwijderen',
   floorWord: 'Verdieping',
   totalWord: 'Totaal',
+  chooseSeats: 'Kies je plaatsen',
+  chooseTickets: 'Tickets kiezen',
+  placeWord: 'PLAATS',
+  ticketWord: 'Ticket',
+  passport: 'Plaatsprofiel',
+  venue3D: '3D',
+  venueZone: 'Zone in de zaal',
+  venueMapHint:
+      'Je kiest plaatsen met de knoppen rond de plattegrond: de prijsbalk erboven, de vakknoppen eronder en het ticketpaneel onderaan.',
+  previousSeat: 'Vorige plaats',
+  nextSeat: 'Volgende plaats',
+  orbitMode: 'Zaal draaien',
+  panMode: 'Zaal verschuiven',
+  openInteractive3dVenue: 'Interactieve 3D-weergave van de zaal openen',
+  showSeatsFor: 'PLAATSEN TONEN VOOR',
+  accessJumpFirstSection: 'Ga naar het eerste vak',
+  accessJumpNextSection: 'Ga naar het volgende vak',
+  fewerTickets: 'Minder tickets',
+  moreTickets: 'Meer tickets',
+  addTickets: 'Tickets toevoegen',
+  noSelectableSeats: 'Er zijn op dit moment geen plaatsen om te kiezen.',
+  confirmYourTickets: 'Bevestig je tickets',
+  seatsSecuredOpeningCheckout:
+      'Plaatsen vastgelegd. Betaalpagina wordt geopend…',
+  holdInCheckoutTitle: 'Je plaatsen zijn al bij het afrekenen',
+  holdInCheckoutBody:
+      'Rond het afrekenen af om ze te houden. Wil je andere plaatsen kiezen? Geef deze dan eerst vrij — ze komen weer in de verkoop.',
+  releaseAndChangeSeats: 'Vrijgeven en plaatsen wijzigen',
+  holdAlreadyHeldTitle: 'Je plaatsen zijn al gereserveerd',
+  holdAlreadyHeldBody: 'Ga door naar afrekenen om ze te houden.',
+  accessExpiredTitle: 'Je sessie is verlopen',
+  accessExpiredCopy:
+      'Laad de zaalplattegrond opnieuw om verder te gaan. Plaatsen die al in je winkelwagen zitten, blijven vastgehouden tot de timer afloopt.',
+  dismissError: 'Foutmelding sluiten',
+  testModeLong: 'Testmodus · boekt niets',
   accessNeeds: <String, String>{
     'wheelchair': 'Rolstoelplaats',
     'companion': 'Begeleidersplaats',
@@ -237,6 +330,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountNl,
   seatJustTakenByAnother: _seatJustTakenByAnotherNl,
   peekSecured: _peekSecuredNl,
+  venueMap: _venueMapNl,
+  accessibleStep: _accessibleStepNl,
+  chooseMinMaxGuests: _chooseMinMaxGuestsNl,
+  chooseMore: _chooseMoreNl,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeNl,
   ticketCount: _ticketCountNl,
   findBestSeats: _findBestSeatsNl,
   reselectSeats: _reselectSeatsNl,
@@ -245,5 +343,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeNl,
   holdLapsedSomeTaken: _holdLapsedSomeTakenNl,
   holdLapsedAllTaken: _holdLapsedAllTakenNl,
+  accessibleSections: _accessibleSectionsNl,
+  placesAvailable: _placesAvailableNl,
+  removeTickets: _removeTicketsNl,
+  holdMinutesLeft: _holdMinutesLeftNl,
+  holdSecondsLeft: _holdSecondsLeftNl,
+  holdLapsedBody: _holdLapsedBodyNl,
+  seatsNotRecovered: _seatsNotRecoveredNl,
   continueWithTotal: _continueWithTotalNl,
 );

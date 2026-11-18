@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherHr(String label) =>
 String _peekSecuredHr(int count, String total) =>
     '✓ $count osigurano · $total. Još vas nećemo teretiti';
 
+String _venueMapHr(String venue) => 'Plan mjesta – $venue';
+
+String _accessibleStepHr(int index, int total) => '$index od $total';
+
+String _chooseMinMaxGuestsHr(int min, int max) =>
+    'Odaberite između $min i $max gostiju.';
+
+String _chooseMoreHr(int count) => 'Odaberi još $count';
+
+String _seatsHeldForNeedMoreTimeHr(String time) =>
+    'Vaša su mjesta rezervirana još $time. Trebate li više vremena?';
+
 String _ticketCountHr(int count) => switch (pickerPluralCategory('hr', count)) {
   PickerPluralCategory.one => '$count ulaznica',
   PickerPluralCategory.few => '$count ulaznice',
@@ -98,6 +110,55 @@ String _holdLapsedAllTakenHr(int count) => switch (pickerPluralCategory(
     'Vaša je rezervacija istekla dok vas nije bilo, a ta su mjesta već zauzeta.',
 };
 
+String _accessibleSectionsHr(int count) =>
+    switch (pickerPluralCategory('hr', count)) {
+      PickerPluralCategory.one => '$count sektor',
+      PickerPluralCategory.few => '$count sektora',
+      _ => '$count sektora',
+    };
+
+String _placesAvailableHr(int count) =>
+    switch (pickerPluralCategory('hr', count)) {
+      PickerPluralCategory.one => 'Trenutno je dostupno $count mjesto',
+      PickerPluralCategory.few => 'Trenutno su dostupna $count mjesta',
+      _ => 'Trenutno je dostupno $count mjesta',
+    };
+
+String _removeTicketsHr(int count) =>
+    switch (pickerPluralCategory('hr', count)) {
+      PickerPluralCategory.one => 'Ukloni $count ulaznicu',
+      PickerPluralCategory.few => 'Ukloni $count ulaznice',
+      _ => 'Ukloni $count ulaznica',
+    };
+
+String _holdMinutesLeftHr(int count) =>
+    switch (pickerPluralCategory('hr', count)) {
+      PickerPluralCategory.one => 'Preostala je $count minuta',
+      PickerPluralCategory.few => 'Preostale su $count minute',
+      _ => 'Preostalo je $count minuta',
+    };
+
+String _holdSecondsLeftHr(int count) =>
+    switch (pickerPluralCategory('hr', count)) {
+      PickerPluralCategory.one => 'Preostala je $count sekunda',
+      PickerPluralCategory.few => 'Preostale su $count sekunde',
+      _ => 'Preostalo je $count sekundi',
+    };
+
+String _holdLapsedBodyHr(int count) =>
+    switch (pickerPluralCategory('hr', count)) {
+      PickerPluralCategory.one => 'Bila su rezervirana $count minutu.',
+      PickerPluralCategory.few => 'Bila su rezervirana $count minute.',
+      _ => 'Bila su rezervirana $count minuta.',
+    };
+
+String _seatsNotRecoveredHr(int count) =>
+    switch (pickerPluralCategory('hr', count)) {
+      PickerPluralCategory.one => '$count mjesto nije bilo moguće vratiti',
+      PickerPluralCategory.few => '$count mjesta nije bilo moguće vratiti',
+      _ => '$count mjesta nije bilo moguće vratiti',
+    };
+
 String _continueWithTotalHr(String money) => 'Nastavi \u00b7 $money';
 
 /// The `hr` defaults for the native picker chrome.
@@ -121,7 +182,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   undo: 'Poništi',
   holdAndCheckout: 'Rezerviraj mjesta i plati',
   poweredBy: 'Pokreće SeatLayer',
-  testMode: 'TESTNI NAČIN',
+  testMode: 'Testni način',
   accessibility: 'Pristupačnost i boje',
   accessibilityTitle: 'Pristupačnost i boje',
   fitVenue: 'Prikaži cijelo mjesto održavanja',
@@ -142,6 +203,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   hideLimitedView: 'Sakrij mjesta s ograničenim pogledom',
   colorblindSafe: 'Boje prilagođene daltonizmu',
   notAvailable: 'Nije dostupno',
+  viewGroupTitle: 'PRIKAZ',
   restrictedView: 'Ograničen pogled',
   obstructedView: 'Zaklonjen pogled',
   premiumSeat: 'Premium mjesto',
@@ -222,6 +284,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   removeWord: 'Ukloni',
   floorWord: 'Kat',
   totalWord: 'Ukupno',
+  chooseSeats: 'Odaberite svoja mjesta',
+  chooseTickets: 'Odaberite ulaznice',
+  placeWord: 'MJESTO',
+  ticketWord: 'Ulaznica',
+  passport: 'Profil mjesta',
+  venue3D: '3D',
+  venueZone: 'Zona prostora',
+  venueMapHint:
+      'Mjesta se biraju kontrolama oko plana: trakom s cijenama iznad njega, kontrolama sektora ispod njega i pločom s ulaznicama na dnu.',
+  previousSeat: 'Prethodno mjesto',
+  nextSeat: 'Sljedeće mjesto',
+  orbitMode: 'Rotiraj prostor',
+  panMode: 'Pomakni prostor',
+  openInteractive3dVenue: 'Otvori interaktivni 3D prikaz prostora',
+  showSeatsFor: 'PRIKAŽI MJESTA ZA',
+  accessJumpFirstSection: 'Idi na prvi sektor',
+  accessJumpNextSection: 'Idi na sljedeći sektor',
+  fewerTickets: 'Manje ulaznica',
+  moreTickets: 'Više ulaznica',
+  addTickets: 'Dodaj ulaznice',
+  noSelectableSeats: 'Trenutno nema dostupnih mjesta za odabir.',
+  confirmYourTickets: 'Potvrdi ulaznice',
+  seatsSecuredOpeningCheckout: 'Mjesta su osigurana. Otvaramo plaćanje…',
+  holdInCheckoutTitle: 'Plaćanje vaših mjesta već je u tijeku',
+  holdInCheckoutBody:
+      'Dovršite plaćanje kako biste ih zadržali. Za odabir drugih mjesta najprije oslobodite ova — vraćaju se u prodaju.',
+  releaseAndChangeSeats: 'Oslobodi i promijeni mjesta',
+  holdAlreadyHeldTitle: 'Vaša su mjesta već rezervirana',
+  holdAlreadyHeldBody: 'Nastavite na plaćanje kako biste ih zadržali.',
+  accessExpiredTitle: 'Vaša je sesija odabira mjesta istekla',
+  accessExpiredCopy:
+      'Ponovno učitajte plan mjesta za nastavak. Mjesta koja su već u vašoj košarici ostaju rezervirana dok ne istekne odbrojavanje.',
+  dismissError: 'Zatvori obavijest o pogrešci',
+  testModeLong: 'Testni način · ništa se ne rezervira',
   accessNeeds: <String, String>{
     'wheelchair': 'Mjesto za kolica',
     'companion': 'Mjesto za pratnju',
@@ -245,6 +341,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountHr,
   seatJustTakenByAnother: _seatJustTakenByAnotherHr,
   peekSecured: _peekSecuredHr,
+  venueMap: _venueMapHr,
+  accessibleStep: _accessibleStepHr,
+  chooseMinMaxGuests: _chooseMinMaxGuestsHr,
+  chooseMore: _chooseMoreHr,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeHr,
   ticketCount: _ticketCountHr,
   findBestSeats: _findBestSeatsHr,
   reselectSeats: _reselectSeatsHr,
@@ -253,5 +354,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeHr,
   holdLapsedSomeTaken: _holdLapsedSomeTakenHr,
   holdLapsedAllTaken: _holdLapsedAllTakenHr,
+  accessibleSections: _accessibleSectionsHr,
+  placesAvailable: _placesAvailableHr,
+  removeTickets: _removeTicketsHr,
+  holdMinutesLeft: _holdMinutesLeftHr,
+  holdSecondsLeft: _holdSecondsLeftHr,
+  holdLapsedBody: _holdLapsedBodyHr,
+  seatsNotRecovered: _seatsNotRecoveredHr,
   continueWithTotal: _continueWithTotalHr,
 );
