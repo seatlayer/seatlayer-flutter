@@ -1896,7 +1896,13 @@ Label ladder, in priority order:
 5. opening checkout → disabled, **no spinner** (words only; the seats are held),
    `strings.seatsSecuredOpeningCheckout`; still busy, so the button stays down
    (the hold has succeeded by now, so the sentence says so; `strings.openingCheckout`
-   stays a public string for a host that composes its own button)
+   stays a public string for a host that composes its own button). Strings
+   built with `openingCheckout` and without `seatsSecuredOpeningCheckout` draw
+   `openingCheckout` here, so a host's earlier wording for this state still
+   shows.
+   Both readings carry `busyInWords: true`, so a host that rebuilds one or
+   draws its own button can tell them apart; a busy reading without it draws a
+   spinner beside its label.
 6. the selection breaks the event's rules → disabled,
    `strings.chooseMore` / `strings.removeTickets…` / `strings.adjustSelection`
 7. **an empty cart on a surface that may offer the finder** → ENABLED,
@@ -2452,11 +2458,13 @@ The stepper is disabled in venue mode.
 the glass, top-end of the scene, on the phone and on wide — `strings.orbitMode`
 | `strings.panMode`, the selected half filled with
 `color.dark.immersiveModeSelected` at `radius.pill`. The pair is inset
-`size.immersiveModePairPadding`; each half is
-`size.immersiveModeSegmentHeight` tall with
+`size.immersiveModePairPadding`; each half is at least
+`size.immersiveModeSegmentHeight` tall (it grows with the text rather than
+clipping it at large text sizes) with
 `size.immersiveModeSegmentPaddingX` of padding and an
-`size.immersiveNavChipFontSize` w600 label, inside a
-`size.minimumHitTarget` reach. Pressing the unselected half switches the
+`size.immersiveNavChipFontSize` w600 label, inside a reach at least
+`size.minimumHitTarget` wide and tall. While the picker is busy both halves
+are dimmed and say they are disabled to assistive technology. Pressing the unselected half switches the
 one-finger gesture; the drag hints `strings.rotateVenue` /
 `strings.moveVenue` are each half's accessible hint. An icon that flipped
 between two drawings never said which gesture a drag would make.
