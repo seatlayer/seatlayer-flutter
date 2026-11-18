@@ -468,6 +468,8 @@ amber as the floor allows rather than driving to maximum contrast.
 explainer toast (§3.12): through the one toast queue, announced once, gone after
 `motion.durationOutsideBudget.toastDwell` or on a tap on the toast. Nothing else
 reacts to the tap. The chip is exposed as a button named `strings.testModeLong`.
+A layout composed without `SeatLayerPickerToastLayer` has no band to show it
+on, so there the tap shows the same sentence as a tooltip under the chip.
 
 **Placement.** The map's top-left corner in both 2D and 3D, at
 `size.mapAnchorInset`. It steps down by the back pill's height plus

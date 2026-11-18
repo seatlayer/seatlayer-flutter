@@ -234,8 +234,15 @@ void main() {
 
       await tester.tap(find.byType(SeatLayerPickerTestModeIndicator));
       await tester.pumpAndSettle();
+      // Once, and on the band: no tooltip beside it.
       expect(find.text(explained), findsOneWidget);
-      expect(find.byType(Tooltip), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(PickerExplainerToastCard),
+          matching: find.text(explained),
+        ),
+        findsOneWidget,
+      );
 
       final band = find.byType(PickerExplainerToastCard);
       expect(band, findsOneWidget);
@@ -259,6 +266,34 @@ void main() {
       await tester.pump(seatLayerToastDwell);
       await tester.pumpAndSettle();
       expect(find.text(explained), findsNothing);
+    });
+
+    testWidgets('falls back to a tooltip in a layout without the toast layer',
+        (tester) async {
+      final map = _FakeMapController();
+      addTearDown(map.dispose);
+      await tester.pumpWidget(
+        _app(
+          map,
+          const Stack(
+            children: <Widget>[
+              Positioned(
+                left: 12,
+                top: 12,
+                child: SeatLayerPickerTestModeIndicator(compact: true),
+              ),
+            ],
+          ),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await tester.pump();
+      expect(find.text(explained), findsNothing);
+
+      await tester.tap(find.byType(SeatLayerPickerTestModeIndicator));
+      await tester.pumpAndSettle();
+      expect(find.text(explained), findsOneWidget);
+      expect(find.byType(PickerExplainerToastCard), findsNothing);
     });
 
     testWidgets('clears the sheet handle above a dock band', (tester) async {

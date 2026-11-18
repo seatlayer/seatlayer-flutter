@@ -156,6 +156,18 @@ SeatLayerPickerToastQueue seatLayerPickerToasts(
 ) =>
     _queues[controller] ??= SeatLayerPickerToastQueue();
 
+final Expando<int> _mountedLayers =
+    Expando<int>('seatlayer-picker-toast-layers');
+
+/// Whether a [SeatLayerPickerToastLayer] is in the tree for [controller].
+///
+/// A host may compose its own layout from the picker's parts and leave the
+/// toast layer out. Anything that would otherwise speak only through the
+/// queue asks this first, so its message still reaches that buyer some other
+/// way instead of waiting in a queue nothing draws.
+bool seatLayerPickerToastLayerMounted(SeatLayerPickerController controller) =>
+    (_mountedLayers[controller] ?? 0) > 0;
+
 /// The toast surface itself: a wrapping sentence on the picker's own ground.
 class SeatLayerPickerToastCard extends StatelessWidget {
   /// Creates the surface for [toast].
@@ -340,6 +352,7 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
     }
     _detach();
     _controller = controller;
+    _mountedLayers[controller] = (_mountedLayers[controller] ?? 0) + 1;
     _queue = seatLayerPickerToasts(controller);
     _queue!.addListener(_onQueue);
     controller.addListener(_onControllerChanged);
@@ -363,6 +376,10 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
   }
 
   void _detach() {
+    final controller = _controller;
+    if (controller != null) {
+      _mountedLayers[controller] = (_mountedLayers[controller] ?? 1) - 1;
+    }
     _controller?.removeListener(_onControllerChanged);
     _queue?.removeListener(_onQueue);
     unawaited(_conflicts?.cancel());
