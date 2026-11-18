@@ -24,6 +24,7 @@ Optional defines:
 | --- | --- |
 | `SEATLAYER_API_BASE` | Points the session at another API origin. |
 | `SEATLAYER_THEME_MODE` | `auto` (default), `light` or `dark`. |
+| `SEATLAYER_LOCALE` | A language such as `de` or `ar`: the map and the native chrome both use it, and a right-to-left language mirrors the chrome. Omit it to follow the device. |
 | `SEATLAYER_RUNTIME_URL` | Load a renderer other than the package's pin — an HTTPS URL, or an `http://localhost` one served from a local build. Omit it to use the pin. |
 
 Choose an iOS or Android simulator or physical device. The seat map must remain
