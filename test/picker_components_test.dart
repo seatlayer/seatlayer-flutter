@@ -9,6 +9,8 @@ import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_status_views.dart';
+import 'package:seatlayer/src/picker/picker_toast.dart';
+import 'package:seatlayer/src/picker/picker_toast_explainer.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_attribution.dart';
 import 'package:seatlayer/src/picker/picker_errors.dart';
@@ -195,6 +197,256 @@ void main() {
     expect(find.text('Powered by SeatLayer'), findsNothing);
   });
 
+  group('a tap on the test badge', () {
+    const explained = 'Bookings here are not real and no card is charged';
+    const surface = Size(390, 700);
+
+    Future<_FakeMapController> pumpBadge(WidgetTester tester) async {
+      final map = _FakeMapController();
+      addTearDown(map.dispose);
+      tester.view.physicalSize = surface;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _app(
+          map,
+          const Stack(
+            children: <Widget>[
+              Positioned(
+                left: 12,
+                top: 12,
+                child: SeatLayerPickerTestModeIndicator(compact: true),
+              ),
+              Positioned.fill(child: SeatLayerPickerToastLayer()),
+            ],
+          ),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await tester.pump();
+      return map;
+    }
+
+    testWidgets('says what test mode means on a full-width band at the foot',
+        (tester) async {
+      await pumpBadge(tester);
+      expect(find.text(explained), findsNothing);
+
+      await tester.tap(find.byType(SeatLayerPickerTestModeIndicator));
+      await tester.pumpAndSettle();
+      // Once, and on the band: no tooltip beside it.
+      expect(find.text(explained), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(PickerExplainerToastCard),
+          matching: find.text(explained),
+        ),
+        findsOneWidget,
+      );
+
+      final band = find.byType(PickerExplainerToastCard);
+      expect(band, findsOneWidget);
+      final rect = tester.getRect(band);
+      expect(rect.left, 12);
+      expect(rect.right, surface.width - 12);
+      expect(rect.bottom, surface.height - 14 - 22,
+          reason: 'clear of the cart handle standing over the map foot');
+      final box = tester.widget<Container>(
+        find.descendant(of: band, matching: find.byType(Container)).first,
+      );
+      final decoration = box.decoration! as BoxDecoration;
+      expect(decoration.borderRadius, BorderRadius.circular(14));
+      final text = tester.widget<Text>(find.text(explained));
+      expect(text.style!.fontSize, 13.5);
+      expect(text.style!.fontWeight, FontWeight.w500);
+      // Ink band: the ground is the map's text colour.
+      expect(decoration.color, isNot(text.style!.color));
+
+      // It leaves on its own after the toast dwell.
+      await tester.pump(seatLayerToastDwell);
+      await tester.pumpAndSettle();
+      expect(find.text(explained), findsNothing);
+    });
+
+    testWidgets('falls back to a tooltip in a layout without the toast layer',
+        (tester) async {
+      final map = _FakeMapController();
+      addTearDown(map.dispose);
+      await tester.pumpWidget(
+        _app(
+          map,
+          const Stack(
+            children: <Widget>[
+              Positioned(
+                left: 12,
+                top: 12,
+                child: SeatLayerPickerTestModeIndicator(compact: true),
+              ),
+            ],
+          ),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await tester.pump();
+      expect(find.text(explained), findsNothing);
+
+      await tester.tap(find.byType(SeatLayerPickerTestModeIndicator));
+      await tester.pumpAndSettle();
+      expect(find.text(explained), findsOneWidget);
+      expect(find.byType(PickerExplainerToastCard), findsNothing);
+    });
+
+    testWidgets('clears the sheet handle above a dock band', (tester) async {
+      final map = _FakeMapController();
+      addTearDown(map.dispose);
+      tester.view.physicalSize = surface;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _app(
+          map,
+          const Stack(
+            children: <Widget>[
+              Positioned(
+                left: 12,
+                top: 12,
+                child: SeatLayerPickerTestModeIndicator(compact: true),
+              ),
+              Positioned.fill(
+                child: SeatLayerPickerToastLayer(bottomInset: 120),
+              ),
+            ],
+          ),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await tester.pump();
+      await tester.tap(find.byType(SeatLayerPickerTestModeIndicator));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getRect(find.byType(PickerExplainerToastCard)).bottom,
+        surface.height - 120 - 22 - 14,
+      );
+    });
+
+    testWidgets('leaves on a tap, and follows reading direction',
+        (tester) async {
+      await pumpBadge(tester);
+      await tester.tap(find.byType(SeatLayerPickerTestModeIndicator));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text(explained), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.text(explained)).textAlign,
+        isNull,
+        reason: 'start-aligned, so it follows the ambient direction',
+      );
+
+      await tester.tap(find.byType(PickerExplainerToastCard));
+      await tester.pumpAndSettle();
+      expect(find.text(explained), findsNothing);
+    });
+
+    testWidgets('is a button, and the band is a live region', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pumpBadge(tester);
+      expect(
+        tester.getSemantics(find.byType(SeatLayerPickerTestModeIndicator)),
+        isSemantics(isButton: true, hasTapAction: true),
+      );
+      await tester.tap(find.byType(SeatLayerPickerTestModeIndicator));
+      await tester.pumpAndSettle();
+      final node = tester.getSemantics(find.text(explained));
+      expect(
+        node.getSemanticsData().flagsCollection.isLiveRegion,
+        isTrue,
+      );
+      semantics.dispose();
+    });
+  });
+
+  testWidgets('the test badge is named by its long sentence', (tester) async {
+    final map = _FakeMapController();
+    addTearDown(map.dispose);
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _app(map, const Center(child: SeatLayerPickerTestModeIndicator())),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+    expect(
+      find.bySemanticsLabel(RegExp('Test mode · books nothing')),
+      findsWidgets,
+    );
+    expect(find.bySemanticsLabel(RegExp('No real inventory')), findsNothing);
+    semantics.dispose();
+  });
+
+  for (final compact in <bool>[true, false]) {
+    testWidgets(
+        'the ${compact ? 'compact' : 'wide'} test badge says its name once, '
+        'with the explanation as its tooltip', (tester) async {
+      final map = _FakeMapController();
+      addTearDown(map.dispose);
+      final semantics = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _app(
+          map,
+          Center(child: SeatLayerPickerTestModeIndicator(compact: compact)),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await tester.pump();
+      final badge = find.byType(SeatLayerPickerTestModeIndicator);
+      final strings = SeatLayerPickerScope.stringsOf(tester.element(badge));
+      final data = tester.getSemantics(badge).getSemanticsData();
+      expect(data.label, strings.testModeLong);
+      expect(data.tooltip, strings.testModeExplained);
+      expect(data.hint, isEmpty);
+      semantics.dispose();
+    });
+  }
+
+  group('the explanation band', () {
+    const toast = PickerExplainerToast('Bookings here are not real');
+
+    testWidgets('sizes to its sentence inside a host row', (tester) async {
+      final map = _FakeMapController();
+      addTearDown(map.dispose);
+      await tester.pumpWidget(
+        _app(
+          map,
+          const Row(
+            children: <Widget>[SeatLayerPickerToastCard(toast: toast)],
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      final card = find.byType(PickerExplainerToastCard);
+      expect(card, findsOneWidget);
+      expect(
+        tester.getSize(card).width,
+        lessThan(tester.getSize(find.byType(Row)).width),
+      );
+    });
+
+    testWidgets('fills a width it is given', (tester) async {
+      final map = _FakeMapController();
+      addTearDown(map.dispose);
+      await tester.pumpWidget(
+        _app(
+          map,
+          const Center(
+            child: SizedBox(
+              width: 300,
+              child: SeatLayerPickerToastCard(toast: toast),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(PickerExplainerToastCard)).width, 300);
+    });
+  });
+
   testWidgets('section navigator exposes a reliable native focus action',
       (tester) async {
     final map = _FakeMapController();
@@ -250,7 +502,7 @@ void main() {
     expect(find.text('Standard'), findsOneWidget);
     expect(find.text('€25'), findsOneWidget);
     expect(find.text('Cancel'), findsOneWidget);
-    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
     expect(find.text('View from here'), findsOneWidget);
     expect(find.text('See it in 3D'), findsOneWidget);
 
@@ -290,7 +542,7 @@ void main() {
       find.widgetWithText(OutlinedButton, 'Cancel'),
     );
     final selectButton = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, 'Select'),
+      find.widgetWithText(FilledButton, 'Add seat'),
     );
     expect(
       cancelButton.style?.foregroundColor?.resolve(<WidgetState>{}),
@@ -301,7 +553,7 @@ void main() {
       const Color(0xFFE54558),
     );
 
-    await tester.tap(find.text('Select'));
+    await tester.tap(find.text('Add seat'));
     await tester.pump();
     expect(confirmed, isTrue);
   });
@@ -325,7 +577,7 @@ void main() {
     expect(find.text('€100'), findsOneWidget);
     expect(find.text('€60'), findsNWidgets(2));
 
-    await tester.tap(find.text('Select'));
+    await tester.tap(find.text('Add seat'));
     await tester.pump();
     expect(
       map.calls.where((call) => call.$1 == 'picker.setSeatTier').single.$2,
@@ -399,14 +651,14 @@ void main() {
 
     // The card continues to absorb the originating iOS gesture while the
     // WebView mounts its modal; otherwise that tap can select another seat.
-    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
 
     ready.complete();
     await pumpToRest(tester);
 
     // A completed custom callback is not proof that an immersive surface is
     // mounted; the card only stands down for runtime-reported panorama/3D.
-    expect(find.text('Select'), findsOneWidget);
+    expect(find.text('Add seat'), findsOneWidget);
   });
 
   testWidgets(

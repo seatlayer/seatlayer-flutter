@@ -177,6 +177,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   selectTable: 'Maseyê hilbijêre',
   updateTable: 'Maseyê nû bike',
   removeWord: 'Rake',
+  floorWord: 'Qat',
+  totalWord: 'Tevahî',
   accessNeeds: <String, String>{
     'wheelchair': 'Cihê kursiya teker',
     'companion': 'Cihê hevaltiyê',

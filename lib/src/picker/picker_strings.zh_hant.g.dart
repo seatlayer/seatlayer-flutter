@@ -164,6 +164,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       selectTable: '選擇桌位',
       updateTable: '更新桌位',
       removeWord: '移除',
+      floorWord: '樓層',
+      totalWord: '合計',
       accessNeeds: <String, String>{
         'wheelchair': '輪椅席位',
         'companion': '陪同席位',

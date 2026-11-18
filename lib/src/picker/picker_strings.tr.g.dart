@@ -177,6 +177,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   selectTable: 'Masayı seç',
   updateTable: 'Masayı güncelle',
   removeWord: 'Kaldır',
+  floorWord: 'Kat',
+  totalWord: 'Toplam',
   accessNeeds: <String, String>{
     'wheelchair': 'Tekerlekli sandalye yeri',
     'companion': 'Refakatçi koltuğu',

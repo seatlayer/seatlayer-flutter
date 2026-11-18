@@ -80,8 +80,7 @@ class SeatLayerPickerStrings {
     this.findBestSeatsCta = SeatLayerStringTokens.findBestSeatsCta,
     this.pickYourSeats = SeatLayerStringTokens.pickYourSeats,
     this.salesClosedPill = SeatLayerStringTokens.salesClosedPill,
-    this.seatsSecuredOpeningCheckout =
-        SeatLayerStringTokens.seatsSecuredOpeningCheckout,
+    String? seatsSecuredOpeningCheckout,
     this.secureMoreAndCheckout = _defaultSecureMoreAndCheckout,
     this.peekSecured = _defaultPeekSecured,
     this.continueWord = SeatLayerStringTokens.continueWord,
@@ -89,7 +88,7 @@ class SeatLayerPickerStrings {
     this.confirmOrCancelSeat = SeatLayerStringTokens.confirmOrCancelSeat,
     this.confirmYourTickets = SeatLayerStringTokens.confirmYourTickets,
     this.securingSeats = SeatLayerStringTokens.securingSeats,
-    this.openingCheckout = SeatLayerStringTokens.openingCheckout,
+    String? openingCheckout,
     this.adjustSelection = SeatLayerStringTokens.adjustSelection,
     this.chooseMore = _defaultChooseMore,
     this.removeTickets = _defaultRemoveTickets,
@@ -111,6 +110,15 @@ class SeatLayerPickerStrings {
     this.zoomOut = SeatLayerStringTokens.zoomOut,
     this.rotateVenue = SeatLayerStringTokens.rotateVenue,
     this.moveVenue = SeatLayerStringTokens.moveVenue,
+    this.orbitMode = SeatLayerStringTokens.orbitMode,
+    this.panMode = SeatLayerStringTokens.panMode,
+    this.showSeatsFor = SeatLayerStringTokens.showSeatsFor,
+    this.dismissError = SeatLayerStringTokens.dismissError,
+    this.backToSeatMap = SeatLayerStringTokens.backToSeatMap,
+    this.openInteractive3dVenue = SeatLayerStringTokens.openInteractive3dVenue,
+    this.floorWord = SeatLayerStringTokens.floorWord,
+    this.totalWord = SeatLayerStringTokens.totalWord,
+    this.ticketWord = SeatLayerStringTokens.ticketWord,
     this.mapView = SeatLayerStringTokens.mapView,
     this.flat2dMap = SeatLayerStringTokens.flat2dMap,
     this.interactive3dVenueView = SeatLayerStringTokens.interactive3dVenueView,
@@ -193,7 +201,14 @@ class SeatLayerPickerStrings {
     this.venueMapHint = SeatLayerStringTokens.venueMapHint,
     this.holdMinutesLeft = _defaultHoldMinutesLeft,
     this.holdSecondsLeft = _defaultHoldSecondsLeft,
-  });
+  })  : seatsSecuredOpeningCheckout = seatsSecuredOpeningCheckout ??
+            SeatLayerStringTokens.seatsSecuredOpeningCheckout,
+        openingCheckout =
+            openingCheckout ?? SeatLayerStringTokens.openingCheckout,
+        // Wording a host gave for the hand-off before the second sentence
+        // existed still wins, unless it gave that sentence too.
+        _handoffKeepsOpeningCheckout =
+            openingCheckout != null && seatsSecuredOpeningCheckout == null;
 
   /// The defaults for [locale], falling back to English.
   ///
@@ -487,10 +502,15 @@ class SeatLayerPickerStrings {
   /// prose where the footer is a button.
   final String salesClosedPill;
 
-  /// The collapsed peek line while checkout is opening and prices are hidden.
+  /// The book button's second busy state: the hold has succeeded and the
+  /// host's checkout is opening.
   ///
   /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
   /// its English wording in every locale until one exists.
+  ///
+  /// A strings object built with [openingCheckout] and without this one draws
+  /// [openingCheckout] in that state instead, so wording set for the hand-off
+  /// before this sentence existed keeps showing.
   final String seatsSecuredOpeningCheckout;
 
   /// The wide layout's call to action, beside a total it does not repeat.
@@ -526,6 +546,8 @@ class SeatLayerPickerStrings {
   /// host's screen is up, because a second press would buy nothing and read as
   /// a failure.
   final String openingCheckout;
+
+  final bool _handoffKeepsOpeningCheckout;
 
   /// The call to action on a selection the event's own rules reject, where
   /// nothing more specific can be said than that it has to change.
@@ -612,6 +634,34 @@ class SeatLayerPickerStrings {
 
   /// The same control's tooltip while one finger moves the venue instead.
   final String moveVenue;
+
+  /// The rotate half of the 3D scene's labelled Rotate / Move pair.
+  final String orbitMode;
+
+  /// The move half of the 3D scene's labelled Rotate / Move pair.
+  final String panMode;
+
+  /// The heading over the access provisions in the accessibility sheet,
+  /// drawn in capitals like every group heading.
+  final String showSeatsFor;
+
+  /// The accessible name of the close control on an error banner.
+  final String dismissError;
+
+  /// The Map/3D disc's name while the 3D scene is up.
+  final String backToSeatMap;
+
+  /// The Map/3D disc's name while the flat map is up.
+  final String openInteractive3dVenue;
+
+  /// The floor picker's hint before a floor is chosen.
+  final String floorWord;
+
+  /// The word over the amount in the compact total.
+  final String totalWord;
+
+  /// The wide seat card's price band where the seat names no category.
+  final String ticketWord;
 
   /// Label of the map half of the Map/3D control.
   final String mapView;
@@ -1102,3 +1152,12 @@ class SeatLayerPickerStrings {
           : SeatLayerStringTokens.holdSecondsLeftOther)
       .replaceAll('{count}', '$count');
 }
+
+/// The words on the book button while the host's checkout opens.
+///
+/// [SeatLayerPickerStrings.seatsSecuredOpeningCheckout], unless the strings
+/// were built with [SeatLayerPickerStrings.openingCheckout] and without it.
+String seatLayerCheckoutHandoffWords(SeatLayerPickerStrings strings) =>
+    strings._handoffKeepsOpeningCheckout
+        ? strings.openingCheckout
+        : strings.seatsSecuredOpeningCheckout;

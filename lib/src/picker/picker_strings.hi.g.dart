@@ -176,6 +176,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   selectTable: 'टेबल चुनें',
   updateTable: 'टेबल अपडेट करें',
   removeWord: 'हटाएँ',
+  floorWord: 'फ़्लोर',
+  totalWord: 'कुल',
   accessNeeds: <String, String>{
     'wheelchair': 'व्हीलचेयर स्थान',
     'companion': 'साथी सीट',

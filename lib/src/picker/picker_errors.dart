@@ -114,7 +114,7 @@ class SeatLayerPickerActionError extends StatelessWidget {
               ),
             ),
             IconButton(
-              tooltip: 'Dismiss error',
+              tooltip: strings.dismissError,
               onPressed: controller.dismissError,
               color: Colors.white,
               icon: const Icon(Icons.close_rounded),

@@ -176,6 +176,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   selectTable: 'Избери маса',
   updateTable: 'Обнови масата',
   removeWord: 'Премахни',
+  floorWord: 'Етаж',
+  totalWord: 'Общо',
   accessNeeds: <String, String>{
     'wheelchair': 'Място за количка',
     'companion': 'Място за придружител',

@@ -84,25 +84,28 @@ class _SeatLayerPickerSeatConfirmationState
     if (!controller.mayAskAboutSeat(seat)) return const SizedBox.shrink();
     _tierId ??= seat.tierId ?? seat.tiers?.firstOrNull?.id;
     final theme = seatLayerPickerThemeOf(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
     final category = controller.state.categories
         .where((item) => item.key == seat.categoryKey)
         .firstOrNull;
     final categoryColor = pickerColor(category?.color) ?? theme.accent;
-    final categoryLabel = category?.label ?? seat.categoryKey ?? 'Ticket';
+    final categoryLabel = category?.label ?? seat.categoryKey ?? strings.ticketWord;
     final identity = <({String key, String value})>[
       if (seat.sectionLabel?.trim().isNotEmpty == true)
-        (key: 'Section', value: seat.sectionLabel!.trim()),
+        (key: strings.sectionWord, value: seat.sectionLabel!.trim()),
       if (seat.rowLabel?.trim().isNotEmpty == true)
         (
           key: seat.displayType?.trim().isNotEmpty == true
               ? seat.displayType!.trim()
               : seat.rowType?.trim().isNotEmpty == true
                   ? seat.rowType!.trim()
-                  : 'Row',
+                  : strings.rowWord,
           value: seat.rowLabel!.trim(),
         ),
       (
-        key: seat.objectType == ObjectType.booth ? 'Place' : 'Seat',
+        key: seat.objectType == ObjectType.booth
+            ? strings.placeWord
+            : strings.seatWord,
         value: seat.seatNumber?.trim().isNotEmpty == true
             ? seat.seatNumber!.trim()
             : seat.buyerFacingLabel,
@@ -111,10 +114,7 @@ class _SeatLayerPickerSeatConfirmationState
     // The same rows the phone's card draws, in the same order — this card used
     // to name a wheelchair provision and ONE limited-view line in which
     // restricted beat obstructed, so a seat marked both said only half of it.
-    final notes = seatLayerSeatNotesFor(
-      seat,
-      SeatLayerPickerScope.stringsOf(context),
-    );
+    final notes = seatLayerSeatNotesFor(seat, strings);
     final tiers = seat.tiers ?? const <CategoryTier>[];
     final selectedPrice = seatLayerPickerSelectedPrice(seat, _tierId);
     final selectedCurrency = seatLayerPickerSelectedCurrency(seat, _tierId);
@@ -256,7 +256,7 @@ class _SeatLayerPickerSeatConfirmationState
                       children: [
                         if (tiers.length > 1) ...[
                           Text(
-                            'Ticket type',
+                            strings.ticketType,
                             style: TextStyle(
                               color: theme.mutedText,
                               fontSize: 12,
@@ -316,7 +316,7 @@ class _SeatLayerPickerSeatConfirmationState
                                 onPressed: controller.state.isBusy
                                     ? null
                                     : () => _cancel(controller, seat),
-                                child: const Text('Cancel'),
+                                child: Text(strings.cancel),
                               ),
                             ),
                             const SizedBox(width: 10),
@@ -350,7 +350,14 @@ class _SeatLayerPickerSeatConfirmationState
                                     ? null
                                     : () => _confirm(controller, seat),
                                 icon: const Icon(Icons.check_rounded),
-                                label: const Text('Select'),
+                                // The phone card's own rule: a booth, a
+                                // table or a standing area is not a seat.
+                                label: Text(
+                                  seat.objectType == null ||
+                                          seat.objectType == ObjectType.seat
+                                      ? strings.addSeat
+                                      : strings.select,
+                                ),
                               ),
                             ),
                           ],
@@ -471,7 +478,7 @@ class SeatLayerPickerSeatViewButton extends StatelessWidget {
       style: _seatInspectionButtonStyle(context, theme),
       onPressed: state.isBusy ? null : () => action(seat),
       icon: const Icon(Icons.visibility_outlined),
-      label: const Text('View from here'),
+      label: Text(SeatLayerPickerScope.stringsOf(context).viewFromHere),
     );
   }
 }
@@ -509,7 +516,11 @@ class SeatLayerPickerSeat3DButton extends StatelessWidget {
             ? Icons.airline_seat_recline_normal_rounded
             : Icons.view_in_ar_outlined,
       ),
-      label: Text(alreadyIn3D ? 'View from this seat' : 'See it in 3D'),
+      label: Text(
+        alreadyIn3D
+            ? SeatLayerPickerScope.stringsOf(context).viewFromThisSeat
+            : SeatLayerPickerScope.stringsOf(context).seeItIn3D,
+      ),
     );
   }
 }

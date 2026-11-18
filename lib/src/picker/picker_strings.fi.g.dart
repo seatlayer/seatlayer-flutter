@@ -177,6 +177,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   selectTable: 'Valitse pöytä',
   updateTable: 'Päivitä pöytä',
   removeWord: 'Poista',
+  floorWord: 'Kerros',
+  totalWord: 'Yhteensä',
   accessNeeds: <String, String>{
     'wheelchair': 'Pyörätuolipaikka',
     'companion': 'Avustajapaikka',

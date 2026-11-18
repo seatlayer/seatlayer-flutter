@@ -173,6 +173,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   selectTable: 'Select table',
   updateTable: 'Update table',
   removeWord: 'Remove',
+  floorWord: 'Floor',
+  totalWord: 'Total',
   accessNeeds: <String, String>{
     'wheelchair': 'Wheelchair space',
     'companion': 'Companion seat',

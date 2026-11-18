@@ -185,6 +185,8 @@ const KEYS = {
   selectTable: 'picker.selectTable',
   updateTable: 'picker.updateTable',
   removeWord: 'picker.gaRemove',
+  floorWord: 'picker.floor',
+  totalWord: 'picker.total',
 };
 
 const dir = process.argv[2];

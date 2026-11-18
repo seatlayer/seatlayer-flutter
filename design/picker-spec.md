@@ -464,6 +464,13 @@ amber as the floor allows rather than driving to maximum contrast.
 **Copy.** Sentence case `strings.testMode`; the accessible name keeps
 `strings.testModeLong`; the description is `strings.testModeExplained`.
 
+**A tap explains it.** Tapping the chip shows `strings.testModeExplained` as the
+explainer toast (§3.12): through the one toast queue, announced once, gone after
+`motion.durationOutsideBudget.toastDwell` or on a tap on the toast. Nothing else
+reacts to the tap. The chip is exposed as a button named `strings.testModeLong`.
+A layout composed without `SeatLayerPickerToastLayer` has no band to show it
+on, so there the tap shows the same sentence as a tooltip under the chip.
+
 **Placement.** The map's top-left corner in both 2D and 3D, at
 `size.mapAnchorInset`. It steps down by the back pill's height plus
 `size.mapAnchorGap` **only while the immersive scene's back pill is actually
@@ -609,10 +616,24 @@ row list scrolls within it. (The web bounds its popover to the room above the
 ♿ button *inside the map*, for the mirror-image reason: a panel measured
 against the window opens straight through the ticket sheet below it.)
 
-Its sheet opens upward from the button and contains switch rows:
+Its sheet opens upward from the button. Its title, `strings.accessibilityTitle`,
+is the picker's own type, never the host's: `size.accessSheetTitleFontSize`
+w800, line height 1.2, in `color.*.text` and the picker font. It contains
+switch rows:
 
-- one row per access need the chart actually authors, in the runtime's order,
-  each with its live free count — `strings.accessFreeCount`, or **`0`** with
+- **first**, under the title, the two switches that act on the MAP rather
+  than on seats: `strings.hideLimitedView`, only where some seat is restricted
+  or obstructed, and `strings.colorblindSafe`. Neither of them reserves a count
+  column.
+- then, **under a group heading** `strings.showSeatsFor` in capitals — 11 /
+  w700 in `color.*.mutedText`, letter-spaced `size.accessGroupHeadingTracking`
+  em (1.1 at 11), inset 8 with 18 above (0 when
+  no map switch is drawn) and 4 below — the provisions (next bullet). The
+  heading is what stops the two map switches from reading as two more
+  provisions; it is drawn only where at least one provision exists. (`strings.viewGroupTitle` is no
+  longer drawn by the sheet; it stays a public string.)
+- each provision row: one per access need the chart actually authors, in the
+  runtime's order, each with its live free count — `strings.accessFreeCount`, or **`0`** with
   the row disabled when the last space goes. A figure, not a sentence: the
   count column carries numbers on every other row, "Not available" needed a
   chip to hold it and made the sold-out row the loudest line on the sheet, and
@@ -626,14 +647,6 @@ Its sheet opens upward from the button and contains switch rows:
   answers. A wheelchair row carries the note `strings.companionSeatsNote` where
   the chart has companion places — **behind an ⓘ**, not on a second line of the
   row: see "one line per row" below.
-- then, **under a group heading** `strings.viewGroupTitle` — 11 / w700 in
-  `color.*.mutedText`, letter-spaced .6, inset 8 with 18 above and 4 below —
-  the two switches that act on the MAP rather than on seats:
-  `strings.hideLimitedView`, only where some seat is restricted or obstructed,
-  and `strings.colorblindSafe`. The heading is what stops those two from
-  reading as two more provisions at the bottom of the provision list; it is
-  drawn only where at least one of the two rows exists. Neither of them
-  reserves a count column.
 
 **Every row wears a drawing, and it is the drawing that row is about.** Each
 provision row takes its own glyph from the shared per-attribute set (§3.8.9) by
@@ -1871,8 +1884,18 @@ Label ladder, in priority order:
    with no card up** and is simply disabled, and it offers no finder either.
    The card is the question; the footer says nothing about it, so the buyer's
    cart still reads as their cart underneath.
-4. securing → disabled, spinner, `strings.securingSeats`
-5. opening checkout → disabled, spinner, `strings.openingCheckout`
+4. securing → disabled, **no spinner** (words only, as the design draws it),
+   `strings.securingSeats`; still busy, so the button stays down
+5. opening checkout → disabled, **no spinner** (words only; the seats are held),
+   `strings.seatsSecuredOpeningCheckout`; still busy, so the button stays down
+   (the hold has succeeded by now, so the sentence says so; `strings.openingCheckout`
+   stays a public string for a host that composes its own button). Strings
+   built with `openingCheckout` and without `seatsSecuredOpeningCheckout` draw
+   `openingCheckout` here, so a host's earlier wording for this state still
+   shows.
+   Both readings carry `busyInWords: true`, so a host that rebuilds one or
+   draws its own button can tell them apart; a busy reading without it draws a
+   spinner beside its label.
 6. the selection breaks the event's rules → disabled,
    `strings.chooseMore` / `strings.removeTickets…` / `strings.adjustSelection`
 7. **an empty cart on a surface that may offer the finder** → ENABLED,
@@ -1999,6 +2022,18 @@ a chip. With an action it becomes a row: the sentence, then a pill at
 **Motion.** Rises on `motion.duration.toast` on `motion.curve.easeEnter`, dwells
 for `motion.durationOutsideBudget.toastDwell`, then leaves and resets to
 neutral. One queue: a second toast replaces the first rather than stacking.
+
+**Explainer.** The answer to a tap on the picker's own chrome (today only the
+test chip, §3.4) is a different surface on the same queue, motion and
+announcement: a full-width band at the map's foot, inset `size.mapAnchorInset`
+at each side and 14 + `size.sheetHandleOverhang` above the bottom chrome (the
+cart handle stands proud of the chrome under the map in every composition, and
+the band never crosses it), ground `color.*.text`, ink
+`color.*.background`, corner `radius.explainerToast`, padding
+`size.explainerToastPaddingY` × `size.explainerToastPaddingX`, text
+`size.explainerToastFontSize` w500 at line height 1.35, wrapping, aligned to
+the reading start; shadow 0 12 30 −12 at black .5. No hairline and no tone.
+A tap on the band dismisses it.
 
 **Accessibility.** A polite live region. A toast is never the only place a
 consequence is stated — anything that outlives 4 seconds also has a persistent
@@ -2412,9 +2447,20 @@ The stepper is disabled in venue mode.
 **Caption** — `size.immersiveCaptionFontSize` on the caption glass at
 `radius.chip`, naming the seat.
 
-**Nav mode** — `SeatLayerPicker3DNavigationModeButton`: a two-state control for
-orbit versus pan, `strings.orbitMode` / `strings.panMode`, with the drag hints
-`strings.rotateVenue` / `strings.moveVenue`.
+**Nav mode** — `SeatLayerPicker3DNavigationModeButton`: a **labelled pair** on
+the glass, top-end of the scene, on the phone and on wide — `strings.orbitMode`
+| `strings.panMode`, the selected half filled with
+`color.dark.immersiveModeSelected` at `radius.pill`. The pair is inset
+`size.immersiveModePairPadding`; each half is at least
+`size.immersiveModeSegmentHeight` tall (it grows with the text rather than
+clipping it at large text sizes) with
+`size.immersiveModeSegmentPaddingX` of padding and an
+`size.immersiveNavChipFontSize` w600 label, inside a reach at least
+`size.minimumHitTarget` wide and tall. While the picker is busy both halves
+are dimmed and say they are disabled to assistive technology. Pressing the unselected half switches the
+one-finger gesture; the drag hints `strings.rotateVenue` /
+`strings.moveVenue` are each half's accessible hint. An icon that flipped
+between two drawings never said which gesture a drag would make.
 
 **Motion.** The chrome settles on `motion.duration.immersive`. The recentre
 control arrives with a single spin on `motion.curve.spring`.
@@ -2686,8 +2732,8 @@ of them portable:
 - **a provision the venue has but has sold out of stays**, named, dimmed and
   reading `0` — removing it would claim the venue has no such seats, which is
   a different fact — and the two switches that recolour or filter the MAP sit
-  under their own `strings.viewGroupTitle` heading so they do not read as two
-  more provisions.
+  above the provisions, which have their own `strings.showSeatsFor` heading,
+  so the switches do not read as two more provisions.
 
 Unbounded and multi-line, the same list took the whole screen on a phone and
 put its first two rows — the wheelchair and companion filters, the two rows the

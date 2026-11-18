@@ -174,6 +174,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   selectTable: 'Chọn bàn',
   updateTable: 'Cập nhật bàn',
   removeWord: 'Bỏ',
+  floorWord: 'Tầng',
+  totalWord: 'Tổng cộng',
   accessNeeds: <String, String>{
     'wheelchair': 'Chỗ xe lăn',
     'companion': 'Ghế người đi kèm',

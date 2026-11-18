@@ -16,6 +16,8 @@ import 'seat_layer_picker_scope.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_theme.dart';
 import 'picker_a11y.dart';
+import 'picker_toast.dart';
+import 'picker_toast_explainer.dart';
 
 class SeatLayerPickerTestModeIndicator extends StatelessWidget {
   /// Creates the test-event badge.
@@ -67,15 +69,19 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
           children: <Widget>[
             _TestModeDot(color: theme.warning),
             const SizedBox(width: 7),
-            Text(
-              compact ? strings.testMode : strings.testModeLong,
-              style: TextStyle(
-                color: ink,
-                fontSize: SeatLayerSizeTokens.testChipFontSize,
-                fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
-                letterSpacing: SeatLayerSizeTokens.testChipFontSize * .01,
-                height: 1,
-                fontFamily: theme.fontFamily,
+            // The chip's [Semantics] carries the name once; the visible words
+            // stay out of the tree so a screen reader does not say them twice.
+            ExcludeSemantics(
+              child: Text(
+                compact ? strings.testMode : strings.testModeLong,
+                style: TextStyle(
+                  color: ink,
+                  fontSize: SeatLayerSizeTokens.testChipFontSize,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
+                  letterSpacing: SeatLayerSizeTokens.testChipFontSize * .01,
+                  height: 1,
+                  fontFamily: theme.fontFamily,
+                ),
               ),
             ),
           ],
@@ -83,15 +89,61 @@ class SeatLayerPickerTestModeIndicator extends StatelessWidget {
       ),
     );
     return Semantics(
-      label: 'Test event. No real inventory will be booked.',
-      child: Tooltip(
-        message: strings.testModeExplained,
+      label: strings.testModeLong,
+      button: true,
+      child: _TestModeExplainOnTap(
+        explanation: strings.testModeExplained,
         // The same chip at every width: an environment flag that changes shape
         // with the layout reads as two different states of the event.
         child: SizedBox(height: compactHeight, child: pill),
       ),
     );
   }
+}
+
+/// A tap on the chip says what test mode means.
+///
+/// In the map's toast band when the picker's toast layer is there to draw it;
+/// as a tooltip under the chip when a host composed its own layout without
+/// that layer, so the explanation never goes unsaid. A long press is a gesture
+/// nobody tries on a status chip, so the explanation went unread.
+class _TestModeExplainOnTap extends StatefulWidget {
+  const _TestModeExplainOnTap({required this.explanation, required this.child});
+
+  final String explanation;
+  final Widget child;
+
+  @override
+  State<_TestModeExplainOnTap> createState() => _TestModeExplainOnTapState();
+}
+
+class _TestModeExplainOnTapState extends State<_TestModeExplainOnTap> {
+  final GlobalKey<TooltipState> _tooltip = GlobalKey<TooltipState>();
+
+  void _explain() {
+    final controller = SeatLayerPickerScope.controllerOf(context);
+    if (seatLayerPickerToastLayerMounted(controller)) {
+      seatLayerPickerToasts(controller).show(
+        PickerExplainerToast(widget.explanation),
+      );
+    } else {
+      _tooltip.currentState?.ensureTooltipVisible();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _explain,
+        child: Tooltip(
+          key: _tooltip,
+          message: widget.explanation,
+          // Shown only from [_explain]: with the toast layer up, the band is
+          // the one place the sentence appears.
+          triggerMode: TooltipTriggerMode.manual,
+          child: widget.child,
+        ),
+      );
 }
 
 /// The badge's status light: a warning dot inside its own halo.
@@ -149,7 +201,7 @@ class SeatLayerPickerFloorSelector extends StatelessWidget {
         child: DropdownButtonHideUnderline(
           child: DropdownButton<String>(
             value: state.snapshot?.map.floorId,
-            hint: const Text('Floor'),
+            hint: Text(SeatLayerPickerScope.stringsOf(context).floorWord),
             items: floors
                 .map(
                   (floor) => DropdownMenuItem<String>(
@@ -199,7 +251,7 @@ class SeatLayerPickerCheckoutBar extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Total',
+                      SeatLayerPickerScope.stringsOf(context).totalWord,
                       style: TextStyle(color: theme.mutedText, fontSize: 11),
                     ),
                     Text(

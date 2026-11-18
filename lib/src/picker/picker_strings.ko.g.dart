@@ -167,6 +167,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   selectTable: '테이블 선택',
   updateTable: '테이블 변경',
   removeWord: '삭제',
+  floorWord: '층',
+  totalWord: '합계',
   accessNeeds: <String, String>{
     'wheelchair': '휠체어석',
     'companion': '동반자석',

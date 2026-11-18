@@ -137,6 +137,9 @@ abstract final class SeatLayerDarkTokens {
   /// `#EEF3FB`
   static const Color immersiveCaptionInk = Color(0xFFEEF3FB);
 
+  /// `#2EFFFFFF`
+  static const Color immersiveModeSelected = Color(0x2EFFFFFF);
+
   /// `#556278`
   static const Color chrome = Color(0xFF556278);
 
@@ -581,6 +584,15 @@ abstract final class SeatLayerSizeTokens {
   /// `32`
   static const double immersiveNavCloseSize = 32;
 
+  /// `3`
+  static const double immersiveModePairPadding = 3;
+
+  /// `28`
+  static const double immersiveModeSegmentHeight = 28;
+
+  /// `10`
+  static const double immersiveModeSegmentPaddingX = 10;
+
   /// `11.5`
   static const double immersiveCaptionFontSize = 11.5;
 
@@ -641,8 +653,23 @@ abstract final class SeatLayerSizeTokens {
   /// `15`
   static const double accessNoteIconSize = 15;
 
+  /// `17`
+  static const double accessSheetTitleFontSize = 17;
+
+  /// `0.1`
+  static const double accessGroupHeadingTracking = 0.1;
+
   /// `232`
   static const double toastCardLift = 232;
+
+  /// `13.5`
+  static const double explainerToastFontSize = 13.5;
+
+  /// `14`
+  static const double explainerToastPaddingX = 14;
+
+  /// `12`
+  static const double explainerToastPaddingY = 12;
 
   /// `56`
   static const double confirmScrimClearRadius = 56;
@@ -719,6 +746,9 @@ abstract final class SeatLayerRadiusTokens {
 
   /// `999`
   static const double pill = 999;
+
+  /// `14`
+  static const double explainerToast = 14;
 }
 
 /// Material elevations.

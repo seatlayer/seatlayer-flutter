@@ -181,6 +181,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   selectTable: 'Selecciona la taula',
   updateTable: 'Actualitza la taula',
   removeWord: 'Treu',
+  floorWord: 'Planta',
+  totalWord: 'Total',
   accessNeeds: <String, String>{
     'wheelchair': 'Espai per a cadira de rodes',
     'companion': 'Seient d’acompanyant',

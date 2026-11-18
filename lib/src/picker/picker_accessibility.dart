@@ -206,11 +206,77 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // The picker's own title, not the host's: a host title style
+                // is a different size and weight in every app it lands in.
                 Text(
                   strings.accessibilityTitle,
-                  style: Theme.of(context).textTheme.titleLarge,
+                  style: TextStyle(
+                    color: theme.text,
+                    fontSize: SeatLayerSizeTokens.accessSheetTitleFontSize,
+                    height: 1.2,
+                    fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
+                    fontFamily: theme.fontFamily,
+                  ),
                 ),
                 const SizedBox(height: 12),
+                if (available.limited)
+                  _AccessOptionRow(
+                    // The switch that hides limited-view seats wears the mark
+                    // those seats carry, so the row and the thing it acts on
+                    // are one idea.
+                    iconKey: 'restrictedView',
+                    label: strings.hideLimitedView,
+                    reserveNoteSlot: false,
+                    hairline: available.colorblind,
+                    value: hideLimited,
+                    onChanged: () {
+                      final next = !hideLimited;
+                      setSheetState(() => hideLimited = next);
+                      ignorePickerAction(applyLimited(next));
+                    },
+                  ),
+                if (available.colorblind)
+                  _AccessOptionRow(
+                    // NOT an eye and not a seat mark: this row recolours the
+                    // map, it does not choose seats. A contrast disc is the
+                    // one shape on this sheet that is about the palette.
+                    iconKey: 'contrast',
+                    label: strings.colorblindSafe,
+                    reserveNoteSlot: false,
+                    hairline: false,
+                    value: colorblind,
+                    onChanged: () {
+                      final next = !colorblind;
+                      setSheetState(() => colorblind = next);
+                      ignorePickerAction(applyColorblind(next));
+                    },
+                  ),
+                if (needs.isNotEmpty)
+                  // The two map switches come first and the provisions sit
+                  // under their own heading, so the switches never read as two
+                  // more provisions at the foot of the list.
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      8,
+                      available.limited || available.colorblind ? 18 : 0,
+                      8,
+                      4,
+                    ),
+                    child: Text(
+                      strings.showSeatsFor.toUpperCase(),
+                      style: TextStyle(
+                        color: theme.mutedText,
+                        fontSize: 11,
+                        fontWeight: seatLayerBoldWeight(
+                          context,
+                          FontWeight.w700,
+                        ),
+                        letterSpacing: 11 *
+                            SeatLayerSizeTokens.accessGroupHeadingTracking,
+                        fontFamily: theme.fontFamily,
+                      ),
+                    ),
+                  ),
                 if (needs.isNotEmpty)
                   Flexible(
                     child: SingleChildScrollView(
@@ -281,55 +347,6 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                             .toList(growable: false),
                       ),
                     ),
-                  ),
-                if (available.limited || available.colorblind)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(8, 18, 8, 4),
-                    child: Text(
-                      strings.viewGroupTitle,
-                      style: TextStyle(
-                        color: theme.mutedText,
-                        fontSize: 11,
-                        fontWeight: seatLayerBoldWeight(
-                          context,
-                          FontWeight.w700,
-                        ),
-                        letterSpacing: .6,
-                        fontFamily: theme.fontFamily,
-                      ),
-                    ),
-                  ),
-                if (available.limited)
-                  _AccessOptionRow(
-                    // The switch that hides limited-view seats wears the mark
-                    // those seats carry, so the row and the thing it acts on
-                    // are one idea.
-                    iconKey: 'restrictedView',
-                    label: strings.hideLimitedView,
-                    reserveNoteSlot: false,
-                    hairline: available.colorblind,
-                    value: hideLimited,
-                    onChanged: () {
-                      final next = !hideLimited;
-                      setSheetState(() => hideLimited = next);
-                      ignorePickerAction(applyLimited(next));
-                    },
-                  ),
-                if (available.colorblind)
-                  _AccessOptionRow(
-                    // NOT an eye and not a seat mark: this row recolours the
-                    // map, it does not choose seats. A contrast disc is the
-                    // one shape on this sheet that is about the palette.
-                    iconKey: 'contrast',
-                    label: strings.colorblindSafe,
-                    reserveNoteSlot: false,
-                    hairline: false,
-                    value: colorblind,
-                    onChanged: () {
-                      final next = !colorblind;
-                      setSheetState(() => colorblind = next);
-                      ignorePickerAction(applyColorblind(next));
-                    },
                   ),
               ],
             ),

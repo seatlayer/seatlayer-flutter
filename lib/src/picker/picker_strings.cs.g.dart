@@ -176,6 +176,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   selectTable: 'Vybrat stůl',
   updateTable: 'Aktualizovat stůl',
   removeWord: 'Odebrat',
+  floorWord: 'Patro',
+  totalWord: 'Celkem',
   accessNeeds: <String, String>{
     'wheelchair': 'Místo pro vozík',
     'companion': 'Místo pro doprovod',

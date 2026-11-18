@@ -33,6 +33,7 @@ class SeatLayerCheckoutCtaState {
     required this.busy,
     required this.statesReason,
     this.findsBestSeats = false,
+    this.busyInWords = false,
   });
 
   /// The words on the button.
@@ -41,7 +42,10 @@ class SeatLayerCheckoutCtaState {
   /// Whether the buyer may press it.
   final bool enabled;
 
-  /// Whether the button should carry a spinner beside [label].
+  /// Whether something the buyer already asked for is in flight, so the
+  /// button stays down. The picker's own readings say so in words alone
+  /// ([busyInWords]); [SeatLayerCheckoutCtaLabel] draws a spinner beside any
+  /// other busy reading.
   ///
   /// Only ever true while something the buyer already asked for is in flight —
   /// the hold being created, or the host's checkout opening.
@@ -60,6 +64,17 @@ class SeatLayerCheckoutCtaState {
   /// IS the sheet, so a full-width disabled button would be the largest thing
   /// on screen saying no.
   final bool findsBestSeats;
+
+  /// Whether a [busy] reading says what is in flight in its [label] alone,
+  /// so it is drawn without a spinner.
+  ///
+  /// True for the picker's own busy readings: "Securing your seats…" and
+  /// "Seats secured. Opening checkout…". A host that builds its own reading
+  /// from one of these (to change the words, say) carries it across to keep
+  /// the button spinner-free, and a host drawing its own button reads it to
+  /// draw the state the same way. Defaults to false, so a busy reading a host
+  /// builds itself keeps its spinner.
+  final bool busyInWords;
 }
 
 /// Resolve the checkout call to action for [state].
@@ -125,6 +140,7 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
       pendingCount: pendingCount,
       canOfferFind: canOfferFind,
     );
+    if (under.busyInWords) return under;
     return SeatLayerCheckoutCtaState(
       label: under.label,
       enabled: false,
@@ -142,9 +158,16 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
   //    the button stays down through it: a second press buys nothing and
   //    reads as a failure.
   if (state.busyAction == SeatLayerPickerBusyAction.creatingHold) {
-    return reason(strings.securingSeats, busy: true);
+    // Words alone, like the handoff below: the sentence already says the
+    // seats are being secured, and the button stays down while it does.
+    return _busyInWords(strings.securingSeats);
   }
-  if (handoffInFlight) return reason(strings.openingCheckout, busy: true);
+  if (handoffInFlight) {
+    // The seats are already held, so there is nothing left to wait on but
+    // the host: the words say so, and a spinner beside them would say the
+    // opposite. Still busy, so the button stays down until the host answers.
+    return _busyInWords(seatLayerCheckoutHandoffWords(strings));
+  }
 
   // 5. A selection the event's own rules reject. Say what would fix it where
   //    the runtime gave a number to say it with, and fall back to the general
@@ -298,10 +321,22 @@ class _SeatLayerCheckoutCtaState extends State<SeatLayerCheckoutCta> {
   }
 }
 
-/// The label, with a spinner beside it while the picker is working.
+/// Work the buyer already asked for — the hold being secured, then the
+/// checkout opening on it: busy, in words alone.
+SeatLayerCheckoutCtaState _busyInWords(String label) =>
+    SeatLayerCheckoutCtaState(
+      label: label,
+      enabled: false,
+      busy: true,
+      statesReason: true,
+      busyInWords: true,
+    );
+
+/// The label of a resolved call to action.
 ///
-/// Shared so the three buttons narrate a hold the same way. The spinner takes
-/// the button's own foreground colour, and the label ellipsizes rather than
+/// Shared so the three buttons narrate a hold the same way. The picker's own
+/// busy readings are words alone; a busy reading a host built itself keeps a
+/// spinner beside its label, in the button's own foreground colour, and the label ellipsizes rather than
 /// wrapping: a reason is longer than "Continue", and a call to action that
 /// grows a second line moves everything under it.
 class SeatLayerCheckoutCtaLabel extends StatelessWidget {
@@ -326,9 +361,9 @@ class SeatLayerCheckoutCtaLabel extends StatelessWidget {
       softWrap: false,
       overflow: TextOverflow.ellipsis,
     );
-    if (!cta.busy) return text;
+    if (!cta.busy || cta.busyInWords) return text;
     // A row lays its non-flexible children out with an unbounded main axis, so
-    // the ellipsis above never fires inside one: `Opening secure checkout…`
+    // the ellipsis above never fires inside one: `Seats secured. Opening checkout…`
     // beside a spinner overran the sheet's own book button by 46 points for as
     // long as the host took to answer. The label is made flexible exactly where
     // there is a width to be flexible within — a flex child cannot be measured

@@ -6,6 +6,7 @@
 // their label. These tests pin the ONE rule they now share, and above all its
 // precedence: two reasons are true at once far more often than not, and the
 // buyer must be told the one they can act on first.
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_checkout_cta.dart';
@@ -126,7 +127,7 @@ void main() {
     expect(_cta(state, seatCardOpen: true).label, 'Confirm your tickets');
   });
 
-  test('creating the hold narrates itself, with a spinner', () {
+  test('creating the hold narrates itself, in words', () {
     final cta = _cta(_state(busy: SeatLayerPickerBusyAction.creatingHold));
     expect(cta.label, 'Securing your seats…');
     expect(cta.busy, isTrue);
@@ -135,9 +136,124 @@ void main() {
 
   test('the host opening its checkout narrates itself too', () {
     final cta = _cta(_state(), handoffInFlight: true);
-    expect(cta.label, 'Opening secure checkout…');
+    expect(cta.label, 'Seats secured. Opening checkout…');
     expect(cta.busy, isTrue);
     expect(cta.enabled, isFalse);
+  });
+
+  testWidgets('the picker\'s busy readings draw no spinner', (tester) async {
+    Future<void> pumpLabel(SeatLayerCheckoutCtaState cta) => tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(child: SeatLayerCheckoutCtaLabel(cta: cta)),
+          ),
+        );
+
+    // Securing the seats is words alone, as the design draws it, and stays
+    // busy so the button stays down.
+    final securing = _cta(_state(busy: SeatLayerPickerBusyAction.creatingHold));
+    await pumpLabel(securing);
+    expect(find.text('Securing your seats…'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(securing.busy, isTrue);
+    expect(securing.enabled, isFalse);
+
+    // A seat card opening over the securing state keeps it words-only too.
+    await pumpLabel(
+      _cta(
+        _state(busy: SeatLayerPickerBusyAction.creatingHold),
+        seatCardOpen: true,
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    // A busy reading a host built itself keeps its spinner.
+    await pumpLabel(
+      const SeatLayerCheckoutCtaState(
+        label: 'Working',
+        enabled: false,
+        busy: true,
+        statesReason: true,
+      ),
+    );
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    // The picker's readings say they are words-only in public, so a host that
+    // rebuilds one with its own label keeps it spinner-free.
+    expect(securing.busyInWords, isTrue);
+    await pumpLabel(
+      SeatLayerCheckoutCtaState(
+        label: 'Holding your seats',
+        enabled: securing.enabled,
+        busy: securing.busy,
+        statesReason: securing.statesReason,
+        busyInWords: securing.busyInWords,
+      ),
+    );
+    expect(find.text('Holding your seats'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    // The seats are held by now: the words say so, with nothing spinning.
+    final handoff = _cta(_state(), handoffInFlight: true);
+    await pumpLabel(handoff);
+    expect(find.text('Seats secured. Opening checkout…'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(handoff.busy, isTrue);
+    expect(handoff.busyInWords, isTrue);
+
+    // A seat card opening over the handoff keeps it words-only.
+    await pumpLabel(_cta(_state(), handoffInFlight: true, seatCardOpen: true));
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  group('the hand-off words', () {
+    String handoff(SeatLayerPickerStrings strings) => seatLayerCheckoutCtaState(
+          state: _state(),
+          strings: strings,
+          label: 'Continue · €25',
+          canCheckout: true,
+          seatCardOpen: false,
+          handoffInFlight: true,
+        ).label;
+
+    test('are the seats-secured sentence by default', () {
+      expect(
+        handoff(const SeatLayerPickerStrings()),
+        'Seats secured. Opening checkout…',
+      );
+    });
+
+    test('keep a host\'s own openingCheckout wording', () {
+      expect(
+        handoff(const SeatLayerPickerStrings(openingCheckout: 'X')),
+        'X',
+      );
+    });
+
+    test('take the new sentence when the host gave both', () {
+      expect(
+        handoff(
+          const SeatLayerPickerStrings(
+            openingCheckout: 'X',
+            seatsSecuredOpeningCheckout: 'Y',
+          ),
+        ),
+        'Y',
+      );
+      expect(
+        handoff(const SeatLayerPickerStrings(seatsSecuredOpeningCheckout: 'Y')),
+        'Y',
+      );
+    });
+
+    test('leave the field itself as given', () {
+      const strings = SeatLayerPickerStrings();
+      expect(strings.openingCheckout, 'Opening secure checkout…');
+      expect(
+        strings.seatsSecuredOpeningCheckout,
+        'Seats secured. Opening checkout…',
+      );
+    });
   });
 
   test('a selection short of the required count asks for the difference', () {

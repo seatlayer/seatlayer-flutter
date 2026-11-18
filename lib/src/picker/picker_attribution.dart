@@ -30,8 +30,9 @@ class SeatLayerPickerAttribution extends StatelessWidget {
     // Read from the picker's own palette, the words were dark ink on a dark
     // sheet, and only the mark survived.
     final theme = seatLayerMapChromeThemeOf(context);
+    final strings = SeatLayerPickerScope.stringsOf(context);
     return Semantics(
-      label: 'Powered by SeatLayer',
+      label: strings.poweredBy,
       child: Opacity(
         opacity: .72,
         child: Padding(
@@ -46,7 +47,7 @@ class SeatLayerPickerAttribution extends StatelessWidget {
               const _SeatLayerPoweredMark(),
               const SizedBox(width: 5),
               Text(
-                'Powered by SeatLayer',
+                strings.poweredBy,
                 style: TextStyle(
                   color: theme.text,
                   fontSize: compact ? 11 : 12,
