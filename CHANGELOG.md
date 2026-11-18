@@ -4,7 +4,8 @@
 
 - **More of the picker in your language:** `SeatLayerPickerStrings.forLocale` now carries the runtime's translation for 77 more strings (status screens, hold and access messages, table and 3D controls, cart labels), and covers 43 locales instead of 37 (adds Hindi, Indonesian, Korean, Malay, Thai and Vietnamese).
 - **Live captions:** the `cart` accessibility provision is CART live captioning; its English default now says "Live captions" instead of "Mobility cart", matching every translation and its CC icon.
-- **Checkout button:** once the seats are held, the second busy state reads "Seats secured. Opening checkout…".
+- **Checkout button:** once the seats are held, the second busy state reads "Seats secured. Opening checkout…". If you set `openingCheckout` and not `seatsSecuredOpeningCheckout`, your `openingCheckout` wording is still drawn there.
+- **Checkout button:** new `SeatLayerCheckoutCtaState.busyInWords` (default false) marks the picker's own busy readings, which are drawn without a spinner; carry it across when you rebuild a reading with your own label.
 - **Test mode:** a tap on the test badge explains it; its screen-reader name is "Test mode · books nothing".
 - **Accessibility sheet:** the two map switches come first, and the provisions follow under a "Show seats for" heading.
 - **3D:** the rotate / move control is a labelled pair, "Rotate venue" and "Move venue", on every width.
