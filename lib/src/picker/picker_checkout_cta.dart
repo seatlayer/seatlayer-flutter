@@ -41,7 +41,9 @@ class SeatLayerCheckoutCtaState {
   /// Whether the buyer may press it.
   final bool enabled;
 
-  /// Whether the button should carry a spinner beside [label].
+  /// Whether something the buyer already asked for is in flight, so the
+  /// button stays down. While the hold is being created it also carries a
+  /// spinner beside [label].
   ///
   /// Only ever true while something the buyer already asked for is in flight —
   /// the hold being created, or the host's checkout opening.
@@ -125,6 +127,7 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
       pendingCount: pendingCount,
       canOfferFind: canOfferFind,
     );
+    if (under is _HandoffCtaState) return under;
     return SeatLayerCheckoutCtaState(
       label: under.label,
       enabled: false,
@@ -145,7 +148,10 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
     return reason(strings.securingSeats, busy: true);
   }
   if (handoffInFlight) {
-    return reason(strings.seatsSecuredOpeningCheckout, busy: true);
+    // The seats are already held, so there is nothing left to wait on but
+    // the host: the words say so, and a spinner beside them would say the
+    // opposite. Still busy, so the button stays down until the host answers.
+    return _HandoffCtaState(label: strings.seatsSecuredOpeningCheckout);
   }
 
   // 5. A selection the event's own rules reject. Say what would fix it where
@@ -300,7 +306,14 @@ class _SeatLayerCheckoutCtaState extends State<SeatLayerCheckoutCta> {
   }
 }
 
-/// The label, with a spinner beside it while the picker is working.
+/// The checkout opening on seats that are already secured: busy, in words
+/// alone.
+class _HandoffCtaState extends SeatLayerCheckoutCtaState {
+  const _HandoffCtaState({required super.label})
+      : super(enabled: false, busy: true, statesReason: true);
+}
+
+/// The label, with a spinner beside it while the hold is being created.
 ///
 /// Shared so the three buttons narrate a hold the same way. The spinner takes
 /// the button's own foreground colour, and the label ellipsizes rather than
@@ -328,7 +341,7 @@ class SeatLayerCheckoutCtaLabel extends StatelessWidget {
       softWrap: false,
       overflow: TextOverflow.ellipsis,
     );
-    if (!cta.busy) return text;
+    if (!cta.busy || cta is _HandoffCtaState) return text;
     // A row lays its non-flexible children out with an unbounded main axis, so
     // the ellipsis above never fires inside one: `Seats secured. Opening checkout…`
     // beside a spinner overran the sheet's own book button by 46 points for as

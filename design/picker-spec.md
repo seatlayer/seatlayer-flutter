@@ -464,9 +464,10 @@ amber as the floor allows rather than driving to maximum contrast.
 **Copy.** Sentence case `strings.testMode`; the accessible name keeps
 `strings.testModeLong`; the description is `strings.testModeExplained`.
 
-**A tap explains it.** Tapping the chip shows `strings.testModeExplained` in the
-platform's own tooltip bubble, which closes on a tap elsewhere or after its
-normal time. No new surface, and nothing else reacts to the tap.
+**A tap explains it.** Tapping the chip shows `strings.testModeExplained` as the
+explainer toast (§3.12): through the one toast queue, announced once, gone after
+`motion.durationOutsideBudget.toastDwell` or on a tap on the toast. Nothing else
+reacts to the tap. The chip is exposed as a button named `strings.testModeLong`.
 
 **Placement.** The map's top-left corner in both 2D and 3D, at
 `size.mapAnchorInset`. It steps down by the back pill's height plus
@@ -613,14 +614,18 @@ row list scrolls within it. (The web bounds its popover to the room above the
 ♿ button *inside the map*, for the mirror-image reason: a panel measured
 against the window opens straight through the ticket sheet below it.)
 
-Its sheet opens upward from the button and contains switch rows:
+Its sheet opens upward from the button. Its title, `strings.accessibilityTitle`,
+is the picker's own type, never the host's: `size.accessSheetTitleFontSize`
+w800, line height 1.2, in `color.*.text` and the picker font. It contains
+switch rows:
 
 - **first**, under the title, the two switches that act on the MAP rather
   than on seats: `strings.hideLimitedView`, only where some seat is restricted
   or obstructed, and `strings.colorblindSafe`. Neither of them reserves a count
   column.
 - then, **under a group heading** `strings.showSeatsFor` in capitals — 11 /
-  w700 in `color.*.mutedText`, letter-spaced .6, inset 8 with 18 above (0 when
+  w700 in `color.*.mutedText`, letter-spaced `size.accessGroupHeadingTracking`
+  em (1.1 at 11), inset 8 with 18 above (0 when
   no map switch is drawn) and 4 below — the provisions (next bullet). The
   heading is what stops the two map switches from reading as two more
   provisions; it is drawn only where at least one provision exists. (`strings.viewGroupTitle` is no
@@ -1878,7 +1883,8 @@ Label ladder, in priority order:
    The card is the question; the footer says nothing about it, so the buyer's
    cart still reads as their cart underneath.
 4. securing → disabled, spinner, `strings.securingSeats`
-5. opening checkout → disabled, spinner, `strings.seatsSecuredOpeningCheckout`
+5. opening checkout → disabled, **no spinner** (words only; the seats are held),
+   `strings.seatsSecuredOpeningCheckout`; still busy, so the button stays down
    (the hold has succeeded by now, so the sentence says so; `strings.openingCheckout`
    stays a public string for a host that composes its own button)
 6. the selection breaks the event's rules → disabled,
@@ -2007,6 +2013,16 @@ a chip. With an action it becomes a row: the sentence, then a pill at
 **Motion.** Rises on `motion.duration.toast` on `motion.curve.easeEnter`, dwells
 for `motion.durationOutsideBudget.toastDwell`, then leaves and resets to
 neutral. One queue: a second toast replaces the first rather than stacking.
+
+**Explainer.** The answer to a tap on the picker's own chrome (today only the
+test chip, §3.4) is a different surface on the same queue, motion and
+announcement: a full-width band at the map's foot, inset `size.mapAnchorInset`
+at each side and 14 above the bottom chrome, ground `color.*.text`, ink
+`color.*.background`, corner `radius.explainerToast`, padding
+`size.explainerToastPaddingY` × `size.explainerToastPaddingX`, text
+`size.explainerToastFontSize` w500 at line height 1.35, wrapping, aligned to
+the reading start; shadow 0 12 30 −12 at black .5. No hairline and no tone.
+A tap on the band dismisses it.
 
 **Accessibility.** A polite live region. A toast is never the only place a
 consequence is stated — anything that outlives 4 seconds also has a persistent
