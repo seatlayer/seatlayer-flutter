@@ -603,19 +603,19 @@ class _SeatLayerPickerAdaptiveLayoutState
                           latch: _mapChromeLatch,
                           children: [
                             Positioned.fill(child: mapSurface),
-                            Positioned(
+                            PositionedDirectional(
                                 top: _mapInset,
-                                left: _mapInset,
+                                start: _mapInset,
                                 child:
                                     SeatLayerMapChromeRegion(child: testBadge)),
-                            Positioned(
+                            PositionedDirectional(
                                 top: _mapInset,
-                                right: _mapInset,
+                                end: _mapInset,
                                 child:
                                     SeatLayerMapChromeRegion(child: controls)),
                             if (chrome.showFloorSelector)
-                              const Positioned(
-                                left: _mapInset,
+                              const PositionedDirectional(
+                                start: _mapInset,
                                 bottom: _mapInset,
                                 child: SeatLayerMapChromeRegion(
                                   child: SeatLayerPickerFloorSelector(),
@@ -868,7 +868,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                       // The immersive scene puts `‹ Back to venue` in this
                       // corner; the badge steps below that pill rather than under
                       // it, and only while the pill is actually drawn.
-                      Positioned(
+                      PositionedDirectional(
                         top: _testBadgeTop(
                           venue3D: venue3DUp,
                           backPill: backPillUp,
@@ -877,7 +877,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                           floorStrip: floorStripUp,
                           floorStripHeight: floorStripHeight,
                         ),
-                        left: _mapInset,
+                        start: _mapInset,
                         child: SeatLayerMapChromeRegion(
                           child: seatLayerReadingOrder(
                             SeatLayerPickerReadingOrder.mapChrome,
@@ -886,9 +886,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                         ),
                       ),
                       if (viewModeControlUp)
-                        Positioned(
+                        PositionedDirectional(
                           top: _railTop,
-                          right: _mapInset,
+                          end: _mapInset,
                           child: seatLayerReadingOrder(
                             // It shares the rail's band, so it is read with the
                             // prices rather than with the map's own corners.
@@ -902,8 +902,8 @@ class _SeatLayerPickerAdaptiveLayoutState
                           ),
                         ),
                       if (chrome.showFloorSelector)
-                        Positioned(
-                          left: _mapInset,
+                        PositionedDirectional(
+                          start: _mapInset,
                           // The map's own bottom-left edge again: the ♿ disc
                           // that used to stand above it moved into the map's
                           // control column on the other side.

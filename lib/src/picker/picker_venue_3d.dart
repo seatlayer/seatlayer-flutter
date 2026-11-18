@@ -103,9 +103,9 @@ class SeatLayerVenue3D extends StatelessWidget {
             : Stack(
                 children: <Widget>[
                   if (targeted)
-                    Positioned(
+                    PositionedDirectional(
                       top: topInset,
-                      left: _anchorInset,
+                      start: _anchorInset,
                       child: _BackPill(
                         label: strings.backToVenue,
                         onPressed: state.isBusy
@@ -119,9 +119,9 @@ class SeatLayerVenue3D extends StatelessWidget {
                                     ),
                       ),
                     ),
-                  Positioned(
+                  PositionedDirectional(
                     top: topInset,
-                    right: _anchorInset,
+                    end: _anchorInset,
                     child: const SeatLayerPicker3DNavigationModeButton(),
                   ),
                   Positioned(

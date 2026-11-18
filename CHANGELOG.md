@@ -12,6 +12,7 @@
 - **Counted sentences in every language's own grammar:** Russian says "Осталось 5 мест" and "Осталось 21 место", and Arabic, Polish, Czech, Lithuanian, Welsh and the rest take every plural form the runtime has, chosen by the locale's own rule for the count.
 - **One English wording:** a few English defaults now say exactly what the runtime says ("More time added. Your seats are still held.", "Drag to rotate the venue", curly apostrophes).
 - **Sold-out prices:** a price with no seats left stays on the price rail, struck through and greyed, and is still a toggle, so a buyer who pinned it can switch the filter off. Only a runtime that counts seats per category is believed at zero.
+- **Right-to-left:** in Arabic, Hebrew, Persian and Kurdish the map's corners mirror with the reading direction: the round controls, the Map / 3D control and the 3D Rotate / Move pair stand on the left, the test badge and the floor picker on the right. The venue itself never mirrors.
 
 ## 0.12.0 (2026-09-25)
 

@@ -250,16 +250,16 @@ class _CornerControls extends StatelessWidget {
     return Stack(
       children: <Widget>[
         if (has3D)
-          Positioned(
+          PositionedDirectional(
             top: inset,
-            right: inset,
+            end: inset,
             child: const SeatLayerMapChromeRegion(
               child: SeatLayerPickerViewModeControl(),
             ),
           ),
         if (bottomLeftColumn.isNotEmpty)
-          Positioned(
-            left: inset,
+          PositionedDirectional(
+            start: inset,
             bottom: bottom,
             child: SeatLayerMapChromeRegion(
               child: _AnchorColumn(
@@ -270,8 +270,8 @@ class _CornerControls extends StatelessWidget {
             ),
           ),
         if (zoomColumn.isNotEmpty)
-          Positioned(
-            right: inset,
+          PositionedDirectional(
+            end: inset,
             bottom: bottom,
             child: SeatLayerMapChromeRegion(
               child: _AnchorColumn(
@@ -286,8 +286,8 @@ class _CornerControls extends StatelessWidget {
         if (onMap &&
             chrome.overviewControlFor(phone: true) &&
             state.snapshot?.map.focusedSection != null)
-          Positioned(
-            left: inset,
+          PositionedDirectional(
+            start: inset,
             top: inset,
             child: const SeatLayerMapChromeRegion(
               child: SeatLayerPickerOverviewButton(),
@@ -630,8 +630,7 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
     final strings = SeatLayerPickerScope.stringsOf(context);
     final busy = controller.state.isBusy;
     Widget segment(SeatLayer3DNavigationMode mode, String label, String hint) {
-      final selected =
-          (mode == SeatLayer3DNavigationMode.move) == moving;
+      final selected = (mode == SeatLayer3DNavigationMode.move) == moving;
       return Semantics(
         button: true,
         selected: selected,

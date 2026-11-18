@@ -114,6 +114,13 @@ Price rail band                            size.topRailHeight          (row)
 Cart sheet (collapsed)          handle + foot + bottom safe area
 ```
 
+**Corners follow the reading direction.** "left" and "right" in the diagram
+are the start and end edges: in a right-to-left locale the test chip, the
+floor rail and the section way-back stand on the right, and the control column,
+the Map | 3D control and the 3D Rotate / Move pair on the left, as the header and
+the price rail already mirror. The venue itself never mirrors: it is the
+runtime's drawing of a real place.
+
 The header, the price rail and the cart sheet are **rows of the same column**:
 the map surface begins and ends where they do. Everything else in the diagram is
 **stacked on the map**.
