@@ -103,6 +103,9 @@ abstract final class SeatLayerStringTokens {
   /// All prices
   static const String allPrices = 'All prices';
 
+  /// Ticket prices
+  static const String ticketPrices = 'Ticket prices';
+
   /// Ticket type
   static const String ticketType = 'Ticket type';
 
@@ -168,6 +171,9 @@ abstract final class SeatLayerStringTokens {
 
   /// Secure more
   static const String secureMore = 'Secure more';
+
+  /// Your seats
+  static const String yourSeats = 'Your seats';
 
   /// No seats selected
   static const String noSeatsSelected = 'No seats selected';

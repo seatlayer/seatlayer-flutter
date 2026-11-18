@@ -25,6 +25,7 @@ import 'picker_header.dart';
 import 'picker_legend.dart';
 import 'picker_map_controls.dart';
 import 'picker_venue_3d.dart';
+import 'picker_wide_panel.dart';
 import 'picker_dock_bar.dart';
 import 'picker_floor_strip.dart';
 import 'picker_haptics.dart';
@@ -270,6 +271,10 @@ class _SeatLayerPickerAdaptiveLayoutState
                     ? SeatLayerPriceLegend(compact: !wide)
                     : const SizedBox.shrink(),
               );
+        // The panel names the prices only while there are prices under it.
+        final pricesUp = !panoramaUp &&
+            chrome.showPriceRail &&
+            state.categories.any((category) => !category.notForSale);
         final sections = _part(
           context,
           widget.builders.sectionNavigator,
@@ -657,15 +662,20 @@ class _SeatLayerPickerAdaptiveLayoutState
                         ),
                       ),
                       Container(
-                        width: 360,
+                        width: SeatLayerSizeTokens.widePanelWidth,
                         decoration: BoxDecoration(
                           color: resolved.surface,
-                          border: Border(
-                            left: BorderSide(color: resolved.divider),
+                          // The edge that meets the map: the start edge, so
+                          // the hairline follows the panel to the left in a
+                          // right-to-left language.
+                          border: BorderDirectional(
+                            start: BorderSide(color: resolved.divider),
                           ),
                         ),
                         child: Column(
                           children: [
+                            if (pricesUp)
+                              SeatLayerWidePanelHeading(strings.ticketPrices),
                             prices,
                             // Beside the map rather than on it, so the wide
                             // layout reports no band for it.
@@ -675,6 +685,10 @@ class _SeatLayerPickerAdaptiveLayoutState
                                 child: floorStrip,
                               ),
                             sections,
+                            if (state.phase !=
+                                SeatLayerPickerPhase.initializing)
+                              SeatLayerWidePanelHeading.seats(
+                                  strings.yourSeats),
                             // The filter control used to be repeated here,
                             // under the best-seats card, while a second copy
                             // stood in the map's bottom-left corner. One
@@ -685,14 +699,10 @@ class _SeatLayerPickerAdaptiveLayoutState
                             ),
                             Expanded(child: SingleChildScrollView(child: tray)),
                             actionError,
-                            const Padding(
-                              padding: EdgeInsetsDirectional.only(end: 8),
-                              child: Align(
-                                alignment: AlignmentDirectional.centerEnd,
-                                child: attribution,
-                              ),
+                            SeatLayerWidePanelFoot(
+                              checkout: checkout,
+                              attribution: attribution,
                             ),
-                            checkout,
                           ],
                         ),
                       ),

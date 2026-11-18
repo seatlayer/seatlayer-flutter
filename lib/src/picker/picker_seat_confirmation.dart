@@ -565,7 +565,9 @@ class _SeatIdentityField extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label.toUpperCase(),
+            // Drawn as given. Upper-casing in code is not a language's own
+            // capitals: Turkish `i` becomes `I` rather than `İ`.
+            label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(

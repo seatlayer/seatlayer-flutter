@@ -273,6 +273,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   seeItIn3D: 'Ei weld mewn 3D',
   viewFromThisSeat: 'Golygfa o\'r sedd hon',
   allPrices: 'Pob pris',
+  ticketPrices: 'Prisiau tocynnau',
+  yourSeats: 'Dy seddi',
   ticketType: 'Math o docyn',
   tierCompanionGuidance: 'Mae angen y lle cadair olwyn cyfagos',
   findingBestSeats: 'Yn chwilio am y seddi gorau…',

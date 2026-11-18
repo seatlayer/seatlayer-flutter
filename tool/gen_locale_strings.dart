@@ -78,6 +78,8 @@ const List<String> _plainFields = <String>[
   'seeItIn3D',
   'viewFromThisSeat',
   'allPrices',
+  'ticketPrices',
+  'yourSeats',
   'ticketType',
   'tierCompanionGuidance',
   'findingBestSeats',

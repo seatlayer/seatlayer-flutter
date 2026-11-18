@@ -263,6 +263,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   seeItIn3D: 'شاهده بثلاثة أبعاد',
   viewFromThisSeat: 'المشهد من هذا المقعد',
   allPrices: 'جميع الأسعار',
+  ticketPrices: 'أسعار التذاكر',
+  yourSeats: 'مقاعدك',
   ticketType: 'نوع التذكرة',
   tierCompanionGuidance: 'يتطلب مكان الكرسي المتحرك المجاور',
   findingBestSeats: 'جارٍ البحث عن أفضل المقاعد…',

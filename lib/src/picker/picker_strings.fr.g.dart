@@ -225,6 +225,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFr = SeatLayerPickerStrings(
   seeItIn3D: 'Voir en 3D',
   viewFromThisSeat: 'Vue depuis cette place',
   allPrices: 'Tous les prix',
+  ticketPrices: 'Prix des billets',
+  yourSeats: 'Vos places',
   ticketType: 'Type de billet',
   tierCompanionGuidance: 'Nécessite la place fauteuil roulant adjacente',
   findingBestSeats: 'Recherche des meilleures places…',

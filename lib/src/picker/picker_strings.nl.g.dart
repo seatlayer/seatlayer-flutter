@@ -205,6 +205,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   seeItIn3D: 'Bekijk in 3D',
   viewFromThisSeat: 'Uitzicht vanaf deze plaats',
   allPrices: 'Alle prijzen',
+  ticketPrices: 'Ticketprijzen',
+  yourSeats: 'Jouw plaatsen',
   ticketType: 'Tickettype',
   tierCompanionGuidance: 'Vereist de aangrenzende rolstoelplaats',
   findingBestSeats: 'De beste plaatsen worden gezocht…',

@@ -218,6 +218,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   seeItIn3D: 'Vezi în 3D',
   viewFromThisSeat: 'Priveliștea de la acest loc',
   allPrices: 'Toate prețurile',
+  ticketPrices: 'Prețurile biletelor',
+  yourSeats: 'Locurile tale',
   ticketType: 'Tip de bilet',
   tierCompanionGuidance: 'Necesită locul alăturat pentru scaun cu rotile',
   findingBestSeats: 'Căutăm cele mai bune locuri…',

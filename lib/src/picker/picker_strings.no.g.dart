@@ -199,6 +199,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   seeItIn3D: 'Se den i 3D',
   viewFromThisSeat: 'Utsikt fra denne plassen',
   allPrices: 'Alle priser',
+  ticketPrices: 'Billettpriser',
+  yourSeats: 'Plassene dine',
   ticketType: 'Billettype',
   tierCompanionGuidance: 'Krever den tilstøtende rullestolplassen',
   findingBestSeats: 'Finner de beste plassene…',

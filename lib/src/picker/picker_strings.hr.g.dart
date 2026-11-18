@@ -219,6 +219,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   seeItIn3D: 'Pogledaj u 3D-u',
   viewFromThisSeat: 'Pogled s ovog mjesta',
   allPrices: 'Sve cijene',
+  ticketPrices: 'Cijene ulaznica',
+  yourSeats: 'Vaša mjesta',
   ticketType: 'Vrsta ulaznice',
   tierCompanionGuidance: 'Zahtijeva susjedno mjesto za invalidska kolica',
   findingBestSeats: 'Tražimo najbolja mjesta…',

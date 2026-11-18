@@ -218,6 +218,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   seeItIn3D: 'Skatīt 3D',
   viewFromThisSeat: 'Skats no šīs vietas',
   allPrices: 'Visas cenas',
+  ticketPrices: 'Biļešu cenas',
+  yourSeats: 'Jūsu vietas',
   ticketType: 'Biļetes veids',
   tierCompanionGuidance: 'Nepieciešama blakus esošā ratiņkrēsla vieta',
   findingBestSeats: 'Meklējam labākās vietas…',

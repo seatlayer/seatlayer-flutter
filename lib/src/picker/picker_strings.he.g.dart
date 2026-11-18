@@ -212,6 +212,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   seeItIn3D: 'לראות בתלת־ממד',
   viewFromThisSeat: 'הנוף מהמושב הזה',
   allPrices: 'כל המחירים',
+  ticketPrices: 'מחירי כרטיסים',
+  yourSeats: 'המושבים שלכם',
   ticketType: 'סוג כרטיס',
   tierCompanionGuidance: 'נדרש מקום הכיסא הגלגלים הסמוך',
   findingBestSeats: 'מחפשים את המושבים הטובים ביותר…',

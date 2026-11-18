@@ -236,6 +236,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsSk = SeatLayerPickerStrings(
   seeItIn3D: 'Zobraziť v 3D',
   viewFromThisSeat: 'Výhľad z tohto miesta',
   allPrices: 'Všetky ceny',
+  ticketPrices: 'Ceny vstupeniek',
+  yourSeats: 'Vaše miesta',
   ticketType: 'Typ vstupenky',
   tierCompanionGuidance: 'Vyžaduje susedné miesto pre vozík',
   findingBestSeats: 'Hľadáme najlepšie miesta…',

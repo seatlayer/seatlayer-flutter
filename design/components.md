@@ -125,6 +125,35 @@ surface begins and ends where they do. Everything else in the diagram stands on
 the map and is reported to the runtime as viewport insets — see
 [`picker-spec.md`](./picker-spec.md) §2.3.
 
+The wide composition puts the cart beside the map, in a panel
+`size.widePanelWidth` wide at the end edge, with a `color.*.divider` hairline
+on its start edge (on the left of the map in a left-to-right language, on its
+right in Arabic):
+
+```
+Header   name over "date · venue"        sales-closed pill · HoldPill · close
+┌ map surface ──────────────────────────┐┌ panel ───────────────────────┐
+│ TestModeBadge (top-start)              ││ "Ticket prices"   heading    │
+│ control column (top-end), top down:    ││ PriceLegend                  │
+│   Venue (only while a section is up)   ││ FloorStrip (multi-floor)     │
+│   ViewModeControl · 3D Rotate / Move   ││ "Your seats"      heading    │
+│   accessibility · `+` · `−`            ││ best-seats card              │
+│ floor selector (bottom-start)          ││ CartList (scrolls)           │
+│ seat card / prompts / status overlay   ││ checkout bar                 │
+└────────────────────────────────────────┘│ Powered by SeatLayer         │
+                                          └──────────────────────────────┘
+```
+
+**Wide panel headings** (`picker_wide_panel.dart`, not exported):
+`strings.ticketPrices` over the prices, only while a for-sale category exists,
+and `strings.yourSeats` over the best-seats card and the cart, except while the
+picker is still loading. `size.widePanelHeadingFontSize` at w700 in
+`color.*.mutedText`, padded `size.widePanelPadX` at the sides,
+`size.widePanelHeadingPadTop` above (`size.widePanelSeatsHeadingPadTop` above
+"Your seats") and `size.widePanelHeadingPadBottom` below. Drawn as given (never upper-cased in code) and exposed as headings to
+screen readers. The credit closes the panel, under the checkout bar, and the
+device's bottom inset is taken once, under the credit.
+
 ---
 
 ## Header
@@ -132,9 +161,12 @@ the map and is reported to the runtime as viewport insets — see
 **Name** `SeatLayerPickerHeader` · **Style slot** `headerStyle` · **Instance
 override** `style:`
 
-- **Inputs** `event.name`, `event.venue`, `branding.logo`, `hold`.
-- **States** compact (phone, one line) / full (wide, two lines); with and
-  without a hold.
+- **Inputs** `event.name`, `event.venue`, `event.startsAtLabel`,
+  `branding.logo`, `hold`.
+- **States** compact (phone, one line) / full (wide, two lines: the name, then
+  `event.startsAtLabel` and `event.venue` joined by ` · `); with and without a
+  hold. No label, no date: `event.startsAt` is an instant and is never
+  formatted on the device, whose time zone may not be the event's.
 - **Anatomy** `size.headerHeight` tall, ground `color.*.surface`, elevation
   `elevation.header`. Left: brand tile `size.headerLogoSize`. Centre: event
   name, `type.headerTitle`, ellipsized. Right: the HoldPill, then the dismiss
@@ -228,11 +260,10 @@ substitutes an emoji or a platform icon. An unknown key draws nothing.
   `size.dockBarHeight` only where a host opted into a dock; by default no
   width mounts one. The accessible-section stepper sits beside the accessibility
   control, `size.accessStepGap` from it, on its inner side.
-- **The ♿ control heads the column** (2026-09-06). It stood alone in the
-  bottom-left region, opposite the stack of discs, and the wide composition
-  drew it a second time in its side panel. Who can sit where is an earlier
-  question than how close the camera is, so it is the disc above `+`, once,
-  on both widths.
+- **The ♿ control is the disc above `+`** on both widths (2026-09-06). It
+  stood alone in the bottom-left region, opposite the stack of discs, and the
+  wide composition drew it a second time in its side panel. On the phone it
+  heads the column; on wide the Map | 3D control is above it.
 - **Phone column** exactly three, `size.zoomColumnGap` apart, top to bottom:
   the ♿ control, `+` (`picker.zoomIn`) and a framed dot,
   `strings.fitWholeVenue`, that shows the whole venue from any depth via
@@ -261,6 +292,13 @@ substitutes an emoji or a platform icon. An unknown key draws nothing.
   dark `chrome` is `#556278` with the pale one. Dark separates by the fill (2.96:1 against the
   map), light by the edge (3.72:1 against the disc). Applies to every floating
   control, the accessibility disc and the Map/3D track included.
+- **Wide column**, top to bottom: the way back to the venue
+  (`SeatLayerPickerOverviewButton`, only while a section is framed, so it
+  joins the top and moves nothing below it), the Map | 3D control, the 3D
+  Rotate / Move pair while the scene is up, the ♿ control, `+`, `−`. The
+  standalone colourblind toggle (`SeatLayerPickerColorblindButton`) is off by
+  default on both widths — the palette is a switch in the display options —
+  and a host's `showColorblindControl: true` puts it last.
 - **Wide** `+` and `−` under the same ♿ disc, and no fit control of its own:
   `SeatLayerPickerZoomToFitButton` left the rail on 2026-09-06 and stays a
   public component for a host that mounts it itself. The immersive scene keeps

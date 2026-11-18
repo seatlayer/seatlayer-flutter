@@ -235,6 +235,14 @@ class _EventTitle extends StatelessWidget {
         ),
       );
     }
+    // When, then where. The date is drawn only from the label the runtime
+    // writes in the event's own time zone: `startsAt` is an instant, and
+    // formatting it here would print the device's hour, which for a buyer
+    // abroad is a wrong time — worse than no time at all.
+    final details = <String>[
+      for (final part in <String?>[event?.startsAtLabel, event?.venue])
+        if (part != null && part.trim().isNotEmpty) part.trim(),
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -250,9 +258,9 @@ class _EventTitle extends StatelessWidget {
             fontFamily: theme.fontFamily,
           ),
         ),
-        if (event?.venue != null)
+        if (details.isNotEmpty)
           Text(
-            event!.venue!,
+            details.join(' · '),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(

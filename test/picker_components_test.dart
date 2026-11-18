@@ -493,11 +493,11 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pump();
 
-    expect(find.text('SECTION'), findsOneWidget);
+    expect(find.text('Section'), findsOneWidget);
     expect(find.text('Gallery'), findsOneWidget);
-    expect(find.text('ROW'), findsOneWidget);
+    expect(find.text('Row'), findsOneWidget);
     expect(find.text('A'), findsOneWidget);
-    expect(find.text('SEAT'), findsOneWidget);
+    expect(find.text('Seat'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
     expect(find.text('Standard'), findsOneWidget);
     expect(find.text('€25'), findsOneWidget);

@@ -197,6 +197,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   seeItIn3D: 'Megnézem 3D-ben',
   viewFromThisSeat: 'Kilátás erről a helyről',
   allPrices: 'Minden ár',
+  ticketPrices: 'Jegyárak',
+  yourSeats: 'A helyeid',
   ticketType: 'Jegytípus',
   tierCompanionGuidance: 'A szomszédos kerekesszékes helyet igényli',
   findingBestSeats: 'A legjobb helyeket keressük…',

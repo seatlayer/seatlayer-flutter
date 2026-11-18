@@ -55,6 +55,7 @@ class SeatLayerPickerEventDetails {
     this.venue,
     this.startsAt,
     this.timezone,
+    this.startsAtLabel,
     this.locale,
     this.posterUrl,
     this.salesClosed = false,
@@ -67,6 +68,14 @@ class SeatLayerPickerEventDetails {
   final String? venue;
   final double? startsAt;
   final String? timezone;
+
+  /// The start written out for a buyer, in the event's own time zone and the
+  /// picker's language — for example `Sat 15 Aug · 15:00`.
+  ///
+  /// The wide header draws it before the venue. It is never derived here from
+  /// [startsAt]: that is an instant, and printing it in the device's zone
+  /// would show a travelling buyer the wrong hour. Null draws no date at all.
+  final String? startsAtLabel;
   final String? locale;
   final String? posterUrl;
   final bool salesClosed;
@@ -82,6 +91,7 @@ class SeatLayerPickerEventDetails {
       venue: jStr(jGet(value, 'venue')),
       startsAt: jDouble(jGet(value, 'startsAt')),
       timezone: jStr(jGet(value, 'timezone')),
+      startsAtLabel: jStr(jGet(value, 'startsAtLabel')),
       locale: jStr(jGet(value, 'locale')),
       posterUrl: jStr(jGet(value, 'posterUrl')),
       salesClosed: jBool(jGet(value, 'salesClosed')) ?? false,

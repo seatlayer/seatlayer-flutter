@@ -238,6 +238,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   seeItIn3D: 'Паглядзець у 3D',
   viewFromThisSeat: 'Від з гэтага месца',
   allPrices: 'Усе цэны',
+  ticketPrices: 'Цэны білетаў',
+  yourSeats: 'Вашы месцы',
   ticketType: 'Тып білета',
   tierCompanionGuidance: 'Патрабуецца суседняе месца для калянкі',
   findingBestSeats: 'Шукаем лепшыя месцы…',
