@@ -58,6 +58,9 @@ final Map<String, String Function(int) Function(SeatLayerPickerStrings)>
   'accessibleSections': (s) => s.accessibleSections,
   'placesAvailable': (s) => s.placesAvailable,
   'seatsNotRecovered': (s) => s.seatsNotRecovered,
+  'activeFilters': (s) => s.activeFilters,
+  'accessibilityFiltersActive': (s) => s.accessibilityFiltersActive,
+  'onlyLeft': (s) => s.onlyLeft,
 };
 
 const List<String> _probeLocales = <String>['en', 'de', 'pl', 'ar', 'ja'];
@@ -190,8 +193,12 @@ void main() {
     }
   });
 
-  test('no locale has a filters sentence yet, so all draw English', () {
-    expect(_strings('de').activeFilters(2), '2 filters');
+  test('the filters sentences come from the app strings', () {
+    expect(_strings('de').activeFilters(2), '2 Filter');
+    expect(_strings('pl').activeFilters(5), '5 filtrów');
+    expect(_strings('pl').accessibilityFiltersActive(2),
+        '2 aktywne filtry dostępności');
+    expect(_strings('ja').activeFilters(3), '絞り込み3件');
   });
 
   test('Norwegian Bokmål devices get the Norwegian strings', () {

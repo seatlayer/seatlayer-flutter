@@ -41,6 +41,8 @@ String _chooseMoreNo(int count) => 'Velg $count til';
 String _seatsHeldForNeedMoreTimeNo(String time) =>
     'Plassene dine er reservert i $time. Trenger du mer tid?';
 
+String _accessNeedWithCountNo(String need, int count) => '$need · $count';
+
 String _ticketCountNo(int count) => switch (pickerPluralCategory('no', count)) {
   PickerPluralCategory.one => '$count billett',
   _ => '$count billetter',
@@ -139,6 +141,23 @@ String _seatsNotRecoveredNo(int count) =>
       PickerPluralCategory.one => '$count plass kunne ikke reserveres igjen',
       _ => '$count plasser kunne ikke reserveres igjen',
     };
+
+String _activeFiltersNo(int count) =>
+    switch (pickerPluralCategory('no', count)) {
+      PickerPluralCategory.one => '$count filter',
+      _ => '$count filtre',
+    };
+
+String _accessibilityFiltersActiveNo(int count) =>
+    switch (pickerPluralCategory('no', count)) {
+      PickerPluralCategory.one => '$count tilgjengelighetsfilter er aktivt',
+      _ => '$count tilgjengelighetsfiltre er aktive',
+    };
+
+String _onlyLeftNo(int count) => switch (pickerPluralCategory('no', count)) {
+  PickerPluralCategory.one => '$count plass igjen',
+  _ => '$count plasser igjen',
+};
 
 String _continueWithTotalNo(String money) => 'Fortsett \u00b7 $money';
 
@@ -267,6 +286,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   removeWord: 'Fjern',
   floorWord: 'Etasje',
   totalWord: 'Totalt',
+  adjustSelection: 'Juster plassvalget',
   chooseSeats: 'Velg plassene dine',
   chooseTickets: 'Velg billetter',
   placeWord: 'PLASS',
@@ -301,6 +321,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
       'Last inn setekartet på nytt for å fortsette. Plasser som allerede ligger i handlekurven din, forblir reservert til tiden er ute.',
   dismissError: 'Lukk feilmelding',
   testModeLong: 'Testmodus · ingenting bestilles',
+  seatRemoved: 'Billett fjernet',
+  reloadSeatMap: 'Last inn setekartet på nytt',
   accessNeeds: <String, String>{
     'wheelchair': 'Rullestolplass',
     'companion': 'Ledsagerplass',
@@ -329,6 +351,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsNo,
   chooseMore: _chooseMoreNo,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeNo,
+  accessNeedWithCount: _accessNeedWithCountNo,
   ticketCount: _ticketCountNo,
   findBestSeats: _findBestSeatsNo,
   reselectSeats: _reselectSeatsNo,
@@ -344,5 +367,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftNo,
   holdLapsedBody: _holdLapsedBodyNo,
   seatsNotRecovered: _seatsNotRecoveredNo,
+  activeFilters: _activeFiltersNo,
+  accessibilityFiltersActive: _accessibilityFiltersActiveNo,
+  onlyLeft: _onlyLeftNo,
   continueWithTotal: _continueWithTotalNo,
 );

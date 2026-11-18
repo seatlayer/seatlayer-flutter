@@ -41,6 +41,8 @@ String _chooseMoreAr(int count) => 'اختر $count إضافية';
 String _seatsHeldForNeedMoreTimeAr(String time) =>
     'مقاعدك محجوزة مؤقتًا لمدة $time. هل تحتاج إلى مزيد من الوقت؟';
 
+String _accessNeedWithCountAr(String need, int count) => '$need · $count';
+
 String _ticketCountAr(int count) => switch (pickerPluralCategory('ar', count)) {
   PickerPluralCategory.zero => '$count تذكرة',
   PickerPluralCategory.one => '$count تذكرة',
@@ -204,6 +206,35 @@ String _seatsNotRecoveredAr(int count) =>
       _ => 'تعذّرت استعادة $count مقعد',
     };
 
+String _activeFiltersAr(int count) =>
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => '$count عامل تصفية',
+      PickerPluralCategory.one => '$count عامل تصفية',
+      PickerPluralCategory.two => '$count عاملا تصفية',
+      PickerPluralCategory.few => '$count عوامل تصفية',
+      PickerPluralCategory.many => '$count عامل تصفية',
+      _ => '$count عامل تصفية',
+    };
+
+String _accessibilityFiltersActiveAr(int count) =>
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => '$count عامل تصفية مفعّل لإمكانية الوصول',
+      PickerPluralCategory.one => '$count عامل تصفية مفعّل لإمكانية الوصول',
+      PickerPluralCategory.two => '$count عاملا تصفية مفعّلان لإمكانية الوصول',
+      PickerPluralCategory.few => '$count عوامل تصفية مفعّلة لإمكانية الوصول',
+      PickerPluralCategory.many => '$count عامل تصفية مفعّل لإمكانية الوصول',
+      _ => '$count عامل تصفية مفعّل لإمكانية الوصول',
+    };
+
+String _onlyLeftAr(int count) => switch (pickerPluralCategory('ar', count)) {
+  PickerPluralCategory.zero => 'بقي $count مقعد',
+  PickerPluralCategory.one => 'بقي $count مقعد',
+  PickerPluralCategory.two => 'بقي $count مقعدان',
+  PickerPluralCategory.few => 'بقيت $count مقاعد',
+  PickerPluralCategory.many => 'بقي $count مقعدًا',
+  _ => 'بقي $count مقعد',
+};
+
 String _continueWithTotalAr(String money) => 'متابعة \u00b7 $money';
 
 /// The `ar` defaults for the native picker chrome.
@@ -328,6 +359,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   removeWord: 'إزالة',
   floorWord: 'الطابق',
   totalWord: 'الإجمالي',
+  adjustSelection: 'تعديل اختيار المقاعد',
   chooseSeats: 'اختر مقاعدك',
   chooseTickets: 'اختر التذاكر',
   placeWord: 'مكان',
@@ -362,6 +394,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
       'أعد تحميل خريطة المقاعد للمتابعة. المقاعد الموجودة في سلتك تبقى محجوزة حتى ينتهي المؤقت.',
   dismissError: 'إغلاق رسالة الخطأ',
   testModeLong: 'وضع الاختبار · لا يُحجز أي شيء',
+  seatRemoved: 'تمت إزالة التذكرة',
+  reloadSeatMap: 'إعادة تحميل خريطة المقاعد',
   accessNeeds: <String, String>{
     'wheelchair': 'مكان لكرسي متحرك',
     'companion': 'مقعد مرافق',
@@ -390,6 +424,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsAr,
   chooseMore: _chooseMoreAr,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeAr,
+  accessNeedWithCount: _accessNeedWithCountAr,
   ticketCount: _ticketCountAr,
   findBestSeats: _findBestSeatsAr,
   reselectSeats: _reselectSeatsAr,
@@ -405,5 +440,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftAr,
   holdLapsedBody: _holdLapsedBodyAr,
   seatsNotRecovered: _seatsNotRecoveredAr,
+  activeFilters: _activeFiltersAr,
+  accessibilityFiltersActive: _accessibilityFiltersActiveAr,
+  onlyLeft: _onlyLeftAr,
   continueWithTotal: _continueWithTotalAr,
 );

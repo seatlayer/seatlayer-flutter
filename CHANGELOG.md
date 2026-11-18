@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **More strings in your language:** `activeFilters`, `accessibilityFiltersActive`, `seatRemoved`, `reloadSeatMap`, `adjustSelection`, `accessNeedWithCount` and `onlyLeft` now carry the runtime's translations, with every plural form each locale uses. `backToSeatMap` takes the runtime's translation once its dictionaries carry it, and draws English until then.
+- **Wording:** `adjustSelection` now reads "Adjust seat selection" (was "Adjust your selection"), and `onlyLeft` reads "8 seats left" (was "Only 8 left"), counted like `seatsLeftInSection`. The extend-hold button keeps drawing `addMinutes` with the amount one tap adds ("+5 min"); `addTime` ("Add time") is still not drawn by the picker.
 - **More of the picker in your language:** `SeatLayerPickerStrings.forLocale` now carries the runtime's translation for 77 more strings (status screens, hold and access messages, table and 3D controls, cart labels), and covers 43 locales instead of 37 (adds Hindi, Indonesian, Korean, Malay, Thai and Vietnamese).
 - **Live captions:** the `cart` accessibility provision is CART live captioning; its English default now says "Live captions" instead of "Mobility cart", matching every translation and its CC icon.
 - **Checkout button:** once the seats are held, the second busy state reads "Seats secured. Opening checkout…". If you set `openingCheckout` and not `seatsSecuredOpeningCheckout`, your `openingCheckout` wording is still drawn there.

@@ -41,6 +41,8 @@ String _chooseMoreLv(int count) => 'Izvēlēties vēl $count';
 String _seatsHeldForNeedMoreTimeLv(String time) =>
     'Jūsu vietas rezervētas vēl $time. Vai nepieciešams vairāk laika?';
 
+String _accessNeedWithCountLv(String need, int count) => '$need · $count';
+
 String _ticketCountLv(int count) => switch (pickerPluralCategory('lv', count)) {
   PickerPluralCategory.zero => '$count biļešu',
   PickerPluralCategory.one => '$count biļete',
@@ -158,6 +160,26 @@ String _seatsNotRecoveredLv(int count) =>
       PickerPluralCategory.one => '$count vietu neizdevās atgūt',
       _ => '$count vietas neizdevās atgūt',
     };
+
+String _activeFiltersLv(int count) =>
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => '$count filtri',
+      PickerPluralCategory.one => '$count filtrs',
+      _ => '$count filtri',
+    };
+
+String _accessibilityFiltersActiveLv(int count) =>
+    switch (pickerPluralCategory('lv', count)) {
+      PickerPluralCategory.zero => '$count pieejamības filtri ir ieslēgti',
+      PickerPluralCategory.one => '$count pieejamības filtrs ir ieslēgts',
+      _ => '$count pieejamības filtri ir ieslēgti',
+    };
+
+String _onlyLeftLv(int count) => switch (pickerPluralCategory('lv', count)) {
+  PickerPluralCategory.zero => 'Atlikušas $count vietu',
+  PickerPluralCategory.one => 'Atlikusi $count vieta',
+  _ => 'Atlikušas $count vietas',
+};
 
 String _continueWithTotalLv(String money) => 'Turpināt \u00b7 $money';
 
@@ -287,6 +309,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   removeWord: 'Noņemt',
   floorWord: 'Stāvs',
   totalWord: 'Kopā',
+  adjustSelection: 'Pielāgot vietu izvēli',
   chooseSeats: 'Izvēlieties savas vietas',
   chooseTickets: 'Izvēlieties biļetes',
   placeWord: 'VIETA',
@@ -321,6 +344,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
       'Pārlādējiet vietu plānu, lai turpinātu. Vietas, kas jau ir jūsu grozā, paliek rezervētas, līdz beidzas taimeris.',
   dismissError: 'Aizvērt kļūdas paziņojumu',
   testModeLong: 'Testa režīms · nekas netiek rezervēts',
+  seatRemoved: 'Biļete noņemta',
+  reloadSeatMap: 'Pārlādēt vietu plānu',
   accessNeeds: <String, String>{
     'wheelchair': 'Ratiņkrēsla vieta',
     'companion': 'Pavadoņa vieta',
@@ -349,6 +374,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsLv,
   chooseMore: _chooseMoreLv,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeLv,
+  accessNeedWithCount: _accessNeedWithCountLv,
   ticketCount: _ticketCountLv,
   findBestSeats: _findBestSeatsLv,
   reselectSeats: _reselectSeatsLv,
@@ -364,5 +390,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftLv,
   holdLapsedBody: _holdLapsedBodyLv,
   seatsNotRecovered: _seatsNotRecoveredLv,
+  activeFilters: _activeFiltersLv,
+  accessibilityFiltersActive: _accessibilityFiltersActiveLv,
+  onlyLeft: _onlyLeftLv,
   continueWithTotal: _continueWithTotalLv,
 );

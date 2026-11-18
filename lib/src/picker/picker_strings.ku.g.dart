@@ -42,6 +42,8 @@ String _chooseMoreKu(int count) => '$count din hilbijêre';
 String _seatsHeldForNeedMoreTimeKu(String time) =>
     'Cihên te ji bo $time hatine girtin. Dema zêdetir lazim e?';
 
+String _accessNeedWithCountKu(String need, int count) => '$need · $count';
+
 String _ticketCountKu(int count) => switch (pickerPluralCategory('ku', count)) {
   PickerPluralCategory.one => '$count bilêt',
   _ => '$count bilêt',
@@ -139,6 +141,23 @@ String _seatsNotRecoveredKu(int count) =>
       PickerPluralCategory.one => '$count cih nehat vegerandin',
       _ => '$count cih nehatin vegerandin',
     };
+
+String _activeFiltersKu(int count) =>
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => '$count fîltre',
+      _ => '$count fîltre',
+    };
+
+String _accessibilityFiltersActiveKu(int count) =>
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => '$count fîltreya gihîştbariyê çalak e',
+      _ => '$count fîltreyên gihîştbariyê çalak in',
+    };
+
+String _onlyLeftKu(int count) => switch (pickerPluralCategory('ku', count)) {
+  PickerPluralCategory.one => '$count cih maye',
+  _ => '$count cih mane',
+};
 
 String _continueWithTotalKu(String money) => 'Berdewam bike \u00b7 $money';
 
@@ -267,6 +286,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   removeWord: 'Rake',
   floorWord: 'Qat',
   totalWord: 'Tevahî',
+  adjustSelection: 'Hilbijartina cihan sererast bike',
   chooseSeats: 'Cihên xwe hilbijêre',
   chooseTickets: 'Bilêtan hilbijêre',
   placeWord: 'CIH',
@@ -301,6 +321,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
       'Ji bo berdewamkirinê nexşeya cihan ji nû ve bar bike. Cihên ku jixwe di selika te de ne heta ku demjimêr biqede girtî dimînin.',
   dismissError: 'Çewtiyê bigire',
   testModeLong: 'Moda ceribandinê · tiştek nayê rezervekirin',
+  seatRemoved: 'Bilêt hat rakirin',
+  reloadSeatMap: 'Nexşeya cihan ji nû ve bar bike',
   accessNeeds: <String, String>{
     'wheelchair': 'Cihê kursiya teker',
     'companion': 'Cihê hevaltiyê',
@@ -329,6 +351,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsKu,
   chooseMore: _chooseMoreKu,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeKu,
+  accessNeedWithCount: _accessNeedWithCountKu,
   ticketCount: _ticketCountKu,
   findBestSeats: _findBestSeatsKu,
   reselectSeats: _reselectSeatsKu,
@@ -344,5 +367,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftKu,
   holdLapsedBody: _holdLapsedBodyKu,
   seatsNotRecovered: _seatsNotRecoveredKu,
+  activeFilters: _activeFiltersKu,
+  accessibilityFiltersActive: _accessibilityFiltersActiveKu,
+  onlyLeft: _onlyLeftKu,
   continueWithTotal: _continueWithTotalKu,
 );

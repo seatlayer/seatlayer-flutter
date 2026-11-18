@@ -213,8 +213,8 @@ abstract final class SeatLayerStringTokens {
   /// Opening secure checkout…
   static const String openingCheckout = 'Opening secure checkout…';
 
-  /// Adjust your selection
-  static const String adjustSelection = 'Adjust your selection';
+  /// Adjust seat selection
+  static const String adjustSelection = 'Adjust seat selection';
 
   /// Powered by SeatLayer
   static const String poweredBy = 'Powered by SeatLayer';
@@ -530,8 +530,11 @@ abstract final class SeatLayerStringTokens {
   /// {count} seats left
   static const String seatsLeftInSectionOther = '{count} seats left';
 
-  /// Only {count} left
-  static const String onlyLeft = 'Only {count} left';
+  /// {count} seat left
+  static const String onlyLeftOne = '{count} seat left';
+
+  /// {count} seats left
+  static const String onlyLeftOther = '{count} seats left';
 
   /// Choose {count} more
   static const String chooseMore = 'Choose {count} more';

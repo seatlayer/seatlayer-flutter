@@ -42,6 +42,8 @@ String _chooseMoreDe(int count) => 'Noch $count wählen';
 String _seatsHeldForNeedMoreTimeDe(String time) =>
     'Ihre Plätze sind für $time reserviert. Brauchen Sie mehr Zeit?';
 
+String _accessNeedWithCountDe(String need, int count) => '$need · $count';
+
 String _ticketCountDe(int count) => switch (pickerPluralCategory('de', count)) {
   PickerPluralCategory.one => '$count Ticket',
   _ => '$count Tickets',
@@ -144,6 +146,23 @@ String _seatsNotRecoveredDe(int count) =>
         '$count Platz konnte nicht wieder reserviert werden',
       _ => '$count Plätze konnten nicht wieder reserviert werden',
     };
+
+String _activeFiltersDe(int count) =>
+    switch (pickerPluralCategory('de', count)) {
+      PickerPluralCategory.one => '$count Filter',
+      _ => '$count Filter',
+    };
+
+String _accessibilityFiltersActiveDe(int count) =>
+    switch (pickerPluralCategory('de', count)) {
+      PickerPluralCategory.one => '$count Barrierefreiheitsfilter aktiv',
+      _ => '$count Barrierefreiheitsfilter aktiv',
+    };
+
+String _onlyLeftDe(int count) => switch (pickerPluralCategory('de', count)) {
+  PickerPluralCategory.one => '$count Platz verfügbar',
+  _ => '$count Plätze verfügbar',
+};
 
 String _continueWithTotalDe(String money) => 'Weiter \u00b7 $money';
 
@@ -277,6 +296,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
   removeWord: 'Entfernen',
   floorWord: 'Etage',
   totalWord: 'Gesamt',
+  adjustSelection: 'Sitzauswahl anpassen',
   chooseSeats: 'Wählen Sie Ihre Plätze',
   chooseTickets: 'Tickets wählen',
   placeWord: 'PLATZ',
@@ -312,6 +332,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
       'Laden Sie den Sitzplan neu, um fortzufahren. Plätze, die bereits in Ihrem Warenkorb sind, bleiben reserviert, bis der Timer abläuft.',
   dismissError: 'Fehlermeldung schließen',
   testModeLong: 'Testmodus · keine Buchung',
+  seatRemoved: 'Ticket entfernt',
+  reloadSeatMap: 'Sitzplan neu laden',
   accessNeeds: <String, String>{
     'wheelchair': 'Rollstuhlplatz',
     'companion': 'Begleitplatz',
@@ -340,6 +362,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsDe,
   chooseMore: _chooseMoreDe,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeDe,
+  accessNeedWithCount: _accessNeedWithCountDe,
   ticketCount: _ticketCountDe,
   findBestSeats: _findBestSeatsDe,
   reselectSeats: _reselectSeatsDe,
@@ -355,5 +378,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftDe,
   holdLapsedBody: _holdLapsedBodyDe,
   seatsNotRecovered: _seatsNotRecoveredDe,
+  activeFilters: _activeFiltersDe,
+  accessibilityFiltersActive: _accessibilityFiltersActiveDe,
+  onlyLeft: _onlyLeftDe,
   continueWithTotal: _continueWithTotalDe,
 );

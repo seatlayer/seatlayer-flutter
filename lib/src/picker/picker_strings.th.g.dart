@@ -40,6 +40,8 @@ String _chooseMoreTh(int count) => 'เลือกเพิ่มอีก $cou
 String _seatsHeldForNeedMoreTimeTh(String time) =>
     'ที่นั่งของคุณถูกกันไว้อีก $time ต้องการเวลาเพิ่มไหม';
 
+String _accessNeedWithCountTh(String need, int count) => '$need · $count';
+
 String _ticketCountTh(int count) => '$count ใบ';
 
 String _findBestSeatsTh(int count) => 'หาที่นั่งที่ดีที่สุด $count ที่';
@@ -72,6 +74,13 @@ String _holdSecondsLeftTh(int count) => 'เหลือ $count วินาท�
 String _holdLapsedBodyTh(int count) => 'ที่นั่งเหล่านั้นถูกกันไว้ $count นาที';
 
 String _seatsNotRecoveredTh(int count) => 'กันที่นั่งคืนไม่ได้ $count ที่';
+
+String _activeFiltersTh(int count) => 'ตัวกรอง $count รายการ';
+
+String _accessibilityFiltersActiveTh(int count) =>
+    'ใช้ตัวกรองการเข้าถึงอยู่ $count รายการ';
+
+String _onlyLeftTh(int count) => 'เหลือ $count ที่นั่ง';
 
 String _continueWithTotalTh(String money) => 'ดำเนินการต่อ \u00b7 $money';
 
@@ -196,6 +205,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   removeWord: 'นำออก',
   floorWord: 'ชั้น',
   totalWord: 'รวม',
+  adjustSelection: 'ปรับที่นั่งที่เลือก',
   chooseSeats: 'เลือกที่นั่งของคุณ',
   chooseTickets: 'เลือกบัตร',
   placeWord: 'ที่',
@@ -230,6 +240,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
       'โหลดผังที่นั่งใหม่เพื่อดำเนินการต่อ ที่นั่งที่อยู่ในตะกร้าแล้วจะยังถูกกันไว้จนกว่าจะหมดเวลา',
   dismissError: 'ปิดข้อผิดพลาด',
   testModeLong: 'โหมดทดสอบ · ไม่มีการจองจริง',
+  seatRemoved: 'นำบัตรออกแล้ว',
+  reloadSeatMap: 'โหลดผังที่นั่งใหม่',
   accessNeeds: <String, String>{
     'wheelchair': 'ที่สำหรับรถเข็น',
     'companion': 'ที่นั่งผู้ติดตาม',
@@ -258,6 +270,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsTh,
   chooseMore: _chooseMoreTh,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeTh,
+  accessNeedWithCount: _accessNeedWithCountTh,
   ticketCount: _ticketCountTh,
   findBestSeats: _findBestSeatsTh,
   reselectSeats: _reselectSeatsTh,
@@ -273,5 +286,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftTh,
   holdLapsedBody: _holdLapsedBodyTh,
   seatsNotRecovered: _seatsNotRecoveredTh,
+  activeFilters: _activeFiltersTh,
+  accessibilityFiltersActive: _accessibilityFiltersActiveTh,
+  onlyLeft: _onlyLeftTh,
   continueWithTotal: _continueWithTotalTh,
 );

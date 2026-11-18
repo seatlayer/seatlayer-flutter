@@ -40,6 +40,8 @@ String _chooseMoreVi(int count) => 'Chọn thêm $count';
 String _seatsHeldForNeedMoreTimeVi(String time) =>
     'Ghế của bạn được giữ trong $time. Cần thêm thời gian?';
 
+String _accessNeedWithCountVi(String need, int count) => '$need · $count';
+
 String _ticketCountVi(int count) => '$count vé';
 
 String _findBestSeatsVi(int count) => 'Tìm $count ghế tốt nhất';
@@ -72,6 +74,13 @@ String _holdSecondsLeftVi(int count) => 'Còn $count giây';
 String _holdLapsedBodyVi(int count) => 'Các ghế đã được giữ trong $count phút.';
 
 String _seatsNotRecoveredVi(int count) => 'Không giữ lại được $count ghế';
+
+String _activeFiltersVi(int count) => '$count bộ lọc';
+
+String _accessibilityFiltersActiveVi(int count) =>
+    'Đang bật $count bộ lọc hỗ trợ tiếp cận';
+
+String _onlyLeftVi(int count) => 'Còn $count ghế';
 
 String _continueWithTotalVi(String money) => 'Tiếp tục \u00b7 $money';
 
@@ -200,6 +209,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   removeWord: 'Bỏ',
   floorWord: 'Tầng',
   totalWord: 'Tổng cộng',
+  adjustSelection: 'Điều chỉnh ghế đã chọn',
   chooseSeats: 'Chọn ghế của bạn',
   chooseTickets: 'Chọn vé',
   placeWord: 'CHỖ',
@@ -234,6 +244,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
       'Tải lại sơ đồ ghế để tiếp tục. Các ghế đã có trong giỏ của bạn vẫn được giữ đến khi hết giờ.',
   dismissError: 'Đóng thông báo lỗi',
   testModeLong: 'Chế độ thử · không đặt vé thật',
+  seatRemoved: 'Đã bỏ vé',
+  reloadSeatMap: 'Tải lại sơ đồ ghế',
   accessNeeds: <String, String>{
     'wheelchair': 'Chỗ xe lăn',
     'companion': 'Ghế người đi kèm',
@@ -262,6 +274,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsVi,
   chooseMore: _chooseMoreVi,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeVi,
+  accessNeedWithCount: _accessNeedWithCountVi,
   ticketCount: _ticketCountVi,
   findBestSeats: _findBestSeatsVi,
   reselectSeats: _reselectSeatsVi,
@@ -277,5 +290,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftVi,
   holdLapsedBody: _holdLapsedBodyVi,
   seatsNotRecovered: _seatsNotRecoveredVi,
+  activeFilters: _activeFiltersVi,
+  accessibilityFiltersActive: _accessibilityFiltersActiveVi,
+  onlyLeft: _onlyLeftVi,
   continueWithTotal: _continueWithTotalVi,
 );

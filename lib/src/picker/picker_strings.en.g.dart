@@ -41,6 +41,8 @@ String _chooseMoreEn(int count) => 'Choose $count more';
 String _seatsHeldForNeedMoreTimeEn(String time) =>
     'Your seats are held for $time. Need more time?';
 
+String _accessNeedWithCountEn(String need, int count) => '$need · $count';
+
 String _ticketCountEn(int count) => switch (pickerPluralCategory('en', count)) {
   PickerPluralCategory.one => '$count ticket',
   _ => '$count tickets',
@@ -136,6 +138,23 @@ String _seatsNotRecoveredEn(int count) =>
       PickerPluralCategory.one => '$count could not be recovered',
       _ => '$count could not be recovered',
     };
+
+String _activeFiltersEn(int count) =>
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => '$count filter',
+      _ => '$count filters',
+    };
+
+String _accessibilityFiltersActiveEn(int count) =>
+    switch (pickerPluralCategory('en', count)) {
+      PickerPluralCategory.one => '$count accessibility filter active',
+      _ => '$count accessibility filters active',
+    };
+
+String _onlyLeftEn(int count) => switch (pickerPluralCategory('en', count)) {
+  PickerPluralCategory.one => '$count seat left',
+  _ => '$count seats left',
+};
 
 String _continueWithTotalEn(String money) => 'Continue \u00b7 $money';
 
@@ -261,6 +280,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   removeWord: 'Remove',
   floorWord: 'Floor',
   totalWord: 'Total',
+  adjustSelection: 'Adjust seat selection',
   chooseSeats: 'Choose your seats',
   chooseTickets: 'Choose tickets',
   placeWord: 'PLACE',
@@ -295,6 +315,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
       'Reload the seat map to continue. Seats already in your cart stay held until the timer ends.',
   dismissError: 'Dismiss error',
   testModeLong: 'Test mode · books nothing',
+  seatRemoved: 'Ticket removed',
+  reloadSeatMap: 'Reload seat map',
   accessNeeds: <String, String>{
     'wheelchair': 'Wheelchair space',
     'companion': 'Companion seat',
@@ -323,6 +345,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsEn,
   chooseMore: _chooseMoreEn,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeEn,
+  accessNeedWithCount: _accessNeedWithCountEn,
   ticketCount: _ticketCountEn,
   findBestSeats: _findBestSeatsEn,
   reselectSeats: _reselectSeatsEn,
@@ -338,5 +361,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftEn,
   holdLapsedBody: _holdLapsedBodyEn,
   seatsNotRecovered: _seatsNotRecoveredEn,
+  activeFilters: _activeFiltersEn,
+  accessibilityFiltersActive: _accessibilityFiltersActiveEn,
+  onlyLeft: _onlyLeftEn,
   continueWithTotal: _continueWithTotalEn,
 );

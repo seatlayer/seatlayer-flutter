@@ -42,6 +42,8 @@ String _chooseMoreNl(int count) => 'Nog $count kiezen';
 String _seatsHeldForNeedMoreTimeNl(String time) =>
     'Je plaatsen worden nog $time voor je vastgehouden. Meer tijd nodig?';
 
+String _accessNeedWithCountNl(String need, int count) => '$need · $count';
+
 String _ticketCountNl(int count) => switch (pickerPluralCategory('nl', count)) {
   PickerPluralCategory.one => '$count ticket',
   _ => '$count tickets',
@@ -144,6 +146,23 @@ String _seatsNotRecoveredNl(int count) =>
         '$count plaats kon niet opnieuw worden vastgelegd',
       _ => '$count plaatsen konden niet opnieuw worden vastgelegd',
     };
+
+String _activeFiltersNl(int count) =>
+    switch (pickerPluralCategory('nl', count)) {
+      PickerPluralCategory.one => '$count filter',
+      _ => '$count filters',
+    };
+
+String _accessibilityFiltersActiveNl(int count) =>
+    switch (pickerPluralCategory('nl', count)) {
+      PickerPluralCategory.one => '$count toegankelijkheidsfilter actief',
+      _ => '$count toegankelijkheidsfilters actief',
+    };
+
+String _onlyLeftNl(int count) => switch (pickerPluralCategory('nl', count)) {
+  PickerPluralCategory.one => 'Nog $count plaats',
+  _ => 'Nog $count plaatsen',
+};
 
 String _continueWithTotalNl(String money) => 'Doorgaan \u00b7 $money';
 
@@ -274,6 +293,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   removeWord: 'Verwijderen',
   floorWord: 'Verdieping',
   totalWord: 'Totaal',
+  adjustSelection: 'Plaatskeuze aanpassen',
   chooseSeats: 'Kies je plaatsen',
   chooseTickets: 'Tickets kiezen',
   placeWord: 'PLAATS',
@@ -309,6 +329,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
       'Laad de zaalplattegrond opnieuw om verder te gaan. Plaatsen die al in je winkelwagen zitten, blijven vastgehouden tot de timer afloopt.',
   dismissError: 'Foutmelding sluiten',
   testModeLong: 'Testmodus · boekt niets',
+  seatRemoved: 'Ticket verwijderd',
+  reloadSeatMap: 'Zaalplattegrond opnieuw laden',
   accessNeeds: <String, String>{
     'wheelchair': 'Rolstoelplaats',
     'companion': 'Begeleidersplaats',
@@ -337,6 +359,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsNl,
   chooseMore: _chooseMoreNl,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeNl,
+  accessNeedWithCount: _accessNeedWithCountNl,
   ticketCount: _ticketCountNl,
   findBestSeats: _findBestSeatsNl,
   reselectSeats: _reselectSeatsNl,
@@ -352,5 +375,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftNl,
   holdLapsedBody: _holdLapsedBodyNl,
   seatsNotRecovered: _seatsNotRecoveredNl,
+  activeFilters: _activeFiltersNl,
+  accessibilityFiltersActive: _accessibilityFiltersActiveNl,
+  onlyLeft: _onlyLeftNl,
   continueWithTotal: _continueWithTotalNl,
 );

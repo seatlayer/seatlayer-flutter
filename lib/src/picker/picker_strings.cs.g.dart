@@ -42,6 +42,8 @@ String _chooseMoreCs(int count) => 'Vyberte ještě $count';
 String _seatsHeldForNeedMoreTimeCs(String time) =>
     'Vaše místa jsou rezervována ještě $time. Potřebujete více času?';
 
+String _accessNeedWithCountCs(String need, int count) => '$need · $count';
+
 String _ticketCountCs(int count) => switch (pickerPluralCategory('cs', count)) {
   PickerPluralCategory.one => '$count vstupenka',
   PickerPluralCategory.few => '$count vstupenky',
@@ -178,6 +180,29 @@ String _seatsNotRecoveredCs(int count) =>
       _ => '$count míst se nepodařilo obnovit',
     };
 
+String _activeFiltersCs(int count) =>
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => '$count filtr',
+      PickerPluralCategory.few => '$count filtry',
+      PickerPluralCategory.many => '$count filtru',
+      _ => '$count filtrů',
+    };
+
+String _accessibilityFiltersActiveCs(int count) =>
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => '$count aktivní filtr přístupnosti',
+      PickerPluralCategory.few => '$count aktivní filtry přístupnosti',
+      PickerPluralCategory.many => '$count aktivního filtru přístupnosti',
+      _ => '$count aktivních filtrů přístupnosti',
+    };
+
+String _onlyLeftCs(int count) => switch (pickerPluralCategory('cs', count)) {
+  PickerPluralCategory.one => 'Zbývá $count místo',
+  PickerPluralCategory.few => 'Zbývají $count místa',
+  PickerPluralCategory.many => 'Zbývá $count místa',
+  _ => 'Zbývá $count míst',
+};
+
 String _continueWithTotalCs(String money) => 'Pokračovat \u00b7 $money';
 
 /// The `cs` defaults for the native picker chrome.
@@ -304,6 +329,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   removeWord: 'Odebrat',
   floorWord: 'Patro',
   totalWord: 'Celkem',
+  adjustSelection: 'Upravit výběr míst',
   chooseSeats: 'Vyberte si místa',
   chooseTickets: 'Vyberte vstupenky',
   placeWord: 'MÍSTO',
@@ -338,6 +364,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
       'Pro pokračování znovu načtěte plán sedadel. Místa, která už máte v košíku, zůstávají rezervována, dokud neskončí odpočet.',
   dismissError: 'Zavřít chybovou zprávu',
   testModeLong: 'Testovací režim · nic se nerezervuje',
+  seatRemoved: 'Vstupenka odebrána',
+  reloadSeatMap: 'Znovu načíst plán sedadel',
   accessNeeds: <String, String>{
     'wheelchair': 'Místo pro vozík',
     'companion': 'Místo pro doprovod',
@@ -366,6 +394,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsCs,
   chooseMore: _chooseMoreCs,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeCs,
+  accessNeedWithCount: _accessNeedWithCountCs,
   ticketCount: _ticketCountCs,
   findBestSeats: _findBestSeatsCs,
   reselectSeats: _reselectSeatsCs,
@@ -381,5 +410,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftCs,
   holdLapsedBody: _holdLapsedBodyCs,
   seatsNotRecovered: _seatsNotRecoveredCs,
+  activeFilters: _activeFiltersCs,
+  accessibilityFiltersActive: _accessibilityFiltersActiveCs,
+  onlyLeft: _onlyLeftCs,
   continueWithTotal: _continueWithTotalCs,
 );

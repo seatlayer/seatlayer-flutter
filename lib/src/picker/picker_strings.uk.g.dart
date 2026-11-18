@@ -41,6 +41,8 @@ String _chooseMoreUk(int count) => 'Оберіть ще $count';
 String _seatsHeldForNeedMoreTimeUk(String time) =>
     'Ваші місця утримуються ще $time. Потрібно більше часу?';
 
+String _accessNeedWithCountUk(String need, int count) => '$need · $count';
+
 String _ticketCountUk(int count) => switch (pickerPluralCategory('uk', count)) {
   PickerPluralCategory.one => '$count квиток',
   PickerPluralCategory.few => '$count квитки',
@@ -175,6 +177,29 @@ String _seatsNotRecoveredUk(int count) =>
       _ => '$count місця не вдалося повернути',
     };
 
+String _activeFiltersUk(int count) =>
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => '$count фільтр',
+      PickerPluralCategory.few => '$count фільтри',
+      PickerPluralCategory.many => '$count фільтрів',
+      _ => '$count фільтра',
+    };
+
+String _accessibilityFiltersActiveUk(int count) =>
+    switch (pickerPluralCategory('uk', count)) {
+      PickerPluralCategory.one => 'Увімкнено $count фільтр доступності',
+      PickerPluralCategory.few => 'Увімкнено $count фільтри доступності',
+      PickerPluralCategory.many => 'Увімкнено $count фільтрів доступності',
+      _ => 'Увімкнено $count фільтра доступності',
+    };
+
+String _onlyLeftUk(int count) => switch (pickerPluralCategory('uk', count)) {
+  PickerPluralCategory.one => 'Залишилося $count місце',
+  PickerPluralCategory.few => 'Залишилося $count місця',
+  PickerPluralCategory.many => 'Залишилося $count місць',
+  _ => 'Залишилося $count місця',
+};
+
 String _continueWithTotalUk(String money) => 'Продовжити \u00b7 $money';
 
 /// The `uk` defaults for the native picker chrome.
@@ -299,6 +324,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   removeWord: 'Прибрати',
   floorWord: 'Поверх',
   totalWord: 'Разом',
+  adjustSelection: 'Змінити вибір місць',
   chooseSeats: 'Оберіть свої місця',
   chooseTickets: 'Оберіть квитки',
   placeWord: 'МІСЦЕ',
@@ -333,6 +359,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
       'Оновіть схему місць, щоб продовжити. Місця, які вже в кошику, залишаються за вами, доки не скінчиться таймер.',
   dismissError: 'Закрити повідомлення про помилку',
   testModeLong: 'Тестовий режим · нічого не бронюється',
+  seatRemoved: 'Квиток прибрано',
+  reloadSeatMap: 'Оновити схему місць',
   accessNeeds: <String, String>{
     'wheelchair': 'Місце для візка',
     'companion': 'Місце для супроводу',
@@ -361,6 +389,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsUk,
   chooseMore: _chooseMoreUk,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeUk,
+  accessNeedWithCount: _accessNeedWithCountUk,
   ticketCount: _ticketCountUk,
   findBestSeats: _findBestSeatsUk,
   reselectSeats: _reselectSeatsUk,
@@ -376,5 +405,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftUk,
   holdLapsedBody: _holdLapsedBodyUk,
   seatsNotRecovered: _seatsNotRecoveredUk,
+  activeFilters: _activeFiltersUk,
+  accessibilityFiltersActive: _accessibilityFiltersActiveUk,
+  onlyLeft: _onlyLeftUk,
   continueWithTotal: _continueWithTotalUk,
 );

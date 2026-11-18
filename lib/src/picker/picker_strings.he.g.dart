@@ -41,6 +41,8 @@ String _chooseMoreHe(int count) => 'בחרו עוד $count';
 String _seatsHeldForNeedMoreTimeHe(String time) =>
     'המושבים שלכם מוחזקים למשך $time. צריכים עוד זמן?';
 
+String _accessNeedWithCountHe(String need, int count) => '$need · $count';
+
 String _ticketCountHe(int count) => switch (pickerPluralCategory('he', count)) {
   PickerPluralCategory.one => '$count כרטיס',
   PickerPluralCategory.two => '$count כרטיסים',
@@ -152,6 +154,26 @@ String _seatsNotRecoveredHe(int count) =>
       PickerPluralCategory.two => 'לא ניתן היה לשחזר $count מושבים',
       _ => 'לא ניתן היה לשחזר $count מושבים',
     };
+
+String _activeFiltersHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => '$count מסנן',
+      PickerPluralCategory.two => '$count מסננים',
+      _ => '$count מסננים',
+    };
+
+String _accessibilityFiltersActiveHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one => '$count מסנן נגישות פעיל',
+      PickerPluralCategory.two => '$count מסנני נגישות פעילים',
+      _ => '$count מסנני נגישות פעילים',
+    };
+
+String _onlyLeftHe(int count) => switch (pickerPluralCategory('he', count)) {
+  PickerPluralCategory.one => 'נותר $count מושב',
+  PickerPluralCategory.two => 'נותרו $count מושבים',
+  _ => 'נותרו $count מושבים',
+};
 
 String _continueWithTotalHe(String money) => 'המשך \u00b7 $money';
 
@@ -276,6 +298,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   removeWord: 'הסרה',
   floorWord: 'קומה',
   totalWord: 'סה״כ',
+  adjustSelection: 'התאמת בחירת המושבים',
   chooseSeats: 'בחרו את המושבים שלכם',
   chooseTickets: 'בחרו כרטיסים',
   placeWord: 'מקום',
@@ -310,6 +333,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
       'טענו מחדש את מפת המושבים כדי להמשיך. מושבים שכבר בעגלה שלכם נשארים מוחזקים עד שהטיימר מסתיים.',
   dismissError: 'סגירת השגיאה',
   testModeLong: 'מצב בדיקה · שום דבר לא מוזמן',
+  seatRemoved: 'הכרטיס הוסר',
+  reloadSeatMap: 'טעינה מחדש של מפת המושבים',
   accessNeeds: <String, String>{
     'wheelchair': 'מקום לכיסא גלגלים',
     'companion': 'מושב מלווה',
@@ -338,6 +363,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsHe,
   chooseMore: _chooseMoreHe,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeHe,
+  accessNeedWithCount: _accessNeedWithCountHe,
   ticketCount: _ticketCountHe,
   findBestSeats: _findBestSeatsHe,
   reselectSeats: _reselectSeatsHe,
@@ -353,5 +379,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftHe,
   holdLapsedBody: _holdLapsedBodyHe,
   seatsNotRecovered: _seatsNotRecoveredHe,
+  activeFilters: _activeFiltersHe,
+  accessibilityFiltersActive: _accessibilityFiltersActiveHe,
+  onlyLeft: _onlyLeftHe,
   continueWithTotal: _continueWithTotalHe,
 );

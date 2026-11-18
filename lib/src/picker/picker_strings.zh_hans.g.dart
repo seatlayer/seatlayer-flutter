@@ -37,6 +37,8 @@ String _chooseMoreZhHans(int count) => '再选 $count 个';
 
 String _seatsHeldForNeedMoreTimeZhHans(String time) => '您的座位将保留 $time。需要更多时间吗？';
 
+String _accessNeedWithCountZhHans(String need, int count) => '$need · $count';
+
 String _ticketCountZhHans(int count) => '$count 张票';
 
 String _findBestSeatsZhHans(int count) => '查找 $count 个最佳座位';
@@ -67,6 +69,12 @@ String _holdSecondsLeftZhHans(int count) => '剩余 $count 秒';
 String _holdLapsedBodyZhHans(int count) => '这些座位曾为您保留 $count 分钟。';
 
 String _seatsNotRecoveredZhHans(int count) => '$count 个座位未能重新锁定';
+
+String _activeFiltersZhHans(int count) => '$count 项筛选';
+
+String _accessibilityFiltersActiveZhHans(int count) => '已启用 $count 项无障碍筛选';
+
+String _onlyLeftZhHans(int count) => '剩余 $count 个座位';
 
 String _continueWithTotalZhHans(String money) => '继续 \u00b7 $money';
 
@@ -188,6 +196,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       removeWord: '移除',
       floorWord: '楼层',
       totalWord: '合计',
+      adjustSelection: '调整选座',
       chooseSeats: '选择座位',
       chooseTickets: '选择门票',
       placeWord: '席位',
@@ -219,6 +228,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       accessExpiredCopy: '请刷新座位图以继续。购物车中的座位会一直为您保留，直到计时结束。',
       dismissError: '关闭错误提示',
       testModeLong: '测试模式 · 不会产生预订',
+      seatRemoved: '已移除一张票',
+      reloadSeatMap: '刷新座位图',
       accessNeeds: <String, String>{
         'wheelchair': '轮椅席位',
         'companion': '陪同席位',
@@ -247,6 +258,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       chooseMinMaxGuests: _chooseMinMaxGuestsZhHans,
       chooseMore: _chooseMoreZhHans,
       seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeZhHans,
+      accessNeedWithCount: _accessNeedWithCountZhHans,
       ticketCount: _ticketCountZhHans,
       findBestSeats: _findBestSeatsZhHans,
       reselectSeats: _reselectSeatsZhHans,
@@ -262,5 +274,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       holdSecondsLeft: _holdSecondsLeftZhHans,
       holdLapsedBody: _holdLapsedBodyZhHans,
       seatsNotRecovered: _seatsNotRecoveredZhHans,
+      activeFilters: _activeFiltersZhHans,
+      accessibilityFiltersActive: _accessibilityFiltersActiveZhHans,
+      onlyLeft: _onlyLeftZhHans,
       continueWithTotal: _continueWithTotalZhHans,
     );

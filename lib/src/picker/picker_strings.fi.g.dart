@@ -41,6 +41,8 @@ String _chooseMoreFi(int count) => 'Valitse vielä $count';
 String _seatsHeldForNeedMoreTimeFi(String time) =>
     'Paikkasi ovat varattuina vielä $time. Tarvitsetko lisäaikaa?';
 
+String _accessNeedWithCountFi(String need, int count) => '$need · $count';
+
 String _ticketCountFi(int count) => switch (pickerPluralCategory('fi', count)) {
   PickerPluralCategory.one => '$count lippu',
   _ => '$count lippua',
@@ -136,6 +138,23 @@ String _seatsNotRecoveredFi(int count) =>
       PickerPluralCategory.one => '$count paikkaa ei voitu varata uudelleen',
       _ => '$count paikkaa ei voitu varata uudelleen',
     };
+
+String _activeFiltersFi(int count) =>
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one => '$count suodatin',
+      _ => '$count suodatinta',
+    };
+
+String _accessibilityFiltersActiveFi(int count) =>
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one => '$count esteettömyyssuodatin käytössä',
+      _ => '$count esteettömyyssuodatinta käytössä',
+    };
+
+String _onlyLeftFi(int count) => switch (pickerPluralCategory('fi', count)) {
+  PickerPluralCategory.one => '$count paikka jäljellä',
+  _ => '$count paikkaa jäljellä',
+};
 
 String _continueWithTotalFi(String money) => 'Jatka \u00b7 $money';
 
@@ -263,6 +282,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   removeWord: 'Poista',
   floorWord: 'Kerros',
   totalWord: 'Yhteensä',
+  adjustSelection: 'Säädä paikkavalintaa',
   chooseSeats: 'Valitse paikkasi',
   chooseTickets: 'Valitse liput',
   placeWord: 'PAIKKA',
@@ -297,6 +317,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
       'Lataa paikkakartta uudelleen jatkaaksesi. Ostoskorissasi olevat paikat pysyvät varattuina, kunnes ajastin päättyy.',
   dismissError: 'Sulje virheilmoitus',
   testModeLong: 'Testitila · mitään ei varata',
+  seatRemoved: 'Lippu poistettu',
+  reloadSeatMap: 'Lataa paikkakartta uudelleen',
   accessNeeds: <String, String>{
     'wheelchair': 'Pyörätuolipaikka',
     'companion': 'Avustajapaikka',
@@ -325,6 +347,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsFi,
   chooseMore: _chooseMoreFi,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeFi,
+  accessNeedWithCount: _accessNeedWithCountFi,
   ticketCount: _ticketCountFi,
   findBestSeats: _findBestSeatsFi,
   reselectSeats: _reselectSeatsFi,
@@ -340,5 +363,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftFi,
   holdLapsedBody: _holdLapsedBodyFi,
   seatsNotRecovered: _seatsNotRecoveredFi,
+  activeFilters: _activeFiltersFi,
+  accessibilityFiltersActive: _accessibilityFiltersActiveFi,
+  onlyLeft: _onlyLeftFi,
   continueWithTotal: _continueWithTotalFi,
 );

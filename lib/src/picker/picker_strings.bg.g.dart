@@ -41,6 +41,8 @@ String _chooseMoreBg(int count) => 'Избери още $count';
 String _seatsHeldForNeedMoreTimeBg(String time) =>
     'Местата ви са запазени за още $time. Нужно ли ви е повече време?';
 
+String _accessNeedWithCountBg(String need, int count) => '$need · $count';
+
 String _ticketCountBg(int count) => switch (pickerPluralCategory('bg', count)) {
   PickerPluralCategory.one => '$count билет',
   _ => '$count билета',
@@ -139,6 +141,23 @@ String _seatsNotRecoveredBg(int count) =>
       PickerPluralCategory.one => '$count място не можа да бъде възстановено',
       _ => '$count места не можаха да бъдат възстановени',
     };
+
+String _activeFiltersBg(int count) =>
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => '$count филтър',
+      _ => '$count филтъра',
+    };
+
+String _accessibilityFiltersActiveBg(int count) =>
+    switch (pickerPluralCategory('bg', count)) {
+      PickerPluralCategory.one => '$count филтър за достъпност е активен',
+      _ => '$count филтъра за достъпност са активни',
+    };
+
+String _onlyLeftBg(int count) => switch (pickerPluralCategory('bg', count)) {
+  PickerPluralCategory.one => 'Остава $count място',
+  _ => 'Остават $count места',
+};
 
 String _continueWithTotalBg(String money) => 'Продължи \u00b7 $money';
 
@@ -266,6 +285,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   removeWord: 'Премахни',
   floorWord: 'Етаж',
   totalWord: 'Общо',
+  adjustSelection: 'Промени избора на места',
   chooseSeats: 'Изберете местата си',
   chooseTickets: 'Изберете билети',
   placeWord: 'МЯСТО',
@@ -300,6 +320,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
       'Презаредете плана на местата, за да продължите. Местата, които вече са в количката ви, остават запазени, докато таймерът изтече.',
   dismissError: 'Затвори съобщението за грешка',
   testModeLong: 'Тестов режим · нищо не се резервира',
+  seatRemoved: 'Билетът е премахнат',
+  reloadSeatMap: 'Презареди плана на местата',
   accessNeeds: <String, String>{
     'wheelchair': 'Място за количка',
     'companion': 'Място за придружител',
@@ -328,6 +350,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsBg,
   chooseMore: _chooseMoreBg,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeBg,
+  accessNeedWithCount: _accessNeedWithCountBg,
   ticketCount: _ticketCountBg,
   findBestSeats: _findBestSeatsBg,
   reselectSeats: _reselectSeatsBg,
@@ -343,5 +366,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftBg,
   holdLapsedBody: _holdLapsedBodyBg,
   seatsNotRecovered: _seatsNotRecoveredBg,
+  activeFilters: _activeFiltersBg,
+  accessibilityFiltersActive: _accessibilityFiltersActiveBg,
+  onlyLeft: _onlyLeftBg,
   continueWithTotal: _continueWithTotalBg,
 );

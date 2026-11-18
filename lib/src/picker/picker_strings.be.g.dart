@@ -42,6 +42,8 @@ String _chooseMoreBe(int count) => 'Выберыце яшчэ $count';
 String _seatsHeldForNeedMoreTimeBe(String time) =>
     'Вашы месцы трымаюцца яшчэ $time. Патрэбна больш часу?';
 
+String _accessNeedWithCountBe(String need, int count) => '$need · $count';
+
 String _ticketCountBe(int count) => switch (pickerPluralCategory('be', count)) {
   PickerPluralCategory.one => '$count білет',
   PickerPluralCategory.few => '$count білеты',
@@ -178,6 +180,29 @@ String _seatsNotRecoveredBe(int count) =>
       _ => '$count месца не ўдалося вярнуць',
     };
 
+String _activeFiltersBe(int count) =>
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => '$count фільтр',
+      PickerPluralCategory.few => '$count фільтры',
+      PickerPluralCategory.many => '$count фільтраў',
+      _ => '$count фільтра',
+    };
+
+String _accessibilityFiltersActiveBe(int count) =>
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => 'Уключаны $count фільтр даступнасці',
+      PickerPluralCategory.few => 'Уключаныя $count фільтры даступнасці',
+      PickerPluralCategory.many => 'Уключана $count фільтраў даступнасці',
+      _ => 'Уключана $count фільтра даступнасці',
+    };
+
+String _onlyLeftBe(int count) => switch (pickerPluralCategory('be', count)) {
+  PickerPluralCategory.one => 'Засталося $count месца',
+  PickerPluralCategory.few => 'Засталося $count месцы',
+  PickerPluralCategory.many => 'Засталося $count месцаў',
+  _ => 'Засталося $count месца',
+};
+
 String _continueWithTotalBe(String money) => 'Працягнуць \u00b7 $money';
 
 /// The `be` defaults for the native picker chrome.
@@ -305,6 +330,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   removeWord: 'Прыбраць',
   floorWord: 'Паверх',
   totalWord: 'Разам',
+  adjustSelection: 'Змяніць выбар месцаў',
   chooseSeats: 'Выберыце свае месцы',
   chooseTickets: 'Выберыце білеты',
   placeWord: 'МЕСЦА',
@@ -339,6 +365,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
       'Абнавіце схему месцаў, каб працягнуць. Месцы, якія ўжо ў кошыку, застаюцца за вамі, пакуль не скончыцца таймер.',
   dismissError: 'Закрыць паведамленне пра памылку',
   testModeLong: 'Тэставы рэжым · нічога не браніруецца',
+  seatRemoved: 'Білет прыбраны',
+  reloadSeatMap: 'Абнавіць схему месцаў',
   accessNeeds: <String, String>{
     'wheelchair': 'Месца для калянкі',
     'companion': 'Месца суправаджэння',
@@ -367,6 +395,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsBe,
   chooseMore: _chooseMoreBe,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeBe,
+  accessNeedWithCount: _accessNeedWithCountBe,
   ticketCount: _ticketCountBe,
   findBestSeats: _findBestSeatsBe,
   reselectSeats: _reselectSeatsBe,
@@ -382,5 +411,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftBe,
   holdLapsedBody: _holdLapsedBodyBe,
   seatsNotRecovered: _seatsNotRecoveredBe,
+  activeFilters: _activeFiltersBe,
+  accessibilityFiltersActive: _accessibilityFiltersActiveBe,
+  onlyLeft: _onlyLeftBe,
   continueWithTotal: _continueWithTotalBe,
 );

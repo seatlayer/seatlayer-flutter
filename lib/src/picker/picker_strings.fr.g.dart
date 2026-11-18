@@ -42,6 +42,8 @@ String _chooseMoreFr(int count) => 'Choisissez-en encore $count';
 String _seatsHeldForNeedMoreTimeFr(String time) =>
     'Vos places sont réservées pendant $time. Besoin de plus de temps ?';
 
+String _accessNeedWithCountFr(String need, int count) => '$need · $count';
+
 String _ticketCountFr(int count) => switch (pickerPluralCategory('fr', count)) {
   PickerPluralCategory.one => '$count billet',
   PickerPluralCategory.many => '$count billets',
@@ -163,6 +165,26 @@ String _seatsNotRecoveredFr(int count) => switch (pickerPluralCategory(
   PickerPluralCategory.one => '$count place n’a pas pu être récupérée',
   PickerPluralCategory.many => '$count de places n’ont pas pu être récupérées',
   _ => '$count places n’ont pas pu être récupérées',
+};
+
+String _activeFiltersFr(int count) =>
+    switch (pickerPluralCategory('fr', count)) {
+      PickerPluralCategory.one => '$count filtre',
+      PickerPluralCategory.many => '$count de filtres',
+      _ => '$count filtres',
+    };
+
+String _accessibilityFiltersActiveFr(int count) =>
+    switch (pickerPluralCategory('fr', count)) {
+      PickerPluralCategory.one => '$count filtre d’accessibilité actif',
+      PickerPluralCategory.many => '$count de filtres d’accessibilité actifs',
+      _ => '$count filtres d’accessibilité actifs',
+    };
+
+String _onlyLeftFr(int count) => switch (pickerPluralCategory('fr', count)) {
+  PickerPluralCategory.one => '$count siège restant',
+  PickerPluralCategory.many => '$count sièges restants',
+  _ => '$count sièges restants',
 };
 
 String _continueWithTotalFr(String money) => 'Continuer \u00b7 $money';
@@ -297,6 +319,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFr = SeatLayerPickerStrings(
   removeWord: 'Retirer',
   floorWord: 'Étage',
   totalWord: 'Total',
+  adjustSelection: 'Ajustez la sélection des sièges',
   chooseSeats: 'Choisissez vos places',
   chooseTickets: 'Choisissez vos billets',
   placeWord: 'PLACE',
@@ -332,6 +355,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFr = SeatLayerPickerStrings(
       'Rechargez le plan de salle pour continuer. Les places déjà dans votre panier restent réservées jusqu’à la fin du minuteur.',
   dismissError: 'Fermer le message d’erreur',
   testModeLong: 'Mode test · rien n’est réservé',
+  seatRemoved: 'Billet retiré',
+  reloadSeatMap: 'Recharger le plan de salle',
   accessNeeds: <String, String>{
     'wheelchair': 'Emplacement fauteuil roulant',
     'companion': 'Place d’accompagnant',
@@ -360,6 +385,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFr = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsFr,
   chooseMore: _chooseMoreFr,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeFr,
+  accessNeedWithCount: _accessNeedWithCountFr,
   ticketCount: _ticketCountFr,
   findBestSeats: _findBestSeatsFr,
   reselectSeats: _reselectSeatsFr,
@@ -375,5 +401,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFr = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftFr,
   holdLapsedBody: _holdLapsedBodyFr,
   seatsNotRecovered: _seatsNotRecoveredFr,
+  activeFilters: _activeFiltersFr,
+  accessibilityFiltersActive: _accessibilityFiltersActiveFr,
+  onlyLeft: _onlyLeftFr,
   continueWithTotal: _continueWithTotalFr,
 );

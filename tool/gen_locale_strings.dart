@@ -139,6 +139,8 @@ const List<String> _plainFields = <String>[
   'removeWord',
   'floorWord',
   'totalWord',
+  'adjustSelection',
+  'backToSeatMap',
   // From the runtime's app strings: sentences only the app SDKs draw.
   'chooseSeats',
   'chooseTickets',
@@ -171,6 +173,8 @@ const List<String> _plainFields = <String>[
   'accessExpiredCopy',
   'dismissError',
   'testModeLong',
+  'seatRemoved',
+  'reloadSeatMap',
 ];
 
 /// The wire keys of the twelve accommodations, whose translated names are
@@ -245,6 +249,11 @@ const Map<String, List<_Slot>> _interpolated = <String, List<_Slot>>{
   'seatsHeldForNeedMoreTime': <_Slot>[
     (parameter: 'time', type: 'String', placeholder: '{time}'),
   ],
+  // The runtime's pair is `{first} · {second}`; the need comes first.
+  'accessNeedWithCount': <_Slot>[
+    (parameter: 'need', type: 'String', placeholder: '{first}'),
+    (parameter: 'count', type: 'int', placeholder: '{second}'),
+  ],
 };
 
 /// The slot every counted string fills.
@@ -273,6 +282,9 @@ const List<String> _plurals = <String>[
   'holdSecondsLeft',
   'holdLapsedBody',
   'seatsNotRecovered',
+  'activeFilters',
+  'accessibilityFiltersActive',
+  'onlyLeft',
 ];
 
 void main(List<String> args) {

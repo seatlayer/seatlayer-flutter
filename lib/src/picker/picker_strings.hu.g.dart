@@ -41,6 +41,8 @@ String _chooseMoreHu(int count) => 'Válassz még $count darabot';
 String _seatsHeldForNeedMoreTimeHu(String time) =>
     'A helyeidet még $time ideig fenntartjuk. Több idő kell?';
 
+String _accessNeedWithCountHu(String need, int count) => '$need · $count';
+
 String _ticketCountHu(int count) => switch (pickerPluralCategory('hu', count)) {
   PickerPluralCategory.one => '$count jegy',
   _ => '$count jegy',
@@ -136,6 +138,23 @@ String _seatsNotRecoveredHu(int count) =>
       PickerPluralCategory.one => '$count helyet nem sikerült visszaszerezni',
       _ => '$count helyet nem sikerült visszaszerezni',
     };
+
+String _activeFiltersHu(int count) =>
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => '$count szűrő',
+      _ => '$count szűrő',
+    };
+
+String _accessibilityFiltersActiveHu(int count) =>
+    switch (pickerPluralCategory('hu', count)) {
+      PickerPluralCategory.one => '$count akadálymentesítési szűrő aktív',
+      _ => '$count akadálymentesítési szűrő aktív',
+    };
+
+String _onlyLeftHu(int count) => switch (pickerPluralCategory('hu', count)) {
+  PickerPluralCategory.one => '$count hely maradt',
+  _ => '$count hely maradt',
+};
 
 String _continueWithTotalHu(String money) => 'Tovább \u00b7 $money';
 
@@ -264,6 +283,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   removeWord: 'Eltávolítás',
   floorWord: 'Emelet',
   totalWord: 'Összesen',
+  adjustSelection: 'Helykiválasztás módosítása',
   chooseSeats: 'Válaszd ki a helyeidet',
   chooseTickets: 'Válassz jegyeket',
   placeWord: 'HELY',
@@ -298,6 +318,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
       'A folytatáshoz töltsd be újra az üléstervet. A kosaradban lévő helyek az időzítő lejártáig lefoglalva maradnak.',
   dismissError: 'Hiba bezárása',
   testModeLong: 'Tesztüzemmód · nem foglal semmit',
+  seatRemoved: 'Jegy eltávolítva',
+  reloadSeatMap: 'Ülésterv újratöltése',
   accessNeeds: <String, String>{
     'wheelchair': 'Kerekesszékes hely',
     'companion': 'Kísérőhely',
@@ -326,6 +348,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsHu,
   chooseMore: _chooseMoreHu,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeHu,
+  accessNeedWithCount: _accessNeedWithCountHu,
   ticketCount: _ticketCountHu,
   findBestSeats: _findBestSeatsHu,
   reselectSeats: _reselectSeatsHu,
@@ -341,5 +364,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftHu,
   holdLapsedBody: _holdLapsedBodyHu,
   seatsNotRecovered: _seatsNotRecoveredHu,
+  activeFilters: _activeFiltersHu,
+  accessibilityFiltersActive: _accessibilityFiltersActiveHu,
+  onlyLeft: _onlyLeftHu,
   continueWithTotal: _continueWithTotalHu,
 );

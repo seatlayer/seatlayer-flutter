@@ -41,6 +41,8 @@ String _chooseMoreFa(int count) => '$count تای دیگر انتخاب کنید
 String _seatsHeldForNeedMoreTimeFa(String time) =>
     'صندلی‌های شما برای $time نگه داشته شده‌اند. زمان بیشتری لازم دارید؟';
 
+String _accessNeedWithCountFa(String need, int count) => '$need · $count';
+
 String _ticketCountFa(int count) => switch (pickerPluralCategory('fa', count)) {
   PickerPluralCategory.one => '$count بلیت',
   _ => '$count بلیت',
@@ -136,6 +138,23 @@ String _seatsNotRecoveredFa(int count) =>
       PickerPluralCategory.one => '$count صندلی بازیابی نشد',
       _ => '$count صندلی بازیابی نشد',
     };
+
+String _activeFiltersFa(int count) =>
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one => '$count فیلتر',
+      _ => '$count فیلتر',
+    };
+
+String _accessibilityFiltersActiveFa(int count) =>
+    switch (pickerPluralCategory('fa', count)) {
+      PickerPluralCategory.one => '$count فیلتر دسترس‌پذیری فعال است',
+      _ => '$count فیلتر دسترس‌پذیری فعال است',
+    };
+
+String _onlyLeftFa(int count) => switch (pickerPluralCategory('fa', count)) {
+  PickerPluralCategory.one => '$count صندلی باقی مانده',
+  _ => '$count صندلی باقی مانده',
+};
 
 String _continueWithTotalFa(String money) => 'ادامه \u00b7 $money';
 
@@ -263,6 +282,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   removeWord: 'حذف',
   floorWord: 'طبقه',
   totalWord: 'جمع کل',
+  adjustSelection: 'تنظیم انتخاب صندلی‌ها',
   chooseSeats: 'صندلی‌های خود را انتخاب کنید',
   chooseTickets: 'بلیت‌ها را انتخاب کنید',
   placeWord: 'جایگاه',
@@ -297,6 +317,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
       'برای ادامه، نقشهٔ صندلی‌ها را دوباره بارگذاری کنید. صندلی‌هایی که در سبد شما هستند تا پایان زمان‌سنج نگه داشته می‌شوند.',
   dismissError: 'بستن خطا',
   testModeLong: 'حالت آزمایشی · چیزی رزرو نمی‌شود',
+  seatRemoved: 'بلیت حذف شد',
+  reloadSeatMap: 'بارگذاری دوبارهٔ نقشهٔ صندلی‌ها',
   accessNeeds: <String, String>{
     'wheelchair': 'جایگاه ویلچر',
     'companion': 'صندلی همراه',
@@ -325,6 +347,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   chooseMinMaxGuests: _chooseMinMaxGuestsFa,
   chooseMore: _chooseMoreFa,
   seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeFa,
+  accessNeedWithCount: _accessNeedWithCountFa,
   ticketCount: _ticketCountFa,
   findBestSeats: _findBestSeatsFa,
   reselectSeats: _reselectSeatsFa,
@@ -340,5 +363,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   holdSecondsLeft: _holdSecondsLeftFa,
   holdLapsedBody: _holdLapsedBodyFa,
   seatsNotRecovered: _seatsNotRecoveredFa,
+  activeFilters: _activeFiltersFa,
+  accessibilityFiltersActive: _accessibilityFiltersActiveFa,
+  onlyLeft: _onlyLeftFa,
   continueWithTotal: _continueWithTotalFa,
 );
