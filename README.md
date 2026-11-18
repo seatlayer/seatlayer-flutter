@@ -232,6 +232,8 @@ any entry with no runtime wording, currently just `allFloors`) keeps its
 English default, and the result is an ordinary `SeatLayerPickerStrings` you can
 still override on top of.
 
+**3D limit.** `SeatLayerPickerOptions(max3DSeats:)`: 3D opens for venues up to 60,000 seats; on a touch screen the default is 30,000 unless you set this option.
+
 **One whole part: a builder slot.** The builder receives the live state, the
 controller and the widget the drop-in would have rendered:
 
@@ -459,7 +461,8 @@ countdown, a cart, 3D and the view from a seat for venues up to 60,000 seats,
 and a checkout hand-off to your backend. Every control is a Flutter widget you
 can restyle or replace, and the seat map itself is the SeatLayer map from the
 web, shown inside your app. You pay only for sold seats, with 100 free every
-month, and the same charts run on the web, iOS, Android and React Native.
+month, and the same charts run on the web, iOS, Android and React Native. Your
+own server and payment provider keep the order and the money.
 
 ### How do I add a seat map to a Flutter app?
 
