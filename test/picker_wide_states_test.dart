@@ -2,6 +2,8 @@
 // accessibility options as a popover beside their control, and the 3D
 // Rotate / Move pair when its words do not fit.
 import 'package:flutter/material.dart';
+import 'dart:ui' show SemanticsRole;
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
@@ -78,6 +80,18 @@ List<Rect> _bars(WidgetTester tester, Color ink) => tester
     )
     .map((box) => tester.getRect(find.byWidget(box)))
     .toList(growable: false);
+
+/// The focus node of the accessibility control's button.
+FocusNode _controlFocus(WidgetTester tester) => Focus.of(
+      tester.element(
+        find
+            .descendant(
+              of: find.byType(SeatLayerPickerAccessibilityFilters),
+              matching: find.byType(Icon),
+            )
+            .first,
+      ),
+    );
 
 double _breath(WidgetTester tester) => tester
     .widget<FadeTransition>(
@@ -199,6 +213,8 @@ void main() {
       required bool wide,
       TextDirection direction = TextDirection.ltr,
       SeatLayerPickerOptions options = const SeatLayerPickerOptions(),
+      bool keyboard = false,
+      VoidCallback? onMapTap,
     }) async {
       final map = FakePickerMap(bundle: accessibilityFocusBundle());
       addTearDown(map.dispose);
@@ -208,15 +224,26 @@ void main() {
           map,
           Directionality(
             textDirection: direction,
-            // Where the layout stands the column: the map's top end.
-            child: Align(
-              alignment: AlignmentDirectional.topEnd,
-              child: Padding(
-                padding: const EdgeInsets.all(
-                  SeatLayerSizeTokens.mapAnchorInset,
+            child: Stack(
+              children: <Widget>[
+                // The map under the column, counting the taps it receives.
+                Positioned.fill(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onMapTap,
+                  ),
                 ),
-                child: SeatLayerPickerMapControls(compact: !wide),
-              ),
+                // Where the layout stands the column: the map's top end.
+                Align(
+                  alignment: AlignmentDirectional.topEnd,
+                  child: Padding(
+                    padding: const EdgeInsets.all(
+                      SeatLayerSizeTokens.mapAnchorInset,
+                    ),
+                    child: SeatLayerPickerMapControls(compact: !wide),
+                  ),
+                ),
+              ],
             ),
           ),
           options: options,
@@ -229,12 +256,17 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(
-        find.descendant(
-          of: find.byType(SeatLayerPickerAccessibilityFilters),
-          matching: find.byType(IconButton),
-        ),
+      final control = find.descendant(
+        of: find.byType(SeatLayerPickerAccessibilityFilters),
+        matching: find.byType(IconButton),
       );
+      if (keyboard) {
+        _controlFocus(tester).requestFocus();
+        await tester.pump();
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      } else {
+        await tester.tap(control);
+      }
       await tester.pumpAndSettle();
       return map;
     }
@@ -323,6 +355,68 @@ void main() {
         },
       );
       expect(map.callsTo('picker.focusNextAccessibleSection'), hasLength(1));
+      expect(find.text('Accessibility and view'), findsNothing);
+    });
+
+    testWidgets('are a dialog to a screen reader', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await open(tester, wide: true);
+
+      final dialog = find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            widget.properties.role == SemanticsRole.dialog,
+      );
+      expect(dialog, findsOneWidget);
+      final node = tester.getSemantics(dialog);
+      expect(node.getSemanticsData().role, SemanticsRole.dialog);
+      expect(
+        node,
+        isSemantics(
+          label: 'Accessibility and view',
+          scopesRoute: true,
+          namesRoute: true,
+        ),
+      );
+      semantics.dispose();
+    });
+
+    testWidgets('give focus back to their control when they close',
+        (tester) async {
+      await open(tester, wide: true, keyboard: true);
+      expect(find.text('Accessibility and view'), findsOneWidget);
+      expect(_controlFocus(tester).hasPrimaryFocus, isFalse);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Accessibility and view'), findsNothing);
+      expect(_controlFocus(tester).hasPrimaryFocus, isTrue);
+    });
+
+    testWidgets('a tap outside closes them and never reaches the map',
+        (tester) async {
+      var mapTaps = 0;
+      await open(tester, wide: true, onMapTap: () => mapTaps++);
+
+      await tester.tapAt(const Offset(40, 700));
+      await tester.pumpAndSettle();
+      expect(find.text('Accessibility and view'), findsNothing);
+      expect(mapTaps, 0);
+
+      // With them closed, the same tap is the map's.
+      await tester.tapAt(const Offset(40, 700));
+      await tester.pumpAndSettle();
+      expect(mapTaps, 1);
+    });
+
+    testWidgets('close when the window changes size', (tester) async {
+      await open(tester, wide: true);
+      expect(find.text('Accessibility and view'), findsOneWidget);
+
+      tester.view.physicalSize = const Size(768, 1024);
+      await tester.pumpAndSettle();
+
       expect(find.text('Accessibility and view'), findsNothing);
     });
 

@@ -8,6 +8,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/material.dart';
 
@@ -39,6 +40,11 @@ class SeatLayerAccessPopoverAnchor extends InheritedWidget {
 /// up as far as it must to stay on screen. It is modal: a tap outside it, the
 /// system back gesture or Escape closes it with nothing, and whatever its
 /// content pops with is the result.
+///
+/// It also closes itself when the window changes size while it is open — a
+/// rotation, a split-screen resize. The control it stood beside has moved, or
+/// gone with the wide layout itself, and a popover pointing at where a control
+/// used to be is worse than one more tap to open it again.
 Future<T?> showSeatLayerAccessPopover<T>({
   required BuildContext context,
   required Widget child,
@@ -105,36 +111,50 @@ class _AccessPopoverRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration =>
       reducedMotion ? Duration.zero : SeatLayerPickerMotion.pop;
 
+  /// The window size the popover was placed for.
+  Size? _placedFor;
+
   @override
   Widget buildPage(
     BuildContext context,
     Animation<double> animation,
     Animation<double> secondaryAnimation,
-  ) =>
-      CustomSingleChildLayout(
-        delegate: SeatLayerAccessPopoverLayout(
-          anchor: anchor,
-          textDirection: textDirection,
-          padding: MediaQuery.paddingOf(context),
-          maxHeight: maxHeight,
-        ),
-        child: Semantics(
-          scopesRoute: true,
-          namesRoute: true,
-          explicitChildNodes: true,
-          label: label,
-          child: Material(
-            color: surface,
-            elevation: SeatLayerElevationTokens.sheet,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.sheet),
-              side: BorderSide(color: divider),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: child,
+  ) {
+    // Registered as a dependency, so a resize rebuilds this page.
+    final size = MediaQuery.sizeOf(context);
+    _placedFor ??= size;
+    if (size != _placedFor) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (isActive) navigator?.removeRoute(this);
+      });
+    }
+    return CustomSingleChildLayout(
+      delegate: SeatLayerAccessPopoverLayout(
+        anchor: anchor,
+        textDirection: textDirection,
+        padding: MediaQuery.paddingOf(context),
+        maxHeight: maxHeight,
+      ),
+      child: Semantics(
+        // What Flutter's own Dialog announces itself as.
+        role: SemanticsRole.dialog,
+        scopesRoute: true,
+        namesRoute: true,
+        explicitChildNodes: true,
+        label: label,
+        child: Material(
+          color: surface,
+          elevation: SeatLayerElevationTokens.sheet,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.sheet),
+            side: BorderSide(color: divider),
           ),
+          clipBehavior: Clip.antiAlias,
+          child: child,
         ),
-      );
+      ),
+    );
+  }
 
   @override
   Widget buildTransitions(
