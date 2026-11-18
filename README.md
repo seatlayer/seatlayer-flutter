@@ -487,8 +487,9 @@ credits you buy never expire.
 
 ### Which Flutter platforms are supported?
 
-The package declares and supports iOS and Android. It does not currently claim
-Flutter web, macOS, Windows, or Linux support.
+iOS and Android, on Flutter 3.19 or newer and Dart 3.4 or newer. For a web page,
+the SeatLayer web SDK shows the same charts in JavaScript, React, Vue or
+Angular.
 
 ### How does seat booking work in a Flutter ticketing app?
 
