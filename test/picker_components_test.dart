@@ -260,6 +260,39 @@ void main() {
       expect(find.text(explained), findsNothing);
     });
 
+    testWidgets('clears the sheet handle above a bottom band', (tester) async {
+      final map = _FakeMapController();
+      addTearDown(map.dispose);
+      tester.view.physicalSize = surface;
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        _app(
+          map,
+          const Stack(
+            children: <Widget>[
+              Positioned(
+                left: 12,
+                top: 12,
+                child: SeatLayerPickerTestModeIndicator(compact: true),
+              ),
+              Positioned.fill(
+                child: SeatLayerPickerToastLayer(bottomInset: 120),
+              ),
+            ],
+          ),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await tester.pump();
+      await tester.tap(find.byType(SeatLayerPickerTestModeIndicator));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getRect(find.byType(PickerExplainerToastCard)).bottom,
+        surface.height - 120 - 22 - 14,
+      );
+    });
+
     testWidgets('leaves on a tap, and follows reading direction',
         (tester) async {
       await pumpBadge(tester);

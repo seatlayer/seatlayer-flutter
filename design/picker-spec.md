@@ -2017,7 +2017,8 @@ neutral. One queue: a second toast replaces the first rather than stacking.
 **Explainer.** The answer to a tap on the picker's own chrome (today only the
 test chip, §3.4) is a different surface on the same queue, motion and
 announcement: a full-width band at the map's foot, inset `size.mapAnchorInset`
-at each side and 14 above the bottom chrome, ground `color.*.text`, ink
+at each side and 14 above the bottom chrome (plus `size.sheetHandleOverhang`
+when the cart sheet is under it, so the band never crosses the sheet handle), ground `color.*.text`, ink
 `color.*.background`, corner `radius.explainerToast`, padding
 `size.explainerToastPaddingY` × `size.explainerToastPaddingX`, text
 `size.explainerToastFontSize` w500 at line height 1.35, wrapping, aligned to
