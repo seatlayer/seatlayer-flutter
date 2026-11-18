@@ -28,6 +28,17 @@ String _seatJustTakenByAnotherKo(String label) =>
 String _peekSecuredKo(int count, String total) =>
     '✓ $count석 확보 · $total. 아직 결제되지 않았어요';
 
+String _venueMapKo(String venue) => '$venue 좌석 배치도';
+
+String _accessibleStepKo(int index, int total) => '$total개 중 $index번째';
+
+String _chooseMinMaxGuestsKo(int min, int max) => '인원을 $min~$max명으로 선택해 주세요.';
+
+String _chooseMoreKo(int count) => '$count석 더 선택';
+
+String _seatsHeldForNeedMoreTimeKo(String time) =>
+    '좌석이 $time 동안 확보돼 있어요. 시간이 더 필요하세요?';
+
 String _ticketCountKo(int count) => '티켓 $count매';
 
 String _findBestSeatsKo(int count) => '추천 좌석 $count석 찾기';
@@ -46,6 +57,20 @@ String _holdLapsedSomeTakenKo(int count) =>
 
 String _holdLapsedAllTakenKo(int count) =>
     '자리를 비운 사이 확보 시간이 끝났고, 좌석은 이미 예매됐어요.';
+
+String _accessibleSectionsKo(int count) => '구역 $count개';
+
+String _placesAvailableKo(int count) => '현재 $count자리 예매 가능';
+
+String _removeTicketsKo(int count) => '티켓 $count매 삭제';
+
+String _holdMinutesLeftKo(int count) => '$count분 남음';
+
+String _holdSecondsLeftKo(int count) => '$count초 남음';
+
+String _holdLapsedBodyKo(int count) => '좌석이 $count분 동안 확보돼 있었어요.';
+
+String _seatsNotRecoveredKo(int count) => '$count석은 다시 확보하지 못했어요';
 
 String _continueWithTotalKo(String money) => '계속 \u00b7 $money';
 
@@ -89,6 +114,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   hideLimitedView: '시야 제한석 숨기기',
   colorblindSafe: '색각 이상자용 색상',
   notAvailable: '선택 불가',
+  viewGroupTitle: '보기',
   restrictedView: '시야 제한석',
   obstructedView: '시야 방해석',
   premiumSeat: '프리미엄 좌석',
@@ -164,6 +190,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   removeWord: '삭제',
   floorWord: '층',
   totalWord: '합계',
+  chooseSeats: '좌석 선택',
+  chooseTickets: '티켓 선택',
+  placeWord: '자리',
+  ticketWord: '티켓',
+  passport: '좌석 프로필',
+  venue3D: '3D',
+  venueZone: '공연장 존',
+  venueMapHint:
+      '좌석은 배치도 주변의 컨트롤로 선택해요. 위쪽의 가격 바, 아래쪽의 구역 컨트롤, 맨 아래의 티켓 패널을 이용해 주세요.',
+  previousSeat: '이전 좌석',
+  nextSeat: '다음 좌석',
+  orbitMode: '공연장 회전',
+  panMode: '공연장 이동',
+  openInteractive3dVenue: '인터랙티브 3D 공연장 열기',
+  showSeatsFor: '다음 조건의 좌석 표시',
+  accessJumpFirstSection: '첫 번째 구역으로 이동',
+  accessJumpNextSection: '다음 구역으로 이동',
+  fewerTickets: '티켓 줄이기',
+  moreTickets: '티켓 늘리기',
+  addTickets: '티켓 추가',
+  noSelectableSeats: '현재 선택할 수 있는 좌석이 없어요.',
+  confirmYourTickets: '티켓 확정',
+  seatsSecuredOpeningCheckout: '좌석을 확보했어요. 결제창을 여는 중…',
+  holdInCheckoutTitle: '좌석이 이미 결제 중이에요',
+  holdInCheckoutBody:
+      '좌석을 유지하려면 결제를 완료해 주세요. 다른 좌석을 고르려면 먼저 이 좌석을 해제해 주세요. 해제한 좌석은 다시 판매돼요.',
+  releaseAndChangeSeats: '해제하고 좌석 변경',
+  holdAlreadyHeldTitle: '좌석이 이미 확보돼 있어요',
+  holdAlreadyHeldBody: '좌석을 유지하려면 결제를 계속해 주세요.',
+  accessExpiredTitle: '좌석 선택 세션이 만료됐어요',
+  accessExpiredCopy:
+      '계속하려면 좌석 배치도를 새로고침해 주세요. 장바구니에 담긴 좌석은 타이머가 끝날 때까지 확보돼 있어요.',
+  dismissError: '오류 닫기',
+  testModeLong: '테스트 모드 · 실제 예매 없음',
   accessNeeds: <String, String>{
     'wheelchair': '휠체어석',
     'companion': '동반자석',
@@ -187,6 +247,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountKo,
   seatJustTakenByAnother: _seatJustTakenByAnotherKo,
   peekSecured: _peekSecuredKo,
+  venueMap: _venueMapKo,
+  accessibleStep: _accessibleStepKo,
+  chooseMinMaxGuests: _chooseMinMaxGuestsKo,
+  chooseMore: _chooseMoreKo,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeKo,
   ticketCount: _ticketCountKo,
   findBestSeats: _findBestSeatsKo,
   reselectSeats: _reselectSeatsKo,
@@ -195,5 +260,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeKo,
   holdLapsedSomeTaken: _holdLapsedSomeTakenKo,
   holdLapsedAllTaken: _holdLapsedAllTakenKo,
+  accessibleSections: _accessibleSectionsKo,
+  placesAvailable: _placesAvailableKo,
+  removeTickets: _removeTicketsKo,
+  holdMinutesLeft: _holdMinutesLeftKo,
+  holdSecondsLeft: _holdSecondsLeftKo,
+  holdLapsedBody: _holdLapsedBodyKo,
+  seatsNotRecovered: _seatsNotRecoveredKo,
   continueWithTotal: _continueWithTotalKo,
 );

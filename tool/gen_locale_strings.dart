@@ -137,6 +137,38 @@ const List<String> _plainFields = <String>[
   'removeWord',
   'floorWord',
   'totalWord',
+  // From the runtime's app strings: sentences only the app SDKs draw.
+  'chooseSeats',
+  'chooseTickets',
+  'placeWord',
+  'ticketWord',
+  'passport',
+  'venue3D',
+  'venueZone',
+  'venueMapHint',
+  'previousSeat',
+  'nextSeat',
+  'orbitMode',
+  'panMode',
+  'openInteractive3dVenue',
+  'showSeatsFor',
+  'accessJumpFirstSection',
+  'accessJumpNextSection',
+  'fewerTickets',
+  'moreTickets',
+  'addTickets',
+  'noSelectableSeats',
+  'confirmYourTickets',
+  'seatsSecuredOpeningCheckout',
+  'holdInCheckoutTitle',
+  'holdInCheckoutBody',
+  'releaseAndChangeSeats',
+  'holdAlreadyHeldTitle',
+  'holdAlreadyHeldBody',
+  'accessExpiredTitle',
+  'accessExpiredCopy',
+  'dismissError',
+  'testModeLong',
 ];
 
 /// The wire keys of the twelve accommodations, whose translated names are
@@ -194,6 +226,23 @@ const Map<String, List<_Slot>> _interpolated = <String, List<_Slot>>{
     (parameter: 'count', type: 'int', placeholder: '{count}'),
     (parameter: 'total', type: 'String', placeholder: '{total}'),
   ],
+  'venueMap': <_Slot>[
+    (parameter: 'venue', type: 'String', placeholder: '{venue}'),
+  ],
+  'accessibleStep': <_Slot>[
+    (parameter: 'index', type: 'int', placeholder: '{index}'),
+    (parameter: 'total', type: 'int', placeholder: '{total}'),
+  ],
+  'chooseMinMaxGuests': <_Slot>[
+    (parameter: 'min', type: 'int', placeholder: '{min}'),
+    (parameter: 'max', type: 'int', placeholder: '{max}'),
+  ],
+  'chooseMore': <_Slot>[
+    (parameter: 'count', type: 'int', placeholder: '{count}'),
+  ],
+  'seatsHeldForNeedMoreTime': <_Slot>[
+    (parameter: 'time', type: 'String', placeholder: '{time}'),
+  ],
 };
 
 /// The slot every counted string fills.
@@ -215,6 +264,13 @@ const List<String> _plurals = <String>[
   'holdLapsedStillFree',
   'holdLapsedSomeTaken',
   'holdLapsedAllTaken',
+  'accessibleSections',
+  'placesAvailable',
+  'removeTickets',
+  'holdMinutesLeft',
+  'holdSecondsLeft',
+  'holdLapsedBody',
+  'seatsNotRecovered',
 ];
 
 void main(List<String> args) {

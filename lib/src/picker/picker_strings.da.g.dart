@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherDa(String label) =>
 String _peekSecuredDa(int count, String total) =>
     '✓ $count sikret · $total. Du bliver ikke trukket endnu';
 
+String _venueMapDa(String venue) => 'Pladsoversigt for $venue';
+
+String _accessibleStepDa(int index, int total) => '$index af $total';
+
+String _chooseMinMaxGuestsDa(int min, int max) =>
+    'Vælg mellem $min og $max gæster.';
+
+String _chooseMoreDa(int count) => 'Vælg $count til';
+
+String _seatsHeldForNeedMoreTimeDa(String time) =>
+    'Dine pladser er reserveret i $time. Brug for mere tid?';
+
 String _ticketCountDa(int count) => switch (pickerPluralCategory('da', count)) {
   PickerPluralCategory.one => '$count billet',
   _ => '$count billetter',
@@ -85,6 +97,48 @@ String _holdLapsedAllTakenDa(int count) => switch (pickerPluralCategory(
   _ => 'Din reservation udløb, mens du var væk, og de pladser er blevet taget.',
 };
 
+String _accessibleSectionsDa(int count) =>
+    switch (pickerPluralCategory('da', count)) {
+      PickerPluralCategory.one => '$count sektion',
+      _ => '$count sektioner',
+    };
+
+String _placesAvailableDa(int count) =>
+    switch (pickerPluralCategory('da', count)) {
+      PickerPluralCategory.one => '$count plads ledig lige nu',
+      _ => '$count pladser ledige lige nu',
+    };
+
+String _removeTicketsDa(int count) =>
+    switch (pickerPluralCategory('da', count)) {
+      PickerPluralCategory.one => 'Fjern $count billet',
+      _ => 'Fjern $count billetter',
+    };
+
+String _holdMinutesLeftDa(int count) =>
+    switch (pickerPluralCategory('da', count)) {
+      PickerPluralCategory.one => '$count minut tilbage',
+      _ => '$count minutter tilbage',
+    };
+
+String _holdSecondsLeftDa(int count) =>
+    switch (pickerPluralCategory('da', count)) {
+      PickerPluralCategory.one => '$count sekund tilbage',
+      _ => '$count sekunder tilbage',
+    };
+
+String _holdLapsedBodyDa(int count) =>
+    switch (pickerPluralCategory('da', count)) {
+      PickerPluralCategory.one => 'De var reserveret i $count minut.',
+      _ => 'De var reserveret i $count minutter.',
+    };
+
+String _seatsNotRecoveredDa(int count) =>
+    switch (pickerPluralCategory('da', count)) {
+      PickerPluralCategory.one => '$count plads kunne ikke reserveres igen',
+      _ => '$count pladser kunne ikke reserveres igen',
+    };
+
 String _continueWithTotalDa(String money) => 'Fortsæt \u00b7 $money';
 
 /// The `da` defaults for the native picker chrome.
@@ -108,7 +162,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   undo: 'Fortryd',
   holdAndCheckout: 'Reservér pladser og betal',
   poweredBy: 'Drevet af SeatLayer',
-  testMode: 'TESTTILSTAND',
+  testMode: 'Testtilstand',
   accessibility: 'Tilgængelighed og farver',
   accessibilityTitle: 'Tilgængelighed og farver',
   fitVenue: 'Vis hele stedet',
@@ -129,6 +183,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   hideLimitedView: 'Skjul pladser med begrænset udsyn',
   colorblindSafe: 'Farveblindvenlige farver',
   notAvailable: 'Ikke tilgængelig',
+  viewGroupTitle: 'VISNING',
   restrictedView: 'Begrænset udsyn',
   obstructedView: 'Blokeret udsyn',
   premiumSeat: 'Premiumplads',
@@ -210,6 +265,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   removeWord: 'Fjern',
   floorWord: 'Etage',
   totalWord: 'I alt',
+  chooseSeats: 'Vælg dine pladser',
+  chooseTickets: 'Vælg billetter',
+  placeWord: 'PLADS',
+  ticketWord: 'Billet',
+  passport: 'Pladsprofil',
+  venue3D: '3D',
+  venueZone: 'Zone på stedet',
+  venueMapHint:
+      'Pladser vælges med knapperne omkring oversigten: prisbjælken over den, sektionsknapperne under den og billetpanelet nederst.',
+  previousSeat: 'Forrige plads',
+  nextSeat: 'Næste plads',
+  orbitMode: 'Rotér stedet',
+  panMode: 'Flyt stedet',
+  openInteractive3dVenue: 'Åbn interaktiv 3D-visning af stedet',
+  showSeatsFor: 'VIS PLADSER TIL',
+  accessJumpFirstSection: 'Gå til den første sektion',
+  accessJumpNextSection: 'Gå til den næste sektion',
+  fewerTickets: 'Færre billetter',
+  moreTickets: 'Flere billetter',
+  addTickets: 'Tilføj billetter',
+  noSelectableSeats: 'Der er ingen pladser at vælge lige nu.',
+  confirmYourTickets: 'Bekræft dine billetter',
+  seatsSecuredOpeningCheckout: 'Pladserne er sikret. Åbner betaling…',
+  holdInCheckoutTitle: 'Dine pladser er allerede i betalingen',
+  holdInCheckoutBody:
+      'Gennemfør betalingen for at beholde dem. Vil du vælge andre pladser, skal du først frigive disse — de kommer til salg igen.',
+  releaseAndChangeSeats: 'Frigiv og skift pladser',
+  holdAlreadyHeldTitle: 'Dine pladser er allerede reserveret',
+  holdAlreadyHeldBody: 'Fortsæt til betaling for at beholde dem.',
+  accessExpiredTitle: 'Din session er udløbet',
+  accessExpiredCopy:
+      'Genindlæs pladsoversigten for at fortsætte. Pladser, der allerede er i din kurv, forbliver reserveret, til tiden løber ud.',
+  dismissError: 'Luk fejlmeddelelse',
+  testModeLong: 'Testtilstand · intet bookes',
   accessNeeds: <String, String>{
     'wheelchair': 'Kørestolsplads',
     'companion': 'Ledsagerplads',
@@ -233,6 +322,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountDa,
   seatJustTakenByAnother: _seatJustTakenByAnotherDa,
   peekSecured: _peekSecuredDa,
+  venueMap: _venueMapDa,
+  accessibleStep: _accessibleStepDa,
+  chooseMinMaxGuests: _chooseMinMaxGuestsDa,
+  chooseMore: _chooseMoreDa,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeDa,
   ticketCount: _ticketCountDa,
   findBestSeats: _findBestSeatsDa,
   reselectSeats: _reselectSeatsDa,
@@ -241,5 +335,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeDa,
   holdLapsedSomeTaken: _holdLapsedSomeTakenDa,
   holdLapsedAllTaken: _holdLapsedAllTakenDa,
+  accessibleSections: _accessibleSectionsDa,
+  placesAvailable: _placesAvailableDa,
+  removeTickets: _removeTicketsDa,
+  holdMinutesLeft: _holdMinutesLeftDa,
+  holdSecondsLeft: _holdSecondsLeftDa,
+  holdLapsedBody: _holdLapsedBodyDa,
+  seatsNotRecovered: _seatsNotRecoveredDa,
   continueWithTotal: _continueWithTotalDa,
 );

@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherSv(String label) =>
 String _peekSecuredSv(int count, String total) =>
     '✓ $count säkrade · $total. Du debiteras inte än';
 
+String _venueMapSv(String venue) => 'Platskarta för $venue';
+
+String _accessibleStepSv(int index, int total) => '$index av $total';
+
+String _chooseMinMaxGuestsSv(int min, int max) =>
+    'Välj mellan $min och $max gäster.';
+
+String _chooseMoreSv(int count) => 'Välj $count till';
+
+String _seatsHeldForNeedMoreTimeSv(String time) =>
+    'Dina platser är reserverade i $time. Behöver du mer tid?';
+
 String _ticketCountSv(int count) => switch (pickerPluralCategory('sv', count)) {
   PickerPluralCategory.one => '$count biljett',
   _ => '$count biljetter',
@@ -86,6 +98,48 @@ String _holdLapsedAllTakenSv(int count) => switch (pickerPluralCategory(
   _ => 'Din reservation gick ut medan du var borta och platserna har tagits.',
 };
 
+String _accessibleSectionsSv(int count) =>
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => '$count sektion',
+      _ => '$count sektioner',
+    };
+
+String _placesAvailableSv(int count) =>
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => '$count plats ledig just nu',
+      _ => '$count platser lediga just nu',
+    };
+
+String _removeTicketsSv(int count) =>
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => 'Ta bort $count biljett',
+      _ => 'Ta bort $count biljetter',
+    };
+
+String _holdMinutesLeftSv(int count) =>
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => '$count minut kvar',
+      _ => '$count minuter kvar',
+    };
+
+String _holdSecondsLeftSv(int count) =>
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => '$count sekund kvar',
+      _ => '$count sekunder kvar',
+    };
+
+String _holdLapsedBodySv(int count) =>
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => 'De var reserverade i $count minut.',
+      _ => 'De var reserverade i $count minuter.',
+    };
+
+String _seatsNotRecoveredSv(int count) =>
+    switch (pickerPluralCategory('sv', count)) {
+      PickerPluralCategory.one => '$count plats kunde inte reserveras igen',
+      _ => '$count platser kunde inte reserveras igen',
+    };
+
 String _continueWithTotalSv(String money) => 'Fortsätt \u00b7 $money';
 
 /// The `sv` defaults for the native picker chrome.
@@ -109,7 +163,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   undo: 'Ångra',
   holdAndCheckout: 'Reservera platser och betala',
   poweredBy: 'Drivs av SeatLayer',
-  testMode: 'TESTLÄGE',
+  testMode: 'Testläge',
   accessibility: 'Tillgänglighet och färger',
   accessibilityTitle: 'Tillgänglighet och färger',
   fitVenue: 'Visa hela lokalen',
@@ -129,6 +183,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   hideLimitedView: 'Dölj platser med begränsad sikt',
   colorblindSafe: 'Färgblindvänliga färger',
   notAvailable: 'Inte tillgänglig',
+  viewGroupTitle: 'VISNING',
   restrictedView: 'Begränsad sikt',
   obstructedView: 'Skymd sikt',
   premiumSeat: 'Premiumplats',
@@ -209,6 +264,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   removeWord: 'Ta bort',
   floorWord: 'Våning',
   totalWord: 'Totalt',
+  chooseSeats: 'Välj dina platser',
+  chooseTickets: 'Välj biljetter',
+  placeWord: 'PLATS',
+  ticketWord: 'Biljett',
+  passport: 'Platsprofil',
+  venue3D: '3D',
+  venueZone: 'Zon i arenan',
+  venueMapHint:
+      'Platser väljs med kontrollerna runt kartan: prisraden ovanför, sektionskontrollerna nedanför och biljettpanelen längst ned.',
+  previousSeat: 'Föregående plats',
+  nextSeat: 'Nästa plats',
+  orbitMode: 'Rotera arenan',
+  panMode: 'Flytta arenan',
+  openInteractive3dVenue: 'Öppna interaktiv 3D-vy av arenan',
+  showSeatsFor: 'VISA PLATSER FÖR',
+  accessJumpFirstSection: 'Gå till den första sektionen',
+  accessJumpNextSection: 'Gå till nästa sektion',
+  fewerTickets: 'Färre biljetter',
+  moreTickets: 'Fler biljetter',
+  addTickets: 'Lägg till biljetter',
+  noSelectableSeats: 'Det finns inga valbara platser just nu.',
+  confirmYourTickets: 'Bekräfta dina biljetter',
+  seatsSecuredOpeningCheckout: 'Platserna är säkrade. Öppnar kassan…',
+  holdInCheckoutTitle: 'Dina platser är redan i kassan',
+  holdInCheckoutBody:
+      'Slutför köpet i kassan för att behålla dem. Vill du välja andra platser släpper du först de här — de går tillbaka till försäljning.',
+  releaseAndChangeSeats: 'Släpp och byt platser',
+  holdAlreadyHeldTitle: 'Dina platser är redan reserverade',
+  holdAlreadyHeldBody: 'Fortsätt till kassan för att behålla dem.',
+  accessExpiredTitle: 'Din session har gått ut',
+  accessExpiredCopy:
+      'Ladda om platskartan för att fortsätta. Platser som redan ligger i din varukorg förblir reserverade tills tiden går ut.',
+  dismissError: 'Stäng felmeddelandet',
+  testModeLong: 'Testläge · inget bokas',
   accessNeeds: <String, String>{
     'wheelchair': 'Rullstolsplats',
     'companion': 'Ledsagarplats',
@@ -232,6 +321,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountSv,
   seatJustTakenByAnother: _seatJustTakenByAnotherSv,
   peekSecured: _peekSecuredSv,
+  venueMap: _venueMapSv,
+  accessibleStep: _accessibleStepSv,
+  chooseMinMaxGuests: _chooseMinMaxGuestsSv,
+  chooseMore: _chooseMoreSv,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeSv,
   ticketCount: _ticketCountSv,
   findBestSeats: _findBestSeatsSv,
   reselectSeats: _reselectSeatsSv,
@@ -240,5 +334,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeSv,
   holdLapsedSomeTaken: _holdLapsedSomeTakenSv,
   holdLapsedAllTaken: _holdLapsedAllTakenSv,
+  accessibleSections: _accessibleSectionsSv,
+  placesAvailable: _placesAvailableSv,
+  removeTickets: _removeTicketsSv,
+  holdMinutesLeft: _holdMinutesLeftSv,
+  holdSecondsLeft: _holdSecondsLeftSv,
+  holdLapsedBody: _holdLapsedBodySv,
+  seatsNotRecovered: _seatsNotRecoveredSv,
   continueWithTotal: _continueWithTotalSv,
 );

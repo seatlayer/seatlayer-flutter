@@ -1,7 +1,7 @@
 // Rebuilds `design/locale_strings.json` from the SeatLayer runtime's own
 // dictionaries.
 //
-//   node tool/extract_runtime_locales.mjs <SeatLayer runtime locale directory>
+//   node tool/extract_runtime_locales.mjs <SeatLayer runtime locale directory> <app strings locale directory>
 //   node tool/extract_runtime_locales.mjs --plural-categories [--check]
 //
 // The second form needs no runtime source: it rewrites (or, with --check,
@@ -17,6 +17,12 @@
 // sentences on this side would drift, so the native chrome takes them from
 // there — but through a file committed HERE, because a generator that reaches
 // outside the package could not be checked by this package's own test suite.
+//
+// The second directory is the runtime's app strings: sentences only the app
+// SDKs draw, one flat JSON object per locale, with counted sentences written
+// as `<key>.<category>` families (see `APP_KEYS` below). Where both sources
+// word the same string, the app strings win: they are written as the app
+// picker draws them.
 //
 // Only the keys the native chrome actually renders are extracted. A Flutter
 // string with no equivalent on the runtime side is simply absent, and keeps
@@ -198,6 +204,61 @@ const KEYS = {
   totalWord: 'picker.total',
 };
 
+/**
+ * Flutter string key -> the app strings key it is taken from. A counted
+ * sentence is named by its family; every category the locale's file has for
+ * it is taken.
+ */
+const APP_KEYS = {
+  chooseSeats: 'chooseSeats',
+  chooseTickets: 'chooseTickets',
+  placeWord: 'placeWord',
+  ticketWord: 'ticketWord',
+  passport: 'passport',
+  venue3D: 'venue3D',
+  venueZone: 'venueZone',
+  venueMap: 'venueMap',
+  venueMapHint: 'venueMapHint',
+  previousSeat: 'previousSeat',
+  nextSeat: 'nextSeat',
+  orbitMode: 'orbitMode',
+  panMode: 'panMode',
+  openInteractive3dVenue: 'openInteractive3dVenue',
+  viewGroupTitle: 'viewGroupTitle',
+  showSeatsFor: 'showSeatsFor',
+  accessibleStep: 'accessibleStep',
+  accessibleSections: 'accessibleSections',
+  accessJumpFirstSection: 'accessJumpFirstSection',
+  accessJumpNextSection: 'accessJumpNextSection',
+  fewerTickets: 'fewerTickets',
+  moreTickets: 'moreTickets',
+  addTickets: 'addTickets',
+  placesAvailable: 'placesAvailable',
+  chooseMinMaxGuests: 'chooseMinMaxGuests',
+  noSelectableSeats: 'noSelectableSeats',
+  chooseMore: 'chooseMore',
+  removeTickets: 'removeTickets',
+  confirmYourTickets: 'confirmYourTickets',
+  seatsSecuredOpeningCheckout: 'seatsSecuredOpeningCheckout',
+  seatsHeldForNeedMoreTime: 'seatsHeldForNeedMoreTime',
+  holdMinutesLeft: 'holdMinutesLeft',
+  holdSecondsLeft: 'holdSecondsLeft',
+  holdLapsedBody: 'holdLapsedBody',
+  seatsNotRecovered: 'seatsNotRecovered',
+  holdInCheckoutTitle: 'holdInCheckoutTitle',
+  holdInCheckoutBody: 'holdInCheckoutBody',
+  releaseAndChangeSeats: 'releaseAndChangeSeats',
+  holdAlreadyHeldTitle: 'holdAlreadyHeldTitle',
+  holdAlreadyHeldBody: 'holdAlreadyHeldBody',
+  accessExpiredTitle: 'accessExpiredTitle',
+  accessExpiredCopy: 'accessExpiredCopy',
+  dismissError: 'dismissError',
+  // The app badge's own short word, in sentence case as drawn; the shared
+  // `picker.testMode` is the web's capitals.
+  testMode: 'testMode',
+  testModeLong: 'testModeLong',
+};
+
 /** One locale file, evaluated as a module with its type annotation removed. */
 async function readDictionary(file) {
   const code = fs
@@ -285,9 +346,10 @@ if (process.argv[2] === '--plural-categories') {
   }
 } else {
   const dir = process.argv[2];
-  if (!dir) {
+  const appDir = process.argv[3];
+  if (!dir || !appDir) {
     throw new Error(
-      'usage: node tool/extract_runtime_locales.mjs <locales dir> | --plural-categories [--check]',
+      'usage: node tool/extract_runtime_locales.mjs <locales dir> <app strings locales dir> | --plural-categories [--check]',
     );
   }
 
@@ -309,13 +371,36 @@ if (process.argv[2] === '--plural-categories') {
         }
       }
     }
-    strings[file.replace(/\.ts$/, '')] = entry;
+    const locale = file.replace(/\.ts$/, '');
+    const appFile = path.join(appDir, `${locale}.json`);
+    if (fs.existsSync(appFile)) {
+      const app = JSON.parse(fs.readFileSync(appFile, 'utf8'));
+      for (const [key, source] of Object.entries(APP_KEYS)) {
+        if (typeof app[source] === 'string') {
+          entry[key] = app[source];
+          continue;
+        }
+        let counted = false;
+        for (const form of PLURAL_FORMS) {
+          const value = app[`${source}.${form}`];
+          if (typeof value !== 'string') continue;
+          if (!counted) {
+            // The app strings replace the whole family, never mix with it.
+            for (const stale of PLURAL_FORMS) delete entry[`${key}.${stale}`];
+            delete entry[key];
+            counted = true;
+          }
+          entry[`${key}.${form}`] = value;
+        }
+      }
+    }
+    strings[locale] = entry;
   }
 
   fs.writeFileSync(
     'design/locale_strings.json',
     `${JSON.stringify(
-      { source: 'the SeatLayer runtime locale dictionaries', strings },
+      { source: 'the SeatLayer runtime locale dictionaries and app strings', strings },
       null,
       2,
     )}\n`,

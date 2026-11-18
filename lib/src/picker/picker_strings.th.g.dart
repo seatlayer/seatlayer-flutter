@@ -28,6 +28,18 @@ String _seatJustTakenByAnotherTh(String label) =>
 String _peekSecuredTh(int count, String total) =>
     '✓ กันไว้แล้ว $count · $total ยังไม่มีการตัดเงิน';
 
+String _venueMapTh(String venue) => 'ผังที่นั่ง $venue';
+
+String _accessibleStepTh(int index, int total) => '$index จาก $total';
+
+String _chooseMinMaxGuestsTh(int min, int max) =>
+    'เลือกจำนวนแขกระหว่าง $min ถึง $max คน';
+
+String _chooseMoreTh(int count) => 'เลือกเพิ่มอีก $count';
+
+String _seatsHeldForNeedMoreTimeTh(String time) =>
+    'ที่นั่งของคุณถูกกันไว้อีก $time ต้องการเวลาเพิ่มไหม';
+
 String _ticketCountTh(int count) => '$count ใบ';
 
 String _findBestSeatsTh(int count) => 'หาที่นั่งที่ดีที่สุด $count ที่';
@@ -46,6 +58,20 @@ String _holdLapsedSomeTakenTh(int count) =>
 
 String _holdLapsedAllTakenTh(int count) =>
     'เวลากันที่นั่งหมดระหว่างที่คุณไม่อยู่ และที่นั่งที่คุณเลือกมีผู้อื่นจองไปแล้ว';
+
+String _accessibleSectionsTh(int count) => '$count โซน';
+
+String _placesAvailableTh(int count) => 'ขณะนี้ว่าง $count ที่';
+
+String _removeTicketsTh(int count) => 'นำบัตรออก $count ใบ';
+
+String _holdMinutesLeftTh(int count) => 'เหลือ $count นาที';
+
+String _holdSecondsLeftTh(int count) => 'เหลือ $count วินาที';
+
+String _holdLapsedBodyTh(int count) => 'ที่นั่งเหล่านั้นถูกกันไว้ $count นาที';
+
+String _seatsNotRecoveredTh(int count) => 'กันที่นั่งคืนไม่ได้ $count ที่';
 
 String _continueWithTotalTh(String money) => 'ดำเนินการต่อ \u00b7 $money';
 
@@ -89,6 +115,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   hideLimitedView: 'ซ่อนที่นั่งมุมมองจำกัด',
   colorblindSafe: 'สีสำหรับผู้ตาบอดสี',
   notAvailable: 'ไม่ว่าง',
+  viewGroupTitle: 'การแสดงผล',
   restrictedView: 'มุมมองจำกัด',
   obstructedView: 'มีสิ่งบดบังการมองเห็น',
   premiumSeat: 'ที่นั่งพรีเมียม',
@@ -167,6 +194,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   removeWord: 'นำออก',
   floorWord: 'ชั้น',
   totalWord: 'รวม',
+  chooseSeats: 'เลือกที่นั่งของคุณ',
+  chooseTickets: 'เลือกบัตร',
+  placeWord: 'ที่',
+  ticketWord: 'บัตร',
+  passport: 'ข้อมูลที่นั่ง',
+  venue3D: '3D',
+  venueZone: 'กลุ่มโซน',
+  venueMapHint:
+      'เลือกที่นั่งได้ด้วยตัวควบคุมรอบผัง ได้แก่ แถบราคาด้านบน ตัวควบคุมโซนด้านล่าง และแผงบัตรที่ด้านล่างสุด',
+  previousSeat: 'ที่นั่งก่อนหน้า',
+  nextSeat: 'ที่นั่งถัดไป',
+  orbitMode: 'หมุนสถานที่',
+  panMode: 'เลื่อนสถานที่',
+  openInteractive3dVenue: 'เปิดสถานที่แบบ 3D ที่โต้ตอบได้',
+  showSeatsFor: 'แสดงที่นั่งสำหรับ',
+  accessJumpFirstSection: 'ไปที่โซนแรก',
+  accessJumpNextSection: 'ไปที่โซนถัดไป',
+  fewerTickets: 'ลดจำนวนบัตร',
+  moreTickets: 'เพิ่มจำนวนบัตร',
+  addTickets: 'เพิ่มบัตร',
+  noSelectableSeats: 'ขณะนี้ไม่มีที่นั่งที่เลือกได้',
+  confirmYourTickets: 'ยืนยันบัตรของคุณ',
+  seatsSecuredOpeningCheckout: 'กันที่นั่งแล้ว กำลังเปิดหน้าชำระเงิน…',
+  holdInCheckoutTitle: 'ที่นั่งของคุณอยู่ระหว่างการชำระเงินแล้ว',
+  holdInCheckoutBody:
+      'ชำระเงินให้เสร็จเพื่อเก็บที่นั่งไว้ หากต้องการเลือกที่นั่งอื่น ให้ปล่อยที่นั่งเหล่านี้ก่อน ที่นั่งจะกลับไปเปิดขายอีกครั้ง',
+  releaseAndChangeSeats: 'ปล่อยและเปลี่ยนที่นั่ง',
+  holdAlreadyHeldTitle: 'ที่นั่งของคุณถูกกันไว้แล้ว',
+  holdAlreadyHeldBody: 'ไปที่หน้าชำระเงินต่อเพื่อเก็บที่นั่งไว้',
+  accessExpiredTitle: 'เซสชันที่นั่งของคุณหมดอายุแล้ว',
+  accessExpiredCopy:
+      'โหลดผังที่นั่งใหม่เพื่อดำเนินการต่อ ที่นั่งที่อยู่ในตะกร้าแล้วจะยังถูกกันไว้จนกว่าจะหมดเวลา',
+  dismissError: 'ปิดข้อผิดพลาด',
+  testModeLong: 'โหมดทดสอบ · ไม่มีการจองจริง',
   accessNeeds: <String, String>{
     'wheelchair': 'ที่สำหรับรถเข็น',
     'companion': 'ที่นั่งผู้ติดตาม',
@@ -190,6 +251,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountTh,
   seatJustTakenByAnother: _seatJustTakenByAnotherTh,
   peekSecured: _peekSecuredTh,
+  venueMap: _venueMapTh,
+  accessibleStep: _accessibleStepTh,
+  chooseMinMaxGuests: _chooseMinMaxGuestsTh,
+  chooseMore: _chooseMoreTh,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeTh,
   ticketCount: _ticketCountTh,
   findBestSeats: _findBestSeatsTh,
   reselectSeats: _reselectSeatsTh,
@@ -198,5 +264,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeTh,
   holdLapsedSomeTaken: _holdLapsedSomeTakenTh,
   holdLapsedAllTaken: _holdLapsedAllTakenTh,
+  accessibleSections: _accessibleSectionsTh,
+  placesAvailable: _placesAvailableTh,
+  removeTickets: _removeTicketsTh,
+  holdMinutesLeft: _holdMinutesLeftTh,
+  holdSecondsLeft: _holdSecondsLeftTh,
+  holdLapsedBody: _holdLapsedBodyTh,
+  seatsNotRecovered: _seatsNotRecoveredTh,
   continueWithTotal: _continueWithTotalTh,
 );

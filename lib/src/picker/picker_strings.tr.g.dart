@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherTr(String label) =>
 String _peekSecuredTr(int count, String total) =>
     '✓ $count güvenceye alındı · $total. Henüz ücret alınmayacak';
 
+String _venueMapTr(String venue) => '$venue koltuk planı';
+
+String _accessibleStepTr(int index, int total) => '$index/$total';
+
+String _chooseMinMaxGuestsTr(int min, int max) =>
+    '$min ile $max arasında misafir seçin.';
+
+String _chooseMoreTr(int count) => '$count tane daha seç';
+
+String _seatsHeldForNeedMoreTimeTr(String time) =>
+    'Koltuklarınız $time boyunca sizin için tutuluyor. Daha fazla süre mi gerekiyor?';
+
 String _ticketCountTr(int count) => switch (pickerPluralCategory('tr', count)) {
   PickerPluralCategory.one => '$count bilet',
   _ => '$count bilet',
@@ -81,6 +93,48 @@ String _holdLapsedAllTakenTr(int count) =>
       _ => 'Siz yokken rezervasyonunuz sona erdi ve o koltuklar alındı.',
     };
 
+String _accessibleSectionsTr(int count) =>
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one => '$count blok',
+      _ => '$count blok',
+    };
+
+String _placesAvailableTr(int count) =>
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one => 'Şu anda $count yer müsait',
+      _ => 'Şu anda $count yer müsait',
+    };
+
+String _removeTicketsTr(int count) =>
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one => '$count bilet çıkar',
+      _ => '$count bilet çıkar',
+    };
+
+String _holdMinutesLeftTr(int count) =>
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one => '$count dakika kaldı',
+      _ => '$count dakika kaldı',
+    };
+
+String _holdSecondsLeftTr(int count) =>
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one => '$count saniye kaldı',
+      _ => '$count saniye kaldı',
+    };
+
+String _holdLapsedBodyTr(int count) =>
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one => 'Koltuklar $count dakika boyunca tutuldu.',
+      _ => 'Koltuklar $count dakika boyunca tutuldu.',
+    };
+
+String _seatsNotRecoveredTr(int count) =>
+    switch (pickerPluralCategory('tr', count)) {
+      PickerPluralCategory.one => '$count koltuk yeniden tutulamadı',
+      _ => '$count koltuk yeniden tutulamadı',
+    };
+
 String _continueWithTotalTr(String money) => 'Devam \u00b7 $money';
 
 /// The `tr` defaults for the native picker chrome.
@@ -104,7 +158,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   undo: 'Geri al',
   holdAndCheckout: 'Koltukları tut ve öde',
   poweredBy: 'SeatLayer tarafından sağlanır',
-  testMode: 'TEST MODU',
+  testMode: 'Test modu',
   accessibility: 'Erişilebilirlik ve renk seçenekleri',
   accessibilityTitle: 'Erişilebilirlik ve renk seçenekleri',
   fitVenue: 'Tüm mekânı göster',
@@ -124,6 +178,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   hideLimitedView: 'Kısıtlı manzaralı koltukları gizle',
   colorblindSafe: 'Renk körlüğüne uygun renkler',
   notAvailable: 'Müsait değil',
+  viewGroupTitle: 'GÖRÜNÜM',
   restrictedView: 'Kısıtlı manzara',
   obstructedView: 'Engelli manzara',
   premiumSeat: 'Premium koltuk',
@@ -205,6 +260,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   removeWord: 'Kaldır',
   floorWord: 'Kat',
   totalWord: 'Toplam',
+  chooseSeats: 'Koltuklarınızı seçin',
+  chooseTickets: 'Bilet seçin',
+  placeWord: 'YER',
+  ticketWord: 'Bilet',
+  passport: 'Koltuk profili',
+  venue3D: '3D',
+  venueZone: 'Mekân bölgesi',
+  venueMapHint:
+      'Koltuklar planın çevresindeki kontrollerle seçilir: üstte fiyat şeridi, altta blok kontrolleri ve en altta bilet paneli.',
+  previousSeat: 'Önceki koltuk',
+  nextSeat: 'Sonraki koltuk',
+  orbitMode: 'Mekânı döndür',
+  panMode: 'Mekânı kaydır',
+  openInteractive3dVenue: 'Etkileşimli 3B mekân görünümünü aç',
+  showSeatsFor: 'KOLTUKLARI GÖSTER:',
+  accessJumpFirstSection: 'İlk bloğa git',
+  accessJumpNextSection: 'Sonraki bloğa git',
+  fewerTickets: 'Daha az bilet',
+  moreTickets: 'Daha fazla bilet',
+  addTickets: 'Bilet ekle',
+  noSelectableSeats: 'Şu anda seçilebilir koltuk yok.',
+  confirmYourTickets: 'Biletlerinizi onaylayın',
+  seatsSecuredOpeningCheckout: 'Koltuklar güvenceye alındı. Ödeme açılıyor…',
+  holdInCheckoutTitle: 'Koltuklarınız zaten ödeme aşamasında',
+  holdInCheckoutBody:
+      'Koltukları korumak için ödemeyi tamamlayın. Farklı koltuklar seçmek için önce bunları serbest bırakın — yeniden satışa çıkarlar.',
+  releaseAndChangeSeats: 'Serbest bırak ve koltukları değiştir',
+  holdAlreadyHeldTitle: 'Koltuklarınız zaten tutuluyor',
+  holdAlreadyHeldBody: 'Koltukları korumak için ödemeye devam edin.',
+  accessExpiredTitle: 'Oturumunuzun süresi doldu',
+  accessExpiredCopy:
+      'Devam etmek için koltuk planını yeniden yükleyin. Sepetinizdeki koltuklar süre bitene kadar sizin için tutulmaya devam eder.',
+  dismissError: 'Hatayı kapat',
+  testModeLong: 'Test modu · hiçbir şey rezerve edilmez',
   accessNeeds: <String, String>{
     'wheelchair': 'Tekerlekli sandalye yeri',
     'companion': 'Refakatçi koltuğu',
@@ -228,6 +317,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountTr,
   seatJustTakenByAnother: _seatJustTakenByAnotherTr,
   peekSecured: _peekSecuredTr,
+  venueMap: _venueMapTr,
+  accessibleStep: _accessibleStepTr,
+  chooseMinMaxGuests: _chooseMinMaxGuestsTr,
+  chooseMore: _chooseMoreTr,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeTr,
   ticketCount: _ticketCountTr,
   findBestSeats: _findBestSeatsTr,
   reselectSeats: _reselectSeatsTr,
@@ -236,5 +330,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeTr,
   holdLapsedSomeTaken: _holdLapsedSomeTakenTr,
   holdLapsedAllTaken: _holdLapsedAllTakenTr,
+  accessibleSections: _accessibleSectionsTr,
+  placesAvailable: _placesAvailableTr,
+  removeTickets: _removeTicketsTr,
+  holdMinutesLeft: _holdMinutesLeftTr,
+  holdSecondsLeft: _holdSecondsLeftTr,
+  holdLapsedBody: _holdLapsedBodyTr,
+  seatsNotRecovered: _seatsNotRecoveredTr,
   continueWithTotal: _continueWithTotalTr,
 );

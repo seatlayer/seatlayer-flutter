@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherEt(String label) =>
 String _peekSecuredEt(int count, String total) =>
     '✓ $count kindlustatud · $total. Veel ei võeta tasu';
 
+String _venueMapEt(String venue) => 'Istekohtade plaan: $venue';
+
+String _accessibleStepEt(int index, int total) => '$index/$total';
+
+String _chooseMinMaxGuestsEt(int min, int max) =>
+    'Vali $min kuni $max külalist.';
+
+String _chooseMoreEt(int count) => 'Vali veel $count';
+
+String _seatsHeldForNeedMoreTimeEt(String time) =>
+    'Sinu kohad on broneeritud veel $time. Vajad rohkem aega?';
+
 String _ticketCountEt(int count) => switch (pickerPluralCategory('et', count)) {
   PickerPluralCategory.one => '$count pilet',
   _ => '$count piletit',
@@ -85,6 +97,48 @@ String _holdLapsedAllTakenEt(int count) => switch (pickerPluralCategory(
   _ => 'Sinu broneering aegus, kui olid eemal, ja need kohad on juba hõivatud.',
 };
 
+String _accessibleSectionsEt(int count) =>
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => '$count sektor',
+      _ => '$count sektorit',
+    };
+
+String _placesAvailableEt(int count) =>
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => 'Praegu on saadaval $count koht',
+      _ => 'Praegu on saadaval $count kohta',
+    };
+
+String _removeTicketsEt(int count) =>
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => 'Eemalda $count pilet',
+      _ => 'Eemalda $count piletit',
+    };
+
+String _holdMinutesLeftEt(int count) =>
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => 'Jäänud $count minut',
+      _ => 'Jäänud $count minutit',
+    };
+
+String _holdSecondsLeftEt(int count) =>
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => 'Jäänud $count sekund',
+      _ => 'Jäänud $count sekundit',
+    };
+
+String _holdLapsedBodyEt(int count) =>
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => 'Need olid broneeritud $count minutiks.',
+      _ => 'Need olid broneeritud $count minutiks.',
+    };
+
+String _seatsNotRecoveredEt(int count) =>
+    switch (pickerPluralCategory('et', count)) {
+      PickerPluralCategory.one => '$count kohta ei õnnestunud taastada',
+      _ => '$count kohta ei õnnestunud taastada',
+    };
+
 String _continueWithTotalEt(String money) => 'Jätka \u00b7 $money';
 
 /// The `et` defaults for the native picker chrome.
@@ -108,7 +162,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   undo: 'Võta tagasi',
   holdAndCheckout: 'Broneeri kohad ja maksa',
   poweredBy: 'Töötab SeatLayeri baasil',
-  testMode: 'TESTREŽIIM',
+  testMode: 'Testrežiim',
   accessibility: 'Ligipääsetavuse ja värvide valikud',
   accessibilityTitle: 'Ligipääsetavuse ja värvide valikud',
   fitVenue: 'Näita kogu toimumiskohta',
@@ -128,6 +182,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   hideLimitedView: 'Peida piiratud vaatega kohad',
   colorblindSafe: 'Värvipimedasõbralikud värvid',
   notAvailable: 'Pole saadaval',
+  viewGroupTitle: 'VAADE',
   restrictedView: 'Piiratud vaade',
   obstructedView: 'Varjatud vaade',
   premiumSeat: 'Premium-koht',
@@ -206,6 +261,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   removeWord: 'Eemalda',
   floorWord: 'Korrus',
   totalWord: 'Kokku',
+  chooseSeats: 'Vali oma kohad',
+  chooseTickets: 'Vali piletid',
+  placeWord: 'KOHT',
+  ticketWord: 'Pilet',
+  passport: 'Koha profiil',
+  venue3D: '3D',
+  venueZone: 'Toimumiskoha tsoon',
+  venueMapHint:
+      'Kohti valitakse plaani ümber olevate juhtnuppudega: hinnariba selle kohal, sektorite juhtnupud selle all ja piletipaneel allservas.',
+  previousSeat: 'Eelmine koht',
+  nextSeat: 'Järgmine koht',
+  orbitMode: 'Pööra toimumiskohta',
+  panMode: 'Liiguta toimumiskohta',
+  openInteractive3dVenue: 'Ava toimumiskoha interaktiivne 3D-vaade',
+  showSeatsFor: 'NÄITA SOBIVAID KOHTI',
+  accessJumpFirstSection: 'Mine esimesse sektorisse',
+  accessJumpNextSection: 'Mine järgmisse sektorisse',
+  fewerTickets: 'Vähem pileteid',
+  moreTickets: 'Rohkem pileteid',
+  addTickets: 'Lisa piletid',
+  noSelectableSeats: 'Praegu pole valitavaid kohti saadaval.',
+  confirmYourTickets: 'Kinnita oma piletid',
+  seatsSecuredOpeningCheckout: 'Kohad on kindlustatud. Avame makse…',
+  holdInCheckoutTitle: 'Sinu kohtade makse on juba pooleli',
+  holdInCheckoutBody:
+      'Lõpeta makse, et kohad endale jätta. Teiste kohtade valimiseks vabasta esmalt need — need lähevad tagasi müüki.',
+  releaseAndChangeSeats: 'Vabasta ja vaheta kohad',
+  holdAlreadyHeldTitle: 'Sinu kohad on juba broneeritud',
+  holdAlreadyHeldBody: 'Jätka maksmisega, et need endale jätta.',
+  accessExpiredTitle: 'Sinu kohavaliku seanss aegus',
+  accessExpiredCopy:
+      'Jätkamiseks laadi istekohtade plaan uuesti. Ostukorvis olevad kohad jäävad broneerituks, kuni taimer lõpeb.',
+  dismissError: 'Sulge veateade',
+  testModeLong: 'Testrežiim · midagi ei broneerita',
   accessNeeds: <String, String>{
     'wheelchair': 'Ratastoolikoht',
     'companion': 'Saatjakoht',
@@ -229,6 +318,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountEt,
   seatJustTakenByAnother: _seatJustTakenByAnotherEt,
   peekSecured: _peekSecuredEt,
+  venueMap: _venueMapEt,
+  accessibleStep: _accessibleStepEt,
+  chooseMinMaxGuests: _chooseMinMaxGuestsEt,
+  chooseMore: _chooseMoreEt,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeEt,
   ticketCount: _ticketCountEt,
   findBestSeats: _findBestSeatsEt,
   reselectSeats: _reselectSeatsEt,
@@ -237,5 +331,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeEt,
   holdLapsedSomeTaken: _holdLapsedSomeTakenEt,
   holdLapsedAllTaken: _holdLapsedAllTakenEt,
+  accessibleSections: _accessibleSectionsEt,
+  placesAvailable: _placesAvailableEt,
+  removeTickets: _removeTicketsEt,
+  holdMinutesLeft: _holdMinutesLeftEt,
+  holdSecondsLeft: _holdSecondsLeftEt,
+  holdLapsedBody: _holdLapsedBodyEt,
+  seatsNotRecovered: _seatsNotRecoveredEt,
   continueWithTotal: _continueWithTotalEt,
 );

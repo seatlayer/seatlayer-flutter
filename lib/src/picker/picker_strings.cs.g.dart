@@ -30,6 +30,18 @@ String _seatJustTakenByAnotherCs(String label) =>
 String _peekSecuredCs(int count, String total) =>
     '✓ $count zajištěno · $total. Zatím vám nic nestrhneme';
 
+String _venueMapCs(String venue) => '$venue: plán sedadel';
+
+String _accessibleStepCs(int index, int total) => '$index z $total';
+
+String _chooseMinMaxGuestsCs(int min, int max) =>
+    'Vyberte od $min do $max hostů.';
+
+String _chooseMoreCs(int count) => 'Vyberte ještě $count';
+
+String _seatsHeldForNeedMoreTimeCs(String time) =>
+    'Vaše místa jsou rezervována ještě $time. Potřebujete více času?';
+
 String _ticketCountCs(int count) => switch (pickerPluralCategory('cs', count)) {
   PickerPluralCategory.one => '$count vstupenka',
   PickerPluralCategory.few => '$count vstupenky',
@@ -110,6 +122,62 @@ String _holdLapsedAllTakenCs(int count) => switch (pickerPluralCategory(
     'Vaše rezervace vypršela, zatímco jste byli pryč, a tato místa jsou již obsazená.',
 };
 
+String _accessibleSectionsCs(int count) =>
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => '$count sektor',
+      PickerPluralCategory.few => '$count sektory',
+      PickerPluralCategory.many => '$count sektoru',
+      _ => '$count sektorů',
+    };
+
+String _placesAvailableCs(int count) =>
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => 'Aktuálně je k dispozici $count místo',
+      PickerPluralCategory.few => 'Aktuálně jsou k dispozici $count místa',
+      PickerPluralCategory.many => 'Aktuálně je k dispozici $count místa',
+      _ => 'Aktuálně je k dispozici $count míst',
+    };
+
+String _removeTicketsCs(int count) =>
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => 'Odebrat $count vstupenku',
+      PickerPluralCategory.few => 'Odebrat $count vstupenky',
+      PickerPluralCategory.many => 'Odebrat $count vstupenky',
+      _ => 'Odebrat $count vstupenek',
+    };
+
+String _holdMinutesLeftCs(int count) =>
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => 'Zbývá $count minuta',
+      PickerPluralCategory.few => 'Zbývají $count minuty',
+      PickerPluralCategory.many => 'Zbývá $count minuty',
+      _ => 'Zbývá $count minut',
+    };
+
+String _holdSecondsLeftCs(int count) =>
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => 'Zbývá $count sekunda',
+      PickerPluralCategory.few => 'Zbývají $count sekundy',
+      PickerPluralCategory.many => 'Zbývá $count sekundy',
+      _ => 'Zbývá $count sekund',
+    };
+
+String _holdLapsedBodyCs(int count) =>
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => 'Byla rezervována $count minutu.',
+      PickerPluralCategory.few => 'Byla rezervována $count minuty.',
+      PickerPluralCategory.many => 'Byla rezervována $count minuty.',
+      _ => 'Byla rezervována $count minut.',
+    };
+
+String _seatsNotRecoveredCs(int count) =>
+    switch (pickerPluralCategory('cs', count)) {
+      PickerPluralCategory.one => '$count místo se nepodařilo obnovit',
+      PickerPluralCategory.few => '$count místa se nepodařilo obnovit',
+      PickerPluralCategory.many => '$count místa se nepodařilo obnovit',
+      _ => '$count míst se nepodařilo obnovit',
+    };
+
 String _continueWithTotalCs(String money) => 'Pokračovat \u00b7 $money';
 
 /// The `cs` defaults for the native picker chrome.
@@ -133,7 +201,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   undo: 'Zpět',
   holdAndCheckout: 'Rezervovat místa a zaplatit',
   poweredBy: 'Běží na SeatLayer',
-  testMode: 'TESTOVACÍ REŽIM',
+  testMode: 'Testovací režim',
   accessibility: 'Přístupnost a barvy',
   accessibilityTitle: 'Přístupnost a barvy',
   fitVenue: 'Zobrazit celé místo konání',
@@ -153,6 +221,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   hideLimitedView: 'Skrýt místa s omezeným výhledem',
   colorblindSafe: 'Barvy vhodné pro barvoslepé',
   notAvailable: 'Není k dispozici',
+  viewGroupTitle: 'ZOBRAZENÍ',
   restrictedView: 'Omezený výhled',
   obstructedView: 'Zakrytý výhled',
   premiumSeat: 'Prémiové místo',
@@ -233,6 +302,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   removeWord: 'Odebrat',
   floorWord: 'Patro',
   totalWord: 'Celkem',
+  chooseSeats: 'Vyberte si místa',
+  chooseTickets: 'Vyberte vstupenky',
+  placeWord: 'MÍSTO',
+  ticketWord: 'Vstupenka',
+  passport: 'Profil místa',
+  venue3D: '3D',
+  venueZone: 'Zóna areálu',
+  venueMapHint:
+      'Místa se vybírají pomocí ovládacích prvků kolem plánu: cenového pruhu nad ním, ovládání sektorů pod ním a panelu vstupenek dole.',
+  previousSeat: 'Předchozí místo',
+  nextSeat: 'Další místo',
+  orbitMode: 'Otočit areál',
+  panMode: 'Posunout areál',
+  openInteractive3dVenue: 'Otevřít interaktivní 3D pohled na areál',
+  showSeatsFor: 'ZOBRAZIT MÍSTA:',
+  accessJumpFirstSection: 'Přejít na první sektor',
+  accessJumpNextSection: 'Přejít na další sektor',
+  fewerTickets: 'Méně vstupenek',
+  moreTickets: 'Více vstupenek',
+  addTickets: 'Přidat vstupenky',
+  noSelectableSeats: 'Momentálně nejsou k dispozici žádná místa k výběru.',
+  confirmYourTickets: 'Potvrďte své vstupenky',
+  seatsSecuredOpeningCheckout: 'Místa zajištěna. Otevíráme pokladnu…',
+  holdInCheckoutTitle: 'Vaše místa už jsou v pokladně',
+  holdInCheckoutBody:
+      'Dokončete nákup, abyste o ně nepřišli. Pokud chcete vybrat jiná místa, nejprve tato uvolněte — vrátí se do prodeje.',
+  releaseAndChangeSeats: 'Uvolnit a změnit místa',
+  holdAlreadyHeldTitle: 'Vaše místa už jsou rezervována',
+  holdAlreadyHeldBody: 'Pokračujte k platbě, abyste o ně nepřišli.',
+  accessExpiredTitle: 'Vaše relace výběru míst vypršela',
+  accessExpiredCopy:
+      'Pro pokračování znovu načtěte plán sedadel. Místa, která už máte v košíku, zůstávají rezervována, dokud neskončí odpočet.',
+  dismissError: 'Zavřít chybovou zprávu',
+  testModeLong: 'Testovací režim · nic se nerezervuje',
   accessNeeds: <String, String>{
     'wheelchair': 'Místo pro vozík',
     'companion': 'Místo pro doprovod',
@@ -256,6 +359,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountCs,
   seatJustTakenByAnother: _seatJustTakenByAnotherCs,
   peekSecured: _peekSecuredCs,
+  venueMap: _venueMapCs,
+  accessibleStep: _accessibleStepCs,
+  chooseMinMaxGuests: _chooseMinMaxGuestsCs,
+  chooseMore: _chooseMoreCs,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeCs,
   ticketCount: _ticketCountCs,
   findBestSeats: _findBestSeatsCs,
   reselectSeats: _reselectSeatsCs,
@@ -264,5 +372,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeCs,
   holdLapsedSomeTaken: _holdLapsedSomeTakenCs,
   holdLapsedAllTaken: _holdLapsedAllTakenCs,
+  accessibleSections: _accessibleSectionsCs,
+  placesAvailable: _placesAvailableCs,
+  removeTickets: _removeTicketsCs,
+  holdMinutesLeft: _holdMinutesLeftCs,
+  holdSecondsLeft: _holdSecondsLeftCs,
+  holdLapsedBody: _holdLapsedBodyCs,
+  seatsNotRecovered: _seatsNotRecoveredCs,
   continueWithTotal: _continueWithTotalCs,
 );

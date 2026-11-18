@@ -28,6 +28,18 @@ String _seatJustTakenByAnotherId(String label) =>
 String _peekSecuredId(int count, String total) =>
     '✓ $count diamankan · $total. Anda belum ditagih';
 
+String _venueMapId(String venue) => 'Denah kursi $venue';
+
+String _accessibleStepId(int index, int total) => '$index dari $total';
+
+String _chooseMinMaxGuestsId(int min, int max) =>
+    'Pilih antara $min dan $max tamu.';
+
+String _chooseMoreId(int count) => 'Pilih $count lagi';
+
+String _seatsHeldForNeedMoreTimeId(String time) =>
+    'Kursi Anda ditahan selama $time. Butuh waktu lebih?';
+
 String _ticketCountId(int count) => '$count tiket';
 
 String _findBestSeatsId(int count) => 'Cari $count kursi terbaik';
@@ -46,6 +58,22 @@ String _holdLapsedSomeTakenId(int count) =>
 
 String _holdLapsedAllTakenId(int count) =>
     'Waktu tahan habis saat Anda tidak aktif, dan kursi Anda sudah diambil orang lain.';
+
+String _accessibleSectionsId(int count) => '$count bagian';
+
+String _placesAvailableId(int count) => '$count tempat tersedia saat ini';
+
+String _removeTicketsId(int count) => 'Hapus $count tiket';
+
+String _holdMinutesLeftId(int count) => 'Sisa $count menit';
+
+String _holdSecondsLeftId(int count) => 'Sisa $count detik';
+
+String _holdLapsedBodyId(int count) =>
+    'Kursi tersebut ditahan selama $count menit.';
+
+String _seatsNotRecoveredId(int count) =>
+    '$count kursi tidak bisa ditahan kembali';
 
 String _continueWithTotalId(String money) => 'Lanjut \u00b7 $money';
 
@@ -70,7 +98,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   undo: 'Urungkan',
   holdAndCheckout: 'Tahan kursi & bayar',
   poweredBy: 'Didukung oleh SeatLayer',
-  testMode: 'MODE UJI',
+  testMode: 'Mode uji',
   accessibility: 'Opsi aksesibilitas dan warna',
   accessibilityTitle: 'Opsi aksesibilitas dan warna',
   fitVenue: 'Tampilkan seluruh venue',
@@ -91,6 +119,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   hideLimitedView: 'Sembunyikan kursi berpandangan terbatas',
   colorblindSafe: 'Warna ramah buta warna',
   notAvailable: 'Tidak tersedia',
+  viewGroupTitle: 'TAMPILAN',
   restrictedView: 'Pandangan terbatas',
   obstructedView: 'Pandangan terhalang',
   premiumSeat: 'Kursi premium',
@@ -173,6 +202,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   removeWord: 'Hapus',
   floorWord: 'Lantai',
   totalWord: 'Total',
+  chooseSeats: 'Pilih kursi Anda',
+  chooseTickets: 'Pilih tiket',
+  placeWord: 'TEMPAT',
+  ticketWord: 'Tiket',
+  passport: 'Profil kursi',
+  venue3D: '3D',
+  venueZone: 'Zona venue',
+  venueMapHint:
+      'Kursi dipilih dengan kontrol di sekitar denah: jalur harga di atasnya, kontrol bagian di bawahnya, dan panel tiket di bagian paling bawah.',
+  previousSeat: 'Kursi sebelumnya',
+  nextSeat: 'Kursi berikutnya',
+  orbitMode: 'Putar venue',
+  panMode: 'Geser venue',
+  openInteractive3dVenue: 'Buka venue 3D interaktif',
+  showSeatsFor: 'TAMPILKAN KURSI UNTUK',
+  accessJumpFirstSection: 'Langsung ke bagian pertama',
+  accessJumpNextSection: 'Langsung ke bagian berikutnya',
+  fewerTickets: 'Kurangi tiket',
+  moreTickets: 'Tambah tiket',
+  addTickets: 'Tambahkan tiket',
+  noSelectableSeats: 'Saat ini tidak ada kursi yang bisa dipilih.',
+  confirmYourTickets: 'Konfirmasi tiket Anda',
+  seatsSecuredOpeningCheckout: 'Kursi diamankan. Membuka halaman pembayaran…',
+  holdInCheckoutTitle: 'Kursi Anda sudah dalam proses pembayaran',
+  holdInCheckoutBody:
+      'Selesaikan pembayaran agar kursi tetap milik Anda. Untuk memilih kursi lain, lepas kursi ini dulu — kursi akan dijual kembali.',
+  releaseAndChangeSeats: 'Lepas dan ganti kursi',
+  holdAlreadyHeldTitle: 'Kursi Anda sudah ditahan',
+  holdAlreadyHeldBody: 'Lanjutkan ke pembayaran agar kursi tetap milik Anda.',
+  accessExpiredTitle: 'Sesi kursi Anda telah berakhir',
+  accessExpiredCopy:
+      'Muat ulang denah kursi untuk melanjutkan. Kursi yang sudah ada di keranjang Anda tetap ditahan sampai waktu habis.',
+  dismissError: 'Tutup pesan kesalahan',
+  testModeLong: 'Mode uji · tidak memesan apa pun',
   accessNeeds: <String, String>{
     'wheelchair': 'Tempat kursi roda',
     'companion': 'Kursi pendamping',
@@ -196,6 +259,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountId,
   seatJustTakenByAnother: _seatJustTakenByAnotherId,
   peekSecured: _peekSecuredId,
+  venueMap: _venueMapId,
+  accessibleStep: _accessibleStepId,
+  chooseMinMaxGuests: _chooseMinMaxGuestsId,
+  chooseMore: _chooseMoreId,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeId,
   ticketCount: _ticketCountId,
   findBestSeats: _findBestSeatsId,
   reselectSeats: _reselectSeatsId,
@@ -204,5 +272,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeId,
   holdLapsedSomeTaken: _holdLapsedSomeTakenId,
   holdLapsedAllTaken: _holdLapsedAllTakenId,
+  accessibleSections: _accessibleSectionsId,
+  placesAvailable: _placesAvailableId,
+  removeTickets: _removeTicketsId,
+  holdMinutesLeft: _holdMinutesLeftId,
+  holdSecondsLeft: _holdSecondsLeftId,
+  holdLapsedBody: _holdLapsedBodyId,
+  seatsNotRecovered: _seatsNotRecoveredId,
   continueWithTotal: _continueWithTotalId,
 );

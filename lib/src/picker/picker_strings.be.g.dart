@@ -30,6 +30,18 @@ String _seatJustTakenByAnotherBe(String label) =>
 String _peekSecuredBe(int count, String total) =>
     '✓ $count замацавана · $total. Спісання пакуль не будзе';
 
+String _venueMapBe(String venue) => '$venue: схема месцаў';
+
+String _accessibleStepBe(int index, int total) => '$index з $total';
+
+String _chooseMinMaxGuestsBe(int min, int max) =>
+    'Выберыце ад $min да $max гасцей.';
+
+String _chooseMoreBe(int count) => 'Выберыце яшчэ $count';
+
+String _seatsHeldForNeedMoreTimeBe(String time) =>
+    'Вашы месцы трымаюцца яшчэ $time. Патрэбна больш часу?';
+
 String _ticketCountBe(int count) => switch (pickerPluralCategory('be', count)) {
   PickerPluralCategory.one => '$count білет',
   PickerPluralCategory.few => '$count білеты',
@@ -110,6 +122,62 @@ String _holdLapsedAllTakenBe(int count) => switch (pickerPluralCategory(
     'Ваша браніраванне скончылася, пакуль вас не было, і гэтыя месцы ўжо занятыя.',
 };
 
+String _accessibleSectionsBe(int count) =>
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => '$count сектар',
+      PickerPluralCategory.few => '$count сектары',
+      PickerPluralCategory.many => '$count сектараў',
+      _ => '$count сектара',
+    };
+
+String _placesAvailableBe(int count) =>
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => 'Цяпер даступна $count месца',
+      PickerPluralCategory.few => 'Цяпер даступна $count месцы',
+      PickerPluralCategory.many => 'Цяпер даступна $count месцаў',
+      _ => 'Цяпер даступна $count месца',
+    };
+
+String _removeTicketsBe(int count) =>
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => 'Выдаліць $count білет',
+      PickerPluralCategory.few => 'Выдаліць $count білеты',
+      PickerPluralCategory.many => 'Выдаліць $count білетаў',
+      _ => 'Выдаліць $count білета',
+    };
+
+String _holdMinutesLeftBe(int count) =>
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => 'Засталася $count хвіліна',
+      PickerPluralCategory.few => 'Засталося $count хвіліны',
+      PickerPluralCategory.many => 'Засталося $count хвілін',
+      _ => 'Засталося $count хвіліны',
+    };
+
+String _holdSecondsLeftBe(int count) =>
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => 'Засталася $count секунда',
+      PickerPluralCategory.few => 'Засталося $count секунды',
+      PickerPluralCategory.many => 'Засталося $count секунд',
+      _ => 'Засталося $count секунды',
+    };
+
+String _holdLapsedBodyBe(int count) =>
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => 'Іх трымалі $count хвіліну.',
+      PickerPluralCategory.few => 'Іх трымалі $count хвіліны.',
+      PickerPluralCategory.many => 'Іх трымалі $count хвілін.',
+      _ => 'Іх трымалі $count хвіліны.',
+    };
+
+String _seatsNotRecoveredBe(int count) =>
+    switch (pickerPluralCategory('be', count)) {
+      PickerPluralCategory.one => '$count месца не ўдалося вярнуць',
+      PickerPluralCategory.few => '$count месцы не ўдалося вярнуць',
+      PickerPluralCategory.many => '$count месцаў не ўдалося вярнуць',
+      _ => '$count месца не ўдалося вярнуць',
+    };
+
 String _continueWithTotalBe(String money) => 'Працягнуць \u00b7 $money';
 
 /// The `be` defaults for the native picker chrome.
@@ -133,7 +201,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   undo: 'Адрабіць',
   holdAndCheckout: 'Забраніраваць месцы і аплаціць',
   poweredBy: 'Працуе на SeatLayer',
-  testMode: 'ТЭСТАВЫ РЭЖЫМ',
+  testMode: 'Тэставы рэжым',
   accessibility: 'Даступнасць і колеры',
   accessibilityTitle: 'Даступнасць і колеры',
   fitVenue: 'Паказаць усю пляцоўку',
@@ -154,6 +222,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   hideLimitedView: 'Схаваць месцы з абмежаваным аглядам',
   colorblindSafe: 'Колеры для дальтонікаў',
   notAvailable: 'Недаступна',
+  viewGroupTitle: 'ВЫГЛЯД',
   restrictedView: 'Абмежаваны агляд',
   obstructedView: 'Агляд перакрыты',
   premiumSeat: 'Прэміяльнае месца',
@@ -234,6 +303,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   removeWord: 'Прыбраць',
   floorWord: 'Паверх',
   totalWord: 'Разам',
+  chooseSeats: 'Выберыце свае месцы',
+  chooseTickets: 'Выберыце білеты',
+  placeWord: 'МЕСЦА',
+  ticketWord: 'Білет',
+  passport: 'Картка месца',
+  venue3D: '3D',
+  venueZone: 'Зона пляцоўкі',
+  venueMapHint:
+      'Месцы выбіраюць з дапамогай элементаў кіравання вакол схемы: паласа цэн над ёй, кіраванне сектарамі пад ёй і панэль білетаў унізе.',
+  previousSeat: 'Папярэдняе месца',
+  nextSeat: 'Наступнае месца',
+  orbitMode: 'Павярнуць пляцоўку',
+  panMode: 'Перамясціць пляцоўку',
+  openInteractive3dVenue: 'Адкрыць інтэрактыўны 3D-выгляд пляцоўкі',
+  showSeatsFor: 'ПАКАЗАЦЬ МЕСЦЫ:',
+  accessJumpFirstSection: 'Перайсці да першага сектара',
+  accessJumpNextSection: 'Перайсці да наступнага сектара',
+  fewerTickets: 'Менш білетаў',
+  moreTickets: 'Больш білетаў',
+  addTickets: 'Дадаць білеты',
+  noSelectableSeats: 'Цяпер няма месцаў, даступных для выбару.',
+  confirmYourTickets: 'Пацвердзіце свае білеты',
+  seatsSecuredOpeningCheckout: 'Месцы замацаваны. Адкрываем аплату…',
+  holdInCheckoutTitle: 'Вашы месцы ўжо ў працэсе аплаты',
+  holdInCheckoutBody:
+      'Завяршыце аплату, каб захаваць іх. Каб выбраць іншыя месцы, спачатку вызваліце гэтыя — яны вернуцца ў продаж.',
+  releaseAndChangeSeats: 'Вызваліць і змяніць месцы',
+  holdAlreadyHeldTitle: 'Вашы месцы ўжо трымаюцца за вамі',
+  holdAlreadyHeldBody: 'Перайдзіце да аплаты, каб захаваць іх.',
+  accessExpiredTitle: 'Ваш сеанс выбару месцаў завяршыўся',
+  accessExpiredCopy:
+      'Абнавіце схему месцаў, каб працягнуць. Месцы, якія ўжо ў кошыку, застаюцца за вамі, пакуль не скончыцца таймер.',
+  dismissError: 'Закрыць паведамленне пра памылку',
+  testModeLong: 'Тэставы рэжым · нічога не браніруецца',
   accessNeeds: <String, String>{
     'wheelchair': 'Месца для калянкі',
     'companion': 'Месца суправаджэння',
@@ -257,6 +360,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountBe,
   seatJustTakenByAnother: _seatJustTakenByAnotherBe,
   peekSecured: _peekSecuredBe,
+  venueMap: _venueMapBe,
+  accessibleStep: _accessibleStepBe,
+  chooseMinMaxGuests: _chooseMinMaxGuestsBe,
+  chooseMore: _chooseMoreBe,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeBe,
   ticketCount: _ticketCountBe,
   findBestSeats: _findBestSeatsBe,
   reselectSeats: _reselectSeatsBe,
@@ -265,5 +373,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeBe,
   holdLapsedSomeTaken: _holdLapsedSomeTakenBe,
   holdLapsedAllTaken: _holdLapsedAllTakenBe,
+  accessibleSections: _accessibleSectionsBe,
+  placesAvailable: _placesAvailableBe,
+  removeTickets: _removeTicketsBe,
+  holdMinutesLeft: _holdMinutesLeftBe,
+  holdSecondsLeft: _holdSecondsLeftBe,
+  holdLapsedBody: _holdLapsedBodyBe,
+  seatsNotRecovered: _seatsNotRecoveredBe,
   continueWithTotal: _continueWithTotalBe,
 );

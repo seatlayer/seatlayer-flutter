@@ -30,6 +30,18 @@ String _seatJustTakenByAnotherKu(String label) =>
 String _peekSecuredKu(int count, String total) =>
     '✓ $count hatin piştrastkirin · $total. Hîn tu pere nayê girtin';
 
+String _venueMapKu(String venue) => 'Nexşeya cihan a $venue';
+
+String _accessibleStepKu(int index, int total) => '$index ji $total';
+
+String _chooseMinMaxGuestsKu(int min, int max) =>
+    'Di navbera $min û $max mêvanan de hilbijêre.';
+
+String _chooseMoreKu(int count) => '$count din hilbijêre';
+
+String _seatsHeldForNeedMoreTimeKu(String time) =>
+    'Cihên te ji bo $time hatine girtin. Dema zêdetir lazim e?';
+
 String _ticketCountKu(int count) => switch (pickerPluralCategory('ku', count)) {
   PickerPluralCategory.one => '$count bilêt',
   _ => '$count bilêt',
@@ -86,6 +98,48 @@ String _holdLapsedAllTakenKu(int count) => switch (pickerPluralCategory(
   _ => 'Dema tu ne li vir bûyî rezervasyona te qediya û ew cih hatine girtin.',
 };
 
+String _accessibleSectionsKu(int count) =>
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => '$count beş',
+      _ => '$count beş',
+    };
+
+String _placesAvailableKu(int count) =>
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => 'Niha $count cih berdest e',
+      _ => 'Niha $count cih berdest in',
+    };
+
+String _removeTicketsKu(int count) =>
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => '$count bilêt rake',
+      _ => '$count bilêtan rake',
+    };
+
+String _holdMinutesLeftKu(int count) =>
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => '$count deqe maye',
+      _ => '$count deqe mane',
+    };
+
+String _holdSecondsLeftKu(int count) =>
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => '$count çirke maye',
+      _ => '$count çirke mane',
+    };
+
+String _holdLapsedBodyKu(int count) =>
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => 'Ew ji bo $count deqeyê hatin girtin.',
+      _ => 'Ew ji bo $count deqeyan hatin girtin.',
+    };
+
+String _seatsNotRecoveredKu(int count) =>
+    switch (pickerPluralCategory('ku', count)) {
+      PickerPluralCategory.one => '$count cih nehat vegerandin',
+      _ => '$count cih nehatin vegerandin',
+    };
+
 String _continueWithTotalKu(String money) => 'Berdewam bike \u00b7 $money';
 
 /// The `ku` defaults for the native picker chrome.
@@ -109,7 +163,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   undo: 'Vegerîne',
   holdAndCheckout: 'Cihan bigire û drav bide',
   poweredBy: 'Bi SeatLayer tê xebitandin',
-  testMode: 'MODA CERIBANDINÊ',
+  testMode: 'Moda ceribandinê',
   accessibility: 'Vebijêrkên gihîştbarî û rengan',
   accessibilityTitle: 'Vebijêrkên gihîştbarî û rengan',
   fitVenue: 'Hemû cih nîşan bide',
@@ -130,6 +184,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   hideLimitedView: 'Cihên bi dîmena sînordar veşêre',
   colorblindSafe: 'Rengên guncav ji bo kortiya rengan',
   notAvailable: 'Ne berdest e',
+  viewGroupTitle: 'XUYANG',
   restrictedView: 'Dîmena sînordar',
   obstructedView: 'Dîmena girtî',
   premiumSeat: 'Cihê premium',
@@ -210,6 +265,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   removeWord: 'Rake',
   floorWord: 'Qat',
   totalWord: 'Tevahî',
+  chooseSeats: 'Cihên xwe hilbijêre',
+  chooseTickets: 'Bilêtan hilbijêre',
+  placeWord: 'CIH',
+  ticketWord: 'Bilêt',
+  passport: 'Profîla cih',
+  venue3D: '3D',
+  venueZone: 'Herêma cihê',
+  venueMapHint:
+      'Cih bi kontrolên li dora nexşeyê têne hilbijartin: rêza bihayan li jorê wê, kontrolên beşan li jêrê wê, û panela bilêtan li binî.',
+  previousSeat: 'Cihê berê',
+  nextSeat: 'Cihê din',
+  orbitMode: 'Zivirandina cihê',
+  panMode: 'Livandina cihê',
+  openInteractive3dVenue: 'Dîmena 3D ya înteraktîv a cihê veke',
+  showSeatsFor: 'CIHAN NÎŞAN BIDE JI BO',
+  accessJumpFirstSection: 'Here beşa yekem',
+  accessJumpNextSection: 'Here beşa din',
+  fewerTickets: 'Bilêtên kêmtir',
+  moreTickets: 'Bilêtên zêdetir',
+  addTickets: 'Bilêtan zêde bike',
+  noSelectableSeats: 'Niha tu cihên hilbijêrbar berdest nînin.',
+  confirmYourTickets: 'Bilêtên xwe piştrast bike',
+  seatsSecuredOpeningCheckout: 'Cih hatin piştrastkirin. Dravdan tê vekirin…',
+  holdInCheckoutTitle: 'Cihên te jixwe di dravdanê de ne',
+  holdInCheckoutBody:
+      'Ji bo ku wan biparêzî dravdanê temam bike. Ji bo hilbijartina cihên din, pêşî van berde — ew dîsa dikevin firotanê.',
+  releaseAndChangeSeats: 'Berde û cihan biguherîne',
+  holdAlreadyHeldTitle: 'Cihên te jixwe hatine girtin',
+  holdAlreadyHeldBody: 'Ji bo ku wan biparêzî, bidomîne bo dravdanê.',
+  accessExpiredTitle: 'Danişîna te ya cihan qediya',
+  accessExpiredCopy:
+      'Ji bo berdewamkirinê nexşeya cihan ji nû ve bar bike. Cihên ku jixwe di selika te de ne heta ku demjimêr biqede girtî dimînin.',
+  dismissError: 'Çewtiyê bigire',
+  testModeLong: 'Moda ceribandinê · tiştek nayê rezervekirin',
   accessNeeds: <String, String>{
     'wheelchair': 'Cihê kursiya teker',
     'companion': 'Cihê hevaltiyê',
@@ -233,6 +322,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountKu,
   seatJustTakenByAnother: _seatJustTakenByAnotherKu,
   peekSecured: _peekSecuredKu,
+  venueMap: _venueMapKu,
+  accessibleStep: _accessibleStepKu,
+  chooseMinMaxGuests: _chooseMinMaxGuestsKu,
+  chooseMore: _chooseMoreKu,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeKu,
   ticketCount: _ticketCountKu,
   findBestSeats: _findBestSeatsKu,
   reselectSeats: _reselectSeatsKu,
@@ -241,5 +335,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeKu,
   holdLapsedSomeTaken: _holdLapsedSomeTakenKu,
   holdLapsedAllTaken: _holdLapsedAllTakenKu,
+  accessibleSections: _accessibleSectionsKu,
+  placesAvailable: _placesAvailableKu,
+  removeTickets: _removeTicketsKu,
+  holdMinutesLeft: _holdMinutesLeftKu,
+  holdSecondsLeft: _holdSecondsLeftKu,
+  holdLapsedBody: _holdLapsedBodyKu,
+  seatsNotRecovered: _seatsNotRecoveredKu,
   continueWithTotal: _continueWithTotalKu,
 );

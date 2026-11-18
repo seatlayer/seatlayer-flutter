@@ -27,6 +27,16 @@ String _seatJustTakenByAnotherJa(String label) => '座席$labelは他のお客�
 String _peekSecuredJa(int count, String total) =>
     '✓ $count席確保 · $total。まだ請求はされません';
 
+String _venueMapJa(String venue) => '$venueの座席図';
+
+String _accessibleStepJa(int index, int total) => '$total件中$index件目';
+
+String _chooseMinMaxGuestsJa(int min, int max) => '$min〜$max名でお選びください。';
+
+String _chooseMoreJa(int count) => 'あと$count席選択';
+
+String _seatsHeldForNeedMoreTimeJa(String time) => '座席の確保は残り$timeです。時間を延長しますか？';
+
 String _ticketCountJa(int count) => '$count枚';
 
 String _findBestSeatsJa(int count) => 'おすすめの$count席を探す';
@@ -43,6 +53,20 @@ String _holdLapsedSomeTakenJa(int count) =>
     '離席中に確保の時間が切れ、そのうち $count 席はすでに他の方が確保しました。残りはまだ空いています。';
 
 String _holdLapsedAllTakenJa(int count) => '離席中に確保の時間が切れ、その席はすでに他の方が確保しました。';
+
+String _accessibleSectionsJa(int count) => '$countブロック';
+
+String _placesAvailableJa(int count) => '現在$count名分の空きがあります';
+
+String _removeTicketsJa(int count) => 'チケットを$count枚外す';
+
+String _holdMinutesLeftJa(int count) => '残り$count分';
+
+String _holdSecondsLeftJa(int count) => '残り$count秒';
+
+String _holdLapsedBodyJa(int count) => '座席は$count分間確保されていました。';
+
+String _seatsNotRecoveredJa(int count) => '$count席を再確保できませんでした';
 
 String _continueWithTotalJa(String money) => '次へ \u00b7 $money';
 
@@ -86,6 +110,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   hideLimitedView: '視界制限のある座席を隠す',
   colorblindSafe: '色覚に配慮した配色',
   notAvailable: '利用できません',
+  viewGroupTitle: '表示',
   restrictedView: '視界制限あり',
   obstructedView: '視界を遮るものあり',
   premiumSeat: 'プレミアム席',
@@ -161,6 +186,38 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   removeWord: '削除',
   floorWord: 'フロア',
   totalWord: '合計',
+  chooseSeats: '座席を選ぶ',
+  chooseTickets: 'チケットを選ぶ',
+  placeWord: 'スペース',
+  ticketWord: 'チケット',
+  passport: '座席カルテ',
+  venue3D: '3D',
+  venueZone: '会場エリア',
+  venueMapHint: '座席は座席図の周りの操作部から選べます。上部の価格バー、下部のブロック操作、最下部のチケットパネルをご利用ください。',
+  previousSeat: '前の席',
+  nextSeat: '次の席',
+  orbitMode: '会場を回転',
+  panMode: '会場を移動',
+  openInteractive3dVenue: '操作できる3D会場を開く',
+  showSeatsFor: '次の条件で座席を表示',
+  accessJumpFirstSection: '最初のブロックへ移動',
+  accessJumpNextSection: '次のブロックへ移動',
+  fewerTickets: 'チケットを減らす',
+  moreTickets: 'チケットを増やす',
+  addTickets: 'チケットを追加',
+  noSelectableSeats: '現在選択できる座席はありません。',
+  confirmYourTickets: 'チケットを確定',
+  seatsSecuredOpeningCheckout: '座席を確保しました。お会計画面を開いています…',
+  holdInCheckoutTitle: '座席はすでにお会計の手続き中です',
+  holdInCheckoutBody:
+      '座席を確保したままにするには、お会計を完了してください。別の座席を選ぶ場合は、先にこれらの座席を解放してください。解放した座席は再び販売されます。',
+  releaseAndChangeSeats: '解放して座席を変更',
+  holdAlreadyHeldTitle: '座席はすでに確保されています',
+  holdAlreadyHeldBody: '確保したままにするには、決済に進んでください。',
+  accessExpiredTitle: '座席選択のセッションの有効期限が切れました',
+  accessExpiredCopy: '続けるには座席図を再読み込みしてください。カートに入っている座席は、タイマーが終わるまで確保されたままです。',
+  dismissError: 'エラーを閉じる',
+  testModeLong: 'テストモード · 予約は発生しません',
   accessNeeds: <String, String>{
     'wheelchair': '車椅子スペース',
     'companion': '同伴者席',
@@ -184,6 +241,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountJa,
   seatJustTakenByAnother: _seatJustTakenByAnotherJa,
   peekSecured: _peekSecuredJa,
+  venueMap: _venueMapJa,
+  accessibleStep: _accessibleStepJa,
+  chooseMinMaxGuests: _chooseMinMaxGuestsJa,
+  chooseMore: _chooseMoreJa,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeJa,
   ticketCount: _ticketCountJa,
   findBestSeats: _findBestSeatsJa,
   reselectSeats: _reselectSeatsJa,
@@ -192,5 +254,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeJa,
   holdLapsedSomeTaken: _holdLapsedSomeTakenJa,
   holdLapsedAllTaken: _holdLapsedAllTakenJa,
+  accessibleSections: _accessibleSectionsJa,
+  placesAvailable: _placesAvailableJa,
+  removeTickets: _removeTicketsJa,
+  holdMinutesLeft: _holdMinutesLeftJa,
+  holdSecondsLeft: _holdSecondsLeftJa,
+  holdLapsedBody: _holdLapsedBodyJa,
+  seatsNotRecovered: _seatsNotRecoveredJa,
   continueWithTotal: _continueWithTotalJa,
 );

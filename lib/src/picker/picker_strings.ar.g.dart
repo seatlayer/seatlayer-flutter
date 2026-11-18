@@ -29,6 +29,18 @@ String _seatJustTakenByAnotherAr(String label) =>
 String _peekSecuredAr(int count, String total) =>
     '✓ تم تأمين $count · $total. لن نخصم أي مبلغ بعد';
 
+String _venueMapAr(String venue) => 'خريطة مقاعد $venue';
+
+String _accessibleStepAr(int index, int total) => '$index من $total';
+
+String _chooseMinMaxGuestsAr(int min, int max) =>
+    'اختر عدد الضيوف بين $min و$max.';
+
+String _chooseMoreAr(int count) => 'اختر $count إضافية';
+
+String _seatsHeldForNeedMoreTimeAr(String time) =>
+    'مقاعدك محجوزة مؤقتًا لمدة $time. هل تحتاج إلى مزيد من الوقت؟';
+
 String _ticketCountAr(int count) => switch (pickerPluralCategory('ar', count)) {
   PickerPluralCategory.zero => '$count تذكرة',
   PickerPluralCategory.one => '$count تذكرة',
@@ -122,6 +134,76 @@ String _holdLapsedAllTakenAr(int count) => switch (pickerPluralCategory(
   _ => 'انتهى حجزك أثناء غيابك، وتم حجز تلك المقاعد.',
 };
 
+String _accessibleSectionsAr(int count) =>
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => '$count قطاع',
+      PickerPluralCategory.one => '$count قطاع',
+      PickerPluralCategory.two => '$count قطاعان',
+      PickerPluralCategory.few => '$count قطاعات',
+      PickerPluralCategory.many => '$count قطاعًا',
+      _ => '$count قطاع',
+    };
+
+String _placesAvailableAr(int count) =>
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => '$count مكان متاح حاليًا',
+      PickerPluralCategory.one => '$count مكان متاح حاليًا',
+      PickerPluralCategory.two => '$count مكانان متاحان حاليًا',
+      PickerPluralCategory.few => '$count أماكن متاحة حاليًا',
+      PickerPluralCategory.many => '$count مكانًا متاحًا حاليًا',
+      _ => '$count مكان متاح حاليًا',
+    };
+
+String _removeTicketsAr(int count) =>
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => 'إزالة $count تذكرة',
+      PickerPluralCategory.one => 'إزالة $count تذكرة',
+      PickerPluralCategory.two => 'إزالة $count تذكرتين',
+      PickerPluralCategory.few => 'إزالة $count تذاكر',
+      PickerPluralCategory.many => 'إزالة $count تذكرة',
+      _ => 'إزالة $count تذكرة',
+    };
+
+String _holdMinutesLeftAr(int count) =>
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => 'بقيت $count دقيقة',
+      PickerPluralCategory.one => 'بقيت $count دقيقة',
+      PickerPluralCategory.two => 'بقيت $count دقيقتان',
+      PickerPluralCategory.few => 'بقيت $count دقائق',
+      PickerPluralCategory.many => 'بقيت $count دقيقة',
+      _ => 'بقيت $count دقيقة',
+    };
+
+String _holdSecondsLeftAr(int count) =>
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => 'بقيت $count ثانية',
+      PickerPluralCategory.one => 'بقيت $count ثانية',
+      PickerPluralCategory.two => 'بقيت $count ثانيتان',
+      PickerPluralCategory.few => 'بقيت $count ثوانٍ',
+      PickerPluralCategory.many => 'بقيت $count ثانية',
+      _ => 'بقيت $count ثانية',
+    };
+
+String _holdLapsedBodyAr(int count) =>
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => 'كانت محجوزة مؤقتًا لمدة $count دقيقة.',
+      PickerPluralCategory.one => 'كانت محجوزة مؤقتًا لمدة $count دقيقة.',
+      PickerPluralCategory.two => 'كانت محجوزة مؤقتًا لمدة $count دقيقتين.',
+      PickerPluralCategory.few => 'كانت محجوزة مؤقتًا لمدة $count دقائق.',
+      PickerPluralCategory.many => 'كانت محجوزة مؤقتًا لمدة $count دقيقة.',
+      _ => 'كانت محجوزة مؤقتًا لمدة $count دقيقة.',
+    };
+
+String _seatsNotRecoveredAr(int count) =>
+    switch (pickerPluralCategory('ar', count)) {
+      PickerPluralCategory.zero => 'تعذّرت استعادة $count مقعد',
+      PickerPluralCategory.one => 'تعذّرت استعادة $count مقعد',
+      PickerPluralCategory.two => 'تعذّرت استعادة $count مقعدين',
+      PickerPluralCategory.few => 'تعذّرت استعادة $count مقاعد',
+      PickerPluralCategory.many => 'تعذّرت استعادة $count مقعدًا',
+      _ => 'تعذّرت استعادة $count مقعد',
+    };
+
 String _continueWithTotalAr(String money) => 'متابعة \u00b7 $money';
 
 /// The `ar` defaults for the native picker chrome.
@@ -165,6 +247,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   hideLimitedView: 'إخفاء المقاعد ذات الرؤية المحدودة',
   colorblindSafe: 'ألوان ملائمة لعمى الألوان',
   notAvailable: 'غير متاح',
+  viewGroupTitle: 'العرض',
   restrictedView: 'رؤية محدودة',
   obstructedView: 'رؤية محجوبة',
   premiumSeat: 'مقعد مميز',
@@ -243,6 +326,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   removeWord: 'إزالة',
   floorWord: 'الطابق',
   totalWord: 'الإجمالي',
+  chooseSeats: 'اختر مقاعدك',
+  chooseTickets: 'اختر التذاكر',
+  placeWord: 'مكان',
+  ticketWord: 'تذكرة',
+  passport: 'بطاقة المقعد',
+  venue3D: '3D',
+  venueZone: 'منطقة في المكان',
+  venueMapHint:
+      'تُختار المقاعد بعناصر التحكم حول الخريطة: شريط الأسعار فوقها، وعناصر التحكم بالقطاعات تحتها، ولوحة التذاكر في أسفلها.',
+  previousSeat: 'المقعد السابق',
+  nextSeat: 'المقعد التالي',
+  orbitMode: 'تدوير المكان',
+  panMode: 'تحريك المكان',
+  openInteractive3dVenue: 'فتح العرض التفاعلي ثلاثي الأبعاد للمكان',
+  showSeatsFor: 'عرض المقاعد المناسبة لـ',
+  accessJumpFirstSection: 'الانتقال إلى القطاع الأول',
+  accessJumpNextSection: 'الانتقال إلى القطاع التالي',
+  fewerTickets: 'تذاكر أقل',
+  moreTickets: 'تذاكر أكثر',
+  addTickets: 'إضافة تذاكر',
+  noSelectableSeats: 'لا توجد حاليًا مقاعد متاحة للاختيار.',
+  confirmYourTickets: 'أكّد تذاكرك',
+  seatsSecuredOpeningCheckout: 'تم تأمين المقاعد. جارٍ فتح الدفع…',
+  holdInCheckoutTitle: 'مقاعدك في الدفع بالفعل',
+  holdInCheckoutBody:
+      'أكمل الدفع للاحتفاظ بها. لاختيار مقاعد أخرى، حرّر هذه المقاعد أولًا — ستعود للبيع.',
+  releaseAndChangeSeats: 'تحرير المقاعد وتغييرها',
+  holdAlreadyHeldTitle: 'مقاعدك محجوزة مؤقتًا بالفعل',
+  holdAlreadyHeldBody: 'تابع إلى الدفع للاحتفاظ بها.',
+  accessExpiredTitle: 'انتهت جلسة اختيار المقاعد',
+  accessExpiredCopy:
+      'أعد تحميل خريطة المقاعد للمتابعة. المقاعد الموجودة في سلتك تبقى محجوزة حتى ينتهي المؤقت.',
+  dismissError: 'إغلاق رسالة الخطأ',
+  testModeLong: 'وضع الاختبار · لا يُحجز أي شيء',
   accessNeeds: <String, String>{
     'wheelchair': 'مكان لكرسي متحرك',
     'companion': 'مقعد مرافق',
@@ -266,6 +383,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountAr,
   seatJustTakenByAnother: _seatJustTakenByAnotherAr,
   peekSecured: _peekSecuredAr,
+  venueMap: _venueMapAr,
+  accessibleStep: _accessibleStepAr,
+  chooseMinMaxGuests: _chooseMinMaxGuestsAr,
+  chooseMore: _chooseMoreAr,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeAr,
   ticketCount: _ticketCountAr,
   findBestSeats: _findBestSeatsAr,
   reselectSeats: _reselectSeatsAr,
@@ -274,5 +396,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeAr,
   holdLapsedSomeTaken: _holdLapsedSomeTakenAr,
   holdLapsedAllTaken: _holdLapsedAllTakenAr,
+  accessibleSections: _accessibleSectionsAr,
+  placesAvailable: _placesAvailableAr,
+  removeTickets: _removeTicketsAr,
+  holdMinutesLeft: _holdMinutesLeftAr,
+  holdSecondsLeft: _holdSecondsLeftAr,
+  holdLapsedBody: _holdLapsedBodyAr,
+  seatsNotRecovered: _seatsNotRecoveredAr,
   continueWithTotal: _continueWithTotalAr,
 );

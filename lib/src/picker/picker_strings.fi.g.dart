@@ -30,6 +30,17 @@ String _seatJustTakenByAnotherFi(String label) =>
 String _peekSecuredFi(int count, String total) =>
     '✓ $count varmistettu · $total. Emme veloita vielä';
 
+String _venueMapFi(String venue) => '$venue – paikkakartta';
+
+String _accessibleStepFi(int index, int total) => '$index/$total';
+
+String _chooseMinMaxGuestsFi(int min, int max) => 'Valitse $min–$max vierasta.';
+
+String _chooseMoreFi(int count) => 'Valitse vielä $count';
+
+String _seatsHeldForNeedMoreTimeFi(String time) =>
+    'Paikkasi ovat varattuina vielä $time. Tarvitsetko lisäaikaa?';
+
 String _ticketCountFi(int count) => switch (pickerPluralCategory('fi', count)) {
   PickerPluralCategory.one => '$count lippu',
   _ => '$count lippua',
@@ -82,6 +93,50 @@ String _holdLapsedAllTakenFi(int count) =>
       _ => 'Varauksesi vanheni poissa ollessasi, ja nämä paikat on jo varattu.',
     };
 
+String _accessibleSectionsFi(int count) =>
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one => '$count lohko',
+      _ => '$count lohkoa',
+    };
+
+String _placesAvailableFi(int count) =>
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one => '$count paikka vapaana nyt',
+      _ => '$count paikkaa vapaana nyt',
+    };
+
+String _removeTicketsFi(int count) =>
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one => 'Poista $count lippu',
+      _ => 'Poista $count lippua',
+    };
+
+String _holdMinutesLeftFi(int count) =>
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one => '$count minuutti jäljellä',
+      _ => '$count minuuttia jäljellä',
+    };
+
+String _holdSecondsLeftFi(int count) =>
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one => '$count sekunti jäljellä',
+      _ => '$count sekuntia jäljellä',
+    };
+
+String _holdLapsedBodyFi(int count) => switch (pickerPluralCategory(
+  'fi',
+  count,
+)) {
+  PickerPluralCategory.one => 'Paikat olivat varattuina $count minuutin ajan.',
+  _ => 'Paikat olivat varattuina $count minuutin ajan.',
+};
+
+String _seatsNotRecoveredFi(int count) =>
+    switch (pickerPluralCategory('fi', count)) {
+      PickerPluralCategory.one => '$count paikkaa ei voitu varata uudelleen',
+      _ => '$count paikkaa ei voitu varata uudelleen',
+    };
+
 String _continueWithTotalFi(String money) => 'Jatka \u00b7 $money';
 
 /// The `fi` defaults for the native picker chrome.
@@ -105,7 +160,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   undo: 'Kumoa',
   holdAndCheckout: 'Varaa paikat ja siirry kassalle',
   poweredBy: 'Palvelun tarjoaa SeatLayer',
-  testMode: 'TESTITILA',
+  testMode: 'Testitila',
   accessibility: 'Esteettömyys- ja väriasetukset',
   accessibilityTitle: 'Esteettömyys- ja väriasetukset',
   fitVenue: 'Näytä koko tapahtumapaikka',
@@ -125,6 +180,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   hideLimitedView: 'Piilota paikat, joissa on rajoitettu näkyvyys',
   colorblindSafe: 'Värisokeusystävälliset värit',
   notAvailable: 'Ei saatavilla',
+  viewGroupTitle: 'NÄKYMÄ',
   restrictedView: 'Rajoitettu näkyvyys',
   obstructedView: 'Estynyt näkyvyys',
   premiumSeat: 'Premium-paikka',
@@ -205,6 +261,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   removeWord: 'Poista',
   floorWord: 'Kerros',
   totalWord: 'Yhteensä',
+  chooseSeats: 'Valitse paikkasi',
+  chooseTickets: 'Valitse liput',
+  placeWord: 'PAIKKA',
+  ticketWord: 'Lippu',
+  passport: 'Paikan profiili',
+  venue3D: '3D',
+  venueZone: 'Alue',
+  venueMapHint:
+      'Paikat valitaan kartan ympärillä olevilla säätimillä: hintapalkki kartan yläpuolella, lohkosäätimet sen alapuolella ja lippupaneeli alareunassa.',
+  previousSeat: 'Edellinen paikka',
+  nextSeat: 'Seuraava paikka',
+  orbitMode: 'Käännä tapahtumapaikkaa',
+  panMode: 'Siirrä tapahtumapaikkaa',
+  openInteractive3dVenue: 'Avaa interaktiivinen 3D-näkymä tapahtumapaikasta',
+  showSeatsFor: 'NÄYTÄ PAIKAT:',
+  accessJumpFirstSection: 'Siirry ensimmäiseen lohkoon',
+  accessJumpNextSection: 'Siirry seuraavaan lohkoon',
+  fewerTickets: 'Vähemmän lippuja',
+  moreTickets: 'Enemmän lippuja',
+  addTickets: 'Lisää liput',
+  noSelectableSeats: 'Valittavia paikkoja ei ole tällä hetkellä saatavilla.',
+  confirmYourTickets: 'Vahvista lippusi',
+  seatsSecuredOpeningCheckout: 'Paikat varmistettu. Avataan kassaa…',
+  holdInCheckoutTitle: 'Paikkasi ovat jo kassalla',
+  holdInCheckoutBody:
+      'Viimeistele maksu, niin pidät ne. Jos haluat valita eri paikat, vapauta nämä ensin — ne palaavat myyntiin.',
+  releaseAndChangeSeats: 'Vapauta ja vaihda paikat',
+  holdAlreadyHeldTitle: 'Paikkasi on jo varattu',
+  holdAlreadyHeldBody: 'Jatka kassalle, niin pidät ne.',
+  accessExpiredTitle: 'Istuntosi vanheni',
+  accessExpiredCopy:
+      'Lataa paikkakartta uudelleen jatkaaksesi. Ostoskorissasi olevat paikat pysyvät varattuina, kunnes ajastin päättyy.',
+  dismissError: 'Sulje virheilmoitus',
+  testModeLong: 'Testitila · mitään ei varata',
   accessNeeds: <String, String>{
     'wheelchair': 'Pyörätuolipaikka',
     'companion': 'Avustajapaikka',
@@ -228,6 +318,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountFi,
   seatJustTakenByAnother: _seatJustTakenByAnotherFi,
   peekSecured: _peekSecuredFi,
+  venueMap: _venueMapFi,
+  accessibleStep: _accessibleStepFi,
+  chooseMinMaxGuests: _chooseMinMaxGuestsFi,
+  chooseMore: _chooseMoreFi,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeFi,
   ticketCount: _ticketCountFi,
   findBestSeats: _findBestSeatsFi,
   reselectSeats: _reselectSeatsFi,
@@ -236,5 +331,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeFi,
   holdLapsedSomeTaken: _holdLapsedSomeTakenFi,
   holdLapsedAllTaken: _holdLapsedAllTakenFi,
+  accessibleSections: _accessibleSectionsFi,
+  placesAvailable: _placesAvailableFi,
+  removeTickets: _removeTicketsFi,
+  holdMinutesLeft: _holdMinutesLeftFi,
+  holdSecondsLeft: _holdSecondsLeftFi,
+  holdLapsedBody: _holdLapsedBodyFi,
+  seatsNotRecovered: _seatsNotRecoveredFi,
   continueWithTotal: _continueWithTotalFi,
 );

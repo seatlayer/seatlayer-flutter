@@ -30,6 +30,17 @@ String _seatJustTakenByAnotherHi(String label) =>
 String _peekSecuredHi(int count, String total) =>
     '✓ $count होल्ड · $total। अभी पैसे नहीं कटेंगे';
 
+String _venueMapHi(String venue) => '$venue का सीट मैप';
+
+String _accessibleStepHi(int index, int total) => '$total में से $index';
+
+String _chooseMinMaxGuestsHi(int min, int max) => '$min से $max मेहमान चुनें।';
+
+String _chooseMoreHi(int count) => '$count और चुनें';
+
+String _seatsHeldForNeedMoreTimeHi(String time) =>
+    'आपकी सीटें $time के लिए होल्ड हैं। और समय चाहिए?';
+
 String _ticketCountHi(int count) => switch (pickerPluralCategory('hi', count)) {
   PickerPluralCategory.one => '$count टिकट',
   _ => '$count टिकट',
@@ -82,6 +93,48 @@ String _holdLapsedAllTakenHi(int count) =>
       _ => 'आपके दूर रहने पर होल्ड खत्म हो गया, और वे सीटें बुक हो चुकी हैं।',
     };
 
+String _accessibleSectionsHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => '$count सेक्शन',
+      _ => '$count सेक्शन',
+    };
+
+String _placesAvailableHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => 'अभी $count स्थान उपलब्ध है',
+      _ => 'अभी $count स्थान उपलब्ध हैं',
+    };
+
+String _removeTicketsHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => '$count टिकट हटाएँ',
+      _ => '$count टिकट हटाएँ',
+    };
+
+String _holdMinutesLeftHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => '$count मिनट बाकी',
+      _ => '$count मिनट बाकी',
+    };
+
+String _holdSecondsLeftHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => '$count सेकंड बाकी',
+      _ => '$count सेकंड बाकी',
+    };
+
+String _holdLapsedBodyHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => 'ये सीटें $count मिनट के लिए होल्ड थीं।',
+      _ => 'ये सीटें $count मिनट के लिए होल्ड थीं।',
+    };
+
+String _seatsNotRecoveredHi(int count) =>
+    switch (pickerPluralCategory('hi', count)) {
+      PickerPluralCategory.one => '$count सीट वापस नहीं मिल सकी',
+      _ => '$count सीटें वापस नहीं मिल सकीं',
+    };
+
 String _continueWithTotalHi(String money) => 'आगे बढ़ें \u00b7 $money';
 
 /// The `hi` defaults for the native picker chrome.
@@ -125,6 +178,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   hideLimitedView: 'सीमित व्यू वाली सीटें छिपाएँ',
   colorblindSafe: 'कलरब्लाइंड-फ़्रेंडली रंग',
   notAvailable: 'उपलब्ध नहीं',
+  viewGroupTitle: 'दृश्य',
   restrictedView: 'सीमित व्यू',
   obstructedView: 'रुकावट वाला व्यू',
   premiumSeat: 'प्रीमियम सीट',
@@ -205,6 +259,40 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   removeWord: 'हटाएँ',
   floorWord: 'फ़्लोर',
   totalWord: 'कुल',
+  chooseSeats: 'अपनी सीटें चुनें',
+  chooseTickets: 'टिकट चुनें',
+  placeWord: 'स्थान',
+  ticketWord: 'टिकट',
+  passport: 'सीट प्रोफ़ाइल',
+  venue3D: '3D',
+  venueZone: 'वेन्यू ज़ोन',
+  venueMapHint:
+      'सीटें मैप के आसपास के कंट्रोल से चुनी जाती हैं: ऊपर प्राइस रेल, नीचे सेक्शन कंट्रोल, और सबसे नीचे टिकट पैनल।',
+  previousSeat: 'पिछली सीट',
+  nextSeat: 'अगली सीट',
+  orbitMode: 'वेन्यू घुमाएँ',
+  panMode: 'वेन्यू खिसकाएँ',
+  openInteractive3dVenue: 'इंटरैक्टिव 3D वेन्यू खोलें',
+  showSeatsFor: 'इनके लिए सीटें दिखाएँ',
+  accessJumpFirstSection: 'पहले सेक्शन पर जाएँ',
+  accessJumpNextSection: 'अगले सेक्शन पर जाएँ',
+  fewerTickets: 'कम टिकट',
+  moreTickets: 'ज़्यादा टिकट',
+  addTickets: 'टिकट जोड़ें',
+  noSelectableSeats: 'अभी चुनने लायक कोई सीट उपलब्ध नहीं है।',
+  confirmYourTickets: 'अपने टिकट कन्फ़र्म करें',
+  seatsSecuredOpeningCheckout: 'सीटें होल्ड हो गईं। चेकआउट खुल रहा है…',
+  holdInCheckoutTitle: 'आपकी सीटें पहले से चेकआउट में हैं',
+  holdInCheckoutBody:
+      'इन्हें रखने के लिए चेकआउट पूरा करें। दूसरी सीटें चुनने के लिए पहले इन्हें छोड़ें — ये फिर से बिक्री पर चली जाएँगी।',
+  releaseAndChangeSeats: 'छोड़ें और सीटें बदलें',
+  holdAlreadyHeldTitle: 'आपकी सीटें पहले से होल्ड पर हैं',
+  holdAlreadyHeldBody: 'इन्हें रखने के लिए चेकआउट पर जाएँ।',
+  accessExpiredTitle: 'आपका सीट सेशन खत्म हो गया',
+  accessExpiredCopy:
+      'जारी रखने के लिए सीट मैप दोबारा लोड करें। आपकी कार्ट में पहले से रखी सीटें टाइमर खत्म होने तक होल्ड पर रहेंगी।',
+  dismissError: 'एरर बंद करें',
+  testModeLong: 'टेस्ट मोड · कुछ भी बुक नहीं होगा',
   accessNeeds: <String, String>{
     'wheelchair': 'व्हीलचेयर स्थान',
     'companion': 'साथी सीट',
@@ -228,6 +316,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   accessFreeCount: _accessFreeCountHi,
   seatJustTakenByAnother: _seatJustTakenByAnotherHi,
   peekSecured: _peekSecuredHi,
+  venueMap: _venueMapHi,
+  accessibleStep: _accessibleStepHi,
+  chooseMinMaxGuests: _chooseMinMaxGuestsHi,
+  chooseMore: _chooseMoreHi,
+  seatsHeldForNeedMoreTime: _seatsHeldForNeedMoreTimeHi,
   ticketCount: _ticketCountHi,
   findBestSeats: _findBestSeatsHi,
   reselectSeats: _reselectSeatsHi,
@@ -236,5 +329,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   holdLapsedStillFree: _holdLapsedStillFreeHi,
   holdLapsedSomeTaken: _holdLapsedSomeTakenHi,
   holdLapsedAllTaken: _holdLapsedAllTakenHi,
+  accessibleSections: _accessibleSectionsHi,
+  placesAvailable: _placesAvailableHi,
+  removeTickets: _removeTicketsHi,
+  holdMinutesLeft: _holdMinutesLeftHi,
+  holdSecondsLeft: _holdSecondsLeftHi,
+  holdLapsedBody: _holdLapsedBodyHi,
+  seatsNotRecovered: _seatsNotRecoveredHi,
   continueWithTotal: _continueWithTotalHi,
 );
