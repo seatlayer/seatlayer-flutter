@@ -8,6 +8,7 @@ import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_accessibility.dart';
 import 'picker_blocked_regions.dart';
+import 'picker_accessibility_popover.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -56,7 +57,7 @@ Widget seatLayerImmersiveGlass({
 /// The ♿ disc used to stand alone in the map's bottom-left corner, opposite
 /// the stack of zoom discs. One control facing four, in the corner the floor
 /// selector already owns, read as something the layout had forgotten — so it
-/// is the TOP DISC OF THIS COLUMN now, on both layouts, which is where a buyer
+/// is IN THIS COLUMN now, above `+`, on both layouts, which is where a buyer
 /// already looks for the controls that act on the map. A control about who can
 /// sit where does not belong below the controls about how close the camera is.
 ///
@@ -151,9 +152,12 @@ class _RailControls extends StatelessWidget {
             const SeatLayerPickerViewModeButton(),
           if (map?.isVenue3D == true)
             const SeatLayerPicker3DNavigationModeButton(),
+          // Here its options open as a popover beside it, not a sheet.
           if (chrome.showAccessibilityControl)
-            owner.accessibilityControl ??
-                const SeatLayerPickerAccessibilityFilters(compact: true),
+            SeatLayerAccessPopoverAnchor(
+              child: owner.accessibilityControl ??
+                  const SeatLayerPickerAccessibilityFilters(compact: true),
+            ),
           if (chrome.zoomControlsFor(phone: false)) ...<Widget>[
             const SeatLayerPickerZoomInButton(),
             const SeatLayerPickerZoomOutButton(),
@@ -634,13 +638,30 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
     final moving = map!.view3DNavigationMode == SeatLayer3DNavigationMode.move;
     final strings = SeatLayerPickerScope.stringsOf(context);
     final busy = controller.state.isBusy;
-    Widget segment(SeatLayer3DNavigationMode mode, String label, String hint) {
+    final ink = busy
+        ? pickerAlpha(SeatLayerDarkTokens.immersiveGlassInk, .6)
+        : SeatLayerDarkTokens.immersiveGlassInk;
+    final labelStyle = TextStyle(
+      color: ink,
+      fontSize: SeatLayerSizeTokens.immersiveNavChipFontSize,
+      fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
+      height: 1,
+    );
+    Widget segment(
+      SeatLayer3DNavigationMode mode,
+      String label,
+      String hint,
+      IconData icon, {
+      required bool labelled,
+    }) {
       final selected = (mode == SeatLayer3DNavigationMode.move) == moving;
       return Semantics(
         button: true,
         selected: selected,
         // A press while the picker is busy does nothing, so it is said so.
         enabled: !busy,
+        // Drawn as a glyph, the half still says its words.
+        label: labelled ? null : label,
         hint: hint,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
@@ -677,18 +698,17 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
                   borderRadius:
                       BorderRadius.circular(SeatLayerRadiusTokens.pill),
                 ),
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  style: TextStyle(
-                    color: busy
-                        ? pickerAlpha(SeatLayerDarkTokens.immersiveGlassInk, .6)
-                        : SeatLayerDarkTokens.immersiveGlassInk,
-                    fontSize: SeatLayerSizeTokens.immersiveNavChipFontSize,
-                    fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
-                    height: 1,
-                  ),
-                ),
+                child: labelled
+                    ? Text(label, maxLines: 1, style: labelStyle)
+                    : Tooltip(
+                        message: label,
+                        excludeFromSemantics: true,
+                        child: Icon(
+                          icon,
+                          size: SeatLayerSizeTokens.immersiveModeIconSize,
+                          color: ink,
+                        ),
+                      ),
               ),
             ),
           ),
@@ -700,28 +720,77 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
     // between two drawings never said which gesture a drag would make. This
     // control only ever exists over the rendered venue, so it wears the
     // scene's glass rather than the picker's own surface.
-    return seatLayerImmersiveGlass(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: SeatLayerSizeTokens.immersiveModePairPadding,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            segment(
-              SeatLayer3DNavigationMode.rotate,
-              strings.orbitMode,
-              strings.rotateVenue,
+    //
+    // WHERE THE WORDS DO NOT FIT, two glyphs. At a large text size the pair
+    // measured wider than a phone; it now asks how much room it has and,
+    // short of room for both words, draws each half as its glyph — still a
+    // pair, the selected half still filled, each half still named to a
+    // screen reader and on a long press.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final labelled = !constraints.hasBoundedWidth ||
+            _labelledWidth(
+                  context,
+                  labelStyle,
+                  <String>[strings.orbitMode, strings.panMode],
+                ) <=
+                constraints.maxWidth;
+        return seatLayerImmersiveGlass(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: SeatLayerSizeTokens.immersiveModePairPadding,
             ),
-            segment(
-              SeatLayer3DNavigationMode.move,
-              strings.panMode,
-              strings.moveVenue,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                segment(
+                  SeatLayer3DNavigationMode.rotate,
+                  strings.orbitMode,
+                  strings.rotateVenue,
+                  Icons.threesixty_rounded,
+                  labelled: labelled,
+                ),
+                segment(
+                  SeatLayer3DNavigationMode.move,
+                  strings.panMode,
+                  strings.moveVenue,
+                  Icons.open_with_rounded,
+                  labelled: labelled,
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
+  }
+
+  /// The width the labelled pair takes at this text size.
+  ///
+  /// Each half is its words plus its padding, and never narrower than a
+  /// touch target; the pair adds its own inset at both ends.
+  static double _labelledWidth(
+    BuildContext context,
+    TextStyle style,
+    List<String> labels,
+  ) {
+    final resolved = DefaultTextStyle.of(context).style.merge(style);
+    var width = 2 * SeatLayerSizeTokens.immersiveModePairPadding;
+    for (final label in labels) {
+      final painter = TextPainter(
+        text: TextSpan(text: label, style: resolved),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+        maxLines: 1,
+      )..layout();
+      final half =
+          painter.width + 2 * SeatLayerSizeTokens.immersiveModeSegmentPaddingX;
+      width += half < SeatLayerSizeTokens.minimumHitTarget
+          ? SeatLayerSizeTokens.minimumHitTarget
+          : half;
+      painter.dispose();
+    }
+    return width;
   }
 }
 

@@ -685,6 +685,24 @@ row list scrolls within it. (The web bounds its popover to the room above the
 ♿ button *inside the map*, for the mirror-image reason: a panel measured
 against the window opens straight through the ticket sheet below it.)
 
+**On the wide composition it is a popover, not a sheet.** The ♿ control in the
+wide column opens the same content — title, the two map switches, the
+provisions under `strings.showSeatsFor` — in a card beside itself, so the map
+it filters stays in view. The card is `size.accessPopoverWidth` wide (less where
+the screen is narrower), bounded in height exactly as the sheet is, on
+`color.*.surface` at `radius.sheet` and `elevation.sheet` with a
+`color.*.divider` hairline, padded `size.accessPopoverPadX` at the sides,
+`size.accessPopoverPadTop` above and `size.accessPopoverPadBottom` below. It
+stands on the control's **start** side, `size.accessPopoverGap` from it — away
+from the column, towards the map, so it mirrors in a right-to-left locale — its
+top level with the control's top; where that would run off the foot it is
+level with the control's bottom instead, and it is always held
+`size.accessPopoverMargin` inside the safe area. There is no scrim. It is modal:
+a tap outside, the system back gesture or Escape closes it with nothing, a
+pressed count closes it and starts the walk, exactly as on the sheet. It fades
+in over `motion.duration.pop`, and appears at once under reduced motion. The
+phone keeps the bottom sheet.
+
 Its sheet opens upward from the button. Its title, `strings.accessibilityTitle`,
 is the picker's own type, never the host's: `size.accessSheetTitleFontSize`
 w800, line height 1.2, in `color.*.text` and the picker font. It contains
@@ -2218,6 +2236,21 @@ cart sheet rises last; the whole arrival is done by
 `motion.durationOutsideBudget.revealDelay`. Under reduced motion the loading
 surface is simply removed — no fade, no sweep, no stagger.
 
+**The wide panel while loading.** Until the first snapshot arrives, the wide
+panel keeps the shape it is about to have instead of standing empty: the
+`strings.ticketPrices` heading; three bars at 70, 55 and 62 per cent of the
+panel's inner width, `size.widePanelPlaceholderBarHeight` tall at
+`radius.pill`, `size.widePanelPlaceholderBarGap` apart, inset
+`size.widePanelPadX`; and at the foot a bar at 40 per cent over a block
+`size.widePanelPlaceholderButtonHeight` tall at `radius.peekButton`, the full
+inner width — where the summary and the button will stand. Every bar is
+`color.*.divider`. They breathe with the venue silhouette — opacity 55 to 100
+per cent over `motion.durationOutsideBudget.loadingBreath`, eased both ways —
+and stand still at full strength under reduced motion. They are hidden from
+assistive technology; the map's loading surface already announces the load.
+No "Your seats" heading, best-seats card, cart or checkout bar is drawn until
+the snapshot lands.
+
 The load itself: adopt a prewarmed runtime page only **after** the picker has
 been laid out, so the chart's first paint is at its final size; hold the loading
 surface until the runtime reports that it has framed the map inside the native
@@ -2538,6 +2571,18 @@ are dimmed and say they are disabled to assistive technology. Pressing the unsel
 one-finger gesture; the drag hints `strings.rotateVenue` /
 `strings.moveVenue` are each half's accessible hint. An icon that flipped
 between two drawings never said which gesture a drag would make.
+
+**Where the words do not fit, glyphs.** The pair is laid out in the room the
+scene's top row leaves it: the scene's width less `size.mapAnchorInset` at both
+ends, less the back pill and `size.mapAnchorGap` while the pill is up, and
+never less than two `size.minimumHitTarget` halves. Where the labelled pair
+(each half its words plus its padding, at least a touch target wide) measures
+wider than that room at the buyer's text size, each half draws its glyph
+instead — a 360° turn for `strings.orbitMode`, a four-way move for
+`strings.panMode` — at `size.immersiveModeIconSize`, the selected half still
+filled. The words stay: each half is named `strings.orbitMode` /
+`strings.panMode` to assistive technology and shows it as a tooltip on a long
+press. A pair with no bound at all (a host's own column) keeps its words.
 
 **Motion.** The chrome settles on `motion.duration.immersive`. The recentre
 control arrives with a single spin on `motion.curve.spring`.

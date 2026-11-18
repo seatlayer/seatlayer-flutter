@@ -170,6 +170,33 @@ abstract final class SeatLayerSizeTokens {
   /// `4`
   static const double widePanelHeadingPadBottom = 4;
 
+  /// `12`
+  static const double widePanelPlaceholderBarHeight = 12;
+
+  /// `12`
+  static const double widePanelPlaceholderBarGap = 12;
+
+  /// `46`
+  static const double widePanelPlaceholderButtonHeight = 46;
+
+  /// `320`
+  static const double accessPopoverWidth = 320;
+
+  /// `8`
+  static const double accessPopoverGap = 8;
+
+  /// `12`
+  static const double accessPopoverMargin = 12;
+
+  /// `14`
+  static const double accessPopoverPadX = 14;
+
+  /// `14`
+  static const double accessPopoverPadTop = 14;
+
+  /// `10`
+  static const double accessPopoverPadBottom = 10;
+
   /// `38`
   static const double headerHeight = 38;
 
@@ -608,6 +635,9 @@ abstract final class SeatLayerSizeTokens {
   /// `10`
   static const double immersiveModeSegmentPaddingX = 10;
 
+  /// `18`
+  static const double immersiveModeIconSize = 18;
+
   /// `11.5`
   static const double immersiveCaptionFontSize = 11.5;
 
@@ -896,6 +926,9 @@ abstract final class SeatLayerMotionTokens {
 
   /// `650` ms — deliberately outside the budget.
   static const int shellSweep = 650;
+
+  /// `1600` ms — deliberately outside the budget.
+  static const int loadingBreath = 1600;
 }
 
 /// What a finger on glass is answered with.
