@@ -113,6 +113,7 @@ class _LiveRunDemoState extends State<LiveRunDemo> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Run')),
     body: SafeArea(
       child: Center(
         child: Padding(

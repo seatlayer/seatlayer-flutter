@@ -41,8 +41,9 @@ void main() => runApp(const DemoApp());
 
 /// The example app.
 ///
-/// It opens on the live picker, which is the product. Pass no event key and it
-/// says so rather than quietly showing something else; the raw protocol-1
+/// It opens on a home screen with the three pickers: an event, a Season and a
+/// run. Each opens when its key is passed; without one it names the define to
+/// pass rather than quietly showing something else. The raw protocol-1
 /// fixture lives in `offline_fixture_demo.dart` for bridge work.
 class DemoApp extends StatelessWidget {
   /// Creates the example app.
@@ -59,47 +60,83 @@ class DemoApp extends StatelessWidget {
       SeatLayerThemeMode.dark => ThemeMode.dark,
       SeatLayerThemeMode.auto => ThemeMode.system,
     },
-    home: _runKey.isNotEmpty
-        ? LiveRunDemo(
-            run: _runKey,
-            themeMode: _themeMode,
-            apiBase: _apiBase.isEmpty ? null : _apiBase,
-            assetPath: _runtimeUrl.isEmpty ? null : _runtimeUrl,
-            locale: _localeTag.isEmpty ? null : _localeTag,
-          )
-        : _seasonKey.isNotEmpty
-        ? LiveSeasonDemo(
-            season: _seasonKey,
-            themeMode: _themeMode,
-            apiBase: _apiBase.isEmpty ? null : _apiBase,
-            locale: _localeTag.isEmpty ? null : _localeTag,
-          )
-        : _eventKey.isEmpty
-        ? const _MissingEventKey()
-        : const LivePickerDemo(),
+    home: const _Home(),
   );
 }
 
-class _MissingEventKey extends StatelessWidget {
-  const _MissingEventKey();
+/// The three pickers, one button each.
+class _Home extends StatelessWidget {
+  const _Home();
+
+  void _push(BuildContext context, Widget page) =>
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
 
   @override
-  Widget build(BuildContext context) => const Scaffold(
-    body: Center(
-      child: Padding(
-        padding: EdgeInsets.all(28),
-        child: Text(
-          'Run with --dart-define=SEATLAYER_EVENT=ev_… and '
-          '--dart-define=SEATLAYER_PUBLIC_KEY=pk_test_… to open the '
-          'picker, --dart-define=SEATLAYER_SEASON=sea_… for a Season, or '
-          '--dart-define=SEATLAYER_RUN=pg_… for a run.'
-          '\n\nFor bridge work without a key, run '
-          'lib/offline_fixture_demo.dart.',
-          textAlign: TextAlign.center,
+  Widget build(BuildContext context) {
+    final entries = <(String, String, String, Widget Function())>[
+      (
+        'Event',
+        _eventKey,
+        'SEATLAYER_EVENT=ev_…',
+        () => const LivePickerDemo(),
+      ),
+      (
+        'Season',
+        _seasonKey,
+        'SEATLAYER_SEASON=sea_…',
+        () => LiveSeasonDemo(
+          season: _seasonKey,
+          themeMode: _themeMode,
+          apiBase: _apiBase.isEmpty ? null : _apiBase,
+          locale: _localeTag.isEmpty ? null : _localeTag,
         ),
       ),
-    ),
-  );
+      (
+        'Run',
+        _runKey,
+        'SEATLAYER_RUN=pg_…',
+        () => LiveRunDemo(
+          run: _runKey,
+          themeMode: _themeMode,
+          apiBase: _apiBase.isEmpty ? null : _apiBase,
+          assetPath: _runtimeUrl.isEmpty ? null : _runtimeUrl,
+          locale: _localeTag.isEmpty ? null : _localeTag,
+        ),
+      ),
+    ];
+    return Scaffold(
+      appBar: AppBar(title: const Text('SeatLayer pickers')),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: <Widget>[
+            for (final (name, key, define, page) in entries)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Card(
+                  child: ListTile(
+                    enabled: key.isNotEmpty,
+                    title: Text(name),
+                    subtitle: Text(
+                      key.isNotEmpty ? key : 'Pass --dart-define=$define',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _push(context, page()),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 8),
+            Text(
+              'The event picker also takes '
+              '--dart-define=SEATLAYER_PUBLIC_KEY=pk_test_…. For bridge work '
+              'without a key, run lib/offline_fixture_demo.dart.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// The complete native picker used for live protocol-v2 validation.
@@ -231,6 +268,8 @@ class _LivePickerDemoState extends State<LivePickerDemo> {
             },
           ),
           onCheckout: _openCheckout,
+          // ✕ goes back to the home screen.
+          onClose: () => Navigator.of(context).pop(),
         ),
       ),
     );

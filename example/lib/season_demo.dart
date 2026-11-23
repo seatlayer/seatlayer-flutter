@@ -105,6 +105,7 @@ class _LiveSeasonDemoState extends State<LiveSeasonDemo> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Season')),
     body: SafeArea(
       child: Center(
         child: Padding(
