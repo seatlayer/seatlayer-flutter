@@ -84,7 +84,7 @@ class SeatLayerSeasonPicker extends StatefulWidget {
 
 /// The state of a [SeatLayerSeasonPicker]; [requestClose] asks the page.
 class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, SeatLayerSurfaceCloser<SeatLayerSeasonPicker> {
   late SeatLayerSeasonController _controller;
   late bool _ownsController;
   final _subscriptions = <StreamSubscription<Object?>>[];
@@ -176,6 +176,7 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
   ///
   /// Each press is sent: a second one while the question is up dismisses it,
   /// and both answer that the buyer stayed (Back pressed twice).
+  @override
   Future<void> requestClose() async {
     try {
       final closed = _controller.isReady
@@ -330,9 +331,17 @@ Future<SeatLayerSeasonHandoff?> showSeatLayerSeasonPicker(
       presentation: presentation,
       useRootNavigator: useRootNavigator,
       routeSettings: routeSettings,
-      page: (inDialog) => _SeatLayerSeasonPage(
+      page: (inDialog) => SeatLayerSurfacePage<SeatLayerSeasonHandoff>(
         useScaffold: !inDialog,
-        picker: (key, pop) => SeatLayerSeasonPicker(
+        // The club's brand never sets the ground, so the frame needs no
+        // status.
+        theme: (context) => resolveSeatLayerPalette(
+          context,
+          null,
+          theme,
+          brightness: resolveSeatLayerThemeBrightness(context, themeMode),
+        ),
+        surface: (key, pop) => SeatLayerSeasonPicker(
           key: key,
           configuration: configuration,
           controller: controller,
@@ -352,40 +361,3 @@ Future<SeatLayerSeasonHandoff?> showSeatLayerSeasonPicker(
       ),
     );
 
-/// The Season picker in the shared page frame.
-class _SeatLayerSeasonPage extends StatefulWidget {
-  const _SeatLayerSeasonPage({required this.useScaffold, required this.picker});
-
-  final bool useScaffold;
-  final SeatLayerSeasonPicker Function(
-    GlobalKey<SeatLayerSeasonPickerState> key,
-    void Function(SeatLayerSeasonHandoff? result) pop,
-  ) picker;
-
-  @override
-  State<_SeatLayerSeasonPage> createState() => _SeatLayerSeasonPageState();
-}
-
-class _SeatLayerSeasonPageState extends State<_SeatLayerSeasonPage> {
-  final _picker = GlobalKey<SeatLayerSeasonPickerState>();
-  bool _allowPop = false;
-
-  void _pop(SeatLayerSeasonHandoff? result) {
-    if (!mounted || _allowPop) return;
-    setState(() => _allowPop = true);
-    Navigator.of(context).pop(result);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final picker = widget.picker(_picker, _pop);
-    return SeatLayerSurfaceFrame(
-      // The club's brand never sets the ground, so the frame needs no status.
-      theme: seatLayerSeasonThemeOf(context, picker, null),
-      canPop: _allowPop,
-      onBack: () => unawaited(_picker.currentState?.requestClose()),
-      useScaffold: widget.useScaffold,
-      child: picker,
-    );
-  }
-}

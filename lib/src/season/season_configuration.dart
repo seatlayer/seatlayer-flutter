@@ -157,7 +157,7 @@ class SeatLayerSeasonConfiguration implements SeatLayerSurfaceConfiguration {
   /// keeps its page instead of reloading it.
   @override
   bool semanticallyEquals(SeatLayerSeasonConfiguration other) =>
-      _same(_identity, other._identity) &&
+      seatLayerSameValue(_identity, other._identity) &&
       identical(buyerAccessTokenProvider, other.buyerAccessTokenProvider);
 
   List<Object?> get _identity => <Object?>[
@@ -180,25 +180,4 @@ class SeatLayerSeasonConfiguration implements SeatLayerSurfaceConfiguration {
         hostInfo,
         assetPath,
       ];
-}
-
-bool _same(Object? left, Object? right) {
-  if (identical(left, right)) return true;
-  if (left is List && right is List) {
-    if (left.length != right.length) return false;
-    for (var i = 0; i < left.length; i++) {
-      if (!_same(left[i], right[i])) return false;
-    }
-    return true;
-  }
-  if (left is Map && right is Map) {
-    if (left.length != right.length) return false;
-    for (final key in left.keys) {
-      if (!right.containsKey(key) || !_same(left[key], right[key])) {
-        return false;
-      }
-    }
-    return true;
-  }
-  return left == right;
 }

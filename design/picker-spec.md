@@ -2763,6 +2763,49 @@ is `season.lifecycle`.
 id); the app's server books it, then `season.markBooked`. `season.status`
 `booked` for a hold the page made is `onBooked`.
 
+### 3.17 The run page
+
+**Name** `SeatLayerRunPicker` · **show** `showSeatLayerRunPicker` · **file**
+`lib/src/run/seat_layer_run_picker.dart`
+
+A run (a few performances sold to one buyer as one hold) is drawn by the pinned
+`group.html` (contract `seatlayer-group-surface`, capabilities
+`group-surface-v1` and `group-app-shell-v1`), booted with `header: false`,
+`appBar: true` and `checkout: handoff`: the map, the seat card and the cart are
+the page's. Board FR01 (approved 23 Nov 2026): a page that says
+`group-app-shell-v2` honours `appBar` and hides its own name row, steps, hint
+line and key; the seat card is a bottom sheet on a phone. A 1.0.0 page ignores
+`appBar` and shows them.
+
+**Bar.** §3.1's header, as on the Season page (§3.16), no new tokens. Name:
+`group.ready`'s `performanceGroup.name`, else the loading words
+`strings.chooseSeats` until it arrives. Brand: `group.status`'s `branding` when
+a page sends it, else the run name's letter. Hold pill: `group.hold` /
+`group.holdChanged` to `null` or `group.holdExpired`; a resumed hold
+(`initialOperationId`) is read once with `group.getHeldOrder` at ready.
+
+**Frame.** §3.16's route frame. The page fits the web view (`group-app-shell-v2`),
+but the web view passes it no bottom safe area (`env(safe-area-inset-bottom)` is
+0 on iOS and Android) and the run page takes no insets yet, so the app keeps it
+above the bottom safe area, on `color.*.surface` (the cart's).
+
+**Close.** The dismiss control and system Back send `group.destroy`, once, and
+close when it answers: as on the event picker, seats not handed off are
+released, and a hold handed off or booked is kept. There is no question to the
+buyer.
+
+**One side.** The page boots on the app's side and stays on it, the bar and
+frame included: runtime 1.0.0's run page has no command to repaint in place,
+and a reload would take the buyer's seats. The app going to the background and
+coming back is `group.lifecycle`.
+
+**Could not load.** As §3.16: the failure view (§3.13.2) under the bar, Retry
+boots a new page, the dismiss control closes at once.
+
+**Checkout.** `group.checkout` hands the hold to the app (once per operation
+id; it carries no price); the app's server prices and books it, then
+`group.markBooked`. `group.booked` is `onBooked`, once per operation.
+
 ---
 
 ## 4. Porting checklist

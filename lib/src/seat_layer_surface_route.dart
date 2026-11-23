@@ -120,3 +120,60 @@ class SeatLayerSurfaceFrame extends StatelessWidget {
     );
   }
 }
+
+/// A page picker whose way out goes through the page first: system Back calls
+/// [requestClose], as the close button does.
+@internal
+mixin SeatLayerSurfaceCloser<T extends StatefulWidget> on State<T> {
+  /// The buyer asked to leave.
+  Future<void> requestClose();
+}
+
+/// A Season or run picker on its route: the shared frame, Back sent to the
+/// picker, and a pop that happens once.
+@internal
+class SeatLayerSurfacePage<R> extends StatefulWidget {
+  /// Creates the page around the picker [surface] builds.
+  const SeatLayerSurfacePage({
+    super.key,
+    required this.useScaffold,
+    required this.theme,
+    required this.surface,
+  });
+
+  /// Whether to draw a scaffold. Off inside a dialog.
+  final bool useScaffold;
+
+  /// The frame's palette.
+  final SeatLayerResolvedPickerTheme Function(BuildContext context) theme;
+
+  /// Builds the picker with the key Back reaches it by and the pop that
+  /// closes the route.
+  final Widget Function(
+    GlobalKey<SeatLayerSurfaceCloser> key,
+    void Function(R? result) pop,
+  ) surface;
+
+  @override
+  State<SeatLayerSurfacePage<R>> createState() => _SeatLayerSurfacePageState<R>();
+}
+
+class _SeatLayerSurfacePageState<R> extends State<SeatLayerSurfacePage<R>> {
+  final _surface = GlobalKey<SeatLayerSurfaceCloser>();
+  bool _allowPop = false;
+
+  void _pop(R? result) {
+    if (!mounted || _allowPop) return;
+    setState(() => _allowPop = true);
+    Navigator.of(context).pop(result);
+  }
+
+  @override
+  Widget build(BuildContext context) => SeatLayerSurfaceFrame(
+        theme: widget.theme(context),
+        canPop: _allowPop,
+        onBack: () => _surface.currentState?.requestClose(),
+        useScaffold: widget.useScaffold,
+        child: widget.surface(_surface, _pop),
+      );
+}

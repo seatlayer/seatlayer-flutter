@@ -1,7 +1,8 @@
 /// SeatLayer Flutter SDK.
 ///
 /// Two ways in. Drop [SeatLayerPicker] on a route and you have the complete
-/// buyer flow (for a Season, [SeatLayerSeasonPicker]); or place a
+/// buyer flow (for a Season, [SeatLayerSeasonPicker]; for a run,
+/// [SeatLayerRunPicker]); or place a
 /// [SeatLayerPickerScope] and compose the parts —
 /// [SeatLayerChart], [SeatLayerPickerHeader], [SeatLayerPriceLegend],
 /// [SeatLayerDockBar], [SeatLayerConfirmCard], [SeatLayerCartSheet],
@@ -186,6 +187,17 @@ export 'src/seat_layer_controller.dart';
 export 'src/seat_layer_error.dart';
 export 'src/seat_layer_prewarm.dart' show seatLayerPrewarmDefaultTtl;
 export 'src/seat_layer_view.dart';
+export 'src/run/run_configuration.dart'
+    show SeatLayerRunConfiguration, seatLayerRunPageUrl;
+export 'src/run/run_models.dart';
+export 'src/run/seat_layer_run_controller.dart' show SeatLayerRunController;
+export 'src/run/seat_layer_run_picker.dart'
+    show
+        SeatLayerRunContinueCallback,
+        SeatLayerRunPicker,
+        SeatLayerRunPickerState,
+        showSeatLayerRunPicker;
+export 'src/run/seat_layer_run_view.dart' show SeatLayerRunView;
 export 'src/season/season_configuration.dart'
     show SeatLayerSeasonConfiguration, seatLayerSeasonPageUrl;
 export 'src/season/season_models.dart';
