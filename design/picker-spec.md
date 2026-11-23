@@ -325,12 +325,16 @@ button read as clutter on the phone.
 header's own style slot, which defaults to `color.*.surface` with `color.*.text`
 on it; a ground and its ink are always resolved as a pair, never from two
 independent tokens (a host that darkens `background` for the map must not
-lose the event name) — with a hairline of `color.*.divider` under it. Left: the
+lose the event name) — with a hairline of `color.*.divider` under it. Start
+(the left in a left-to-right language, the right in Arabic or Hebrew): the
 brand mark, a square of `size.headerLogoSize` at `radius.headerLogo`, filled
 with the accent and carrying either the organizer's logo image (cover-fitted) or
 the first letter of the brand or event name in `color.*.onAccent`. Centre: the
-event name at `size.headerNameFontSize` w700, one line, ellipsized. Right, in
-order: the hold pill, the sales-closed pill, the close ring.
+event name at `size.headerNameFontSize` w700, one line, ellipsized. End, in
+order: the hold pill, the sales-closed pill, the close ring. The row's padding
+is directional: 12 before the mark on a phone (16 / 12 / 4 / 12 start / top /
+end / bottom on the wide header), so the mark stands as far from its edge in
+Arabic as it does in English.
 
 **The wide header's second line.** Under the name (16, w800), one line at 12 in
 `color.*.mutedText`, ellipsized: `event.startsAtLabel`, then `event.venue`,
