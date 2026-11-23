@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_styles.dart';
-import 'picker_models.dart';
+import 'picker_strings.dart';
 import 'seat_layer_picker_scope.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_theme.dart';
@@ -45,10 +46,98 @@ class SeatLayerPickerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
-    // The header caps the immersive scene, so it takes its palette too.
-    final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
     final options = SeatLayerPickerScope.optionsOf(context);
+    final event = state.event;
+    // The runtime's own name wins the moment it arrives; until then the host's
+    // is a better placeholder than a generic instruction, because it is the
+    // name the buyer just tapped and the header never has to change its mind.
+    final placeholder = options.eventName;
+    final runtimeName = event?.name;
+    final name = runtimeName != null && runtimeName.isNotEmpty
+        ? runtimeName
+        : (placeholder != null && placeholder.isNotEmpty
+            ? placeholder
+            : strings.chooseSeats);
+    // When, then where. The date is drawn only from the label the runtime
+    // writes in the event's own time zone: `startsAt` is an instant, and
+    // formatting it here would print the device's hour, which for a buyer
+    // abroad is a wrong time — worse than no time at all.
+    final details = <String>[
+      for (final part in <String?>[event?.startsAtLabel, event?.venue])
+        if (part != null && part.trim().isNotEmpty) part.trim(),
+    ];
+    return SeatLayerHeaderBar(
+      // The header caps the immersive scene, so it takes its palette too.
+      theme: seatLayerMapChromeThemeOf(context),
+      strings: strings,
+      logoUrl: state.branding?.logoUrl,
+      markName: state.branding?.brandName ?? event?.name,
+      title: showEventDetails && !options.hideEventDetails ? name : null,
+      details: details.isEmpty ? null : details.join(' · '),
+      // Sales that have ended are a fact about the event, so they are stated
+      // beside its name — and never in the accent, which in this header means
+      // "your seats".
+      notice: state.event?.salesClosed == true
+          ? SeatLayerPickerSalesClosedPill(compact: compact)
+          : null,
+      clock: showHoldPill && state.hold != null
+          ? SeatLayerPickerHoldCountdown(compact: compact)
+          : null,
+      onClose: onClose,
+      compact: compact,
+      style: style,
+    );
+  }
+}
+
+/// The header's layout, fed what to show rather than reading it: the event
+/// picker and the Season page draw the same bar (NS01) from their own state.
+@internal
+class SeatLayerHeaderBar extends StatelessWidget {
+  /// Creates the bar.
+  const SeatLayerHeaderBar({
+    super.key,
+    required this.theme,
+    required this.strings,
+    this.logoUrl,
+    this.markName,
+    this.title,
+    this.details,
+    this.notice,
+    this.clock,
+    this.onClose,
+    this.compact = false,
+    this.style,
+  });
+
+  final SeatLayerResolvedPickerTheme theme;
+  final SeatLayerPickerStrings strings;
+
+  /// The organizer's logo; [SeatLayerResolvedPickerTheme.logo] wins over it.
+  final String? logoUrl;
+
+  /// The name the mark takes its letter from when there is no logo.
+  final String? markName;
+
+  /// The name on the bar, or null to leave the space empty.
+  final String? title;
+
+  /// When and where, under the name; never on a phone.
+  final String? details;
+
+  /// A fact stated beside the name.
+  final Widget? notice;
+
+  /// The hold clock.
+  final Widget? clock;
+
+  final VoidCallback? onClose;
+  final bool compact;
+  final SeatLayerSurfaceStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
     final logoSize = compact ? theme.layout.headerLogoSize : 36.0;
 
     final headerStyle =
@@ -81,23 +170,29 @@ class SeatLayerPickerHeader extends StatelessWidget {
               children: [
                 _air(
                   compact,
-                  _PickerBrandMark(theme: theme, state: state, size: logoSize),
+                  _PickerBrandMark(
+                    theme: theme,
+                    logoUrl: logoUrl,
+                    markName: markName,
+                    size: logoSize,
+                  ),
                 ),
                 gap,
                 Expanded(
                   child: _air(
                     compact,
-                    showEventDetails && !options.hideEventDetails
-                        ? _EventTitle(compact: compact)
+                    title != null
+                        ? _HeaderTitle(
+                            theme: theme,
+                            name: title!,
+                            details: details,
+                            compact: compact,
+                          )
                         : const SizedBox.shrink(),
                   ),
                 ),
-                // Sales that have ended are a fact about the event, so they
-                // are stated beside its name — and never in the accent, which
-                // in this header means "your seats".
-                if (state.event?.salesClosed == true) ...[
-                  _air(compact,
-                      SeatLayerPickerSalesClosedPill(compact: compact)),
+                if (notice != null) ...[
+                  _air(compact, notice!),
                   gap,
                 ],
                 // The one clock in the picker: it
@@ -106,13 +201,17 @@ class SeatLayerPickerHeader extends StatelessWidget {
                 // collapsed cart's pill carried the clock, the web's
                 // data-peek-clock rule; a clock inside the button read as
                 // clutter on the phone.
-                if (showHoldPill && state.hold != null) ...[
-                  _air(compact, SeatLayerPickerHoldCountdown(compact: compact)),
+                if (clock != null) ...[
+                  _air(compact, clock!),
                   gap,
                 ],
                 if (onClose != null)
                   compact
-                      ? _CloseRing(onClose: onClose!, tooltip: strings.close)
+                      ? _CloseRing(
+                          theme: theme,
+                          onClose: onClose!,
+                          tooltip: strings.close,
+                        )
                       : IconButton(
                           tooltip: strings.close,
                           onPressed: onClose,
@@ -153,14 +252,18 @@ Widget _air(bool compact, Widget child) => compact
 /// enough to reach the screen edge while the ring stays ten points clear of
 /// it.
 class _CloseRing extends StatelessWidget {
-  const _CloseRing({required this.onClose, required this.tooltip});
+  const _CloseRing({
+    required this.theme,
+    required this.onClose,
+    required this.tooltip,
+  });
 
+  final SeatLayerResolvedPickerTheme theme;
   final VoidCallback onClose;
   final String tooltip;
 
   @override
   Widget build(BuildContext context) {
-    final theme = seatLayerMapChromeThemeOf(context);
     const ring = SeatLayerSizeTokens.headerCloseSize;
     // The target is the line, so it has to be the line the header was told to
     // draw rather than the default the tokens ship.
@@ -198,27 +301,21 @@ class _CloseRing extends StatelessWidget {
   }
 }
 
-class _EventTitle extends StatelessWidget {
-  const _EventTitle({required this.compact});
+class _HeaderTitle extends StatelessWidget {
+  const _HeaderTitle({
+    required this.theme,
+    required this.name,
+    required this.details,
+    required this.compact,
+  });
 
+  final SeatLayerResolvedPickerTheme theme;
+  final String name;
+  final String? details;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final state = SeatLayerPickerScope.stateOf(context);
-    final theme = seatLayerMapChromeThemeOf(context);
-    final strings = SeatLayerPickerScope.stringsOf(context);
-    final event = state.event;
-    // The runtime's own name wins the moment it arrives; until then the host's
-    // is a better placeholder than a generic instruction, because it is the
-    // name the buyer just tapped and the header never has to change its mind.
-    final placeholder = SeatLayerPickerScope.optionsOf(context).eventName;
-    final runtimeName = event?.name;
-    final name = runtimeName != null && runtimeName.isNotEmpty
-        ? runtimeName
-        : (placeholder != null && placeholder.isNotEmpty
-            ? placeholder
-            : strings.chooseSeats);
     if (compact) {
       // One line. A phone header that stacks a name over a venue spends the
       // height the map needs on words the buyer already chose their way past.
@@ -235,14 +332,6 @@ class _EventTitle extends StatelessWidget {
         ),
       );
     }
-    // When, then where. The date is drawn only from the label the runtime
-    // writes in the event's own time zone: `startsAt` is an instant, and
-    // formatting it here would print the device's hour, which for a buyer
-    // abroad is a wrong time — worse than no time at all.
-    final details = <String>[
-      for (final part in <String?>[event?.startsAtLabel, event?.venue])
-        if (part != null && part.trim().isNotEmpty) part.trim(),
-    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -258,9 +347,9 @@ class _EventTitle extends StatelessWidget {
             fontFamily: theme.fontFamily,
           ),
         ),
-        if (details.isNotEmpty)
+        if (details != null)
           Text(
-            details.join(' · '),
+            details!,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -277,18 +366,20 @@ class _EventTitle extends StatelessWidget {
 class _PickerBrandMark extends StatelessWidget {
   const _PickerBrandMark({
     required this.theme,
-    required this.state,
+    required this.logoUrl,
+    required this.markName,
     required this.size,
   });
 
   final SeatLayerResolvedPickerTheme theme;
-  final SeatLayerPickerState state;
+  final String? logoUrl;
+  final String? markName;
   final double size;
 
   @override
   Widget build(BuildContext context) {
     final provider = theme.logo;
-    final url = state.branding?.logoUrl;
+    final url = logoUrl;
     if (provider != null || url != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(_radius),
@@ -313,7 +404,7 @@ class _PickerBrandMark extends StatelessWidget {
   /// A letter is the mark the web falls back to, and it is the one thing on
   /// the header that says whose event this is when no logo was uploaded.
   Widget _fallback(BuildContext context) {
-    final named = state.branding?.brandName ?? state.event?.name;
+    final named = markName;
     final letter = named == null || named.trim().isEmpty
         ? null
         : String.fromCharCode(named.trim().runes.first).toUpperCase();
@@ -358,7 +449,7 @@ DateTime seatLayerPickerNow() => SeatLayerPickerHoldCountdown.debugClock();
 /// How long the buyer's seats stay held, counting down once a second.
 ///
 /// Renders nothing until there is a hold, so it can be placed unconditionally.
-class SeatLayerPickerHoldCountdown extends StatefulWidget {
+class SeatLayerPickerHoldCountdown extends StatelessWidget {
   /// Creates the hold countdown pill.
   const SeatLayerPickerHoldCountdown({super.key, this.compact = false});
 
@@ -379,12 +470,42 @@ class SeatLayerPickerHoldCountdown extends StatefulWidget {
   static DateTime Function() debugClock = DateTime.now;
 
   @override
-  State<SeatLayerPickerHoldCountdown> createState() =>
-      _SeatLayerPickerHoldCountdownState();
+  Widget build(BuildContext context) {
+    final state = SeatLayerPickerScope.stateOf(context);
+    if (state.hold == null) return const SizedBox.shrink();
+    return SeatLayerHoldClock(
+      expiresAt: state.hold!.expiryDate,
+      theme: seatLayerMapChromeThemeOf(context),
+      strings: SeatLayerPickerScope.stringsOf(context),
+      compact: compact,
+    );
+  }
 }
 
-class _SeatLayerPickerHoldCountdownState
-    extends State<SeatLayerPickerHoldCountdown> {
+/// The hold pill itself, counting [expiresAt] down: the event picker's and
+/// the Season page's.
+@internal
+class SeatLayerHoldClock extends StatefulWidget {
+  /// Creates the pill.
+  const SeatLayerHoldClock({
+    super.key,
+    required this.expiresAt,
+    required this.theme,
+    required this.strings,
+    this.compact = false,
+  });
+
+  /// When the hold runs out; null reads as run out.
+  final DateTime? expiresAt;
+  final SeatLayerResolvedPickerTheme theme;
+  final SeatLayerPickerStrings strings;
+  final bool compact;
+
+  @override
+  State<SeatLayerHoldClock> createState() => _SeatLayerHoldClockState();
+}
+
+class _SeatLayerHoldClockState extends State<SeatLayerHoldClock> {
   Timer? _timer;
 
   @override
@@ -401,13 +522,18 @@ class _SeatLayerPickerHoldCountdownState
     super.dispose();
   }
 
+  Duration get _remaining {
+    final expiry = widget.expiresAt;
+    if (expiry == null) return Duration.zero;
+    final remaining = expiry.difference(seatLayerPickerNow());
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final state = SeatLayerPickerScope.stateOf(context);
-    if (state.hold == null) return const SizedBox.shrink();
-    final theme = seatLayerMapChromeThemeOf(context);
-    final strings = SeatLayerPickerScope.stringsOf(context);
-    final remaining = state.holdRemaining(seatLayerPickerNow());
+    final theme = widget.theme;
+    final strings = widget.strings;
+    final remaining = _remaining;
     final minutes =
         remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds =
@@ -446,7 +572,7 @@ class _SeatLayerPickerHoldCountdownState
     String minutes,
     String seconds,
   ) {
-    final strings = SeatLayerPickerScope.stringsOf(context);
+    final strings = widget.strings;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: expiring
