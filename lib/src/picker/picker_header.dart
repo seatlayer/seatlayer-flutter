@@ -164,8 +164,8 @@ class SeatLayerHeaderBar extends StatelessWidget {
             // its ring ends ten points from the edge while the target it
             // answers to runs all the way out to the corner.
             padding: compact
-                ? const EdgeInsets.only(left: 12)
-                : const EdgeInsets.fromLTRB(16, 12, 4, 12),
+                ? const EdgeInsetsDirectional.only(start: 12)
+                : const EdgeInsetsDirectional.fromSTEB(16, 12, 4, 12),
             child: Row(
               children: [
                 _air(
