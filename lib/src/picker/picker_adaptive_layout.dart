@@ -388,6 +388,13 @@ class _SeatLayerPickerAdaptiveLayoutState
                         bottomInset: !wide && dockUp
                             ? SeatLayerDockBar.heightFor(context)
                             : 0,
+                        // Under the Map/3D control, or the floor strip below.
+                        topInset: floorStripUp
+                            ? _floorStripTop(
+                                    viewModeControl: viewModeControlUp) +
+                                floorStripHeight +
+                                _badgeGap
+                            : immersiveTopInset,
                         // On a phone the top rail below owns the Map/3D control.
                         includeViewModeControl: wide,
                         accessibilityControl: accessibility,

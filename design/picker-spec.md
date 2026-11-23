@@ -644,6 +644,18 @@ broken-map reading, so it goes inert once `map.rung` is `seats` or
 altogether pulled the ♿ disc down under the thumb already reaching for it.
 Reserve the slot; do not reflow the column.
 
+**On a short map the column flows; it never climbs over the chrome above it.**
+The column's ceiling is the foot of whatever stands on the map's top line on
+its side — the Map | 3D control, or the floor strip across the map's full
+width — plus `size.mapAnchorGap`. The test badge stands on the other side and
+does not count. A column that fits under the ceiling is drawn exactly as
+above. On a map too short for it, as on a phone held sideways, the discs that
+would climb past the ceiling flow into a second column on the start side, at
+full size and in the same order from the foot, so the whole-venue disc keeps
+the corner and the retired `+` keeps its slot. A map shorter than one disc
+(`size.mapControlSize`), as under an open cart sheet on a small phone at a
+large text size, draws no column at all rather than a sliver of one.
+
 **A retired or disabled disc looks retired, and its ground never changes.**
 These controls dim in place rather than disappearing, which only works as an
 answer if the buyer can see that it is one. The glyph steps back to

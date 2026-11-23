@@ -134,9 +134,11 @@ Map<String, Object?> _snapshotFor(PhoneState state) {
   }
 }
 
+const Color _mapPlaceholderColor = Color(0xFF9AA3AE);
+
 /// A flat stand-in for the web view the map is drawn in.
 Widget _mapPlaceholder(BuildContext context, SeatLayerPickerPartContext part) =>
-    const ColoredBox(color: Color(0xFF9AA3AE), child: SizedBox.expand());
+    const ColoredBox(color: _mapPlaceholderColor, child: SizedBox.expand());
 
 /// Put the picker on [phone] in [state].
 ///
@@ -170,7 +172,25 @@ Future<SeatLayerPickerStrings> pumpPhone(
     );
   addTearDown(tester.view.reset);
 
-  final map = FakePickerMap(bundle: nativeChromeBundle());
+  // What runtime 1.0.0 speaks on a chart with no access provisions, so the
+  // map carries the same control column as a real app: the palette disc
+  // above the whole-venue disc.
+  final map = FakePickerMap(
+    bundle: nativeChromeBundle(
+      capabilities: const <String>[
+        'native-chrome-contract-v1',
+        'viewport-insets-v1',
+        'colorblind-safe',
+        'venue-3d-controls-v1',
+      ],
+      commands: const <String>[
+        'picker.setThemeMode',
+        'picker.setViewportInsets',
+        'picker.setColorblindSafe',
+        'picker.setVenue3DNavigationMode',
+      ],
+    ),
+  );
   addTearDown(map.dispose);
   final picker = SeatLayerPickerController(mapController: map);
   addTearDown(picker.dispose);
@@ -318,6 +338,24 @@ List<Tappable> tappables(WidgetTester tester) {
   return found;
 }
 
+/// Whether a press at [point] lands on [control]: the semantics node of
+/// something on the press's hit path is the control's own or one inside it.
+bool pressReaches(WidgetTester tester, Offset point, Tappable control) {
+  final hit = HitTestResult();
+  tester.binding.hitTestInView(hit, point, tester.view.viewId);
+  for (final entry in hit.path) {
+    final target = entry.target;
+    if (target is! RenderObject) continue;
+    final node = target.debugSemantics;
+    if (node == null) continue;
+    if (node == control.node) return true;
+    for (SemanticsNode? up = node.parent; up != null; up = up.parent) {
+      if (up == control.node) return true;
+    }
+  }
+  return false;
+}
+
 /// The smallest a control may be: WCAG 2.2's 24 points (2.5.8, level AA).
 ///
 /// Apple asks for 44. The approved phone boards draw several controls between
@@ -361,6 +399,38 @@ void expectPhoneLayout(
   for (final control in controlsUnder(tester, minimumTapTarget)) {
     problems.add('${control.name} is ${control.rect.size}, under '
         '$minimumTapTarget × $minimumTapTarget');
+  }
+  // No control covered by another. Where two overlap, a press there must
+  // reach the smaller one: a disc standing on the edge of a wide row is
+  // fine, but a disc over half of a switch takes that half's presses. The
+  // map's own surface answers a tap too and every control stands on it, so
+  // the surface is not compared.
+  double area(Rect rect) => rect.width * rect.height;
+  final surface = find.byWidgetPredicate(
+    (widget) => widget is ColoredBox && widget.color == _mapPlaceholderColor,
+  );
+  final mapRect =
+      surface.evaluate().isEmpty ? Rect.zero : tester.getRect(surface.first);
+  bool isSurface(Rect rect) =>
+      area(mapRect) > 0 && area(rect.intersect(mapRect)) >= .9 * area(mapRect);
+  final controls = <Tappable>[
+    for (final control in tappables(tester))
+      if (!control.atScrollEdge && !isSurface(control.rect)) control,
+  ];
+  for (var i = 0; i < controls.length; i++) {
+    for (var j = i + 1; j < controls.length; j++) {
+      final a = controls[i];
+      final b = controls[j];
+      if (a.contains(b) || b.contains(a)) continue;
+      final both = a.rect.intersect(b.rect);
+      if (both.width <= 1 || both.height <= 1) continue;
+      final smaller = area(a.rect) <= area(b.rect) ? a : b;
+      final larger = identical(smaller, a) ? b : a;
+      if (!pressReaches(tester, both.center, smaller)) {
+        problems.add('${larger.name} at ${larger.rect} covers '
+            '${smaller.name} at ${smaller.rect}');
+      }
+    }
   }
   final mainLabels = <String>[
     strings.addSeat,
