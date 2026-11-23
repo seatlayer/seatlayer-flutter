@@ -2,8 +2,8 @@
 // accessibility options as a popover beside their control, and the 3D
 // Rotate / Move pair when its words do not fit.
 import 'package:flutter/material.dart';
-import 'dart:ui' show SemanticsRole;
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/open_enums.dart';
@@ -215,6 +215,7 @@ void main() {
       SeatLayerPickerOptions options = const SeatLayerPickerOptions(),
       bool keyboard = false,
       VoidCallback? onMapTap,
+      List<String> needs = const <String>['wheelchair'],
     }) async {
       final map = FakePickerMap(bundle: accessibilityFocusBundle());
       addTearDown(map.dispose);
@@ -252,7 +253,7 @@ void main() {
       map.emit(
         pickerSnapshot(
           withSelection: false,
-          accessNeeds: <Object?>[accessNeed('wheelchair', 15)],
+          accessNeeds: <Object?>[for (final need in needs) accessNeed(need, 15)],
         ),
       );
       await tester.pumpAndSettle();
@@ -419,6 +420,39 @@ void main() {
 
       expect(find.text('Accessibility and view'), findsNothing);
     });
+
+    for (final scale in <double>[1, 1.3, 2]) {
+      testWidgets('wrap a long name instead of cutting it — text $scale',
+          (tester) async {
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        for (final tag in <String>['en', 'de', 'fr', 'fi', 'ru', 'ar', 'ja']) {
+          final strings = SeatLayerPickerStrings.forLocale(Locale(tag));
+          await open(
+            tester,
+            wide: true,
+            direction: tag == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+            options: SeatLayerPickerOptions(strings: strings),
+            needs: strings.accessNeeds.keys.toList(),
+          );
+          expect(tester.takeException(), isNull, reason: tag);
+          for (final name in <String>[
+            strings.colorblindSafe,
+            ...strings.accessNeeds.values,
+          ]) {
+            final text = tester.renderObject<RenderParagraph>(
+              find.descendant(
+                of: find.text(name, skipOffstage: false).first,
+                matching: find.byType(RichText, skipOffstage: false),
+              ),
+            );
+            expect(text.didExceedMaxLines, isFalse, reason: '$tag: $name');
+            expect(text.maxLines, isNull, reason: '$tag: $name');
+          }
+          await tester.pumpWidget(const SizedBox());
+        }
+      });
+    }
 
     testWidgets('the phone keeps its bottom sheet', (tester) async {
       await open(tester, wide: false);

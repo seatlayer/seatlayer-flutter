@@ -243,6 +243,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                     iconKey: 'restrictedView',
                     label: strings.hideLimitedView,
                     reserveNoteSlot: false,
+                    wrapLabel: popover,
                     hairline: available.colorblind,
                     value: hideLimited,
                     onChanged: () {
@@ -259,6 +260,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                     iconKey: 'contrast',
                     label: strings.colorblindSafe,
                     reserveNoteSlot: false,
+                    wrapLabel: popover,
                     hairline: false,
                     value: colorblind,
                     onChanged: () {
@@ -318,6 +320,7 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                             // nothing about which one a row was.
                             iconKey: need.key,
                             label: need.label,
+                            wrapLabel: popover,
                             note: need.note,
                             // A NUMBER, INCLUDING AT ZERO. The row used to
                             // say "Not available" when the last space went,
@@ -529,7 +532,7 @@ const double _controlIconSize = 21;
 /// that turned a sheet of switches into a page of prose. The sentence rides an
 /// ⓘ beside the label now and opens under the row that owns it, and the label
 /// truncates rather than wrapping when a translation runs long, so twelve rows
-/// stay twelve lines on any phone.
+/// stay twelve lines on any phone. In the wide popover the label wraps.
 class _AccessOptionRow extends StatefulWidget {
   const _AccessOptionRow({
     required this.iconKey,
@@ -542,6 +545,7 @@ class _AccessOptionRow extends StatefulWidget {
     this.onCountPressed,
     this.reserveNoteSlot = true,
     this.hairline = true,
+    this.wrapLabel = false,
   });
 
   /// Which shared drawing this row wears, by the runtime's own key.
@@ -563,6 +567,11 @@ class _AccessOptionRow extends StatefulWidget {
 
   /// Whether a hairline closes the row.
   final bool hairline;
+
+  /// Whether a label too long for its cell takes a second line. The popover is
+  /// narrower than the sheet, so there the row grows rather than cutting the
+  /// name.
+  final bool wrapLabel;
 
   final bool value;
   final VoidCallback? onChanged;
@@ -650,8 +659,10 @@ class _AccessOptionRowState extends State<_AccessOptionRow> {
                             Flexible(
                               child: Text(
                                 label,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                maxLines: widget.wrapLabel ? null : 1,
+                                overflow: widget.wrapLabel
+                                    ? null
+                                    : TextOverflow.ellipsis,
                                 style: TextStyle(
                                   color: theme.text,
                                   fontSize: SeatLayerSizeTokens

@@ -876,7 +876,7 @@ trench coat:
 | --- | --- | --- |
 | icon | `size.accessRowIconCell` (20) | the attribute's own drawing at `size.accessRowIconSize`, in `color.*.mutedText` |
 | gap | `size.accessRowGap` (10) | — |
-| label + ⓘ | flexible | the short name at `size.accessRowLabelFontSize` / w600 in `color.*.text`, one line, ellipsized; then, only where the row has a note, the ⓘ in a 36-wide column |
+| label + ⓘ | flexible | the short name at `size.accessRowLabelFontSize` / w600 in `color.*.text`, one line, ellipsized (in the wide popover it wraps instead and its row grows past 50); then, only where the row has a note, the ⓘ in a 36-wide column |
 | count | 68, trailing-aligned | `strings.accessFreeCount`, or `0`; wide enough for "999 free" |
 | gap | `size.accessRowSwitchGap` (12) | — |
 | switch | `size.accessSwitchWidth` × `size.accessSwitchHeight` | drawn, not the platform's |
@@ -3069,8 +3069,8 @@ of them portable:
   floored at `size.accessSheetMinHeight`, never taller than the screen — and
   the provision list **scrolls inside** that bound rather than the sheet
   growing;
-- **every row is one line at one fixed height (50)**, short name truncating
-  rather than wrapping, with any sentence it needs behind an ⓘ that opens
+- **every row is one line at one fixed height (50)** on the sheet, short name
+  truncating rather than wrapping (the narrower wide popover wraps it), with any sentence it needs behind an ⓘ that opens
   *under* the row it belongs to;
 - **the whole line toggles**, so the target is the words and not the
   20-point switch at the end of it, and each row's count keeps its own
