@@ -9,6 +9,10 @@ import 'run_models.dart';
 const String seatLayerRunPageUrl =
     '$seatLayerMobileOrigin/seatlayer-js@$seatLayerHostedWebVersion/group.html';
 
+/// A run page that honours `appBar`: it hides its own name row, steps, hint
+/// and key, fits the web view and runs its cart bar to the bottom edge.
+const String seatLayerGroupAppShellV2 = 'group-app-shell-v2';
+
 /// Everything needed to open a run: a few performances sold to one buyer as
 /// one hold, with your app's own checkout.
 ///
@@ -144,8 +148,11 @@ class SeatLayerRunConfiguration implements SeatLayerSurfaceConfiguration {
       if (locale != null) 'locale': locale,
       if (colorblindSafe != null) 'colorblindSafe': colorblindSafe,
       if (enable3D != null) 'enable3D': enable3D,
-      // The app's bar is the only one, and checkout is the app's.
+      // The app's bar is the only one, with the name, the clock and the ✕;
+      // checkout is the app's. A page older than [seatLayerGroupAppShellV2]
+      // ignores `appBar`.
       'header': false,
+      'appBar': true,
       'checkout': 'handoff',
     };
     return <String, Object?>{

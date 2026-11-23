@@ -26,8 +26,9 @@ typedef SeatLayerRunContinueCallback = FutureOr<void> Function(
 );
 
 /// The complete run picker: the header the event picker wears (brand mark,
-/// name, hold clock, ✕) over the run page, which draws the map, the
-/// performances and the cart. The page's own header is off.
+/// name, hold clock, ✕) over the run page, which draws the map, the seat
+/// card and the cart. The page's own header is off, and a page that honours
+/// `appBar` hides its name row, steps, hint line and key too (FR01).
 ///
 /// Give it a definite size. [showSeatLayerRunPicker] puts it on a route of its
 /// own with system Back wired up.
@@ -109,6 +110,16 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
     }
 
     _subscriptions.addAll(<StreamSubscription<Object?>>[
+      _controller.onReady.listen((_) {
+        rebuild(null);
+        // A resumed hold may never be announced: ask the page, so the bar
+        // shows its clock.
+        if (widget.configuration.initialOperationId != null) {
+          unawaited(_controller
+              .readHeldOrder()
+              .then<void>((_) {}, onError: (Object _) {}));
+        }
+      }),
       _controller.onRun.listen(rebuild),
       _controller.onStatus.listen(rebuild),
       _controller.onHold.listen(rebuild),
@@ -232,13 +243,19 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
                     strings: widget.strings,
                     onRetry: _retry,
                   )
-                // Runtime 1.0.0's run page takes no insets, so the app keeps
-                // it clear of the home indicator, on the cart's surface.
+                // A page that honours `appBar` fits the web view and runs its
+                // cart bar under the home indicator. Runtime 1.0.0's page
+                // takes no insets, so the app keeps it clear of the indicator,
+                // on the cart's surface.
                 : ColoredBox(
                     color: theme.surface,
                     child: Padding(
                       padding: EdgeInsets.only(
-                        bottom: MediaQuery.paddingOf(context).bottom,
+                        bottom: _controller.bundleInfo?.supportsCapability(
+                                    seatLayerGroupAppShellV2) ==
+                                true
+                            ? 0
+                            : MediaQuery.paddingOf(context).bottom,
                       ),
                       child: SeatLayerRunView(
                         key: ValueKey<int>(_page),

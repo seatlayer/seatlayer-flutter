@@ -39,7 +39,8 @@ Future<SeatLayerPickerStrings> _pumpRun(
   Locale locale = const Locale('en'),
   bool golden = false,
 }) async {
-  final page = RunPage(useFakeWebViewPlatform());
+  // The page FR01 pairs with: it honours `appBar`.
+  final page = RunPage(useFakeWebViewPlatform(), hello: runHelloAppBar);
   putOnPhone(tester, phone);
   final strings = SeatLayerPickerStrings.forLocale(locale);
   final rtl = locale.languageCode == 'ar' || locale.languageCode == 'he';
@@ -106,14 +107,9 @@ void _expectRunLayout(WidgetTester tester, Phone phone,
   // Under the status bar, on the page's ground, as on the event page.
   expect(bar.top, phone.insets.top);
   expect(page.top, moreOrLessEquals(bar.bottom));
-  // Runtime 1.0.0's run page takes no insets: the app keeps it clear of the
-  // home indicator (the failure view is the app's own and needs no room).
-  expect(
-    page.bottom,
-    state == RunPhoneState.failed
-        ? phone.size.height
-        : phone.size.height - phone.insets.bottom,
-  );
+  // The page runs its cart bar under the home indicator (FR01), and the
+  // failure view is the app's own: both reach the bottom edge.
+  expect(page.bottom, phone.size.height);
   expect(page.left, moreOrLessEquals(phone.insets.left));
   expect(page.right, moreOrLessEquals(phone.size.width - phone.insets.right));
   expect(find.byTooltip(strings.close), findsOneWidget);

@@ -2770,17 +2770,24 @@ id); the app's server books it, then `season.markBooked`. `season.status`
 
 A run (a few performances sold to one buyer as one hold) is drawn by the pinned
 `group.html` (contract `seatlayer-group-surface`, capabilities
-`group-surface-v1` and `group-app-shell-v1`), booted with `header: false` and
-`checkout: handoff`: the map, the performances and the cart are the page's.
+`group-surface-v1` and `group-app-shell-v1`), booted with `header: false`,
+`appBar: true` and `checkout: handoff`: the map, the seat card and the cart are
+the page's. Board FR01 (approved 23 Nov 2026): a page that says
+`group-app-shell-v2` honours `appBar` and hides its own name row, steps, hint
+line and key; the seat card is a bottom sheet on a phone. A 1.0.0 page ignores
+`appBar` and shows them.
 
 **Bar.** §3.1's header, as on the Season page (§3.16), no new tokens. Name:
 `group.ready`'s `performanceGroup.name`, else the loading words
 `strings.chooseSeats` until it arrives. Brand: `group.status`'s `branding` when
 a page sends it, else the run name's letter. Hold pill: `group.hold` /
-`group.holdChanged` to `null` or `group.holdExpired`.
+`group.holdChanged` to `null` or `group.holdExpired`; a resumed hold
+(`initialOperationId`) is read once with `group.getHeldOrder` at ready.
 
-**Frame.** §3.16's route frame. Runtime 1.0.0's run page takes no insets, so the
-app keeps it above the bottom safe area, on `color.*.surface` (the cart's).
+**Frame.** §3.16's route frame. A `group-app-shell-v2` page fits the web view
+and runs its cart bar under the bottom safe area, so the page reaches the bottom
+edge. Runtime 1.0.0's run page takes no insets, so the app keeps it above the
+bottom safe area, on `color.*.surface` (the cart's).
 
 **Close.** The dismiss control and system Back send `group.destroy`, once, and
 close when it answers: as on the event picker, seats not handed off are

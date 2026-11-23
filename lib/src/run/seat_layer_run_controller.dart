@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart' show internal;
 
 import '../bridge/bridge_protocol.dart';
 import '../bridge/bridge_session.dart';
@@ -160,6 +161,17 @@ class SeatLayerRunController
         await run('group.getHeldOrder', const <String, Object?>{}),
         'heldOrder',
       ));
+
+  /// Put the page's hold in [hold] when no event has named one: a hold the
+  /// page resumed at boot. The app's bar reads its clock from it.
+  @internal
+  Future<void> readHeldOrder() async {
+    if (_hold != null) return;
+    final held = await getHeldOrder();
+    if (held == null || _hold != null || isDisposed) return;
+    _hold = held;
+    _onHold.add(held);
+  }
 
   /// Let the whole hold go. True only when it is gone; a booked hold is never
   /// released.

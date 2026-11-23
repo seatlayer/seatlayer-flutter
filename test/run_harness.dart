@@ -15,6 +15,17 @@ const runHello = <String, Object?>{
   'commands': <String>[],
 };
 
+/// A page that honours `appBar` (FR01): it fits the web view and runs its
+/// cart bar under the home indicator.
+final runHelloAppBar = <String, Object?>{
+  ...runHello,
+  'capabilities': <String>[
+    'group-surface-v1',
+    'group-app-shell-v1',
+    'group-app-shell-v2',
+  ],
+};
+
 Map<String, Object?> runReady(String name) => <String, Object?>{
       'performanceGroup': <String, Object?>{
         'key': 'pg_test',
@@ -70,11 +81,14 @@ Map<String, Object?> runHandoff(String operationId, {bool booked = false}) =>
 
 /// Plays group.html's part of the bridge.
 class RunPage extends SeasonPage {
-  RunPage(super.fake);
+  RunPage(super.fake, {this.hello = runHello});
+
+  /// What the page says it can do: runtime 1.0.0's by default.
+  final Map<String, Object?> hello;
 
   @override
   Future<void> boot(WidgetTester tester) async {
-    post(EnvelopeKind.hello, 'hello', runHello);
+    post(EnvelopeKind.hello, 'hello', hello);
     await tester.pump();
     evt('sys.ready', <String, Object?>{
       'protocol': 2,
@@ -97,7 +111,7 @@ class RunPage extends SeasonPage {
 
   /// What the page sends for a run it cannot show.
   Future<void> fail(WidgetTester tester) async {
-    post(EnvelopeKind.hello, 'hello', runHello);
+    post(EnvelopeKind.hello, 'hello', hello);
     await tester.pump();
     evt('sys.error', <String, Object?>{'code': 'render_failed'});
   }

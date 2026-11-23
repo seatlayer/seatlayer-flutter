@@ -49,6 +49,7 @@ void main() {
     final config = payload['config']! as Map;
     expect(config['theme'], 'light');
     expect(config['header'], isFalse);
+    expect(config['appBar'], isTrue);
 
     // group.ready carries the run's name at runtime 1.0.0.
     page.ready('The Lantern Keeper');
@@ -56,12 +57,57 @@ void main() {
     expect(find.text('The Lantern Keeper'), findsOneWidget);
     expect(find.text('T'), findsOneWidget);
 
-    // The page takes no insets: the app keeps it above the home indicator.
+    // Runtime 1.0.0's page takes no insets: the app keeps it above the home
+    // indicator.
     expect(
       tester.getRect(find.byType(SeatLayerRunView)).bottom,
       tester.getRect(find.byType(SeatLayerRunPicker)).bottom - 34,
     );
     expect(page.sent.where((e) => e.type.contains('Insets')), isEmpty);
+    // Nothing to resume, so nothing asked.
+    expect(page.sent.where((e) => e.type == 'group.getHeldOrder'), isEmpty);
+  });
+
+  testWidgets('a page that honours appBar runs to the bottom edge (FR01)',
+      (tester) async {
+    final page = RunPage(useFakeWebViewPlatform(), hello: runHelloAppBar);
+    await tester.pumpWidget(_app(SeatLayerRunPicker(
+      configuration: runConfiguration,
+      onContinue: (_) {},
+      onClose: () {},
+    )));
+    await page.boot(tester);
+    page.ready('The Lantern Keeper');
+    await _settle(tester);
+    expect(
+      tester.getRect(find.byType(SeatLayerRunView)).bottom,
+      tester.getRect(find.byType(SeatLayerRunPicker)).bottom,
+    );
+    // One name and one ✕: the app's.
+    expect(find.text('The Lantern Keeper'), findsOneWidget);
+    expect(find.byTooltip('Close seat selection'), findsOneWidget);
+  });
+
+  testWidgets('a resumed hold puts its clock in the bar', (tester) async {
+    final page = RunPage(useFakeWebViewPlatform(), hello: runHelloAppBar);
+    await tester.pumpWidget(_app(SeatLayerRunPicker(
+      configuration: SeatLayerRunConfiguration(
+        run: 'pg_test',
+        initialHoldId: 'hold_r',
+        initialOperationId: 'pghop_r',
+      ),
+      onContinue: (_) {},
+    )));
+    await page.boot(tester);
+    await _settle(tester);
+    expect(find.byType(SeatLayerHoldClock), findsNothing);
+    expect(page.sent.where((e) => e.type == 'group.getHeldOrder'), hasLength(1));
+
+    page.answer('group.getHeldOrder', <String, Object?>{
+      'heldOrder': runHandoff('pghop_r'),
+    });
+    await _settle(tester);
+    expect(find.text('15:00'), findsOneWidget);
   });
 
   testWidgets('a hold puts the clock in the header', (tester) async {

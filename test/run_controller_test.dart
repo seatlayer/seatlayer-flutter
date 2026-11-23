@@ -79,6 +79,7 @@ void main() {
       'performanceGroup': 'pg_test',
       'locale': 'de',
       'header': false,
+      'appBar': true,
       'checkout': 'handoff',
       'theme': 'dark',
     });
