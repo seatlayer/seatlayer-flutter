@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/open_enums.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_checkout_cta.dart';
 import 'package:seatlayer/src/picker/picker_confirm_card.dart';
@@ -76,7 +77,11 @@ void main() {
       pickerHarness(
         map,
         const Center(child: SeatLayerPicker3DNavigationModeButton()),
-        options: _options('de'),
+        // The pair is drawn only under the older touch gestures.
+        options: SeatLayerPickerOptions(
+          strings: _strings('de'),
+          touchNavigation3D: SeatLayer3DTouchNavigation.classic,
+        ),
       ),
     );
     map.emit(snapshot);

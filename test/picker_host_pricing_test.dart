@@ -73,6 +73,77 @@ void main() {
       expect(profile(486).equivalentTo(profile(486)), isTrue);
       expect(profile(486).equivalentTo(profile(500)), isFalse);
     });
+
+    test('a seat is priced by label: a number, or { tiers } and never a base',
+        () {
+      const pricing = SeatLayerPickerPricing(
+        objects: <String, SeatLayerSeatPricing>{
+          'A-1': SeatLayerSeatPricing(95),
+          'A-2': SeatLayerSeatPricing.tiers(<String, double>{
+            'adult': 120,
+            'child': 60,
+          }),
+          'A-3': SeatLayerSeatPricing.tiers(<String, double>{}),
+        },
+      );
+      expect(pricing.toBridgeConfig(), <String, Object?>{
+        'objects': <String, Object?>{
+          'A-1': 95.0,
+          'A-2': <String, Object?>{
+            'tiers': <String, double>{'adult': 120, 'child': 60},
+          },
+        },
+      });
+    });
+
+    test('category and seat prices travel together', () {
+      const pricing = SeatLayerPickerPricing(
+        categories: <String, SeatLayerCategoryPricing>{
+          'gold': SeatLayerCategoryPricing(base: 486),
+        },
+        objects: <String, SeatLayerSeatPricing>{
+          'A-1': SeatLayerSeatPricing(95),
+        },
+      );
+      expect(pricing.toBridgeConfig(), <String, Object?>{
+        'prices': <String, Object?>{'gold': 486.0},
+        'objects': <String, Object?>{'A-1': 95.0},
+      });
+    });
+
+    test('an empty seat entry alone puts no pricing on the wire', () {
+      const pricing = SeatLayerPickerPricing(
+        objects: <String, SeatLayerSeatPricing>{
+          'A-3': SeatLayerSeatPricing.tiers(<String, double>{}),
+        },
+      );
+      expect(pricing.toBridgeConfig(), isNull);
+    });
+  });
+
+  group('3D options', () {
+    test('defaults send nothing new, so the runtime keeps its own', () {
+      final config = const SeatLayerPickerOptions().toBridgeConfig();
+      expect(config.containsKey('enable3DCrowd'), isFalse);
+      expect(config.containsKey('touchNavigation3D'), isFalse);
+    });
+
+    test(
+        'the crowd opt-out and the touch mode travel as the runtime reads them',
+        () {
+      final config = const SeatLayerPickerOptions(
+        enable3DCrowd: false,
+        touchNavigation3D: SeatLayer3DTouchNavigation.classic,
+      ).toBridgeConfig();
+      expect(config['enable3DCrowd'], isFalse);
+      expect(config['touchNavigation3D'], 'classic');
+      expect(
+        const SeatLayerPickerOptions(
+          touchNavigation3D: SeatLayer3DTouchNavigation.map,
+        ).toBridgeConfig()['touchNavigation3D'],
+        'map',
+      );
+    });
   });
 }
 

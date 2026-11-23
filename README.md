@@ -76,7 +76,8 @@ nest it in a gesture-driven `ListView` or `SingleChildScrollView`.
 `SeatLayerPickerPage(configuration:, onCheckout:)` is the same widget as a route
 you push; `showSeatLayerPicker(context, configuration:, presentation:)` is it as
 a modal returning the handoff, or `null` if the buyer closes it. `adaptive` is
-edge-to-edge on a phone and a constrained dialog at 700 logical pixels or wider;
+edge-to-edge on a phone, however it is held, and a constrained dialog on a
+tablet (shortest side 600 or more) at 700 logical pixels or wider;
 `.fullScreen` / `.dialog` force one. Both intercept close and system back and
 release a picker-owned hold before the route leaves. A hold already handed to
 you is never released.

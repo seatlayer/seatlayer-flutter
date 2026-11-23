@@ -84,14 +84,28 @@ the seat-view caption — each floats over imagery that can be any colour.
 
 ### 2.1 Two compositions, keyed off the container
 
-Measure the **picker's own container width**, never the device or window:
+Measure the **picker's own container width**, and take the wide composition
+only on a tablet:
 
 | Composition | Rule |
 | --- | --- |
-| compact (phone) | container width below `size.phoneBreakpoint` |
-| wide | container width at or above `size.wideBreakpoint` |
+| compact (phone) | container width below `size.phoneBreakpoint`, or any phone |
+| wide | container width at or above `size.wideBreakpoint`, on a device whose shortest side is `size.tabletShortestSide` or more |
 
-Between the two the compact composition holds. Everything in §3 describes the
+Between the two the compact composition holds.
+
+**A phone is a phone however it is held.** Turned sideways a phone is 844 to
+932 wide but only 390 to 430 tall. That is past both breakpoints, but the side
+panel is built for a tablet's height: on a phone its column overflowed. So the
+device's shortest side decides, never its width alone. The same rule holds for
+`showSeatLayerPicker`'s adaptive presentation: the dialog is for a tablet 700
+or more wide, and a phone held either way opens full screen.
+
+**The sides are the picker's own to keep clear.** Held sideways, a phone's
+camera cutout or curved edge is a side inset (52 points on a Pixel 7). The
+picker keeps every part of itself inside the side insets, on its own ground,
+whether or not the host wraps it in a SafeArea; the top and bottom stay with
+the header and the cart, as before. Everything in §3 describes the
 compact composition unless a row says otherwise; the wide composition moves the
 cart into a side pane and the Map/3D control into the corner-control stack, and
 otherwise reuses the same components.
@@ -630,6 +644,18 @@ broken-map reading, so it goes inert once `map.rung` is `seats` or
 altogether pulled the ♿ disc down under the thumb already reaching for it.
 Reserve the slot; do not reflow the column.
 
+**On a short map the column flows; it never climbs over the chrome above it.**
+The column's ceiling is the foot of whatever stands on the map's top line on
+its side — the Map | 3D control, or the floor strip across the map's full
+width — plus `size.mapAnchorGap`. The test badge stands on the other side and
+does not count. A column that fits under the ceiling is drawn exactly as
+above. On a map too short for it, as on a phone held sideways, the discs that
+would climb past the ceiling flow into a second column on the start side, at
+full size and in the same order from the foot, so the whole-venue disc keeps
+the corner and the retired `+` keeps its slot. A map shorter than one disc
+(`size.mapControlSize`), as under an open cart sheet on a small phone at a
+large text size, draws no column at all rather than a sliver of one.
+
 **A retired or disabled disc looks retired, and its ground never changes.**
 These controls dim in place rather than disappearing, which only works as an
 answer if the buyer can see that it is one. The glyph steps back to
@@ -672,7 +698,7 @@ map moves.
 **The wide composition's column** stands at the map's bottom end and grows
 upward. Top to bottom: the way back to the venue
 while a section is framed, the Map | 3D control, the 3D Rotate / Move pair while
-the scene is up, the same ♿ disc, then `+` and `−`. The way back joins the top
+the scene is up under the older gestures (§3.14), the same ♿ disc, then `+` and `−`. The way back joins the top
 and leaves again, so it never moves a control below it. The standalone
 colourblind toggle is **off by default on both widths** — the palette is a
 switch in the accessibility sheet — and `showColorblindControl: true` adds it
@@ -1089,7 +1115,9 @@ view.
 **Accessibility.** A group named for floors; each chip a toggle with a pressed
 state.
 
-**Snapshot.** the runtime's floor list and the active floor.
+**Snapshot.** the runtime's floor list and the active floor; on a chart with
+two or more levels, each `selection.seats[]` entry carries `floorId` and, when
+the level is named, `levelName` (runtime 1.0.0+).
 **Command** `picker.setFloor`.
 
 ### 3.8 Seat card
@@ -1192,9 +1220,17 @@ The card has **one home**. It is the bottom sheet the buyer already expects,
 `restInset` above the foot of whatever the picker's own chrome has left of the
 map, on every tap, for every seat — nothing about the tapped seat is read when
 it is placed. `topInset` and `bottomInset` are the bands that chrome stands on,
-so the sheet never slides under the dock or behind the floor rail; a card
-taller than the band it lives in keeps its top edge rather than climbing past
-`topInset`.
+so the sheet never slides under the dock or behind the floor rail. A press
+reaches only what lies inside the map, so a card that hung past its foot, as
+on a phone held sideways (145 to 170 points of map), was drawn where Add seat
+could not be pressed. A card that fits is unchanged. A card taller than the
+room between `topInset` and its resting place keeps that resting place and
+**rises over the chrome on the map's top line**, up to
+`size.confirmCardTopInset` under the map's own top edge. That chrome is idle
+while a card asks, and its buttons keep their size. Only a card taller than the
+whole map is **drawn scaled down** to fit between that edge and `restInset`
+above the foot. Held sideways at text 1.3, the card's buttons stay about 34
+points, where scaling under the top line's chrome drew them at 21.
 
 Keeping the seat and its card together is then the **map's** job, and it is
 done the way the web sheet does it — by a **pan**, never a zoom:
@@ -2262,6 +2298,15 @@ same moment once through `onBooked(handoff)`. Port note: RN / iOS / Android
 must gate their success screen the same way; showing it on hand-off was the
 bug a pilot host hit when a buyer backed out of checkout without paying.
 
+A host whose server has booked says so with `markBooked({holdId?})`
+(`picker.markBooked`, capability `hold-mark-booked-v1`). The runtime paints the
+bought seats booked, stops the clock, never releases that hold, and sends the
+snapshot without it, so the rule above reaches the same "booked" at once
+instead of on the next map read. Without `holdId` it means the hand-off hold
+only. It resolves true for `booked` and `already_booked`, false (nothing
+changed) for `no_hold`, `different_hold`, or a runtime without the capability,
+where nothing is sent. Allowed while read-only.
+
 Every state below is a **designed state**, not a set of disabled controls.
 
 #### 3.13.1 Loading
@@ -2272,6 +2317,10 @@ not a spinner: three concentric seating shells around a stage, in the accent at
 low opacity, breathing slowly under a diagonal sweep, with a thin indeterminate
 progress strip at the top of the map. The sentence
 `strings.loading` is announced but not drawn.
+
+Where the map area is shorter than the silhouette and its line, as on a phone
+held sideways (145 to 170 points of map), the two scale down together to fit;
+they are never cut.
 
 Reveal sequence, once the runtime has framed the map: the loading surface fades
 out over `motion.duration.exit`-scale time, a sweep passes over the shells for
@@ -2615,6 +2664,14 @@ are dimmed and say they are disabled to assistive technology. Pressing the unsel
 one-finger gesture; the drag hints `strings.rotateVenue` /
 `strings.moveVenue` are each half's accessible hint. An icon that flipped
 between two drawings never said which gesture a drag would make.
+
+**Only under the older gestures.** The pair is drawn only when the host boots
+the scene with `touchNavigation3D: 'classic'`. The runtime's default touch
+gestures (`'map'`, runtime 1.0.0) move the venue under a finger, turn it with
+a two-finger twist and tilt it with a two-finger drag, and never ask the drag
+mode what a finger does, so a Rotate / Move choice would change nothing. The
+pair is not drawn there, on the phone or on wide, as the web picker leaves it
+out on touch. Init config `enable3DCrowd: false` turns the standing crowd off.
 
 **Where the words do not fit, glyphs.** The pair is laid out in the room the
 scene's top row leaves it: the scene's width less `size.mapAnchorInset` at both
@@ -2979,7 +3036,8 @@ from the wrong one.
 | `hold-ownership-v1`, `hold-selection-v1` | who owns a hold, and holding a named selection |
 | `checkout-handoff-v1`, `checkout-handoff-reject-v1` | the hold crossing to the host, and giving it back |
 | `cart-line-remove-v1` | removing a cart line the selection cannot name |
-| `host-pricing-v1` | the host's own category and tier prices (`pricing.categories`) on the rail, the seat card, the cart and the handoff, sent in `init.config.pricing` and changed live with `picker.setPricing`; a category the host leaves out keeps the chart's price, and an older runtime keeps the chart's prices for all |
+| `host-pricing-v1` | the host's own category and tier prices (`pricing.categories`) and, from runtime 1.0.0, single-seat and table prices by label (`pricing.objects`: a number, or `{ tiers }`) on the rail, the seat card, the cart and the handoff, sent in `init.config.pricing` and changed live with `picker.setPricing`; a category the host leaves out keeps the chart's price, a seat listed in `objects` wins over its category, and an older runtime keeps the chart's prices for all |
+| `hold-mark-booked-v1` | `picker.markBooked { holdId? }`: the host's server booked the hold; the runtime settles it and the booked state follows (§3.13) |
 
 A capability the runtime does not advertise is a feature that is **not offered**,
 never a feature that fails.

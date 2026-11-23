@@ -315,7 +315,7 @@ substitutes an emoji or a platform icon. An unknown key draws nothing.
 - **Wide column**, top to bottom: the way back to the venue
   (`SeatLayerPickerOverviewButton`, only while a section is framed, so it
   joins the top and moves nothing below it), the Map | 3D control, the 3D
-  Rotate / Move pair while the scene is up, the ♿ control, `+`, `−`. The
+  Rotate / Move pair while the scene is up under `'classic'` gestures, the ♿ control, `+`, `−`. The
   standalone colourblind toggle (`SeatLayerPickerColorblindButton`) is off by
   default on both widths — the palette is a switch in the display options —
   and a host's `showColorblindControl: true` puts it last.
@@ -689,7 +689,8 @@ sheet merges `continueButtonStyle` over it) · **Instance override** `style:`
   `size.immersiveGlassBlur`; captions use the deeper caption glass. Every piece
   is a pill. Top-left `‹ Back to venue` (`size.immersiveBackPillHeight`), drawn
   only while the buyer is sitting in an exact seat. Top-right the Rotate / Move
-  pair, in the room the back pill leaves it; where its words do not fit at the
+  pair, only under `touchNavigation3D: 'classic'` (the default map gestures
+  never read it), in the room the back pill leaves it; where its words do not fit at the
   buyer's text size it draws two glyphs at `size.immersiveModeIconSize`, each
   still named and tooltipped with its words. Bottom: a caption chip
   naming the seat, then `‹` previous seat, `Open venue 360°`, `›` next seat, and

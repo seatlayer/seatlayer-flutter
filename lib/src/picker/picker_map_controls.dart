@@ -85,6 +85,7 @@ class SeatLayerPickerMapControls extends StatelessWidget {
     this.compact = false,
     this.edgeInset = SeatLayerSizeTokens.mapAnchorInset,
     this.bottomInset = 0,
+    this.topInset = 0,
     this.includeViewModeControl = true,
     this.accessibilityControl,
   });
@@ -97,6 +98,16 @@ class SeatLayerPickerMapControls extends StatelessWidget {
 
   /// Extra space to leave at the bottom, so controls ride above the dock bar.
   final double bottomInset;
+
+  /// The highest the phone's control column may reach: under whatever
+  /// stands on the map's top line on its side, with the gap it keeps.
+  ///
+  /// The column never climbs past it: on a map too short for the column, as
+  /// on a phone held sideways, the column flows into a second one beside it.
+  /// A host that draws the Map/3D control or a band of its own across the
+  /// map's top passes where the column must stop. Zero keeps it inside the
+  /// map's own edge.
+  final double topInset;
 
   /// Whether the Map/3D control belongs to this stack.
   ///
@@ -258,6 +269,39 @@ class _CornerControls extends StatelessWidget {
       if (onMap && chrome.colorblindControlFor(phone: true))
         const SeatLayerPickerColorblindButton(),
     ];
+    // The column's ceiling: under whatever stands on the map's top line on
+    // its side, one anchor gap below it, and never past the map's own edge.
+    var ceiling = owner.topInset > inset ? owner.topInset : inset;
+    final under3D = inset +
+        SeatLayerPickerViewModeControl.height +
+        SeatLayerSizeTokens.mapAnchorGap;
+    if (has3D && under3D > ceiling) ceiling = under3D;
+    return LayoutBuilder(
+      builder: (context, constraints) => _cornerStack(
+        has3D: has3D,
+        onMap: onMap,
+        inset: inset,
+        bottom: bottom,
+        room: constraints.maxHeight - bottom - ceiling,
+        zoomColumn: zoomColumn,
+        bottomLeftColumn: bottomLeftColumn,
+        showOverview: onMap &&
+            chrome.overviewControlFor(phone: true) &&
+            state.snapshot?.map.focusedSection != null,
+      ),
+    );
+  }
+
+  Widget _cornerStack({
+    required bool has3D,
+    required bool onMap,
+    required double inset,
+    required double bottom,
+    required double room,
+    required List<Widget> zoomColumn,
+    required List<Widget> bottomLeftColumn,
+    required bool showOverview,
+  }) {
     return Stack(
       children: <Widget>[
         if (has3D)
@@ -280,23 +324,23 @@ class _CornerControls extends StatelessWidget {
               ),
             ),
           ),
-        if (zoomColumn.isNotEmpty)
+        // A map too short for even one disc, as under an open cart sheet on a
+        // small phone at a large text size, draws none rather than a sliver.
+        if (zoomColumn.isNotEmpty && room >= SeatLayerSizeTokens.mapControlSize)
           PositionedDirectional(
             end: inset,
             bottom: bottom,
             child: SeatLayerMapChromeRegion(
-              child: _AnchorColumn(
+              child: _FlowingColumn(
+                room: room,
                 gap: SeatLayerSizeTokens.zoomColumnGap,
-                crossAxisAlignment: CrossAxisAlignment.end,
                 children: zoomColumn,
               ),
             ),
           ),
         // The back-to-overview control is a different question from the zoom
         // ladder: it only has an answer while a section is actually framed.
-        if (onMap &&
-            chrome.overviewControlFor(phone: true) &&
-            state.snapshot?.map.focusedSection != null)
+        if (showOverview)
           PositionedDirectional(
             start: inset,
             top: inset,
@@ -305,6 +349,44 @@ class _CornerControls extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+/// The phone's control column, anchored at its foot in the map's end corner.
+///
+/// Where it fits under [room] it is one column, exactly as [_AnchorColumn]
+/// draws it. On a shorter map the discs that would climb past [room] flow
+/// into a second column on its start side, at full size and in the same
+/// order from the foot, so none is drawn over the chrome above it.
+class _FlowingColumn extends StatelessWidget {
+  const _FlowingColumn({
+    required this.room,
+    required this.gap,
+    required this.children,
+  });
+
+  final double room;
+  final double gap;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    // Runs go from the end corner towards the start, so the Wrap reads the
+    // other way round from the text around it.
+    final towardsStart = Directionality.of(context) == TextDirection.ltr
+        ? TextDirection.rtl
+        : TextDirection.ltr;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: room),
+      child: Wrap(
+        direction: Axis.vertical,
+        verticalDirection: VerticalDirection.up,
+        textDirection: towardsStart,
+        spacing: gap,
+        runSpacing: gap,
+        children: children.reversed.toList(growable: false),
+      ),
     );
   }
 }
@@ -623,6 +705,12 @@ class SeatLayerPickerViewModeButton extends StatelessWidget {
 ///
 /// Pinch-to-zoom and two-finger movement remain available in both modes; this
 /// explicit control makes the primary one-finger gesture discoverable.
+///
+/// Drawn only under the older touch gestures,
+/// [SeatLayer3DTouchNavigation.classic]. Under the runtime's default map
+/// gestures a finger moves the venue whatever this says, and a two-finger
+/// twist turns it, so the choice would change nothing and is not offered, as
+/// on the web.
 class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
   /// Creates the 3D navigation-mode toggle.
   const SeatLayerPicker3DNavigationModeButton({super.key});
@@ -632,6 +720,10 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final map = controller.state.snapshot?.map;
     if (map?.isVenue3D != true) return const SizedBox.shrink();
+    if (SeatLayerPickerScope.optionsOf(context).touchNavigation3D !=
+        SeatLayer3DTouchNavigation.classic) {
+      return const SizedBox.shrink();
+    }
     final bundle = controller.mapController.bundleInfo;
     if (bundle?.supportsCapability('venue-3d-controls-v1') != true ||
         bundle?.supportsCommand('picker.setVenue3DNavigationMode') != true) {

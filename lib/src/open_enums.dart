@@ -331,6 +331,32 @@ class SeatLayer3DNavigationMode {
   int get hashCode => raw.hashCode;
 }
 
+/// How fingers move the real venue-3D surface.
+class SeatLayer3DTouchNavigation {
+  const SeatLayer3DTouchNavigation(this.raw);
+  final String raw;
+
+  /// The runtime's default: a finger moves the venue the way it moves the 2D
+  /// map, a pinch zooms, a two-finger twist turns and a two-finger drag tilts.
+  static const map = SeatLayer3DTouchNavigation('map');
+
+  /// The older gestures: one finger turns at the overview and moves once
+  /// zoomed in.
+  static const classic = SeatLayer3DTouchNavigation('classic');
+
+  factory SeatLayer3DTouchNavigation.fromRaw(String raw) => switch (raw) {
+        'map' => map,
+        'classic' => classic,
+        _ => SeatLayer3DTouchNavigation(raw),
+      };
+
+  @override
+  bool operator ==(Object other) =>
+      other is SeatLayer3DTouchNavigation && other.raw == raw;
+  @override
+  int get hashCode => raw.hashCode;
+}
+
 /// Decode an optional open-enum string, tolerating null and non-strings.
 EventMode? eventModeOrNull(Object? v) =>
     v is String ? EventMode.fromRaw(v) : null;

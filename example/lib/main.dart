@@ -117,8 +117,10 @@ class _LivePickerDemoState extends State<LivePickerDemo> {
     await showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
+      // Scrolls on a phone held sideways, where the sheet is shorter than
+      // its words.
       builder: (context) => SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(24, 4, 24, 24),
           child: Column(
             mainAxisSize: MainAxisSize.min,

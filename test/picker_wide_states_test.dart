@@ -6,6 +6,7 @@ import 'dart:ui' show SemanticsRole;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/open_enums.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_accessibility_popover.dart';
@@ -489,6 +490,10 @@ void main() {
                 textScaler: TextScaler.linear(textScale),
               ),
             ),
+          ),
+          // The pair is drawn only under the older touch gestures.
+          options: const SeatLayerPickerOptions(
+            touchNavigation3D: SeatLayer3DTouchNavigation.classic,
           ),
         ),
       );

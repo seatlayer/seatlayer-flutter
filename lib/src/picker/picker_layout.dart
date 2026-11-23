@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'picker_tokens.g.dart';
 
@@ -431,3 +431,14 @@ class SeatLayerPickerLayout {
         legendChipFontSize,
       ]);
 }
+
+/// Whether the device is a tablet: its shortest side is
+/// [SeatLayerSizeTokens.tabletShortestSide] or more.
+///
+/// A phone is a phone however it is held. Turned sideways it is wide enough
+/// for the wide composition and the dialog, but only 390 to 430 tall, and
+/// both are built for a tablet's height. So the device's shortest side
+/// decides, never its width alone.
+bool seatLayerOnTablet(BuildContext context) =>
+    MediaQuery.sizeOf(context).shortestSide >=
+    SeatLayerSizeTokens.tabletShortestSide;

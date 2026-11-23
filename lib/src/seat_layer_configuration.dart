@@ -7,7 +7,7 @@ import 'payloads.dart';
 const String seatLayerSdkVersion = '0.12.0';
 
 /// The SeatLayer renderer version this SDK release is pinned to.
-const String seatLayerHostedWebVersion = '0.101.0';
+const String seatLayerHostedWebVersion = '1.0.0';
 
 /// Renderer version retained only for the example app's offline fixture.
 ///
@@ -56,6 +56,7 @@ class SeatLayerConfiguration {
     this.selectableObjects,
     this.numberOfPlacesToSelect,
     this.selectionValidators,
+    this.telemetry,
     this.commandTimeout = BridgeClient.defaultTimeout,
     this.handshakeTimeout = const Duration(seconds: 30),
     this.hostInfo = const {},
@@ -137,6 +138,13 @@ class SeatLayerConfiguration {
   final int? numberOfPlacesToSelect;
   final List<SelectionValidator>? selectionValidators;
 
+  /// False: the map page sends SeatLayer no load or error reports. Null or
+  /// true keeps them on, the runtime's default.
+  ///
+  /// The page still reports each chart load to this SDK, so
+  /// `SeatLayerPickerCallbacks.onChartLoad` fires either way.
+  final bool? telemetry;
+
   /// Native-side deadline for a single command before it fails `sl_timeout`.
   final Duration commandTimeout;
 
@@ -176,6 +184,7 @@ class SeatLayerConfiguration {
     if (colorblindSafe != null) config['colorblindSafe'] = colorblindSafe;
     if (initialView != null) config['initialView'] = initialView!.raw;
     if (messages != null) config['messages'] = messages;
+    if (telemetry != null) config['telemetry'] = telemetry;
     if (buyerAccessToken != null) {
       config['buyerAccessToken'] = buyerAccessToken!.toJson();
     }
@@ -232,6 +241,7 @@ class SeatLayerConfiguration {
       _deepEquals(selectedObjects, other.selectedObjects) &&
       _deepEquals(selectableObjects, other.selectableObjects) &&
       numberOfPlacesToSelect == other.numberOfPlacesToSelect &&
+      telemetry == other.telemetry &&
       _deepEquals(
         selectionValidators
             ?.map((validator) => validator.toJson())

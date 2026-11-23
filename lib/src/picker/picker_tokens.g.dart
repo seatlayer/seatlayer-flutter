@@ -155,6 +155,9 @@ abstract final class SeatLayerSizeTokens {
   /// `840`
   static const double wideBreakpoint = 840;
 
+  /// `600`
+  static const double tabletShortestSide = 600;
+
   /// `360`
   static const double widePanelWidth = 360;
 

@@ -22,6 +22,7 @@ import 'picker_blocked_regions.dart';
 import 'picker_cart_sheet.dart';
 import 'picker_confirm_card.dart';
 import 'picker_header.dart';
+import 'picker_layout.dart';
 import 'picker_legend.dart';
 import 'picker_map_controls.dart';
 import 'picker_venue_3d.dart';
@@ -222,7 +223,8 @@ class _SeatLayerPickerAdaptiveLayoutState
         final requested = SeatLayerPickerScope.optionsOf(context).layout;
         final wide = requested == SeatLayerPickerLayoutMode.wide ||
             (requested == SeatLayerPickerLayoutMode.adaptive &&
-                constraints.maxWidth >= 840);
+                constraints.maxWidth >= SeatLayerSizeTokens.wideBreakpoint &&
+                seatLayerOnTablet(context));
         final options = SeatLayerPickerScope.optionsOf(context);
         final chrome = options.chrome;
         final venue3DUp =
@@ -386,6 +388,13 @@ class _SeatLayerPickerAdaptiveLayoutState
                         bottomInset: !wide && dockUp
                             ? SeatLayerDockBar.heightFor(context)
                             : 0,
+                        // Under the Map/3D control, or the floor strip below.
+                        topInset: floorStripUp
+                            ? _floorStripTop(
+                                    viewModeControl: viewModeControlUp) +
+                                floorStripHeight +
+                                _badgeGap
+                            : immersiveTopInset,
                         // On a phone the top rail below owns the Map/3D control.
                         includeViewModeControl: wide,
                         accessibilityControl: accessibility,
@@ -1086,7 +1095,16 @@ class _SeatLayerPickerAdaptiveLayoutState
       // One function themes every native surface, this composition and any
       // route it pushes alike; see seatLayerPickerMaterialTheme.
       data: seatLayerPickerMaterialTheme(context, resolved),
-      child: ColoredBox(color: resolved.background, child: body),
+      // The sides are the picker's own to keep clear. Held sideways, a phone's
+      // camera cutout or curved edge is a side inset, and a host that mounts
+      // the picker bare, as the example does, gives it no SafeArea: only the
+      // header stepped clear, and the prices, the map's chrome and the cart
+      // stood under the cutout. Inside SeatLayerPickerPage, or held upright,
+      // there is no side inset left, and this changes nothing.
+      child: ColoredBox(
+        color: resolved.background,
+        child: SafeArea(top: false, bottom: false, child: body),
+      ),
     );
     // The rung ladder. Android predictive back and the iOS edge swipe both
     // arrive here, so one gesture walks seat card → section → overview →
