@@ -7,16 +7,22 @@ customization, and the full seat-map API.
 
 ## Run the picker
 
-The default screen is the live picker, which is the product. It needs a test
-event key; pass no key and the app says so rather than quietly showing
-something else.
+The app opens on a home screen with the three pickers: **Event**, **Season**
+and **Run**. Each opens when its key is passed; without one, its button names
+the define to pass rather than quietly showing something else. Pass all three
+to try every picker from one build.
 
 ```bash
 flutter pub get
 flutter run \
   --dart-define=SEATLAYER_EVENT=ev_your_test_event \
-  --dart-define=SEATLAYER_PUBLIC_KEY=pk_test_your_public_key
+  --dart-define=SEATLAYER_PUBLIC_KEY=pk_test_your_public_key \
+  --dart-define=SEATLAYER_SEASON=sea_your_test_season \
+  --dart-define=SEATLAYER_RUN=pg_your_test_run
 ```
+
+The event picker's ✕ goes back to the home screen; the Season and Run pages
+open their picker straight away and keep an Open button and a back arrow.
 
 Optional defines:
 
