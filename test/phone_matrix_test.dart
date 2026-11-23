@@ -69,31 +69,43 @@ void main() {
 
   group('sideways', () {
     for (final phone in sidewaysPhones) {
-      for (final presentation in PhonePresentation.values) {
-        for (final state in PhoneState.values) {
-          testWidgets('$phone, ${presentation.name}, ${state.name}',
-              // Held sideways with the cart open, the sheet leaves about 30
-              // points of map and cuts the Map/3D switch and the fit button.
-              // No approved board covers this state yet; it waits for one.
-              skip: state == PhoneState.cartOpen, (tester) async {
-            final semantics = tester.ensureSemantics();
-            final strings = await pumpPhone(
-              tester,
-              phone,
-              state,
-              presentation: presentation,
-            );
-            // A phone is a phone however it is held: full screen, with the
-            // phone layout, never the tablet dialog or the wide panel.
-            expect(find.byType(Dialog), findsNothing);
-            expect(find.byType(SeatLayerWidePanelHeading), findsNothing);
-            final layout = tester.getRect(
-              find.byType(SeatLayerPickerAdaptiveLayout),
-            );
-            expect(layout.width, greaterThanOrEqualTo(phone.safe.width - .5));
-            expectPhoneLayout(tester, phone, strings);
-            semantics.dispose();
-          });
+      for (final scale in <double>[1, 1.3]) {
+        for (final presentation in PhonePresentation.values) {
+          for (final state in PhoneState.values) {
+            testWidgets(
+                '$phone, text ${scale.toStringAsFixed(1)}, '
+                '${presentation.name}, ${state.name}',
+                // Held sideways with the cart open, the sheet leaves about 30
+                // points of map and cuts the Map/3D switch and the fit button.
+                // No approved board covers this state yet; it waits for one.
+                //
+                // Held sideways at text 1.3, the seat card gets 69 to 78
+                // points of map and fits only drawn at about 0.4 of its size,
+                // where its buttons are 21 points on the 915 phone. Clamping
+                // the text does not help; a fix changes where the card may
+                // stand, which waits for a decision.
+                skip: state == PhoneState.cartOpen ||
+                    (state == PhoneState.card && scale > 1), (tester) async {
+              final semantics = tester.ensureSemantics();
+              final strings = await pumpPhone(
+                tester,
+                phone,
+                state,
+                presentation: presentation,
+                textScale: scale,
+              );
+              // A phone is a phone however it is held: full screen, with the
+              // phone layout, never the tablet dialog or the wide panel.
+              expect(find.byType(Dialog), findsNothing);
+              expect(find.byType(SeatLayerWidePanelHeading), findsNothing);
+              final layout = tester.getRect(
+                find.byType(SeatLayerPickerAdaptiveLayout),
+              );
+              expect(layout.width, greaterThanOrEqualTo(phone.safe.width - .5));
+              expectPhoneLayout(tester, phone, strings);
+              semantics.dispose();
+            });
+          }
         }
       }
     }
