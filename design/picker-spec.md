@@ -2774,7 +2774,7 @@ A run (a few performances sold to one buyer as one hold) is drawn by the pinned
 `group.html` (contract `seatlayer-group-surface`, capabilities
 `group-surface-v1` and `group-app-shell-v1`), booted with `header: false`,
 `appBar: true` and `checkout: handoff`: the map, the seat card and the cart are
-the page's. Board FR01 (approved 23 Nov 2026): a page that says
+the page's. A page that says
 `group-app-shell-v2` honours `appBar` and hides its own name row, steps, hint
 line and key; the seat card is a bottom sheet on a phone. A 1.0.0 page ignores
 `appBar` and shows them.

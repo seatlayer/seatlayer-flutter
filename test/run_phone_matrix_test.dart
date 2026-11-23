@@ -39,7 +39,7 @@ Future<SeatLayerPickerStrings> _pumpRun(
   Locale locale = const Locale('en'),
   bool golden = false,
 }) async {
-  // The page FR01 pairs with: it honours `appBar`.
+  // The page honours `appBar`.
   final page = RunPage(useFakeWebViewPlatform(), hello: runHelloAppBar);
   putOnPhone(tester, phone);
   final strings = SeatLayerPickerStrings.forLocale(locale);

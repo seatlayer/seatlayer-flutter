@@ -15,7 +15,7 @@ const runHello = <String, Object?>{
   'commands': <String>[],
 };
 
-/// A page that honours `appBar` (FR01): it fits the web view and runs its
+/// A page that honours `appBar`: it fits the web view and runs its
 /// cart bar under the home indicator.
 final runHelloAppBar = <String, Object?>{
   ...runHello,

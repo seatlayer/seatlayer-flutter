@@ -25,7 +25,7 @@ view from each seat (3D for venues up to 60,000 seats; the 2D map benchmarked at
 [Season tickets](https://seatlayer.io/season-tickets/) · [Pricing](https://seatlayer.io/pricing/) ·
 [Live demo](https://seatlayer.io/demo/)
 
-Season tickets are in the web and server SDKs today, not in this SDK.
+Season tickets and runs open with `showSeatLayerSeasonPicker` and `showSeatLayerRunPicker`.
 
 ## Try it
 
