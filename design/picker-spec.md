@@ -84,14 +84,22 @@ the seat-view caption — each floats over imagery that can be any colour.
 
 ### 2.1 Two compositions, keyed off the container
 
-Measure the **picker's own container width**, never the device or window:
+Measure the **picker's own container width**, and take the wide composition
+only on a tablet:
 
 | Composition | Rule |
 | --- | --- |
-| compact (phone) | container width below `size.phoneBreakpoint` |
-| wide | container width at or above `size.wideBreakpoint` |
+| compact (phone) | container width below `size.phoneBreakpoint`, or any phone |
+| wide | container width at or above `size.wideBreakpoint`, on a device whose shortest side is `size.tabletShortestSide` or more |
 
-Between the two the compact composition holds. Everything in §3 describes the
+Between the two the compact composition holds.
+
+**A phone is a phone however it is held.** Turned sideways a phone is 844 to
+932 wide but only 390 to 430 tall. That is past both breakpoints, but the side
+panel is built for a tablet's height: on a phone its column overflowed. So the
+device's shortest side decides, never its width alone. The same rule holds for
+`showSeatLayerPicker`'s adaptive presentation: the dialog is for a tablet 700
+or more wide, and a phone held either way opens full screen. Everything in §3 describes the
 compact composition unless a row says otherwise; the wide composition moves the
 cart into a side pane and the Map/3D control into the corner-control stack, and
 otherwise reuses the same components.

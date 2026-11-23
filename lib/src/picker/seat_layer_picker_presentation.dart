@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../seat_layer_configuration.dart';
 import 'picker_builders.dart';
+import 'picker_layout.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
 import 'picker_system_overlay.dart';
@@ -247,7 +248,7 @@ Future<SeatLayerCheckoutHandoff?> showSeatLayerPicker(
   RouteSettings? routeSettings,
 }) {
   final resolved = presentation == SeatLayerPickerPresentation.adaptive
-      ? (MediaQuery.sizeOf(context).width >= 700
+      ? (MediaQuery.sizeOf(context).width >= 700 && seatLayerOnTablet(context)
           ? SeatLayerPickerPresentation.dialog
           : SeatLayerPickerPresentation.fullScreen)
       : presentation;

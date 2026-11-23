@@ -22,6 +22,7 @@ import 'picker_blocked_regions.dart';
 import 'picker_cart_sheet.dart';
 import 'picker_confirm_card.dart';
 import 'picker_header.dart';
+import 'picker_layout.dart';
 import 'picker_legend.dart';
 import 'picker_map_controls.dart';
 import 'picker_venue_3d.dart';
@@ -222,7 +223,8 @@ class _SeatLayerPickerAdaptiveLayoutState
         final requested = SeatLayerPickerScope.optionsOf(context).layout;
         final wide = requested == SeatLayerPickerLayoutMode.wide ||
             (requested == SeatLayerPickerLayoutMode.adaptive &&
-                constraints.maxWidth >= 840);
+                constraints.maxWidth >= SeatLayerSizeTokens.wideBreakpoint &&
+                seatLayerOnTablet(context));
         final options = SeatLayerPickerScope.optionsOf(context);
         final chrome = options.chrome;
         final venue3DUp =
