@@ -18,12 +18,17 @@ class LiveRunDemo extends StatefulWidget {
     required this.themeMode,
     this.apiBase,
     this.locale,
+    this.assetPath,
   });
 
   final String run;
   final SeatLayerThemeMode themeMode;
   final String? apiBase;
   final String? locale;
+
+  /// A run page to test against instead of the pinned one
+  /// (`SEATLAYER_RUNTIME_URL`).
+  final String? assetPath;
 
   @override
   State<LiveRunDemo> createState() => _LiveRunDemoState();
@@ -83,6 +88,8 @@ class _LiveRunDemoState extends State<LiveRunDemo> {
         apiBase: widget.apiBase,
         locale: widget.locale,
         hostInfo: const {'app': 'SeatLayerFlutterPickerExample/0.3-dev'},
+        assetPath: widget.assetPath ??
+            SeatLayerRunConfiguration.defaultAssetPath,
       ),
       controller: _controller,
       themeMode: widget.themeMode,

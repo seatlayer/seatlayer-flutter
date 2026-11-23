@@ -2784,10 +2784,10 @@ a page sends it, else the run name's letter. Hold pill: `group.hold` /
 `group.holdChanged` to `null` or `group.holdExpired`; a resumed hold
 (`initialOperationId`) is read once with `group.getHeldOrder` at ready.
 
-**Frame.** §3.16's route frame. A `group-app-shell-v2` page fits the web view
-and runs its cart bar under the bottom safe area, so the page reaches the bottom
-edge. Runtime 1.0.0's run page takes no insets, so the app keeps it above the
-bottom safe area, on `color.*.surface` (the cart's).
+**Frame.** §3.16's route frame. The page fits the web view (`group-app-shell-v2`),
+but the web view passes it no bottom safe area (`env(safe-area-inset-bottom)` is
+0 on iOS and Android) and the run page takes no insets yet, so the app keeps it
+above the bottom safe area, on `color.*.surface` (the cart's).
 
 **Close.** The dismiss control and system Back send `group.destroy`, once, and
 close when it answers: as on the event picker, seats not handed off are

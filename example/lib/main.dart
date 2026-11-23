@@ -64,6 +64,7 @@ class DemoApp extends StatelessWidget {
             run: _runKey,
             themeMode: _themeMode,
             apiBase: _apiBase.isEmpty ? null : _apiBase,
+            assetPath: _runtimeUrl.isEmpty ? null : _runtimeUrl,
             locale: _localeTag.isEmpty ? null : _localeTag,
           )
         : _seasonKey.isNotEmpty

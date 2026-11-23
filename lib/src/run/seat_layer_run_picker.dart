@@ -243,19 +243,15 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
                     strings: widget.strings,
                     onRetry: _retry,
                   )
-                // A page that honours `appBar` fits the web view and runs its
-                // cart bar under the home indicator. Runtime 1.0.0's page
-                // takes no insets, so the app keeps it clear of the indicator,
-                // on the cart's surface.
+                // The web view does not pass the bottom safe area to the page
+                // (env() reads 0 on iOS and Android), and the run page takes
+                // no insets yet, so the app keeps it clear of the home
+                // indicator, on the cart's surface.
                 : ColoredBox(
                     color: theme.surface,
                     child: Padding(
                       padding: EdgeInsets.only(
-                        bottom: _controller.bundleInfo?.supportsCapability(
-                                    seatLayerGroupAppShellV2) ==
-                                true
-                            ? 0
-                            : MediaQuery.paddingOf(context).bottom,
+                        bottom: MediaQuery.paddingOf(context).bottom,
                       ),
                       child: SeatLayerRunView(
                         key: ValueKey<int>(_page),

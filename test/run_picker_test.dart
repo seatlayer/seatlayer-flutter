@@ -68,7 +68,7 @@ void main() {
     expect(page.sent.where((e) => e.type == 'group.getHeldOrder'), isEmpty);
   });
 
-  testWidgets('a page that honours appBar runs to the bottom edge (FR01)',
+  testWidgets('a page that honours appBar still sits above the home indicator',
       (tester) async {
     final page = RunPage(useFakeWebViewPlatform(), hello: runHelloAppBar);
     await tester.pumpWidget(_app(SeatLayerRunPicker(
@@ -79,9 +79,10 @@ void main() {
     await page.boot(tester);
     page.ready('The Lantern Keeper');
     await _settle(tester);
+    // The web view passes no bottom inset to the page, so the app keeps it.
     expect(
       tester.getRect(find.byType(SeatLayerRunView)).bottom,
-      tester.getRect(find.byType(SeatLayerRunPicker)).bottom,
+      tester.getRect(find.byType(SeatLayerRunPicker)).bottom - 34,
     );
     // One name and one ✕: the app's.
     expect(find.text('The Lantern Keeper'), findsOneWidget);

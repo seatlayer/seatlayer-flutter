@@ -107,9 +107,15 @@ void _expectRunLayout(WidgetTester tester, Phone phone,
   // Under the status bar, on the page's ground, as on the event page.
   expect(bar.top, phone.insets.top);
   expect(page.top, moreOrLessEquals(bar.bottom));
-  // The page runs its cart bar under the home indicator (FR01), and the
-  // failure view is the app's own: both reach the bottom edge.
-  expect(page.bottom, phone.size.height);
+  // The web view passes no bottom inset to the page, so the app keeps it
+  // clear of the home indicator (the failure view is the app's own and needs
+  // no room).
+  expect(
+    page.bottom,
+    state == RunPhoneState.failed
+        ? phone.size.height
+        : phone.size.height - phone.insets.bottom,
+  );
   expect(page.left, moreOrLessEquals(phone.insets.left));
   expect(page.right, moreOrLessEquals(phone.size.width - phone.insets.right));
   expect(find.byTooltip(strings.close), findsOneWidget);
