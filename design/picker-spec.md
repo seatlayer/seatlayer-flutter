@@ -2763,6 +2763,42 @@ is `season.lifecycle`.
 id); the app's server books it, then `season.markBooked`. `season.status`
 `booked` for a hold the page made is `onBooked`.
 
+### 3.17 The run page
+
+**Name** `SeatLayerRunPicker` · **show** `showSeatLayerRunPicker` · **file**
+`lib/src/run/seat_layer_run_picker.dart`
+
+A run (a few performances sold to one buyer as one hold) is drawn by the pinned
+`group.html` (contract `seatlayer-group-surface`, capabilities
+`group-surface-v1` and `group-app-shell-v1`), booted with `header: false` and
+`checkout: handoff`: the map, the performances and the cart are the page's.
+
+**Bar.** §3.1's header, as on the Season page (§3.16), no new tokens. Name:
+`group.ready`'s `performanceGroup.name`, else the loading words
+`strings.chooseSeats` until it arrives. Brand: `group.status`'s `branding` when
+a page sends it, else the run name's letter. Hold pill: `group.hold` /
+`group.holdChanged` to `null` or `group.holdExpired`.
+
+**Frame.** §3.16's route frame. Runtime 1.0.0's run page takes no insets, so the
+app keeps it above the bottom safe area, on `color.*.surface` (the cart's).
+
+**Close.** The dismiss control and system Back send `group.destroy`, once, and
+close when it answers: as on the event picker, seats not handed off are
+released, and a hold handed off or booked is kept. There is no question to the
+buyer.
+
+**One side.** The page boots on the app's side and stays on it, the bar and
+frame included: runtime 1.0.0's run page has no command to repaint in place,
+and a reload would take the buyer's seats. The app going to the background and
+coming back is `group.lifecycle`.
+
+**Could not load.** As §3.16: the failure view (§3.13.2) under the bar, Retry
+boots a new page, the dismiss control closes at once.
+
+**Checkout.** `group.checkout` hands the hold to the app (once per operation
+id; it carries no price); the app's server prices and books it, then
+`group.markBooked`. `group.booked` is `onBooked`, once per operation.
+
 ---
 
 ## 4. Porting checklist

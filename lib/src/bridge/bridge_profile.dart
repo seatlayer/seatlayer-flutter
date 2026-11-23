@@ -84,6 +84,23 @@ class SeatLayerBridgeProfile {
         config: Map<String, Object?>.unmodifiable(config),
       );
 
+  /// The run page (`group.html`): a few performances, one buyer, the app's
+  /// own checkout. Its header is off, so the app's bar is the only one.
+  factory SeatLayerBridgeProfile.group({
+    Map<String, Object?> config = const <String, Object?>{},
+  }) =>
+      SeatLayerBridgeProfile._(
+        surface: 'group',
+        protocolRange: const ProtocolRange(min: 2, max: 2),
+        destroyCommand: 'group.destroy',
+        surfaceInit: const <String, Object?>{'kind': 'group'},
+        requiredCapabilities: const <String>[
+          'group-surface-v1',
+          'group-app-shell-v1',
+        ],
+        config: Map<String, Object?>.unmodifiable(config),
+      );
+
   final String surface;
   final ProtocolRange protocolRange;
   final List<String> requiredCapabilities;

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:seatlayer/seatlayer.dart';
 
+import 'run_demo.dart';
 import 'season_demo.dart';
 
 const _eventKey = String.fromEnvironment('SEATLAYER_EVENT');
 const _seasonKey = String.fromEnvironment('SEATLAYER_SEASON');
+const _runKey = String.fromEnvironment('SEATLAYER_RUN');
 const _publicKey = String.fromEnvironment('SEATLAYER_PUBLIC_KEY');
 const _runtimeUrl = String.fromEnvironment('SEATLAYER_RUNTIME_URL');
 const _apiBase = String.fromEnvironment('SEATLAYER_API_BASE');
@@ -57,7 +59,14 @@ class DemoApp extends StatelessWidget {
       SeatLayerThemeMode.dark => ThemeMode.dark,
       SeatLayerThemeMode.auto => ThemeMode.system,
     },
-    home: _seasonKey.isNotEmpty
+    home: _runKey.isNotEmpty
+        ? LiveRunDemo(
+            run: _runKey,
+            themeMode: _themeMode,
+            apiBase: _apiBase.isEmpty ? null : _apiBase,
+            locale: _localeTag.isEmpty ? null : _localeTag,
+          )
+        : _seasonKey.isNotEmpty
         ? LiveSeasonDemo(
             season: _seasonKey,
             themeMode: _themeMode,
@@ -81,7 +90,8 @@ class _MissingEventKey extends StatelessWidget {
         child: Text(
           'Run with --dart-define=SEATLAYER_EVENT=ev_… and '
           '--dart-define=SEATLAYER_PUBLIC_KEY=pk_test_… to open the '
-          'picker, or --dart-define=SEATLAYER_SEASON=sea_… for a Season.'
+          'picker, --dart-define=SEATLAYER_SEASON=sea_… for a Season, or '
+          '--dart-define=SEATLAYER_RUN=pg_… for a run.'
           '\n\nFor bridge work without a key, run '
           'lib/offline_fixture_demo.dart.',
           textAlign: TextAlign.center,

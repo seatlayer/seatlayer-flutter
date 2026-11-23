@@ -198,6 +198,10 @@ override** `style:`
   sends them (`season.name`, `branding`), else the loading words
   (`strings.chooseSeats`) and the seat glyph; the HoldPill counts the Season
   hold's `expiresAt`. See picker-spec §3.16.
+- **So does the run page.** The name from `group.ready`'s
+  `performanceGroup.name` (the loading words until it arrives), the brand from
+  `group.status`'s `branding` when a page sends it; the HoldPill counts the run
+  hold's `expiresAt`. See picker-spec §3.17.
 
 ## PriceLegend
 
