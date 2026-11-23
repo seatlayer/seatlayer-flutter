@@ -6,8 +6,8 @@ import 'package:meta/meta.dart';
 
 import '../json.dart';
 import '../payloads.dart';
-import '../seat_layer_configuration.dart';
 import '../seat_layer_error.dart';
+import '../seat_layer_surface_configuration.dart';
 import 'bridge_client.dart';
 import 'bridge_profile.dart';
 import 'bridge_protocol.dart';
@@ -16,13 +16,15 @@ import 'envelope.dart';
 /// What every SeatLayer page needs from the app, whatever it shows: the
 /// handshake, private buyer access and the correlated command runner.
 ///
-/// A surface controller extends this and adds its own events and commands
-/// through [handleSurfaceEvent] and [compatibilityProblem].
-abstract class SeatLayerBridgeSession {
+/// A surface controller extends this for its own configuration [C], and adds
+/// its events and commands through [handleSurfaceEvent] and
+/// [compatibilityProblem].
+abstract class SeatLayerBridgeSession<
+    C extends SeatLayerSurfaceConfiguration> {
   SeatLayerBridgeSession();
 
   BridgeClient? _client;
-  SeatLayerConfiguration? _configuration;
+  C? _configuration;
   SeatLayerBridgeProfile _profile = SeatLayerBridgeProfile.chart;
 
   ReadyInfo? _readyInfo;
@@ -90,7 +92,7 @@ abstract class SeatLayerBridgeSession {
   /// after the protocol and the profile's required capabilities agree.
   @protected
   String? compatibilityProblem(
-    SeatLayerConfiguration configuration,
+    C configuration,
     BundleInfo bundle,
   ) =>
       null;
@@ -110,7 +112,7 @@ abstract class SeatLayerBridgeSession {
   @internal
   Future<ReadyInfo> beginHandshake(
     BridgeChannel channel,
-    SeatLayerConfiguration configuration, {
+    C configuration, {
     SeatLayerBridgeProfile profile = SeatLayerBridgeProfile.chart,
   }) {
     if (_disposed) {

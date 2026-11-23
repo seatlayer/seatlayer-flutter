@@ -24,7 +24,7 @@ export 'seat_layer_runtime_host.dart' show prepareSeatLayerRuntimeReload;
 /// size and let the map own the space it occupies. The map claims a touch on
 /// press, so it — not Flutter — wins those gestures; inside the turnkey picker
 /// it resigns the presses that landed on the native chrome standing over it.
-class SeatLayerView extends SeatLayerRuntimeHost {
+class SeatLayerView extends SeatLayerRuntimeHost<SeatLayerConfiguration> {
   const SeatLayerView({
     super.key,
     required this.controller,

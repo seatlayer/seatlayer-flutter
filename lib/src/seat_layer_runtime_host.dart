@@ -11,10 +11,10 @@ import 'bridge/bridge_profile.dart';
 import 'bridge/bridge_session.dart';
 import 'bridge/envelope.dart';
 import 'payloads.dart';
-import 'seat_layer_configuration.dart';
 import 'seat_layer_error.dart';
 import 'seat_layer_map_chrome.dart';
 import 'seat_layer_prewarm.dart';
+import 'seat_layer_surface_configuration.dart';
 
 /// The JavaScript channel name the web bundle probes for
 /// (`window.SeatLayer.postMessage`). MUST be exactly this string, and is
@@ -28,14 +28,15 @@ const String _channelName = seatLayerChannelName;
 /// It loads the configured page (or adopts a prewarmed one), arms the
 /// handshake, keeps navigation on that page, and reboots the page when the
 /// session, the configuration or the profile changes.
-abstract class SeatLayerRuntimeHost extends StatefulWidget {
+abstract class SeatLayerRuntimeHost<C extends SeatLayerSurfaceConfiguration>
+    extends StatefulWidget {
   const SeatLayerRuntimeHost({super.key});
 
   /// The session the page talks to.
-  SeatLayerBridgeSession get controller;
+  SeatLayerBridgeSession<C> get controller;
 
   /// What page to load, and the `init` it is answered with.
-  SeatLayerConfiguration get configuration;
+  C get configuration;
 
   /// Called once `sys.ready` arrives.
   void Function(ReadyInfo info)? get onReady;
@@ -50,10 +51,12 @@ abstract class SeatLayerRuntimeHost extends StatefulWidget {
   SeatLayerBridgeProfile get bridgeProfile;
 
   @override
-  State<SeatLayerRuntimeHost> createState() => _SeatLayerRuntimeHostState();
+  State<SeatLayerRuntimeHost<C>> createState() =>
+      _SeatLayerRuntimeHostState<C>();
 }
 
-class _SeatLayerRuntimeHostState extends State<SeatLayerRuntimeHost> {
+class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
+    extends State<SeatLayerRuntimeHost<C>> {
   late final WebViewController _web;
   int _generation = 0;
 
@@ -208,7 +211,7 @@ class _SeatLayerRuntimeHostState extends State<SeatLayerRuntimeHost> {
   }
 
   @override
-  void didUpdateWidget(covariant SeatLayerRuntimeHost oldWidget) {
+  void didUpdateWidget(covariant SeatLayerRuntimeHost<C> oldWidget) {
     super.didUpdateWidget(oldWidget);
     final controllerChanged = oldWidget.controller != widget.controller;
     final configurationChanged =
@@ -221,9 +224,9 @@ class _SeatLayerRuntimeHostState extends State<SeatLayerRuntimeHost> {
 
     // Invalidate callbacks from the old page before closing its correlations.
     final generation = ++_generation;
-    if (oldWidget.bridgeProfile.isPicker) {
+    if (oldWidget.bridgeProfile.destroyCommand != null) {
       unawaited(
-        _destroyPickerThenBoot(
+        _destroyThenBoot(
           oldWidget.controller,
           oldWidget.bridgeProfile,
           generation,
@@ -235,7 +238,7 @@ class _SeatLayerRuntimeHostState extends State<SeatLayerRuntimeHost> {
     unawaited(_boot());
   }
 
-  Future<void> _destroyPickerThenBoot(
+  Future<void> _destroyThenBoot(
     SeatLayerBridgeSession controller,
     SeatLayerBridgeProfile profile,
     int generation,
@@ -314,11 +317,12 @@ Future<void> prepareSeatLayerRuntimeReload({
   required SeatLayerBridgeSession oldController,
   required SeatLayerBridgeProfile oldProfile,
 }) async {
-  if (!oldProfile.isPicker) return;
+  final destroy = oldProfile.destroyCommand;
+  if (destroy == null) return;
   try {
-    // Give the old picker a chance to release only picker-owned inventory and
-    // acknowledge teardown before its command correlations are closed.
-    await oldController.runBridgeCommand('picker.destroy');
+    // Give the old page a chance to release only what it owns and acknowledge
+    // teardown before its command correlations are closed.
+    await oldController.runBridgeCommand(destroy);
   } catch (_) {
     // Reload remains recoverable when an old or stalled runtime cannot ack.
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../payloads.dart';
-import '../seat_layer_configuration.dart';
+import '../seat_layer_surface_configuration.dart';
 import 'bridge_protocol.dart';
 
 /// Internal handshake profile shared by the raw chart and high-level picker.
@@ -15,6 +15,8 @@ class SeatLayerBridgeProfile {
     required this.surface,
     required this.protocolRange,
     this.requiredCapabilities = const <String>[],
+    this.destroyCommand,
+    this.surfaceInit,
     this.config = const <String, Object?>{},
     this.chrome = const <String, Object?>{},
   });
@@ -30,6 +32,12 @@ class SeatLayerBridgeProfile {
       SeatLayerBridgeProfile._(
         surface: 'picker',
         protocolRange: const ProtocolRange(min: 2, max: 2),
+        destroyCommand: 'picker.destroy',
+        surfaceInit: const <String, Object?>{
+          'kind': 'picker',
+          'stateContract': 1,
+          'chromeOwner': 'native',
+        },
         requiredCapabilities: <String>[
           'picker-session-v2',
           'picker-snapshot-v1',
@@ -61,6 +69,15 @@ class SeatLayerBridgeProfile {
   final Map<String, Object?> config;
   final Map<String, Object?> chrome;
 
+  /// The command that lets the page release what it owns before a reload
+  /// replaces it, and acknowledges. Null for the raw chart, which is detached
+  /// without one.
+  final String? destroyCommand;
+
+  /// The `surface` block of the page's `init`, or null when the page takes
+  /// none.
+  final Map<String, Object?>? surfaceInit;
+
   bool get isPicker => surface == 'picker';
 
   /// The `init` reply for [configuration], as answered to [bundle]'s `hello`.
@@ -71,7 +88,7 @@ class SeatLayerBridgeProfile {
   /// on, because [equivalentTo] does not see it and a difference it caused
   /// would not reboot the runtime.
   Map<String, Object?> initPayload(
-    SeatLayerConfiguration configuration, {
+    SeatLayerSurfaceConfiguration configuration, {
     BundleInfo? bundle,
   }) {
     final payload = configuration.initPayload(protocolRange: protocolRange);
@@ -100,11 +117,7 @@ class SeatLayerBridgeProfile {
 
     return <String, Object?>{
       ...payload,
-      'surface': const <String, Object?>{
-        'kind': 'picker',
-        'stateContract': 1,
-        'chromeOwner': 'native',
-      },
+      'surface': surfaceInit,
       'requirements': <String, Object?>{'capabilities': requiredCapabilities},
       'chrome': currentChrome,
       'config': currentConfig,

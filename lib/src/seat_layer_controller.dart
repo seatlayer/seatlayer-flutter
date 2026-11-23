@@ -18,7 +18,8 @@ import 'seat_layer_error.dart';
 /// does not merely surface on [onError]) — the iOS SDK's key fix. A
 /// [bestAvailable] conflict throws `sold_out` / `not_enough_together` from the
 /// awaited call.
-class SeatLayerController extends SeatLayerBridgeSession {
+class SeatLayerController
+    extends SeatLayerBridgeSession<SeatLayerConfiguration> {
   SeatLayerController();
 
   final _onSelectionChanged = StreamController<List<SelectedSeat>>.broadcast();
