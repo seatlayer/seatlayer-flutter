@@ -15,13 +15,17 @@ Future<void> _settle(WidgetTester tester) async {
   await tester.pump();
 }
 
-Widget _app(Widget child, {Brightness brightness = Brightness.light}) =>
+Widget _app(
+  Widget child, {
+  Brightness brightness = Brightness.light,
+  double bottom = 34,
+}) =>
     MaterialApp(
       theme: ThemeData(brightness: brightness),
       home: MediaQuery(
-        data: const MediaQueryData(
-          size: Size(390, 844),
-          padding: EdgeInsets.only(top: 47, bottom: 34),
+        data: MediaQueryData(
+          size: const Size(390, 844),
+          padding: EdgeInsets.only(top: 47, bottom: bottom),
         ),
         child: child,
       ),
@@ -84,9 +88,73 @@ void main() {
       tester.getRect(find.byType(SeatLayerRunView)).bottom,
       tester.getRect(find.byType(SeatLayerRunPicker)).bottom - 34,
     );
+    expect(page.sent.where((e) => e.type.contains('Insets')), isEmpty);
     // One name and one ✕: the app's.
     expect(find.text('The Lantern Keeper'), findsOneWidget);
     expect(find.byTooltip('Close seat selection'), findsOneWidget);
+  });
+
+  testWidgets('a page that takes insets runs its cart under the indicator',
+      (tester) async {
+    final page = RunPage(useFakeWebViewPlatform(), hello: runHelloInsets);
+    Widget picker() => SeatLayerRunPicker(
+          configuration: runConfiguration,
+          onContinue: (_) {},
+          onClose: () {},
+        );
+    await tester.pumpWidget(_app(picker()));
+    await page.boot(tester);
+    page.ready('The Lantern Keeper');
+    await _settle(tester);
+    // No band: the page pads its own cart by the inset it is sent.
+    expect(
+      tester.getRect(find.byType(SeatLayerRunView)).bottom,
+      tester.getRect(find.byType(SeatLayerRunPicker)).bottom,
+    );
+    Iterable<Object?> insets() => page.sent
+        .where((e) => e.type == 'group.setViewportInsets')
+        .map((e) => e.payload);
+    expect(insets(), <Object?>[
+      <String, Object?>{'top': 0.0, 'right': 0.0, 'bottom': 34.0, 'left': 0.0},
+    ]);
+    page.answer('group.setViewportInsets', const <String, Object?>{});
+    await _settle(tester);
+    expect(insets(), hasLength(1));
+
+    // Turned sideways: the new inset goes too.
+    await tester.pumpWidget(_app(picker(), bottom: 21));
+    await _settle(tester);
+    expect(insets(), hasLength(2));
+    expect(insets().last, <String, Object?>{
+      'top': 0.0,
+      'right': 0.0,
+      'bottom': 21.0,
+      'left': 0.0,
+    });
+  });
+
+  testWidgets('a page that refuses the inset gets the band back',
+      (tester) async {
+    final page = RunPage(useFakeWebViewPlatform(), hello: runHelloInsets);
+    await tester.pumpWidget(_app(SeatLayerRunPicker(
+      configuration: runConfiguration,
+      onContinue: (_) {},
+      onClose: () {},
+    )));
+    await page.boot(tester);
+    page.ready('The Lantern Keeper');
+    await _settle(tester);
+    page.post(
+      EnvelopeKind.err,
+      'group.setViewportInsets',
+      const <String, Object?>{'code': 'bad_payload', 'message': 'no'},
+      id: page.last('group.setViewportInsets').id,
+    );
+    await _settle(tester);
+    expect(
+      tester.getRect(find.byType(SeatLayerRunView)).bottom,
+      tester.getRect(find.byType(SeatLayerRunPicker)).bottom - 34,
+    );
   });
 
   testWidgets('a resumed hold puts its clock in the bar', (tester) async {

@@ -95,6 +95,10 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
   int _page = 0;
   bool _closing = false;
 
+  /// The bottom inset this page was last sent, and whether it refused one.
+  double? _sentBottomInset;
+  bool _insetsRefused = false;
+
   @override
   void initState() {
     super.initState();
@@ -111,6 +115,9 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
 
     _subscriptions.addAll(<StreamSubscription<Object?>>[
       _controller.onReady.listen((_) {
+        // A page that just booted knows no insets.
+        _sentBottomInset = null;
+        _insetsRefused = false;
         rebuild(null);
         // A resumed hold may never be announced: ask the page, so the bar
         // shows its clock.
@@ -185,6 +192,32 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
     }
   }
 
+  /// Whether this page keeps its own cart clear of the home indicator / gesture
+  /// bar from the inset the app sends (#15). Without it the app keeps a band
+  /// there: the web view passes no bottom inset (env() reads 0 on iOS and
+  /// Android).
+  bool get _pageTakesInsets =>
+      _controller.isReady &&
+      !_insetsRefused &&
+      (_controller.bundleInfo?.supportsCommand('group.setViewportInsets') ??
+          false);
+
+  /// Send the bottom inset after `group.ready` and when it changes (rotation).
+  void _followInset(double bottomInset) {
+    if (bottomInset == _sentBottomInset) return;
+    _sentBottomInset = bottomInset;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_controller.isReady) return;
+      if (_sentBottomInset != bottomInset) return;
+      unawaited(_controller
+          .setViewportInsets(EdgeInsets.only(bottom: bottomInset))
+          .then<void>((_) {}, onError: (Object _) {
+        // The page did not take it: the app keeps the band.
+        if (mounted) setState(() => _insetsRefused = true);
+      }));
+    });
+  }
+
   void _failed(SeatLayerError error) {
     if (mounted) setState(() => _loadError = error);
   }
@@ -209,6 +242,9 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
           : Brightness.light,
     );
     final hold = _controller.hold;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final pageTakesInsets = _pageTakesInsets;
+    if (pageTakesInsets) _followInset(bottomInset);
     final wide = MediaQuery.sizeOf(context).width >=
             SeatLayerSizeTokens.wideBreakpoint &&
         seatLayerOnTablet(context);
@@ -243,15 +279,14 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
                     strings: widget.strings,
                     onRetry: _retry,
                   )
-                // The web view does not pass the bottom safe area to the page
-                // (env() reads 0 on iOS and Android), and the run page takes
-                // no insets yet, so the app keeps it clear of the home
-                // indicator, on the cart's surface.
+                // A page that takes the inset runs its cart under the home
+                // indicator; for one that does not, the app keeps it clear,
+                // on the cart's surface.
                 : ColoredBox(
                     color: theme.surface,
                     child: Padding(
                       padding: EdgeInsets.only(
-                        bottom: MediaQuery.paddingOf(context).bottom,
+                        bottom: pageTakesInsets ? 0 : bottomInset,
                       ),
                       child: SeatLayerRunView(
                         key: ValueKey<int>(_page),

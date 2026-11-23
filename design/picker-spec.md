@@ -2786,8 +2786,13 @@ a page sends it, else the run name's letter. Hold pill: `group.hold` /
 
 **Frame.** §3.16's route frame. The page fits the web view (`group-app-shell-v2`),
 but the web view passes it no bottom safe area (`env(safe-area-inset-bottom)` is
-0 on iOS and Android) and the run page takes no insets yet, so the app keeps it
-above the bottom safe area, on `color.*.surface` (the cart's).
+0 on iOS and Android). A page that lists `group.setViewportInsets` in its
+commands runs to the bottom edge: the picker sends it the bottom safe area
+(`{top: 0, right: 0, bottom, left: 0}`) after `group.ready` and again whenever
+it changes (rotation), and the page keeps its cart clear of the home indicator
+/ gesture bar on the cart's own ground (§4.6: one surface owns the bottom
+inset). For a page without the command, or one that refuses the inset, the app
+keeps the page above the bottom safe area, on `color.*.surface` (the cart's).
 
 **Close.** The dismiss control and system Back send `group.destroy`, once, and
 close when it answers: as on the event picker, seats not handed off are
