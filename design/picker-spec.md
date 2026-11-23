@@ -329,7 +329,9 @@ lose the event name) — with a hairline of `color.*.divider` under it. Start
 (the left in a left-to-right language, the right in Arabic or Hebrew): the
 brand mark, a square of `size.headerLogoSize` at `radius.headerLogo`, filled
 with the accent and carrying either the organizer's logo image (cover-fitted) or
-the first letter of the brand or event name in `color.*.onAccent`. Centre: the
+the first letter of the brand or event name in `color.*.onAccent` (on a brand
+accent: the organizer's ink where it reads at 3:1, else white where white
+does, else `#1A1200`, the web picker's rule from runtime 1.0.1). Centre: the
 event name at `size.headerNameFontSize` w700, one line, ellipsized. End, in
 order: the hold pill, the sales-closed pill, the close ring. The row's padding
 is directional: 12 before the mark on a phone (16 / 12 / 4 / 12 start / top /

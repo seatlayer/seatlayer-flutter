@@ -609,7 +609,14 @@ Color _recessed(Color surface) =>
 /// readable and the choice is not a preference.
 const double _onAccentContrastFloor = 3.0;
 
-/// White or black, whichever a brand accent should carry.
+/// The ink a brand accent carries when white cannot be read on it.
+///
+/// A warm near-black, not pure black: it is the web picker's ink for the same
+/// accents (`#1a1200`), so a chip on the page and the app's own badge beside
+/// it agree.
+const Color _darkOnAccent = Color(0xFF1A1200);
+
+/// White or near-black, whichever a brand accent should carry.
 ///
 /// A host brands the picker by handing it one colour. Pairing that colour with
 /// a FIXED ink is how a pale brand accent ends up carrying white text: the
@@ -621,16 +628,29 @@ const double _onAccentContrastFloor = 3.0;
 /// Picking the merely-higher ratio does not agree — it hands a brand red black
 /// text, which is legible and still plainly wrong.
 ///
-/// So white wins unless it drops under [_onAccentContrastFloor], and black
-/// takes over only for the accents where black is the obvious reading anyway:
-/// a yellow, a mint, a near-white tint. The handover is safe in both
-/// directions — an accent pale enough to fail white clears 7:1 on black — so
-/// whatever comes back is above the floor for every colour a host can send.
+/// So white wins unless it drops under [_onAccentContrastFloor], and the
+/// near-black [_darkOnAccent] takes over only for the accents where dark ink is
+/// the obvious reading anyway: a yellow, a mint, a near-white tint. The
+/// handover is safe in both directions — an accent pale enough to fail white
+/// clears 6:1 on the near-black — so whatever comes back is above the floor
+/// for every colour a host can send. The web picker uses the same
+/// rule.
 Color seatLayerOnAccentFor(Color accent) {
   final onWhite = 1.05 / (accent.computeLuminance() + 0.05);
   return onWhite >= _onAccentContrastFloor
       ? const Color(0xFFFFFFFF)
-      : const Color(0xFF000000);
+      : _darkOnAccent;
+}
+
+/// The organizer's own ink for [accent], if it can be read there.
+///
+/// A chart's ink was chosen against the chart's accent; a host accent, or a
+/// chart whose ink was never checked, can leave it unreadable. Kept at
+/// [_onAccentContrastFloor] or above, as the web runtime keeps it.
+Color? _organizerInkOn(Color accent, String? accentInk) {
+  final ink = _hex(accentInk);
+  if (ink == null) return null;
+  return _contrast(ink, accent) >= _onAccentContrastFloor ? ink : null;
 }
 
 /// The contrast an accent used as ordinary-size ink has to clear.
@@ -803,12 +823,14 @@ SeatLayerResolvedPickerTheme resolveSeatLayerPalette(
   // was designed against, while a colour the host or the organizer chose has
   // no ink of its own and must be given one that can be read on it.
   final brandAccent = host((theme) => theme.accent) ?? _hex(organizer?.accent);
+  final accent = brandAccent ?? preset.accent!;
 
   return SeatLayerResolvedPickerTheme(
     brightness: side,
-    accent: brandAccent ?? preset.accent!,
+    accent: accent,
+    // The host's ink is obeyed as given; the organizer's only where it reads.
     onAccent: host((theme) => theme.onAccent) ??
-        _hex(organizer?.accentInk) ??
+        _organizerInkOn(accent, organizer?.accentInk) ??
         (brandAccent == null
             ? preset.onAccent!
             : seatLayerOnAccentFor(brandAccent)),
