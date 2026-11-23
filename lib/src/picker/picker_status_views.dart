@@ -336,21 +336,26 @@ class SeatLayerPickerLoadingView extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = theme ?? seatLayerPickerThemeOf(context);
     final words = strings ?? SeatLayerPickerScope.stringsOf(context);
+    // Scaled down, never cut, where the map is short: a phone held sideways
+    // leaves the map 145 to 170 points, under the silhouette and its line.
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          _VenueSilhouette(accent: palette.accent),
-          const SizedBox(height: 16),
-          Text(
-            words.loading,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: palette.text,
-              fontFamily: palette.fontFamily,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _VenueSilhouette(accent: palette.accent),
+            const SizedBox(height: 16),
+            Text(
+              words.loading,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: palette.text,
+                fontFamily: palette.fontFamily,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

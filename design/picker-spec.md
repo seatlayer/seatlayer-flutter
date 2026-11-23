@@ -2292,6 +2292,10 @@ low opacity, breathing slowly under a diagonal sweep, with a thin indeterminate
 progress strip at the top of the map. The sentence
 `strings.loading` is announced but not drawn.
 
+Where the map area is shorter than the silhouette and its line, as on a phone
+held sideways (145 to 170 points of map), the two scale down together to fit;
+they are never cut.
+
 Reveal sequence, once the runtime has framed the map: the loading surface fades
 out over `motion.duration.exit`-scale time, a sweep passes over the shells for
 `motion.durationOutsideBudget.shellSweep`, the rail chips stagger in, and the
