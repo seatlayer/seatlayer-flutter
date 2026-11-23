@@ -358,6 +358,16 @@ void expectPhoneLayout(
     if (paragraph.didExceedMaxLines) {
       problems.add('the main button label "$text" is cut');
     }
+    // Drawn is not enough: a press on its middle has to reach it. A card that
+    // hung past the foot of a short map was drawn there and pressed nothing.
+    final middle = paragraph.localToGlobal(
+      paragraph.size.center(Offset.zero),
+    );
+    final hit = HitTestResult();
+    tester.binding.hitTestInView(hit, middle, tester.view.viewId);
+    if (!hit.path.any((entry) => identical(entry.target, paragraph))) {
+      problems.add('a press on "$text" at $middle does not reach it');
+    }
   }
   expect(problems, isEmpty, reason: 'on the $phone phone');
 }

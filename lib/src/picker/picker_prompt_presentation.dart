@@ -10,6 +10,7 @@ library;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'picker_a11y.dart';
@@ -348,14 +349,118 @@ class _SeatCardFrame extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => CustomSingleChildLayout(
-        delegate: _SeatCardLayout(
-          topInset: topInset,
-          bottomInset: bottomInset,
-          onSheetBand: onSheetBand,
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) => CustomSingleChildLayout(
+          delegate: _SeatCardLayout(
+            topInset: topInset,
+            bottomInset: bottomInset,
+            onSheetBand: onSheetBand,
+          ),
+          child: _FitCardHeight(
+            room: constraints.maxHeight -
+                topInset -
+                seatLayerConfirmCardTopInset -
+                bottomInset -
+                seatLayerConfirmCardRestInset,
+            child: child,
+          ),
         ),
-        child: child,
       );
+}
+
+/// Draws the card scaled down when the map is too short to hold it.
+///
+/// A phone held sideways leaves the map 145 to 170 points, and a card is about
+/// 140 at ordinary text. Placed from its ceiling, a taller card ran past the
+/// foot of the map, where it was drawn but could not be pressed: a press there
+/// reaches the sheet below, not the card. Scaled to [room], the whole card,
+/// Add seat included, stays where a press reaches it. A card that fits is laid
+/// out and painted exactly as before.
+class _FitCardHeight extends SingleChildRenderObjectWidget {
+  const _FitCardHeight({required this.room, required super.child});
+
+  final double room;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderFitCardHeight(room);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderFitCardHeight renderObject,
+  ) =>
+      renderObject.room = room;
+}
+
+class _RenderFitCardHeight extends RenderProxyBox {
+  _RenderFitCardHeight(this._room);
+
+  double _room;
+  set room(double value) {
+    if (value == _room) return;
+    _room = value;
+    markNeedsLayout();
+  }
+
+  /// 1 while the card fits; under 1 while it is drawn smaller.
+  double _scale = 1;
+
+  @override
+  void performLayout() {
+    final card = child;
+    if (card == null) {
+      size = constraints.smallest;
+      return;
+    }
+    // At its own height, not the map's: capped by a short map, the card's
+    // contents ran past its own box, and out of reach just the same.
+    card.layout(
+      constraints.copyWith(minHeight: 0, maxHeight: double.infinity),
+      parentUsesSize: true,
+    );
+    final height = card.size.height;
+    _scale = height > _room && _room > 0 ? _room / height : 1;
+    size = constraints.constrain(
+      Size(card.size.width, height * _scale),
+    );
+  }
+
+  /// Scaled about the card's top centre, so it keeps its own width's middle.
+  Matrix4 get _transform => Matrix4.identity()
+    ..setEntry(0, 0, _scale)
+    ..setEntry(1, 1, _scale)
+    ..setEntry(0, 3, size.width * (1 - _scale) / 2);
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (_scale == 1) return super.paint(context, offset);
+    layer = context.pushTransform(
+      needsCompositing,
+      offset,
+      _transform,
+      super.paint,
+      oldLayer: layer is TransformLayer ? layer as TransformLayer? : null,
+    );
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    if (_scale == 1) {
+      return super.hitTestChildren(result, position: position);
+    }
+    return result.addWithPaintTransform(
+      transform: _transform,
+      position: position,
+      hitTest: (result, position) =>
+          super.hitTestChildren(result, position: position),
+    );
+  }
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    if (_scale != 1) transform.multiply(_transform);
+  }
 }
 
 /// Places the sheet from [seatLayerConfirmCardTop], and reports what it

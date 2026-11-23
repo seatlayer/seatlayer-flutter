@@ -1204,7 +1204,10 @@ map, on every tap, for every seat — nothing about the tapped seat is read when
 it is placed. `topInset` and `bottomInset` are the bands that chrome stands on,
 so the sheet never slides under the dock or behind the floor rail; a card
 taller than the band it lives in keeps its top edge rather than climbing past
-`topInset`.
+`topInset`, and is drawn scaled down to fit between that edge and `restInset`
+above the foot. A press reaches only what lies inside the map, so a card that
+hung past its foot, as on a phone held sideways (145 to 170 points of map),
+was drawn where Add seat could not be pressed. A card that fits is unchanged.
 
 Keeping the seat and its card together is then the **map's** job, and it is
 done the way the web sheet does it — by a **pan**, never a zoom:
