@@ -13,7 +13,9 @@ import 'package:seatlayer/src/picker/picker_status_views.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/picker_layout.dart';
+import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
+import 'package:seatlayer/src/seat_layer_error.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
@@ -79,6 +81,32 @@ void main() {
     expect(find.text('Check your connection and try again.'), findsOneWidget);
     await tester.tap(find.text('Try again'));
     expect(retried, 1);
+  });
+
+  testWidgets('the error\'s own message never reaches the buyer',
+      (tester) async {
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerPickerErrorView(), controller: picker),
+    );
+    await tester.pump();
+    // What a failed page leaves on the picker: a developer's line, in English.
+    picker.value = picker.value.withError(const SeatLayerError.transport(
+      'page load failed: net::ERR_NAME_NOT_RESOLVED',
+    ));
+    await tester.pump();
+    expect(picker.state.error, isA<SeatLayerError>());
+
+    expect(find.textContaining('page load failed'), findsNothing);
+    expect(find.textContaining('SeatLayer'), findsNothing);
+    // The default sentence is the title's, so it is said once.
+    expect(find.text('The seat map didn’t load'), findsOneWidget);
+    expect(find.text('Check your connection and try again.'), findsOneWidget);
+    expect(find.text('Try again'), findsOneWidget);
   });
 
   testWidgets('the empty view is a host wording too', (tester) async {

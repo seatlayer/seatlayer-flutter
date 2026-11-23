@@ -2362,6 +2362,12 @@ a title `strings.mapDidNotLoad`, a line `strings.checkConnection`, and an action
 `strings.retry` at `radius.button` on the accent. Retry fully remounts the
 picker rather than patching a half-built one.
 
+Between the title and that line stands the host's own sentence (`message`, else
+`strings.errorMessage`) only when it says something the title does not; the
+default `errorMessage` is the title's words, so by default there is none. **The
+error's own message is never drawn**: it is a developer's line in English
+("SeatLayer bridge error [code]: …"), and it reaches the app through `onError`.
+
 #### 3.13.3 Access
 
 `SeatLayerPickerAccessPanel` — `lib/src/picker/picker_states.dart`. A veiled
@@ -2742,9 +2748,9 @@ the question is up, which dismisses it) stays.
 
 **Could not load.** A Season the page cannot mount renders nothing and fails
 the handshake (`sys.error`, `sys.incompatible` or no answer in time). Under the
-bar stands the event picker's own failure view (`SeatLayerPickerErrorView`:
-`strings.mapDidNotLoad`, the error's sentence, `strings.checkConnection`,
-`strings.retry`), no new words or tokens. Retry boots a new page; the dismiss
+bar stands the event picker's own failure view (`SeatLayerPickerErrorView`,
+§3.13.2: `strings.mapDidNotLoad`, `strings.checkConnection`, `strings.retry`),
+no new words or tokens. Retry boots a new page; the dismiss
 control closes at once (`closed`), as there is no page to ask. A `failed`
 status after `ready` is the page's own (a hold it could not make) and stays on
 the page.
