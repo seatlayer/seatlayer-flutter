@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/seatlayer.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
+import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 
 import 'fake_webview_platform.dart';
 import 'phone_matrix_harness.dart';
@@ -24,6 +25,9 @@ enum SeasonPhoneState {
 
   /// Runtime 1.0.1's page names the Season and its club; seats held.
   named,
+
+  /// The Season could not be shown: the event picker's failure view.
+  failed,
 }
 
 Future<SeatLayerPickerStrings> _pumpSeason(
@@ -77,6 +81,19 @@ Future<SeatLayerPickerStrings> _pumpSeason(
   );
   await tester.tap(find.text('Open'));
   await tester.pumpAndSettle();
+  if (state == SeasonPhoneState.failed) {
+    page.post(EnvelopeKind.hello, 'hello', <String, Object?>{
+      'bundle': '1.0.0',
+      'protocol': <String, Object?>{'min': 2, 'max': 2},
+      'capabilities': <String>['season-surface-v1', 'season-app-shell-v1'],
+      'events': <String>[],
+      'commands': <String>[],
+    });
+    await tester.pump();
+    page.evt('sys.error', <String, Object?>{'code': 'render_failed'});
+    await pumpToRest(tester);
+    return strings;
+  }
   await page.boot(tester);
   if (state == SeasonPhoneState.named) {
     page.named('Riverside Winter Season 2027', 'Riverside FC');
@@ -91,7 +108,11 @@ void _expectSeasonLayout(WidgetTester tester, Phone phone,
   expectPhoneLayout(tester, phone, strings);
   // The bar stands under the safe area's top; the page fills the rest.
   final bar = tester.getRect(find.byType(SeatLayerHeaderBar));
-  final page = tester.getRect(find.byType(SeatLayerSeasonView));
+  final page = tester.getRect(find.byType(
+    state == SeasonPhoneState.failed
+        ? SeatLayerPickerErrorView
+        : SeatLayerSeasonView,
+  ));
   // Under the status bar, on the page's ground, as on the event page.
   expect(bar.top, phone.insets.top);
   expect(page.top, moreOrLessEquals(bar.bottom));
@@ -102,8 +123,17 @@ void _expectSeasonLayout(WidgetTester tester, Phone phone,
   expect(find.byTooltip(strings.close), findsOneWidget);
   expect(
     find.byType(SeatLayerHoldClock),
-    state == SeasonPhoneState.ready ? findsNothing : findsOneWidget,
+    state == SeasonPhoneState.ready || state == SeasonPhoneState.failed
+        ? findsNothing
+        : findsOneWidget,
   );
+  if (state == SeasonPhoneState.failed) {
+    expect(find.text(strings.retry), findsOneWidget);
+    expect(
+      tester.getSize(find.widgetWithText(FilledButton, strings.retry)).height,
+      greaterThanOrEqualTo(SeatLayerSizeTokens.minimumHitTarget),
+    );
+  }
 }
 
 String _scale(double textScale) =>
@@ -226,6 +256,12 @@ void main() {
             textScale: textScale);
       });
     }
+    testWidgets('season_320_failed_light_t20', tags: goldenTag,
+        (tester) async {
+      await shoot(tester, 'season_320_failed_light_t20', phone320,
+          SeasonPhoneState.failed,
+          textScale: 2);
+    });
     testWidgets('season_390_ar_named_light', tags: goldenTag, (tester) async {
       await shoot(
           tester, 'season_390_ar_named_light', phone390, SeasonPhoneState.named,

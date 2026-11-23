@@ -136,6 +136,84 @@ void main() {
     ]);
   });
 
+  testWidgets(
+      'a Season that cannot be shown gets the event picker\'s failure view; '
+      'Retry boots a new page', (tester) async {
+    final fake = useFakeWebViewPlatform();
+    final page = SeasonPage(fake);
+    final closes = <SeatLayerSeasonCloseOutcome>[];
+    await tester.pumpWidget(_app(SeatLayerSeasonPicker(
+      configuration: seasonConfiguration,
+      onContinue: (_) {},
+      onClose: (outcome, _) => closes.add(outcome),
+    )));
+    const words = SeatLayerPickerStrings();
+
+    // season.html renders nothing for a Season it cannot mount and says so
+    // instead of sys.ready.
+    page.post(EnvelopeKind.hello, 'hello', <String, Object?>{
+      'bundle': '1.0.0',
+      'protocol': <String, Object?>{'min': 2, 'max': 2},
+      'capabilities': <String>['season-surface-v1', 'season-app-shell-v1'],
+      'events': <String>[],
+      'commands': <String>[],
+    });
+    await tester.pump();
+    page.evt('sys.error', <String, Object?>{
+      'code': 'not_found',
+      'message': 'Season not found',
+    });
+    await _settle(tester);
+
+    expect(find.byType(SeatLayerSeasonView), findsNothing);
+    expect(find.byType(SeatLayerPickerErrorView), findsOneWidget);
+    expect(find.text(words.mapDidNotLoad), findsOneWidget);
+    expect(find.text(words.checkConnection), findsOneWidget);
+    // The bar stays, so the buyer still has the way out.
+    expect(find.byType(SeatLayerHeaderBar), findsOneWidget);
+
+    await tester.tap(find.text(words.retry));
+    await _settle(tester);
+    expect(find.byType(SeatLayerPickerErrorView), findsNothing);
+    expect(fake.loads, <String>[seatLayerSeasonPageUrl, seatLayerSeasonPageUrl]);
+    page.reloaded();
+    await page.boot(tester);
+    expect(page.sent.where((e) => e.kind == EnvelopeKind.init), hasLength(2));
+    page.held('sop_a');
+    await _settle(tester);
+    expect(find.byType(SeatLayerHoldClock), findsOneWidget);
+    expect(closes, isEmpty);
+  });
+
+  testWidgets('a page that never loads closes at once', (tester) async {
+    final fake = useFakeWebViewPlatform();
+    final page = SeasonPage(fake);
+    final closes = <SeatLayerSeasonCloseOutcome>[];
+    await tester.pumpWidget(_app(SeatLayerSeasonPicker(
+      configuration: seasonConfiguration,
+      onContinue: (_) {},
+      onClose: (outcome, _) => closes.add(outcome),
+    )));
+    page.post(EnvelopeKind.hello, 'hello', <String, Object?>{
+      'bundle': '1.0.0',
+      'protocol': <String, Object?>{'min': 2, 'max': 2},
+      'capabilities': <String>['season-surface-v1', 'season-app-shell-v1'],
+      'events': <String>[],
+      'commands': <String>[],
+    });
+    await tester.pump();
+    page.evt('sys.error', <String, Object?>{'code': 'render_failed'});
+    await _settle(tester);
+    expect(find.byType(SeatLayerPickerErrorView), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Close seat selection'));
+    await _settle(tester);
+    expect(page.sent.where((e) => e.type == 'season.requestClose'), isEmpty);
+    expect(closes, <SeatLayerSeasonCloseOutcome>[
+      SeatLayerSeasonCloseOutcome.closed,
+    ]);
+  });
+
   testWidgets('a theme flip repaints the page in place', (tester) async {
     final fake = useFakeWebViewPlatform();
     final page = SeasonPage(fake);
