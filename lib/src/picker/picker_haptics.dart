@@ -154,8 +154,8 @@ void playPickerHaptic(PickerHapticCue cue) {
   unawaited(_fire(pickerHapticStrength(cue)).catchError((Object _) {}));
 }
 
-/// Which platform strength [cue] fires, named the way `design/tokens.json`
-/// names it so every SDK feels the same.
+/// Which platform strength [cue] fires, named the way the design
+/// tokens name it so every SDK feels the same.
 String pickerHapticStrength(PickerHapticCue cue) => switch (cue) {
       PickerHapticCue.selectionAdded => SeatLayerHapticTokens.selectionAdded,
       PickerHapticCue.sectionFocused => SeatLayerHapticTokens.sectionFocused,

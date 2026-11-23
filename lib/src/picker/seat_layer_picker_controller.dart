@@ -1177,7 +1177,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   ///
   /// A refusal the server is entitled to make answers `false` rather than
   /// throwing: it is not a fault, the buyer asked and the answer is no. A
-  /// transport failure still throws. See `design/picker-spec.md` 3.13.8.
+  /// transport failure still throws.
   /// Re-acquire the buyer access session, without taking the map away.
   ///
   /// IN PLACE FIRST, ALWAYS. This re-bootstraps the session and re-reads the

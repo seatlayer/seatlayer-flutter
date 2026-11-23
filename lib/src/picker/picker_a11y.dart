@@ -70,7 +70,7 @@ Widget seatLayerReadingOrder(double order, Widget child) => Semantics(
 /// A clamp is a statement about a layout, not a preference: past it the surface
 /// clips, and a buyer who cannot read a clipped price is worse off than one
 /// reading a slightly smaller one. Which clamp belongs to which surface is a
-/// design token (`type.scaleClamp` in `design/tokens.json`), so a port cannot
+/// design token (`type.scaleClamp`), so a port cannot
 /// invent its own ceiling — and surfaces that own the whole screen and scroll
 /// (the prompts) have no token, because they are never clamped.
 ///
@@ -135,7 +135,7 @@ double seatLayerTypeScaleOf(BuildContext context, {required double max}) {
 
 /// [base] grown by the surface's clamped text scale.
 ///
-/// The fixed heights in `tokens.json` are heights for type at 1.0. Left fixed
+/// The fixed heights in the tokens are heights for type at 1.0. Left fixed
 /// they become ceilings the moment a buyer scales their text up, and a bar
 /// whose contents are taller than the bar clips or overflows. Used as a
 /// *minimum* wherever the surface can afford to grow, and as the height where

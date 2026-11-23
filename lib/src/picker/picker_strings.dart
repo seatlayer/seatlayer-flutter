@@ -1026,8 +1026,8 @@ class SeatLayerPickerStrings {
   /// "Royal Albert Hall seat map" — what a screen reader calls the drawn map.
   ///
   /// The map is one node to assistive technology: the runtime draws its seats
-  /// on a canvas inside a web view and cannot yet expose one node per seat
-  /// (see the runtime gap in `design/picker-spec.md` §4.9). Naming it after
+  /// on a canvas inside a web view and cannot yet expose one node per
+  /// seat. Naming it after
   /// the venue at least says what the unexplorable region *is*.
   ///
   /// The SeatLayer runtime has no dictionary entry for this one, so it keeps
