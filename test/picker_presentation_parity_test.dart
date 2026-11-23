@@ -71,8 +71,9 @@ void main() {
   test('every forwarded option is actually passed on, not just accepted', () {
     final source = File('lib/src/picker/seat_layer_picker_presentation.dart')
         .readAsStringSync();
-    // Two call sites in showSeatLayerPicker, one in the page's build.
-    expect('themeMode: themeMode,'.allMatches(source).length, 2);
+    // One call site in showSeatLayerPicker (its route builds the page for
+    // both presentations), one in the page's build.
+    expect('themeMode: themeMode,'.allMatches(source).length, 1);
     expect(source, contains('themeMode: widget.themeMode,'));
   });
 

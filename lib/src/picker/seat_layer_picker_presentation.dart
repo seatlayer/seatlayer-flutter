@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../seat_layer_configuration.dart';
+import '../seat_layer_surface_route.dart';
 import 'picker_builders.dart';
-import 'picker_layout.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
 import 'picker_system_overlay.dart';
@@ -247,58 +247,23 @@ Future<SeatLayerCheckoutHandoff?> showSeatLayerPicker(
   bool useRootNavigator = true,
   RouteSettings? routeSettings,
 }) {
-  final resolved = presentation == SeatLayerPickerPresentation.adaptive
-      ? (MediaQuery.sizeOf(context).width >= 700 && seatLayerOnTablet(context)
-          ? SeatLayerPickerPresentation.dialog
-          : SeatLayerPickerPresentation.fullScreen)
-      : presentation;
-
-  if (resolved == SeatLayerPickerPresentation.dialog) {
-    return showDialog<SeatLayerCheckoutHandoff>(
-      context: context,
-      useRootNavigator: useRootNavigator,
-      barrierDismissible: false,
-      routeSettings: routeSettings,
-      builder: (dialogContext) => Dialog(
-        clipBehavior: Clip.antiAlias,
-        insetPadding: const EdgeInsets.all(24),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1180, maxHeight: 820),
-          child: SeatLayerPickerPage(
-            configuration: configuration,
-            controller: controller,
-            options: options,
-            theme: theme,
-            themeMode: themeMode,
-            builders: builders,
-            callbacks: callbacks,
-            onClose: onClose,
-            useScaffold: false,
-            popOnCheckout: true,
-            onCheckout: onCheckout ?? (_) {},
-          ),
-        ),
-      ),
-    );
-  }
-
-  return Navigator.of(context, rootNavigator: useRootNavigator)
-      .push<SeatLayerCheckoutHandoff>(
-    MaterialPageRoute<SeatLayerCheckoutHandoff>(
-      settings: routeSettings,
-      fullscreenDialog: true,
-      builder: (_) => SeatLayerPickerPage(
-        configuration: configuration,
-        controller: controller,
-        options: options,
-        theme: theme,
-        themeMode: themeMode,
-        builders: builders,
-        callbacks: callbacks,
-        onClose: onClose,
-        popOnCheckout: true,
-        onCheckout: onCheckout ?? (_) {},
-      ),
+  return showSeatLayerSurface<SeatLayerCheckoutHandoff>(
+    context,
+    presentation: presentation,
+    useRootNavigator: useRootNavigator,
+    routeSettings: routeSettings,
+    page: (inDialog) => SeatLayerPickerPage(
+      configuration: configuration,
+      controller: controller,
+      options: options,
+      theme: theme,
+      themeMode: themeMode,
+      builders: builders,
+      callbacks: callbacks,
+      onClose: onClose,
+      useScaffold: !inDialog,
+      popOnCheckout: true,
+      onCheckout: onCheckout ?? (_) {},
     ),
   );
 }
