@@ -54,6 +54,8 @@ void main() {
     expect(payload['protocol'], <String, Object?>{'min': 1, 'max': 1});
     expect(payload, isNot(contains('surface')));
     expect(payload, isNot(contains('requirements')));
+    // A raw chart is detached on reload without a destroy command.
+    expect(SeatLayerBridgeProfile.chart.destroyCommand, isNull);
   });
 
   test('turnkey picker requests v2 state/actions and native-owned chrome', () {
@@ -70,6 +72,7 @@ void main() {
       'stateContract': 1,
       'chromeOwner': 'native',
     });
+    expect(profile.destroyCommand, 'picker.destroy');
     expect(
       payload['requirements'],
       <String, Object?>{'capabilities': profile.requiredCapabilities},

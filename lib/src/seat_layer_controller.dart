@@ -1,13 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-
-import 'package:meta/meta.dart';
-
-import 'bridge/bridge_client.dart';
-import 'bridge/bridge_profile.dart';
 import 'bridge/bridge_protocol.dart';
-import 'bridge/envelope.dart';
+import 'bridge/bridge_session.dart';
 import 'open_enums.dart';
 import 'payloads.dart';
 import 'seat_layer_configuration.dart';
@@ -24,29 +18,10 @@ import 'seat_layer_error.dart';
 /// does not merely surface on [onError]) — the iOS SDK's key fix. A
 /// [bestAvailable] conflict throws `sold_out` / `not_enough_together` from the
 /// awaited call.
-class SeatLayerController {
+class SeatLayerController
+    extends SeatLayerBridgeSession<SeatLayerConfiguration> {
   SeatLayerController();
 
-  BridgeClient? _client;
-  SeatLayerConfiguration? _configuration;
-  SeatLayerBridgeProfile _profile = SeatLayerBridgeProfile.chart;
-
-  ReadyInfo? _readyInfo;
-  BundleInfo? _bundleInfo;
-  int? _protocolRevision;
-
-  Completer<ReadyInfo>? _readyCompleter;
-  Timer? _handshakeTimer;
-
-  /// Runs from the view arming the handshake to `sys.ready`, which is the only
-  /// place the WHOLE cold start is visible: the web side cannot see the map host
-  /// being created and the app cannot see the chart finish rendering.
-  Stopwatch? _handshakeClock;
-  int? _timeToHelloMs;
-  bool _hasFinished = false;
-  bool _disposed = false;
-
-  final _onReady = StreamController<ReadyInfo>.broadcast();
   final _onSelectionChanged = StreamController<List<SelectedSeat>>.broadcast();
   final _onSelectionValidityChanged =
       StreamController<SelectionValidity>.broadcast();
@@ -63,32 +38,12 @@ class SeatLayerController {
   final _onHoldRestored = StreamController<HoldResult>.broadcast();
   final _onHoldExpired = StreamController<void>.broadcast();
   final _onCheckout = StreamController<Object?>.broadcast();
-  final _onError = StreamController<SeatLayerError>.broadcast();
   final _onHint = StreamController<String?>.broadcast();
   final _onGAClick = StreamController<GAArea>.broadcast();
   final _onSeatHover = StreamController<SeatHoverDetails?>.broadcast();
   final _onDeckTap = StreamController<String>.broadcast();
-  final _onUnknownEvent = StreamController<UnknownEvent>.broadcast();
-  final _onBridgeEvent = StreamController<EventSignal>.broadcast();
-
-  // MARK: - State
-
-  /// What `sys.ready` reported. Non-null once the chart exists.
-  ReadyInfo? get readyInfo => _readyInfo;
-
-  /// What the bundle advertised in `hello`. Populated before [readyInfo].
-  BundleInfo? get bundleInfo => _bundleInfo;
-
-  /// The negotiated protocol revision, or `null` before a successful handshake.
-  int? get protocolRevision => _protocolRevision;
-
-  bool get isReady => _readyInfo != null;
 
   // MARK: - Event streams
-
-  /// The handshake completed and the chart rendered. Check `mode` —
-  /// [EventMode.test] books no real inventory and must be badged.
-  Stream<ReadyInfo> get onReady => _onReady.stream;
 
   /// The buyer's selection changed. Carries the FULL current selection.
   Stream<List<SelectedSeat>> get onSelectionChanged =>
@@ -120,10 +75,6 @@ class SeatLayerController {
   /// not advertise this event; drive checkout from your own UI after a hold.
   Stream<Object?> get onCheckout => _onCheckout.stream;
 
-  /// Something failed out of band. A failed COMMAND does not appear here — it
-  /// throws from its `Future` instead.
-  Stream<SeatLayerError> get onError => _onError.stream;
-
   /// A transient buyer-facing hint, or `null` to clear it.
   Stream<String?> get onHint => _onHint.stream;
 
@@ -138,189 +89,11 @@ class SeatLayerController {
   /// The buyer tapped a floor in a multi-floor deck.
   Stream<String> get onDeckTap => _onDeckTap.stream;
 
-  /// An event this build does not model — a bundle newer than the app.
-  Stream<UnknownEvent> get onUnknownEvent => _onUnknownEvent.stream;
+  // MARK: - Chart events
 
-  /// Every accepted bridge event, before raw-chart routing.
-  ///
-  /// Used by the high-level picker adapter so protocol-v2 events do not have to
-  /// masquerade as unknown raw-chart events.
-  @internal
-  Stream<EventSignal> get onBridgeEvent => _onBridgeEvent.stream;
-
-  // MARK: - Handshake orchestration (driven by SeatLayerView)
-
-  /// Attach a channel, arm the handshake, and complete when `sys.ready` arrives.
-  /// Called by [SeatLayerView]; not part of the app-facing API.
-  @internal
-  Future<ReadyInfo> beginHandshake(
-    BridgeChannel channel,
-    SeatLayerConfiguration configuration, {
-    SeatLayerBridgeProfile profile = SeatLayerBridgeProfile.chart,
-  }) {
-    if (_disposed) {
-      return Future<ReadyInfo>.error(const SeatLayerError.destroyed());
-    }
-    _configuration = configuration;
-    _profile = profile;
-    _handshakeClock = Stopwatch()..start();
-    _timeToHelloMs = null;
-    _hasFinished = false;
-    _readyInfo = null;
-    _bundleInfo = null;
-    _protocolRevision = null;
-
-    // A fresh client so a reload never inherits stale correlations or event
-    // sequence watermarks from a previous chart.
-    _client?.close();
-    final client = BridgeClient(
-      channel: channel,
-      timeout: configuration.commandTimeout,
-    );
-    client.onSignal(_handleSignal);
-    _client = client;
-
-    final completer = Completer<ReadyInfo>();
-    _readyCompleter = completer;
-
-    _handshakeTimer?.cancel();
-    _handshakeTimer = Timer(configuration.handshakeTimeout, () {
-      _finishHandshake(
-        SeatLayerError.handshakeTimeout(configuration.handshakeTimeout),
-      );
-    });
-
-    return completer.future;
-  }
-
-  /// Feed one raw web→native frame (the `JavaScriptChannel` string) to the
-  /// client. Called by [SeatLayerView].
-  @internal
-  void ingestRaw(Object? message) {
-    final envelope = Envelope.decode(message);
-    if (envelope == null) return; // not ours, or malformed — dropped.
-    _client?.ingest(envelope);
-  }
-
-  /// Report a page-load / navigation failure as a transport error. Called by
-  /// [SeatLayerView].
-  @internal
-  void failWithTransport(String detail) {
-    _finishHandshake(SeatLayerError.transport(detail));
-  }
-
-  void _handleSignal(BridgeSignal signal) {
-    switch (signal) {
-      case HelloSignal(:final payload):
-        _handleHello(payload);
-      case EventSignal(:final name, :final payload):
-        _onBridgeEvent.add(signal);
-        _handleEvent(name, payload);
-      case UnhandledSignal(:final envelope):
-        _onUnknownEvent.add(
-          UnknownEvent(name: envelope.type, payload: envelope.payload),
-        );
-    }
-  }
-
-  void _handleHello(Object? payload) {
-    _timeToHelloMs ??= _handshakeClock?.elapsedMilliseconds;
-    final info = BundleInfo.fromJson(payload);
-    _bundleInfo = info;
-
-    // Negotiate natively BEFORE replying. The web side checks too, but failing
-    // here means the app never asks for a chart it could not drive, and the
-    // caller gets a typed error instead of a blank view.
-    final profile = _profile;
-    final result = negotiate(
-      native: profile.protocolRange,
-      web: info.protocolRange,
-    );
-    switch (result) {
-      case NegotiationIncompatible(:final reason):
-        _finishHandshake(
-          SeatLayerError.incompatible(
-            native: profile.protocolRange,
-            web: info.protocolRange,
-            reason: reason,
-          ),
-        );
-      case NegotiationAgreed():
-        final config = _configuration;
-        if (config != null) {
-          final missing = profile.requiredCapabilities
-              .where((capability) => !info.supportsCapability(capability))
-              .toList(growable: false);
-          if (missing.isNotEmpty) {
-            _finishHandshake(
-              SeatLayerError.incompatible(
-                native: profile.protocolRange,
-                web: info.protocolRange,
-                reason:
-                    'the bundle is missing required picker capabilities: ${missing.join(', ')}',
-              ),
-            );
-            return;
-          }
-          if (config.usesPrivateAccess &&
-              !info.supportsCapability('native-access-provider')) {
-            _finishHandshake(
-              SeatLayerError.incompatible(
-                native: profile.protocolRange,
-                web: info.protocolRange,
-                reason: 'the bundle does not support private buyer access',
-              ),
-            );
-            return;
-          }
-          if (config.usesSelectionPolicy &&
-              (!info.supportsCapability('selection-controls') ||
-                  !info.supportsCapability('selection-validity'))) {
-            _finishHandshake(
-              SeatLayerError.incompatible(
-                native: profile.protocolRange,
-                web: info.protocolRange,
-                reason:
-                    'the bundle does not support the configured selection policy',
-              ),
-            );
-            return;
-          }
-          unawaited(
-            _client?.sendInit(profile.initPayload(config, bundle: info)) ??
-                Future.value(),
-          );
-        }
-    }
-  }
-
-  void _handleEvent(String name, Object? payload) {
+  @override
+  void handleSurfaceEvent(String name, Object? payload) {
     switch (name) {
-      case 'sys.ready':
-        _finishHandshake(
-          ReadyInfo.fromJson(
-            payload,
-            timeToHelloMs: _timeToHelloMs,
-            timeToReadyMs: _handshakeClock?.elapsedMilliseconds,
-          ),
-        );
-      case 'sys.incompatible':
-        final web = ProtocolRange.from(jGetLocal(payload, 'web')) ??
-            ProtocolRange.native;
-        final reason = jStrLocal(jGetLocal(payload, 'message')) ??
-            jStrLocal(jGetLocal(payload, 'code')) ??
-            "the seat map bundle rejected this app's protocol range";
-        _finishHandshake(
-          SeatLayerError.incompatible(
-            native: _profile.protocolRange,
-            web: web,
-            reason: reason,
-          ),
-        );
-      case 'sys.error':
-        _finishHandshake(
-          SeatLayerError.bridge(BridgeErrorPayload.fromJson(payload)),
-        );
       case 'selection.changed':
         _onSelectionChanged.add(
           _decodeList(jGetLocal(payload, 'seats'), SelectedSeat.fromJson),
@@ -342,8 +115,6 @@ class SeatLayerController {
       case 'selection.limit':
         final maximum = jIntLocal(jGetLocal(payload, 'maxSelection'));
         if (maximum != null) _onSelectionLimit.add(maximum);
-      case 'access.token.request':
-        unawaited(_provideBuyerAccessToken(payload));
       case 'access.expired':
         final event = BuyerAccessExpiredEvent.fromJson(payload);
         if (event != null) _onBuyerAccessExpired.add(event);
@@ -367,9 +138,7 @@ class SeatLayerController {
       case 'hint':
         _onHint.add(jStrLocal(jGetLocal(payload, 'message')));
       case 'error':
-        _onError.add(
-          SeatLayerError.bridge(BridgeErrorPayload.fromJson(payload)),
-        );
+        emitError(SeatLayerError.bridge(BridgeErrorPayload.fromJson(payload)));
       case 'seat.hover':
         final raw = jGetLocal(payload, 'details');
         _onSeatHover.add(raw == null ? null : SeatHoverDetails.fromJson(raw));
@@ -379,148 +148,53 @@ class SeatLayerController {
       case 'checkout':
         _onCheckout.add(payload);
       default:
-        _onUnknownEvent.add(UnknownEvent(name: name, payload: payload));
+        emitUnknownEvent(UnknownEvent(name: name, payload: payload));
     }
   }
 
-  Future<void> _provideBuyerAccessToken(Object? payload) async {
-    final requestId = jStrLocal(jGetLocal(payload, 'requestId'));
-    if (requestId == null) return;
-    final client = _client;
-    if (client == null) return;
-    final rawReason = jStrLocal(jGetLocal(payload, 'reason')) ?? 'initial';
-    final provider = _configuration?.buyerAccessTokenProvider;
-
-    if (provider == null) {
-      try {
-        await client.command(
-          'access.token.unavailable',
-          payload: {'requestId': requestId},
-        );
-      } catch (_) {}
-      return;
+  @override
+  String? compatibilityProblem(
+    SeatLayerConfiguration configuration,
+    BundleInfo bundle,
+  ) {
+    if (configuration.usesPrivateAccess &&
+        !bundle.supportsCapability('native-access-provider')) {
+      return 'the bundle does not support private buyer access';
     }
-
-    BuyerAccessToken token;
-    try {
-      token = await provider(
-        BuyerAccessRequestContext(
-          reason: BuyerAccessRefreshReason.fromRaw(rawReason),
-        ),
-      );
-      if (token.token.trim().isEmpty || token.expiresAt?.isFinite == false) {
-        throw StateError('invalid buyer access token');
-      }
-    } catch (_) {
-      // Provider failures are sanitized; errors and bearers never become events.
-      try {
-        await client.command(
-          'access.token.unavailable',
-          payload: {'requestId': requestId},
-        );
-      } catch (_) {}
-      return;
+    if (configuration.usesSelectionPolicy &&
+        (!bundle.supportsCapability('selection-controls') ||
+            !bundle.supportsCapability('selection-validity'))) {
+      return 'the bundle does not support the configured selection policy';
     }
-
-    try {
-      await client.command(
-        'access.token.provide',
-        payload: {
-          'requestId': requestId,
-          'token': token.token,
-          if (token.expiresAt != null) 'expiresAt': token.expiresAt,
-        },
-      );
-    } catch (_) {
-      // The request may have timed out or the view may have reloaded.
-    }
-  }
-
-  void _finishHandshake(Object outcome) {
-    if (_disposed) return;
-    if (_hasFinished) {
-      // A failure AFTER ready (a late sys.error / error) is a stream event, not
-      // a load result.
-      if (outcome is SeatLayerError) _onError.add(outcome);
-      return;
-    }
-    _hasFinished = true;
-    _handshakeTimer?.cancel();
-    _handshakeTimer = null;
-    _handshakeClock?.stop();
-
-    final completer = _readyCompleter;
-    _readyCompleter = null;
-
-    if (outcome is ReadyInfo) {
-      _readyInfo = outcome;
-      _protocolRevision = outcome.protocolRevision;
-      _onReady.add(outcome);
-      completer?.complete(outcome);
-    } else if (outcome is SeatLayerError) {
-      _onError.add(outcome);
-      completer?.completeError(outcome);
-    }
+    return null;
   }
 
   // MARK: - Commands
 
-  Future<Object?> _run(String command, [Object? payload]) {
-    final client = _client;
-    if (client == null) {
-      return Future.error(const SeatLayerError.transport('no chart loaded'));
-    }
-    return client.command(command, payload: payload);
-  }
-
-  /// Send a correlated semantic bridge command for the high-level picker.
-  @internal
-  Future<Object?> runBridgeCommand(String command, [Object? payload]) =>
-      _run(command, payload);
-
-  /// Detach the current page/transport without disposing this caller-owned
-  /// controller. A subsequent page load may attach a fresh bridge.
-  @internal
-  void detachTransport() {
-    _handshakeTimer?.cancel();
-    _handshakeTimer = null;
-    final pending = _readyCompleter;
-    _readyCompleter = null;
-    if (pending != null && !pending.isCompleted) {
-      pending.completeError(const SeatLayerError.destroyed());
-    }
-    _client?.close();
-    _client = null;
-    _readyInfo = null;
-    _bundleInfo = null;
-    _protocolRevision = null;
-    _hasFinished = false;
-  }
-
   /// Hold the current selection.
   Future<HoldResult?> hold({int? ttlMs}) async {
-    final result = await _run('hold', _compact({'ttlMs': ttlMs}));
+    final result = await run('hold', _compact({'ttlMs': ttlMs}));
     return HoldResult.fromJson(jGetLocal(result, 'hold'));
   }
 
   /// Reattach to an open hold (app relaunch, checkout resume).
   Future<HoldResult?> resumeHold(String holdId) async {
-    final result = await _run('resumeHold', {'holdId': holdId});
+    final result = await run('resumeHold', {'holdId': holdId});
     return HoldResult.fromJson(jGetLocal(result, 'hold'));
   }
 
   /// Push the hold's expiry out.
   Future<HoldResult?> extendHold({int? ttlMs}) async {
-    final result = await _run('extendHold', _compact({'ttlMs': ttlMs}));
+    final result = await run('extendHold', _compact({'ttlMs': ttlMs}));
     return HoldResult.fromJson(jGetLocal(result, 'hold'));
   }
 
   /// Release the whole hold.
-  Future<void> release() => _run('release');
+  Future<void> release() => run('release');
 
   /// Release specific seats from the hold, keeping the rest.
   Future<bool> releaseLabels(List<String> labels) async {
-    final result = await _run('releaseLabels', {'labels': labels});
+    final result = await run('releaseLabels', {'labels': labels});
     return jBoolLocal(jGetLocal(result, 'released')) ?? false;
   }
 
@@ -530,7 +204,7 @@ class SeatLayerController {
     int qty, {
     String? categoryKey,
   }) async {
-    final result = await _run(
+    final result = await run(
       'bestAvailable',
       _compact({'qty': qty, 'categoryKey': categoryKey}),
     );
@@ -552,100 +226,100 @@ class SeatLayerController {
     final payload = <String, Object?>{'areaId': areaId, 'qty': qty};
     if (setTier) payload['tierId'] = tierId;
     if (ttlMs != null) payload['ttlMs'] = ttlMs;
-    final result = await _run('holdGA', payload);
+    final result = await run('holdGA', payload);
     return HoldResult.fromJson(jGetLocal(result, 'hold'));
   }
 
   /// Choose a ticket tier for one seat. `null` reverts to the default tier.
   Future<void> setSeatTier(String seatId, String? tierId) =>
-      _run('setSeatTier', {'seatId': seatId, 'tierId': tierId});
+      run('setSeatTier', {'seatId': seatId, 'tierId': tierId});
 
   /// The current selection.
   Future<List<SelectedSeat>> getSelection() async {
-    final result = await _run('getSelection');
+    final result = await run('getSelection');
     return _decodeList(jGetLocal(result, 'seats'), SelectedSeat.fromJson);
   }
 
   Future<List<SelectedSeat>> selectObjects(List<String> objects) async {
-    final result = await _run('selectObjects', {'objects': objects});
+    final result = await run('selectObjects', {'objects': objects});
     return _decodeList(jGetLocal(result, 'seats'), SelectedSeat.fromJson);
   }
 
   Future<void> deselectObjects(List<String> objects) =>
-      _run('deselectObjects', {'objects': objects});
+      run('deselectObjects', {'objects': objects});
 
-  Future<void> clearSelection() => _run('clearSelection');
+  Future<void> clearSelection() => run('clearSelection');
 
   Future<List<SelectedSeat>> selectCategories(List<String> categoryKeys) async {
-    final result = await _run('selectCategories', {
+    final result = await run('selectCategories', {
       'categoryKeys': categoryKeys,
     });
     return _decodeList(jGetLocal(result, 'seats'), SelectedSeat.fromJson);
   }
 
   Future<void> deselectCategories(List<String> categoryKeys) =>
-      _run('deselectCategories', {'categoryKeys': categoryKeys});
+      run('deselectCategories', {'categoryKeys': categoryKeys});
 
   Future<void> setSelectableObjects(List<String>? objects) =>
-      _run('setSelectableObjects', {'objects': objects});
+      run('setSelectableObjects', {'objects': objects});
 
   Future<void> setMaxSelection(int maximum) {
     if (maximum < 1) return Future.error(ArgumentError.value(maximum));
-    return _run('setMaxSelection', {'maxSelection': maximum});
+    return run('setMaxSelection', {'maxSelection': maximum});
   }
 
   Future<SelectionValidity?> getSelectionValidity() async {
-    final result = await _run('getSelectionValidity');
+    final result = await run('getSelectionValidity');
     return SelectionValidity.fromJson(jGetLocal(result, 'validity'));
   }
 
   Future<bool> refreshAccess() async {
-    final result = await _run('refreshAccess');
+    final result = await run('refreshAccess');
     return jBoolLocal(jGetLocal(result, 'refreshed')) ?? false;
   }
 
   /// The open hold, if any.
   Future<HoldResult?> getCurrentHold() async {
-    final result = await _run('getCurrentHold');
+    final result = await run('getCurrentHold');
     return HoldResult.fromJson(jGetLocal(result, 'hold'));
   }
 
   /// General-admission areas and their live availability.
   Future<List<GAArea>> getGAAreas() async {
-    final result = await _run('getGAAreas');
+    final result = await run('getGAAreas');
     return _decodeList(jGetLocal(result, 'areas'), GAArea.fromJson);
   }
 
   /// Floors of a multi-floor venue. Empty for a single-floor chart.
   Future<List<FloorInfo>> getFloors() async {
-    final result = await _run('getFloors');
+    final result = await run('getFloors');
     return _decodeList(jGetLocal(result, 'floors'), FloorInfo.fromJson);
   }
 
   Future<void> setFloor(String floorId) =>
-      _run('setFloor', {'floorId': floorId});
+      run('setFloor', {'floorId': floorId});
 
   Future<void> setColorblindSafe(bool on) =>
-      _run('setColorblindSafe', {'on': on});
+      run('setColorblindSafe', {'on': on});
 
   Future<void> setViewMode(SeatLayerViewMode mode) =>
-      _run('setViewMode', {'mode': mode.raw});
+      run('setViewMode', {'mode': mode.raw});
 
   Future<SeatLayerViewMode> getViewMode() async {
-    final result = await _run('getViewMode');
+    final result = await run('getViewMode');
     return SeatLayerViewMode.fromRaw(
       jStrLocal(jGetLocal(result, 'mode')) ?? 'flat',
     );
   }
 
-  Future<void> zoomIn() => _run('zoomIn');
-  Future<void> zoomOut() => _run('zoomOut');
-  Future<void> zoomToFit() => _run('zoomToFit');
+  Future<void> zoomIn() => run('zoomIn');
+  Future<void> zoomOut() => run('zoomOut');
+  Future<void> zoomToFit() => run('zoomToFit');
 
   /// Tear the chart down. Subsequent commands fail with `destroyed`.
   Future<void> destroy() async {
     try {
-      await _run('destroy');
+      await run('destroy');
     } catch (_) {
       // Best-effort: the chart may already be gone.
     }
@@ -653,11 +327,10 @@ class SeatLayerController {
   }
 
   /// Release all resources. Call from your `State.dispose`.
+  @override
   void dispose() {
-    if (_disposed) return;
-    detachTransport();
-    _disposed = true;
-    _onReady.close();
+    if (isDisposed) return;
+    super.dispose();
     _onSelectionChanged.close();
     _onSelectionValidityChanged.close();
     _onSelectionValid.close();
@@ -670,13 +343,10 @@ class SeatLayerController {
     _onHoldRestored.close();
     _onHoldExpired.close();
     _onCheckout.close();
-    _onError.close();
     _onHint.close();
     _onGAClick.close();
     _onSeatHover.close();
     _onDeckTap.close();
-    _onUnknownEvent.close();
-    _onBridgeEvent.close();
   }
 
   List<T> _decodeList<T>(Object? value, T? Function(Object?) decode) {

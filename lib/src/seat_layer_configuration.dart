@@ -2,6 +2,7 @@ import 'bridge/bridge_client.dart';
 import 'bridge/bridge_protocol.dart';
 import 'open_enums.dart';
 import 'payloads.dart';
+import 'seat_layer_surface_configuration.dart';
 
 /// This SDK's version.
 const String seatLayerSdkVersion = '0.12.0';
@@ -38,7 +39,7 @@ const String seatLayerMobilePageUrl =
 ///
 /// Field names mirror the web `SeatingChart` options and the iOS
 /// `SeatLayerConfiguration` so all three SDKs read as one product.
-class SeatLayerConfiguration {
+class SeatLayerConfiguration implements SeatLayerSurfaceConfiguration {
   SeatLayerConfiguration({
     required this.event,
     this.apiBase,
@@ -131,6 +132,7 @@ class SeatLayerConfiguration {
   final BuyerAccessToken? buyerAccessToken;
 
   /// Renews private buyer access in memory without rebuilding the view.
+  @override
   final BuyerAccessTokenProvider? buyerAccessTokenProvider;
 
   final List<String>? selectedObjects;
@@ -146,9 +148,11 @@ class SeatLayerConfiguration {
   final bool? telemetry;
 
   /// Native-side deadline for a single command before it fails `sl_timeout`.
+  @override
   final Duration commandTimeout;
 
   /// How long to wait for `sys.ready` before failing the load.
+  @override
   final Duration handshakeTimeout;
 
   /// Free-form host identification, for server-side diagnostics.
@@ -163,9 +167,11 @@ class SeatLayerConfiguration {
   ///
   /// The publishable key's registered origins govern what the API will
   /// answer, so any origin you point this at has to be registered too.
+  @override
   final String assetPath;
 
   /// The initialisation payload sent to the renderer.
+  @override
   Map<String, Object?> initPayload({
     ProtocolRange protocolRange = ProtocolRange.native,
   }) {
@@ -222,6 +228,7 @@ class SeatLayerConfiguration {
   /// semantics. This intentionally does not use object identity: Flutter apps
   /// commonly construct configuration inline in `build`, and that must not
   /// reload the venue map or erase a buyer's place in the map.
+  @override
   bool semanticallyEquals(SeatLayerConfiguration other) =>
       event == other.event &&
       apiBase == other.apiBase &&
