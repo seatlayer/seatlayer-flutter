@@ -72,6 +72,26 @@ const List<Phone> sidewaysPhones = <Phone>[
   ),
 ];
 
+/// Make the test view [phone]'s screen, its insets included.
+void putOnPhone(WidgetTester tester, Phone phone) {
+  tester.view
+    ..devicePixelRatio = 1
+    ..physicalSize = phone.size
+    ..padding = FakeViewPadding(
+      left: phone.insets.left,
+      top: phone.insets.top,
+      right: phone.insets.right,
+      bottom: phone.insets.bottom,
+    )
+    ..viewPadding = FakeViewPadding(
+      left: phone.insets.left,
+      top: phone.insets.top,
+      right: phone.insets.right,
+      bottom: phone.insets.bottom,
+    );
+  addTearDown(tester.view.reset);
+}
+
 /// What the buyer is looking at.
 enum PhoneState {
   /// The map is up and nothing is chosen.
@@ -155,22 +175,7 @@ Future<SeatLayerPickerStrings> pumpPhone(
   bool golden = false,
 }) async {
   useFakeWebViewPlatform();
-  tester.view
-    ..devicePixelRatio = 1
-    ..physicalSize = phone.size
-    ..padding = FakeViewPadding(
-      left: phone.insets.left,
-      top: phone.insets.top,
-      right: phone.insets.right,
-      bottom: phone.insets.bottom,
-    )
-    ..viewPadding = FakeViewPadding(
-      left: phone.insets.left,
-      top: phone.insets.top,
-      right: phone.insets.right,
-      bottom: phone.insets.bottom,
-    );
-  addTearDown(tester.view.reset);
+  putOnPhone(tester, phone);
 
   // What runtime 1.0.0 speaks on a chart with no access provisions, so the
   // map carries the same control column as a real app: the palette disc

@@ -214,7 +214,7 @@ abstract class SeatLayerBridgeSession<
                 native: profile.protocolRange,
                 web: info.protocolRange,
                 reason:
-                    'the bundle is missing required picker capabilities: ${missing.join(', ')}',
+                    'the bundle is missing required ${profile.surface} capabilities: ${missing.join(', ')}',
               ),
             );
             return;
@@ -363,6 +363,19 @@ abstract class SeatLayerBridgeSession<
       return Future.error(const SeatLayerError.transport('no chart loaded'));
     }
     return client.command(command, payload: payload);
+  }
+
+  /// [run] for a command that waits for the buyer, such as a question the
+  /// page puts to them: no deadline, since the buyer takes the time they take.
+  /// The page answers every command once, and a detached page fails it.
+  @protected
+  @internal
+  Future<Object?> runAwaitingBuyer(String command, [Object? payload]) {
+    final client = _client;
+    if (client == null) {
+      return Future.error(const SeatLayerError.transport('no chart loaded'));
+    }
+    return client.command(command, payload: payload, untimed: true);
   }
 
   /// Send a correlated semantic bridge command for the high-level picker.

@@ -193,6 +193,11 @@ override** `style:`
   control.
 - **Callbacks** `onClose`.
 - **Commands** none.
+- **The Season page wears the same bar.** Its inputs come from the Season
+  page instead: the name and brand from `season.status` `ready` when the page
+  sends them (`season.name`, `branding`), else the loading words
+  (`strings.chooseSeats`) and the seat glyph; the HoldPill counts the Season
+  hold's `expiresAt`. See picker-spec §3.16.
 
 ## PriceLegend
 

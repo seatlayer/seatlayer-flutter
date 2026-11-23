@@ -4,7 +4,8 @@ import '../payloads.dart';
 import '../seat_layer_surface_configuration.dart';
 import 'bridge_protocol.dart';
 
-/// Internal handshake profile shared by the raw chart and high-level picker.
+/// Internal handshake profile: the raw chart, the high-level picker and the
+/// Season page.
 ///
 /// The raw [SeatLayerView] keeps its original profile. The additive picker
 /// profile fails closed when the renderer cannot provide the state/action
@@ -63,6 +64,26 @@ class SeatLayerBridgeProfile {
         },
       );
 
+  /// The Season page (`season.html`): a fixed package of dates, sold as the
+  /// same seat for every date, with the app's own checkout.
+  ///
+  /// [config] is folded into `init.config`: what a reload must boot with, as
+  /// the picker's is.
+  factory SeatLayerBridgeProfile.season({
+    Map<String, Object?> config = const <String, Object?>{},
+  }) =>
+      SeatLayerBridgeProfile._(
+        surface: 'season',
+        protocolRange: const ProtocolRange(min: 2, max: 2),
+        destroyCommand: 'season.destroy',
+        surfaceInit: const <String, Object?>{'kind': 'season'},
+        requiredCapabilities: const <String>[
+          'season-surface-v1',
+          'season-app-shell-v1',
+        ],
+        config: Map<String, Object?>.unmodifiable(config),
+      );
+
   final String surface;
   final ProtocolRange protocolRange;
   final List<String> requiredCapabilities;
@@ -92,11 +113,19 @@ class SeatLayerBridgeProfile {
     BundleInfo? bundle,
   }) {
     final payload = configuration.initPayload(protocolRange: protocolRange);
-    if (!isPicker) return payload;
+    final surface = surfaceInit;
+    if (surface == null) return payload;
 
     final currentConfig = Map<String, Object?>.from(
       payload['config']! as Map<String, Object?>,
     )..addAll(config);
+    if (!isPicker) {
+      return <String, Object?>{
+        ...payload,
+        'surface': surface,
+        'config': currentConfig,
+      };
+    }
     final currentChrome = Map<String, Object?>.from(
       payload['chrome']! as Map<String, Object?>,
     )..addAll(chrome);
@@ -117,7 +146,7 @@ class SeatLayerBridgeProfile {
 
     return <String, Object?>{
       ...payload,
-      'surface': surfaceInit,
+      'surface': surface,
       'requirements': <String, Object?>{'capabilities': requiredCapabilities},
       'chrome': currentChrome,
       'config': currentConfig,

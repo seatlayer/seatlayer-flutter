@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart' show CupertinoTheme;
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 
 import 'picker_internal.dart';
 import 'picker_layout.dart';
@@ -768,9 +769,24 @@ SeatLayerResolvedPickerTheme resolveSeatLayerPickerTheme(
   SeatLayerPickerState state,
   SeatLayerPickerThemeData? explicit, {
   Brightness? brightness,
+}) =>
+    resolveSeatLayerPalette(
+      context,
+      state.branding,
+      explicit,
+      brightness: brightness,
+    );
+
+/// [resolveSeatLayerPickerTheme] for a page whose organizer's branding is not
+/// an event's: the Season page's.
+@internal
+SeatLayerResolvedPickerTheme resolveSeatLayerPalette(
+  BuildContext context,
+  SeatLayerPickerBranding? organizer,
+  SeatLayerPickerThemeData? explicit, {
+  Brightness? brightness,
 }) {
   final app = Theme.of(context).extension<SeatLayerPickerThemeData>();
-  final organizer = state.branding;
   final scheme = Theme.of(context).colorScheme;
   final side = brightness ?? Theme.of(context).brightness;
   final preset = SeatLayerPickerThemeData.forBrightness(side);

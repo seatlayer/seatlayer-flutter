@@ -56,7 +56,9 @@ class _Pending {
   /// recently sent, which is the one an out-of-band `error` belongs to.
   final int order;
   final Completer<Object?> completer;
-  final Timer timer;
+
+  /// Null for a command with no deadline.
+  final Timer? timer;
 }
 
 /// Correlation, timeout and event ordering for the bridge.
@@ -125,7 +127,14 @@ class BridgeClient {
   // MARK: - Outbound
 
   /// Send a `cmd` and await its single `res`/`err`.
-  Future<Object?> command(String name, {Object? payload}) {
+  ///
+  /// [untimed] lifts the deadline, for a command that waits for the buyer:
+  /// the page answers every command once, and [close] fails it otherwise.
+  Future<Object?> command(
+    String name, {
+    Object? payload,
+    bool untimed = false,
+  }) {
     if (_closed) return Future.error(const SeatLayerError.destroyed());
     final channel = _channel;
     if (channel == null) {
@@ -140,7 +149,7 @@ class BridgeClient {
 
     // Register the pending entry BEFORE sending: a synchronous reply must never
     // arrive to an empty pending table.
-    final timer = Timer(timeout, () => _expire(id));
+    final timer = untimed ? null : Timer(timeout, () => _expire(id));
     _pending[id] = _Pending(
       command: name,
       order: order,
@@ -171,7 +180,7 @@ class BridgeClient {
   void _expire(String id) {
     final entry = _pending.remove(id);
     if (entry == null) return;
-    entry.timer.cancel();
+    entry.timer?.cancel();
     entry.completer
         .completeError(SeatLayerError.timeout(entry.command, timeout));
   }
@@ -213,7 +222,7 @@ class BridgeClient {
       final entry = _mostRecentFailablePending();
       if (entry != null) {
         _pending.remove(entry.key);
-        entry.value.timer.cancel();
+        entry.value.timer?.cancel();
         entry.value.completer.completeError(
           SeatLayerError.bridge(BridgeErrorPayload.fromJson(envelope.payload)),
         );
@@ -256,7 +265,7 @@ class BridgeClient {
   _Pending? _takePending(String? id) {
     if (id == null) return null;
     final entry = _pending.remove(id);
-    entry?.timer.cancel();
+    entry?.timer?.cancel();
     return entry;
   }
 
@@ -281,7 +290,7 @@ class BridgeClient {
     final open = List.of(_pending.values);
     _pending.clear();
     for (final entry in open) {
-      entry.timer.cancel();
+      entry.timer?.cancel();
       if (!entry.completer.isCompleted) entry.completer.completeError(error);
     }
     _signalHandler = null;

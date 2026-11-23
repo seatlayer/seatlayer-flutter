@@ -2708,6 +2708,42 @@ at `init` to suppress its own words. Consequently, a host that hides this strip
 **owns the disclosure itself** — turning the native strip off does not give the
 words back to the runtime.
 
+### 3.16 The Season page
+
+**Name** `SeatLayerSeasonPicker` · **show** `showSeatLayerSeasonPicker` ·
+**file** `lib/src/season/seat_layer_season_picker.dart`
+
+A Season (one package of dates, the same seat for every date) is drawn by the
+pinned `season.html` (contract `seatlayer-season-surface-v1`, capabilities
+`season-surface-v1` and `season-app-shell-v1`): the package step, the dates,
+the map and the cart are the page's. The app draws only what stands around it.
+
+**Bar.** §3.1's header, the same layout and numbers: brand mark, name, the
+hold pill, the dismiss control. No new tokens.
+- Name: `season.status` `ready`'s `season.name` when the page sends it, else
+  the loading words `strings.chooseSeats`. Brand: its `branding` (`brandName`,
+  `logoUrl`, `accent`, the event's field names), else the seat glyph.
+- Hold pill: from `season.hold` / `season.holdChanged` to `null` or
+  `season.holdExpired`, counting the handoff's `expiresAt`.
+
+**Frame.** The same route frame as the event page: top and side safe areas on
+the page's own ground, the bottom one sent to the page with
+`season.setViewportInsets` (its cart docks over the home indicator).
+
+**Close.** The dismiss control and system Back send `season.requestClose`,
+every press: the page may ask the buyer to release or keep the seats, so the
+command has no deadline. `closed`, `released` and `booked` close the screen;
+`kept` closes it and reports the operation id; `stayed` (a second press while
+the question is up, which dismisses it) stays.
+
+**Follows the app.** The boot side goes in `init.config.theme`; a later flip is
+`season.setThemeMode`, in place. The app going to the background and coming back
+is `season.lifecycle`.
+
+**Checkout.** `season.continue` hands the hold to the app (once per operation
+id); the app's server books it, then `season.markBooked`. `season.status`
+`booked` for a hold the page made is `onBooked`.
+
 ---
 
 ## 4. Porting checklist
