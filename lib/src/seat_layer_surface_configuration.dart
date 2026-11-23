@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 import 'bridge/bridge_protocol.dart';
 import 'payloads.dart';
 
@@ -27,4 +29,28 @@ abstract class SeatLayerSurfaceConfiguration {
   /// Whether [other] boots the same page the same way, so a rebuilt widget
   /// keeps its page instead of reloading it.
   bool semanticallyEquals(covariant SeatLayerSurfaceConfiguration other);
+}
+
+/// Whether two configuration values are the same: lists and maps by content,
+/// everything else by `==`.
+@internal
+bool seatLayerSameValue(Object? left, Object? right) {
+  if (identical(left, right)) return true;
+  if (left is List && right is List) {
+    if (left.length != right.length) return false;
+    for (var i = 0; i < left.length; i++) {
+      if (!seatLayerSameValue(left[i], right[i])) return false;
+    }
+    return true;
+  }
+  if (left is Map && right is Map) {
+    if (left.length != right.length) return false;
+    for (final key in left.keys) {
+      if (!right.containsKey(key) || !seatLayerSameValue(left[key], right[key])) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return left == right;
 }
