@@ -42,16 +42,17 @@ class Phone {
 const List<Phone> uprightPhones = <Phone>[
   // iPhone SE (1st generation), and the smallest Android screens.
   Phone('320', Size(320, 568), EdgeInsets.only(top: 20)),
-  // The common Android phone: status bar and gesture bar.
-  Phone('360', Size(360, 800), EdgeInsets.only(top: 24, bottom: 24)),
+  // The common Android phone: the Pixel 7's status bar over its camera cutout
+  // and its gesture bar, as the emulator reports them.
+  Phone('360', Size(360, 800), EdgeInsets.only(top: 52, bottom: 24)),
   // iPhone SE (2nd and 3rd generation): no notch, no home indicator.
   Phone('375', Size(375, 667), EdgeInsets.only(top: 20)),
   // iPhone 12 to 14: the notch.
   Phone('390', Size(390, 844), EdgeInsets.only(top: 47, bottom: 34)),
   // iPhone 15 and 16: the Dynamic Island.
   Phone('393', Size(393, 852), EdgeInsets.only(top: 59, bottom: 34)),
-  // Pixel 7.
-  Phone('412', Size(412, 915), EdgeInsets.only(top: 24, bottom: 24)),
+  // Pixel 7, as its emulator reports it: 1080 × 2400 at 420 dpi.
+  Phone('412', Size(412, 915), EdgeInsets.only(top: 52, bottom: 24)),
   // iPhone 15 and 16 Plus and Pro Max.
   Phone('430', Size(430, 932), EdgeInsets.only(top: 59, bottom: 34)),
 ];
@@ -63,10 +64,11 @@ const List<Phone> sidewaysPhones = <Phone>[
     Size(844, 390),
     EdgeInsets.only(left: 47, right: 47, bottom: 21),
   ),
+  // Pixel 7 turned sideways: the camera cutout becomes the left inset.
   Phone(
     '915x412',
     Size(915, 412),
-    EdgeInsets.only(left: 24, top: 24, bottom: 24),
+    EdgeInsets.only(left: 52, top: 28, bottom: 24),
   ),
 ];
 
@@ -98,6 +100,10 @@ enum PhonePresentation {
 
   /// `showSeatLayerPicker` with its adaptive choice.
   show,
+
+  /// `SeatLayerPicker` mounted bare in the host's own scaffold, with no
+  /// SafeArea around it, as the example app does.
+  bare,
 }
 
 Map<String, Object?> _confirmedCart(int count) {
@@ -184,30 +190,41 @@ Future<SeatLayerPickerStrings> pumpPhone(
   // Android phone draws it, measures the words as a buyer sees them.
   const theme = SeatLayerPickerThemeData(fontFamily: 'Roboto');
 
-  final Widget home = presentation == PhonePresentation.page
-      ? SeatLayerPickerPage(
+  final Widget home = switch (presentation) {
+    PhonePresentation.page => SeatLayerPickerPage(
+        configuration: configuration,
+        controller: picker,
+        options: options,
+        theme: theme,
+        builders: builders,
+        onCheckout: (_) {},
+      ),
+    PhonePresentation.bare => Scaffold(
+        body: SeatLayerPicker(
           configuration: configuration,
           controller: picker,
           options: options,
           theme: theme,
           builders: builders,
           onCheckout: (_) {},
-        )
-      : Builder(
-          builder: (context) => Center(
-            child: TextButton(
-              onPressed: () => showSeatLayerPicker(
-                context,
-                configuration: configuration,
-                controller: picker,
-                options: options,
-                theme: theme,
-                builders: builders,
-              ),
-              child: const Text('Open'),
+        ),
+      ),
+    PhonePresentation.show => Builder(
+        builder: (context) => Center(
+          child: TextButton(
+            onPressed: () => showSeatLayerPicker(
+              context,
+              configuration: configuration,
+              controller: picker,
+              options: options,
+              theme: theme,
+              builders: builders,
             ),
+            child: const Text('Open'),
           ),
-        );
+        ),
+      ),
+  };
 
   await tester.pumpWidget(
     MaterialApp(

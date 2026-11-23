@@ -99,7 +99,13 @@ Between the two the compact composition holds.
 panel is built for a tablet's height: on a phone its column overflowed. So the
 device's shortest side decides, never its width alone. The same rule holds for
 `showSeatLayerPicker`'s adaptive presentation: the dialog is for a tablet 700
-or more wide, and a phone held either way opens full screen. Everything in §3 describes the
+or more wide, and a phone held either way opens full screen.
+
+**The sides are the picker's own to keep clear.** Held sideways, a phone's
+camera cutout or curved edge is a side inset (52 points on a Pixel 7). The
+picker keeps every part of itself inside the side insets, on its own ground,
+whether or not the host wraps it in a SafeArea; the top and bottom stay with
+the header and the cart, as before. Everything in §3 describes the
 compact composition unless a row says otherwise; the wide composition moves the
 cart into a side pane and the Map/3D control into the corner-control stack, and
 otherwise reuses the same components.

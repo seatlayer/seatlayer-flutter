@@ -26,6 +26,24 @@ void main() {
     }
   });
 
+  group('bare in the host scaffold, upright', () {
+    for (final phone in uprightPhones) {
+      for (final state in PhoneState.values) {
+        testWidgets('$phone, ${state.name}', (tester) async {
+          final semantics = tester.ensureSemantics();
+          final strings = await pumpPhone(
+            tester,
+            phone,
+            state,
+            presentation: PhonePresentation.bare,
+          );
+          expectPhoneLayout(tester, phone, strings);
+          semantics.dispose();
+        });
+      }
+    }
+  });
+
   group('right to left, Arabic', () {
     for (final phone in uprightPhones.where(
       (phone) => phone.name == '320' || phone.name == '390',

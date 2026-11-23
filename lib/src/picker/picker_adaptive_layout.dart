@@ -1088,7 +1088,16 @@ class _SeatLayerPickerAdaptiveLayoutState
       // One function themes every native surface, this composition and any
       // route it pushes alike; see seatLayerPickerMaterialTheme.
       data: seatLayerPickerMaterialTheme(context, resolved),
-      child: ColoredBox(color: resolved.background, child: body),
+      // The sides are the picker's own to keep clear. Held sideways, a phone's
+      // camera cutout or curved edge is a side inset, and a host that mounts
+      // the picker bare, as the example does, gives it no SafeArea: only the
+      // header stepped clear, and the prices, the map's chrome and the cart
+      // stood under the cutout. Inside SeatLayerPickerPage, or held upright,
+      // there is no side inset left, and this changes nothing.
+      child: ColoredBox(
+        color: resolved.background,
+        child: SafeArea(top: false, bottom: false, child: body),
+      ),
     );
     // The rung ladder. Android predictive back and the iOS edge swipe both
     // arrive here, so one gesture walks seat card → section → overview →
