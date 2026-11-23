@@ -5,7 +5,6 @@ library;
 
 import 'package:flutter/material.dart';
 
-import '../seat_layer_error.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_options.dart';
@@ -536,7 +535,9 @@ class SeatLayerPickerErrorView extends StatelessWidget {
   /// The words to use, or null to read them from the scope.
   final SeatLayerPickerStrings? strings;
 
-  /// What went wrong, or null for the generic wording.
+  /// The host's own sentence under the title, or null for
+  /// `strings.errorMessage`. Drawn only when it says something the title does
+  /// not.
   final String? message;
 
   @override
@@ -545,12 +546,16 @@ class SeatLayerPickerErrorView extends StatelessWidget {
     final words = strings ?? SeatLayerPickerScope.stringsOf(context);
     final controller =
         theme == null ? SeatLayerPickerScope.controllerOf(context) : null;
-    final error = controller?.state.error;
-    final text = message ??
-        (error is SeatLayerError ? error.message : words.errorMessage);
-    // Title, sentence, way out — the same three lines the web picker draws in
-    // place of its boot skeleton. No icon: a picture of a broken cloud says
-    // less than the sentence under it and takes the room the sentence needs.
+    // Never the error's own message: that is a developer's line ("SeatLayer
+    // bridge error [code]: …"), in English, and it reaches the app through
+    // onError. The buyer reads the host's words, and the default sentence is
+    // the title's, so by default the view says it once.
+    final text = message ?? words.errorMessage;
+    final sentence = text.trim().isEmpty || text == words.mapDidNotLoad
+        ? null
+        : text;
+    // Title, an optional sentence, way out. No icon: a picture of a broken
+    // cloud says less than the words under it and takes the room they need.
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(28),
@@ -567,18 +572,21 @@ class SeatLayerPickerErrorView extends StatelessWidget {
                 fontFamily: palette.fontFamily,
               ),
             ),
-            const SizedBox(height: 10),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: palette.mutedText,
-                fontSize: 13,
-                fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
-                fontFamily: palette.fontFamily,
+            if (sentence != null) ...<Widget>[
+              const SizedBox(height: 10),
+              Text(
+                sentence,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: palette.mutedText,
+                  fontSize: 13,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
+                  fontFamily: palette.fontFamily,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
+              const SizedBox(height: 4),
+            ] else
+              const SizedBox(height: 10),
             Text(
               words.checkConnection,
               textAlign: TextAlign.center,

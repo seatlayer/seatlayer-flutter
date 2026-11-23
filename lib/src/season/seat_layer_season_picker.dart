@@ -274,7 +274,6 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
                 ? SeatLayerPickerErrorView.standalone(
                     theme: theme,
                     strings: widget.strings,
-                    message: _loadError!.message,
                     onRetry: _retry,
                   )
                 : SeatLayerSeasonView(

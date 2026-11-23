@@ -169,6 +169,9 @@ void main() {
     expect(find.byType(SeatLayerPickerErrorView), findsOneWidget);
     expect(find.text(words.mapDidNotLoad), findsOneWidget);
     expect(find.text(words.checkConnection), findsOneWidget);
+    // The page's code and sentence are the app's (onError), not the buyer's.
+    expect(find.textContaining('not_found'), findsNothing);
+    expect(find.textContaining('Season not found'), findsNothing);
     // The bar stays, so the buyer still has the way out.
     expect(find.byType(SeatLayerHeaderBar), findsOneWidget);
 
