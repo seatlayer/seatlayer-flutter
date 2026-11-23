@@ -850,7 +850,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
         bundle.supportsCapability(seatLayerHostPricingCapability);
   }
 
-  /// Show [pricing]'s category prices in place of the chart's without a
+  /// Show [pricing]'s prices in place of the chart's without a
   /// reload (null: the chart's own). Boot prices come from
   /// [SeatLayerPickerOptions.pricing]; a runtime without
   /// [seatLayerHostPricingCapability] keeps the chart's prices.

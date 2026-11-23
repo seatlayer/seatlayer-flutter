@@ -672,7 +672,7 @@ map moves.
 **The wide composition's column** stands at the map's bottom end and grows
 upward. Top to bottom: the way back to the venue
 while a section is framed, the Map | 3D control, the 3D Rotate / Move pair while
-the scene is up, the same ♿ disc, then `+` and `−`. The way back joins the top
+the scene is up under the older gestures (§3.14), the same ♿ disc, then `+` and `−`. The way back joins the top
 and leaves again, so it never moves a control below it. The standalone
 colourblind toggle is **off by default on both widths** — the palette is a
 switch in the accessibility sheet — and `showColorblindControl: true` adds it
@@ -1089,7 +1089,9 @@ view.
 **Accessibility.** A group named for floors; each chip a toggle with a pressed
 state.
 
-**Snapshot.** the runtime's floor list and the active floor.
+**Snapshot.** the runtime's floor list and the active floor; on a chart with
+two or more levels, each `selection.seats[]` entry carries `floorId` and, when
+the level is named, `levelName` (runtime 1.0.0+).
 **Command** `picker.setFloor`.
 
 ### 3.8 Seat card
@@ -2262,6 +2264,15 @@ same moment once through `onBooked(handoff)`. Port note: RN / iOS / Android
 must gate their success screen the same way; showing it on hand-off was the
 bug a pilot host hit when a buyer backed out of checkout without paying.
 
+A host whose server has booked says so with `markBooked({holdId?})`
+(`picker.markBooked`, capability `hold-mark-booked-v1`). The runtime paints the
+bought seats booked, stops the clock, never releases that hold, and sends the
+snapshot without it, so the rule above reaches the same "booked" at once
+instead of on the next map read. Without `holdId` it means the hand-off hold
+only. It resolves true for `booked` and `already_booked`, false (nothing
+changed) for `no_hold`, `different_hold`, or a runtime without the capability,
+where nothing is sent. Allowed while read-only.
+
 Every state below is a **designed state**, not a set of disabled controls.
 
 #### 3.13.1 Loading
@@ -2615,6 +2626,14 @@ are dimmed and say they are disabled to assistive technology. Pressing the unsel
 one-finger gesture; the drag hints `strings.rotateVenue` /
 `strings.moveVenue` are each half's accessible hint. An icon that flipped
 between two drawings never said which gesture a drag would make.
+
+**Only under the older gestures.** The pair is drawn only when the host boots
+the scene with `touchNavigation3D: 'classic'`. The runtime's default touch
+gestures (`'map'`, runtime 1.0.0) move the venue under a finger, turn it with
+a two-finger twist and tilt it with a two-finger drag, and never ask the drag
+mode what a finger does, so a Rotate / Move choice would change nothing. The
+pair is not drawn there, on the phone or on wide, as the web picker leaves it
+out on touch. Init config `enable3DCrowd: false` turns the standing crowd off.
 
 **Where the words do not fit, glyphs.** The pair is laid out in the room the
 scene's top row leaves it: the scene's width less `size.mapAnchorInset` at both
@@ -2979,7 +2998,8 @@ from the wrong one.
 | `hold-ownership-v1`, `hold-selection-v1` | who owns a hold, and holding a named selection |
 | `checkout-handoff-v1`, `checkout-handoff-reject-v1` | the hold crossing to the host, and giving it back |
 | `cart-line-remove-v1` | removing a cart line the selection cannot name |
-| `host-pricing-v1` | the host's own category and tier prices (`pricing.categories`) on the rail, the seat card, the cart and the handoff, sent in `init.config.pricing` and changed live with `picker.setPricing`; a category the host leaves out keeps the chart's price, and an older runtime keeps the chart's prices for all |
+| `host-pricing-v1` | the host's own category and tier prices (`pricing.categories`) and, from runtime 1.0.0, single-seat and table prices by label (`pricing.objects`: a number, or `{ tiers }`) on the rail, the seat card, the cart and the handoff, sent in `init.config.pricing` and changed live with `picker.setPricing`; a category the host leaves out keeps the chart's price, a seat listed in `objects` wins over its category, and an older runtime keeps the chart's prices for all |
+| `hold-mark-booked-v1` | `picker.markBooked { holdId? }`: the host's server booked the hold; the runtime settles it and the booked state follows (§3.13) |
 
 A capability the runtime does not advertise is a feature that is **not offered**,
 never a feature that fails.

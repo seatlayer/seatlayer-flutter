@@ -5,7 +5,7 @@ import 'package:seatlayer/src/seat_layer_configuration.dart';
 
 void main() {
   test('hosted and fixture runtime versions remain explicitly pinned', () {
-    expect(seatLayerHostedWebVersion, '0.101.0');
+    expect(seatLayerHostedWebVersion, '1.0.0');
     expect(seatLayerLegacyFixtureWebVersion, '0.68.0');
     expect(
       seatLayerMobilePageUrl,
@@ -39,6 +39,25 @@ void main() {
     expect(config['publicKey'], 'pk_test_example');
     expect(config['nativeAccessProvider'], isTrue);
     expect(configuration.usesPrivateAccess, isTrue);
+  });
+
+  test('telemetry travels only when the host sets it', () {
+    Map<String, Object?> config(bool? telemetry) => SeatLayerConfiguration(
+          event: 'ev_quiet',
+          telemetry: telemetry,
+        ).initPayload()['config']! as Map<String, Object?>;
+
+    expect(config(null).containsKey('telemetry'), isFalse);
+    expect(config(false)['telemetry'], isFalse);
+    expect(config(true)['telemetry'], isTrue);
+
+    // Turning reports off is a different page, so the map boots again.
+    expect(
+      SeatLayerConfiguration(event: 'ev_quiet').semanticallyEquals(
+        SeatLayerConfiguration(event: 'ev_quiet', telemetry: false),
+      ),
+      isFalse,
+    );
   });
 
   group('open enums — unknown values never throw', () {
@@ -106,6 +125,28 @@ void main() {
       expect(seat, isNotNull);
       expect(seat!.label, 'A-1');
       expect(seat.commercial!.premium, isTrue);
+    });
+
+    test('SelectedSeat names its level on a chart with several', () {
+      final seat = SelectedSeat.fromJson({
+        'id': 's1',
+        'label': 'STALLS-B-4',
+        'floorId': 'floor-stalls',
+        'levelName': 'Stalls',
+      })!;
+      expect(seat.floorId, 'floor-stalls');
+      expect(seat.levelName, 'Stalls');
+
+      // One level, or an older runtime: neither is sent, neither is guessed.
+      final single = SelectedSeat.fromJson({'id': 's2', 'label': 'A-1'})!;
+      expect(single.floorId, isNull);
+      expect(single.levelName, isNull);
+
+      // A level with no name still has an id, so seats can be counted on it.
+      final unnamed = SelectedSeat.fromJson(
+          {'id': 's3', 'label': 'B-1', 'floorId': 'floor-2'})!;
+      expect(unnamed.floorId, 'floor-2');
+      expect(unnamed.levelName, isNull);
     });
 
     test('SelectedSeat.buyerFacingLabel falls back to label', () {

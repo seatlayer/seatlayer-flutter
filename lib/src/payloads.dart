@@ -317,6 +317,8 @@ class SelectedSeat {
     this.seatViewThumb,
     this.sightlineMetres,
     this.seatViewConfidence,
+    this.floorId,
+    this.levelName,
     String? seatViewKind,
   }) : _seatViewKind = seatViewKind;
 
@@ -403,6 +405,19 @@ class SelectedSeat {
   /// What the runtime will say about how this seat's view was produced.
   final SeatConfidenceDisclosure? seatViewConfidence;
 
+  /// The id of the level this seat is on, on a chart with two or more
+  /// levels; null on a single-level chart and from a runtime that does not
+  /// report it.
+  ///
+  /// Set even when the level has no name, and names can repeat, so this is
+  /// what counts a buyer's seats per level.
+  final String? floorId;
+
+  /// The authored name of this seat's level ("Stalls"), on a chart with two
+  /// or more levels; null where the chart has one level or the level has no
+  /// name. Display only.
+  final String? levelName;
+
   /// What to show the buyer. Booking still uses [label].
   String get buyerFacingLabel => displayLabel ?? label;
 
@@ -443,6 +458,8 @@ class SelectedSeat {
       sightlineMetres: jDouble(jGet(v, 'sightlineMetres')),
       seatViewConfidence:
           SeatConfidenceDisclosure.fromJson(jGet(v, 'seatViewConfidence')),
+      floorId: jStr(jGet(v, 'floorId')),
+      levelName: jStr(jGet(v, 'levelName')),
       seatViewKind: jStr(jGet(v, 'seatViewKind')),
     );
   }

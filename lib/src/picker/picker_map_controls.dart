@@ -623,6 +623,12 @@ class SeatLayerPickerViewModeButton extends StatelessWidget {
 ///
 /// Pinch-to-zoom and two-finger movement remain available in both modes; this
 /// explicit control makes the primary one-finger gesture discoverable.
+///
+/// Drawn only under the older touch gestures,
+/// [SeatLayer3DTouchNavigation.classic]. Under the runtime's default map
+/// gestures a finger moves the venue whatever this says, and a two-finger
+/// twist turns it, so the choice would change nothing and is not offered, as
+/// on the web.
 class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
   /// Creates the 3D navigation-mode toggle.
   const SeatLayerPicker3DNavigationModeButton({super.key});
@@ -632,6 +638,10 @@ class SeatLayerPicker3DNavigationModeButton extends StatelessWidget {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final map = controller.state.snapshot?.map;
     if (map?.isVenue3D != true) return const SizedBox.shrink();
+    if (SeatLayerPickerScope.optionsOf(context).touchNavigation3D !=
+        SeatLayer3DTouchNavigation.classic) {
+      return const SizedBox.shrink();
+    }
     final bundle = controller.mapController.bundleInfo;
     if (bundle?.supportsCapability('venue-3d-controls-v1') != true ||
         bundle?.supportsCommand('picker.setVenue3DNavigationMode') != true) {

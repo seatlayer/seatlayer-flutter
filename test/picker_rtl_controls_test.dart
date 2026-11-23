@@ -6,9 +6,11 @@
 // right, under their thumb's opposite side.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/open_enums.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
+import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_status_views.dart';
 import 'package:seatlayer/src/picker/picker_venue_3d.dart';
 
@@ -36,8 +38,9 @@ Future<FakePickerMap> _mount(
   WidgetTester tester,
   TextDirection direction,
   Widget child,
-  Map<String, Object?> snapshot,
-) async {
+  Map<String, Object?> snapshot, {
+  SeatLayerPickerOptions options = const SeatLayerPickerOptions(),
+}) async {
   useFakeWebViewPlatform();
   final map = FakePickerMap(bundle: _bundle());
   addTearDown(map.dispose);
@@ -46,6 +49,7 @@ Future<FakePickerMap> _mount(
     pickerHarness(
       map,
       Directionality(textDirection: direction, child: child),
+      options: options,
     ),
   );
   map.emit(snapshot);
@@ -89,12 +93,22 @@ void main() {
         (tester) async {
       final snapshot = snapshotWithTicketCount(2, revision: 3);
       (snapshot['map']! as Map<String, Object?>)['buyerView'] = 'venue3d';
-      await _mount(tester, direction, const SeatLayerVenue3D(), snapshot);
+      // The pair is drawn only under the older touch gestures.
+      await _mount(
+        tester,
+        direction,
+        const SeatLayerVenue3D(),
+        snapshot,
+        options: const SeatLayerPickerOptions(
+          touchNavigation3D: SeatLayer3DTouchNavigation.classic,
+        ),
+      );
       final pair = _centreX(tester, find.text('Rotate venue'));
       expect(pair > half, !rtl, reason: 'Rotate venue at x=$pair');
     });
 
-    testWidgets('the 3D back pill points to the start edge in ${direction.name}',
+    testWidgets(
+        'the 3D back pill points to the start edge in ${direction.name}',
         (tester) async {
       final snapshot = snapshotWithTicketCount(1, revision: 3);
       final seat = ((snapshot['selection']! as Map<String, Object?>)['seats']!
@@ -119,7 +133,8 @@ void main() {
       expect(_mirrored(tester, chevron), rtl);
     });
 
-    testWidgets('the way-back control points to the start edge in '
+    testWidgets(
+        'the way-back control points to the start edge in '
         '${direction.name}', (tester) async {
       await _mount(
         tester,

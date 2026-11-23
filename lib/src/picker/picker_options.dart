@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../open_enums.dart';
 import '../payloads.dart';
 import '../seat_layer_error.dart';
 import 'picker_chart_load.dart';
@@ -17,7 +18,8 @@ typedef SeatLayerMoneyFormatter = String Function(
     double amount, String currency);
 
 /// The runtime capability that carries [SeatLayerPickerPricing.categories]
-/// to the map: `init.config.pricing` and `cmd picker.setPricing`.
+/// and [SeatLayerPickerPricing.objects] to the map: `init.config.pricing` and
+/// `cmd picker.setPricing`.
 const String seatLayerHostPricingCapability = 'host-pricing-v1';
 
 /// Host-supplied prices for one category and its tiers.
@@ -46,37 +48,82 @@ class SeatLayerCategoryPricing {
   }
 }
 
+/// Host-supplied price for one seat or table.
+///
+/// A seat has no base price: it is one price, or one price per tier.
+@immutable
+class SeatLayerSeatPricing {
+  /// One price for this seat, whatever the tier.
+  const SeatLayerSeatPricing(double this.price)
+      : tiers = const <String, double>{};
+
+  /// One price per tier id for this seat.
+  const SeatLayerSeatPricing.tiers(this.tiers) : price = null;
+
+  /// The seat's price, when it has one price for every tier.
+  final double? price;
+
+  /// Price per tier id; empty when [price] is set.
+  final Map<String, double> tiers;
+
+  /// The runtime's shape: a bare number, else `{ tiers }`; null when this
+  /// entry sets nothing.
+  Object? toBridgeJson() {
+    if (price != null) return price;
+    if (tiers.isEmpty) return null;
+    return <String, Object?>{'tiers': Map<String, double>.of(tiers)};
+  }
+}
+
 /// Host-supplied pricing and money formatting.
 ///
 /// [categories] are the prices the buyer is shown — on the price rail, the
 /// seat card, the cart and the checkout handoff — in place of the chart's own.
 /// A ticketing host that charges from its own catalogue sets them so the map
 /// says what checkout will charge; a category it leaves out keeps the chart's
-/// price. Display only: the hold is still priced by SeatLayer. Needs a runtime
+/// price. [objects] price single seats and tables, keyed by their label; a
+/// seat the event priced on its own keeps that price unless it is listed
+/// here. Display only: the hold is still priced by SeatLayer. Needs a runtime
 /// advertising [seatLayerHostPricingCapability]; an older one keeps the chart's
-/// prices.
+/// prices, and one before runtime 1.0.0 ignores [objects].
 @immutable
 class SeatLayerPickerPricing {
   /// Creates a pricing override.
   const SeatLayerPickerPricing({
     this.categories = const <String, SeatLayerCategoryPricing>{},
+    this.objects = const <String, SeatLayerSeatPricing>{},
     this.formatter,
   });
 
   /// Price overrides keyed by category key.
   final Map<String, SeatLayerCategoryPricing> categories;
 
+  /// Price overrides for single seats and tables, keyed by their label.
+  ///
+  /// The label is the booking identity (`SelectedSeat.label`), not the
+  /// display label. A seat listed here wins over its category's price.
+  final Map<String, SeatLayerSeatPricing> objects;
+
   /// How every amount in the native chrome is rendered.
   final SeatLayerMoneyFormatter? formatter;
 
-  /// The runtime's `pricing` value, or null when no category sets a price.
+  /// The runtime's `pricing` value, or null when nothing sets a price.
   Map<String, Object?>? toBridgeConfig() {
     final prices = <String, Object?>{
       for (final entry in categories.entries)
         if (entry.value.toBridgeJson() != null)
           entry.key: entry.value.toBridgeJson(),
     };
-    return prices.isEmpty ? null : <String, Object?>{'prices': prices};
+    final seats = <String, Object?>{
+      for (final entry in objects.entries)
+        if (entry.value.toBridgeJson() != null)
+          entry.key: entry.value.toBridgeJson(),
+    };
+    if (prices.isEmpty && seats.isEmpty) return null;
+    return <String, Object?>{
+      if (prices.isNotEmpty) 'prices': prices,
+      if (seats.isNotEmpty) 'objects': seats,
+    };
   }
 }
 
@@ -289,6 +336,8 @@ class SeatLayerPickerOptions {
     this.enable3D = true,
     this.enableSeatView = true,
     this.max3DSeats,
+    this.enable3DCrowd = true,
+    this.touchNavigation3D,
     this.hideEventDetails = false,
     this.eventName,
     this.panelInitiallyCollapsed = true,
@@ -336,6 +385,13 @@ class SeatLayerPickerOptions {
 
   /// Optional WebGL seat ceiling. Omit to use SeatLayer's device-aware limit.
   final int? max3DSeats;
+
+  /// Whether the 3D venue draws its standing crowd. False turns it off.
+  final bool enable3DCrowd;
+
+  /// How fingers move the 3D venue. Null takes the runtime's default,
+  /// [SeatLayer3DTouchNavigation.map].
+  final SeatLayer3DTouchNavigation? touchNavigation3D;
 
   /// Whether to suppress the event name and venue in the header.
   final bool hideEventDetails;
@@ -436,6 +492,9 @@ class SeatLayerPickerOptions {
         'enable3D': enable3D,
         'enableSeatView': enableSeatView,
         if (max3DSeats != null) 'max3DSeats': max3DSeats,
+        if (!enable3DCrowd) 'enable3DCrowd': false,
+        if (touchNavigation3D != null)
+          'touchNavigation3D': touchNavigation3D!.raw,
         'hideEventDetails': hideEventDetails,
         'panelCollapsed': panelInitiallyCollapsed,
         'languages': languages.map((locale) => locale.toLanguageTag()).toList(),

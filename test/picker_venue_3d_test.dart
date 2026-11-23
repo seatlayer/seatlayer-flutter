@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/open_enums.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
 import 'package:seatlayer/src/picker/picker_legend.dart';
@@ -71,6 +72,11 @@ Map<String, Object?> _seatedInQualifiedRow() {
   return snapshot;
 }
 
+/// The older touch gestures, under which the Rotate / Move pair is drawn.
+const SeatLayerPickerOptions _classic = SeatLayerPickerOptions(
+  touchNavigation3D: SeatLayer3DTouchNavigation.classic,
+);
+
 void main() {
   testWidgets('the chrome stays away until the scene is up', (tester) async {
     final map = FakePickerMap(bundle: _venueBundle());
@@ -100,6 +106,23 @@ void main() {
     );
     expect(find.text('Back to venue'), findsOneWidget);
     expect(find.text('View from here'), findsOneWidget);
+    // The runtime's map gestures never read Rotate / Move: no pair is drawn.
+    expect(find.text('Rotate venue'), findsNothing);
+    expect(find.text('Move venue'), findsNothing);
+  });
+
+  testWidgets('the older gestures bring the rotate and move pair back',
+      (tester) async {
+    final map = FakePickerMap(bundle: _venueBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerVenue3D(), options: _classic),
+    );
+    map.emit(_seated());
+    await tester.pumpAndSettle();
+
     expect(find.text('Rotate venue'), findsOneWidget);
     expect(find.text('Move venue'), findsOneWidget);
   });
@@ -110,7 +133,9 @@ void main() {
     addTearDown(map.dispose);
     usePhoneSurface(tester);
 
-    await tester.pumpWidget(pickerHarness(map, const SeatLayerVenue3D()));
+    await tester.pumpWidget(
+      pickerHarness(map, const SeatLayerVenue3D(), options: _classic),
+    );
     map.emit(_seated());
     await tester.pumpAndSettle();
 
@@ -144,6 +169,7 @@ void main() {
           map,
           const SeatLayerVenue3D(),
           options: const SeatLayerPickerOptions(
+            touchNavigation3D: SeatLayer3DTouchNavigation.classic,
             strings: SeatLayerPickerStrings(orbitMode: 'R', panMode: 'M'),
           ),
         ),
@@ -179,6 +205,7 @@ void main() {
               ),
             ),
           ),
+          options: _classic,
         ),
       );
       map.emit(_seated());
@@ -200,7 +227,9 @@ void main() {
       final map = FakePickerMap(bundle: _venueBundle());
       addTearDown(map.dispose);
       usePhoneSurface(tester);
-      await tester.pumpWidget(pickerHarness(map, const SeatLayerVenue3D()));
+      await tester.pumpWidget(
+        pickerHarness(map, const SeatLayerVenue3D(), options: _classic),
+      );
       map.emit(_seated());
       await tester.pumpAndSettle();
       expect(
