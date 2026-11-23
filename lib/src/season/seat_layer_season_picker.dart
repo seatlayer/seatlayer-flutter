@@ -8,9 +8,11 @@ import 'package:flutter/material.dart';
 import '../picker/picker_header.dart';
 import '../picker/picker_layout.dart';
 import '../picker/picker_models.dart';
+import '../picker/picker_status_views.dart';
 import '../picker/picker_strings.dart';
 import '../picker/picker_tokens.g.dart';
 import '../picker/seat_layer_picker_theme.dart';
+import '../seat_layer_error.dart';
 import '../seat_layer_surface_route.dart';
 import 'season_configuration.dart';
 import 'season_models.dart';
@@ -91,6 +93,11 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
   SeatLayerThemeMode? _bootMode;
   SeatLayerThemeMode? _pageMode;
   double? _sentBottomInset;
+
+  /// Why the page did not load, while the event picker's failure view stands
+  /// in its place; and which page Retry is on, so a retry mounts a new one.
+  SeatLayerError? _loadError;
+  int _page = 0;
 
   @override
   void initState() {
@@ -181,6 +188,19 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
     }
   }
 
+  /// A Season that cannot be mounted renders nothing and fails the handshake
+  /// (`sys.error`, `sys.incompatible`, or no answer in time). The buyer gets
+  /// the event picker's own failure view under the bar, not a blank page.
+  void _failed(SeatLayerError error) {
+    if (mounted) setState(() => _loadError = error);
+  }
+
+  /// Retry boots a new page, as the event picker's does.
+  void _retry() => setState(() {
+        _loadError = null;
+        _page += 1;
+      });
+
   /// The side the page is painted on: `auto` resolved here, where the app's
   /// own brightness is known, as the event picker does.
   SeatLayerThemeMode _sideOf(BuildContext context) =>
@@ -250,12 +270,21 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
             compact: !wide,
           ),
           Expanded(
-            child: SeatLayerSeasonView(
-              controller: _controller,
-              configuration: widget.configuration,
-              bootThemeMode: _bootMode ?? mode,
-              backgroundColor: theme.mapBackground ?? theme.background,
-            ),
+            child: _loadError != null
+                ? SeatLayerPickerErrorView.standalone(
+                    theme: theme,
+                    strings: widget.strings,
+                    message: _loadError!.message,
+                    onRetry: _retry,
+                  )
+                : SeatLayerSeasonView(
+                    key: ValueKey<int>(_page),
+                    controller: _controller,
+                    configuration: widget.configuration,
+                    bootThemeMode: _bootMode ?? mode,
+                    backgroundColor: theme.mapBackground ?? theme.background,
+                    onLoadError: _failed,
+                  ),
           ),
         ],
       ),

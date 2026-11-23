@@ -32,14 +32,26 @@ class SeasonPage {
   final FakeWebViewPlatform fake;
   var _n = 0;
 
+  /// The web view the page speaks from: a retry mounts a new one.
+  var controller = 0;
+
+  /// Speak from the newest web view, as a page that just booted does.
+  void reloaded() {
+    controller = fake.channels.length - 1;
+    _n = 0;
+  }
+
   void post(EnvelopeKind kind, String type, Object? payload, {String? id}) =>
-      fake.postFromPage(Envelope(
-        kind: kind,
-        type: type,
-        sequence: kind == EnvelopeKind.evt ? ++_n : null,
-        id: id,
-        payload: payload,
-      ).encode());
+      fake.postFromPage(
+        Envelope(
+          kind: kind,
+          type: type,
+          sequence: kind == EnvelopeKind.evt ? ++_n : null,
+          id: id,
+          payload: payload,
+        ).encode(),
+        controller: controller,
+      );
 
   void evt(String type, Object? payload) =>
       post(EnvelopeKind.evt, type, payload);

@@ -2740,6 +2740,15 @@ command has no deadline. `closed`, `released` and `booked` close the screen;
 `kept` closes it and reports the operation id; `stayed` (a second press while
 the question is up, which dismisses it) stays.
 
+**Could not load.** A Season the page cannot mount renders nothing and fails
+the handshake (`sys.error`, `sys.incompatible` or no answer in time). Under the
+bar stands the event picker's own failure view (`SeatLayerPickerErrorView`:
+`strings.mapDidNotLoad`, the error's sentence, `strings.checkConnection`,
+`strings.retry`), no new words or tokens. Retry boots a new page; the dismiss
+control closes at once (`closed`), as there is no page to ask. A `failed`
+status after `ready` is the page's own (a hold it could not make) and stays on
+the page.
+
 **Follows the app.** The boot side goes in `init.config.theme`; a later flip is
 `season.setThemeMode`, in place. The app going to the background and coming back
 is `season.lifecycle`.
