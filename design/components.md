@@ -14,8 +14,7 @@ in buyer order. Where the two disagree, the spec is newer.
 
 ## Corner radius: which surfaces are pills
 
-**Decision, 2026-08-28, restated after the web-parity round.** Actions carry
-`radius.button`, which is what the web picker's own buttons measure. Material's
+Actions carry `radius.button`, which is what the web picker's own buttons measure. Material's
 default stadium button is therefore wrong for this design, and every action that
 is not listed as a pill below overrides it.
 
@@ -289,14 +288,14 @@ substitutes an emoji or a platform icon. An unknown key draws nothing.
   `size.dockBarHeight` only where a host opted into a dock; by default no
   width mounts one. The accessible-section stepper sits beside the accessibility
   control, `size.accessStepGap` from it, on its inner side.
-- **The ♿ control is the disc above `+`** on both widths (2026-09-06). It
+- **The ♿ control is the disc above `+`** on both widths. It
   stood alone in the bottom-left region, opposite the stack of discs, and the
   wide composition drew it a second time in its side panel. On the phone it
   heads the column; on wide the Map | 3D control is above it.
 - **Phone column** exactly three, `size.zoomColumnGap` apart, top to bottom:
   the ♿ control, `+` (`picker.zoomIn`) and a framed dot,
   `strings.fitWholeVenue`, that shows the whole venue from any depth via
-  `picker.overview`. **There is no `−` on the phone** (2026-09-06): its only
+  `picker.overview`. **There is no `−` on the phone**: its only
   rung of its own was among the seats, everywhere else the one step back is the
   whole venue, and two discs for one move read as a puzzle. Pinch steps out.
   `SeatLayerPickerZoomOutButton` stays public for a host's own composition.
@@ -498,7 +497,7 @@ element) and `hoverCardContent.ts` (the pure model). Spec: `picker-spec.md`
   hairline-divided, so a hover is the first frame of the card a click opens
   rather than a differently shaped restatement of it. A section card's head is
   its name, centred over the bands. Rows carry category name and price only —
-  availability counts were refused (2026-09-04): a per-category "12 left" on
+  availability counts are not shown: a per-category "12 left" on
   every hover is a pressure device, and the number most likely to be stale.
 - **Category band** full bleed, edge to edge like a legend chip, no dot and no
   rail — bands inside a margin read as buttons on a panel rather than as one

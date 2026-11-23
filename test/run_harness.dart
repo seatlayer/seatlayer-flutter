@@ -26,7 +26,7 @@ final runHelloAppBar = <String, Object?>{
   ],
 };
 
-/// A page that also takes the app's insets (#15): it keeps its cart clear of
+/// A page that also takes the app's insets: it keeps its cart clear of
 /// the home indicator itself.
 final runHelloInsets = <String, Object?>{
   ...runHelloAppBar,

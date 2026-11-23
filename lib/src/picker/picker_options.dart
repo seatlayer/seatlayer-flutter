@@ -140,7 +140,7 @@ class SeatLayerPickerPricing {
 /// both. Set one explicitly to override that.
 @immutable
 class SeatLayerPickerChromeOptions {
-  /// Creates a chrome visibility set. Defaults are the approved phone UX.
+  /// Creates a chrome visibility set. Defaults are the phone layout.
   const SeatLayerPickerChromeOptions({
     this.showHeader = true,
     this.showPriceRail = true,
@@ -325,7 +325,7 @@ class SeatLayerPickerChromeOptions {
 /// Behaviour of one picker session and its native chrome.
 @immutable
 class SeatLayerPickerOptions {
-  /// Creates an options set; every default is the approved buyer experience.
+  /// Creates an options set; every default is the standard buyer experience.
   const SeatLayerPickerOptions({
     this.layout = SeatLayerPickerLayoutMode.adaptive,
     this.holdTtl,

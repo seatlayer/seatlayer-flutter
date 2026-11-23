@@ -77,7 +77,7 @@ void main() {
                 '${presentation.name}, ${state.name}',
                 // Held sideways with the cart open, the sheet leaves about 30
                 // points of map and cuts the Map/3D switch and the fit button.
-                // No approved board covers this state yet; it waits for one.
+                // This state has no layout of its own yet.
                 skip: state == PhoneState.cartOpen, (tester) async {
               final semantics = tester.ensureSemantics();
               final strings = await pumpPhone(

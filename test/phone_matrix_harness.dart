@@ -363,8 +363,8 @@ bool pressReaches(WidgetTester tester, Offset point, Tappable control) {
 
 /// The smallest a control may be: WCAG 2.2's 24 points (2.5.8, level AA).
 ///
-/// Apple asks for 44. The approved phone boards draw several controls between
-/// the two, so [controlsUnder] lists those for a decision rather than failing.
+/// Apple asks for 44. Several phone controls are between the two, so
+/// [controlsUnder] lists those rather than failing.
 const double minimumTapTarget = 24;
 
 /// What Apple's Human Interface Guidelines ask a control to be.

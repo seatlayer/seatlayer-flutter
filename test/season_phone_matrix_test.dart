@@ -1,4 +1,4 @@
-// The Season picker on every phone in the matrix: the app's header (NS01)
+// The Season picker on every phone in the matrix: the app's header
 // over season.html, which a test cannot draw — the page is the web view, so
 // its area shows the page's ground here and the device runs show the rest.
 //

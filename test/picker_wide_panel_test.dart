@@ -1,4 +1,4 @@
-// The wide composition as its design frames draw it: the control column at
+// The wide composition: the control column at
 // the map's bottom end, the prices as a named list, and the panel's foot as a
 // summary line over one full-width button.
 import 'package:flutter/material.dart';

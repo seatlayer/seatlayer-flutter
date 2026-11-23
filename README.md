@@ -214,7 +214,7 @@ numbers are defaults, not constants, and every buyer-facing string is an
 override:
 
 ```dart
-// before: the approved phone metrics and English defaults.
+// before: the default phone metrics and English defaults.
 // after: a taller dock, no floor strip, French wording.
 theme: const SeatLayerPickerThemeData.light(
   layout: SeatLayerPickerLayout(dockBarHeight: 60, sheetMaxHeightFraction: .5),

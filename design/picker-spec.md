@@ -259,7 +259,7 @@ additionally tell the runtime to stop accepting input at all
 (`picker.setInteractionEnabled`), so the map is quiet as well as unclaimed
 while a decision is open.
 
-**The second guard, on the runtime's side (2026-09-05).** The three rules
+**The second guard, on the runtime's side.** The three rules
 above are necessary and, on iOS 26, not sufficient: measured on the
 simulator, the platform view is told it lost 134 ms before the finger lifts
 and WKWebView is handed the touch regardless, so a tap on a corner disc still
@@ -708,7 +708,7 @@ the scene is up under the older gestures (§3.14), the same ♿ disc, then `+` a
 and leaves again, so it never moves a control below it. The standalone
 colourblind toggle is **off by default on both widths** — the palette is a
 switch in the accessibility sheet — and `showColorblindControl: true` adds it
-last, under `−`. The column has **no fit control of its own** (2026-09-06). It carried a plain fit-to-screen
+last, under `−`. The column has **no fit control of its own**. It carried a plain fit-to-screen
 button until then; two ways to frame the same flat venue on one composition is
 one too many, and the one that went is the one a pinch already does. The
 immersive scene keeps its own Fit chip (§3.14), which frames a camera rather
@@ -2065,7 +2065,7 @@ Label ladder, in priority order:
    with no card up** and is simply disabled, and it offers no finder either.
    The card is the question; the footer says nothing about it, so the buyer's
    cart still reads as their cart underneath.
-4. securing → disabled, **no spinner** (words only, as the design draws it),
+4. securing → disabled, **no spinner** (words only),
    `strings.securingSeats`; still busy, so the button stays down
 5. opening checkout → disabled, **no spinner** (words only; the seats are held),
    `strings.seatsSecuredOpeningCheckout`; still busy, so the button stays down
@@ -2516,7 +2516,7 @@ dismiss at `size.minimumHitTarget`. Due while the hold has under a minute left
 and the booked overlay is not up — and mounted only where the layout asks for
 it, which by default is the wide layout alone.
 
-**Decision (2026-09-04): not shown on the phone by default.** The phone picker
+**Not shown on the phone by default.** The phone picker
 gives the buyer ONE timer — the header's hold countdown
 (`SeatLayerPickerHoldCountdown`), which fills with the accent, breathes its
 status light, and counts the last minute out second by second to a screen

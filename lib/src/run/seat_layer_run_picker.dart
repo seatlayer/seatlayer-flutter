@@ -193,7 +193,7 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
   }
 
   /// Whether this page keeps its own cart clear of the home indicator / gesture
-  /// bar from the inset the app sends (#15). Without it the app keeps a band
+  /// bar from the inset the app sends. Without it the app keeps a band
   /// there: the web view passes no bottom inset (env() reads 0 on iOS and
   /// Android).
   bool get _pageTakesInsets =>

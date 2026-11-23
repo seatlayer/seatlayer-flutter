@@ -268,7 +268,7 @@ void main() {
     map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
     await tester.pumpAndSettle();
 
-    // THE WIDE FIT-TO-SCREEN CONTROL WENT (2026-09-06). Two ways to frame the
+    // THE WIDE FIT-TO-SCREEN CONTROL WENT. Two ways to frame the
     // same flat venue on one layout is one too many, and the one that went is
     // the one pinch already does. The immersive scene keeps its own Fit chip,
     // which frames a camera rather than a map.
