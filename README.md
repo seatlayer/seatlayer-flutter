@@ -446,12 +446,9 @@ event streams.
 The picker fails closed rather than showing a control that quietly does
 nothing, and it reads one immutable state snapshot at a time: stale state is
 dropped, and inventory-changing actions are serialized, repeated checkout taps
-included. Private buyer tokens stay in memory and never enter a snapshot. See
-[the picker architecture](doc/mobile-picker-architecture.md) for the layers,
-ownership rules and validation gates.
+included. Private buyer tokens stay in memory and never enter a snapshot.
 
-The design tokens behind these widgets, and how to build and test the package,
-are in [CONTRIBUTING.md](CONTRIBUTING.md).
+How to build and test the package is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Frequently asked questions
 
