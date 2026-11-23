@@ -356,9 +356,11 @@ class _SeatCardFrame extends StatelessWidget {
             bottomInset: bottomInset,
             onSheetBand: onSheetBand,
           ),
+          // Measured from the map's own top edge: a card too tall for the
+          // room under the chrome on the map's top line rises over it before
+          // it is drawn any smaller (see [_SeatCardLayout]).
           child: _FitCardHeight(
             room: constraints.maxHeight -
-                topInset -
                 seatLayerConfirmCardTopInset -
                 bottomInset -
                 seatLayerConfirmCardRestInset,
@@ -375,7 +377,9 @@ class _SeatCardFrame extends StatelessWidget {
 /// foot of the map, where it was drawn but could not be pressed: a press there
 /// reaches the sheet below, not the card. Scaled to [room], the whole card,
 /// Add seat included, stays where a press reaches it. A card that fits is laid
-/// out and painted exactly as before.
+/// out and painted exactly as before. [room] runs from the map's own top edge,
+/// because a card first rises over the top line's chrome, so it is drawn
+/// smaller only when the whole map is too short for it.
 class _FitCardHeight extends SingleChildRenderObjectWidget {
   const _FitCardHeight({required this.room, required super.child});
 
@@ -482,10 +486,20 @@ class _SeatCardLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
+    // On a short map, as on a phone held sideways at a large text size, a
+    // card taller than the room under the top line's chrome keeps its resting
+    // place and rises over that chrome, which a card that asks leaves idle,
+    // so its buttons keep their size rather than being drawn smaller.
+    final rises = childSize.height >
+        size.height -
+            topInset -
+            seatLayerConfirmCardTopInset -
+            bottomInset -
+            seatLayerConfirmCardRestInset;
     final top = seatLayerConfirmCardTop(
       card: childSize,
       area: size,
-      topInset: topInset,
+      topInset: rises ? 0 : topInset,
       bottomInset: bottomInset,
     );
     final report = onSheetBand;

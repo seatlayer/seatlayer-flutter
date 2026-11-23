@@ -78,14 +78,7 @@ void main() {
                 // Held sideways with the cart open, the sheet leaves about 30
                 // points of map and cuts the Map/3D switch and the fit button.
                 // No approved board covers this state yet; it waits for one.
-                //
-                // Held sideways at text 1.3, the seat card gets 69 to 78
-                // points of map and fits only drawn at about 0.4 of its size,
-                // where its buttons are 21 points on the 915 phone. Clamping
-                // the text does not help; a fix changes where the card may
-                // stand, which waits for a decision.
-                skip: state == PhoneState.cartOpen ||
-                    (state == PhoneState.card && scale > 1), (tester) async {
+                skip: state == PhoneState.cartOpen, (tester) async {
               final semantics = tester.ensureSemantics();
               final strings = await pumpPhone(
                 tester,

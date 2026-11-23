@@ -1220,12 +1220,17 @@ The card has **one home**. It is the bottom sheet the buyer already expects,
 `restInset` above the foot of whatever the picker's own chrome has left of the
 map, on every tap, for every seat — nothing about the tapped seat is read when
 it is placed. `topInset` and `bottomInset` are the bands that chrome stands on,
-so the sheet never slides under the dock or behind the floor rail; a card
-taller than the band it lives in keeps its top edge rather than climbing past
-`topInset`, and is drawn scaled down to fit between that edge and `restInset`
-above the foot. A press reaches only what lies inside the map, so a card that
-hung past its foot, as on a phone held sideways (145 to 170 points of map),
-was drawn where Add seat could not be pressed. A card that fits is unchanged.
+so the sheet never slides under the dock or behind the floor rail. A press
+reaches only what lies inside the map, so a card that hung past its foot, as
+on a phone held sideways (145 to 170 points of map), was drawn where Add seat
+could not be pressed. A card that fits is unchanged. A card taller than the
+room between `topInset` and its resting place keeps that resting place and
+**rises over the chrome on the map's top line**, up to
+`size.confirmCardTopInset` under the map's own top edge. That chrome is idle
+while a card asks, and its buttons keep their size. Only a card taller than the
+whole map is **drawn scaled down** to fit between that edge and `restInset`
+above the foot. Held sideways at text 1.3, the card's buttons stay about 34
+points, where scaling under the top line's chrome drew them at 21.
 
 Keeping the seat and its card together is then the **map's** job, and it is
 done the way the web sheet does it — by a **pan**, never a zoom:
