@@ -26,6 +26,13 @@ final runHelloAppBar = <String, Object?>{
   ],
 };
 
+/// A page that also takes the app's insets (#15): it keeps its cart clear of
+/// the home indicator itself.
+final runHelloInsets = <String, Object?>{
+  ...runHelloAppBar,
+  'commands': <String>['group.setViewportInsets'],
+};
+
 Map<String, Object?> runReady(String name) => <String, Object?>{
       'performanceGroup': <String, Object?>{
         'key': 'pg_test',

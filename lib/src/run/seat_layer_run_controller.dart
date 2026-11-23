@@ -204,6 +204,24 @@ class SeatLayerRunController
     );
   }
 
+  /// The room the system takes around the page, in logical pixels: the page
+  /// keeps its cart clear of it. Null clears it. Only a page that lists
+  /// `group.setViewportInsets` in its commands takes it; an older one answers
+  /// `unsupported_command`.
+  Future<void> setViewportInsets(EdgeInsets? insets) async {
+    await run(
+      'group.setViewportInsets',
+      insets == null
+          ? const <String, Object?>{'insets': null}
+          : <String, Object?>{
+              'top': insets.top,
+              'right': insets.right,
+              'bottom': insets.bottom,
+              'left': insets.left,
+            },
+    );
+  }
+
   /// Tell the page the app went to the background or came back. Coming back,
   /// the page re-reads the hold; the answer says whether it is still held.
   Future<bool?> setForeground(bool foreground) async => jBool(jGet(
