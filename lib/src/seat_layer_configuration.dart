@@ -8,7 +8,7 @@ import 'seat_layer_surface_configuration.dart';
 const String seatLayerSdkVersion = '0.13.0';
 
 /// The SeatLayer renderer version this SDK release is pinned to.
-const String seatLayerHostedWebVersion = '1.0.2';
+const String seatLayerHostedWebVersion = '1.0.3';
 
 /// Renderer version retained only for the example app's offline fixture.
 ///
