@@ -300,38 +300,74 @@ void main() {
       pickerErrorWords(_refused('a_code_from_next_year'), _english).message,
       _english.checkConnection,
     );
+    // The app's own exception.
     expect(
       pickerErrorWords(StateError('not for buyers'), _english).message,
-      _english.checkConnection,
+      _english.eventUnavailable,
     );
   });
 
-  test('a failure of the app or the page asks to try again', () {
-    for (final code in <String>[
-      'bad_payload',
-      'not_ready',
-      'handoff_not_owned',
-      'idempotency_key_conflict',
-      'selections_required',
-      'table_quantity_rejected',
+  test('a failure of the app or the page says whether to try again', () {
+    for (final (codes, said) in <(List<String>, String)>[
+      (
+        <String>[
+          'bad_payload',
+          'destroyed',
+          'not_ready',
+          'read_only',
+          'handoff_not_owned',
+          'idempotency_key_conflict',
+          'invalid_referral',
+          'holdId_required',
+          'selections_required',
+          'sl_incompatible',
+          'table_quantity_rejected',
+          'unsupported_command',
+          'unsupported_state_contract',
+        ],
+        _english.eventUnavailable,
+      ),
+      (
+        <String>[
+          'command_failed',
+          'internal_error',
+          'picker_error',
+          'render_failed',
+          'sl_decoding',
+          'sl_timeout',
+          'sl_transport',
+        ],
+        _english.checkConnection,
+      ),
     ]) {
-      for (final command in <String>[
-        'picker.holdSelection',
-        'picker.bestAvailable',
-        'picker.removeCartLine',
-        'picker.extendHold',
-        'picker.zoomToFit',
-      ]) {
-        expect(
-          _said(_refused(code, status: null), command: command),
-          _english.checkConnection,
-          reason: '$code, $command',
-        );
+      for (final code in codes) {
+        for (final command in <String>[
+          'picker.holdSelection',
+          'picker.bestAvailable',
+          'picker.removeCartLine',
+          'picker.extendHold',
+          'picker.zoomToFit',
+        ]) {
+          expect(
+            _said(
+              _refused(code, status: null),
+              command: command,
+              label: 'A-1',
+            ),
+            said,
+            reason: '$code, $command',
+          );
+        }
       }
     }
     expect(
-        _said(const SeatLayerError.readOnly('hold')), _english.checkConnection);
-    expect(_said(const SeatLayerError.decoding('x')), _english.checkConnection);
+      _said(const SeatLayerError.readOnly('hold')),
+      _english.eventUnavailable,
+    );
+    expect(
+      _said(const SeatLayerError.decoding('x')),
+      _english.checkConnection,
+    );
   });
 
   test('every language says each sentence in its own words', () {
@@ -451,23 +487,27 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pump();
     final unknown = _refused('a_code_from_next_year', message: 'server words');
-    for (final error in <Object>[
-      unknown,
-      _refused('command_failed', message: 'TypeError: x is null', status: null),
-      const SeatLayerError.decoding('server words'),
-      StateError('server words'),
+    for (final (error, said) in <(Object, String)>[
+      (unknown, _english.checkConnection),
+      (
+        _refused('command_failed',
+            message: 'TypeError: x is null', status: null),
+        _english.checkConnection,
+      ),
+      (const SeatLayerError.decoding('server words'), _english.checkConnection),
+      (const SeatLayerError.readOnly('hold'), _english.eventUnavailable),
+      (StateError('server words'), _english.eventUnavailable),
     ]) {
       picker.reportActionError(error);
       await tester.pump();
-      expect(find.text(_english.checkConnection), findsOneWidget,
-          reason: '$error');
+      expect(find.text(said), findsOneWidget, reason: '$error');
       for (final part in <String>['server', 'code', 'Error', 'SeatLayer']) {
         expect(find.textContaining(part), findsNothing, reason: '$error');
       }
       // The host still has the error itself.
       expect(picker.state.error, same(error));
     }
-    expect(reported, hasLength(3));
+    expect(reported, hasLength(4));
     expect(reported.first, same(unknown));
   });
 }

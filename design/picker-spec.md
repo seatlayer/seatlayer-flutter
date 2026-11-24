@@ -2650,15 +2650,16 @@ names its own sentence, the code decides; otherwise the action does.
 | a hold, with seats named (the first three, standing places left out) | `labelNoLongerAvailable` / `labelsNoLongerAvailable` |
 | `not_for_sale`, with no seat named | `seatUnavailable` |
 | a hold, anything else | `seatsJustTaken` |
+| a call made wrongly, or a page the app cannot speak to (`sl_incompatible`, `unsupported_*`, `read_only`, `not_ready`, `destroyed`, `bad_payload`, `handoff_not_owned`, `table_quantity_rejected`, a missing or invalid argument, an idempotency key used twice); an exception of the app's own | `eventUnavailable` |
 | anything else | `checkConnection` |
 
 A removal and more time keep their own sentence for the codes from
 `seat_held_for_renewal` to `eventUnavailable`.
 
-"Anything else" is a failure that answers nobody (a bad command, a decoding
-fault, a read-only picker, an exception of the app's own checkout) and any code
-the picker does not know, outside a hold, Best Available, a removal and more
-time. The error's own line is never drawn.
+The last two rows answer nobody: the action's own sentence would not be true.
+"Anything else" is a failure that may pass (a transport or decoding fault, a
+page's fallback code) and any code the picker does not know, outside a hold,
+Best Available, a removal and more time. The error's own line is never drawn.
 
 A sentence wraps and is never cut; the bar's words take at most 15 per cent of
 the screen's height (84 at least) and scroll past it, so the button under them stays in

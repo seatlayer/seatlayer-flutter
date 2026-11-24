@@ -68,36 +68,40 @@ const Set<String> _holdCommands = <String>{
   'picker.setTableQuantity',
 };
 
-/// Failures of the app, the page or the call itself rather than an answer to
-/// the buyer. The action's own sentence would not be true of them.
-const Set<String> _notAnAnswer = <String>{
+/// Failures of the app, the page or the call itself, where asking again cannot
+/// help: a page the app cannot speak to, or a call made wrongly.
+const Set<String> _cannotRetry = <String>{
   'bad_payload',
-  'command_failed',
   'destroyed',
   'handoff_not_owned',
   'holdId_required',
   'idempotency_key_conflict',
   'idempotency_key_reused',
-  'internal_error',
   'invalid_channel_scope',
   'invalid_expect_extends',
   'invalid_idempotency_key',
   'invalid_referral',
   'labels_and_holdId_required',
   'not_ready',
-  'picker_error',
   'picker_requires_protocol_2',
   'read_only',
-  'render_failed',
   'selections_required',
-  'sl_decoding',
-  'sl_handshake_timeout',
   'sl_incompatible',
-  'sl_transport',
   'table_quantity_rejected',
-  'unknown_error',
   'unsupported_command',
   'unsupported_state_contract',
+};
+
+/// The same, where asking again may help.
+const Set<String> _mayRetry = <String>{
+  'command_failed',
+  'internal_error',
+  'picker_error',
+  'render_failed',
+  'sl_decoding',
+  'sl_handshake_timeout',
+  'sl_transport',
+  'unknown_error',
 };
 
 /// What a web view calls a request that reached no server. Such a failure has
@@ -120,9 +124,8 @@ PickerErrorWords pickerErrorWords(
   PickerErrorWords line(String message, [String? detail]) =>
       (message: message, detail: detail);
 
-  // A failure nobody has a sentence for.
-  final other = line(strings.checkConnection);
-  if (error is! SeatLayerError) return other;
+  // An exception of the app's own, which asking again would only meet again.
+  if (error is! SeatLayerError) return line(strings.eventUnavailable);
 
   final payload = error is BridgeFailure ? error.payload : null;
   final details = payload?.details;
@@ -131,8 +134,15 @@ PickerErrorWords pickerErrorWords(
   final code = error.code;
   // The page's fallback codes carry an HTTP status when the server did answer,
   // with nothing more to say about it.
-  final answered = !_notAnAnswer.contains(code) ||
+  final answered = !_cannotRetry.contains(code) && !_mayRetry.contains(code) ||
       (status != null && (code == 'command_failed' || code == 'picker_error'));
+
+  // Neither the action's sentence nor one of the code's own is true of it.
+  final other = line(
+    _cannotRetry.contains(code)
+        ? strings.eventUnavailable
+        : strings.checkConnection,
+  );
 
   switch (code) {
     case 'maintenance_mode':
