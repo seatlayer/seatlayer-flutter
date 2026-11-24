@@ -50,6 +50,8 @@
 
 - **A phone held sideways** keeps the phone layout and opens full screen; the dialog and the wide layout need a tablet (shortest side 600 or more). The seat card, the loading view and the map's controls fit its short map, and the prices, map controls and cart stay clear of the camera cutout. `SeatLayerPickerMapControls.topInset` keeps the controls under top chrome of your own.
 - **Right to left:** the map's controls, the header's padding and the wide panel's divider follow the reading direction. The venue itself never mirrors.
+- **The folded cart line** names a seat as its card does, section, row and seat, where the chart gives the row a name of its own. It showed the row's code.
+- **When the map does not load**, nothing of the page shows through the message.
 
 ## 0.12.0 (2026-09-25)
 

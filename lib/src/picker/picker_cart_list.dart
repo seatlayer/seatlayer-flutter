@@ -312,6 +312,31 @@ SeatLayerTicketLine _resolveLine(
   );
 }
 
+/// The seat's name on the folded sheet's line.
+///
+/// The line's label with `-` as ` · `, unless the chart gives the seat a name
+/// of its own: then the label is only a code, and the line says what the card
+/// says — section, row and seat, or the display name where there are none.
+String seatLayerFoldedSeatName(
+  SeatLayerCheckoutLineItem item,
+  SeatLayerPickerState state,
+) {
+  final shown = item.displayLabel?.trim() ?? '';
+  if (shown.isEmpty || shown == item.label) {
+    return item.label.replaceAll('-', ' · ');
+  }
+  final seat = _seatBehind(state.selection, item);
+  final section = _first(item.sectionLabel, seat?.sectionLabel);
+  final row = pickerRowLabel(
+    _first(item.rowLabel, seat?.rowLabel),
+    section,
+    sectionCode: pickerSectionCode(state, section),
+  );
+  final number = _first(item.seatNumber, seat?.seatNumber);
+  if (row.isEmpty || number == null) return shown;
+  return <String>[if (section != null) section, row, number].join(' · ');
+}
+
 /// One ticket, as the desktop panel and the phone sheet both draw it.
 ///
 /// A row, not a two-column grid: everything the card needs sits on one

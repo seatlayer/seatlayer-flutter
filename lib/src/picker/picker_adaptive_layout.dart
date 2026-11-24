@@ -553,8 +553,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                 : switch (state.phase) {
                     SeatLayerPickerPhase.failed ||
                     SeatLayerPickerPhase.unavailable =>
+                      // Opaque: the page under it has words of its own.
                       ColoredBox(
-                        color: pickerAlpha(resolved.background, .94),
+                        color: pickerAlpha(resolved.background, 1),
                         child: _part(
                           context,
                           widget.builders.error,

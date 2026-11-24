@@ -1873,7 +1873,9 @@ bottom edge instead and the spring puts it back.
   `type.footTotalAmount` (17 / w700) in tabular figures once there is one.
 - **While collapsed and non-empty, a second, muted line under it names the
   seats**: each cart line's label with `-` replaced by ` · `, joined by a comma
-  and two spaces — `204 · Q · 7,  204 · U · 13` — at 12 / w600 in
+  and two spaces — `204 · Q · 7,  204 · U · 13`. A seat the chart gives a name
+  of its own is named as its card names it, section, row and seat, or by that
+  name where it has no row — at 12 / w600 in
   `color.*.mutedText`, one line, ellipsized, 3 points under the total row, with
   an unfold glyph at 16 on the trailing edge. "2 tickets" alone told a buyer
   they had bought something and not what, and the handle above was the only way

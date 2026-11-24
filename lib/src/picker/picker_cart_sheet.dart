@@ -837,7 +837,7 @@ class _TotalLineState extends State<_TotalLine>
     final collapsed = !controller.cartSheetExpanded;
     final seats = widget.namesSeats && collapsed && count > 0
         ? controller.confirmedCartLines
-            .map((line) => line.label.replaceAll('-', ' · '))
+            .map((line) => seatLayerFoldedSeatName(line, state))
             .join(',  ')
         : '';
     final line = Row(

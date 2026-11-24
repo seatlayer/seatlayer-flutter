@@ -88,6 +88,79 @@ void main() {
   _identityJoinTests();
   _clockTests();
 
+  for (final (what, line, said) in <(String, Map<String, Object?>, String)>[
+    (
+      'its display name and address',
+      <String, Object?>{
+        'label': 'F2-A4-7',
+        'displayLabel': 'D-7',
+        'sectionLabel': 'Stalls Centre',
+        'rowLabel': 'D',
+        'seatNumber': '7',
+      },
+      'Stalls Centre · D · 7',
+    ),
+    (
+      'its display name where it has no row',
+      <String, Object?>{
+        'label': 'T5',
+        'displayLabel': 'Loge 1',
+        'seatId': 'table-5',
+        'sectionLabel': null,
+        'rowLabel': null,
+        'seatNumber': null,
+      },
+      'Loge 1',
+    ),
+    (
+      'its label where the chart gives it no other name',
+      <String, Object?>{'label': '204-Q-7', 'displayLabel': null},
+      '204 · Q · 7',
+    ),
+  ]) {
+    testWidgets('the folded sheet names a seat by $what', (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: _sheet(expanded: false),
+          ),
+        ),
+      );
+      final snapshot = pickerSnapshot(withSelection: false);
+      final cart = snapshot['cart']! as Map<String, Object?>;
+      cart['items'] = <Object?>[
+        <String, Object?>{
+          'lineKey': 'seat:1',
+          'objectId': 'seat-1',
+          'objectType': 'seat',
+          'categoryKey': 'standard',
+          'unitPrice': 25.0,
+          'currency': 'EUR',
+          'quantity': 1,
+          ...line,
+        },
+      ];
+      cart['quantity'] = 1;
+      cart['total'] = 25.0;
+      map.emit(snapshot);
+      await tester.pumpAndSettle();
+
+      // The 12-point line under the count; a card says some of it too.
+      expect(
+        find.byWidgetPredicate((widget) =>
+            widget is Text &&
+            widget.data == said &&
+            widget.style?.fontSize == 12),
+        findsOneWidget,
+      );
+    });
+  }
+
   testWidgets('the collapsed sheet IS the footer block', (
     tester,
   ) async {

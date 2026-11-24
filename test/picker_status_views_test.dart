@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
+import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_status_views.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
@@ -17,6 +18,7 @@ import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
 import 'package:seatlayer/src/seat_layer_error.dart';
 
+import 'fake_webview_platform.dart';
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
 
@@ -108,6 +110,49 @@ void main() {
     expect(find.text('Check your connection and try again.'), findsOneWidget);
     expect(find.text('Try again'), findsOneWidget);
   });
+
+  for (final mode in <SeatLayerThemeMode>[
+    SeatLayerThemeMode.light,
+    SeatLayerThemeMode.dark,
+  ]) {
+    testWidgets('the failure view hides the page under it, ${mode.name}',
+        (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      useFakeWebViewPlatform();
+      usePhoneSurface(tester);
+      final picker = SeatLayerPickerController(mapController: map);
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          SeatLayerPickerAdaptiveLayout(onCheckout: (_) async {}),
+          controller: picker,
+          themeMode: mode,
+        ),
+      );
+      await tester.pump();
+      picker.value = picker.value.withError(
+        const SeatLayerError.transport('not_found'),
+      );
+      await pumpToRest(tester);
+
+      final ground = tester.widget<ColoredBox>(
+        find
+            .ancestor(
+              of: find.byType(SeatLayerPickerErrorView),
+              matching: find.byType(ColoredBox),
+            )
+            .first,
+      );
+      expect(
+        ground.color,
+        mode == SeatLayerThemeMode.light
+            ? SeatLayerLightTokens.background
+            : SeatLayerDarkTokens.background,
+      );
+      expect(ground.color.a, 1);
+    });
+  }
 
   testWidgets('the empty view is a host wording too', (tester) async {
     final map = FakePickerMap();
