@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.13.0 (2026-11-24)
+## 0.13.0 (unreleased)
 
 **New**
 
@@ -16,7 +16,7 @@
 
 **Changed**
 
-- **Map 1.0.1** (was 0.101.0). A venue with several levels opens on its lowest level, and the map's loads, holds and releases are tried again when the server is busy. What else changed on the map is in the [changelog](https://docs.seatlayer.io/changelog/).
+- **Map 1.0.2** (was 0.101.0). A venue with several levels opens on its lowest level, and the map's loads, holds and releases are tried again when the server is busy. Moving the map over a standing area no longer opens its number, and the outermost seats are drawn whole. What else changed on the map is in the [changelog](https://docs.seatlayer.io/changelog/).
 - **3D touch (behaviour change):** one finger moves the view, a pinch zooms, a two-finger twist turns the venue and a two-finger drag tilts it. The Rotate / Move pair is drawn only with `touchNavigation3D: SeatLayer3DTouchNavigation.classic`, which also keeps the earlier gestures. The pair now has labels, "Rotate venue" and "Move venue", or icons where the labels do not fit.
 - **The ink on a brand colour (behaviour change):** an organizer's own ink is used where it reads at 3:1 on the accent; otherwise white where white reads at 3:1; otherwise `#1A1200` instead of black. An `onAccent` you pass is used exactly.
 - **When the map does not load (behaviour change):** the buyer no longer sees the error's own message, only "The seat map didn’t load", "Check your connection and try again." and Try again. The error still reaches `onError`. A sentence you pass as `SeatLayerPickerErrorView.standalone(message:)` or `errorMessage` is still drawn when it differs from the title.
