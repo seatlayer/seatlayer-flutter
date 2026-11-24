@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableFa(String labels) =>
 String _couldNotFindSeatsTogetherFa(int count) =>
     '$count صندلی کنار هم پیدا نشد. تعداد کمتر یا نوع بلیت دیگری را امتحان کنید.';
 
+String _maxTicketsForOrderFa(int count) =>
+    'برای این سفارش می‌توانید تا $count بلیت انتخاب کنید.';
+
 String _couldNotRemoveLabelFa(String label) =>
     '$label حذف نشد. نگه‌داشت شما تغییری نکرده است.';
 
@@ -289,6 +292,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
       'رزرو برای چند دقیقه به‌دلیل نگهداری متوقف شده است. لطفاً کمی بعد دوباره تلاش کنید.',
   guestsOnly: 'این رویداد برای مهمانان دعوت‌شده است.',
   guestChoiceClosed: 'انتخاب صندلی در حال حاضر باز نیست.',
+  maxOneTicketForOrder: 'برای این سفارش می‌توانید تا 1 بلیت انتخاب کنید.',
   tooManyAttempts:
       'تعداد تلاش‌ها بیش از حد مجاز است. کمی صبر کنید و دوباره تلاش کنید.',
   seatHeldForRenewal:
@@ -385,6 +389,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableFa,
   labelsNoLongerAvailable: _labelsNoLongerAvailableFa,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherFa,
+  maxTicketsForOrder: _maxTicketsForOrderFa,
   couldNotRemoveLabel: _couldNotRemoveLabelFa,
   peekSecured: _peekSecuredFa,
   venueMap: _venueMapFa,

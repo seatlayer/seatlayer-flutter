@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableHr(String labels) =>
 String _couldNotFindSeatsTogetherHr(int count) =>
     'Nismo pronašli $count mjesta jedno uz drugo. Pokušajte s manje mjesta ili drugom vrstom ulaznice.';
 
+String _maxTicketsForOrderHr(int count) =>
+    'Za ovu narudžbu možete odabrati najviše $count ulaznica.';
+
 String _couldNotRemoveLabelHr(String label) =>
     'Nismo mogli ukloniti $label. Rezervacija je nepromijenjena.';
 
@@ -319,6 +322,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
       'Rezervacija je pauzirana na nekoliko minuta zbog održavanja. Pokušajte ponovno uskoro.',
   guestsOnly: 'Ovaj događaj je za pozvane goste.',
   guestChoiceClosed: 'Odabir mjesta trenutačno nije otvoren.',
+  maxOneTicketForOrder: 'Za ovu narudžbu možete odabrati najviše 1 ulaznicu.',
   tooManyAttempts: 'Previše pokušaja. Pričekajte trenutak i pokušajte ponovno.',
   seatHeldForRenewal:
       'Jedno od ovih mjesta čuva se za vlasnika sezonske ulaznice koji je još može obnoviti. Odaberite drugo mjesto.',
@@ -414,6 +418,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableHr,
   labelsNoLongerAvailable: _labelsNoLongerAvailableHr,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherHr,
+  maxTicketsForOrder: _maxTicketsForOrderHr,
   couldNotRemoveLabel: _couldNotRemoveLabelHr,
   peekSecured: _peekSecuredHr,
   venueMap: _venueMapHr,

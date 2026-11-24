@@ -209,6 +209,8 @@ const KEYS = {
   maintenancePausedShortly: 'picker.maintenancePausedShortly',
   guestsOnly: 'picker.guestsOnlyToast',
   guestChoiceClosed: 'picker.guestChoiceClosed',
+  maxTicketsForOrder: 'picker.maxTicketsForOrder',
+  maxOneTicketForOrder: 'picker.maxOneTicketForOrder',
   tooManyAttempts: 'checkout.error.rateLimited',
   seatHeldForRenewal: 'season.seatHeldForRenewal',
   seatUnavailable: 'picker.seatUnavailableNote',

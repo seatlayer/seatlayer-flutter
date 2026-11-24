@@ -36,6 +36,9 @@ String _labelsNoLongerAvailableEl(String labels) =>
 String _couldNotFindSeatsTogetherEl(int count) =>
     'Δεν βρήκαμε $count θέσεις μαζί. Δοκιμάστε λιγότερες θέσεις ή άλλον τύπο εισιτηρίου.';
 
+String _maxTicketsForOrderEl(int count) =>
+    'Μπορείτε να επιλέξετε έως $count εισιτήρια για αυτή την παραγγελία.';
+
 String _couldNotRemoveLabelEl(String label) =>
     'Δεν ήταν δυνατή η αφαίρεση του $label. Η κράτησή σας παραμένει ως έχει.';
 
@@ -299,6 +302,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
       'Οι κρατήσεις έχουν διακοπεί για λίγα λεπτά λόγω συντήρησης. Δοκιμάστε ξανά σε λίγο.',
   guestsOnly: 'Αυτή η εκδήλωση είναι για προσκεκλημένους.',
   guestChoiceClosed: 'Η επιλογή θέσεων δεν είναι ανοιχτή αυτή τη στιγμή.',
+  maxOneTicketForOrder:
+      'Μπορείτε να επιλέξετε έως 1 εισιτήριο για αυτή την παραγγελία.',
   tooManyAttempts: 'Πολλές προσπάθειες. Περιμένετε λίγο και δοκιμάστε ξανά.',
   seatHeldForRenewal:
       'Μία από αυτές τις θέσεις κρατείται για κάτοχο εισιτηρίου διαρκείας που μπορεί ακόμη να την ανανεώσει. Επιλέξτε άλλη θέση.',
@@ -395,6 +400,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableEl,
   labelsNoLongerAvailable: _labelsNoLongerAvailableEl,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherEl,
+  maxTicketsForOrder: _maxTicketsForOrderEl,
   couldNotRemoveLabel: _couldNotRemoveLabelEl,
   peekSecured: _peekSecuredEl,
   venueMap: _venueMapEl,

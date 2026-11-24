@@ -34,6 +34,9 @@ String _labelsNoLongerAvailableMs(String labels) =>
 String _couldNotFindSeatsTogetherMs(int count) =>
     'Tiada $count tempat duduk bersebelahan. Cuba kurangkan tempat duduk atau pilih jenis tiket lain.';
 
+String _maxTicketsForOrderMs(int count) =>
+    'Anda boleh memilih sehingga $count tiket untuk pesanan ini.';
+
 String _couldNotRemoveLabelMs(String label) =>
     '$label tidak dapat dibuang. Tahanan anda tidak berubah.';
 
@@ -216,6 +219,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsMs = SeatLayerPickerStrings(
       'Tempahan dihentikan beberapa minit untuk penyelenggaraan. Sila cuba lagi sebentar nanti.',
   guestsOnly: 'Acara ini untuk tetamu jemputan.',
   guestChoiceClosed: 'Pemilihan tempat duduk tidak dibuka sekarang.',
+  maxOneTicketForOrder:
+      'Anda boleh memilih sehingga 1 tiket untuk pesanan ini.',
   tooManyAttempts: 'Terlalu banyak cubaan. Tunggu sebentar dan cuba lagi.',
   seatHeldForRenewal:
       'Salah satu tempat duduk ini disimpan untuk pemegang tiket musim yang masih boleh memperbaharuinya. Pilih tempat duduk lain.',
@@ -312,6 +317,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsMs = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableMs,
   labelsNoLongerAvailable: _labelsNoLongerAvailableMs,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherMs,
+  maxTicketsForOrder: _maxTicketsForOrderMs,
   couldNotRemoveLabel: _couldNotRemoveLabelMs,
   peekSecured: _peekSecuredMs,
   venueMap: _venueMapMs,

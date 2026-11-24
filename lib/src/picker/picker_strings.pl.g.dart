@@ -36,6 +36,9 @@ String _labelsNoLongerAvailablePl(String labels) =>
 String _couldNotFindSeatsTogetherPl(int count) =>
     'Nie znaleźliśmy $count miejsc obok siebie. Spróbuj mniejszej liczby miejsc lub innego rodzaju biletu.';
 
+String _maxTicketsForOrderPl(int count) =>
+    'W tym zamówieniu możesz wybrać maksymalnie $count biletów.';
+
 String _couldNotRemoveLabelPl(String label) =>
     'Nie udało się usunąć $label. Rezerwacja pozostaje bez zmian.';
 
@@ -344,6 +347,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsPl = SeatLayerPickerStrings(
       'Rezerwacja jest wstrzymana na kilka minut z powodu konserwacji. Spróbuj ponownie za chwilę.',
   guestsOnly: 'To wydarzenie jest dla zaproszonych gości.',
   guestChoiceClosed: 'Wybór miejsc nie jest teraz otwarty.',
+  maxOneTicketForOrder: 'W tym zamówieniu możesz wybrać maksymalnie 1 bilet.',
   tooManyAttempts: 'Zbyt wiele prób. Poczekaj chwilę i spróbuj ponownie.',
   seatHeldForRenewal:
       'Jedno z tych miejsc jest zatrzymane dla posiadacza karnetu sezonowego, który wciąż może przedłużyć karnet. Wybierz inne miejsce.',
@@ -439,6 +443,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsPl = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailablePl,
   labelsNoLongerAvailable: _labelsNoLongerAvailablePl,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherPl,
+  maxTicketsForOrder: _maxTicketsForOrderPl,
   couldNotRemoveLabel: _couldNotRemoveLabelPl,
   peekSecured: _peekSecuredPl,
   venueMap: _venueMapPl,

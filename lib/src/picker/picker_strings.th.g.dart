@@ -34,6 +34,9 @@ String _labelsNoLongerAvailableTh(String labels) =>
 String _couldNotFindSeatsTogetherTh(int count) =>
     'ไม่พบที่นั่งติดกัน $count ที่ ลองลดจำนวนที่นั่งหรือเลือกบัตรประเภทอื่น';
 
+String _maxTicketsForOrderTh(int count) =>
+    'เลือกได้สูงสุด $count ใบต่อคำสั่งซื้อนี้';
+
 String _couldNotRemoveLabelTh(String label) =>
     'นำ $label ออกไม่ได้ บัตรที่กันไว้ยังเหมือนเดิม';
 
@@ -205,6 +208,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
       'ระบบหยุดรับจองไม่กี่นาทีเพื่อปรับปรุง กรุณาลองใหม่อีกครั้งในไม่ช้า',
   guestsOnly: 'งานนี้สำหรับแขกที่ได้รับเชิญ',
   guestChoiceClosed: 'ขณะนี้ยังไม่เปิดให้เลือกที่นั่ง',
+  maxOneTicketForOrder: 'เลือกได้สูงสุด 1 ใบต่อคำสั่งซื้อนี้',
   tooManyAttempts: 'ลองหลายครั้งเกินไป รอสักครู่แล้วลองอีกครั้ง',
   seatHeldForRenewal:
       'ที่นั่งหนึ่งในนี้ถูกกันไว้ให้ผู้ถือบัตรซีซันที่ยังต่ออายุได้ กรุณาเลือกที่นั่งอื่น',
@@ -300,6 +304,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableTh,
   labelsNoLongerAvailable: _labelsNoLongerAvailableTh,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherTh,
+  maxTicketsForOrder: _maxTicketsForOrderTh,
   couldNotRemoveLabel: _couldNotRemoveLabelTh,
   peekSecured: _peekSecuredTh,
   venueMap: _venueMapTh,

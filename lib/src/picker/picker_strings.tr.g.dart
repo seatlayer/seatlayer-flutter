@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableTr(String labels) =>
 String _couldNotFindSeatsTogetherTr(int count) =>
     '$count koltuğu yan yana bulamadık. Daha az koltuk veya başka bir bilet türü deneyin.';
 
+String _maxTicketsForOrderTr(int count) =>
+    'Bu sipariş için en fazla $count bilet seçebilirsiniz.';
+
 String _couldNotRemoveLabelTr(String label) =>
     '$label kaldırılamadı. Rezervasyonunuz değişmedi.';
 
@@ -289,6 +292,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
       'Rezervasyon bakım nedeniyle birkaç dakikalığına duraklatıldı. Lütfen kısa süre sonra tekrar deneyin.',
   guestsOnly: 'Bu etkinlik davetli konuklar içindir.',
   guestChoiceClosed: 'Koltuk seçimi şu anda açık değil.',
+  maxOneTicketForOrder: 'Bu sipariş için en fazla 1 bilet seçebilirsiniz.',
   tooManyAttempts: 'Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin.',
   seatHeldForRenewal:
       'Bu koltuklardan biri, hâlâ yenileyebilecek bir sezon bileti sahibi için ayrıldı. Başka bir koltuk seçin.',
@@ -384,6 +388,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableTr,
   labelsNoLongerAvailable: _labelsNoLongerAvailableTr,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherTr,
+  maxTicketsForOrder: _maxTicketsForOrderTr,
   couldNotRemoveLabel: _couldNotRemoveLabelTr,
   peekSecured: _peekSecuredTr,
   venueMap: _venueMapTr,

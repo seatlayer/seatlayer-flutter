@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableCa(String labels) =>
 String _couldNotFindSeatsTogetherCa(int count) =>
     'No hem trobat $count seients junts. Prova amb menys seients o un altre tipus d\'entrada.';
 
+String _maxTicketsForOrderCa(int count) =>
+    'Pots seleccionar fins a $count entrades per a aquesta comanda.';
+
 String _couldNotRemoveLabelCa(String label) =>
     'No hem pogut treure $label. La reserva no ha canviat.';
 
@@ -324,6 +327,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
       'La reserva està en pausa uns minuts per manteniment. Torna-ho a provar d’aquí a poc.',
   guestsOnly: 'Aquest esdeveniment és per a convidats.',
   guestChoiceClosed: 'Ara mateix no es poden triar seients.',
+  maxOneTicketForOrder:
+      'Pots seleccionar fins a 1 entrada per a aquesta comanda.',
   tooManyAttempts: 'Massa intents. Espera un moment i torna-ho a provar.',
   seatHeldForRenewal:
       'Un d\'aquests seients està reservat per a un abonat que encara el pot renovar. Tria un altre seient.',
@@ -419,6 +424,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableCa,
   labelsNoLongerAvailable: _labelsNoLongerAvailableCa,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherCa,
+  maxTicketsForOrder: _maxTicketsForOrderCa,
   couldNotRemoveLabel: _couldNotRemoveLabelCa,
   peekSecured: _peekSecuredCa,
   venueMap: _venueMapCa,

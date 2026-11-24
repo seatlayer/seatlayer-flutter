@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableLt(String labels) =>
 String _couldNotFindSeatsTogetherLt(int count) =>
     'Neradome $count vietų greta. Pabandykite mažiau vietų arba kitą bilieto tipą.';
 
+String _maxTicketsForOrderLt(int count) =>
+    'Šiame užsakyme galite pasirinkti iki $count bilietų.';
+
 String _couldNotRemoveLabelLt(String label) =>
     'Nepavyko pašalinti $label. Rezervacija nepakito.';
 
@@ -337,6 +340,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
       'Rezervavimas kelioms minutėms pristabdytas dėl techninės priežiūros. Netrukus bandykite dar kartą.',
   guestsOnly: 'Šis renginys skirtas pakviestiems svečiams.',
   guestChoiceClosed: 'Vietų pasirinkimas šiuo metu neatidarytas.',
+  maxOneTicketForOrder: 'Šiame užsakyme galite pasirinkti iki 1 bilieto.',
   tooManyAttempts:
       'Per daug bandymų. Palaukite akimirką ir bandykite dar kartą.',
   seatHeldForRenewal:
@@ -433,6 +437,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableLt,
   labelsNoLongerAvailable: _labelsNoLongerAvailableLt,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherLt,
+  maxTicketsForOrder: _maxTicketsForOrderLt,
   couldNotRemoveLabel: _couldNotRemoveLabelLt,
   peekSecured: _peekSecuredLt,
   venueMap: _venueMapLt,

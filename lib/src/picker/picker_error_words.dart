@@ -69,7 +69,7 @@ const Set<String> _holdCommands = <String>{
 };
 
 /// Failures of the app, the page or the call itself rather than an answer to
-/// the buyer. They have no buyer sentence.
+/// the buyer. The action's own sentence would not be true of them.
 const Set<String> _notAnAnswer = <String>{
   'bad_payload',
   'command_failed',
@@ -110,14 +110,19 @@ final RegExp _noConnection = RegExp(
   caseSensitive: false,
 );
 
-/// The buyer's sentence for [error], or null when there is none for it.
-PickerErrorWords? pickerErrorWords(
-  SeatLayerError error,
+/// The buyer's sentence for [error]: never a code, the server's message or an
+/// exception's own text.
+PickerErrorWords pickerErrorWords(
+  Object error,
   SeatLayerPickerStrings strings, {
   PickerActionFailure? failure,
 }) {
   PickerErrorWords line(String message, [String? detail]) =>
       (message: message, detail: detail);
+
+  // A failure nobody has a sentence for.
+  final other = line(strings.checkConnection);
+  if (error is! SeatLayerError) return other;
 
   final payload = error is BridgeFailure ? error.payload : null;
   final details = payload?.details;
@@ -188,6 +193,14 @@ PickerErrorWords? pickerErrorWords(
   // else was asked for is refused for a reason the code names.
   if (command != 'picker.removeCartLine' && command != 'picker.extendHold') {
     switch (code) {
+      case 'hold_quantity_exceeded':
+        // The limit, when the page passes the server's number on.
+        final limit =
+            jInt(jGet(details, 'max')) ?? jInt(jGet(details, 'limit'));
+        if (limit == 1) return line(strings.maxOneTicketForOrder);
+        if (limit != null && limit > 1) {
+          return line(strings.maxTicketsForOrder(limit));
+        }
       case 'seat_held_for_renewal':
         return line(strings.seatHeldForRenewal);
       case 'channel_access_denied':
@@ -212,7 +225,7 @@ PickerErrorWords? pickerErrorWords(
   }
 
   if (command == 'picker.bestAvailable') {
-    if (!answered) return null;
+    if (!answered) return other;
     return line(switch (code) {
       'not_enough_together' when failure?.quantity != null =>
         strings.couldNotFindSeatsTogether(failure!.quantity!),
@@ -222,7 +235,7 @@ PickerErrorWords? pickerErrorWords(
   }
   if (command == 'picker.removeCartLine') {
     final label = failure?.label;
-    if (label == null || !answered) return null;
+    if (label == null || !answered) return other;
     return line(
       strings.couldNotRemoveLabel(
         label.startsWith('__sl_ga__') ? strings.generalAdmission : label,
@@ -254,7 +267,7 @@ PickerErrorWords? pickerErrorWords(
       (answered && _holdCommands.contains(command))) {
     return line(strings.seatsJustTaken);
   }
-  return null;
+  return other;
 }
 
 /// Refusals that are about the seats whichever action met them.

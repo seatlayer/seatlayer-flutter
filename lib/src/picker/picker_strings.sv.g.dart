@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableSv(String labels) =>
 String _couldNotFindSeatsTogetherSv(int count) =>
     'Vi hittade inte $count platser bredvid varandra. Prova färre platser eller en annan biljettyp.';
 
+String _maxTicketsForOrderSv(int count) =>
+    'Du kan välja upp till $count biljetter för den här beställningen.';
+
 String _couldNotRemoveLabelSv(String label) =>
     'Kunde inte ta bort $label. Din reservation är oförändrad.';
 
@@ -293,6 +296,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
       'Bokningen är pausad några minuter för underhåll. Försök igen om en liten stund.',
   guestsOnly: 'Det här evenemanget är för inbjudna gäster.',
   guestChoiceClosed: 'Platsvalet är inte öppet just nu.',
+  maxOneTicketForOrder:
+      'Du kan välja upp till 1 biljett för den här beställningen.',
   tooManyAttempts: 'För många försök. Vänta en stund och försök igen.',
   seatHeldForRenewal:
       'En av de här platserna hålls för en säsongskortsinnehavare som fortfarande kan förnya den. Välj en annan plats.',
@@ -388,6 +393,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableSv,
   labelsNoLongerAvailable: _labelsNoLongerAvailableSv,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherSv,
+  maxTicketsForOrder: _maxTicketsForOrderSv,
   couldNotRemoveLabel: _couldNotRemoveLabelSv,
   peekSecured: _peekSecuredSv,
   venueMap: _venueMapSv,

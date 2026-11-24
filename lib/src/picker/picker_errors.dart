@@ -47,7 +47,6 @@ class SeatLayerPickerActionError extends StatelessWidget {
     final String message;
     String? detail;
     VoidCallback? release;
-    var worded = true;
     if (code != null && _holdOwnershipCodes.contains(code)) {
       if (handoff != null || state.hasHostOwnedHold) {
         message = strings.holdInCheckoutTitle;
@@ -66,17 +65,14 @@ class SeatLayerPickerActionError extends StatelessWidget {
         detail = strings.holdAlreadyHeldBody;
       }
     } else {
-      final words = error is SeatLayerError
-          ? pickerErrorWords(
-              error,
-              strings,
-              failure: controller.failureFor(error),
-            )
-          : null;
-      worded = words != null;
-      message = words?.message ??
-          (error is SeatLayerError ? error.message : '$error');
-      detail = words?.detail;
+      final words = pickerErrorWords(
+        error,
+        strings,
+        failure:
+            error is SeatLayerError ? controller.failureFor(error) : null,
+      );
+      message = words.message;
+      detail = words.detail;
     }
     return Material(
       color: theme.error,
@@ -111,11 +107,6 @@ class SeatLayerPickerActionError extends StatelessWidget {
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
                         ),
-                        // A buyer's sentence is never cut; a line that is not
-                        // one keeps to two.
-                        maxLines: worded ? null : 2,
-                        overflow:
-                            worded ? TextOverflow.clip : TextOverflow.ellipsis,
                       ),
                       if (detail != null) ...[
                         const SizedBox(height: 2),

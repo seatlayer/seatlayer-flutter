@@ -181,6 +181,7 @@ class SeatLayerPickerStrings {
         SeatLayerStringTokens.maintenancePausedShortly,
     this.guestsOnly = SeatLayerStringTokens.guestsOnly,
     this.guestChoiceClosed = SeatLayerStringTokens.guestChoiceClosed,
+    this.maxOneTicketForOrder = SeatLayerStringTokens.maxOneTicketForOrder,
     this.tooManyAttempts = SeatLayerStringTokens.tooManyAttempts,
     this.seatHeldForRenewal = SeatLayerStringTokens.seatHeldForRenewal,
     this.seatUnavailable = SeatLayerStringTokens.seatUnavailable,
@@ -189,6 +190,7 @@ class SeatLayerPickerStrings {
     this.labelNoLongerAvailable = _defaultLabelNoLongerAvailable,
     this.labelsNoLongerAvailable = _defaultLabelsNoLongerAvailable,
     this.couldNotFindSeatsTogether = _defaultCouldNotFindSeatsTogether,
+    this.maxTicketsForOrder = _defaultMaxTicketsForOrder,
     this.couldNotRemoveLabel = _defaultCouldNotRemoveLabel,
     this.maintenancePaused = _defaultMaintenancePaused,
     this.allSetTitle = SeatLayerStringTokens.allSetTitle,
@@ -980,6 +982,12 @@ class SeatLayerPickerStrings {
   /// "Seat choice isn’t open right now."
   final String guestChoiceClosed;
 
+  /// "You can select up to 4 tickets for this order."
+  final String Function(int count) maxTicketsForOrder;
+
+  /// The same for one ticket.
+  final String maxOneTicketForOrder;
+
   /// "Too many attempts. Wait a moment and try again."
   final String tooManyAttempts;
 
@@ -1291,6 +1299,9 @@ class SeatLayerPickerStrings {
   static String _defaultCouldNotFindSeatsTogether(int count) =>
       SeatLayerStringTokens.couldNotFindSeatsTogether
           .replaceAll('{count}', '$count');
+
+  static String _defaultMaxTicketsForOrder(int count) =>
+      SeatLayerStringTokens.maxTicketsForOrder.replaceAll('{count}', '$count');
 
   static String _defaultCouldNotRemoveLabel(String label) =>
       SeatLayerStringTokens.couldNotRemoveLabel.replaceAll('{label}', label);

@@ -36,6 +36,9 @@ String _labelsNoLongerAvailableBe(String labels) =>
 String _couldNotFindSeatsTogetherBe(int count) =>
     'Мы не знайшлі $count месцаў побач. Паспрабуйце менш месцаў або іншы тып білета.';
 
+String _maxTicketsForOrderBe(int count) =>
+    'У гэтым заказе можна выбраць не больш за $count білетаў.';
+
 String _couldNotRemoveLabelBe(String label) =>
     'Не ўдалося прыбраць $label. Броня засталася без змен.';
 
@@ -342,6 +345,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
       'Браніраванне прыпынена на некалькі хвілін для тэхнічнага абслугоўвання. Паспрабуйце зноў крыху пазней.',
   guestsOnly: 'Гэтая падзея для запрошаных гасцей.',
   guestChoiceClosed: 'Выбар месцаў зараз недаступны.',
+  maxOneTicketForOrder: 'У гэтым заказе можна выбраць не больш за 1 білет.',
   tooManyAttempts: 'Занадта шмат спроб. Пачакайце крыху і паспрабуйце зноў.',
   seatHeldForRenewal:
       'Адно з гэтых месцаў замацавана за ўладальнікам абанемента, які яшчэ можа яго падоўжыць. Выберыце іншае месца.',
@@ -437,6 +441,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableBe,
   labelsNoLongerAvailable: _labelsNoLongerAvailableBe,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherBe,
+  maxTicketsForOrder: _maxTicketsForOrderBe,
   couldNotRemoveLabel: _couldNotRemoveLabelBe,
   peekSecured: _peekSecuredBe,
   venueMap: _venueMapBe,

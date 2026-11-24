@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableHe(String labels) =>
 String _couldNotFindSeatsTogetherHe(int count) =>
     'לא מצאנו $count מושבים צמודים. נסו פחות מושבים או סוג כרטיס אחר.';
 
+String _maxTicketsForOrderHe(int count) =>
+    'אפשר לבחור עד $count כרטיסים בהזמנה הזו.';
+
 String _couldNotRemoveLabelHe(String label) =>
     'לא הצלחנו להסיר את $label. ההחזקה לא השתנתה.';
 
@@ -304,6 +307,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
       'ההזמנה מושהית לכמה דקות לצורך תחזוקה. נסו שוב בעוד רגע.',
   guestsOnly: 'האירוע הזה מיועד לאורחים מוזמנים.',
   guestChoiceClosed: 'בחירת המקומות לא פתוחה כרגע.',
+  maxOneTicketForOrder: 'אפשר לבחור עד כרטיס אחד בהזמנה הזו.',
   tooManyAttempts: 'יותר מדי ניסיונות. המתן/י רגע ונסה/י שוב.',
   seatHeldForRenewal:
       'אחד המושבים האלה שמור לבעל כרטיס עונה שעדיין יכול לחדש אותו. בחרו מושב אחר.',
@@ -398,6 +402,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableHe,
   labelsNoLongerAvailable: _labelsNoLongerAvailableHe,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherHe,
+  maxTicketsForOrder: _maxTicketsForOrderHe,
   couldNotRemoveLabel: _couldNotRemoveLabelHe,
   peekSecured: _peekSecuredHe,
   venueMap: _venueMapHe,

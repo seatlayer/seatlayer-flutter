@@ -960,7 +960,8 @@ void main() {
       map.calls.last.$2,
       <String, Object?>{'holdId': 'hold-1'},
     );
-    expect(find.textContaining('checkout route failed'), findsOneWidget);
+    expect(find.text('Check your connection and try again.'), findsOneWidget);
+    expect(find.textContaining('checkout route failed'), findsNothing);
     expect(find.textContaining('rejection unavailable'), findsNothing);
   });
 }

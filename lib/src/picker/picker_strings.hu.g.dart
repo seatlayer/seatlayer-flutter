@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableHu(String labels) =>
 String _couldNotFindSeatsTogetherHu(int count) =>
     'Nem találtunk $count egymás melletti helyet. Próbálj kevesebb helyet vagy másik jegytípust.';
 
+String _maxTicketsForOrderHu(int count) =>
+    'Ehhez a rendeléshez legfeljebb $count jegyet választhatsz.';
+
 String _couldNotRemoveLabelHu(String label) =>
     'Nem sikerült eltávolítani: $label. A foglalásod változatlan.';
 
@@ -291,6 +294,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
       'A foglalás karbantartás miatt néhány percig szünetel. Próbálja újra hamarosan.',
   guestsOnly: 'Ez az esemény meghívott vendégeknek szól.',
   guestChoiceClosed: 'A helyválasztás most nincs nyitva.',
+  maxOneTicketForOrder: 'Ehhez a rendeléshez legfeljebb 1 jegyet választhatsz.',
   tooManyAttempts:
       'Túl sok próbálkozás történt. Várjon egy kicsit, majd próbálja újra.',
   seatHeldForRenewal:
@@ -387,6 +391,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableHu,
   labelsNoLongerAvailable: _labelsNoLongerAvailableHu,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherHu,
+  maxTicketsForOrder: _maxTicketsForOrderHu,
   couldNotRemoveLabel: _couldNotRemoveLabelHu,
   peekSecured: _peekSecuredHu,
   venueMap: _venueMapHu,

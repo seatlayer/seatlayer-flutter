@@ -34,6 +34,9 @@ String _labelsNoLongerAvailableVi(String labels) =>
 String _couldNotFindSeatsTogetherVi(int count) =>
     'Không tìm được $count ghế liền nhau. Hãy thử ít ghế hơn hoặc loại vé khác.';
 
+String _maxTicketsForOrderVi(int count) =>
+    'Bạn có thể chọn tối đa $count vé cho đơn hàng này.';
+
 String _couldNotRemoveLabelVi(String label) =>
     'Không bỏ được $label. Các vé đang giữ vẫn giữ nguyên.';
 
@@ -209,6 +212,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
       'Hệ thống tạm dừng đặt vé vài phút để bảo trì. Vui lòng thử lại sau ít phút.',
   guestsOnly: 'Sự kiện này dành cho khách mời.',
   guestChoiceClosed: 'Hiện không mở chọn chỗ ngồi.',
+  maxOneTicketForOrder: 'Bạn có thể chọn tối đa 1 vé cho đơn hàng này.',
   tooManyAttempts:
       'Bạn đã thử quá nhiều lần. Vui lòng chờ một chút rồi thử lại.',
   seatHeldForRenewal:
@@ -305,6 +309,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableVi,
   labelsNoLongerAvailable: _labelsNoLongerAvailableVi,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherVi,
+  maxTicketsForOrder: _maxTicketsForOrderVi,
   couldNotRemoveLabel: _couldNotRemoveLabelVi,
   peekSecured: _peekSecuredVi,
   venueMap: _venueMapVi,

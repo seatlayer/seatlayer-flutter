@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableLv(String labels) =>
 String _couldNotFindSeatsTogetherLv(int count) =>
     'Neatradām $count vietas blakus. Mēģiniet mazāk vietu vai citu biļetes veidu.';
 
+String _maxTicketsForOrderLv(int count) =>
+    'Šim pasūtījumam varat izvēlēties līdz $count biļetēm.';
+
 String _couldNotRemoveLabelLv(String label) =>
     'Neizdevās noņemt $label. Rezervācija nav mainījusies.';
 
@@ -319,6 +322,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
       'Rezervēšana uz dažām minūtēm ir apturēta apkopes dēļ. Mēģiniet vēlreiz pēc brīža.',
   guestsOnly: 'Šis pasākums ir paredzēts ielūgtajiem viesiem.',
   guestChoiceClosed: 'Vietu izvēle pašlaik nav atvērta.',
+  maxOneTicketForOrder: 'Šim pasūtījumam varat izvēlēties līdz 1 biļetei.',
   tooManyAttempts:
       'Pārāk daudz mēģinājumu. Uzgaidiet brīdi un mēģiniet vēlreiz.',
   seatHeldForRenewal:
@@ -415,6 +419,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableLv,
   labelsNoLongerAvailable: _labelsNoLongerAvailableLv,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherLv,
+  maxTicketsForOrder: _maxTicketsForOrderLv,
   couldNotRemoveLabel: _couldNotRemoveLabelLv,
   peekSecured: _peekSecuredLv,
   venueMap: _venueMapLv,

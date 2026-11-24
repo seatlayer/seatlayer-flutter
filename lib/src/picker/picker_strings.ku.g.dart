@@ -36,6 +36,9 @@ String _labelsNoLongerAvailableKu(String labels) =>
 String _couldNotFindSeatsTogetherKu(int count) =>
     'Me $count cihên li kêleka hev nedîtin. Cihên kêmtir an cureyeke bilêtê ya din biceribîne.';
 
+String _maxTicketsForOrderKu(int count) =>
+    'Ji bo vê siparîşê tu dikarî herî zêde $count bilêtan hilbijêrî.';
+
 String _couldNotRemoveLabelKu(String label) =>
     '$label nehat rakirin. Girtina te neguherî.';
 
@@ -295,6 +298,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
       'Rezervasyon ji bo lênihêrînê çend deqeyan hatiye rawestandin. Ji kerema xwe piştî demekê dîsa biceribîne.',
   guestsOnly: 'Ev çalakî ji bo mêvanên vexwendî ye.',
   guestChoiceClosed: 'Hilbijartina cihan niha ne vekirî ye.',
+  maxOneTicketForOrder:
+      'Ji bo vê siparîşê tu dikarî herî zêde 1 bilêtê hilbijêrî.',
   tooManyAttempts:
       'Gelek ceribandin hatin kirin. Hinekî bisekine û dîsa biceribîne.',
   seatHeldForRenewal:
@@ -391,6 +396,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableKu,
   labelsNoLongerAvailable: _labelsNoLongerAvailableKu,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherKu,
+  maxTicketsForOrder: _maxTicketsForOrderKu,
   couldNotRemoveLabel: _couldNotRemoveLabelKu,
   peekSecured: _peekSecuredKu,
   venueMap: _venueMapKu,

@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableBg(String labels) =>
 String _couldNotFindSeatsTogetherBg(int count) =>
     'Не намерихме $count места едно до друго. Опитайте с по-малко места или друг вид билет.';
 
+String _maxTicketsForOrderBg(int count) =>
+    'За тази поръчка можете да изберете най-много $count билета.';
+
 String _couldNotRemoveLabelBg(String label) =>
     'Не можахме да премахнем $label. Резервацията ви остава непроменена.';
 
@@ -293,6 +296,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
       'Резервациите са спрени за няколко минути заради поддръжка. Опитайте отново след малко.',
   guestsOnly: 'Това събитие е за поканени гости.',
   guestChoiceClosed: 'Изборът на места не е отворен в момента.',
+  maxOneTicketForOrder: 'За тази поръчка можете да изберете най-много 1 билет.',
   tooManyAttempts: 'Твърде много опити. Изчакайте малко и опитайте отново.',
   seatHeldForRenewal:
       'Едно от тези места е запазено за притежател на абонамент, който все още може да го поднови. Изберете друго място.',
@@ -388,6 +392,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableBg,
   labelsNoLongerAvailable: _labelsNoLongerAvailableBg,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherBg,
+  maxTicketsForOrder: _maxTicketsForOrderBg,
   couldNotRemoveLabel: _couldNotRemoveLabelBg,
   peekSecured: _peekSecuredBg,
   venueMap: _venueMapBg,

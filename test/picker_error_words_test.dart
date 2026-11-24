@@ -30,7 +30,7 @@ SeatLayerError _refused(
       ),
     );
 
-String? _said(
+String _said(
   SeatLayerError error, {
   String command = 'picker.holdSelection',
   int? quantity,
@@ -41,7 +41,7 @@ String? _said(
       error,
       strings,
       failure: PickerActionFailure(command, quantity: quantity, label: label),
-    )?.message;
+    ).message;
 
 void main() {
   group('a refused hold', () {
@@ -137,7 +137,7 @@ void main() {
       // Outside a hold a missing thing is not about tickets.
       expect(
         _said(_refused('not_found'), command: 'picker.zoomToFit'),
-        isNull,
+        _english.checkConnection,
       );
       expect(_said(_refused('command_failed', status: 404)),
           _english.seatsJustTaken);
@@ -190,8 +190,8 @@ void main() {
   test('a maintenance pause says how long', () {
     SeatLayerError paused(Map<String, Object?> details) =>
         _refused('maintenance_mode', status: 503, details: details);
-    expect(_said(paused(<String, Object?>{})),
-        _english.maintenancePausedShortly);
+    expect(
+        _said(paused(<String, Object?>{})), _english.maintenancePausedShortly);
     expect(
       _said(paused(<String, Object?>{'retryAfterS': 30})),
       'Booking is paused for maintenance. Please try again in about 1 minute.',
@@ -207,7 +207,7 @@ void main() {
   });
 
   test('Best Available has its own sentences', () {
-    String? said(String code) => _said(
+    String said(String code) => _said(
           _refused(code),
           command: 'picker.bestAvailable',
           quantity: 4,
@@ -258,12 +258,55 @@ void main() {
       ),
     ]) {
       final words = pickerErrorWords(_refused(code, status: 403), _english);
-      expect(words?.message, title, reason: code);
-      expect(words?.detail, copy, reason: code);
+      expect(words.message, title, reason: code);
+      expect(words.detail, copy, reason: code);
     }
   });
 
-  test('a failure of the app or the page has no buyer sentence', () {
+  test('a limit is said when its number came with the refusal', () {
+    for (final (key, limit, said) in <(String, Object?, String)>[
+      ('max', 4, 'You can select up to 4 tickets for this order.'),
+      ('limit', 6, 'You can select up to 6 tickets for this order.'),
+      ('max', 1, 'You can select up to 1 ticket for this order.'),
+      ('max', 0, _english.seatsJustTaken),
+      ('max', null, _english.seatsJustTaken),
+    ]) {
+      expect(
+        _said(_refused(
+          'hold_quantity_exceeded',
+          details: <String, Object?>{key: limit},
+        )),
+        said,
+        reason: '$key $limit',
+      );
+    }
+  });
+
+  test('a code the picker does not know asks to try again', () {
+    for (final command in <String>['picker.zoomToFit', 'picker.setFloor']) {
+      for (final status in <int?>[null, 400, 409]) {
+        expect(
+          _said(
+            _refused('a_code_from_next_year', status: status),
+            command: command,
+          ),
+          _english.checkConnection,
+          reason: '$command, $status',
+        );
+      }
+    }
+    // Answering no action the picker knows of, and not a SeatLayer error.
+    expect(
+      pickerErrorWords(_refused('a_code_from_next_year'), _english).message,
+      _english.checkConnection,
+    );
+    expect(
+      pickerErrorWords(StateError('not for buyers'), _english).message,
+      _english.checkConnection,
+    );
+  });
+
+  test('a failure of the app or the page asks to try again', () {
     for (final code in <String>[
       'bad_payload',
       'not_ready',
@@ -272,10 +315,23 @@ void main() {
       'selections_required',
       'table_quantity_rejected',
     ]) {
-      expect(_said(_refused(code, status: null)), isNull, reason: code);
+      for (final command in <String>[
+        'picker.holdSelection',
+        'picker.bestAvailable',
+        'picker.removeCartLine',
+        'picker.extendHold',
+        'picker.zoomToFit',
+      ]) {
+        expect(
+          _said(_refused(code, status: null), command: command),
+          _english.checkConnection,
+          reason: '$code, $command',
+        );
+      }
     }
-    expect(_said(const SeatLayerError.readOnly('hold')), isNull);
-    expect(_said(const SeatLayerError.decoding('x')), isNull);
+    expect(
+        _said(const SeatLayerError.readOnly('hold')), _english.checkConnection);
+    expect(_said(const SeatLayerError.decoding('x')), _english.checkConnection);
   });
 
   test('every language says each sentence in its own words', () {
@@ -303,6 +359,8 @@ void main() {
         'maintenancePausedShortly',
         'guestsOnly',
         'guestChoiceClosed',
+        'maxTicketsForOrder',
+        'maxOneTicketForOrder',
         'tooManyAttempts',
         'seatHeldForRenewal',
         'seatUnavailable',
@@ -326,6 +384,7 @@ void main() {
       for (final sentence in <String>[
         strings.couldNotFindSeatsTogether(4),
         strings.maintenancePaused(5),
+        strings.maxTicketsForOrder(4),
       ]) {
         expect(sentence, isNot(contains('{')), reason: tag);
       }
@@ -373,5 +432,42 @@ void main() {
       find.text(_english.seatsNoLongerAvailableTryAnother),
       findsOneWidget,
     );
+  });
+
+  testWidgets('no code or exception text is drawn', (tester) async {
+    final map = FakePickerMap(handler: (command, payload) async => null);
+    addTearDown(map.dispose);
+    final reported = <SeatLayerError>[];
+    final picker = SeatLayerPickerController(mapController: map);
+    addTearDown(picker.dispose);
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const SeatLayerPickerActionError(),
+        controller: picker,
+        callbacks: SeatLayerPickerCallbacks(onError: reported.add),
+      ),
+    );
+    map.emit(pickerSnapshot());
+    await tester.pump();
+    final unknown = _refused('a_code_from_next_year', message: 'server words');
+    for (final error in <Object>[
+      unknown,
+      _refused('command_failed', message: 'TypeError: x is null', status: null),
+      const SeatLayerError.decoding('server words'),
+      StateError('server words'),
+    ]) {
+      picker.reportActionError(error);
+      await tester.pump();
+      expect(find.text(_english.checkConnection), findsOneWidget,
+          reason: '$error');
+      for (final part in <String>['server', 'code', 'Error', 'SeatLayer']) {
+        expect(find.textContaining(part), findsNothing, reason: '$error');
+      }
+      // The host still has the error itself.
+      expect(picker.state.error, same(error));
+    }
+    expect(reported, hasLength(3));
+    expect(reported.first, same(unknown));
   });
 }

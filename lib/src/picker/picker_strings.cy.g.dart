@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableCy(String labels) =>
 String _couldNotFindSeatsTogetherCy(int count) =>
     'Ni ddaethom o hyd i $count sedd gyda\'i gilydd. Rho gynnig ar lai o seddi neu fath arall o docyn.';
 
+String _maxTicketsForOrderCy(int count) =>
+    'Gelli ddewis hyd at $count tocyn ar gyfer yr archeb hon.';
+
 String _couldNotRemoveLabelCy(String label) =>
     'Nid oedd modd tynnu $label. Nid yw dy gadw wedi newid.';
 
@@ -392,6 +395,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
       'Mae archebu wedi’i oedi am ychydig funudau ar gyfer gwaith cynnal a chadw. Rhowch gynnig arall arni cyn bo hir.',
   guestsOnly: 'Mae\'r digwyddiad hwn ar gyfer gwesteion gwahoddedig.',
   guestChoiceClosed: 'Dyw dewis seddi ddim ar agor ar hyn o bryd.',
+  maxOneTicketForOrder: 'Gelli ddewis hyd at 1 tocyn ar gyfer yr archeb hon.',
   tooManyAttempts:
       'Gormod o gynigion. Arhoswch eiliad a rhowch gynnig arall arni.',
   seatHeldForRenewal:
@@ -488,6 +492,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableCy,
   labelsNoLongerAvailable: _labelsNoLongerAvailableCy,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherCy,
+  maxTicketsForOrder: _maxTicketsForOrderCy,
   couldNotRemoveLabel: _couldNotRemoveLabelCy,
   peekSecured: _peekSecuredCy,
   venueMap: _venueMapCy,

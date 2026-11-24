@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableNo(String labels) =>
 String _couldNotFindSeatsTogetherNo(int count) =>
     'Vi fant ikke $count plasser ved siden av hverandre. Prøv færre plasser eller en annen billettype.';
 
+String _maxTicketsForOrderNo(int count) =>
+    'Du kan velge opptil $count billetter til denne bestillingen.';
+
 String _couldNotRemoveLabelNo(String label) =>
     'Kunne ikke fjerne $label. Reservasjonen din er uendret.';
 
@@ -294,6 +297,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
       'Bestilling er satt på pause i noen minutter på grunn av vedlikehold. Prøv igjen om litt.',
   guestsOnly: 'Dette arrangementet er for inviterte gjester.',
   guestChoiceClosed: 'Plassvalget er ikke åpent akkurat nå.',
+  maxOneTicketForOrder: 'Du kan velge opptil 1 billett til denne bestillingen.',
   tooManyAttempts: 'For mange forsøk. Vent litt og prøv igjen.',
   seatHeldForRenewal:
       'Én av disse plassene er holdt av til en sesongkortinnehaver som fortsatt kan fornye den. Velg en annen plass.',
@@ -389,6 +393,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableNo,
   labelsNoLongerAvailable: _labelsNoLongerAvailableNo,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherNo,
+  maxTicketsForOrder: _maxTicketsForOrderNo,
   couldNotRemoveLabel: _couldNotRemoveLabelNo,
   peekSecured: _peekSecuredNo,
   venueMap: _venueMapNo,

@@ -690,6 +690,14 @@ abstract final class SeatLayerStringTokens {
   /// Seat choice isn’t open right now.
   static const String guestChoiceClosed = 'Seat choice isn’t open right now.';
 
+  /// You can select up to {count} tickets for this order.
+  static const String maxTicketsForOrder =
+      'You can select up to {count} tickets for this order.';
+
+  /// You can select up to 1 ticket for this order.
+  static const String maxOneTicketForOrder =
+      'You can select up to 1 ticket for this order.';
+
   /// Too many attempts. Wait a moment and try again.
   static const String tooManyAttempts =
       'Too many attempts. Wait a moment and try again.';

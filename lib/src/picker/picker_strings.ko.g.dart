@@ -34,6 +34,9 @@ String _labelsNoLongerAvailableKo(String labels) =>
 String _couldNotFindSeatsTogetherKo(int count) =>
     '연석 $count석을 찾지 못했어요. 좌석 수를 줄이거나 다른 티켓 종류를 선택해 보세요.';
 
+String _maxTicketsForOrderKo(int count) =>
+    '이번 주문에서 티켓은 최대 $count매까지 선택할 수 있어요.';
+
 String _couldNotRemoveLabelKo(String label) =>
     '$label을(를) 삭제하지 못했어요. 확보한 좌석은 그대로예요.';
 
@@ -201,6 +204,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   maintenancePausedShortly: '점검으로 몇 분간 예매가 중지됐어요. 잠시 후 다시 시도해 주세요.',
   guestsOnly: '이 이벤트는 초대받은 게스트를 위한 것입니다.',
   guestChoiceClosed: '지금은 좌석을 선택할 수 없습니다.',
+  maxOneTicketForOrder: '이번 주문에서 티켓은 최대 1매까지 선택할 수 있어요.',
   tooManyAttempts: '시도 횟수가 너무 많아요. 잠시 후 다시 시도해 주세요.',
   seatHeldForRenewal:
       '이 중 한 좌석은 아직 갱신할 수 있는 시즌권 보유자를 위해 남겨 둔 좌석이에요. 다른 좌석을 선택해 주세요.',
@@ -292,6 +296,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableKo,
   labelsNoLongerAvailable: _labelsNoLongerAvailableKo,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherKo,
+  maxTicketsForOrder: _maxTicketsForOrderKo,
   couldNotRemoveLabel: _couldNotRemoveLabelKo,
   peekSecured: _peekSecuredKo,
   venueMap: _venueMapKo,

@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableRo(String labels) =>
 String _couldNotFindSeatsTogetherRo(int count) =>
     'Nu am găsit $count locuri alăturate. Încearcă mai puține locuri sau alt tip de bilet.';
 
+String _maxTicketsForOrderRo(int count) =>
+    'Poți selecta cel mult $count bilete pentru această comandă.';
+
 String _couldNotRemoveLabelRo(String label) =>
     'Nu am putut elimina $label. Rezervarea rămâne neschimbată.';
 
@@ -321,6 +324,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
       'Rezervarea este întreruptă câteva minute pentru mentenanță. Încercați din nou în curând.',
   guestsOnly: 'Acest eveniment este pentru invitați.',
   guestChoiceClosed: 'Alegerea locurilor nu este deschisă acum.',
+  maxOneTicketForOrder: 'Poți selecta cel mult 1 bilet pentru această comandă.',
   tooManyAttempts: 'Prea multe încercări. Așteaptă puțin și încearcă din nou.',
   seatHeldForRenewal:
       'Unul dintre aceste locuri este păstrat pentru un abonat care îl mai poate reînnoi. Alege alt loc.',
@@ -416,6 +420,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableRo,
   labelsNoLongerAvailable: _labelsNoLongerAvailableRo,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherRo,
+  maxTicketsForOrder: _maxTicketsForOrderRo,
   couldNotRemoveLabel: _couldNotRemoveLabelRo,
   peekSecured: _peekSecuredRo,
   venueMap: _venueMapRo,

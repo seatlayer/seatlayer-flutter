@@ -31,6 +31,8 @@ String _labelsNoLongerAvailableZhHans(String labels) => '$labels 已不可售。
 String _couldNotFindSeatsTogetherZhHans(int count) =>
     '未能找到 $count 个连坐座位。请减少座位数或换一个票种。';
 
+String _maxTicketsForOrderZhHans(int count) => '本次订单最多可选择 $count 张票。';
+
 String _couldNotRemoveLabelZhHans(String label) => '无法移除 $label。您的占座保持不变。';
 
 String _peekSecuredZhHans(int count, String total) =>
@@ -193,6 +195,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       maintenancePausedShortly: '预订因维护暂停几分钟。请稍后重试。',
       guestsOnly: '本活动仅向受邀嘉宾开放。',
       guestChoiceClosed: '目前未开放选座。',
+      maxOneTicketForOrder: '本次订单最多可选择 1 张票。',
       tooManyAttempts: '尝试次数过多。请稍等片刻后重试。',
       seatHeldForRenewal: '其中一个座位为仍可续订的季票持有人保留，请选择其他座位。',
       seatUnavailable: '此座位不可选。',
@@ -279,6 +282,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       labelNoLongerAvailable: _labelNoLongerAvailableZhHans,
       labelsNoLongerAvailable: _labelsNoLongerAvailableZhHans,
       couldNotFindSeatsTogether: _couldNotFindSeatsTogetherZhHans,
+      maxTicketsForOrder: _maxTicketsForOrderZhHans,
       couldNotRemoveLabel: _couldNotRemoveLabelZhHans,
       peekSecured: _peekSecuredZhHans,
       venueMap: _venueMapZhHans,

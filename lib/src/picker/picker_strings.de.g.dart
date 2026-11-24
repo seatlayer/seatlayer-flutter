@@ -36,6 +36,9 @@ String _labelsNoLongerAvailableDe(String labels) =>
 String _couldNotFindSeatsTogetherDe(int count) =>
     'Wir konnten keine $count zusammenhängenden Plätze finden. Versuchen Sie es mit weniger Plätzen oder einer anderen Ticketart.';
 
+String _maxTicketsForOrderDe(int count) =>
+    'Sie können für diese Bestellung bis zu $count Tickets auswählen.';
+
 String _couldNotRemoveLabelDe(String label) =>
     '$label konnte nicht entfernt werden. Ihre Reservierung bleibt unverändert.';
 
@@ -304,6 +307,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
       'Die Buchung ist wegen Wartungsarbeiten für einige Minuten pausiert. Bitte versuchen Sie es in Kürze erneut.',
   guestsOnly: 'Diese Veranstaltung ist für eingeladene Gäste.',
   guestChoiceClosed: 'Die Platzwahl ist gerade nicht geöffnet.',
+  maxOneTicketForOrder:
+      'Sie können für diese Bestellung bis zu 1 Ticket auswählen.',
   tooManyAttempts:
       'Zu viele Versuche. Warten Sie einen Moment und versuchen Sie es erneut.',
   seatHeldForRenewal:
@@ -402,6 +407,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableDe,
   labelsNoLongerAvailable: _labelsNoLongerAvailableDe,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherDe,
+  maxTicketsForOrder: _maxTicketsForOrderDe,
   couldNotRemoveLabel: _couldNotRemoveLabelDe,
   peekSecured: _peekSecuredDe,
   venueMap: _venueMapDe,

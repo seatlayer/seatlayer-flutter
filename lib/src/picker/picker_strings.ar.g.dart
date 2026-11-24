@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableAr(String labels) =>
 String _couldNotFindSeatsTogetherAr(int count) =>
     'لم نجد $count مقاعد متجاورة. جرّب عددًا أقل أو نوع تذكرة آخر.';
 
+String _maxTicketsForOrderAr(int count) =>
+    'يمكنك اختيار $count تذكرة كحد أقصى لهذا الطلب.';
+
 String _couldNotRemoveLabelAr(String label) =>
     'تعذّرت إزالة $label. حجزك المؤقت لم يتغير.';
 
@@ -373,6 +376,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
       'الحجز متوقف مؤقتًا لبضع دقائق للصيانة. يُرجى المحاولة مجددًا بعد قليل.',
   guestsOnly: 'هذه الفعالية مخصصة للضيوف المدعوين.',
   guestChoiceClosed: 'اختيار المقاعد غير متاح الآن.',
+  maxOneTicketForOrder: 'يمكنك اختيار تذكرة واحدة كحد أقصى لهذا الطلب.',
   tooManyAttempts: 'محاولات كثيرة جدًا. انتظر لحظة وأعد المحاولة.',
   seatHeldForRenewal:
       'أحد هذه المقاعد محجوز لحامل تذكرة موسمية لا يزال بإمكانه التجديد. اختر مقعدًا آخر.',
@@ -468,6 +472,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableAr,
   labelsNoLongerAvailable: _labelsNoLongerAvailableAr,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherAr,
+  maxTicketsForOrder: _maxTicketsForOrderAr,
   couldNotRemoveLabel: _couldNotRemoveLabelAr,
   peekSecured: _peekSecuredAr,
   venueMap: _venueMapAr,

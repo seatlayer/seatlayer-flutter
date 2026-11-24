@@ -125,6 +125,7 @@ const List<String> _plainFields = <String>[
   'maintenancePausedShortly',
   'guestsOnly',
   'guestChoiceClosed',
+  'maxOneTicketForOrder',
   'tooManyAttempts',
   'seatHeldForRenewal',
   'seatUnavailable',
@@ -247,6 +248,9 @@ const Map<String, List<_Slot>> _interpolated = <String, List<_Slot>>{
     (parameter: 'labels', type: 'String', placeholder: '{labels}'),
   ],
   'couldNotFindSeatsTogether': <_Slot>[
+    (parameter: 'count', type: 'int', placeholder: '{count}'),
+  ],
+  'maxTicketsForOrder': <_Slot>[
     (parameter: 'count', type: 'int', placeholder: '{count}'),
   ],
   'couldNotRemoveLabel': <_Slot>[

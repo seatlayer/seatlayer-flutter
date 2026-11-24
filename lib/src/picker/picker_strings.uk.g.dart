@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableUk(String labels) =>
 String _couldNotFindSeatsTogetherUk(int count) =>
     'Не знайшли $count місць поруч. Спробуйте менше місць або інший тип квитка.';
 
+String _maxTicketsForOrderUk(int count) =>
+    'У цьому замовленні можна обрати не більше $count квитків.';
+
 String _couldNotRemoveLabelUk(String label) =>
     'Не вдалося прибрати $label. Бронь залишилася без змін.';
 
@@ -336,6 +339,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
       'Бронювання призупинено на кілька хвилин через технічні роботи. Спробуйте ще раз трохи пізніше.',
   guestsOnly: 'Ця подія для запрошених гостей.',
   guestChoiceClosed: 'Вибір місць зараз недоступний.',
+  maxOneTicketForOrder: 'У цьому замовленні можна обрати не більше 1 квитка.',
   tooManyAttempts: 'Забагато спроб. Зачекайте трохи й спробуйте ще раз.',
   seatHeldForRenewal:
       'Одне з цих місць закріплено за власником абонемента, який ще може його продовжити. Оберіть інше місце.',
@@ -431,6 +435,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableUk,
   labelsNoLongerAvailable: _labelsNoLongerAvailableUk,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherUk,
+  maxTicketsForOrder: _maxTicketsForOrderUk,
   couldNotRemoveLabel: _couldNotRemoveLabelUk,
   peekSecured: _peekSecuredUk,
   venueMap: _venueMapUk,

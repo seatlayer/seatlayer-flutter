@@ -2640,6 +2640,7 @@ names its own sentence, the code decides; otherwise the action does.
 | `companion_pair_required` / `ticket_option_not_applicable` | `companionPairRequired` / `ticketOptionNotApplicable` |
 | `channel_paused`; `buyer_access_revoked`; an expired or invalid session; `buyer_access_*_mismatch`, `access_provider_unavailable` | the access panel's title and body for paused; revoked; expired; not verified |
 | `seat_held_for_renewal` | `seatHeldForRenewal` |
+| `hold_quantity_exceeded`, when the limit comes with it | `maxTicketsForOrder(limit)` / `maxOneTicketForOrder` |
 | `channel_access_denied` | `accessUnverifiedCopy` |
 | `hold_not_active` / `hold_not_found`, `legacy_hold_requires_restart` | `holdExpired` / `savedSeatsNotRestored` |
 | `order_edit_in_progress`, `event_not_found`, `key_not_found`, `key_revoked`, `mode_mismatch`, `org_mismatch`, `credit_limit_reached`; `forbidden` and `not_found` on a hold or Best Available | `eventUnavailable` |
@@ -2649,13 +2650,15 @@ names its own sentence, the code decides; otherwise the action does.
 | a hold, with seats named (the first three, standing places left out) | `labelNoLongerAvailable` / `labelsNoLongerAvailable` |
 | `not_for_sale`, with no seat named | `seatUnavailable` |
 | a hold, anything else | `seatsJustTaken` |
+| anything else | `checkConnection` |
 
 A removal and more time keep their own sentence for the codes from
 `seat_held_for_renewal` to `eventUnavailable`.
 
-A failure that answers nobody (a bad command, a decoding fault, a read-only
-picker, an exception of the app's own checkout) has no buyer sentence and keeps
-the error's own line.
+"Anything else" is a failure that answers nobody (a bad command, a decoding
+fault, a read-only picker, an exception of the app's own checkout) and any code
+the picker does not know, outside a hold, Best Available, a removal and more
+time. The error's own line is never drawn.
 
 A sentence wraps and is never cut; the bar's words take at most 15 per cent of
 the screen's height (84 at least) and scroll past it, so the button under them stays in

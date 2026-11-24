@@ -36,6 +36,9 @@ String _labelsNoLongerAvailableFi(String labels) =>
 String _couldNotFindSeatsTogetherFi(int count) =>
     'Emme löytäneet $count paikkaa vierekkäin. Kokeile vähempää paikkaa tai toista lipputyyppiä.';
 
+String _maxTicketsForOrderFi(int count) =>
+    'Voit valita tähän tilaukseen enintään $count lippua.';
+
 String _couldNotRemoveLabelFi(String label) =>
     'Kohdetta $label ei voitu poistaa. Varauksesi on ennallaan.';
 
@@ -291,6 +294,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
       'Varaaminen on keskeytetty muutamaksi minuutiksi huollon vuoksi. Yritä pian uudelleen.',
   guestsOnly: 'Tämä tapahtuma on kutsutuille vieraille.',
   guestChoiceClosed: 'Paikkojen valinta ei ole nyt auki.',
+  maxOneTicketForOrder: 'Voit valita tähän tilaukseen enintään 1 lipun.',
   tooManyAttempts: 'Liian monta yritystä. Odota hetki ja yritä uudelleen.',
   seatHeldForRenewal:
       'Yksi näistä paikoista on varattu kausilipun haltijalle, joka voi vielä uusia sen. Valitse toinen paikka.',
@@ -386,6 +390,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableFi,
   labelsNoLongerAvailable: _labelsNoLongerAvailableFi,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherFi,
+  maxTicketsForOrder: _maxTicketsForOrderFi,
   couldNotRemoveLabel: _couldNotRemoveLabelFi,
   peekSecured: _peekSecuredFi,
   venueMap: _venueMapFi,

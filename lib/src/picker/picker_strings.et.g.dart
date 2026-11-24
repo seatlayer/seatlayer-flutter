@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableEt(String labels) =>
 String _couldNotFindSeatsTogetherEt(int count) =>
     'Me ei leidnud $count kõrvuti kohta. Proovi vähem kohti või muud piletitüüpi.';
 
+String _maxTicketsForOrderEt(int count) =>
+    'Selle tellimuse jaoks saad valida kuni $count piletit.';
+
 String _couldNotRemoveLabelEt(String label) =>
     '$label eemaldamine ebaõnnestus. Broneering on muutumatu.';
 
@@ -290,6 +293,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
       'Broneerimine on hoolduse tõttu mõneks minutiks peatatud. Proovi varsti uuesti.',
   guestsOnly: 'See üritus on kutsutud külalistele.',
   guestChoiceClosed: 'Kohtade valik ei ole praegu avatud.',
+  maxOneTicketForOrder: 'Selle tellimuse jaoks saad valida kuni 1 pileti.',
   tooManyAttempts: 'Liiga palju katseid. Oodake hetk ja proovige uuesti.',
   seatHeldForRenewal:
       'Üks neist kohtadest on hoitud hooajapileti omanikule, kes saab selle veel pikendada. Vali muu koht.',
@@ -385,6 +389,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableEt,
   labelsNoLongerAvailable: _labelsNoLongerAvailableEt,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherEt,
+  maxTicketsForOrder: _maxTicketsForOrderEt,
   couldNotRemoveLabel: _couldNotRemoveLabelEt,
   peekSecured: _peekSecuredEt,
   venueMap: _venueMapEt,

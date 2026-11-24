@@ -36,6 +36,9 @@ String _labelsNoLongerAvailableNl(String labels) =>
 String _couldNotFindSeatsTogetherNl(int count) =>
     'We konden geen $count plaatsen naast elkaar vinden. Probeer minder plaatsen of een ander tickettype.';
 
+String _maxTicketsForOrderNl(int count) =>
+    'Je kunt maximaal $count tickets selecteren voor deze bestelling.';
+
 String _couldNotRemoveLabelNl(String label) =>
     'Kon $label niet verwijderen. Je reservering blijft ongewijzigd.';
 
@@ -302,6 +305,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
       'Boeken is enkele minuten gepauzeerd voor onderhoud. Probeer het zo meteen opnieuw.',
   guestsOnly: 'Dit evenement is voor genodigden.',
   guestChoiceClosed: 'Plaatsen kiezen is nu niet mogelijk.',
+  maxOneTicketForOrder:
+      'Je kunt maximaal 1 ticket selecteren voor deze bestelling.',
   tooManyAttempts: 'Te veel pogingen. Wacht even en probeer het opnieuw.',
   seatHeldForRenewal:
       'Een van deze plaatsen is gereserveerd voor een houder van een seizoensticket die hem nog kan verlengen. Kies een andere plaats.',
@@ -398,6 +403,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableNl,
   labelsNoLongerAvailable: _labelsNoLongerAvailableNl,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherNl,
+  maxTicketsForOrder: _maxTicketsForOrderNl,
   couldNotRemoveLabel: _couldNotRemoveLabelNl,
   peekSecured: _peekSecuredNl,
   venueMap: _venueMapNl,

@@ -36,6 +36,9 @@ String _labelsNoLongerAvailableHi(String labels) =>
 String _couldNotFindSeatsTogetherHi(int count) =>
     'हमें $count साथ वाली सीटें नहीं मिलीं। कम सीटें या कोई दूसरा टिकट टाइप आज़माएँ।';
 
+String _maxTicketsForOrderHi(int count) =>
+    'इस ऑर्डर में आप ज़्यादा से ज़्यादा $count टिकट चुन सकते हैं।';
+
 String _couldNotRemoveLabelHi(String label) =>
     '$label हटाया नहीं जा सका। आपका होल्ड पहले जैसा है।';
 
@@ -288,6 +291,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
       'मेंटेनेंस के कारण बुकिंग कुछ मिनटों के लिए रुकी है। कृपया थोड़ी देर बाद फिर कोशिश करें।',
   guestsOnly: 'यह इवेंट आमंत्रित मेहमानों के लिए है।',
   guestChoiceClosed: 'सीट चुनना अभी खुला नहीं है।',
+  maxOneTicketForOrder:
+      'इस ऑर्डर में आप ज़्यादा से ज़्यादा 1 टिकट चुन सकते हैं।',
   tooManyAttempts: 'बहुत ज़्यादा कोशिशें हुईं। थोड़ा रुककर फिर कोशिश करें।',
   seatHeldForRenewal:
       'इनमें से एक सीट ऐसे सीज़न टिकट होल्डर के लिए रखी गई है जो अभी इसे रिन्यू कर सकते हैं। कोई दूसरी सीट चुनें।',
@@ -383,6 +388,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableHi,
   labelsNoLongerAvailable: _labelsNoLongerAvailableHi,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherHi,
+  maxTicketsForOrder: _maxTicketsForOrderHi,
   couldNotRemoveLabel: _couldNotRemoveLabelHi,
   peekSecured: _peekSecuredHi,
   venueMap: _venueMapHi,

@@ -35,6 +35,9 @@ String _labelsNoLongerAvailableRu(String labels) =>
 String _couldNotFindSeatsTogetherRu(int count) =>
     'Не нашли $count мест рядом. Попробуйте меньше мест или другой тип билета.';
 
+String _maxTicketsForOrderRu(int count) =>
+    'В этом заказе можно выбрать не более $count билетов.';
+
 String _couldNotRemoveLabelRu(String label) =>
     'Не удалось убрать $label. Бронь осталась без изменений.';
 
@@ -333,6 +336,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRu = SeatLayerPickerStrings(
       'Бронирование приостановлено на несколько минут из-за технических работ. Попробуйте снова чуть позже.',
   guestsOnly: 'Это мероприятие для приглашённых гостей.',
   guestChoiceClosed: 'Выбор мест сейчас недоступен.',
+  maxOneTicketForOrder: 'В этом заказе можно выбрать не более 1 билета.',
   tooManyAttempts:
       'Слишком много попыток. Подождите немного и попробуйте снова.',
   seatHeldForRenewal:
@@ -429,6 +433,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRu = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableRu,
   labelsNoLongerAvailable: _labelsNoLongerAvailableRu,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherRu,
+  maxTicketsForOrder: _maxTicketsForOrderRu,
   couldNotRemoveLabel: _couldNotRemoveLabelRu,
   peekSecured: _peekSecuredRu,
   venueMap: _venueMapRu,

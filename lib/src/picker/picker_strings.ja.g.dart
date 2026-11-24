@@ -33,6 +33,8 @@ String _labelsNoLongerAvailableJa(String labels) =>
 String _couldNotFindSeatsTogetherJa(int count) =>
     '隣り合った$count席が見つかりませんでした。席数を減らすか、別のチケット種別をお試しください。';
 
+String _maxTicketsForOrderJa(int count) => 'このご注文で選べるチケットは$count枚までです。';
+
 String _couldNotRemoveLabelJa(String label) => '$labelを外せませんでした。確保状況は変わっていません。';
 
 String _peekSecuredJa(int count, String total) =>
@@ -195,6 +197,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   maintenancePausedShortly: '予約はメンテナンスのため数分間停止しています。しばらくしてからもう一度お試しください。',
   guestsOnly: 'このイベントは招待されたゲスト専用です。',
   guestChoiceClosed: '現在、座席の選択は受け付けていません。',
+  maxOneTicketForOrder: 'このご注文で選べるチケットは1枚までです。',
   tooManyAttempts: '試行回数が多すぎます。しばらく待ってからもう一度お試しください。',
   seatHeldForRenewal:
       'これらの座席のうち1席は、まだ更新できるシーズンチケット保有者のために確保されています。別の座席をお選びください。',
@@ -284,6 +287,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   labelNoLongerAvailable: _labelNoLongerAvailableJa,
   labelsNoLongerAvailable: _labelsNoLongerAvailableJa,
   couldNotFindSeatsTogether: _couldNotFindSeatsTogetherJa,
+  maxTicketsForOrder: _maxTicketsForOrderJa,
   couldNotRemoveLabel: _couldNotRemoveLabelJa,
   peekSecured: _peekSecuredJa,
   venueMap: _venueMapJa,
