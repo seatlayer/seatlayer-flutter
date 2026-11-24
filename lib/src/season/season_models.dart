@@ -102,12 +102,12 @@ class SeatLayerSeasonStatus {
   /// On [SeatLayerSeasonStatusKind.ready] only: the package's dates.
   final List<SeatLayerSeasonDate>? dates;
 
-  /// On [SeatLayerSeasonStatusKind.ready], from a page that sends it: the
-  /// Season's name, for the app's header.
+  /// Once the Season is read, from a page that sends it: the Season's name,
+  /// for the app's header.
   final String? seasonName;
 
-  /// On [SeatLayerSeasonStatusKind.ready], from a page that sends it: the
-  /// club's brand, under the event's field names.
+  /// Once the Season is read, from a page that sends it: the club's brand,
+  /// under the event's field names.
   final SeatLayerPickerBranding? branding;
 
   static SeatLayerSeasonStatus? fromJson(Object? value) {

@@ -1,5 +1,5 @@
-// season.html's part of the bridge, played by a test: what runtime 1.0.0
-// sends, and the name and brand 1.0.1 adds.
+// season.html's part of the bridge, played by a test: what a page of
+// `season-app-shell-v1` sends, and the name and brand `-v2` adds.
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +31,9 @@ class SeasonPage {
 
   final FakeWebViewPlatform fake;
   var _n = 0;
+
+  /// Whether the page lists `season-app-shell-v2`.
+  var appBarPage = false;
 
   /// The web view the page speaks from: a retry mounts a new one.
   var controller = 0;
@@ -68,11 +71,32 @@ class SeasonPage {
   void answer(String type, Object? result) =>
       post(EnvelopeKind.res, type, result, id: last(type).id);
 
+  /// The contract's own `status` frame [kind], as a page of
+  /// `season-app-shell-v2` sends it once the Season is read.
+  void statusV2(String kind, {Map<String, Object?>? branding}) => evt(
+        'season.status',
+        <String, Object?>{
+          'kind': kind,
+          'message': kind,
+          'season': <String, Object?>{'name': 'Main Stage 2026/27'},
+          'branding': branding ??
+              <String, Object?>{
+                'brandName': 'Grand Theatre',
+                'logoUrl': 'https://api.example.test/logo.png',
+                'accent': '#0f766e',
+              },
+        },
+      );
+
   Future<void> boot(WidgetTester tester) async {
     post(EnvelopeKind.hello, 'hello', <String, Object?>{
       'bundle': '1.0.0',
       'protocol': <String, Object?>{'min': 2, 'max': 2},
-      'capabilities': <String>['season-surface-v1', 'season-app-shell-v1'],
+      'capabilities': <String>[
+        'season-surface-v1',
+        'season-app-shell-v1',
+        if (appBarPage) 'season-app-shell-v2',
+      ],
       'events': <String>[],
       'commands': <String>[],
     });
@@ -91,7 +115,7 @@ class SeasonPage {
     await tester.pump();
   }
 
-  /// Runtime 1.0.1's `ready`: the Season's name and its club's brand.
+  /// A `ready` with the Season's name and its club's brand.
   void named(String name, String brandName) => evt(
         'season.status',
         <String, Object?>{

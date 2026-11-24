@@ -11,7 +11,9 @@ import 'seat_layer_season_controller.dart';
 /// The Season page in a web view: its package step, map and cart.
 ///
 /// Give it a definite size, as the seat map. [SeatLayerSeasonPicker] places it
-/// under the app's header; use this directly only for a layout of your own.
+/// under the app's header; use this directly only for a layout of your own. The
+/// page leaves the Season's name and the hold clock to the app: draw them from
+/// [SeatLayerSeasonController.status] and [SeatLayerSeasonController.hold].
 class SeatLayerSeasonView
     extends SeatLayerRuntimeHost<SeatLayerSeasonConfiguration> {
   const SeatLayerSeasonView({
