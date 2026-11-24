@@ -216,10 +216,11 @@ void main() {
       bool keyboard = false,
       VoidCallback? onMapTap,
       List<String> needs = const <String>['wheelchair'],
+      Size phone = phoneSize,
     }) async {
       final map = FakePickerMap(bundle: accessibilityFocusBundle());
       addTearDown(map.dispose);
-      _useSurface(tester, wide ? _tablet : phoneSize);
+      _useSurface(tester, wide ? _tablet : phone);
       await tester.pumpWidget(
         pickerHarness(
           map,
@@ -421,37 +422,49 @@ void main() {
       expect(find.text('Accessibility and view'), findsNothing);
     });
 
-    for (final scale in <double>[1, 1.3, 2]) {
-      testWidgets('wrap a long name instead of cutting it — text $scale',
-          (tester) async {
-        tester.platformDispatcher.textScaleFactorTestValue = scale;
-        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-        for (final tag in <String>['en', 'de', 'fr', 'fi', 'ru', 'ar', 'ja']) {
-          final strings = SeatLayerPickerStrings.forLocale(Locale(tag));
-          await open(
-            tester,
-            wide: true,
-            direction: tag == 'ar' ? TextDirection.rtl : TextDirection.ltr,
-            options: SeatLayerPickerOptions(strings: strings),
-            needs: strings.accessNeeds.keys.toList(),
+    for (final (label, wide, size) in const <(String, bool, Size)>[
+      ('tablet', true, _tablet),
+      ('320', false, Size(320, 568)),
+      ('360', false, Size(360, 640)),
+      ('390', false, Size(390, 844)),
+      ('430', false, Size(430, 932)),
+      ('844 sideways', false, Size(844, 390)),
+    ]) {
+      for (final scale in <double>[1, 1.3, 2]) {
+        testWidgets('wrap a long name instead of cutting it: $label, $scale',
+            (tester) async {
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(
+            tester.platformDispatcher.clearTextScaleFactorTestValue,
           );
-          expect(tester.takeException(), isNull, reason: tag);
-          for (final name in <String>[
-            strings.colorblindSafe,
-            ...strings.accessNeeds.values,
-          ]) {
-            final text = tester.renderObject<RenderParagraph>(
-              find.descendant(
-                of: find.text(name, skipOffstage: false).first,
-                matching: find.byType(RichText, skipOffstage: false),
-              ),
+          for (final tag in <String>['en', 'de', 'fr', 'fi', 'ru', 'ar', 'ja']) {
+            final strings = SeatLayerPickerStrings.forLocale(Locale(tag));
+            await open(
+              tester,
+              wide: wide,
+              phone: size,
+              direction: tag == 'ar' ? TextDirection.rtl : TextDirection.ltr,
+              options: SeatLayerPickerOptions(strings: strings),
+              needs: strings.accessNeeds.keys.toList(),
             );
-            expect(text.didExceedMaxLines, isFalse, reason: '$tag: $name');
-            expect(text.maxLines, isNull, reason: '$tag: $name');
+            expect(tester.takeException(), isNull, reason: tag);
+            for (final name in <String>[
+              strings.colorblindSafe,
+              ...strings.accessNeeds.values,
+            ]) {
+              final text = tester.renderObject<RenderParagraph>(
+                find.descendant(
+                  of: find.text(name, skipOffstage: false).first,
+                  matching: find.byType(RichText, skipOffstage: false),
+                ),
+              );
+              expect(text.didExceedMaxLines, isFalse, reason: '$tag: $name');
+              expect(text.maxLines, isNull, reason: '$tag: $name');
+            }
+            await tester.pumpWidget(const SizedBox());
           }
-          await tester.pumpWidget(const SizedBox());
-        }
-      });
+        });
+      }
     }
 
     testWidgets('the phone keeps its bottom sheet', (tester) async {

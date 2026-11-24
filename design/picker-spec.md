@@ -850,8 +850,8 @@ label now (`size.accessNoteIconSize`, muted, accent while open, inside a
 line is a line whether or not the buyer has asked for it. The ⓘ carries the
 sentence as its own accessible name, so it is spoken either way, and it is a
 separate node from the row's switch because the two do different things. The
-label itself is `maxLines: 1` and truncates: a translation that runs long
-shortens rather than wrapping.
+label itself is never cut: a name too long for its cell wraps and its row
+grows.
 
 **The line reads icon · name · ⓘ · count · switch**, and the ⓘ shares ONE cell
 with the label: it explains the words beside it, not the switch at the far end.
@@ -867,15 +867,14 @@ from `picker.accessShort.*` so they agree. The wire key `cart` is the CART
 live-caption provision (its glyph is the CC mark), so its English name is
 "Live captions"; it is not a mobility vehicle.
 
-Row anatomy, leading to trailing, at **one fixed height of 50 for every row on
-the sheet** — a sheet whose rows breathe differently reads as three lists in a
-trench coat:
+Row anatomy, leading to trailing, at **a height of 50 for every row whose name
+fits**; a row whose name wraps grows, with 6 above and below the name:
 
 | Cell | Width | Contents |
 | --- | --- | --- |
 | icon | `size.accessRowIconCell` (20) | the attribute's own drawing at `size.accessRowIconSize`, in `color.*.mutedText` |
 | gap | `size.accessRowGap` (10) | — |
-| label + ⓘ | flexible | the short name at `size.accessRowLabelFontSize` / w600 in `color.*.text`, one line, ellipsized (in the wide popover it wraps instead and its row grows past 50); then, only where the row has a note, the ⓘ in a 36-wide column |
+| label + ⓘ | flexible | the short name at `size.accessRowLabelFontSize` / w600 in `color.*.text`, wrapping (never cut); then, only where the row has a note, the ⓘ in a 36-wide column |
 | count | 68, trailing-aligned | `strings.accessFreeCount`, or `0`; wide enough for "999 free" |
 | gap | `size.accessRowSwitchGap` (12) | — |
 | switch | `size.accessSwitchWidth` × `size.accessSwitchHeight` | drawn, not the platform's |
@@ -3064,8 +3063,8 @@ of them portable:
   floored at `size.accessSheetMinHeight`, never taller than the screen — and
   the provision list **scrolls inside** that bound rather than the sheet
   growing;
-- **every row is one line at one fixed height (50)** on the sheet, short name
-  truncating rather than wrapping (the narrower wide popover wraps it), with any sentence it needs behind an ⓘ that opens
+- **every row is 50 high and grows only where its short name wraps**, with any
+  sentence it needs behind an ⓘ that opens
   *under* the row it belongs to;
 - **the whole line toggles**, so the target is the words and not the
   20-point switch at the end of it, and each row's count keeps its own

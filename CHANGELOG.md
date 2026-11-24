@@ -25,7 +25,7 @@
 - **Sold-out prices** stay on the price rail, struck through and greyed, and can still be tapped to clear a filter.
 - **Checkout button:** "Securing your seats…" and "Seats secured. Opening checkout…" are drawn without a spinner. If you set `openingCheckout` and not `seatsSecuredOpeningCheckout`, your wording is still drawn. `SeatLayerCheckoutCtaState.busyInWords` marks these states when you rebuild one with your own label.
 - **Test mode:** a tap on the test badge says "Bookings here are not real and no card is charged". Its screen-reader name is "Test mode · books nothing".
-- **Accessibility sheet:** the two map switches come first, then "SHOW SEATS FOR". `showSeatsFor` is drawn as written, no longer upper-cased.
+- **Accessibility sheet:** the two map switches come first, then "SHOW SEATS FOR". A long name wraps and its row grows; it is never cut. `showSeatsFor` is drawn as written, no longer upper-cased.
 - **English wording:**
   - "Adjust seat selection" (was "Adjust your selection")
   - "8 seats left" (was "Only 8 left")

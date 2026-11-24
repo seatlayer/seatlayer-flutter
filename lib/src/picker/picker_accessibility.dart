@@ -243,7 +243,6 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                     iconKey: 'restrictedView',
                     label: strings.hideLimitedView,
                     reserveNoteSlot: false,
-                    wrapLabel: popover,
                     hairline: available.colorblind,
                     value: hideLimited,
                     onChanged: () {
@@ -260,7 +259,6 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                     iconKey: 'contrast',
                     label: strings.colorblindSafe,
                     reserveNoteSlot: false,
-                    wrapLabel: popover,
                     hairline: false,
                     value: colorblind,
                     onChanged: () {
@@ -320,7 +318,6 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                             // nothing about which one a row was.
                             iconKey: need.key,
                             label: need.label,
-                            wrapLabel: popover,
                             note: need.note,
                             // A NUMBER, INCLUDING AT ZERO. The row used to
                             // say "Not available" when the last space went,
@@ -545,7 +542,6 @@ class _AccessOptionRow extends StatefulWidget {
     this.onCountPressed,
     this.reserveNoteSlot = true,
     this.hairline = true,
-    this.wrapLabel = false,
   });
 
   /// Which shared drawing this row wears, by the runtime's own key.
@@ -568,11 +564,6 @@ class _AccessOptionRow extends StatefulWidget {
   /// Whether a hairline closes the row.
   final bool hairline;
 
-  /// Whether a label too long for its cell takes a second line. The popover is
-  /// narrower than the sheet, so there the row grows rather than cutting the
-  /// name.
-  final bool wrapLabel;
-
   final bool value;
   final VoidCallback? onChanged;
 
@@ -580,8 +571,11 @@ class _AccessOptionRow extends StatefulWidget {
   State<_AccessOptionRow> createState() => _AccessOptionRowState();
 }
 
-/// One row height for the whole sheet.
+/// The height of every row whose name fits on the lines it has.
 const double _rowHeight = 50;
+
+/// What keeps a row's text off its hairlines once it has grown.
+const double _rowPaddingY = 6;
 
 /// The width of the count column, right-aligned, wide enough for "999 free".
 const double _countColumn = 68;
@@ -629,9 +623,8 @@ class _AccessOptionRowState extends State<_AccessOptionRow> {
                     : const Border(),
               ),
               child: ConstrainedBox(
-                // ONE height for every row, whatever it carries: a sheet whose
-                // rows breathe differently reads as three lists in a trench
-                // coat.
+                // ONE height for every row whose name fits. A name that does
+                // not fit wraps and its row grows: it is never cut.
                 constraints: const BoxConstraints(minHeight: _rowHeight),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -657,22 +650,23 @@ class _AccessOptionRowState extends State<_AccessOptionRow> {
                         child: Row(
                           children: <Widget>[
                             Flexible(
-                              child: Text(
-                                label,
-                                maxLines: widget.wrapLabel ? null : 1,
-                                overflow: widget.wrapLabel
-                                    ? null
-                                    : TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: theme.text,
-                                  fontSize: SeatLayerSizeTokens
-                                      .accessRowLabelFontSize,
-                                  fontWeight: seatLayerBoldWeight(
-                                    context,
-                                    FontWeight.w600,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: _rowPaddingY,
+                                ),
+                                child: Text(
+                                  label,
+                                  style: TextStyle(
+                                    color: theme.text,
+                                    fontSize: SeatLayerSizeTokens
+                                        .accessRowLabelFontSize,
+                                    fontWeight: seatLayerBoldWeight(
+                                      context,
+                                      FontWeight.w600,
+                                    ),
+                                    height: 1.25,
+                                    fontFamily: theme.fontFamily,
                                   ),
-                                  height: 1.25,
-                                  fontFamily: theme.fontFamily,
                                 ),
                               ),
                             ),
