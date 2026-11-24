@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -289,8 +290,14 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
     // reads as a mistake, and the three were disagreeing in 3D.
     final theme = seatLayerMapChromeThemeOf(context);
     final layout = theme.layout;
-    final bottomInset =
-        widget.reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0;
+    // A phone that takes no room at its foot still keeps the button off the
+    // glass's edge.
+    final bottomInset = widget.reserveBottomInset
+        ? math.max(
+            MediaQuery.paddingOf(context).bottom,
+            SeatLayerSizeTokens.footMinInset,
+          )
+        : 0.0;
     final hasTickets = controller.confirmedCartLines.isNotEmpty;
     // The handle leaves while a confirm card is up (web 0.84.1): the disc was
     // sitting half under the card's scrim, and the card is the only question

@@ -1893,7 +1893,8 @@ pay. `fromAmount` / `fromPriceText` and every path that carried them are gone.
 **The foot** is the lapse notice, the hold-ending cue, the inline action error,
 the total line, `size.footTotalGap` (8) and the BookButton, inside
 `size.footPadX` (16) / `size.footPadTop` (4) /
-`size.footPadBottom` (2). It carries a hairline on its top edge **only when the
+`size.footPadBottom` (2), over the bottom safe inset, which is never less than
+`size.footMinInset` (10). It carries a hairline on its top edge **only when the
 sheet is open and there are tickets above it** — the collapsed sheet has
 nothing above the foot but the panel's own top edge, and a second hairline a
 few points under the first read as two lines for one edge. It is **not

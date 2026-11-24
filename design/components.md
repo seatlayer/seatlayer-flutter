@@ -587,7 +587,8 @@ map; see `picker-spec.md` §3.13.7, "Divergence from the web picker".
   - **Foot** the lapse notice, the hold-ending cue, the inline action error,
     the total line, `size.footTotalGap` (8) and the BookButton, in
     `size.footPadX` (16) / `size.footPadTop` (4) /
-    `size.footPadBottom` (2). A hairline above it **only when the sheet is open
+    `size.footPadBottom` (2), over the bottom safe inset, which is never less
+    than `size.footMinInset` (10). A hairline above it **only when the sheet is open
     with tickets** — collapsed, the panel's own top edge is the only edge
     there is. Not restyled on a phone at all — one block on both widths.
   - **Total line** `strings.noSeatsSelected` on an empty cart, else

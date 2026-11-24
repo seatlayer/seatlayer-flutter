@@ -120,6 +120,44 @@ void main() {
     expect(find.byType(SeatLayerBestSeatsForm), findsNothing);
   });
 
+  for (final inset in <double>[0, 8, 34]) {
+    testWidgets('the button stands off the edge over a $inset inset', (
+      tester,
+    ) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          Builder(
+            builder: (context) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                padding: EdgeInsets.only(bottom: inset),
+              ),
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: _sheet(expanded: false),
+              ),
+            ),
+          ),
+        ),
+      );
+      map.emit(pickerSnapshot());
+      await tester.pumpAndSettle();
+
+      final sheet = tester.getRect(find.byType(SeatLayerCartSheet));
+      final button = tester.getRect(find.byType(FilledButton).last);
+      expect(
+        sheet.bottom - button.bottom,
+        SeatLayerSizeTokens.footPadBottom +
+            (inset > SeatLayerSizeTokens.footMinInset
+                ? inset
+                : SeatLayerSizeTokens.footMinInset),
+      );
+    });
+  }
+
   testWidgets('an empty cart says so, and never a price it cannot act on', (
     tester,
   ) async {
