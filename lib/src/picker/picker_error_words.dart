@@ -82,7 +82,6 @@ const Set<String> _cannotRetry = <String>{
   'invalid_idempotency_key',
   'invalid_referral',
   'labels_and_holdId_required',
-  'not_ready',
   'picker_requires_protocol_2',
   'read_only',
   'selections_required',
@@ -96,6 +95,7 @@ const Set<String> _cannotRetry = <String>{
 const Set<String> _mayRetry = <String>{
   'command_failed',
   'internal_error',
+  'not_ready',
   'picker_error',
   'render_failed',
   'sl_decoding',
@@ -124,8 +124,8 @@ PickerErrorWords pickerErrorWords(
   PickerErrorWords line(String message, [String? detail]) =>
       (message: message, detail: detail);
 
-  // An exception of the app's own, which asking again would only meet again.
-  if (error is! SeatLayerError) return line(strings.eventUnavailable);
+  // An exception of the app's own: its request may go through a second time.
+  if (error is! SeatLayerError) return line(strings.checkConnection);
 
   final payload = error is BridgeFailure ? error.payload : null;
   final details = payload?.details;

@@ -303,7 +303,7 @@ void main() {
     // The app's own exception.
     expect(
       pickerErrorWords(StateError('not for buyers'), _english).message,
-      _english.eventUnavailable,
+      _english.checkConnection,
     );
   });
 
@@ -313,7 +313,6 @@ void main() {
         <String>[
           'bad_payload',
           'destroyed',
-          'not_ready',
           'read_only',
           'handoff_not_owned',
           'idempotency_key_conflict',
@@ -331,6 +330,7 @@ void main() {
         <String>[
           'command_failed',
           'internal_error',
+          'not_ready',
           'picker_error',
           'render_failed',
           'sl_decoding',
@@ -496,7 +496,7 @@ void main() {
       ),
       (const SeatLayerError.decoding('server words'), _english.checkConnection),
       (const SeatLayerError.readOnly('hold'), _english.eventUnavailable),
-      (StateError('server words'), _english.eventUnavailable),
+      (StateError('server words'), _english.checkConnection),
     ]) {
       picker.reportActionError(error);
       await tester.pump();
