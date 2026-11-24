@@ -26,6 +26,18 @@ String _accessFreeCountCy(int count) => '$count ar gael';
 String _seatJustTakenByAnotherCy(String label) =>
     'Cymerwyd sedd $label newydd gan brynwr arall.';
 
+String _labelNoLongerAvailableCy(String label) =>
+    'Nid yw $label ar gael mwyach. Dewisa sedd arall.';
+
+String _labelsNoLongerAvailableCy(String labels) =>
+    'Nid yw $labels ar gael mwyach. Dewisa grŵp arall.';
+
+String _couldNotFindSeatsTogetherCy(int count) =>
+    'Ni ddaethom o hyd i $count sedd gyda\'i gilydd. Rho gynnig ar lai o seddi neu fath arall o docyn.';
+
+String _couldNotRemoveLabelCy(String label) =>
+    'Nid oedd modd tynnu $label. Nid yw dy gadw wedi newid.';
+
 String _peekSecuredCy(int count, String total) =>
     '✓ $count wedi\'u sicrhau · $total. Ni chodir tâl arnat eto';
 
@@ -244,6 +256,24 @@ String _onlyLeftCy(int count) => switch (pickerPluralCategory('cy', count)) {
   _ => '$count o seddi ar ôl',
 };
 
+String _maintenancePausedCy(int count) => switch (pickerPluralCategory(
+  'cy',
+  count,
+)) {
+  PickerPluralCategory.zero =>
+    'Mae archebu wedi’i oedi ar gyfer gwaith cynnal a chadw. Rhowch gynnig arall arni ymhen tua $count munud.',
+  PickerPluralCategory.one =>
+    'Mae archebu wedi’i oedi ar gyfer gwaith cynnal a chadw. Rhowch gynnig arall arni ymhen tua $count funud.',
+  PickerPluralCategory.two =>
+    'Mae archebu wedi’i oedi ar gyfer gwaith cynnal a chadw. Rhowch gynnig arall arni ymhen tua $count funud.',
+  PickerPluralCategory.few =>
+    'Mae archebu wedi’i oedi ar gyfer gwaith cynnal a chadw. Rhowch gynnig arall arni ymhen tua $count munud.',
+  PickerPluralCategory.many =>
+    'Mae archebu wedi’i oedi ar gyfer gwaith cynnal a chadw. Rhowch gynnig arall arni ymhen tua $count munud.',
+  _ =>
+    'Mae archebu wedi’i oedi ar gyfer gwaith cynnal a chadw. Rhowch gynnig arall arni ymhen tua $count munud.',
+};
+
 String _continueWithTotalCy(String money) => 'Parhau \u00b7 $money';
 
 /// The `cy` defaults for the native picker chrome.
@@ -350,6 +380,18 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   couldNotAddMoreTime:
       'Nid oedd modd ychwanegu mwy o amser. Dos i\'r taliad nawr.',
   seatsJustTaken: 'Cymerwyd un sedd neu fwy newydd. Dewisa eto.',
+  ticketTypeSoldOut:
+      'Mae\'r math hwnnw o docyn wedi gwerthu allan. Rho gynnig ar fath arall.',
+  seatsNoLongerAvailableTryAnother:
+      'Nid yw\'r seddi hynny ar gael mwyach. Rho gynnig ar nifer arall neu fath arall o docyn.',
+  companionPairRequired:
+      'Dewisa\'r lle cadair olwyn cyfagos gyda phob tocyn cydymaith.',
+  ticketOptionNotApplicable:
+      'Dyw’r dewis tocyn hwnnw ddim ar gael ar gyfer y sedd a ddewiswyd.',
+  maintenancePausedShortly:
+      'Mae archebu wedi’i oedi am ychydig funudau ar gyfer gwaith cynnal a chadw. Rhowch gynnig arall arni cyn bo hir.',
+  guestsOnly: 'Mae\'r digwyddiad hwn ar gyfer gwesteion gwahoddedig.',
+  guestChoiceClosed: 'Dyw dewis seddi ddim ar agor ar hyn o bryd.',
   allSetTitle: 'Rwyt ti\'n barod',
   confirmedAndOnWay: 'wedi\'i gadarnhau. Mae cadarnhad ar y ffordd.',
   backToMap: 'Yn ôl i\'r map',
@@ -376,6 +418,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   floorWord: 'Llawr',
   totalWord: 'Cyfanswm',
   adjustSelection: 'Addasu\'r dewis seddi',
+  backToSeatMap: 'Yn ôl i\'r map seddi',
   chooseSeats: 'Dewisa dy seddi',
   chooseTickets: 'Dewisa docynnau',
   placeWord: 'LLE',
@@ -434,6 +477,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutCy,
   accessFreeCount: _accessFreeCountCy,
   seatJustTakenByAnother: _seatJustTakenByAnotherCy,
+  labelNoLongerAvailable: _labelNoLongerAvailableCy,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableCy,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherCy,
+  couldNotRemoveLabel: _couldNotRemoveLabelCy,
   peekSecured: _peekSecuredCy,
   venueMap: _venueMapCy,
   accessibleStep: _accessibleStepCy,
@@ -459,5 +506,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   activeFilters: _activeFiltersCy,
   accessibilityFiltersActive: _accessibilityFiltersActiveCy,
   onlyLeft: _onlyLeftCy,
+  maintenancePaused: _maintenancePausedCy,
   continueWithTotal: _continueWithTotalCy,
 );

@@ -640,6 +640,56 @@ abstract final class SeatLayerStringTokens {
   static const String seatsJustTaken =
       'One or more seats were just taken. Please pick again.';
 
+  /// {labels} is no longer available. Choose another seat.
+  static const String labelNoLongerAvailable =
+      '{labels} is no longer available. Choose another seat.';
+
+  /// {labels} are no longer available. Choose another group.
+  static const String labelsNoLongerAvailable =
+      '{labels} are no longer available. Choose another group.';
+
+  /// We couldn’t find {count} seats together. Try fewer seats or another ticket type.
+  static const String couldNotFindSeatsTogether =
+      'We couldn’t find {count} seats together. Try fewer seats or another ticket type.';
+
+  /// That ticket type is sold out. Try another ticket type.
+  static const String ticketTypeSoldOut =
+      'That ticket type is sold out. Try another ticket type.';
+
+  /// Those seats are no longer available. Try another quantity or ticket type.
+  static const String seatsNoLongerAvailableTryAnother =
+      'Those seats are no longer available. Try another quantity or ticket type.';
+
+  /// Select the adjacent wheelchair place with each companion ticket.
+  static const String companionPairRequired =
+      'Select the adjacent wheelchair place with each companion ticket.';
+
+  /// That ticket choice is not available for the selected seat.
+  static const String ticketOptionNotApplicable =
+      'That ticket choice is not available for the selected seat.';
+
+  /// Couldn’t remove {label}. Your hold is unchanged.
+  static const String couldNotRemoveLabel =
+      'Couldn’t remove {label}. Your hold is unchanged.';
+
+  /// Booking is paused for maintenance. Please try again in about {count} minute.
+  static const String maintenancePausedOne =
+      'Booking is paused for maintenance. Please try again in about {count} minute.';
+
+  /// Booking is paused for maintenance. Please try again in about {count} minutes.
+  static const String maintenancePausedOther =
+      'Booking is paused for maintenance. Please try again in about {count} minutes.';
+
+  /// Booking is paused for a few minutes for maintenance. Please try again shortly.
+  static const String maintenancePausedShortly =
+      'Booking is paused for a few minutes for maintenance. Please try again shortly.';
+
+  /// This event is for invited guests.
+  static const String guestsOnly = 'This event is for invited guests.';
+
+  /// Seat choice isn’t open right now.
+  static const String guestChoiceClosed = 'Seat choice isn’t open right now.';
+
   /// You’re all set
   static const String allSetTitle = 'You’re all set';
 

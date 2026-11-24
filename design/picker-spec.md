@@ -2622,6 +2622,37 @@ the hold after handoff, which is checkout's contract, not the picker's.
 
 Dart file: `lib/src/picker/picker_errors.dart`.
 
+#### 3.13.14 What a refused action says
+
+After the map is ready, a failure is said in the inline action error in the web
+picker's own sentence, in the buyer's language. The machine code and the
+server's message go to the host's `onError`, never to the buyer. Where the code
+names its own sentence, the code decides; otherwise the action does.
+
+| What came back | What the buyer reads |
+|---|---|
+| no connection, no answer, a 5xx page, a 503, a command that timed out | `checkConnection` |
+| `maintenance_mode` | the operator's notice; else `maintenancePaused(minutes)` from `retryAfterS`, rounded up; else `maintenancePausedShortly` |
+| `event_closed`, "seat sales are closed" | `salesClosedToast` |
+| `guests_only` / `guest_choice_closed` | `guestsOnly` / `guestChoiceClosed` |
+| `companion_pair_required` / `ticket_option_not_applicable` | `companionPairRequired` / `ticketOptionNotApplicable` |
+| `channel_paused`; `buyer_access_revoked`; an expired or invalid session; `buyer_access_*_mismatch`, `access_provider_unavailable` | the access panel's title and body for paused; revoked; expired; not verified |
+| Best Available: `not_enough_together` / `sold_out` / anything else | `couldNotFindSeatsTogether(n)` / `ticketTypeSoldOut` / `seatsNoLongerAvailableTryAnother` |
+| a removal, anything else | `couldNotRemoveLabel(line)`; a standing place by its area |
+| more time, anything else | `couldNotAddMoreTime` |
+| a hold, with seats named (the first three, standing places left out) | `labelNoLongerAvailable` / `labelsNoLongerAvailable` |
+| a hold, anything else | `seatsJustTaken` |
+
+A failure that answers nobody (a bad command, a decoding fault, a read-only
+picker, an exception of the app's own checkout) has no buyer sentence and keeps
+the error's own line.
+
+A sentence wraps and is never cut; the bar's words take at most 16 per cent of
+the screen's height (84 at least) and scroll past it, so the button under them stays in
+reach.
+
+Dart file: `lib/src/picker/picker_error_words.dart`.
+
 ### 3.14 3D chrome
 
 **Name** `SeatLayerVenue3D` · **slot** `pillStyle` · **file**

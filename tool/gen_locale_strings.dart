@@ -118,6 +118,13 @@ const List<String> _plainFields = <String>[
   'moreTimeAdded',
   'couldNotAddMoreTime',
   'seatsJustTaken',
+  'ticketTypeSoldOut',
+  'seatsNoLongerAvailableTryAnother',
+  'companionPairRequired',
+  'ticketOptionNotApplicable',
+  'maintenancePausedShortly',
+  'guestsOnly',
+  'guestChoiceClosed',
   'allSetTitle',
   'confirmedAndOnWay',
   'backToMap',
@@ -228,6 +235,18 @@ const Map<String, List<_Slot>> _interpolated = <String, List<_Slot>>{
   'seatJustTakenByAnother': <_Slot>[
     (parameter: 'label', type: 'String', placeholder: '{label}'),
   ],
+  'labelNoLongerAvailable': <_Slot>[
+    (parameter: 'label', type: 'String', placeholder: '{labels}'),
+  ],
+  'labelsNoLongerAvailable': <_Slot>[
+    (parameter: 'labels', type: 'String', placeholder: '{labels}'),
+  ],
+  'couldNotFindSeatsTogether': <_Slot>[
+    (parameter: 'count', type: 'int', placeholder: '{count}'),
+  ],
+  'couldNotRemoveLabel': <_Slot>[
+    (parameter: 'label', type: 'String', placeholder: '{label}'),
+  ],
   'peekSecured': <_Slot>[
     (parameter: 'count', type: 'int', placeholder: '{count}'),
     (parameter: 'total', type: 'String', placeholder: '{total}'),
@@ -285,6 +304,7 @@ const List<String> _plurals = <String>[
   'activeFilters',
   'accessibilityFiltersActive',
   'onlyLeft',
+  'maintenancePaused',
 ];
 
 void main(List<String> args) {

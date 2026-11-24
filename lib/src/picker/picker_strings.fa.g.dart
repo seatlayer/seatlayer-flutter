@@ -26,6 +26,18 @@ String _accessFreeCountFa(int count) => '$count آزاد';
 String _seatJustTakenByAnotherFa(String label) =>
     'صندلی $label هم‌اکنون توسط خریدار دیگری گرفته شد.';
 
+String _labelNoLongerAvailableFa(String label) =>
+    '$label دیگر در دسترس نیست. صندلی دیگری انتخاب کنید.';
+
+String _labelsNoLongerAvailableFa(String labels) =>
+    '$labels دیگر در دسترس نیستند. گروه دیگری انتخاب کنید.';
+
+String _couldNotFindSeatsTogetherFa(int count) =>
+    '$count صندلی کنار هم پیدا نشد. تعداد کمتر یا نوع بلیت دیگری را امتحان کنید.';
+
+String _couldNotRemoveLabelFa(String label) =>
+    '$label حذف نشد. نگه‌داشت شما تغییری نکرده است.';
+
 String _peekSecuredFa(int count, String total) =>
     '✓ $count تثبیت شد · $total. هنوز مبلغی کسر نمی‌شود';
 
@@ -156,6 +168,16 @@ String _onlyLeftFa(int count) => switch (pickerPluralCategory('fa', count)) {
   _ => '$count صندلی باقی مانده',
 };
 
+String _maintenancePausedFa(int count) => switch (pickerPluralCategory(
+  'fa',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'رزرو به‌دلیل نگهداری موقتاً متوقف شده است. لطفاً حدود $count دقیقه دیگر دوباره تلاش کنید.',
+  _ =>
+    'رزرو به‌دلیل نگهداری موقتاً متوقف شده است. لطفاً حدود $count دقیقه دیگر دوباره تلاش کنید.',
+};
+
 String _continueWithTotalFa(String money) => 'ادامه \u00b7 $money';
 
 /// The `fa` defaults for the native picker chrome.
@@ -257,6 +279,16 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
       'زمان بیشتری افزوده شد. صندلی‌های شما همچنان نگه داشته شده‌اند.',
   couldNotAddMoreTime: 'زمان بیشتری افزوده نشد. همین حالا به پرداخت بروید.',
   seatsJustTaken: 'یک یا چند صندلی هم‌اکنون گرفته شد. دوباره انتخاب کنید.',
+  ticketTypeSoldOut: 'این نوع بلیت تمام شده است. نوع دیگری را امتحان کنید.',
+  seatsNoLongerAvailableTryAnother:
+      'آن صندلی‌ها دیگر در دسترس نیستند. تعداد یا نوع بلیت دیگری را امتحان کنید.',
+  companionPairRequired: 'با هر بلیت همراه، جایگاه ویلچر مجاور را انتخاب کنید.',
+  ticketOptionNotApplicable:
+      'این گزینهٔ بلیت برای صندلی انتخاب‌شده در دسترس نیست.',
+  maintenancePausedShortly:
+      'رزرو برای چند دقیقه به‌دلیل نگهداری متوقف شده است. لطفاً کمی بعد دوباره تلاش کنید.',
+  guestsOnly: 'این رویداد برای مهمانان دعوت‌شده است.',
+  guestChoiceClosed: 'انتخاب صندلی در حال حاضر باز نیست.',
   allSetTitle: 'همه‌چیز آماده است',
   confirmedAndOnWay: 'تأیید شد. تأییدیه در راه است.',
   backToMap: 'بازگشت به نقشه',
@@ -283,6 +315,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   floorWord: 'طبقه',
   totalWord: 'جمع کل',
   adjustSelection: 'تنظیم انتخاب صندلی‌ها',
+  backToSeatMap: 'بازگشت به نقشهٔ صندلی‌ها',
   chooseSeats: 'صندلی‌های خود را انتخاب کنید',
   chooseTickets: 'بلیت‌ها را انتخاب کنید',
   placeWord: 'جایگاه',
@@ -341,6 +374,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutFa,
   accessFreeCount: _accessFreeCountFa,
   seatJustTakenByAnother: _seatJustTakenByAnotherFa,
+  labelNoLongerAvailable: _labelNoLongerAvailableFa,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableFa,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherFa,
+  couldNotRemoveLabel: _couldNotRemoveLabelFa,
   peekSecured: _peekSecuredFa,
   venueMap: _venueMapFa,
   accessibleStep: _accessibleStepFa,
@@ -366,5 +403,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   activeFilters: _activeFiltersFa,
   accessibilityFiltersActive: _accessibilityFiltersActiveFa,
   onlyLeft: _onlyLeftFa,
+  maintenancePaused: _maintenancePausedFa,
   continueWithTotal: _continueWithTotalFa,
 );

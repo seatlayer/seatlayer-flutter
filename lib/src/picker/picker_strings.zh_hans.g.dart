@@ -24,6 +24,15 @@ String _accessFreeCountZhHans(int count) => '$count 个可选';
 
 String _seatJustTakenByAnotherZhHans(String label) => '座位 $label 刚被另一位买家选走。';
 
+String _labelNoLongerAvailableZhHans(String label) => '$label 已不可售。请另选座位。';
+
+String _labelsNoLongerAvailableZhHans(String labels) => '$labels 已不可售。请另选座位。';
+
+String _couldNotFindSeatsTogetherZhHans(int count) =>
+    '未能找到 $count 个连坐座位。请减少座位数或换一个票种。';
+
+String _couldNotRemoveLabelZhHans(String label) => '无法移除 $label。您的占座保持不变。';
+
 String _peekSecuredZhHans(int count, String total) =>
     '✓ 已锁定 $count 个 · $total，暂不会扣款';
 
@@ -75,6 +84,8 @@ String _activeFiltersZhHans(int count) => '$count 项筛选';
 String _accessibilityFiltersActiveZhHans(int count) => '已启用 $count 项无障碍筛选';
 
 String _onlyLeftZhHans(int count) => '剩余 $count 个座位';
+
+String _maintenancePausedZhHans(int count) => '预订因维护暂时停止。请在约 $count 分钟后重试。';
 
 String _continueWithTotalZhHans(String money) => '继续 \u00b7 $money';
 
@@ -175,6 +186,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       moreTimeAdded: '已延长时间。您的座位仍在锁定中。',
       couldNotAddMoreTime: '无法延长时间，请立即前往结算。',
       seatsJustTaken: '有一个或多个座位刚被选走，请重新选择。',
+      ticketTypeSoldOut: '该票种已售罄。请换一个票种。',
+      seatsNoLongerAvailableTryAnother: '这些座位已不可售。请换一个数量或票种。',
+      companionPairRequired: '每张陪同票都需要选择相邻的轮椅席位。',
+      ticketOptionNotApplicable: '所选座位不适用该票种选项。',
+      maintenancePausedShortly: '预订因维护暂停几分钟。请稍后重试。',
+      guestsOnly: '本活动仅向受邀嘉宾开放。',
+      guestChoiceClosed: '目前未开放选座。',
       allSetTitle: '一切就绪',
       confirmedAndOnWay: '已确认。确认信息即将送达。',
       backToMap: '返回座位图',
@@ -197,6 +215,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       floorWord: '楼层',
       totalWord: '合计',
       adjustSelection: '调整选座',
+      backToSeatMap: '返回座位图',
       chooseSeats: '选择座位',
       chooseTickets: '选择门票',
       placeWord: '席位',
@@ -252,6 +271,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       secureMoreAndCheckout: _secureMoreAndCheckoutZhHans,
       accessFreeCount: _accessFreeCountZhHans,
       seatJustTakenByAnother: _seatJustTakenByAnotherZhHans,
+      labelNoLongerAvailable: _labelNoLongerAvailableZhHans,
+      labelsNoLongerAvailable: _labelsNoLongerAvailableZhHans,
+      couldNotFindSeatsTogether: _couldNotFindSeatsTogetherZhHans,
+      couldNotRemoveLabel: _couldNotRemoveLabelZhHans,
       peekSecured: _peekSecuredZhHans,
       venueMap: _venueMapZhHans,
       accessibleStep: _accessibleStepZhHans,
@@ -277,5 +300,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHans =
       activeFilters: _activeFiltersZhHans,
       accessibilityFiltersActive: _accessibilityFiltersActiveZhHans,
       onlyLeft: _onlyLeftZhHans,
+      maintenancePaused: _maintenancePausedZhHans,
       continueWithTotal: _continueWithTotalZhHans,
     );

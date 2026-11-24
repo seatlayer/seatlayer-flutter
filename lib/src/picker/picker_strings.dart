@@ -171,6 +171,21 @@ class SeatLayerPickerStrings {
     this.moreTimeAdded = SeatLayerStringTokens.moreTimeAdded,
     this.couldNotAddMoreTime = SeatLayerStringTokens.couldNotAddMoreTime,
     this.seatsJustTaken = SeatLayerStringTokens.seatsJustTaken,
+    this.ticketTypeSoldOut = SeatLayerStringTokens.ticketTypeSoldOut,
+    this.seatsNoLongerAvailableTryAnother =
+        SeatLayerStringTokens.seatsNoLongerAvailableTryAnother,
+    this.companionPairRequired = SeatLayerStringTokens.companionPairRequired,
+    this.ticketOptionNotApplicable =
+        SeatLayerStringTokens.ticketOptionNotApplicable,
+    this.maintenancePausedShortly =
+        SeatLayerStringTokens.maintenancePausedShortly,
+    this.guestsOnly = SeatLayerStringTokens.guestsOnly,
+    this.guestChoiceClosed = SeatLayerStringTokens.guestChoiceClosed,
+    this.labelNoLongerAvailable = _defaultLabelNoLongerAvailable,
+    this.labelsNoLongerAvailable = _defaultLabelsNoLongerAvailable,
+    this.couldNotFindSeatsTogether = _defaultCouldNotFindSeatsTogether,
+    this.couldNotRemoveLabel = _defaultCouldNotRemoveLabel,
+    this.maintenancePaused = _defaultMaintenancePaused,
     this.allSetTitle = SeatLayerStringTokens.allSetTitle,
     this.confirmedAndOnWay = SeatLayerStringTokens.confirmedAndOnWay,
     this.backToMap = SeatLayerStringTokens.backToMap,
@@ -921,6 +936,45 @@ class SeatLayerPickerStrings {
   /// runtime could not attribute to one named seat.
   final String seatsJustTaken;
 
+  /// "A-12 is no longer available. Choose another seat." — a refused hold that
+  /// names one seat.
+  final String Function(String label) labelNoLongerAvailable;
+
+  /// "A-12, A-13 are no longer available. Choose another group."
+  final String Function(String labels) labelsNoLongerAvailable;
+
+  /// "We couldn’t find 4 seats together. Try fewer seats or another ticket
+  /// type."
+  final String Function(int count) couldNotFindSeatsTogether;
+
+  /// "That ticket type is sold out. Try another ticket type." — Best Available.
+  final String ticketTypeSoldOut;
+
+  /// "Those seats are no longer available. Try another quantity or ticket
+  /// type." — Best Available, any other refusal.
+  final String seatsNoLongerAvailableTryAnother;
+
+  /// "Select the adjacent wheelchair place with each companion ticket."
+  final String companionPairRequired;
+
+  /// "That ticket choice is not available for the selected seat."
+  final String ticketOptionNotApplicable;
+
+  /// "Couldn’t remove A-12. Your hold is unchanged."
+  final String Function(String label) couldNotRemoveLabel;
+
+  /// "Booking is paused for maintenance. Please try again in about 5 minutes."
+  final String Function(int minutes) maintenancePaused;
+
+  /// The same pause when the server does not say how long.
+  final String maintenancePausedShortly;
+
+  /// "This event is for invited guests."
+  final String guestsOnly;
+
+  /// "Seat choice isn’t open right now."
+  final String guestChoiceClosed;
+
   /// "You’re all set" — the booked overlay's title.
   final String allSetTitle;
 
@@ -1204,6 +1258,27 @@ class SeatLayerPickerStrings {
 
   static String _defaultSeatJustTakenByAnother(String label) =>
       SeatLayerStringTokens.seatJustTakenByAnother.replaceAll('{label}', label);
+
+  static String _defaultLabelNoLongerAvailable(String label) =>
+      SeatLayerStringTokens.labelNoLongerAvailable
+          .replaceAll('{labels}', label);
+
+  static String _defaultLabelsNoLongerAvailable(String labels) =>
+      SeatLayerStringTokens.labelsNoLongerAvailable
+          .replaceAll('{labels}', labels);
+
+  static String _defaultCouldNotFindSeatsTogether(int count) =>
+      SeatLayerStringTokens.couldNotFindSeatsTogether
+          .replaceAll('{count}', '$count');
+
+  static String _defaultCouldNotRemoveLabel(String label) =>
+      SeatLayerStringTokens.couldNotRemoveLabel.replaceAll('{label}', label);
+
+  static String _defaultMaintenancePaused(int minutes) => _english(
+        minutes,
+        SeatLayerStringTokens.maintenancePausedOne,
+        SeatLayerStringTokens.maintenancePausedOther,
+      );
 
   static String _defaultChooseMinMaxGuests(int min, int max) =>
       SeatLayerStringTokens.chooseMinMaxGuests

@@ -26,6 +26,18 @@ String _accessFreeCountEt(int count) => '$count vaba';
 String _seatJustTakenByAnotherEt(String label) =>
     'Koha $label võttis just teine ostja.';
 
+String _labelNoLongerAvailableEt(String label) =>
+    '$label pole enam saadaval. Vali teine koht.';
+
+String _labelsNoLongerAvailableEt(String labels) =>
+    '$labels pole enam saadaval. Vali teine rühm.';
+
+String _couldNotFindSeatsTogetherEt(int count) =>
+    'Me ei leidnud $count kõrvuti kohta. Proovi vähem kohti või muud piletitüüpi.';
+
+String _couldNotRemoveLabelEt(String label) =>
+    '$label eemaldamine ebaõnnestus. Broneering on muutumatu.';
+
 String _peekSecuredEt(int count, String total) =>
     '✓ $count kindlustatud · $total. Veel ei võeta tasu';
 
@@ -158,6 +170,16 @@ String _onlyLeftEt(int count) => switch (pickerPluralCategory('et', count)) {
   _ => 'Jäänud $count kohta',
 };
 
+String _maintenancePausedEt(int count) => switch (pickerPluralCategory(
+  'et',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Broneerimine on hoolduse ajaks peatatud. Proovi uuesti umbes $count minuti pärast.',
+  _ =>
+    'Broneerimine on hoolduse ajaks peatatud. Proovi uuesti umbes $count minuti pärast.',
+};
+
 String _continueWithTotalEt(String money) => 'Jätka \u00b7 $money';
 
 /// The `et` defaults for the native picker chrome.
@@ -257,6 +279,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   moreTimeAdded: 'Aega lisati. Sinu kohad on endiselt broneeritud.',
   couldNotAddMoreTime: 'Aega ei õnnestunud lisada. Mine kohe maksma.',
   seatsJustTaken: 'Üks või mitu kohta võeti just ära. Palun vali uuesti.',
+  ticketTypeSoldOut: 'See piletitüüp on välja müüdud. Proovi muud tüüpi.',
+  seatsNoLongerAvailableTryAnother:
+      'Need kohad pole enam saadaval. Proovi teist kogust või piletitüüpi.',
+  companionPairRequired:
+      'Vali iga saatja pileti juurde kõrvalasuv ratastoolikoht.',
+  ticketOptionNotApplicable:
+      'See piletivalik pole valitud koha jaoks saadaval.',
+  maintenancePausedShortly:
+      'Broneerimine on hoolduse tõttu mõneks minutiks peatatud. Proovi varsti uuesti.',
+  guestsOnly: 'See üritus on kutsutud külalistele.',
+  guestChoiceClosed: 'Kohtade valik ei ole praegu avatud.',
   allSetTitle: 'Kõik on valmis',
   confirmedAndOnWay: 'kinnitatud. Kinnitus on teel.',
   backToMap: 'Tagasi plaanile',
@@ -283,6 +316,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   floorWord: 'Korrus',
   totalWord: 'Kokku',
   adjustSelection: 'Kohanda kohtade valikut',
+  backToSeatMap: 'Tagasi istekohtade plaanile',
   chooseSeats: 'Vali oma kohad',
   chooseTickets: 'Vali piletid',
   placeWord: 'KOHT',
@@ -341,6 +375,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutEt,
   accessFreeCount: _accessFreeCountEt,
   seatJustTakenByAnother: _seatJustTakenByAnotherEt,
+  labelNoLongerAvailable: _labelNoLongerAvailableEt,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableEt,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherEt,
+  couldNotRemoveLabel: _couldNotRemoveLabelEt,
   peekSecured: _peekSecuredEt,
   venueMap: _venueMapEt,
   accessibleStep: _accessibleStepEt,
@@ -366,5 +404,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   activeFilters: _activeFiltersEt,
   accessibilityFiltersActive: _accessibilityFiltersActiveEt,
   onlyLeft: _onlyLeftEt,
+  maintenancePaused: _maintenancePausedEt,
   continueWithTotal: _continueWithTotalEt,
 );

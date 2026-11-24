@@ -26,6 +26,18 @@ String _accessFreeCountHe(int count) => '$count פנויים';
 String _seatJustTakenByAnotherHe(String label) =>
     'מושב $label נתפס זה עתה על ידי קונה אחר.';
 
+String _labelNoLongerAvailableHe(String label) =>
+    '$label כבר לא זמין. בחרו מושב אחר.';
+
+String _labelsNoLongerAvailableHe(String labels) =>
+    '$labels כבר לא זמינים. בחרו קבוצה אחרת.';
+
+String _couldNotFindSeatsTogetherHe(int count) =>
+    'לא מצאנו $count מושבים צמודים. נסו פחות מושבים או סוג כרטיס אחר.';
+
+String _couldNotRemoveLabelHe(String label) =>
+    'לא הצלחנו להסיר את $label. ההחזקה לא השתנתה.';
+
 String _peekSecuredHe(int count, String total) =>
     '✓ $count הובטחו · $total. עדיין לא תחויבו';
 
@@ -175,6 +187,15 @@ String _onlyLeftHe(int count) => switch (pickerPluralCategory('he', count)) {
   _ => 'נותרו $count מושבים',
 };
 
+String _maintenancePausedHe(int count) =>
+    switch (pickerPluralCategory('he', count)) {
+      PickerPluralCategory.one =>
+        'ההזמנה מושהית לצורך תחזוקה. נסו שוב בעוד כ-$count דקה.',
+      PickerPluralCategory.two =>
+        'ההזמנה מושהית לצורך תחזוקה. נסו שוב בעוד כ-$count דקות.',
+      _ => 'ההזמנה מושהית לצורך תחזוקה. נסו שוב בעוד כ-$count דקות.',
+    };
+
 String _continueWithTotalHe(String money) => 'המשך \u00b7 $money';
 
 /// The `he` defaults for the native picker chrome.
@@ -274,6 +295,15 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   moreTimeAdded: 'נוסף זמן. המושבים שלכם עדיין מוחזקים.',
   couldNotAddMoreTime: 'לא הצלחנו להוסיף זמן. עברו לתשלום עכשיו.',
   seatsJustTaken: 'מושב אחד או יותר נתפסו זה עתה. בחרו שוב.',
+  ticketTypeSoldOut: 'סוג הכרטיס הזה אזל. נסו סוג אחר.',
+  seatsNoLongerAvailableTryAnother:
+      'המושבים האלה כבר לא זמינים. נסו כמות אחרת או סוג כרטיס אחר.',
+  companionPairRequired: 'בחרו את מקום הכיסא הגלגלים הסמוך עם כל כרטיס מלווה.',
+  ticketOptionNotApplicable: 'אפשרות הכרטיס הזו אינה זמינה למושב שנבחר.',
+  maintenancePausedShortly:
+      'ההזמנה מושהית לכמה דקות לצורך תחזוקה. נסו שוב בעוד רגע.',
+  guestsOnly: 'האירוע הזה מיועד לאורחים מוזמנים.',
+  guestChoiceClosed: 'בחירת המקומות לא פתוחה כרגע.',
   allSetTitle: 'הכול מוכן',
   confirmedAndOnWay: 'אושר. האישור בדרך אליכם.',
   backToMap: 'חזרה למפה',
@@ -299,6 +329,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   floorWord: 'קומה',
   totalWord: 'סה״כ',
   adjustSelection: 'התאמת בחירת המושבים',
+  backToSeatMap: 'חזרה למפת המושבים',
   chooseSeats: 'בחרו את המושבים שלכם',
   chooseTickets: 'בחרו כרטיסים',
   placeWord: 'מקום',
@@ -357,6 +388,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutHe,
   accessFreeCount: _accessFreeCountHe,
   seatJustTakenByAnother: _seatJustTakenByAnotherHe,
+  labelNoLongerAvailable: _labelNoLongerAvailableHe,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableHe,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherHe,
+  couldNotRemoveLabel: _couldNotRemoveLabelHe,
   peekSecured: _peekSecuredHe,
   venueMap: _venueMapHe,
   accessibleStep: _accessibleStepHe,
@@ -382,5 +417,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   activeFilters: _activeFiltersHe,
   accessibilityFiltersActive: _accessibilityFiltersActiveHe,
   onlyLeft: _onlyLeftHe,
+  maintenancePaused: _maintenancePausedHe,
   continueWithTotal: _continueWithTotalHe,
 );

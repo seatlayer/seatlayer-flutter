@@ -25,6 +25,18 @@ String _accessFreeCountTh(int count) => 'ว่าง $count';
 String _seatJustTakenByAnotherTh(String label) =>
     'ที่นั่ง $label เพิ่งถูกผู้ซื้อคนอื่นจองไป';
 
+String _labelNoLongerAvailableTh(String label) =>
+    '$label ไม่ว่างแล้ว กรุณาเลือกที่นั่งอื่น';
+
+String _labelsNoLongerAvailableTh(String labels) =>
+    '$labels ไม่ว่างแล้ว กรุณาเลือกที่นั่งอื่น';
+
+String _couldNotFindSeatsTogetherTh(int count) =>
+    'ไม่พบที่นั่งติดกัน $count ที่ ลองลดจำนวนที่นั่งหรือเลือกบัตรประเภทอื่น';
+
+String _couldNotRemoveLabelTh(String label) =>
+    'นำ $label ออกไม่ได้ บัตรที่กันไว้ยังเหมือนเดิม';
+
 String _peekSecuredTh(int count, String total) =>
     '✓ กันไว้แล้ว $count · $total ยังไม่มีการตัดเงิน';
 
@@ -81,6 +93,9 @@ String _accessibilityFiltersActiveTh(int count) =>
     'ใช้ตัวกรองการเข้าถึงอยู่ $count รายการ';
 
 String _onlyLeftTh(int count) => 'เหลือ $count ที่นั่ง';
+
+String _maintenancePausedTh(int count) =>
+    'ระบบหยุดรับจองชั่วคราวเพื่อปรับปรุง กรุณาลองใหม่ในอีกประมาณ $count นาที';
 
 String _continueWithTotalTh(String money) => 'ดำเนินการต่อ \u00b7 $money';
 
@@ -180,6 +195,16 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   moreTimeAdded: 'เพิ่มเวลาแล้ว ที่นั่งของคุณยังถูกกันไว้',
   couldNotAddMoreTime: 'เพิ่มเวลาไม่ได้ กรุณาไปชำระเงินตอนนี้',
   seatsJustTaken: 'มีที่นั่งเพิ่งถูกจองไป กรุณาเลือกใหม่',
+  ticketTypeSoldOut: 'บัตรประเภทนั้นหมดแล้ว ลองเลือกประเภทอื่น',
+  seatsNoLongerAvailableTryAnother:
+      'ที่นั่งเหล่านั้นไม่ว่างแล้ว ลองเปลี่ยนจำนวนหรือประเภทบัตร',
+  companionPairRequired:
+      'บัตรผู้ติดตามแต่ละใบต้องเลือกคู่กับที่สำหรับรถเข็นที่อยู่ติดกัน',
+  ticketOptionNotApplicable: 'ที่นั่งที่เลือกใช้ตัวเลือกบัตรนั้นไม่ได้',
+  maintenancePausedShortly:
+      'ระบบหยุดรับจองไม่กี่นาทีเพื่อปรับปรุง กรุณาลองใหม่อีกครั้งในไม่ช้า',
+  guestsOnly: 'งานนี้สำหรับแขกที่ได้รับเชิญ',
+  guestChoiceClosed: 'ขณะนี้ยังไม่เปิดให้เลือกที่นั่ง',
   allSetTitle: 'เรียบร้อยแล้ว',
   confirmedAndOnWay: 'ยืนยันแล้ว กำลังส่งอีเมลยืนยันถึงคุณ',
   backToMap: 'กลับไปที่ผัง',
@@ -206,6 +231,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   floorWord: 'ชั้น',
   totalWord: 'รวม',
   adjustSelection: 'ปรับที่นั่งที่เลือก',
+  backToSeatMap: 'กลับไปที่ผังที่นั่ง',
   chooseSeats: 'เลือกที่นั่งของคุณ',
   chooseTickets: 'เลือกบัตร',
   placeWord: 'ที่',
@@ -264,6 +290,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutTh,
   accessFreeCount: _accessFreeCountTh,
   seatJustTakenByAnother: _seatJustTakenByAnotherTh,
+  labelNoLongerAvailable: _labelNoLongerAvailableTh,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableTh,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherTh,
+  couldNotRemoveLabel: _couldNotRemoveLabelTh,
   peekSecured: _peekSecuredTh,
   venueMap: _venueMapTh,
   accessibleStep: _accessibleStepTh,
@@ -289,5 +319,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   activeFilters: _activeFiltersTh,
   accessibilityFiltersActive: _accessibilityFiltersActiveTh,
   onlyLeft: _onlyLeftTh,
+  maintenancePaused: _maintenancePausedTh,
   continueWithTotal: _continueWithTotalTh,
 );

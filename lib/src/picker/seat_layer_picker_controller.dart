@@ -14,6 +14,7 @@ import 'picker_availability.dart';
 import 'picker_blocked_regions.dart';
 import 'picker_booked_tracker.dart';
 import 'picker_chart_load.dart';
+import 'picker_error_words.dart';
 import 'picker_haptics.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
@@ -31,7 +32,7 @@ part 'picker_seat_answers.dart';
 /// inventory-changing operations are serialized, and concurrent checkout calls
 /// share one Future so a double tap cannot create two holds.
 class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
-    with _PickerSeatAnswers {
+    with _PickerSeatAnswers, PickerFailureLog {
   SeatLayerPickerController({SeatLayerController? mapController})
       : mapController = mapController ?? SeatLayerController(),
         _ownsMapController = mapController == null,
@@ -1120,7 +1121,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
         }
         value = value.withGeneralAdmissionCandidate(null);
       } catch (error) {
-        value = value.withActionError(error);
+        value = failed(error, 'picker.holdGA');
         rethrow;
       }
     });
@@ -1253,7 +1254,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
         _callbacks.onHoldChanged?.call(value.hold, handoff);
         return handoff;
       } catch (error) {
-        value = value.withActionError(error);
+        value = failed(error, 'picker.continue');
         rethrow;
       }
     });
@@ -1410,7 +1411,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
           }
           return result;
         } catch (error) {
-          value = value.withActionError(error);
+          value = failed(error, command, payload);
           rethrow;
         }
       });

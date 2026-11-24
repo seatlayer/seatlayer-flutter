@@ -26,6 +26,18 @@ String _accessFreeCountTr(int count) => '$count boş';
 String _seatJustTakenByAnotherTr(String label) =>
     '$label koltuğunu az önce başka bir alıcı aldı.';
 
+String _labelNoLongerAvailableTr(String label) =>
+    '$label artık müsait değil. Başka bir koltuk seçin.';
+
+String _labelsNoLongerAvailableTr(String labels) =>
+    '$labels artık müsait değil. Başka bir grup seçin.';
+
+String _couldNotFindSeatsTogetherTr(int count) =>
+    '$count koltuğu yan yana bulamadık. Daha az koltuk veya başka bir bilet türü deneyin.';
+
+String _couldNotRemoveLabelTr(String label) =>
+    '$label kaldırılamadı. Rezervasyonunuz değişmedi.';
+
 String _peekSecuredTr(int count, String total) =>
     '✓ $count güvenceye alındı · $total. Henüz ücret alınmayacak';
 
@@ -154,6 +166,16 @@ String _onlyLeftTr(int count) => switch (pickerPluralCategory('tr', count)) {
   _ => '$count koltuk kaldı',
 };
 
+String _maintenancePausedTr(int count) => switch (pickerPluralCategory(
+  'tr',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Rezervasyon bakım nedeniyle duraklatıldı. Lütfen yaklaşık $count dakika sonra tekrar deneyin.',
+  _ =>
+    'Rezervasyon bakım nedeniyle duraklatıldı. Lütfen yaklaşık $count dakika sonra tekrar deneyin.',
+};
+
 String _continueWithTotalTr(String money) => 'Devam \u00b7 $money';
 
 /// The `tr` defaults for the native picker chrome.
@@ -256,6 +278,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   couldNotAddMoreTime: 'Ek süre verilemedi. Lütfen şimdi ödemeye geçin.',
   seatsJustTaken:
       'Bir veya daha fazla koltuk az önce alındı. Lütfen tekrar seçin.',
+  ticketTypeSoldOut: 'Bu bilet türü tükendi. Başka bir bilet türü deneyin.',
+  seatsNoLongerAvailableTryAnother:
+      'O koltuklar artık müsait değil. Başka bir adet veya bilet türü deneyin.',
+  companionPairRequired:
+      'Her refakatçi bileti için bitişikteki tekerlekli sandalye yerini seçin.',
+  ticketOptionNotApplicable:
+      'Bu bilet seçeneği seçilen koltuk için kullanılamıyor.',
+  maintenancePausedShortly:
+      'Rezervasyon bakım nedeniyle birkaç dakikalığına duraklatıldı. Lütfen kısa süre sonra tekrar deneyin.',
+  guestsOnly: 'Bu etkinlik davetli konuklar içindir.',
+  guestChoiceClosed: 'Koltuk seçimi şu anda açık değil.',
   allSetTitle: 'Her şey hazır',
   confirmedAndOnWay: 'onaylandı. Onay e-postası yolda.',
   backToMap: 'Plana dön',
@@ -282,6 +315,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   floorWord: 'Kat',
   totalWord: 'Toplam',
   adjustSelection: 'Koltuk seçimini düzenle',
+  backToSeatMap: 'Koltuk planına dön',
   chooseSeats: 'Koltuklarınızı seçin',
   chooseTickets: 'Bilet seçin',
   placeWord: 'YER',
@@ -340,6 +374,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutTr,
   accessFreeCount: _accessFreeCountTr,
   seatJustTakenByAnother: _seatJustTakenByAnotherTr,
+  labelNoLongerAvailable: _labelNoLongerAvailableTr,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableTr,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherTr,
+  couldNotRemoveLabel: _couldNotRemoveLabelTr,
   peekSecured: _peekSecuredTr,
   venueMap: _venueMapTr,
   accessibleStep: _accessibleStepTr,
@@ -365,5 +403,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   activeFilters: _activeFiltersTr,
   accessibilityFiltersActive: _accessibilityFiltersActiveTr,
   onlyLeft: _onlyLeftTr,
+  maintenancePaused: _maintenancePausedTr,
   continueWithTotal: _continueWithTotalTr,
 );

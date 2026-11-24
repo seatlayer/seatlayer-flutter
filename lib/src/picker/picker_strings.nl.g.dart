@@ -27,6 +27,18 @@ String _accessFreeCountNl(int count) => '$count vrij';
 String _seatJustTakenByAnotherNl(String label) =>
     'Plaats $label is zojuist door een andere koper genomen.';
 
+String _labelNoLongerAvailableNl(String label) =>
+    '$label is niet meer beschikbaar. Kies een andere plaats.';
+
+String _labelsNoLongerAvailableNl(String labels) =>
+    '$labels zijn niet meer beschikbaar. Kies een andere groep.';
+
+String _couldNotFindSeatsTogetherNl(int count) =>
+    'We konden geen $count plaatsen naast elkaar vinden. Probeer minder plaatsen of een ander tickettype.';
+
+String _couldNotRemoveLabelNl(String label) =>
+    'Kon $label niet verwijderen. Je reservering blijft ongewijzigd.';
+
 String _peekSecuredNl(int count, String total) =>
     '✓ $count vastgelegd · $total. Je betaalt nu nog niets';
 
@@ -164,6 +176,16 @@ String _onlyLeftNl(int count) => switch (pickerPluralCategory('nl', count)) {
   _ => 'Nog $count plaatsen',
 };
 
+String _maintenancePausedNl(int count) => switch (pickerPluralCategory(
+  'nl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Boeken is gepauzeerd voor onderhoud. Probeer het over ongeveer $count minuut opnieuw.',
+  _ =>
+    'Boeken is gepauzeerd voor onderhoud. Probeer het over ongeveer $count minuten opnieuw.',
+};
+
 String _continueWithTotalNl(String money) => 'Doorgaan \u00b7 $money';
 
 /// The `nl` defaults for the native picker chrome.
@@ -268,6 +290,18 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   couldNotAddMoreTime:
       'Kon geen extra tijd toevoegen. Ga nu naar de betaalpagina.',
   seatsJustTaken: 'Een of meer plaatsen zijn zojuist genomen. Kies opnieuw.',
+  ticketTypeSoldOut:
+      'Dat tickettype is uitverkocht. Probeer een ander tickettype.',
+  seatsNoLongerAvailableTryAnother:
+      'Die plaatsen zijn niet meer beschikbaar. Probeer een ander aantal of tickettype.',
+  companionPairRequired:
+      'Selecteer bij elk begeleiderticket de aangrenzende rolstoelplaats.',
+  ticketOptionNotApplicable:
+      'Die ticketkeuze is niet beschikbaar voor de geselecteerde plaats.',
+  maintenancePausedShortly:
+      'Boeken is enkele minuten gepauzeerd voor onderhoud. Probeer het zo meteen opnieuw.',
+  guestsOnly: 'Dit evenement is voor genodigden.',
+  guestChoiceClosed: 'Plaatsen kiezen is nu niet mogelijk.',
   allSetTitle: 'Je bent klaar',
   confirmedAndOnWay: 'bevestigd. Je bevestiging is onderweg.',
   backToMap: 'Terug naar plattegrond',
@@ -294,6 +328,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   floorWord: 'Verdieping',
   totalWord: 'Totaal',
   adjustSelection: 'Plaatskeuze aanpassen',
+  backToSeatMap: 'Terug naar zaalplattegrond',
   chooseSeats: 'Kies je plaatsen',
   chooseTickets: 'Tickets kiezen',
   placeWord: 'PLAATS',
@@ -353,6 +388,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutNl,
   accessFreeCount: _accessFreeCountNl,
   seatJustTakenByAnother: _seatJustTakenByAnotherNl,
+  labelNoLongerAvailable: _labelNoLongerAvailableNl,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableNl,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherNl,
+  couldNotRemoveLabel: _couldNotRemoveLabelNl,
   peekSecured: _peekSecuredNl,
   venueMap: _venueMapNl,
   accessibleStep: _accessibleStepNl,
@@ -378,5 +417,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   activeFilters: _activeFiltersNl,
   accessibilityFiltersActive: _accessibilityFiltersActiveNl,
   onlyLeft: _onlyLeftNl,
+  maintenancePaused: _maintenancePausedNl,
   continueWithTotal: _continueWithTotalNl,
 );

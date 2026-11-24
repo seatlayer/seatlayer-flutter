@@ -26,6 +26,18 @@ String _accessFreeCountUk(int count) => 'Вільно: $count';
 String _seatJustTakenByAnotherUk(String label) =>
     'Місце $label щойно зайняв інший покупець.';
 
+String _labelNoLongerAvailableUk(String label) =>
+    '$label більше недоступне. Оберіть інше місце.';
+
+String _labelsNoLongerAvailableUk(String labels) =>
+    '$labels більше недоступні. Оберіть іншу групу.';
+
+String _couldNotFindSeatsTogetherUk(int count) =>
+    'Не знайшли $count місць поруч. Спробуйте менше місць або інший тип квитка.';
+
+String _couldNotRemoveLabelUk(String label) =>
+    'Не вдалося прибрати $label. Бронь залишилася без змін.';
+
 String _peekSecuredUk(int count, String total) =>
     '✓ $count закріплено · $total. Списання поки не буде';
 
@@ -200,6 +212,20 @@ String _onlyLeftUk(int count) => switch (pickerPluralCategory('uk', count)) {
   _ => 'Залишилося $count місця',
 };
 
+String _maintenancePausedUk(int count) => switch (pickerPluralCategory(
+  'uk',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Бронювання призупинено на час технічних робіт. Спробуйте ще раз приблизно через $count хвилину.',
+  PickerPluralCategory.few =>
+    'Бронювання призупинено на час технічних робіт. Спробуйте ще раз приблизно через $count хвилини.',
+  PickerPluralCategory.many =>
+    'Бронювання призупинено на час технічних робіт. Спробуйте ще раз приблизно через $count хвилин.',
+  _ =>
+    'Бронювання призупинено на час технічних робіт. Спробуйте ще раз приблизно через $count хвилини.',
+};
+
 String _continueWithTotalUk(String money) => 'Продовжити \u00b7 $money';
 
 /// The `uk` defaults for the native picker chrome.
@@ -299,6 +325,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   moreTimeAdded: 'Час продовжено. Ваші місця й далі заброньовані.',
   couldNotAddMoreTime: 'Не вдалося продовжити час. Перейдіть до оплати зараз.',
   seatsJustTaken: 'Одне або кілька місць щойно зайняли. Оберіть знову.',
+  ticketTypeSoldOut: 'Цей тип квитка розпродано. Спробуйте інший тип.',
+  seatsNoLongerAvailableTryAnother:
+      'Ці місця більше недоступні. Спробуйте іншу кількість або тип квитка.',
+  companionPairRequired:
+      'До кожного квитка супроводу оберіть сусіднє місце для візка.',
+  ticketOptionNotApplicable:
+      'Цей варіант квитка недоступний для вибраного місця.',
+  maintenancePausedShortly:
+      'Бронювання призупинено на кілька хвилин через технічні роботи. Спробуйте ще раз трохи пізніше.',
+  guestsOnly: 'Ця подія для запрошених гостей.',
+  guestChoiceClosed: 'Вибір місць зараз недоступний.',
   allSetTitle: 'Усе готово',
   confirmedAndOnWay: 'підтверджено. Підтвердження вже в дорозі.',
   backToMap: 'Назад до схеми',
@@ -325,6 +362,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   floorWord: 'Поверх',
   totalWord: 'Разом',
   adjustSelection: 'Змінити вибір місць',
+  backToSeatMap: 'Назад до схеми місць',
   chooseSeats: 'Оберіть свої місця',
   chooseTickets: 'Оберіть квитки',
   placeWord: 'МІСЦЕ',
@@ -383,6 +421,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutUk,
   accessFreeCount: _accessFreeCountUk,
   seatJustTakenByAnother: _seatJustTakenByAnotherUk,
+  labelNoLongerAvailable: _labelNoLongerAvailableUk,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableUk,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherUk,
+  couldNotRemoveLabel: _couldNotRemoveLabelUk,
   peekSecured: _peekSecuredUk,
   venueMap: _venueMapUk,
   accessibleStep: _accessibleStepUk,
@@ -408,5 +450,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   activeFilters: _activeFiltersUk,
   accessibilityFiltersActive: _accessibilityFiltersActiveUk,
   onlyLeft: _onlyLeftUk,
+  maintenancePaused: _maintenancePausedUk,
   continueWithTotal: _continueWithTotalUk,
 );

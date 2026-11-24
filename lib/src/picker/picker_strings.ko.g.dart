@@ -25,6 +25,18 @@ String _accessFreeCountKo(int count) => '잔여 $count석';
 String _seatJustTakenByAnotherKo(String label) =>
     '방금 다른 고객이 좌석 $label을(를) 예매했어요.';
 
+String _labelNoLongerAvailableKo(String label) =>
+    '$label은(는) 더 이상 예매할 수 없어요. 다른 좌석을 선택해 주세요.';
+
+String _labelsNoLongerAvailableKo(String labels) =>
+    '$labels은(는) 더 이상 예매할 수 없어요. 다른 좌석을 선택해 주세요.';
+
+String _couldNotFindSeatsTogetherKo(int count) =>
+    '연석 $count석을 찾지 못했어요. 좌석 수를 줄이거나 다른 티켓 종류를 선택해 보세요.';
+
+String _couldNotRemoveLabelKo(String label) =>
+    '$label을(를) 삭제하지 못했어요. 확보한 좌석은 그대로예요.';
+
 String _peekSecuredKo(int count, String total) =>
     '✓ $count석 확보 · $total. 아직 결제되지 않았어요';
 
@@ -79,6 +91,9 @@ String _activeFiltersKo(int count) => '필터 $count개';
 String _accessibilityFiltersActiveKo(int count) => '접근성 필터 $count개 사용 중';
 
 String _onlyLeftKo(int count) => '잔여 $count석';
+
+String _maintenancePausedKo(int count) =>
+    '점검으로 예매가 일시 중지됐어요. 약 $count분 후 다시 시도해 주세요.';
 
 String _continueWithTotalKo(String money) => '계속 \u00b7 $money';
 
@@ -178,6 +193,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   moreTimeAdded: '시간이 연장됐어요. 좌석은 계속 확보돼 있어요.',
   couldNotAddMoreTime: '시간을 연장하지 못했어요. 지금 바로 결제를 진행해 주세요.',
   seatsJustTaken: '방금 일부 좌석이 예매됐어요. 다시 선택해 주세요.',
+  ticketTypeSoldOut: '해당 티켓 종류가 매진됐어요. 다른 티켓 종류를 선택해 주세요.',
+  seatsNoLongerAvailableTryAnother:
+      '해당 좌석은 더 이상 예매할 수 없어요. 수량이나 티켓 종류를 바꿔 보세요.',
+  companionPairRequired: '동반자석 티켓마다 옆 휠체어석을 함께 선택해 주세요.',
+  ticketOptionNotApplicable: '선택한 좌석에서는 해당 티켓 종류를 선택할 수 없어요.',
+  maintenancePausedShortly: '점검으로 몇 분간 예매가 중지됐어요. 잠시 후 다시 시도해 주세요.',
+  guestsOnly: '이 이벤트는 초대받은 게스트를 위한 것입니다.',
+  guestChoiceClosed: '지금은 좌석을 선택할 수 없습니다.',
   allSetTitle: '예매가 완료됐어요',
   confirmedAndOnWay: '예매 확정. 확인 메일이 곧 도착해요.',
   backToMap: '배치도로 돌아가기',
@@ -201,6 +224,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   floorWord: '층',
   totalWord: '합계',
   adjustSelection: '좌석 선택 조정',
+  backToSeatMap: '좌석 배치도로 돌아가기',
   chooseSeats: '좌석 선택',
   chooseTickets: '티켓 선택',
   placeWord: '자리',
@@ -259,6 +283,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutKo,
   accessFreeCount: _accessFreeCountKo,
   seatJustTakenByAnother: _seatJustTakenByAnotherKo,
+  labelNoLongerAvailable: _labelNoLongerAvailableKo,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableKo,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherKo,
+  couldNotRemoveLabel: _couldNotRemoveLabelKo,
   peekSecured: _peekSecuredKo,
   venueMap: _venueMapKo,
   accessibleStep: _accessibleStepKo,
@@ -284,5 +312,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   activeFilters: _activeFiltersKo,
   accessibilityFiltersActive: _accessibilityFiltersActiveKo,
   onlyLeft: _onlyLeftKo,
+  maintenancePaused: _maintenancePausedKo,
   continueWithTotal: _continueWithTotalKo,
 );

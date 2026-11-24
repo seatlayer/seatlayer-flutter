@@ -26,6 +26,18 @@ String _accessFreeCountDa(int count) => '$count ledige';
 String _seatJustTakenByAnotherDa(String label) =>
     'Plads $label blev lige taget af en anden køber.';
 
+String _labelNoLongerAvailableDa(String label) =>
+    '$label er ikke længere ledig. Vælg en anden plads.';
+
+String _labelsNoLongerAvailableDa(String labels) =>
+    '$labels er ikke længere ledige. Vælg en anden gruppe.';
+
+String _couldNotFindSeatsTogetherDa(int count) =>
+    'Vi kunne ikke finde $count pladser ved siden af hinanden. Prøv færre pladser eller en anden billettype.';
+
+String _couldNotRemoveLabelDa(String label) =>
+    'Kunne ikke fjerne $label. Din reservation er uændret.';
+
 String _peekSecuredDa(int count, String total) =>
     '✓ $count sikret · $total. Du bliver ikke trukket endnu';
 
@@ -158,6 +170,16 @@ String _onlyLeftDa(int count) => switch (pickerPluralCategory('da', count)) {
   _ => '$count pladser tilbage',
 };
 
+String _maintenancePausedDa(int count) => switch (pickerPluralCategory(
+  'da',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Booking er sat på pause på grund af vedligeholdelse. Prøv igen om cirka $count minut.',
+  _ =>
+    'Booking er sat på pause på grund af vedligeholdelse. Prøv igen om cirka $count minutter.',
+};
+
 String _continueWithTotalDa(String money) => 'Fortsæt \u00b7 $money';
 
 /// The `da` defaults for the native picker chrome.
@@ -261,6 +283,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   moreTimeAdded: 'Mere tid tilføjet. Dine pladser er stadig reserveret.',
   couldNotAddMoreTime: 'Kunne ikke tilføje mere tid. Gå til betaling nu.',
   seatsJustTaken: 'En eller flere pladser blev lige taget. Vælg igen.',
+  ticketTypeSoldOut: 'Den billettype er udsolgt. Prøv en anden billettype.',
+  seatsNoLongerAvailableTryAnother:
+      'De pladser er ikke længere ledige. Prøv et andet antal eller en anden billettype.',
+  companionPairRequired:
+      'Vælg den tilstødende kørestolsplads til hver ledsagerbillet.',
+  ticketOptionNotApplicable:
+      'Det billetvalg er ikke tilgængeligt for den valgte plads.',
+  maintenancePausedShortly:
+      'Booking er sat på pause i et par minutter på grund af vedligeholdelse. Prøv igen om lidt.',
+  guestsOnly: 'Dette arrangement er for inviterede gæster.',
+  guestChoiceClosed: 'Valg af pladser er ikke åbent lige nu.',
   allSetTitle: 'Så er alt klar',
   confirmedAndOnWay: 'bekræftet. En bekræftelse er på vej.',
   backToMap: 'Tilbage til oversigten',
@@ -287,6 +320,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   floorWord: 'Etage',
   totalWord: 'I alt',
   adjustSelection: 'Justér pladsvalget',
+  backToSeatMap: 'Tilbage til pladsoversigten',
   chooseSeats: 'Vælg dine pladser',
   chooseTickets: 'Vælg billetter',
   placeWord: 'PLADS',
@@ -345,6 +379,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutDa,
   accessFreeCount: _accessFreeCountDa,
   seatJustTakenByAnother: _seatJustTakenByAnotherDa,
+  labelNoLongerAvailable: _labelNoLongerAvailableDa,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableDa,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherDa,
+  couldNotRemoveLabel: _couldNotRemoveLabelDa,
   peekSecured: _peekSecuredDa,
   venueMap: _venueMapDa,
   accessibleStep: _accessibleStepDa,
@@ -370,5 +408,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   activeFilters: _activeFiltersDa,
   accessibilityFiltersActive: _accessibilityFiltersActiveDa,
   onlyLeft: _onlyLeftDa,
+  maintenancePaused: _maintenancePausedDa,
   continueWithTotal: _continueWithTotalDa,
 );

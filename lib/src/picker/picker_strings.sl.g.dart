@@ -26,6 +26,18 @@ String _accessFreeCountSl(int count) => 'Prostih: $count';
 String _seatJustTakenByAnotherSl(String label) =>
     'Sedež $label je pravkar zasedel drug kupec.';
 
+String _labelNoLongerAvailableSl(String label) =>
+    '$label ni več na voljo. Izberite drug sedež.';
+
+String _labelsNoLongerAvailableSl(String labels) =>
+    '$labels niso več na voljo. Izberite drugo skupino.';
+
+String _couldNotFindSeatsTogetherSl(int count) =>
+    'Nismo našli $count sedežev skupaj. Poskusite manj sedežev ali drugo vrsto vstopnice.';
+
+String _couldNotRemoveLabelSl(String label) =>
+    'Ni bilo mogoče odstraniti $label. Rezervacija ostaja nespremenjena.';
+
 String _peekSecuredSl(int count, String total) =>
     '✓ $count zagotovljenih · $total. Zdaj še ne bomo bremenili';
 
@@ -205,6 +217,20 @@ String _onlyLeftSl(int count) => switch (pickerPluralCategory('sl', count)) {
   _ => 'Ostalo $count sedežev',
 };
 
+String _maintenancePausedSl(int count) => switch (pickerPluralCategory(
+  'sl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Rezervacija je začasno ustavljena zaradi vzdrževanja. Poskusite znova čez približno $count minuto.',
+  PickerPluralCategory.two =>
+    'Rezervacija je začasno ustavljena zaradi vzdrževanja. Poskusite znova čez približno $count minuti.',
+  PickerPluralCategory.few =>
+    'Rezervacija je začasno ustavljena zaradi vzdrževanja. Poskusite znova čez približno $count minute.',
+  _ =>
+    'Rezervacija je začasno ustavljena zaradi vzdrževanja. Poskusite znova čez približno $count minut.',
+};
+
 String _continueWithTotalSl(String money) => 'Nadaljuj \u00b7 $money';
 
 /// The `sl` defaults for the native picker chrome.
@@ -308,6 +334,16 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
       'Časa ni bilo mogoče podaljšati. Pojdite na plačilo zdaj.',
   seatsJustTaken:
       'Eden ali več sedežev je bilo pravkar zasedenih. Izberite znova.',
+  ticketTypeSoldOut: 'Ta vrsta vstopnice je razprodana. Poskusite drugo vrsto.',
+  seatsNoLongerAvailableTryAnother:
+      'Ti sedeži niso več na voljo. Poskusite drugo količino ali vrsto vstopnice.',
+  companionPairRequired:
+      'Pri vsaki spremljevalni vstopnici izberite sosednje mesto za invalidski voziček.',
+  ticketOptionNotApplicable: 'Ta vrsta vstopnice za izbrani sedež ni na voljo.',
+  maintenancePausedShortly:
+      'Rezervacija je zaradi vzdrževanja ustavljena za nekaj minut. Poskusite znova kmalu.',
+  guestsOnly: 'Ta dogodek je za povabljene goste.',
+  guestChoiceClosed: 'Izbira sedežev trenutno ni odprta.',
   allSetTitle: 'Vse je pripravljeno',
   confirmedAndOnWay: 'potrjeno. Potrdilo je že na poti.',
   backToMap: 'Nazaj na načrt',
@@ -334,6 +370,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   floorWord: 'Nadstropje',
   totalWord: 'Skupaj',
   adjustSelection: 'Prilagodi izbiro sedežev',
+  backToSeatMap: 'Nazaj na načrt sedežev',
   chooseSeats: 'Izberite sedeže',
   chooseTickets: 'Izberite vstopnice',
   placeWord: 'MESTO',
@@ -392,6 +429,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutSl,
   accessFreeCount: _accessFreeCountSl,
   seatJustTakenByAnother: _seatJustTakenByAnotherSl,
+  labelNoLongerAvailable: _labelNoLongerAvailableSl,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableSl,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherSl,
+  couldNotRemoveLabel: _couldNotRemoveLabelSl,
   peekSecured: _peekSecuredSl,
   venueMap: _venueMapSl,
   accessibleStep: _accessibleStepSl,
@@ -417,5 +458,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   activeFilters: _activeFiltersSl,
   accessibilityFiltersActive: _accessibilityFiltersActiveSl,
   onlyLeft: _onlyLeftSl,
+  maintenancePaused: _maintenancePausedSl,
   continueWithTotal: _continueWithTotalSl,
 );

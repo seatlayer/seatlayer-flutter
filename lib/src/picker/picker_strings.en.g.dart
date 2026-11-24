@@ -26,6 +26,18 @@ String _accessFreeCountEn(int count) => '$count free';
 String _seatJustTakenByAnotherEn(String label) =>
     'Seat $label was just taken by another buyer.';
 
+String _labelNoLongerAvailableEn(String label) =>
+    '$label is no longer available. Choose another seat.';
+
+String _labelsNoLongerAvailableEn(String labels) =>
+    '$labels are no longer available. Choose another group.';
+
+String _couldNotFindSeatsTogetherEn(int count) =>
+    'We couldn’t find $count seats together. Try fewer seats or another ticket type.';
+
+String _couldNotRemoveLabelEn(String label) =>
+    'Couldn’t remove $label. Your hold is unchanged.';
+
 String _peekSecuredEn(int count, String total) =>
     '✓ $count secured · $total. You won’t be charged yet';
 
@@ -156,6 +168,16 @@ String _onlyLeftEn(int count) => switch (pickerPluralCategory('en', count)) {
   _ => '$count seats left',
 };
 
+String _maintenancePausedEn(int count) => switch (pickerPluralCategory(
+  'en',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Booking is paused for maintenance. Please try again in about $count minute.',
+  _ =>
+    'Booking is paused for maintenance. Please try again in about $count minutes.',
+};
+
 String _continueWithTotalEn(String money) => 'Continue \u00b7 $money';
 
 /// The `en` defaults for the native picker chrome.
@@ -255,6 +277,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   moreTimeAdded: 'More time added. Your seats are still held.',
   couldNotAddMoreTime: 'Couldn’t add more time. Please head to checkout now.',
   seatsJustTaken: 'One or more seats were just taken. Please pick again.',
+  ticketTypeSoldOut: 'That ticket type is sold out. Try another ticket type.',
+  seatsNoLongerAvailableTryAnother:
+      'Those seats are no longer available. Try another quantity or ticket type.',
+  companionPairRequired:
+      'Select the adjacent wheelchair place with each companion ticket.',
+  ticketOptionNotApplicable:
+      'That ticket choice is not available for the selected seat.',
+  maintenancePausedShortly:
+      'Booking is paused for a few minutes for maintenance. Please try again shortly.',
+  guestsOnly: 'This event is for invited guests.',
+  guestChoiceClosed: 'Seat choice isn’t open right now.',
   allSetTitle: 'You’re all set',
   confirmedAndOnWay: 'confirmed. A confirmation is on its way.',
   backToMap: 'Back to map',
@@ -281,6 +314,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   floorWord: 'Floor',
   totalWord: 'Total',
   adjustSelection: 'Adjust seat selection',
+  backToSeatMap: 'Back to seat map',
   chooseSeats: 'Choose your seats',
   chooseTickets: 'Choose tickets',
   placeWord: 'PLACE',
@@ -339,6 +373,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutEn,
   accessFreeCount: _accessFreeCountEn,
   seatJustTakenByAnother: _seatJustTakenByAnotherEn,
+  labelNoLongerAvailable: _labelNoLongerAvailableEn,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableEn,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherEn,
+  couldNotRemoveLabel: _couldNotRemoveLabelEn,
   peekSecured: _peekSecuredEn,
   venueMap: _venueMapEn,
   accessibleStep: _accessibleStepEn,
@@ -364,5 +402,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   activeFilters: _activeFiltersEn,
   accessibilityFiltersActive: _accessibilityFiltersActiveEn,
   onlyLeft: _onlyLeftEn,
+  maintenancePaused: _maintenancePausedEn,
   continueWithTotal: _continueWithTotalEn,
 );

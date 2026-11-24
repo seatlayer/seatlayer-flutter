@@ -26,6 +26,18 @@ String _accessFreeCountSv(int count) => '$count lediga';
 String _seatJustTakenByAnotherSv(String label) =>
     'Plats $label togs precis av en annan köpare.';
 
+String _labelNoLongerAvailableSv(String label) =>
+    '$label är inte längre tillgänglig. Välj en annan plats.';
+
+String _labelsNoLongerAvailableSv(String labels) =>
+    '$labels är inte längre tillgängliga. Välj en annan grupp.';
+
+String _couldNotFindSeatsTogetherSv(int count) =>
+    'Vi hittade inte $count platser bredvid varandra. Prova färre platser eller en annan biljettyp.';
+
+String _couldNotRemoveLabelSv(String label) =>
+    'Kunde inte ta bort $label. Din reservation är oförändrad.';
+
 String _peekSecuredSv(int count, String total) =>
     '✓ $count säkrade · $total. Du debiteras inte än';
 
@@ -159,6 +171,16 @@ String _onlyLeftSv(int count) => switch (pickerPluralCategory('sv', count)) {
   _ => '$count platser kvar',
 };
 
+String _maintenancePausedSv(int count) => switch (pickerPluralCategory(
+  'sv',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Bokningen är pausad för underhåll. Försök igen om cirka $count minut.',
+  _ =>
+    'Bokningen är pausad för underhåll. Försök igen om cirka $count minuter.',
+};
+
 String _continueWithTotalSv(String money) => 'Fortsätt \u00b7 $money';
 
 /// The `sv` defaults for the native picker chrome.
@@ -260,6 +282,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   moreTimeAdded: 'Mer tid tillagd. Dina platser är fortfarande reserverade.',
   couldNotAddMoreTime: 'Kunde inte lägga till mer tid. Gå till kassan nu.',
   seatsJustTaken: 'En eller flera platser togs precis. Välj igen.',
+  ticketTypeSoldOut: 'Den biljettypen är slutsåld. Prova en annan biljettyp.',
+  seatsNoLongerAvailableTryAnother:
+      'De platserna är inte längre tillgängliga. Prova ett annat antal eller en annan biljettyp.',
+  companionPairRequired:
+      'Välj den intilliggande rullstolsplatsen till varje ledsagarbiljett.',
+  ticketOptionNotApplicable:
+      'Det biljettvalet är inte tillgängligt för den valda platsen.',
+  maintenancePausedShortly:
+      'Bokningen är pausad några minuter för underhåll. Försök igen om en liten stund.',
+  guestsOnly: 'Det här evenemanget är för inbjudna gäster.',
+  guestChoiceClosed: 'Platsvalet är inte öppet just nu.',
   allSetTitle: 'Allt är klart',
   confirmedAndOnWay: 'bekräftat. En bekräftelse är på väg.',
   backToMap: 'Tillbaka till kartan',
@@ -286,6 +319,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   floorWord: 'Våning',
   totalWord: 'Totalt',
   adjustSelection: 'Justera platsvalet',
+  backToSeatMap: 'Tillbaka till platskartan',
   chooseSeats: 'Välj dina platser',
   chooseTickets: 'Välj biljetter',
   placeWord: 'PLATS',
@@ -344,6 +378,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutSv,
   accessFreeCount: _accessFreeCountSv,
   seatJustTakenByAnother: _seatJustTakenByAnotherSv,
+  labelNoLongerAvailable: _labelNoLongerAvailableSv,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableSv,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherSv,
+  couldNotRemoveLabel: _couldNotRemoveLabelSv,
   peekSecured: _peekSecuredSv,
   venueMap: _venueMapSv,
   accessibleStep: _accessibleStepSv,
@@ -369,5 +407,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   activeFilters: _activeFiltersSv,
   accessibilityFiltersActive: _accessibilityFiltersActiveSv,
   onlyLeft: _onlyLeftSv,
+  maintenancePaused: _maintenancePausedSv,
   continueWithTotal: _continueWithTotalSv,
 );

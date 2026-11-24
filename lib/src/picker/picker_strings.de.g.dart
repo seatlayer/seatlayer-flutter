@@ -27,6 +27,18 @@ String _accessFreeCountDe(int count) => '$count frei';
 String _seatJustTakenByAnotherDe(String label) =>
     'Platz $label wurde gerade von einem anderen Käufer übernommen.';
 
+String _labelNoLongerAvailableDe(String label) =>
+    '$label ist nicht mehr verfügbar. Wählen Sie einen anderen Platz.';
+
+String _labelsNoLongerAvailableDe(String labels) =>
+    '$labels sind nicht mehr verfügbar. Wählen Sie eine andere Gruppe.';
+
+String _couldNotFindSeatsTogetherDe(int count) =>
+    'Wir konnten keine $count zusammenhängenden Plätze finden. Versuchen Sie es mit weniger Plätzen oder einer anderen Ticketart.';
+
+String _couldNotRemoveLabelDe(String label) =>
+    '$label konnte nicht entfernt werden. Ihre Reservierung bleibt unverändert.';
+
 String _peekSecuredDe(int count, String total) =>
     '✓ $count gesichert · $total. Noch wird nichts abgebucht';
 
@@ -164,6 +176,16 @@ String _onlyLeftDe(int count) => switch (pickerPluralCategory('de', count)) {
   _ => '$count Plätze verfügbar',
 };
 
+String _maintenancePausedDe(int count) => switch (pickerPluralCategory(
+  'de',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Die Buchung ist wegen Wartungsarbeiten pausiert. Bitte versuchen Sie es in etwa $count Minute erneut.',
+  _ =>
+    'Die Buchung ist wegen Wartungsarbeiten pausiert. Bitte versuchen Sie es in etwa $count Minuten erneut.',
+};
+
 String _continueWithTotalDe(String money) => 'Weiter \u00b7 $money';
 
 /// The `de` defaults for the native picker chrome.
@@ -270,6 +292,18 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
       'Zusätzliche Zeit konnte nicht hinzugefügt werden. Bitte jetzt zum Checkout gehen.',
   seatsJustTaken:
       'Ein oder mehrere Plätze wurden gerade vergeben. Bitte wählen Sie erneut.',
+  ticketTypeSoldOut:
+      'Diese Ticketart ist ausverkauft. Versuchen Sie eine andere Ticketart.',
+  seatsNoLongerAvailableTryAnother:
+      'Diese Plätze sind nicht mehr verfügbar. Versuchen Sie eine andere Anzahl oder Ticketart.',
+  companionPairRequired:
+      'Wählen Sie zu jedem Begleitticket den benachbarten Rollstuhlplatz aus.',
+  ticketOptionNotApplicable:
+      'Diese Ticketauswahl ist für den gewählten Platz nicht verfügbar.',
+  maintenancePausedShortly:
+      'Die Buchung ist wegen Wartungsarbeiten für einige Minuten pausiert. Bitte versuchen Sie es in Kürze erneut.',
+  guestsOnly: 'Diese Veranstaltung ist für eingeladene Gäste.',
+  guestChoiceClosed: 'Die Platzwahl ist gerade nicht geöffnet.',
   allSetTitle: 'Alles bereit',
   confirmedAndOnWay: 'bestätigt. Eine Bestätigung ist unterwegs.',
   backToMap: 'Zurück zur Karte',
@@ -297,6 +331,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
   floorWord: 'Etage',
   totalWord: 'Gesamt',
   adjustSelection: 'Sitzauswahl anpassen',
+  backToSeatMap: 'Zurück zum Sitzplan',
   chooseSeats: 'Wählen Sie Ihre Plätze',
   chooseTickets: 'Tickets wählen',
   placeWord: 'PLATZ',
@@ -356,6 +391,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutDe,
   accessFreeCount: _accessFreeCountDe,
   seatJustTakenByAnother: _seatJustTakenByAnotherDe,
+  labelNoLongerAvailable: _labelNoLongerAvailableDe,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableDe,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherDe,
+  couldNotRemoveLabel: _couldNotRemoveLabelDe,
   peekSecured: _peekSecuredDe,
   venueMap: _venueMapDe,
   accessibleStep: _accessibleStepDe,
@@ -381,5 +420,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
   activeFilters: _activeFiltersDe,
   accessibilityFiltersActive: _accessibilityFiltersActiveDe,
   onlyLeft: _onlyLeftDe,
+  maintenancePaused: _maintenancePausedDe,
   continueWithTotal: _continueWithTotalDe,
 );

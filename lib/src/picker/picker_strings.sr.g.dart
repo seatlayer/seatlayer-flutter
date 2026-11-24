@@ -26,6 +26,18 @@ String _accessFreeCountSr(int count) => 'Слободних: $count';
 String _seatJustTakenByAnotherSr(String label) =>
     'Место $label управо је заузео други купац.';
 
+String _labelNoLongerAvailableSr(String label) =>
+    '$label више није доступно. Изаберите друго место.';
+
+String _labelsNoLongerAvailableSr(String labels) =>
+    '$labels више нису доступна. Изаберите другу групу.';
+
+String _couldNotFindSeatsTogetherSr(int count) =>
+    'Нисмо пронашли $count места једно уз друго. Покушајте са мање места или другом врстом улазнице.';
+
+String _couldNotRemoveLabelSr(String label) =>
+    'Нисмо могли да уклонимо $label. Резервација је непромењена.';
+
 String _peekSecuredSr(int count, String total) =>
     '✓ $count обезбеђено · $total. Још вас нећемо теретити';
 
@@ -181,6 +193,18 @@ String _onlyLeftSr(int count) => switch (pickerPluralCategory('sr', count)) {
   _ => 'Преостало $count места',
 };
 
+String _maintenancePausedSr(int count) => switch (pickerPluralCategory(
+  'sr',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Резервација је паузирана због одржавања. Покушајте поново за отприлике $count минут.',
+  PickerPluralCategory.few =>
+    'Резервација је паузирана због одржавања. Покушајте поново за отприлике $count минута.',
+  _ =>
+    'Резервација је паузирана због одржавања. Покушајте поново за отприлике $count минута.',
+};
+
 String _continueWithTotalSr(String money) => 'Настави \u00b7 $money';
 
 /// The `sr` defaults for the native picker chrome.
@@ -281,6 +305,18 @@ const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
   moreTimeAdded: 'Додато је време. Ваша места су и даље резервисана.',
   couldNotAddMoreTime: 'Није било могуће додати време. Идите одмах на плаћање.',
   seatsJustTaken: 'Једно или више места је управо заузето. Изаберите поново.',
+  ticketTypeSoldOut:
+      'Та врста улазнице је распродата. Покушајте са другом врстом.',
+  seatsNoLongerAvailableTryAnother:
+      'Та места више нису доступна. Покушајте са другом количином или врстом улазнице.',
+  companionPairRequired:
+      'Уз сваку улазницу за пратиоца изаберите суседно место за инвалидска колица.',
+  ticketOptionNotApplicable:
+      'Та врста улазнице није доступна за изабрано место.',
+  maintenancePausedShortly:
+      'Резервација је паузирана на неколико минута због одржавања. Покушајте поново ускоро.',
+  guestsOnly: 'Овај догађај је за позване госте.',
+  guestChoiceClosed: 'Избор места тренутно није отворен.',
   allSetTitle: 'Све је спремно',
   confirmedAndOnWay: 'потврђено. Потврда је на путу.',
   backToMap: 'Назад на план',
@@ -307,6 +343,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
   floorWord: 'Спрат',
   totalWord: 'Укупно',
   adjustSelection: 'Прилагоди избор места',
+  backToSeatMap: 'Назад на план места',
   chooseSeats: 'Изаберите своја места',
   chooseTickets: 'Изаберите улазнице',
   placeWord: 'МЕСТО',
@@ -365,6 +402,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutSr,
   accessFreeCount: _accessFreeCountSr,
   seatJustTakenByAnother: _seatJustTakenByAnotherSr,
+  labelNoLongerAvailable: _labelNoLongerAvailableSr,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableSr,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherSr,
+  couldNotRemoveLabel: _couldNotRemoveLabelSr,
   peekSecured: _peekSecuredSr,
   venueMap: _venueMapSr,
   accessibleStep: _accessibleStepSr,
@@ -390,5 +431,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
   activeFilters: _activeFiltersSr,
   accessibilityFiltersActive: _accessibilityFiltersActiveSr,
   onlyLeft: _onlyLeftSr,
+  maintenancePaused: _maintenancePausedSr,
   continueWithTotal: _continueWithTotalSr,
 );

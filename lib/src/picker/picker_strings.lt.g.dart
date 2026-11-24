@@ -26,6 +26,18 @@ String _accessFreeCountLt(int count) => 'Laisvų: $count';
 String _seatJustTakenByAnotherLt(String label) =>
     'Vietą $label ką tik užėmė kitas pirkėjas.';
 
+String _labelNoLongerAvailableLt(String label) =>
+    '$label nebepasiekiama. Pasirinkite kitą vietą.';
+
+String _labelsNoLongerAvailableLt(String labels) =>
+    '$labels nebepasiekiamos. Pasirinkite kitą grupę.';
+
+String _couldNotFindSeatsTogetherLt(int count) =>
+    'Neradome $count vietų greta. Pabandykite mažiau vietų arba kitą bilieto tipą.';
+
+String _couldNotRemoveLabelLt(String label) =>
+    'Nepavyko pašalinti $label. Rezervacija nepakito.';
+
 String _peekSecuredLt(int count, String total) =>
     '✓ $count užtikrinta · $total. Kol kas nieko nenuskaičiuosime';
 
@@ -200,6 +212,20 @@ String _onlyLeftLt(int count) => switch (pickerPluralCategory('lt', count)) {
   _ => 'Liko $count vietų',
 };
 
+String _maintenancePausedLt(int count) => switch (pickerPluralCategory(
+  'lt',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Rezervavimas pristabdytas dėl techninės priežiūros. Bandykite dar kartą maždaug po $count minutės.',
+  PickerPluralCategory.few =>
+    'Rezervavimas pristabdytas dėl techninės priežiūros. Bandykite dar kartą maždaug po $count minučių.',
+  PickerPluralCategory.many =>
+    'Rezervavimas pristabdytas dėl techninės priežiūros. Bandykite dar kartą maždaug po $count minutės.',
+  _ =>
+    'Rezervavimas pristabdytas dėl techninės priežiūros. Bandykite dar kartą maždaug po $count minučių.',
+};
+
 String _continueWithTotalLt(String money) => 'Tęsti \u00b7 $money';
 
 /// The `lt` defaults for the native picker chrome.
@@ -300,6 +326,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   moreTimeAdded: 'Pridėta laiko. Jūsų vietos tebėra rezervuotos.',
   couldNotAddMoreTime: 'Nepavyko pridėti laiko. Pereikite prie mokėjimo dabar.',
   seatsJustTaken: 'Viena ar kelios vietos ką tik užimtos. Rinkitės iš naujo.',
+  ticketTypeSoldOut: 'Šis bilieto tipas išparduotas. Pabandykite kitą tipą.',
+  seatsNoLongerAvailableTryAnother:
+      'Tos vietos nebepasiekiamos. Pabandykite kitą kiekį arba bilieto tipą.',
+  companionPairRequired:
+      'Prie kiekvieno lydinčiojo bilieto pasirinkite gretimą vietą vežimėliui.',
+  ticketOptionNotApplicable:
+      'Šis bilieto variantas pasirinktai vietai negalimas.',
+  maintenancePausedShortly:
+      'Rezervavimas kelioms minutėms pristabdytas dėl techninės priežiūros. Netrukus bandykite dar kartą.',
+  guestsOnly: 'Šis renginys skirtas pakviestiems svečiams.',
+  guestChoiceClosed: 'Vietų pasirinkimas šiuo metu neatidarytas.',
   allSetTitle: 'Viskas paruošta',
   confirmedAndOnWay: 'patvirtinta. Patvirtinimas jau pakeliui.',
   backToMap: 'Atgal į planą',
@@ -326,6 +363,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   floorWord: 'Aukštas',
   totalWord: 'Iš viso',
   adjustSelection: 'Koreguoti vietų pasirinkimą',
+  backToSeatMap: 'Atgal į vietų planą',
   chooseSeats: 'Pasirinkite savo vietas',
   chooseTickets: 'Pasirinkite bilietus',
   placeWord: 'VIETA',
@@ -384,6 +422,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutLt,
   accessFreeCount: _accessFreeCountLt,
   seatJustTakenByAnother: _seatJustTakenByAnotherLt,
+  labelNoLongerAvailable: _labelNoLongerAvailableLt,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableLt,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherLt,
+  couldNotRemoveLabel: _couldNotRemoveLabelLt,
   peekSecured: _peekSecuredLt,
   venueMap: _venueMapLt,
   accessibleStep: _accessibleStepLt,
@@ -409,5 +451,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   activeFilters: _activeFiltersLt,
   accessibilityFiltersActive: _accessibilityFiltersActiveLt,
   onlyLeft: _onlyLeftLt,
+  maintenancePaused: _maintenancePausedLt,
   continueWithTotal: _continueWithTotalLt,
 );

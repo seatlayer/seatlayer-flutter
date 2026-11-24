@@ -26,6 +26,18 @@ String _accessFreeCountSk(int count) => 'Voľných: $count';
 String _seatJustTakenByAnotherSk(String label) =>
     'Miesto $label práve obsadil iný kupujúci.';
 
+String _labelNoLongerAvailableSk(String label) =>
+    '$label už nie je dostupné. Vyberte iné miesto.';
+
+String _labelsNoLongerAvailableSk(String labels) =>
+    '$labels už nie sú dostupné. Vyberte inú skupinu.';
+
+String _couldNotFindSeatsTogetherSk(int count) =>
+    'Nenašli sme $count miest vedľa seba. Skúste menej miest alebo iný typ vstupenky.';
+
+String _couldNotRemoveLabelSk(String label) =>
+    'Nepodarilo sa odobrať $label. Rezervácia zostáva bez zmeny.';
+
 String _peekSecuredSk(int count, String total) =>
     '✓ $count zaistených · $total. Zatiaľ vám nič nestrhneme';
 
@@ -202,6 +214,20 @@ String _onlyLeftSk(int count) => switch (pickerPluralCategory('sk', count)) {
   _ => 'Zostáva $count miest',
 };
 
+String _maintenancePausedSk(int count) => switch (pickerPluralCategory(
+  'sk',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Rezervácia je pozastavená z dôvodu údržby. Skúste to znova približne o $count minútu.',
+  PickerPluralCategory.few =>
+    'Rezervácia je pozastavená z dôvodu údržby. Skúste to znova približne o $count minúty.',
+  PickerPluralCategory.many =>
+    'Rezervácia je pozastavená z dôvodu údržby. Skúste to znova približne o $count minúty.',
+  _ =>
+    'Rezervácia je pozastavená z dôvodu údržby. Skúste to znova približne o $count minút.',
+};
+
 String _continueWithTotalSk(String money) => 'Pokračovať \u00b7 $money';
 
 /// The `sk` defaults for the native picker chrome.
@@ -304,6 +330,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsSk = SeatLayerPickerStrings(
       'Nepodarilo sa pridať čas. Prejdite prosím k platbe hneď.',
   seatsJustTaken:
       'Jedno alebo viac miest bolo práve obsadených. Vyberte prosím znova.',
+  ticketTypeSoldOut: 'Tento typ vstupenky je vypredaný. Skúste iný typ.',
+  seatsNoLongerAvailableTryAnother:
+      'Tieto miesta už nie sú dostupné. Skúste iný počet alebo typ vstupenky.',
+  companionPairRequired:
+      'Ku každej vstupenke pre sprievod vyberte susedné miesto pre vozík.',
+  ticketOptionNotApplicable:
+      'Tento typ vstupenky nie je pre vybrané miesto dostupný.',
+  maintenancePausedShortly:
+      'Rezervácia je na niekoľko minút pozastavená z dôvodu údržby. Skúste to znova o chvíľu.',
+  guestsOnly: 'Toto podujatie je pre pozvaných hostí.',
+  guestChoiceClosed: 'Výber miest teraz nie je otvorený.',
   allSetTitle: 'Všetko je pripravené',
   confirmedAndOnWay: 'potvrdené. Potvrdenie je na ceste.',
   backToMap: 'Späť na plán',
@@ -330,6 +367,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsSk = SeatLayerPickerStrings(
   floorWord: 'Poschodie',
   totalWord: 'Spolu',
   adjustSelection: 'Upraviť výber miest',
+  backToSeatMap: 'Späť na plán miest',
   chooseSeats: 'Vyberte si miesta',
   chooseTickets: 'Vyberte vstupenky',
   placeWord: 'MIESTO',
@@ -388,6 +426,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsSk = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutSk,
   accessFreeCount: _accessFreeCountSk,
   seatJustTakenByAnother: _seatJustTakenByAnotherSk,
+  labelNoLongerAvailable: _labelNoLongerAvailableSk,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableSk,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherSk,
+  couldNotRemoveLabel: _couldNotRemoveLabelSk,
   peekSecured: _peekSecuredSk,
   venueMap: _venueMapSk,
   accessibleStep: _accessibleStepSk,
@@ -413,5 +455,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsSk = SeatLayerPickerStrings(
   activeFilters: _activeFiltersSk,
   accessibilityFiltersActive: _accessibilityFiltersActiveSk,
   onlyLeft: _onlyLeftSk,
+  maintenancePaused: _maintenancePausedSk,
   continueWithTotal: _continueWithTotalSk,
 );

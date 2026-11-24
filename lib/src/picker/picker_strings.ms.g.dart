@@ -25,6 +25,18 @@ String _accessFreeCountMs(int count) => '$count kosong';
 String _seatJustTakenByAnotherMs(String label) =>
     'Tempat duduk $label baru sahaja diambil pembeli lain.';
 
+String _labelNoLongerAvailableMs(String label) =>
+    '$label sudah tidak tersedia. Pilih tempat duduk lain.';
+
+String _labelsNoLongerAvailableMs(String labels) =>
+    '$labels sudah tidak tersedia. Pilih tempat duduk lain.';
+
+String _couldNotFindSeatsTogetherMs(int count) =>
+    'Tiada $count tempat duduk bersebelahan. Cuba kurangkan tempat duduk atau pilih jenis tiket lain.';
+
+String _couldNotRemoveLabelMs(String label) =>
+    '$label tidak dapat dibuang. Tahanan anda tidak berubah.';
+
 String _peekSecuredMs(int count, String total) =>
     '✓ $count ditahan · $total. Anda belum dicaj';
 
@@ -83,6 +95,9 @@ String _accessibilityFiltersActiveMs(int count) =>
     '$count penapis kebolehcapaian aktif';
 
 String _onlyLeftMs(int count) => 'Tinggal $count tempat duduk';
+
+String _maintenancePausedMs(int count) =>
+    'Tempahan dihentikan sementara untuk penyelenggaraan. Sila cuba lagi dalam kira-kira $count minit.';
 
 String _continueWithTotalMs(String money) => 'Teruskan \u00b7 $money';
 
@@ -189,6 +204,18 @@ const SeatLayerPickerStrings seatLayerPickerStringsMs = SeatLayerPickerStrings(
       'Masa tidak dapat ditambah. Sila terus ke pembayaran sekarang.',
   seatsJustTaken:
       'Satu atau lebih tempat duduk baru sahaja diambil. Sila pilih semula.',
+  ticketTypeSoldOut:
+      'Jenis tiket itu sudah habis dijual. Cuba jenis tiket lain.',
+  seatsNoLongerAvailableTryAnother:
+      'Tempat duduk itu sudah tidak tersedia. Cuba kuantiti atau jenis tiket lain.',
+  companionPairRequired:
+      'Pilih ruang kerusi roda di sebelahnya bagi setiap tiket peneman.',
+  ticketOptionNotApplicable:
+      'Pilihan tiket itu tidak tersedia untuk tempat duduk yang dipilih.',
+  maintenancePausedShortly:
+      'Tempahan dihentikan beberapa minit untuk penyelenggaraan. Sila cuba lagi sebentar nanti.',
+  guestsOnly: 'Acara ini untuk tetamu jemputan.',
+  guestChoiceClosed: 'Pemilihan tempat duduk tidak dibuka sekarang.',
   allSetTitle: 'Semua sudah siap',
   confirmedAndOnWay: 'disahkan. Pengesahan sedang dihantar.',
   backToMap: 'Kembali ke pelan',
@@ -215,6 +242,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsMs = SeatLayerPickerStrings(
   floorWord: 'Tingkat',
   totalWord: 'Jumlah',
   adjustSelection: 'Ubah pilihan tempat duduk',
+  backToSeatMap: 'Kembali ke pelan tempat duduk',
   chooseSeats: 'Pilih tempat duduk anda',
   chooseTickets: 'Pilih tiket',
   placeWord: 'TEMPAT',
@@ -274,6 +302,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsMs = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutMs,
   accessFreeCount: _accessFreeCountMs,
   seatJustTakenByAnother: _seatJustTakenByAnotherMs,
+  labelNoLongerAvailable: _labelNoLongerAvailableMs,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableMs,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherMs,
+  couldNotRemoveLabel: _couldNotRemoveLabelMs,
   peekSecured: _peekSecuredMs,
   venueMap: _venueMapMs,
   accessibleStep: _accessibleStepMs,
@@ -299,5 +331,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsMs = SeatLayerPickerStrings(
   activeFilters: _activeFiltersMs,
   accessibilityFiltersActive: _accessibilityFiltersActiveMs,
   onlyLeft: _onlyLeftMs,
+  maintenancePaused: _maintenancePausedMs,
   continueWithTotal: _continueWithTotalMs,
 );

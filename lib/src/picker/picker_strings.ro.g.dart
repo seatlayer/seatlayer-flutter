@@ -26,6 +26,18 @@ String _accessFreeCountRo(int count) => '$count libere';
 String _seatJustTakenByAnotherRo(String label) =>
     'Locul $label tocmai a fost luat de alt cumpărător.';
 
+String _labelNoLongerAvailableRo(String label) =>
+    '$label nu mai este disponibil. Alege alt loc.';
+
+String _labelsNoLongerAvailableRo(String labels) =>
+    '$labels nu mai sunt disponibile. Alege alt grup.';
+
+String _couldNotFindSeatsTogetherRo(int count) =>
+    'Nu am găsit $count locuri alăturate. Încearcă mai puține locuri sau alt tip de bilet.';
+
+String _couldNotRemoveLabelRo(String label) =>
+    'Nu am putut elimina $label. Rezervarea rămâne neschimbată.';
+
 String _peekSecuredRo(int count, String total) =>
     '✓ $count asigurate · $total. Încă nu vei fi taxat';
 
@@ -180,6 +192,18 @@ String _onlyLeftRo(int count) => switch (pickerPluralCategory('ro', count)) {
   _ => 'Au rămas $count de locuri',
 };
 
+String _maintenancePausedRo(int count) => switch (pickerPluralCategory(
+  'ro',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Rezervarea este întreruptă pentru mentenanță. Încercați din nou în aproximativ $count minut.',
+  PickerPluralCategory.few =>
+    'Rezervarea este întreruptă pentru mentenanță. Încercați din nou în aproximativ $count minute.',
+  _ =>
+    'Rezervarea este întreruptă pentru mentenanță. Încercați din nou în aproximativ $count de minute.',
+};
+
 String _continueWithTotalRo(String money) => 'Continuă \u00b7 $money';
 
 /// The `ro` defaults for the native picker chrome.
@@ -285,6 +309,18 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   couldNotAddMoreTime: 'Nu am putut adăuga timp. Mergi acum la plată.',
   seatsJustTaken:
       'Unul sau mai multe locuri tocmai au fost luate. Alege din nou.',
+  ticketTypeSoldOut:
+      'Acel tip de bilet este epuizat. Încearcă alt tip de bilet.',
+  seatsNoLongerAvailableTryAnother:
+      'Acele locuri nu mai sunt disponibile. Încearcă altă cantitate sau alt tip de bilet.',
+  companionPairRequired:
+      'Selectează locul alăturat pentru scaun cu rotile la fiecare bilet de însoțitor.',
+  ticketOptionNotApplicable:
+      'Această opțiune de bilet nu este disponibilă pentru locul selectat.',
+  maintenancePausedShortly:
+      'Rezervarea este întreruptă câteva minute pentru mentenanță. Încercați din nou în curând.',
+  guestsOnly: 'Acest eveniment este pentru invitați.',
+  guestChoiceClosed: 'Alegerea locurilor nu este deschisă acum.',
   allSetTitle: 'Totul e pregătit',
   confirmedAndOnWay: 'confirmat. Confirmarea este pe drum.',
   backToMap: 'Înapoi la hartă',
@@ -311,6 +347,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   floorWord: 'Etaj',
   totalWord: 'Total',
   adjustSelection: 'Ajustează selecția locurilor',
+  backToSeatMap: 'Înapoi la harta locurilor',
   chooseSeats: 'Alege-ți locurile',
   chooseTickets: 'Alege bilete',
   placeWord: 'LOC',
@@ -369,6 +406,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutRo,
   accessFreeCount: _accessFreeCountRo,
   seatJustTakenByAnother: _seatJustTakenByAnotherRo,
+  labelNoLongerAvailable: _labelNoLongerAvailableRo,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableRo,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherRo,
+  couldNotRemoveLabel: _couldNotRemoveLabelRo,
   peekSecured: _peekSecuredRo,
   venueMap: _venueMapRo,
   accessibleStep: _accessibleStepRo,
@@ -394,5 +435,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   activeFilters: _activeFiltersRo,
   accessibilityFiltersActive: _accessibilityFiltersActiveRo,
   onlyLeft: _onlyLeftRo,
+  maintenancePaused: _maintenancePausedRo,
   continueWithTotal: _continueWithTotalRo,
 );

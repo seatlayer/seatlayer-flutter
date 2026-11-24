@@ -27,6 +27,18 @@ String _accessFreeCountHi(int count) => '$count खाली';
 String _seatJustTakenByAnotherHi(String label) =>
     'सीट $label अभी-अभी किसी और खरीदार ने ले ली।';
 
+String _labelNoLongerAvailableHi(String label) =>
+    '$label अब उपलब्ध नहीं है। कोई दूसरी सीट चुनें।';
+
+String _labelsNoLongerAvailableHi(String labels) =>
+    '$labels अब उपलब्ध नहीं हैं। कोई दूसरा ग्रुप चुनें।';
+
+String _couldNotFindSeatsTogetherHi(int count) =>
+    'हमें $count साथ वाली सीटें नहीं मिलीं। कम सीटें या कोई दूसरा टिकट टाइप आज़माएँ।';
+
+String _couldNotRemoveLabelHi(String label) =>
+    '$label हटाया नहीं जा सका। आपका होल्ड पहले जैसा है।';
+
 String _peekSecuredHi(int count, String total) =>
     '✓ $count होल्ड · $total। अभी पैसे नहीं कटेंगे';
 
@@ -154,6 +166,16 @@ String _onlyLeftHi(int count) => switch (pickerPluralCategory('hi', count)) {
   _ => '$count सीटें बाकी',
 };
 
+String _maintenancePausedHi(int count) => switch (pickerPluralCategory(
+  'hi',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'मेंटेनेंस के कारण बुकिंग रुकी हुई है। कृपया लगभग $count मिनट बाद फिर कोशिश करें।',
+  _ =>
+    'मेंटेनेंस के कारण बुकिंग रुकी हुई है। कृपया लगभग $count मिनट बाद फिर कोशिश करें।',
+};
+
 String _continueWithTotalHi(String money) => 'आगे बढ़ें \u00b7 $money';
 
 /// The `hi` defaults for the native picker chrome.
@@ -255,6 +277,17 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   moreTimeAdded: 'और समय जोड़ दिया गया। आपकी सीटें अब भी होल्ड पर हैं।',
   couldNotAddMoreTime: 'और समय नहीं जुड़ सका। कृपया अभी चेकआउट करें।',
   seatsJustTaken: 'एक या ज़्यादा सीटें अभी-अभी बुक हो गईं। कृपया फिर से चुनें।',
+  ticketTypeSoldOut: 'यह टिकट टाइप सोल्ड आउट है। कोई दूसरा टिकट टाइप आज़माएँ।',
+  seatsNoLongerAvailableTryAnother:
+      'वे सीटें अब उपलब्ध नहीं हैं। कोई दूसरी संख्या या टिकट टाइप आज़माएँ।',
+  companionPairRequired:
+      'हर साथी सीट टिकट के साथ बगल वाला व्हीलचेयर स्थान भी चुनें।',
+  ticketOptionNotApplicable:
+      'चुनी गई सीट के लिए यह टिकट विकल्प उपलब्ध नहीं है।',
+  maintenancePausedShortly:
+      'मेंटेनेंस के कारण बुकिंग कुछ मिनटों के लिए रुकी है। कृपया थोड़ी देर बाद फिर कोशिश करें।',
+  guestsOnly: 'यह इवेंट आमंत्रित मेहमानों के लिए है।',
+  guestChoiceClosed: 'सीट चुनना अभी खुला नहीं है।',
   allSetTitle: 'सब तैयार है',
   confirmedAndOnWay: 'की बुकिंग कन्फ़र्म हो गई है। कन्फ़र्मेशन भेजा जा रहा है।',
   backToMap: 'मैप पर वापस',
@@ -281,6 +314,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   floorWord: 'फ़्लोर',
   totalWord: 'कुल',
   adjustSelection: 'सीट चयन बदलें',
+  backToSeatMap: 'सीट मैप पर वापस',
   chooseSeats: 'अपनी सीटें चुनें',
   chooseTickets: 'टिकट चुनें',
   placeWord: 'स्थान',
@@ -339,6 +373,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutHi,
   accessFreeCount: _accessFreeCountHi,
   seatJustTakenByAnother: _seatJustTakenByAnotherHi,
+  labelNoLongerAvailable: _labelNoLongerAvailableHi,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableHi,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherHi,
+  couldNotRemoveLabel: _couldNotRemoveLabelHi,
   peekSecured: _peekSecuredHi,
   venueMap: _venueMapHi,
   accessibleStep: _accessibleStepHi,
@@ -364,5 +402,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   activeFilters: _activeFiltersHi,
   accessibilityFiltersActive: _accessibilityFiltersActiveHi,
   onlyLeft: _onlyLeftHi,
+  maintenancePaused: _maintenancePausedHi,
   continueWithTotal: _continueWithTotalHi,
 );

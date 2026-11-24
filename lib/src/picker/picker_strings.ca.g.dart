@@ -26,6 +26,18 @@ String _accessFreeCountCa(int count) => '$count lliures';
 String _seatJustTakenByAnotherCa(String label) =>
     'Un altre comprador acaba d\'agafar el seient $label.';
 
+String _labelNoLongerAvailableCa(String label) =>
+    '$label ja no està disponible. Tria un altre seient.';
+
+String _labelsNoLongerAvailableCa(String labels) =>
+    '$labels ja no estan disponibles. Tria un altre grup.';
+
+String _couldNotFindSeatsTogetherCa(int count) =>
+    'No hem trobat $count seients junts. Prova amb menys seients o un altre tipus d\'entrada.';
+
+String _couldNotRemoveLabelCa(String label) =>
+    'No hem pogut treure $label. La reserva no ha canviat.';
+
 String _peekSecuredCa(int count, String total) =>
     '✓ $count assegurats · $total. Encara no et cobrarem';
 
@@ -183,6 +195,18 @@ String _onlyLeftCa(int count) => switch (pickerPluralCategory('ca', count)) {
   _ => 'Queden $count seients',
 };
 
+String _maintenancePausedCa(int count) => switch (pickerPluralCategory(
+  'ca',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'La reserva està en pausa per manteniment. Torna-ho a provar d’aquí a $count minut aproximadament.',
+  PickerPluralCategory.many =>
+    'La reserva està en pausa per manteniment. Torna-ho a provar d’aquí a $count minuts aproximadament.',
+  _ =>
+    'La reserva està en pausa per manteniment. Torna-ho a provar d’aquí a $count minuts aproximadament.',
+};
+
 String _continueWithTotalCa(String money) => 'Continua \u00b7 $money';
 
 /// The `ca` defaults for the native picker chrome.
@@ -288,6 +312,18 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
       'S\'ha afegit més temps: els teus seients continuen reservats.',
   couldNotAddMoreTime: 'No s\'ha pogut afegir més temps: ves al pagament ara.',
   seatsJustTaken: 'Un o més seients s\'acaben d\'ocupar. Torna a triar.',
+  ticketTypeSoldOut:
+      'Aquest tipus d\'entrada està esgotat. Prova un altre tipus.',
+  seatsNoLongerAvailableTryAnother:
+      'Aquests seients ja no estan disponibles. Prova amb una altra quantitat o tipus d\'entrada.',
+  companionPairRequired:
+      'Selecciona la plaça de cadira de rodes contigua amb cada entrada d\'acompanyant.',
+  ticketOptionNotApplicable:
+      'Aquesta opció d’entrada no està disponible per al seient seleccionat.',
+  maintenancePausedShortly:
+      'La reserva està en pausa uns minuts per manteniment. Torna-ho a provar d’aquí a poc.',
+  guestsOnly: 'Aquest esdeveniment és per a convidats.',
+  guestChoiceClosed: 'Ara mateix no es poden triar seients.',
   allSetTitle: 'Ja ho tens tot a punt',
   confirmedAndOnWay: 'confirmat. La confirmació ja està en camí.',
   backToMap: 'Torna al mapa',
@@ -314,6 +350,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   floorWord: 'Planta',
   totalWord: 'Total',
   adjustSelection: 'Ajusta la selecció de seients',
+  backToSeatMap: 'Torna al mapa de seients',
   chooseSeats: 'Tria els teus seients',
   chooseTickets: 'Tria entrades',
   placeWord: 'PLAÇA',
@@ -372,6 +409,10 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutCa,
   accessFreeCount: _accessFreeCountCa,
   seatJustTakenByAnother: _seatJustTakenByAnotherCa,
+  labelNoLongerAvailable: _labelNoLongerAvailableCa,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableCa,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherCa,
+  couldNotRemoveLabel: _couldNotRemoveLabelCa,
   peekSecured: _peekSecuredCa,
   venueMap: _venueMapCa,
   accessibleStep: _accessibleStepCa,
@@ -397,5 +438,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   activeFilters: _activeFiltersCa,
   accessibilityFiltersActive: _accessibilityFiltersActiveCa,
   onlyLeft: _onlyLeftCa,
+  maintenancePaused: _maintenancePausedCa,
   continueWithTotal: _continueWithTotalCa,
 );
