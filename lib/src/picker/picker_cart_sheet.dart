@@ -18,7 +18,6 @@ import 'picker_sheet_drag.dart';
 import 'picker_states.dart';
 import 'picker_styles.dart';
 import 'picker_tokens.g.dart';
-import 'picker_attribution.dart';
 import 'picker_errors.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -62,7 +61,7 @@ class SeatLayerCartSheet extends StatefulWidget {
     this.bestSeats,
     this.checkoutBar,
     this.actionError,
-    this.attribution = const SeatLayerPickerAttribution(compact: true),
+    this.attribution,
     this.reserveBottomInset = true,
     this.style,
     this.continueButtonStyle,
@@ -101,8 +100,8 @@ class SeatLayerCartSheet extends StatefulWidget {
   /// merges over.
   final ButtonStyle? continueButtonStyle;
 
-  /// The required SeatLayer attribution.
-  final Widget attribution;
+  /// A line of the host's own under the button, or nothing.
+  final Widget? attribution;
 
   /// Whether to reserve the device's bottom inset below the sheet.
   final bool reserveBottomInset;
@@ -693,7 +692,7 @@ class _SheetFoot extends StatelessWidget {
 
   final Widget? actionError;
   final Widget? checkoutBar;
-  final Widget attribution;
+  final Widget? attribution;
 
   /// Whether a card list sits above the foot and wants a rule under it.
   ///
@@ -740,9 +739,8 @@ class _SheetFoot extends StatelessWidget {
                   style: buttonStyle,
                 ),
             // Centred, not trailing: at the foot of a phone the trailing edge
-            // is the display's rounded corner, and a credit tucked into it lost
-            // its last letters behind the glass.
-            Center(child: attribution),
+            // is the display's rounded corner.
+            if (attribution case final line?) Center(child: line),
           ],
         ),
       ),

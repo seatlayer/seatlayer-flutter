@@ -72,25 +72,17 @@ class SeatLayerWidePanelHeading extends StatelessWidget {
   }
 }
 
-/// The foot of the wide panel: the checkout bar, then the credit under it.
-///
-/// The credit closes the panel, below the button rather than above it, so the
-/// button sits straight under the buyer's seats. The device's bottom inset is
-/// taken once, under the credit: the checkout bar is told there is none, or
-/// the inset would open a gap between the button and the line under it.
+/// The foot of the wide panel: the checkout bar over the device's bottom
+/// inset, which is taken once, here: the checkout bar is told there is none.
 class SeatLayerWidePanelFoot extends StatelessWidget {
-  /// Creates the foot from the layout's [checkout] bar and [attribution].
+  /// Creates the foot from the layout's [checkout] bar.
   const SeatLayerWidePanelFoot({
     super.key,
     required this.checkout,
-    required this.attribution,
   });
 
   /// The checkout bar, or whatever a host's builder drew in its place.
   final Widget checkout;
-
-  /// The credit line; it draws nothing where the organizer may omit it.
-  final Widget attribution;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -102,16 +94,7 @@ class SeatLayerWidePanelFoot extends StatelessWidget {
             removeBottom: true,
             child: checkout,
           ),
-          SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsetsDirectional.only(end: 8),
-              child: Align(
-                alignment: AlignmentDirectional.centerEnd,
-                child: attribution,
-              ),
-            ),
-          ),
+          const SafeArea(top: false, child: SizedBox.shrink()),
         ],
       );
 }

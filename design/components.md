@@ -83,7 +83,7 @@ Snapshot fields the catalogue refers to:
 | `hold` | `holdId`, `expiresAt`, `owner` |
 | `access` | why access is limited, where it is — paused, revoked, expired, unverified |
 | `capabilities` | which optional features are available — venue 3D, seat view, best available |
-| `branding.attributionRequired` | whether the attribution line must render |
+| `branding.attributionRequired` | not read: the picker draws no credit line |
 
 Two rules bind every component:
 
@@ -140,8 +140,7 @@ Header   name over "date · venue"        sales-closed pill · HoldPill · close
 │   ViewModeControl · 3D Rotate / Move   ││ CartList (scrolls)           │
 │   accessibility · `+` · `−`            ││ summary line                 │
 │                                        ││ full-width checkout button   │
-└────────────────────────────────────────┘│ Powered by SeatLayer         │
-                                          └──────────────────────────────┘
+└────────────────────────────────────────┘└──────────────────────────────┘
 ```
 
 **Wide panel headings** (`picker_wide_panel.dart`, not exported):
@@ -586,12 +585,11 @@ map; see `picker-spec.md` §3.13.7, "Divergence from the web picker".
     best-seats form. The extras stay laid out offstage while shut, so the sheet
     opens straight to its height.
   - **Foot** the lapse notice, the hold-ending cue, the inline action error,
-    the total line, `size.footTotalGap` (8), the BookButton and the centred
-    attribution, in `size.footPadX` (16) / `size.footPadTop` (4) /
+    the total line, `size.footTotalGap` (8) and the BookButton, in
+    `size.footPadX` (16) / `size.footPadTop` (4) /
     `size.footPadBottom` (2). A hairline above it **only when the sheet is open
     with tickets** — collapsed, the panel's own top edge is the only edge
-    there is. Not restyled on a phone at all — one block on both widths. The
-    attribution is absent entirely on a white-labelled account.
+    there is. Not restyled on a phone at all — one block on both widths.
   - **Total line** `strings.noSeatsSelected` on an empty cart, else
     `strings.ticketCount` at `type.footTotalLabel` (13 / w600) with the total
     at `type.footTotalAmount` (17 / w700) in tabular figures on the trailing
@@ -759,6 +757,6 @@ specification. Names, slots and files:
 | `SeatLayerPickerAccessibilityFilters` | — | §3.5, §4.10 — in the map's control column, above `+`, on both widths; switches apply on change, no apply step, the sheet stays open; opening it clears a pending seat card; the sheet is bounded to `size.accessSheetMaxHeightFraction` (floor `size.accessSheetMinHeight`) and scrolls inside it. In the wide column the same content opens as a popover beside the control (`picker_accessibility_popover.dart`): `size.accessPopoverWidth` wide, on its start side `size.accessPopoverGap` away, top-aligned with it, no scrim, closed by a tap outside (which never reaches the map), Back or Escape, focus back on the control; announced as a dialog; it closes itself if the window changes size while open. Rows are a FIXED 50 high, closed by a hairline of `color.*.divider` at 35 per cent, and read **icon cell (`size.accessRowIconCell`) · `size.accessRowGap` · label (flexible, ellipsized; wraps in the popover) · ⓘ in a 36 column where the row has a note · count in a 68 column · `size.accessRowSwitchGap` · drawn switch**. The whole line toggles. The count is `N free` on a quiet ground of `color.*.text` at 6 per cent, tappable to jump where the runtime supports it; a sold-out provision stays, named and disabled, reading `0`. The two map switches (hide limited view, colourblind-friendly) come first; the provisions follow under a `strings.showSeatsFor` heading, drawn as given (written in capitals, never upper-cased in code); the labelled form (`compact: false`) reads `strings.activeFilters(n)` while filters are on |
 | `SeatLayerPickerAccessibleStepper` | — | §3.4.1 |
 | `SeatLayerSeatViewChrome` | `seatViewChromeStyle` | §3.15 |
-| `SeatLayerPickerAttribution` | — | §3.10.3 |
+| `SeatLayerPickerAttribution` | — | §3.10.3 — deprecated, draws nothing |
 | `SeatLayerCheckoutCta` (the one label resolver) | — | §3.9, §3.10.3 |
 | `SeatLayerTypeScale` / `seatLayerReadingOrder` / `seatLayerBoldWeight` | — | §4.10 |

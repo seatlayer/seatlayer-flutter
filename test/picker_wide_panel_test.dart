@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
-import 'package:seatlayer/src/picker/picker_attribution.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_map_controls.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
@@ -338,11 +337,6 @@ void main() {
       expect(
         _rect(tester, button()).top,
         greaterThan(_rect(tester, find.text('No seats selected')).bottom),
-      );
-      // And the credit under the button.
-      expect(
-        _rect(tester, find.byType(SeatLayerPickerAttribution)).top,
-        greaterThanOrEqualTo(_rect(tester, button()).bottom),
       );
     });
 

@@ -385,7 +385,7 @@ void main() {
     expect(remove.height, greaterThanOrEqualTo(44));
   });
 
-  testWidgets('the collapsed safe area carries required attribution only', (
+  testWidgets('the collapsed sheet ends with its button, over the safe area', (
     tester,
   ) async {
     final map = FakePickerMap();
@@ -407,25 +407,7 @@ void main() {
     map.emit(pickerSnapshot(withSelection: false));
     await tester.pumpAndSettle();
 
-    expect(find.text('Powered by SeatLayer'), findsOneWidget);
-    final withCredit = _sheetHeight(tester);
-    final attributionRect = tester.getRect(find.text('Powered by SeatLayer'));
-    final sheetRect = tester.getRect(find.byType(SeatLayerCartSheet));
-    // Centred: a phone's rounded corner clips whatever hugs the trailing edge.
-    expect(
-      (attributionRect.center.dx - sheetRect.center.dx).abs(),
-      lessThan(12),
-    );
-
-    final hidden = pickerSnapshot(revision: 2, withSelection: false);
-    (hidden['branding']! as Map<String, Object?>)['attributionRequired'] =
-        false;
-    map.emit(hidden);
-    await tester.pumpAndSettle();
-    expect(find.text('Powered by SeatLayer'), findsNothing);
-    // The credit is the only thing that goes: the sheet is shorter by exactly
-    // the line it stopped drawing, and the safe area is still reserved.
-    expect(_sheetHeight(tester), lessThan(withCredit));
+    expect(find.textContaining('SeatLayer'), findsNothing);
     expect(
       tester.getRect(find.byType(SeatLayerCartSheet)).bottom -
           tester.getRect(find.byType(FilledButton)).bottom,
@@ -536,7 +518,6 @@ void main() {
       tester.getSize(find.byType(SeatLayerBookButton)).width,
       390 - (SeatLayerSizeTokens.footPadX * 2),
     );
-    expect(find.text('Powered by SeatLayer'), findsOneWidget);
   });
 
   testWidgets('the footer holds its button while a seat card is open',

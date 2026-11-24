@@ -428,7 +428,6 @@ Every widget below works standalone inside a `SeatLayerPickerScope`.
 | `SeatLayerPickerTablePrompt` / `…GeneralAdmissionPrompt` | Quantity prompts |
 | `SeatLayerPickerSectionNavigator` | Section list and stepping |
 | `SeatLayerPickerTestModeIndicator` | The one test-event badge |
-| `SeatLayerPickerAttribution` | Draws the badge only when the server requires it; the server requires it on no plan, so it draws nothing |
 
 The individual corner controls (`…ZoomInButton`, `…ZoomToFitButton`,
 `…ViewModeControl`, `…ColorblindButton`, `…OverviewButton`,

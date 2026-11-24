@@ -573,7 +573,7 @@ class SeatLayerPickerStrings {
   /// "Adjust seat selection", in the runtime dictionary's own wording.
   final String adjustSelection;
 
-  /// Required SeatLayer attribution.
+  /// Not drawn. Kept because a host may still be passing it.
   final String poweredBy;
 
   /// Badge shown on a test event.

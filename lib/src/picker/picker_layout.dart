@@ -216,7 +216,8 @@ class SeatLayerPickerLayout {
   /// Edge length of every other map corner control.
   final double mapControlSize;
 
-  /// Height of the "Powered by SeatLayer" line.
+  /// Not used: the picker draws no credit line. Kept because a host may still
+  /// be passing it.
   final double attributionHeight;
 
   /// Font size of a price legend chip.

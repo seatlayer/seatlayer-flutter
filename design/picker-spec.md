@@ -128,8 +128,7 @@ Header   brand · name over "date · venue" · sales-closed pill · hold pill ·
 │              ♿ · + · −                 ││ action error                 │
 │                                        ││ summary line                 │
 │                                        ││ full-width checkout button   │
-└────────────────────────────────────────┘│ Powered by SeatLayer         │
-                                          └──────────────────────────────┘
+└────────────────────────────────────────┘└──────────────────────────────┘
 ```
 
 - **Panel headings.** `strings.ticketPrices` over the price legend, drawn only
@@ -1893,8 +1892,8 @@ do about it, on the one line a buyer reads to find out what they are about to
 pay. `fromAmount` / `fromPriceText` and every path that carried them are gone.
 
 **The foot** is the lapse notice, the hold-ending cue, the inline action error,
-the total line, `size.footTotalGap` (8), the BookButton and the centred
-attribution, inside `size.footPadX` (16) / `size.footPadTop` (4) /
+the total line, `size.footTotalGap` (8) and the BookButton, inside
+`size.footPadX` (16) / `size.footPadTop` (4) /
 `size.footPadBottom` (2). It carries a hairline on its top edge **only when the
 sheet is open and there are tickets above it** — the collapsed sheet has
 nothing above the foot but the panel's own top edge, and a second hairline a
@@ -2045,7 +2044,7 @@ for a line the selection cannot name, and `picker.frameSeat` for the card tap.
 #### 3.10.3 Foot
 
 Order: the lapse notice if there is one, the hold-ending cue, the inline action
-error, the total line, the checkout button, then the attribution. The whole
+error, the total line, then the checkout button. The whole
 foot is drawn in both sheet states, and it carries a hairline above it **only
 while the sheet is open with tickets in it** (§3.9).
 
@@ -2097,13 +2096,9 @@ Label ladder, in priority order:
 hold is never stranded. Checkout phases run idle → holding → checkout and each
 phase ends where the work ends, never on a timer.
 
-**Attribution** — `SeatLayerPickerAttribution`, height
-`size.attributionHeight`, `type.attribution`, centred at the **foot of the
-sheet**, where a phone's rounded corner cannot clip it. It reads the map
-chrome's palette, not the picker's, so its words survive on the dark scene
-sheet. Copy `strings.poweredBy`. Drawn when `branding.attributionRequired`; it is
-**absent entirely on a white-labelled account**, hidden server-side with no
-host switch.
+**No credit line.** The picker draws no "Powered by SeatLayer", whatever
+`branding.attributionRequired` says: the foot ends with its button.
+`SeatLayerPickerAttribution` is kept, deprecated, and draws nothing.
 
 The total is said ONCE, on the foot's own line, and there is no separate
 "secured" strip on a phone: the header pill is the clock, and each held card's
