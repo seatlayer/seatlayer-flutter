@@ -24,7 +24,7 @@ const Set<String> _holdOwnershipCodes = <String>{
 };
 
 /// How much of the screen's height the bar's words may take before they scroll.
-const double _maxHeightFraction = .16;
+const double _maxHeightFraction = .15;
 
 /// And what they always get, on a phone held sideways.
 const double _minMaxHeight = 84;
@@ -84,13 +84,9 @@ class SeatLayerPickerActionError extends StatelessWidget {
         top: false,
         bottom: false,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(width: 12),
-            const Padding(
-              padding: EdgeInsets.only(top: 10),
-              child: Icon(Icons.error_outline_rounded, color: Colors.white),
-            ),
+            const Icon(Icons.error_outline_rounded, color: Colors.white),
             const SizedBox(width: 9),
             Expanded(
               // A sentence that outgrows its share of the screen scrolls: it is
