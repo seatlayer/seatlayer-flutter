@@ -690,6 +690,25 @@ abstract final class SeatLayerStringTokens {
   /// Seat choice isn’t open right now.
   static const String guestChoiceClosed = 'Seat choice isn’t open right now.';
 
+  /// Too many attempts. Wait a moment and try again.
+  static const String tooManyAttempts =
+      'Too many attempts. Wait a moment and try again.';
+
+  /// One of these seats is kept for a season ticket holder who can still renew it. Choose another seat.
+  static const String seatHeldForRenewal =
+      'One of these seats is kept for a season ticket holder who can still renew it. Choose another seat.';
+
+  /// This seat isn’t available.
+  static const String seatUnavailable = 'This seat isn’t available.';
+
+  /// Tickets can’t be booked here right now.
+  static const String eventUnavailable =
+      'Tickets can’t be booked here right now.';
+
+  /// Your earlier seats could not be restored. Please choose again.
+  static const String savedSeatsNotRestored =
+      'Your earlier seats could not be restored. Please choose again.';
+
   /// You’re all set
   static const String allSetTitle = 'You’re all set';
 

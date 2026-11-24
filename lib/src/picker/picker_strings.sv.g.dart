@@ -293,6 +293,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
       'Bokningen är pausad några minuter för underhåll. Försök igen om en liten stund.',
   guestsOnly: 'Det här evenemanget är för inbjudna gäster.',
   guestChoiceClosed: 'Platsvalet är inte öppet just nu.',
+  tooManyAttempts: 'För många försök. Vänta en stund och försök igen.',
+  seatHeldForRenewal:
+      'En av de här platserna hålls för en säsongskortsinnehavare som fortfarande kan förnya den. Välj en annan plats.',
+  seatUnavailable: 'Den här platsen är inte tillgänglig.',
+  eventUnavailable: 'Det går inte att boka biljetter här just nu.',
+  savedSeatsNotRestored:
+      'Dina tidigare platser kunde inte återställas. Välj igen.',
   allSetTitle: 'Allt är klart',
   confirmedAndOnWay: 'bekräftat. En bekräftelse är på väg.',
   backToMap: 'Tillbaka till kartan',

@@ -291,6 +291,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
       'Varaaminen on keskeytetty muutamaksi minuutiksi huollon vuoksi. Yritä pian uudelleen.',
   guestsOnly: 'Tämä tapahtuma on kutsutuille vieraille.',
   guestChoiceClosed: 'Paikkojen valinta ei ole nyt auki.',
+  tooManyAttempts: 'Liian monta yritystä. Odota hetki ja yritä uudelleen.',
+  seatHeldForRenewal:
+      'Yksi näistä paikoista on varattu kausilipun haltijalle, joka voi vielä uusia sen. Valitse toinen paikka.',
+  seatUnavailable: 'Tämä paikka ei ole saatavilla.',
+  eventUnavailable: 'Lippuja ei voi varata täällä juuri nyt.',
+  savedSeatsNotRestored:
+      'Aiempia paikkojasi ei voitu palauttaa. Valitse uudelleen.',
   allSetTitle: 'Kaikki valmista',
   confirmedAndOnWay: 'vahvistettu. Vahvistus on matkalla.',
   backToMap: 'Takaisin karttaan',

@@ -205,6 +205,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
       'ระบบหยุดรับจองไม่กี่นาทีเพื่อปรับปรุง กรุณาลองใหม่อีกครั้งในไม่ช้า',
   guestsOnly: 'งานนี้สำหรับแขกที่ได้รับเชิญ',
   guestChoiceClosed: 'ขณะนี้ยังไม่เปิดให้เลือกที่นั่ง',
+  tooManyAttempts: 'ลองหลายครั้งเกินไป รอสักครู่แล้วลองอีกครั้ง',
+  seatHeldForRenewal:
+      'ที่นั่งหนึ่งในนี้ถูกกันไว้ให้ผู้ถือบัตรซีซันที่ยังต่ออายุได้ กรุณาเลือกที่นั่งอื่น',
+  seatUnavailable: 'ที่นั่งนี้ไม่ว่าง',
+  eventUnavailable: 'ขณะนี้ยังจองบัตรที่นี่ไม่ได้',
+  savedSeatsNotRestored:
+      'กู้คืนที่นั่งที่คุณเลือกไว้ก่อนหน้าไม่ได้ กรุณาเลือกใหม่',
   allSetTitle: 'เรียบร้อยแล้ว',
   confirmedAndOnWay: 'ยืนยันแล้ว กำลังส่งอีเมลยืนยันถึงคุณ',
   backToMap: 'กลับไปที่ผัง',

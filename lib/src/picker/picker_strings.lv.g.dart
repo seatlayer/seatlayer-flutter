@@ -319,6 +319,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
       'Rezervēšana uz dažām minūtēm ir apturēta apkopes dēļ. Mēģiniet vēlreiz pēc brīža.',
   guestsOnly: 'Šis pasākums ir paredzēts ielūgtajiem viesiem.',
   guestChoiceClosed: 'Vietu izvēle pašlaik nav atvērta.',
+  tooManyAttempts:
+      'Pārāk daudz mēģinājumu. Uzgaidiet brīdi un mēģiniet vēlreiz.',
+  seatHeldForRenewal:
+      'Viena no šīm vietām tiek turēta abonementa īpašniekam, kurš to vēl var pagarināt. Izvēlieties citu vietu.',
+  seatUnavailable: 'Šī vieta nav pieejama.',
+  eventUnavailable: 'Pašlaik šeit nevar rezervēt biļetes.',
+  savedSeatsNotRestored:
+      'Jūsu iepriekšējās vietas neizdevās atjaunot. Lūdzu, izvēlieties vēlreiz.',
   allSetTitle: 'Viss ir gatavs',
   confirmedAndOnWay: 'apstiprināts. Apstiprinājums jau ceļā.',
   backToMap: 'Atpakaļ uz plānu',

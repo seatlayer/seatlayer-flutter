@@ -304,6 +304,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
       'Die Buchung ist wegen Wartungsarbeiten für einige Minuten pausiert. Bitte versuchen Sie es in Kürze erneut.',
   guestsOnly: 'Diese Veranstaltung ist für eingeladene Gäste.',
   guestChoiceClosed: 'Die Platzwahl ist gerade nicht geöffnet.',
+  tooManyAttempts:
+      'Zu viele Versuche. Warten Sie einen Moment und versuchen Sie es erneut.',
+  seatHeldForRenewal:
+      'Einer dieser Plätze ist für einen Saisonticket-Inhaber reserviert, der ihn noch verlängern kann. Wählen Sie einen anderen Platz.',
+  seatUnavailable: 'Dieser Platz ist nicht verfügbar.',
+  eventUnavailable: 'Tickets können hier gerade nicht gebucht werden.',
+  savedSeatsNotRestored:
+      'Ihre vorherigen Plätze konnten nicht wiederhergestellt werden. Bitte wählen Sie erneut.',
   allSetTitle: 'Alles bereit',
   confirmedAndOnWay: 'bestätigt. Eine Bestätigung ist unterwegs.',
   backToMap: 'Zurück zur Karte',

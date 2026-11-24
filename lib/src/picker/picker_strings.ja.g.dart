@@ -195,6 +195,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   maintenancePausedShortly: '予約はメンテナンスのため数分間停止しています。しばらくしてからもう一度お試しください。',
   guestsOnly: 'このイベントは招待されたゲスト専用です。',
   guestChoiceClosed: '現在、座席の選択は受け付けていません。',
+  tooManyAttempts: '試行回数が多すぎます。しばらく待ってからもう一度お試しください。',
+  seatHeldForRenewal:
+      'これらの座席のうち1席は、まだ更新できるシーズンチケット保有者のために確保されています。別の座席をお選びください。',
+  seatUnavailable: 'この席はご利用いただけません。',
+  eventUnavailable: '現在、ここではチケットを予約できません。',
+  savedSeatsNotRestored: '以前の座席を復元できませんでした。もう一度お選びください。',
   allSetTitle: '準備完了です',
   confirmedAndOnWay: '確定しました。確認のご連絡をお送りします。',
   backToMap: '座席図に戻る',

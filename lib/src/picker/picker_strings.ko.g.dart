@@ -201,6 +201,12 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   maintenancePausedShortly: '점검으로 몇 분간 예매가 중지됐어요. 잠시 후 다시 시도해 주세요.',
   guestsOnly: '이 이벤트는 초대받은 게스트를 위한 것입니다.',
   guestChoiceClosed: '지금은 좌석을 선택할 수 없습니다.',
+  tooManyAttempts: '시도 횟수가 너무 많아요. 잠시 후 다시 시도해 주세요.',
+  seatHeldForRenewal:
+      '이 중 한 좌석은 아직 갱신할 수 있는 시즌권 보유자를 위해 남겨 둔 좌석이에요. 다른 좌석을 선택해 주세요.',
+  seatUnavailable: '이 좌석은 선택할 수 없습니다.',
+  eventUnavailable: '지금은 여기서 티켓을 예매할 수 없어요.',
+  savedSeatsNotRestored: '이전에 고른 좌석을 불러오지 못했어요. 다시 선택해 주세요.',
   allSetTitle: '예매가 완료됐어요',
   confirmedAndOnWay: '예매 확정. 확인 메일이 곧 도착해요.',
   backToMap: '배치도로 돌아가기',

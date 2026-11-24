@@ -337,6 +337,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
       'Rezervavimas kelioms minutėms pristabdytas dėl techninės priežiūros. Netrukus bandykite dar kartą.',
   guestsOnly: 'Šis renginys skirtas pakviestiems svečiams.',
   guestChoiceClosed: 'Vietų pasirinkimas šiuo metu neatidarytas.',
+  tooManyAttempts:
+      'Per daug bandymų. Palaukite akimirką ir bandykite dar kartą.',
+  seatHeldForRenewal:
+      'Viena iš šių vietų laikoma abonemento turėtojui, kuris dar gali jį pratęsti. Pasirinkite kitą vietą.',
+  seatUnavailable: 'Ši vieta neprieinama.',
+  eventUnavailable: 'Šiuo metu čia negalima užsisakyti bilietų.',
+  savedSeatsNotRestored:
+      'Ankstesnių jūsų vietų atkurti nepavyko. Pasirinkite iš naujo.',
   allSetTitle: 'Viskas paruošta',
   confirmedAndOnWay: 'patvirtinta. Patvirtinimas jau pakeliui.',
   backToMap: 'Atgal į planą',

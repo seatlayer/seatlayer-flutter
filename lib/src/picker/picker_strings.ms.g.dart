@@ -216,6 +216,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsMs = SeatLayerPickerStrings(
       'Tempahan dihentikan beberapa minit untuk penyelenggaraan. Sila cuba lagi sebentar nanti.',
   guestsOnly: 'Acara ini untuk tetamu jemputan.',
   guestChoiceClosed: 'Pemilihan tempat duduk tidak dibuka sekarang.',
+  tooManyAttempts: 'Terlalu banyak cubaan. Tunggu sebentar dan cuba lagi.',
+  seatHeldForRenewal:
+      'Salah satu tempat duduk ini disimpan untuk pemegang tiket musim yang masih boleh memperbaharuinya. Pilih tempat duduk lain.',
+  seatUnavailable: 'Tempat duduk ini tidak tersedia.',
+  eventUnavailable: 'Tiket tidak boleh ditempah di sini buat masa ini.',
+  savedSeatsNotRestored:
+      'Tempat duduk pilihan anda sebelum ini tidak dapat dipulihkan. Sila pilih semula.',
   allSetTitle: 'Semua sudah siap',
   confirmedAndOnWay: 'disahkan. Pengesahan sedang dihantar.',
   backToMap: 'Kembali ke pelan',

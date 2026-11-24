@@ -289,6 +289,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
       'Rezervasyon bakım nedeniyle birkaç dakikalığına duraklatıldı. Lütfen kısa süre sonra tekrar deneyin.',
   guestsOnly: 'Bu etkinlik davetli konuklar içindir.',
   guestChoiceClosed: 'Koltuk seçimi şu anda açık değil.',
+  tooManyAttempts: 'Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin.',
+  seatHeldForRenewal:
+      'Bu koltuklardan biri, hâlâ yenileyebilecek bir sezon bileti sahibi için ayrıldı. Başka bir koltuk seçin.',
+  seatUnavailable: 'Bu koltuk müsait değil.',
+  eventUnavailable: 'Şu anda burada bilet ayırtılamıyor.',
+  savedSeatsNotRestored:
+      'Önceki koltuklarınız geri yüklenemedi. Lütfen yeniden seçin.',
   allSetTitle: 'Her şey hazır',
   confirmedAndOnWay: 'onaylandı. Onay e-postası yolda.',
   backToMap: 'Plana dön',

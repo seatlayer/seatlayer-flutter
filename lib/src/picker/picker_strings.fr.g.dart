@@ -330,6 +330,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsFr = SeatLayerPickerStrings(
       'La réservation est en pause quelques minutes pour maintenance. Veuillez réessayer sous peu.',
   guestsOnly: 'Cet événement est réservé aux invités.',
   guestChoiceClosed: 'Le choix des places n’est pas ouvert pour le moment.',
+  tooManyAttempts: 'Trop de tentatives. Patientez un instant puis réessayez.',
+  seatHeldForRenewal:
+      'L’une de ces places est réservée à un abonné qui peut encore la renouveler. Choisissez une autre place.',
+  seatUnavailable: 'Cette place n\'est pas disponible.',
+  eventUnavailable:
+      'Les billets ne peuvent pas être réservés ici pour le moment.',
+  savedSeatsNotRestored:
+      'Vos places précédentes n’ont pas pu être restaurées. Veuillez les choisir à nouveau.',
   allSetTitle: 'Tout est prêt',
   confirmedAndOnWay: 'confirmés. Une confirmation arrive.',
   backToMap: 'Retour au plan',

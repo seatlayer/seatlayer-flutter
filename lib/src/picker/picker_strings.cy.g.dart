@@ -392,6 +392,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
       'Mae archebu wedi’i oedi am ychydig funudau ar gyfer gwaith cynnal a chadw. Rhowch gynnig arall arni cyn bo hir.',
   guestsOnly: 'Mae\'r digwyddiad hwn ar gyfer gwesteion gwahoddedig.',
   guestChoiceClosed: 'Dyw dewis seddi ddim ar agor ar hyn o bryd.',
+  tooManyAttempts:
+      'Gormod o gynigion. Arhoswch eiliad a rhowch gynnig arall arni.',
+  seatHeldForRenewal:
+      'Mae un o\'r seddi hyn yn cael ei chadw i ddeiliad tocyn tymor sy\'n dal i allu ei hadnewyddu. Dewisa sedd arall.',
+  seatUnavailable: 'Nid yw\'r sedd hon ar gael.',
+  eventUnavailable: 'Nid oes modd archebu tocynnau yma ar hyn o bryd.',
+  savedSeatsNotRestored:
+      'Doedd dim modd adfer eich seddi blaenorol. Dewiswch eto.',
   allSetTitle: 'Rwyt ti\'n barod',
   confirmedAndOnWay: 'wedi\'i gadarnhau. Mae cadarnhad ar y ffordd.',
   backToMap: 'Yn ôl i\'r map',

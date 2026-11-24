@@ -324,6 +324,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
       'La reserva està en pausa uns minuts per manteniment. Torna-ho a provar d’aquí a poc.',
   guestsOnly: 'Aquest esdeveniment és per a convidats.',
   guestChoiceClosed: 'Ara mateix no es poden triar seients.',
+  tooManyAttempts: 'Massa intents. Espera un moment i torna-ho a provar.',
+  seatHeldForRenewal:
+      'Un d\'aquests seients està reservat per a un abonat que encara el pot renovar. Tria un altre seient.',
+  seatUnavailable: 'Aquest seient no està disponible.',
+  eventUnavailable: 'Ara mateix no es poden reservar entrades aquí.',
+  savedSeatsNotRestored:
+      'No s’han pogut recuperar els seients que teníeu. Torneu-los a triar.',
   allSetTitle: 'Ja ho tens tot a punt',
   confirmedAndOnWay: 'confirmat. La confirmació ja està en camí.',
   backToMap: 'Torna al mapa',

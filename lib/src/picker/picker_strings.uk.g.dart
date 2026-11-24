@@ -336,6 +336,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
       'Бронювання призупинено на кілька хвилин через технічні роботи. Спробуйте ще раз трохи пізніше.',
   guestsOnly: 'Ця подія для запрошених гостей.',
   guestChoiceClosed: 'Вибір місць зараз недоступний.',
+  tooManyAttempts: 'Забагато спроб. Зачекайте трохи й спробуйте ще раз.',
+  seatHeldForRenewal:
+      'Одне з цих місць закріплено за власником абонемента, який ще може його продовжити. Оберіть інше місце.',
+  seatUnavailable: 'Це місце недоступне.',
+  eventUnavailable: 'Зараз тут не можна забронювати квитки.',
+  savedSeatsNotRestored:
+      'Не вдалося відновити ваші попередні місця. Будь ласка, виберіть знову.',
   allSetTitle: 'Усе готово',
   confirmedAndOnWay: 'підтверджено. Підтвердження вже в дорозі.',
   backToMap: 'Назад до схеми',

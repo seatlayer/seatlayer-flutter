@@ -341,6 +341,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsCs = SeatLayerPickerStrings(
       'Rezervace je na několik minut pozastavena kvůli údržbě. Zkuste to znovu za chvíli.',
   guestsOnly: 'Tato akce je pro pozvané hosty.',
   guestChoiceClosed: 'Výběr míst teď není otevřený.',
+  tooManyAttempts: 'Příliš mnoho pokusů. Chvíli počkejte a zkuste to znovu.',
+  seatHeldForRenewal:
+      'Jedno z těchto míst je vyhrazeno pro držitele permanentky, který si ji ještě může prodloužit. Vyberte jiné místo.',
+  seatUnavailable: 'Toto místo není k dispozici.',
+  eventUnavailable: 'Vstupenky tu teď nelze rezervovat.',
+  savedSeatsNotRestored:
+      'Vaše předchozí místa se nepodařilo obnovit. Vyberte je prosím znovu.',
   allSetTitle: 'Vše je připraveno',
   confirmedAndOnWay: 'potvrzeno. Potvrzení je na cestě.',
   backToMap: 'Zpět na plán',

@@ -344,6 +344,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
       'Rezervacija je zaradi vzdrževanja ustavljena za nekaj minut. Poskusite znova kmalu.',
   guestsOnly: 'Ta dogodek je za povabljene goste.',
   guestChoiceClosed: 'Izbira sedežev trenutno ni odprta.',
+  tooManyAttempts: 'Preveč poskusov. Počakajte trenutek in poskusite znova.',
+  seatHeldForRenewal:
+      'Eden od teh sedežev je zadržan za imetnika sezonske vstopnice, ki jo lahko še podaljša. Izberite drug sedež.',
+  seatUnavailable: 'Ta sedež ni na voljo.',
+  eventUnavailable: 'Vstopnic tukaj trenutno ni mogoče rezervirati.',
+  savedSeatsNotRestored:
+      'Vaših prejšnjih sedežev ni bilo mogoče obnoviti. Izberite znova.',
   allSetTitle: 'Vse je pripravljeno',
   confirmedAndOnWay: 'potrjeno. Potrdilo je že na poti.',
   backToMap: 'Nazaj na načrt',

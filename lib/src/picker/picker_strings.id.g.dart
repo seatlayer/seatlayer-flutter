@@ -214,6 +214,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
       'Pemesanan dihentikan beberapa menit untuk pemeliharaan. Silakan coba lagi sebentar lagi.',
   guestsOnly: 'Acara ini khusus untuk tamu undangan.',
   guestChoiceClosed: 'Pemilihan kursi sedang tidak dibuka.',
+  tooManyAttempts: 'Terlalu banyak percobaan. Tunggu sebentar, lalu coba lagi.',
+  seatHeldForRenewal:
+      'Salah satu kursi ini dicadangkan untuk pemegang tiket musiman yang masih bisa memperpanjangnya. Pilih kursi lain.',
+  seatUnavailable: 'Kursi ini tidak tersedia.',
+  eventUnavailable: 'Saat ini tiket tidak bisa dipesan di sini.',
+  savedSeatsNotRestored:
+      'Kursi pilihan Anda sebelumnya tidak bisa dipulihkan. Silakan pilih lagi.',
   allSetTitle: 'Semua beres',
   confirmedAndOnWay: 'terkonfirmasi. Konfirmasi sedang dikirim.',
   backToMap: 'Kembali ke denah',

@@ -181,6 +181,11 @@ class SeatLayerPickerStrings {
         SeatLayerStringTokens.maintenancePausedShortly,
     this.guestsOnly = SeatLayerStringTokens.guestsOnly,
     this.guestChoiceClosed = SeatLayerStringTokens.guestChoiceClosed,
+    this.tooManyAttempts = SeatLayerStringTokens.tooManyAttempts,
+    this.seatHeldForRenewal = SeatLayerStringTokens.seatHeldForRenewal,
+    this.seatUnavailable = SeatLayerStringTokens.seatUnavailable,
+    this.eventUnavailable = SeatLayerStringTokens.eventUnavailable,
+    this.savedSeatsNotRestored = SeatLayerStringTokens.savedSeatsNotRestored,
     this.labelNoLongerAvailable = _defaultLabelNoLongerAvailable,
     this.labelsNoLongerAvailable = _defaultLabelsNoLongerAvailable,
     this.couldNotFindSeatsTogether = _defaultCouldNotFindSeatsTogether,
@@ -974,6 +979,22 @@ class SeatLayerPickerStrings {
 
   /// "Seat choice isn’t open right now."
   final String guestChoiceClosed;
+
+  /// "Too many attempts. Wait a moment and try again."
+  final String tooManyAttempts;
+
+  /// "One of these seats is kept for a season ticket holder who can still renew
+  /// it. Choose another seat."
+  final String seatHeldForRenewal;
+
+  /// "This seat isn’t available." — a seat that is not sold here.
+  final String seatUnavailable;
+
+  /// "Tickets can’t be booked here right now."
+  final String eventUnavailable;
+
+  /// "Your earlier seats could not be restored. Please choose again."
+  final String savedSeatsNotRestored;
 
   /// "You’re all set" — the booked overlay's title.
   final String allSetTitle;

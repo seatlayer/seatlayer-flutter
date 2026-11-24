@@ -321,6 +321,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
       'Rezervarea este întreruptă câteva minute pentru mentenanță. Încercați din nou în curând.',
   guestsOnly: 'Acest eveniment este pentru invitați.',
   guestChoiceClosed: 'Alegerea locurilor nu este deschisă acum.',
+  tooManyAttempts: 'Prea multe încercări. Așteaptă puțin și încearcă din nou.',
+  seatHeldForRenewal:
+      'Unul dintre aceste locuri este păstrat pentru un abonat care îl mai poate reînnoi. Alege alt loc.',
+  seatUnavailable: 'Acest loc nu este disponibil.',
+  eventUnavailable: 'Momentan nu se pot rezerva bilete aici.',
+  savedSeatsNotRestored:
+      'Locurile alese anterior nu au putut fi restaurate. Vă rugăm să alegeți din nou.',
   allSetTitle: 'Totul e pregătit',
   confirmedAndOnWay: 'confirmat. Confirmarea este pe drum.',
   backToMap: 'Înapoi la hartă',

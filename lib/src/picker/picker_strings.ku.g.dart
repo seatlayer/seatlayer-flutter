@@ -295,6 +295,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
       'Rezervasyon ji bo lênihêrînê çend deqeyan hatiye rawestandin. Ji kerema xwe piştî demekê dîsa biceribîne.',
   guestsOnly: 'Ev çalakî ji bo mêvanên vexwendî ye.',
   guestChoiceClosed: 'Hilbijartina cihan niha ne vekirî ye.',
+  tooManyAttempts:
+      'Gelek ceribandin hatin kirin. Hinekî bisekine û dîsa biceribîne.',
+  seatHeldForRenewal:
+      'Yek ji van cihan ji bo xwediyê bilêta demsalê tê girtin ku hîn dikare wê nû bike. Cihekî din hilbijêre.',
+  seatUnavailable: 'Ev cih ne berdest e.',
+  eventUnavailable: 'Niha li vir bilêt nayên rezervekirin.',
+  savedSeatsNotRestored:
+      'Kursiyên te yên berê nehatin vegerandin. Ji kerema xwe dîsa hilbijêre.',
   allSetTitle: 'Her tişt amade ye',
   confirmedAndOnWay: 'hat piştrastkirin. Piştrastkirin di rê de ye.',
   backToMap: 'Vegere nexşeyê',

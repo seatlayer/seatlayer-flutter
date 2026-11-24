@@ -317,6 +317,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsSr = SeatLayerPickerStrings(
       'Резервација је паузирана на неколико минута због одржавања. Покушајте поново ускоро.',
   guestsOnly: 'Овај догађај је за позване госте.',
   guestChoiceClosed: 'Избор места тренутно није отворен.',
+  tooManyAttempts: 'Превише покушаја. Сачекајте тренутак и покушајте поново.',
+  seatHeldForRenewal:
+      'Једно од ових места чува се за власника сезонске улазнице који још може да је обнови. Изаберите друго место.',
+  seatUnavailable: 'Ово место није доступно.',
+  eventUnavailable: 'Улазнице се тренутно не могу резервисати овде.',
+  savedSeatsNotRestored:
+      'Ваша претходна места није било могуће вратити. Изаберите поново.',
   allSetTitle: 'Све је спремно',
   confirmedAndOnWay: 'потврђено. Потврда је на путу.',
   backToMap: 'Назад на план',

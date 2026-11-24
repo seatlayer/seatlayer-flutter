@@ -288,6 +288,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
       'मेंटेनेंस के कारण बुकिंग कुछ मिनटों के लिए रुकी है। कृपया थोड़ी देर बाद फिर कोशिश करें।',
   guestsOnly: 'यह इवेंट आमंत्रित मेहमानों के लिए है।',
   guestChoiceClosed: 'सीट चुनना अभी खुला नहीं है।',
+  tooManyAttempts: 'बहुत ज़्यादा कोशिशें हुईं। थोड़ा रुककर फिर कोशिश करें।',
+  seatHeldForRenewal:
+      'इनमें से एक सीट ऐसे सीज़न टिकट होल्डर के लिए रखी गई है जो अभी इसे रिन्यू कर सकते हैं। कोई दूसरी सीट चुनें।',
+  seatUnavailable: 'यह सीट उपलब्ध नहीं है।',
+  eventUnavailable: 'अभी यहाँ टिकट बुक नहीं किए जा सकते।',
+  savedSeatsNotRestored:
+      'आपकी पहले चुनी सीटें वापस नहीं आ सकीं। कृपया फिर से चुनें।',
   allSetTitle: 'सब तैयार है',
   confirmedAndOnWay: 'की बुकिंग कन्फ़र्म हो गई है। कन्फ़र्मेशन भेजा जा रहा है।',
   backToMap: 'मैप पर वापस',

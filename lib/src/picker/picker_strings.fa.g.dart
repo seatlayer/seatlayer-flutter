@@ -289,6 +289,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
       'رزرو برای چند دقیقه به‌دلیل نگهداری متوقف شده است. لطفاً کمی بعد دوباره تلاش کنید.',
   guestsOnly: 'این رویداد برای مهمانان دعوت‌شده است.',
   guestChoiceClosed: 'انتخاب صندلی در حال حاضر باز نیست.',
+  tooManyAttempts:
+      'تعداد تلاش‌ها بیش از حد مجاز است. کمی صبر کنید و دوباره تلاش کنید.',
+  seatHeldForRenewal:
+      'یکی از این صندلی‌ها برای دارندهٔ بلیت فصلی نگه داشته شده است که هنوز می‌تواند آن را تمدید کند. صندلی دیگری انتخاب کنید.',
+  seatUnavailable: 'این صندلی در دسترس نیست.',
+  eventUnavailable: 'در حال حاضر امکان رزرو بلیت در اینجا وجود ندارد.',
+  savedSeatsNotRestored:
+      'صندلی‌های قبلی شما بازیابی نشد. لطفاً دوباره انتخاب کنید.',
   allSetTitle: 'همه‌چیز آماده است',
   confirmedAndOnWay: 'تأیید شد. تأییدیه در راه است.',
   backToMap: 'بازگشت به نقشه',

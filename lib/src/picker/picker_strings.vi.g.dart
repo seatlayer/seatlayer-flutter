@@ -209,6 +209,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
       'Hệ thống tạm dừng đặt vé vài phút để bảo trì. Vui lòng thử lại sau ít phút.',
   guestsOnly: 'Sự kiện này dành cho khách mời.',
   guestChoiceClosed: 'Hiện không mở chọn chỗ ngồi.',
+  tooManyAttempts:
+      'Bạn đã thử quá nhiều lần. Vui lòng chờ một chút rồi thử lại.',
+  seatHeldForRenewal:
+      'Một trong các ghế này đang được giữ cho người có vé cả mùa vẫn còn có thể gia hạn. Hãy chọn ghế khác.',
+  seatUnavailable: 'Ghế này không khả dụng.',
+  eventUnavailable: 'Hiện chưa thể đặt vé tại đây.',
+  savedSeatsNotRestored:
+      'Không khôi phục được các ghế bạn chọn trước đó. Vui lòng chọn lại.',
   allSetTitle: 'Đã xong',
   confirmedAndOnWay: 'đã được xác nhận. Email xác nhận đang được gửi đến bạn.',
   backToMap: 'Quay lại sơ đồ',

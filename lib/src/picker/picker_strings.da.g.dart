@@ -294,6 +294,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
       'Booking er sat på pause i et par minutter på grund af vedligeholdelse. Prøv igen om lidt.',
   guestsOnly: 'Dette arrangement er for inviterede gæster.',
   guestChoiceClosed: 'Valg af pladser er ikke åbent lige nu.',
+  tooManyAttempts: 'For mange forsøg. Vent et øjeblik, og prøv igen.',
+  seatHeldForRenewal:
+      'En af disse pladser er reserveret til en sæsonkortholder, som stadig kan forny den. Vælg en anden plads.',
+  seatUnavailable: 'Denne plads er ikke tilgængelig.',
+  eventUnavailable: 'Der kan ikke bestilles billetter her lige nu.',
+  savedSeatsNotRestored:
+      'Dine tidligere pladser kunne ikke gendannes. Vælg venligst igen.',
   allSetTitle: 'Så er alt klar',
   confirmedAndOnWay: 'bekræftet. En bekræftelse er på vej.',
   backToMap: 'Tilbage til oversigten',

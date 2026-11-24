@@ -291,6 +291,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
       'A foglalás karbantartás miatt néhány percig szünetel. Próbálja újra hamarosan.',
   guestsOnly: 'Ez az esemény meghívott vendégeknek szól.',
   guestChoiceClosed: 'A helyválasztás most nincs nyitva.',
+  tooManyAttempts:
+      'Túl sok próbálkozás történt. Várjon egy kicsit, majd próbálja újra.',
+  seatHeldForRenewal:
+      'Az egyik hely egy szezonbérletesnek van fenntartva, aki még megújíthatja a bérletét. Válassz másik helyet.',
+  seatUnavailable: 'Ez a hely nem elérhető.',
+  eventUnavailable: 'Jegyet most nem lehet itt foglalni.',
+  savedSeatsNotRestored:
+      'A korábbi helyeit nem sikerült visszaállítani. Kérjük, válasszon újra.',
   allSetTitle: 'Minden készen áll',
   confirmedAndOnWay: 'megerősítve. A visszaigazolás úton van.',
   backToMap: 'Vissza az üléstervhez',

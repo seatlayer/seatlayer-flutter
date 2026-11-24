@@ -304,6 +304,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
       'ההזמנה מושהית לכמה דקות לצורך תחזוקה. נסו שוב בעוד רגע.',
   guestsOnly: 'האירוע הזה מיועד לאורחים מוזמנים.',
   guestChoiceClosed: 'בחירת המקומות לא פתוחה כרגע.',
+  tooManyAttempts: 'יותר מדי ניסיונות. המתן/י רגע ונסה/י שוב.',
+  seatHeldForRenewal:
+      'אחד המושבים האלה שמור לבעל כרטיס עונה שעדיין יכול לחדש אותו. בחרו מושב אחר.',
+  seatUnavailable: 'המושב הזה לא זמין.',
+  eventUnavailable: 'לא ניתן להזמין כאן כרטיסים כרגע.',
+  savedSeatsNotRestored:
+      'לא ניתן היה לשחזר את המושבים הקודמים שלך. יש לבחור שוב.',
   allSetTitle: 'הכול מוכן',
   confirmedAndOnWay: 'אושר. האישור בדרך אליכם.',
   backToMap: 'חזרה למפה',

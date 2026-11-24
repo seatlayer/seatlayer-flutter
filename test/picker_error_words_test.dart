@@ -80,15 +80,65 @@ void main() {
         'hold_unavailable',
         'invalid_selection',
         'release_exhausted',
-        'seat_held_for_renewal',
-        'not_for_sale',
+        'allocation_exhausted',
         'hold_quantity_exceeded',
-        'rate_limited',
-        'hold_not_found',
         'a_code_from_next_year',
       ]) {
         expect(_said(_refused(code)), _english.seatsJustTaken, reason: code);
       }
+      for (final (code, said) in <(String, String)>[
+        ('seat_held_for_renewal', _english.seatHeldForRenewal),
+        ('channel_access_denied', _english.accessUnverifiedCopy),
+        ('not_for_sale', _english.seatUnavailable),
+        ('rate_limited', _english.tooManyAttempts),
+        ('hold_not_active', _english.holdExpired),
+        ('hold_not_found', _english.savedSeatsNotRestored),
+        ('legacy_hold_requires_restart', _english.savedSeatsNotRestored),
+        for (final code in <String>[
+          'order_edit_in_progress',
+          'event_not_found',
+          'key_not_found',
+          'key_revoked',
+          'mode_mismatch',
+          'org_mismatch',
+          'credit_limit_reached',
+          'forbidden',
+          'not_found',
+        ])
+          (code, _english.eventUnavailable),
+      ]) {
+        expect(_said(_refused(code)), said, reason: code);
+        if (code != 'not_for_sale') {
+          expect(_said(_refused(code), command: 'picker.bestAvailable'), said,
+              reason: 'best available, $code');
+        }
+        if (code == 'rate_limited') continue;
+        // A removal and more time say their own.
+        expect(
+          _said(_refused(code), command: 'picker.removeCartLine', label: 'A-1'),
+          _english.couldNotRemoveLabel('A-1'),
+          reason: 'removal, $code',
+        );
+        expect(
+          _said(_refused(code), command: 'picker.extendHold'),
+          _english.couldNotAddMoreTime,
+          reason: 'more time, $code',
+        );
+      }
+      // A named seat is named, whatever the reason it is not sold.
+      expect(
+        _said(_refused('not_for_sale', details: <String, Object?>{
+          'conflicts': <Object?>[
+            <String, Object?>{'label': 'A-12'},
+          ],
+        })),
+        'A-12 is no longer available. Choose another seat.',
+      );
+      // Outside a hold a missing thing is not about tickets.
+      expect(
+        _said(_refused('not_found'), command: 'picker.zoomToFit'),
+        isNull,
+      );
       expect(_said(_refused('command_failed', status: 404)),
           _english.seatsJustTaken);
     });
@@ -253,6 +303,11 @@ void main() {
         'maintenancePausedShortly',
         'guestsOnly',
         'guestChoiceClosed',
+        'tooManyAttempts',
+        'seatHeldForRenewal',
+        'seatUnavailable',
+        'eventUnavailable',
+        'savedSeatsNotRestored',
       ]) {
         expect(entry[key], isA<String>(), reason: '$key in $tag');
         if (tag != 'en') {

@@ -290,6 +290,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
       'Broneerimine on hoolduse tõttu mõneks minutiks peatatud. Proovi varsti uuesti.',
   guestsOnly: 'See üritus on kutsutud külalistele.',
   guestChoiceClosed: 'Kohtade valik ei ole praegu avatud.',
+  tooManyAttempts: 'Liiga palju katseid. Oodake hetk ja proovige uuesti.',
+  seatHeldForRenewal:
+      'Üks neist kohtadest on hoitud hooajapileti omanikule, kes saab selle veel pikendada. Vali muu koht.',
+  seatUnavailable: 'See koht pole saadaval.',
+  eventUnavailable: 'Pileteid ei saa siin praegu broneerida.',
+  savedSeatsNotRestored:
+      'Teie varasemaid kohti ei õnnestunud taastada. Palun valige uuesti.',
   allSetTitle: 'Kõik on valmis',
   confirmedAndOnWay: 'kinnitatud. Kinnitus on teel.',
   backToMap: 'Tagasi plaanile',

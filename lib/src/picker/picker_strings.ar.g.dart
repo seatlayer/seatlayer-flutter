@@ -373,6 +373,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
       'الحجز متوقف مؤقتًا لبضع دقائق للصيانة. يُرجى المحاولة مجددًا بعد قليل.',
   guestsOnly: 'هذه الفعالية مخصصة للضيوف المدعوين.',
   guestChoiceClosed: 'اختيار المقاعد غير متاح الآن.',
+  tooManyAttempts: 'محاولات كثيرة جدًا. انتظر لحظة وأعد المحاولة.',
+  seatHeldForRenewal:
+      'أحد هذه المقاعد محجوز لحامل تذكرة موسمية لا يزال بإمكانه التجديد. اختر مقعدًا آخر.',
+  seatUnavailable: 'هذا المقعد غير متاح.',
+  eventUnavailable: 'لا يمكن حجز التذاكر هنا حاليًا.',
+  savedSeatsNotRestored:
+      'تعذّرت استعادة مقاعدك السابقة. يرجى الاختيار مرة أخرى.',
   allSetTitle: 'كل شيء جاهز',
   confirmedAndOnWay: 'تم التأكيد. رسالة التأكيد في طريقها إليك.',
   backToMap: 'العودة إلى الخريطة',

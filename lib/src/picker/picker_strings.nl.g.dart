@@ -302,6 +302,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
       'Boeken is enkele minuten gepauzeerd voor onderhoud. Probeer het zo meteen opnieuw.',
   guestsOnly: 'Dit evenement is voor genodigden.',
   guestChoiceClosed: 'Plaatsen kiezen is nu niet mogelijk.',
+  tooManyAttempts: 'Te veel pogingen. Wacht even en probeer het opnieuw.',
+  seatHeldForRenewal:
+      'Een van deze plaatsen is gereserveerd voor een houder van een seizoensticket die hem nog kan verlengen. Kies een andere plaats.',
+  seatUnavailable: 'Deze plaats is niet beschikbaar.',
+  eventUnavailable: 'Hier kunnen nu geen tickets worden geboekt.',
+  savedSeatsNotRestored:
+      'Je eerdere stoelen konden niet worden hersteld. Kies ze opnieuw.',
   allSetTitle: 'Je bent klaar',
   confirmedAndOnWay: 'bevestigd. Je bevestiging is onderweg.',
   backToMap: 'Terug naar plattegrond',

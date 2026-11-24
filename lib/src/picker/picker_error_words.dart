@@ -141,6 +141,8 @@ PickerErrorWords? pickerErrorWords(
       return line(strings.maintenancePaused(minutes < 1 ? 1 : minutes));
     case 'sl_timeout' || 'host_timeout':
       return line(strings.checkConnection);
+    case 'rate_limited':
+      return line(strings.tooManyAttempts);
     case 'guests_only':
       return line(strings.guestsOnly);
     case 'guest_choice_closed':
@@ -182,6 +184,33 @@ PickerErrorWords? pickerErrorWords(
     return line(strings.salesClosedToast);
   }
 
+  // A removal and more time have their own sentence for every refusal; what
+  // else was asked for is refused for a reason the code names.
+  if (command != 'picker.removeCartLine' && command != 'picker.extendHold') {
+    switch (code) {
+      case 'seat_held_for_renewal':
+        return line(strings.seatHeldForRenewal);
+      case 'channel_access_denied':
+        return line(strings.accessUnverifiedCopy);
+      case 'hold_not_active':
+        return line(strings.holdExpired);
+      case 'hold_not_found' || 'legacy_hold_requires_restart':
+        return line(strings.savedSeatsNotRestored);
+      case 'order_edit_in_progress' ||
+            'event_not_found' ||
+            'key_not_found' ||
+            'key_revoked' ||
+            'mode_mismatch' ||
+            'org_mismatch' ||
+            'credit_limit_reached':
+        return line(strings.eventUnavailable);
+      case 'forbidden' || 'not_found'
+          when command == 'picker.bestAvailable' ||
+              _holdCommands.contains(command):
+        return line(strings.eventUnavailable);
+    }
+  }
+
   if (command == 'picker.bestAvailable') {
     if (!answered) return null;
     return line(switch (code) {
@@ -220,6 +249,7 @@ PickerErrorWords? pickerErrorWords(
     );
   }
   if (code == 'sold_out') return line(strings.ticketTypeSoldOut);
+  if (code == 'not_for_sale') return line(strings.seatUnavailable);
   if (_takenCodes.contains(code) ||
       (answered && _holdCommands.contains(command))) {
     return line(strings.seatsJustTaken);
@@ -234,8 +264,6 @@ const Set<String> _takenCodes = <String>{
   'hold_unavailable',
   'invalid_selection',
   'not_enough_together',
-  'not_for_sale',
   'release_closed',
   'release_exhausted',
-  'seat_held_for_renewal',
 };
