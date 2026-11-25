@@ -32,6 +32,7 @@ import 'picker_wide_panel.dart';
 import 'picker_dock_bar.dart';
 import 'picker_floor_strip.dart';
 import 'picker_floor_strip_touch.dart';
+import 'picker_phone_top.dart';
 import 'picker_haptics.dart';
 import 'picker_camera_actions.dart';
 import 'picker_models.dart';
@@ -49,21 +50,9 @@ import 'picker_section_navigator.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 
-/// The gap between two stacked pieces of map chrome, and how far a floating
-/// control stands off the map's edge — one pair for every anchor region.
-const double _badgeGap = SeatLayerSizeTokens.mapAnchorGap;
-const double _mapInset = SeatLayerSizeTokens.mapAnchorInset;
-
-/// Where the phone's map chrome starts, below the map's own top edge.
-const double _railTop = 8;
-
-/// How much of the map the immersive scene's own chrome is given when
-/// nothing else stands in the map's top corners.
-///
-/// The prices are a row above the map rather than on it; only the Map/3D
-/// control shares the map's top edge, and when it does the scene's chrome
-/// steps below it — see `_immersiveTopInset`.
-const double _venue3DRestingInset = _mapInset;
+const double _badgeGap = PickerPhoneTop.gap;
+const double _mapInset = PickerPhoneTop.inset;
+const double _railTop = PickerPhoneTop.railTop;
 
 /// How much closer to the foot the card rests in 3D: ten, not fourteen.
 const double _cardLift3D = seatLayerConfirmCardRestInset -
@@ -246,7 +235,7 @@ class _SeatLayerPickerAdaptiveLayoutState
         // give back a rail that is never clipped under the control.
         final viewModeControlUp =
             !wide && chrome.showMapControls && !panoramaUp;
-        final immersiveTopInset = _immersiveTopInset(
+        final immersiveTopInset = PickerPhoneTop.immersiveTopInset(
           viewModeControl: viewModeControlUp,
         );
         final map = _part(
@@ -389,7 +378,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                             : 0,
                         // Under the Map/3D control, or the floor strip below.
                         topInset: floorStripUp
-                            ? _floorStripTop(
+                            ? PickerPhoneTop.floorStripTop(
                                     viewModeControl: viewModeControlUp) +
                                 floorStripHeight +
                                 _badgeGap
@@ -773,7 +762,7 @@ class _SeatLayerPickerAdaptiveLayoutState
         // the test badge and the dock are not — they are stacked on the map —
         // so a section framed to the whole surface lands partly underneath
         // them unless the runtime is told.
-        final topBand = _topBand(
+        final topBand = PickerPhoneTop.topBand(
           panorama: panoramaUp,
           testBadge: state.isTestEvent,
           venue3D: venue3DUp,
@@ -783,7 +772,7 @@ class _SeatLayerPickerAdaptiveLayoutState
           floorStrip: floorStripUp,
           floorStripHeight: floorStripHeight,
         );
-        final bottomBand = _bottomBand(
+        final bottomBand = PickerPhoneTop.bottomBand(
           chrome: chrome,
           seated: targeted,
           dockLift: dockLift,
@@ -882,7 +871,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                       // map's own edge.
                       if (floorStripUp && !venue3DUp)
                         Positioned(
-                          top: _floorStripTop(
+                          top: PickerPhoneTop.floorStripTop(
                               viewModeControl: viewModeControlUp) - stripRoom,
                           left: 0,
                           right: 0,
@@ -897,7 +886,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                       // corner; the badge steps below that pill rather than under
                       // it, and only while the pill is actually drawn.
                       PositionedDirectional(
-                        top: _testBadgeTop(
+                        top: PickerPhoneTop.testBadgeTop(
                           venue3D: venue3DUp,
                           backPill: backPillUp,
                           backPillInset: immersiveTopInset,
@@ -1120,130 +1109,6 @@ class _SeatLayerPickerAdaptiveLayoutState
         child: themed,
       ),
     );
-  }
-
-  /// How much of the map's top the phone's chrome is standing on.
-  ///
-  /// The rail of prices is a row above the map rather than a band on it, so it
-  /// is deliberately not counted. What is left standing on the map is the
-  /// floor strip and, under it, the test badge — and a test event is not a
-  /// rare case, it is what every integration sees first. In the immersive
-  /// scene `‹ Back to venue` takes the strip's place, and only while the scene
-  /// is aimed at a seat.
-  static double _topBand({
-    required bool panorama,
-    required bool testBadge,
-    required bool venue3D,
-    required bool backPill,
-    required double backPillInset,
-    required bool viewModeControl,
-    required bool floorStrip,
-    required double floorStripHeight,
-  }) {
-    if (panorama) return 0;
-    // The Map/3D control shares the map's top line with the badge, so the
-    // band is whichever of the two reaches lower.
-    final control = viewModeControl
-        ? _railTop + SeatLayerPickerViewModeControl.height
-        : 0.0;
-    final above = _aboveBadgeBand(
-      venue3D: venue3D,
-      backPill: backPill,
-      backPillInset: backPillInset,
-      viewModeControl: viewModeControl,
-      floorStrip: floorStrip,
-      floorStripHeight: floorStripHeight,
-    );
-    if (!testBadge) return above > control ? above : control;
-    final badge = _testBadgeTop(
-          venue3D: venue3D,
-          backPill: backPill,
-          backPillInset: backPillInset,
-          viewModeControl: viewModeControl,
-          floorStrip: floorStrip,
-          floorStripHeight: floorStripHeight,
-        ) +
-        SeatLayerPickerTestModeIndicator.compactHeight;
-    return badge > control ? badge : control;
-  }
-
-  /// Where the immersive scene's own chrome starts.
-  ///
-  /// The scene's rotate control and its way back both sit on the map's top
-  /// line; when the Map/3D control is already there they step under it.
-  static double _immersiveTopInset({required bool viewModeControl}) =>
-      viewModeControl
-          ? _railTop + SeatLayerPickerViewModeControl.height + _badgeGap
-          : _venue3DRestingInset;
-
-  /// The band the floor strip, or the scene's way back, occupies on its own.
-  static double _aboveBadgeBand({
-    required bool venue3D,
-    required bool backPill,
-    required double backPillInset,
-    required bool viewModeControl,
-    required bool floorStrip,
-    required double floorStripHeight,
-  }) {
-    if (venue3D) {
-      return backPill ? backPillInset + SeatLayerVenue3D.backPillHeight : 0;
-    }
-    if (floorStrip) {
-      return _floorStripTop(viewModeControl: viewModeControl) +
-          floorStripHeight;
-    }
-    return 0;
-  }
-
-  /// Where the floor strip starts: the map's top line, or under the Map/3D
-  /// control when that is on the same line — the strip runs the map's full
-  /// width and the two would otherwise be drawn over each other.
-  static double _floorStripTop({required bool viewModeControl}) =>
-      viewModeControl
-          ? _railTop + SeatLayerPickerViewModeControl.height + _badgeGap
-          : _railTop;
-
-  /// Where the test-mode badge sits, which is one line under whatever is
-  /// above it — or at the map's own top corner when nothing is.
-  static double _testBadgeTop({
-    required bool venue3D,
-    required bool backPill,
-    required double backPillInset,
-    required bool viewModeControl,
-    required bool floorStrip,
-    required double floorStripHeight,
-  }) {
-    final above = _aboveBadgeBand(
-      venue3D: venue3D,
-      backPill: backPill,
-      backPillInset: backPillInset,
-      viewModeControl: viewModeControl,
-      floorStrip: floorStrip,
-      floorStripHeight: floorStripHeight,
-    );
-    return above == 0 ? _railTop : above + _badgeGap;
-  }
-
-  /// How much of the map's bottom the phone's chrome is standing on.
-  ///
-  /// The dock on the map — zero unless a host asked for one, since the phone
-  /// mounts none — and in the scene the seat deck above it, which is taller
-  /// once the buyer is sitting somewhere because it grows a caption. The
-  /// header and the cart sheet are rows of the same Column as the map, so the
-  /// map surface already ends where they begin and they are correctly not
-  /// reported.
-  static double _bottomBand({
-    required SeatLayerPickerChromeOptions chrome,
-    required bool seated,
-    required double dockLift,
-    required bool venue3D,
-  }) {
-    // `dockLift` is already zero unless a dock is really drawn.
-    final dock = dockLift;
-    if (!venue3D || !chrome.showVenue3DChrome) return dock;
-    final deck =
-        _mapInset + dockLift + SeatLayerVenue3D.seatDeckHeight(seated: seated);
-    return deck > dock ? deck : dock;
   }
 
   /// Whether the picker still has a rung of its own to descend.
