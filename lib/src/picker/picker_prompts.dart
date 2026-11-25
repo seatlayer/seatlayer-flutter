@@ -12,6 +12,8 @@ import 'package:flutter/material.dart';
 
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_short_map_scroll.dart';
+import 'picker_standing_amounts.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -155,15 +157,16 @@ class _SeatLayerPickerGeneralAdmissionPromptState
     final area = widget.area ?? controller.state.generalAdmissionCandidate;
     if (area == null) return const SizedBox.shrink();
     _tierId ??= area.tiers?.firstOrNull?.id;
-    final selectedCount = controller.state.snapshot?.ticketCount ?? 0;
-    final remainingCap =
-        (controller.state.snapshot?.maxSelection ?? 10) - selectedCount;
-    final max = [area.available ?? remainingCap, remainingCap]
-        .where((value) => value > 0)
-        .fold<int>(remainingCap, (a, b) => a < b ? a : b);
+    final snapshot = controller.state.snapshot;
+    final live = seatLayerLiveStandingArea(area, snapshot);
+    final amounts = seatLayerStandingAmounts(live, snapshot);
+    final quantity =
+        amounts == null ? 0 : _quantity.clamp(amounts.minimum, amounts.maximum);
     return _PromptSheet(
       title: area.label ?? strings.generalAdmission,
-      subtitle: strings.placesAvailable(area.available ?? 0),
+      subtitle: strings.placesAvailable(
+        seatLayerStandingPlacesFree(live, snapshot) ?? 0,
+      ),
       children: <Widget>[
         if (area.tiers?.isNotEmpty == true)
           Padding(
@@ -187,9 +190,9 @@ class _SeatLayerPickerGeneralAdmissionPromptState
           ),
         _StepperLabel(text: strings.chooseTickets, theme: theme),
         _PromptStepper(
-          value: _quantity,
-          canDecrease: _quantity > 1,
-          canIncrease: _quantity < max,
+          value: quantity,
+          canDecrease: amounts != null && quantity > amounts.minimum,
+          canIncrease: amounts != null && quantity < amounts.maximum,
           decreaseLabel: strings.fewerTickets,
           increaseLabel: strings.moreTickets,
           onChanged: (next) => setState(() => _quantity = next),
@@ -201,14 +204,14 @@ class _SeatLayerPickerGeneralAdmissionPromptState
             controller.dismissGeneralAdmissionCandidate();
             widget.onCancel?.call();
           },
-          onConfirm: max < 1 ||
+          onConfirm: amounts == null ||
                   controller.state.isBusy ||
                   !controller.state.canMutateInventory
               ? null
               : () => ignorePickerAction(() async {
                     await controller.setGeneralAdmissionQuantity(
                       areaId: area.id,
-                      quantitiesByTier: <String?, int>{_tierId: _quantity},
+                      quantitiesByTier: <String?, int>{_tierId: quantity},
                     );
                     await widget.onConfirmed?.call(area);
                   }()),
@@ -376,6 +379,7 @@ class _PromptActions extends StatelessWidget {
               onPressed: onDismiss,
               child: Text(
                 dismissLabel,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                     fontWeight: seatLayerBoldWeight(context, FontWeight.w800)),
               ),
@@ -393,6 +397,7 @@ class _PromptActions extends StatelessWidget {
               onPressed: onConfirm,
               child: Text(
                 confirmLabel,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                     fontWeight: seatLayerBoldWeight(context, FontWeight.w800)),
               ),
@@ -430,37 +435,44 @@ class _PromptSheet extends StatelessWidget {
           // at the top, the way every sheet on a phone arrives.
           borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
           clipBehavior: Clip.antiAlias,
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: theme.text,
-                      fontSize: 22,
-                      height: 1.15,
-                      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
-                      fontFamily: theme.fontFamily,
+          // Where it does not fit it opens at its foot: the number and the
+          // buttons are there, and the name is a scroll away.
+          child: PickerShortMapScroll(
+            reverse: true,
+            roomUnder: 18 + MediaQuery.paddingOf(context).bottom,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: theme.text,
+                        fontSize: 22,
+                        height: 1.15,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w800),
+                        fontFamily: theme.fontFamily,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 7),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: theme.mutedText,
-                      fontSize: 13,
-                      height: 1.45,
-                      fontFamily: theme.fontFamily,
+                    const SizedBox(height: 7),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: theme.mutedText,
+                        fontSize: 13,
+                        height: 1.45,
+                        fontFamily: theme.fontFamily,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  ...children,
-                ],
+                    const SizedBox(height: 16),
+                    ...children,
+                  ],
+                ),
               ),
             ),
           ),

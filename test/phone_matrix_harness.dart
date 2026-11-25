@@ -106,6 +106,9 @@ enum PhoneState {
   /// The cart sheet open over three seats.
   cartOpen,
 
+  /// A box tapped: how many places, in a range.
+  standing,
+
   /// The 3D venue under the runtime's default map gestures: no Rotate / Move.
   venue3DMap,
 
@@ -136,6 +139,15 @@ Map<String, Object?> _confirmedCart(int count) {
   return snapshot;
 }
 
+const Map<String, Object?> _box = <String, Object?>{
+  'id': 'box-1',
+  'label': 'Box 1',
+  'available': 6,
+  'bookingMode': 'variable',
+  'minOccupancy': 2,
+  'maxOccupancy': 6,
+};
+
 Map<String, Object?> _snapshotFor(PhoneState state) {
   switch (state) {
     case PhoneState.ready:
@@ -146,6 +158,13 @@ Map<String, Object?> _snapshotFor(PhoneState state) {
       return _confirmedCart(2);
     case PhoneState.cartOpen:
       return _confirmedCart(3);
+    case PhoneState.standing:
+      final snapshot =
+          pickerSnapshot(withSelection: false, sections: pickerSections());
+      (snapshot['catalog']! as Map<String, Object?>)['gaAreas'] = <Object?>[
+        _box,
+      ];
+      return snapshot;
     case PhoneState.venue3DMap:
     case PhoneState.venue3DClassic:
       final snapshot = _confirmedCart(1);
@@ -279,6 +298,10 @@ Future<SeatLayerPickerStrings> pumpPhone(
   }
   map.emit(_snapshotFor(state));
   await pumpToRest(tester);
+  if (state == PhoneState.standing) {
+    map.emitStandingTap(GAArea.fromJson(_box)!);
+    await pumpToRest(tester);
+  }
   if (state == PhoneState.cartOpen) {
     await tester.tap(find.byIcon(Icons.keyboard_arrow_up_rounded).first);
     await pumpToRest(tester);

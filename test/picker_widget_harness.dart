@@ -225,6 +225,15 @@ final class FakePickerMap extends SeatLayerController {
         ),
       );
 
+  final StreamController<GAArea> _standingTaps =
+      StreamController<GAArea>.broadcast();
+
+  @override
+  Stream<GAArea> get onGAClick => _standingTaps.stream;
+
+  /// Report a tap on a standing area.
+  void emitStandingTap(GAArea area) => _standingTaps.add(area);
+
   /// Push one arbitrary bridge event, for the surfaces that are not snapshots.
   void emitEvent(String name, Object? payload, {int sequence = 1}) => _events
       .add(EventSignal(name: name, payload: payload, sequence: sequence));
@@ -238,6 +247,7 @@ final class FakePickerMap extends SeatLayerController {
     unawaited(_events.close());
     unawaited(_ready.close());
     unawaited(_conflicts.close());
+    unawaited(_standingTaps.close());
     super.dispose();
   }
 }

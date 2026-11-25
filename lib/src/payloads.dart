@@ -713,6 +713,11 @@ class GAArea {
     this.price,
     this.currency,
     this.tiers,
+    this.bookingMode,
+    this.minOccupancy,
+    this.maxOccupancy,
+    this.wheelchairPlaces,
+    this.wheelchairAvailable,
   });
 
   final String id;
@@ -723,6 +728,17 @@ class GAArea {
   final double? price;
   final String? currency;
   final List<CategoryTier>? tiers;
+
+  /// How an area is sold when it is one box for one party: `whole` takes all
+  /// its places, `variable` a party from [minOccupancy] to [maxOccupancy].
+  /// Null for an area sold per person.
+  final String? bookingMode;
+  final int? minOccupancy;
+  final int? maxOccupancy;
+
+  /// The area's wheelchair places, and how many of them are free.
+  final int? wheelchairPlaces;
+  final int? wheelchairAvailable;
 
   static GAArea? fromJson(Object? v) {
     final id = jStr(jGet(v, 'id'));
@@ -737,6 +753,11 @@ class GAArea {
       price: jDouble(jGet(v, 'price')),
       currency: jStr(jGet(v, 'currency')),
       tiers: tiers == null ? null : jListOf(tiers, CategoryTier.fromJson),
+      bookingMode: jStr(jGet(v, 'bookingMode')),
+      minOccupancy: jInt(jGet(v, 'minOccupancy')),
+      maxOccupancy: jInt(jGet(v, 'maxOccupancy')),
+      wheelchairPlaces: jInt(jGet(v, 'wheelchairPlaces')),
+      wheelchairAvailable: jInt(jGet(v, 'wheelchairAvailable')),
     );
   }
 }
