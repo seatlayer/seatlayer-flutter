@@ -45,7 +45,7 @@ mixin _PickerStandingPlaces
             throw const SeatLayerError.bridge(
               BridgeErrorPayload(
                 code: 'hold_unavailable',
-                message: 'The standing places could not be held.',
+                message: 'picker.holdGA took no places.',
               ),
             );
           }

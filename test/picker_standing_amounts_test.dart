@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/seatlayer.dart';
 import 'package:seatlayer/src/picker/picker_standing_amounts.dart';
+import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 
 import 'fake_webview_platform.dart';
 import 'picker_test_fixture.dart';
@@ -49,7 +50,7 @@ SeatLayerStandingAmounts? _amounts(
     );
 
 void main() {
-  useFakeWebViewPlatform();
+  setUp(useFakeWebViewPlatform);
 
   group('what one standing area or box can be asked for', () {
     test('reads the box and wheelchair facts the page sends', () {
@@ -295,6 +296,38 @@ void main() {
                 find.widgetWithText(FilledButton, _strings.addTickets))
             .onPressed,
         isNull,
+      );
+    });
+
+    for (final short in <bool>[true, false]) {
+      testWidgets(
+          short
+              ? 'keeps its buttons clear of the cart handle where it scrolls'
+              : 'takes no room under its buttons where it fits',
+          (tester) async {
+        await tester.binding.setSurfaceSize(
+          short ? const Size(568, 320) : const Size(375, 812),
+        );
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        tester.platformDispatcher.textScaleFactorTestValue = short ? 1.6 : 1;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        await open(tester, area: box);
+        final prompt = find.byType(SeatLayerPickerGeneralAdmissionPrompt);
+        final sheet =
+            find.descendant(of: prompt, matching: find.byType(Material)).first;
+        final button = find.widgetWithText(FilledButton, _strings.addTickets);
+        expect(
+          tester.getRect(sheet).bottom - tester.getRect(button).bottom,
+          closeTo(short ? SeatLayerSizeTokens.sheetHandleOverhang + 8 : 18, .5),
+        );
+      });
+    }
+
+    testWidgets('centres a button whose words take two lines', (tester) async {
+      await open(tester, area: box);
+      expect(
+        tester.widget<Text>(find.text(_strings.addTickets)).textAlign,
+        TextAlign.center,
       );
     });
 

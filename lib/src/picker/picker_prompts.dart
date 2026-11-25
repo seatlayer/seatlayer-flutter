@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_short_map_scroll.dart';
 import 'picker_standing_amounts.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
@@ -378,6 +379,7 @@ class _PromptActions extends StatelessWidget {
               onPressed: onDismiss,
               child: Text(
                 dismissLabel,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                     fontWeight: seatLayerBoldWeight(context, FontWeight.w800)),
               ),
@@ -395,6 +397,7 @@ class _PromptActions extends StatelessWidget {
               onPressed: onConfirm,
               child: Text(
                 confirmLabel,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                     fontWeight: seatLayerBoldWeight(context, FontWeight.w800)),
               ),
@@ -432,37 +435,44 @@ class _PromptSheet extends StatelessWidget {
           // at the top, the way every sheet on a phone arrives.
           borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
           clipBehavior: Clip.antiAlias,
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  Text(
-                    title,
-                    style: TextStyle(
-                      color: theme.text,
-                      fontSize: 22,
-                      height: 1.15,
-                      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
-                      fontFamily: theme.fontFamily,
+          // Where it does not fit it opens at its foot: the number and the
+          // buttons are there, and the name is a scroll away.
+          child: PickerShortMapScroll(
+            reverse: true,
+            roomUnder: 18 + MediaQuery.paddingOf(context).bottom,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: theme.text,
+                        fontSize: 22,
+                        height: 1.15,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w800),
+                        fontFamily: theme.fontFamily,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 7),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: theme.mutedText,
-                      fontSize: 13,
-                      height: 1.45,
-                      fontFamily: theme.fontFamily,
+                    const SizedBox(height: 7),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: theme.mutedText,
+                        fontSize: 13,
+                        height: 1.45,
+                        fontFamily: theme.fontFamily,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  ...children,
-                ],
+                    const SizedBox(height: 16),
+                    ...children,
+                  ],
+                ),
               ),
             ),
           ),
