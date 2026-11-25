@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
@@ -554,6 +555,62 @@ void main() {
         <String, Object?>{'view': 'venue3d'},
       );
     });
+
+    for (final scale in <double>[1, 1.3, 2, 3]) {
+      testWidgets('at text $scale the segmented control shows its words whole',
+          (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        usePhoneSurface(tester);
+
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            Builder(
+              builder: (context) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: TextScaler.linear(scale),
+                ),
+                // The phone map holds the control at its own height.
+                child: const Align(
+                  alignment: Alignment.topLeft,
+                  child: SizedBox(
+                    height: SeatLayerPickerViewModeControl.height,
+                    child: SeatLayerPickerViewModeControl(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        map.emit(pickerSnapshot(withSelection: false));
+        await tester.pumpAndSettle();
+
+        for (final half in <String>['Map', '3D']) {
+          final words = tester.renderObject<RenderParagraph>(find.text(half));
+          // Laid out at the height its line needs, not squeezed under it.
+          expect(
+            words.size.height,
+            greaterThanOrEqualTo(
+              words.getMaxIntrinsicHeight(double.infinity) - .5,
+            ),
+            reason: half,
+          );
+          final ink = tester.getRect(
+            find
+                .ancestor(of: find.text(half), matching: find.byType(Material))
+                .first,
+          );
+          final drawn = tester.getRect(find.text(half));
+          expect(drawn.top, greaterThanOrEqualTo(ink.top - .5), reason: half);
+          expect(
+            drawn.bottom,
+            lessThanOrEqualTo(ink.bottom + .5),
+            reason: half,
+          );
+        }
+      });
+    }
 
     testWidgets('controls lift above the dock bar', (tester) async {
       final map = FakePickerMap();

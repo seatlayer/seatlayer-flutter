@@ -527,19 +527,24 @@ class _Segment extends StatelessWidget {
                 widthFactor: 1,
                 heightFactor: 1,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  child: Text(
-                    label,
-                    style: TextStyle(
-                      color: selected ? theme.onAccent : theme.mutedText,
-                      fontSize: SeatLayerSizeTokens.viewModeLabelFontSize,
-                      fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
-                      letterSpacing:
-                          SeatLayerSizeTokens.viewModeLabelFontSize * .04,
-                      fontFamily: theme.fontFamily,
+                  // The half's own height centres the words, so they keep all
+                  // of it for themselves as the text grows.
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  // The map holds the control at its own height. Words taller
+                  // than a half are drawn smaller rather than cut off.
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: selected ? theme.onAccent : theme.mutedText,
+                        fontSize: SeatLayerSizeTokens.viewModeLabelFontSize,
+                        fontWeight:
+                            seatLayerBoldWeight(context, FontWeight.w800),
+                        letterSpacing:
+                            SeatLayerSizeTokens.viewModeLabelFontSize * .04,
+                        fontFamily: theme.fontFamily,
+                      ),
                     ),
                   ),
                 ),
