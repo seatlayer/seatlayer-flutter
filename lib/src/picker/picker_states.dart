@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 
 import 'picker_header.dart';
 import 'picker_internal.dart';
+import 'picker_layout.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_short_map_scroll.dart';
@@ -326,9 +327,9 @@ class _SeatLayerPickerAccessPanelState
                         borderRadius: BorderRadius.circular(theme.radius),
                         boxShadow: <BoxShadow>[
                           BoxShadow(
-                            color: pickerAlpha(const Color(0xFF000000), .66),
-                            blurRadius: 64,
-                            spreadRadius: -24,
+                            color: pickerAlpha(const Color(0xFF000000), .72),
+                            blurRadius: 55,
+                            spreadRadius: -18,
                             offset: const Offset(0, 24),
                           ),
                         ],
@@ -377,35 +378,55 @@ class _SeatLayerPickerAccessPanelState
                               ),
                               if (telling.action != null) ...<Widget>[
                                 SizedBox(height: short ? 12 : 18),
-                                FilledButton(
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: theme.accent,
-                                    foregroundColor: theme.onAccent,
-                                    minimumSize: const Size(
-                                      0,
-                                      SeatLayerSizeTokens.minimumHitTarget,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 18),
+                                DecoratedBox(
+                                  // The accent's own glow, as the web draws it.
+                                  decoration: ShapeDecoration(
                                     shape: const StadiumBorder(),
+                                    shadows: <BoxShadow>[
+                                      BoxShadow(
+                                        color: theme.accent,
+                                        blurRadius: 24,
+                                        spreadRadius: -14,
+                                        offset: const Offset(0, 10),
+                                      ),
+                                    ],
                                   ),
-                                  onPressed: _retrying
-                                      ? null
-                                      : () => _recover(
-                                            controller,
-                                            paused: reason == 'paused',
-                                            hostListening: SeatLayerPickerScope
-                                                        .callbacksOf(context)
-                                                    .onAccessUnavailable !=
-                                                null,
-                                          ),
-                                  child: Text(
-                                    telling.action!,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: seatLayerBoldWeight(
-                                          context, FontWeight.w800),
-                                      fontFamily: theme.fontFamily,
+                                  child: SizedBox(
+                                    // A phone gives the action the whole card.
+                                    width: seatLayerOnTablet(context)
+                                        ? null
+                                        : double.infinity,
+                                    child: FilledButton(
+                                      style: FilledButton.styleFrom(
+                                        backgroundColor: theme.accent,
+                                        foregroundColor: theme.onAccent,
+                                        minimumSize: const Size(
+                                          0,
+                                          SeatLayerSizeTokens.minimumHitTarget,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20),
+                                        shape: const StadiumBorder(),
+                                      ),
+                                      onPressed: _retrying
+                                          ? null
+                                          : () => _recover(
+                                                controller,
+                                                paused: reason == 'paused',
+                                                hostListening: SeatLayerPickerScope
+                                                            .callbacksOf(context)
+                                                        .onAccessUnavailable !=
+                                                    null,
+                                              ),
+                                      child: Text(
+                                        telling.action!,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: seatLayerBoldWeight(
+                                              context, FontWeight.w800),
+                                          fontFamily: theme.fontFamily,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),

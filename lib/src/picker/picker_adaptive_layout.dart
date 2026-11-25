@@ -524,9 +524,8 @@ class _SeatLayerPickerAdaptiveLayoutState
         }
         // The same card over the scene, in its own dimensions.
         final seatCard3D = seatCardUp && venue3DUp;
-        // An immersive inspection temporarily takes the card off the picture,
-        // but it does not answer the buyer's Select/Cancel question. Keep that
-        // exact seat out of cart totals until they explicitly decide.
+        // An immersive inspection takes the card off the picture, not the
+        // question: its seat stays out of the totals until it is answered.
         controller.setConfirmCardSeat(
           pendingSeat != null &&
                   chrome.showConfirmCard &&
@@ -535,11 +534,9 @@ class _SeatLayerPickerAdaptiveLayoutState
               ? pendingSeat
               : null,
         );
-        // Ready, but the runtime has not been told what the chrome covers yet:
-        // revealing the map now shows it at one framing and then re-fits it in
-        // front of the buyer. Held for the moment that takes, and never longer
-        // than [_mapFramingGrace] — a runtime that never answers must not be
-        // able to hang the picker on a loading screen.
+        // Ready, but not told what the chrome covers yet: the map would re-fit
+        // in front of the buyer. Held for that moment, and never longer than
+        // [_mapFramingGrace]: no answer must not hang a loading screen.
         _syncFramingGrace(state);
         final framing = state.phase == SeatLayerPickerPhase.ready &&
             !state.mapFramed &&
@@ -555,7 +552,10 @@ class _SeatLayerPickerAdaptiveLayoutState
                     ),
                   )
                 : switch (state.phase) {
-                    SeatLayerPickerPhase.failed =>
+                    SeatLayerPickerPhase.failed ||
+                    SeatLayerPickerPhase.unavailable
+                        when state.phase == SeatLayerPickerPhase.failed ||
+                            widget.builders.error != null =>
                       // Opaque: the page under it has words of its own.
                       ColoredBox(
                         color: pickerAlpha(resolved.background, 1),

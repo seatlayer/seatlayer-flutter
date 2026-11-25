@@ -239,6 +239,35 @@ void main() {
       });
     }
 
+    testWidgets('gives way to an error builder of the app\'s own',
+        (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          SeatLayerPickerAdaptiveLayout(
+            onCheckout: (_) async {},
+            builders: SeatLayerPickerBuilders(
+              map: (_, __) => const SizedBox.expand(),
+              error: (_, __) =>
+                  const SizedBox.expand(child: Text('Own words')),
+            ),
+          ),
+        ),
+      );
+      for (final reason in <String>['no_token', 'paused', 'revoked']) {
+        map.emit(<String, Object?>{
+          ..._accessSnapshot(reason),
+          'revision': map.revision + 1,
+        });
+        await tester.pumpAndSettle();
+        expect(find.text('Own words').hitTestable(), findsOneWidget);
+      }
+      expect(find.text('Refresh').hitTestable(), findsNothing);
+    });
+
     testWidgets('keeps its button clear of the cart handle where it scrolls',
         (tester) async {
       final map = FakePickerMap();
