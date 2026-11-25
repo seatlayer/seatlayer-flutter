@@ -8,12 +8,16 @@
 // picker's own.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
+import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
 import 'package:seatlayer/src/picker/picker_states.dart';
+import 'package:seatlayer/src/picker/picker_status_views.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
 import 'package:seatlayer/src/picker/picker_toast.dart';
+import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 
 import 'picker_test_fixture.dart';
@@ -200,6 +204,96 @@ void main() {
         reason: 'the recovery has to actually clear the panel',
       );
       expect(find.text('Your seat session has expired'), findsNothing);
+    });
+
+    for (final wide in <bool>[false, true]) {
+      testWidgets('is drawn by the ${wide ? 'wide' : 'phone'} picker itself',
+          (tester) async {
+        final map = FakePickerMap();
+        addTearDown(map.dispose);
+        tester.view.physicalSize =
+            wide ? const Size(1024, 768) : const Size(390, 844);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(
+          pickerHarness(
+            map,
+            SeatLayerPickerAdaptiveLayout(
+              onCheckout: (_) async {},
+              builders: SeatLayerPickerBuilders(
+                map: (_, __) => const SizedBox.expand(),
+              ),
+            ),
+          ),
+        );
+        map.emit(_accessSnapshot('no_token'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Your seat session has expired'), findsOneWidget);
+        expect(find.byType(SeatLayerPickerErrorView), findsNothing);
+
+        // The icon turns until the page has answered.
+        await tester.tap(find.text('Refresh'));
+        await tester.pump();
+        expect(map.callsTo('refreshAccess'), hasLength(1));
+      });
+    }
+
+    testWidgets('gives way to an error builder of the app\'s own',
+        (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      usePhoneSurface(tester);
+      await tester.pumpWidget(
+        pickerHarness(
+          map,
+          SeatLayerPickerAdaptiveLayout(
+            onCheckout: (_) async {},
+            builders: SeatLayerPickerBuilders(
+              map: (_, __) => const SizedBox.expand(),
+              error: (_, __) =>
+                  const SizedBox.expand(child: Text('Own words')),
+            ),
+          ),
+        ),
+      );
+      for (final reason in <String>['no_token', 'paused', 'revoked']) {
+        map.emit(<String, Object?>{
+          ..._accessSnapshot(reason),
+          'revision': map.revision + 1,
+        });
+        await tester.pumpAndSettle();
+        expect(find.text('Own words').hitTestable(), findsOneWidget);
+      }
+      expect(find.text('Refresh').hitTestable(), findsNothing);
+    });
+
+    testWidgets('keeps its button clear of the cart handle where it scrolls',
+        (tester) async {
+      final map = FakePickerMap();
+      addTearDown(map.dispose);
+      tester.view.physicalSize = const Size(320, 150);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+      await tester.pumpWidget(
+        pickerHarness(map, const _Fill(SeatLayerPickerAccessPanel())),
+      );
+      map.emit(_accessSnapshot('no_token'));
+      await tester.pumpAndSettle();
+      await tester.drag(
+        find.byType(SeatLayerPickerAccessPanel),
+        const Offset(0, -2000),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getRect(find.byType(SeatLayerPickerAccessPanel)).bottom -
+            tester.getRect(find.byType(FilledButton)).bottom,
+        closeTo(SeatLayerSizeTokens.sheetHandleOverhang + 8, .5),
+      );
     });
 
     testWidgets('is absent while the picker is ready', (tester) async {

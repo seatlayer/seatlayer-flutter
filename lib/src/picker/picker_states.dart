@@ -13,8 +13,10 @@ import 'package:flutter/material.dart';
 
 import 'picker_header.dart';
 import 'picker_internal.dart';
+import 'picker_layout.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
+import 'picker_short_map_scroll.dart';
 import 'picker_strings.dart';
 import 'picker_toast.dart';
 import 'picker_tokens.g.dart';
@@ -307,103 +309,126 @@ class _SeatLayerPickerAccessPanelState
       liveRegion: true,
       child: ColoredBox(
         color: pickerAlpha(theme.background, .9),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(theme.radius),
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(
-                      color: pickerAlpha(const Color(0xFF000000), .66),
-                      blurRadius: 64,
-                      spreadRadius: -24,
-                      offset: const Offset(0, 24),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: theme.surface,
-                  borderRadius: BorderRadius.circular(theme.radius),
-                  child: Container(
-                    decoration: BoxDecoration(
+        child: LayoutBuilder(
+          builder: (context, map) {
+            // The map of a phone held sideways, or of a small one with large
+            // text: closer, without the picture, and scrolling past that.
+            final short = map.maxHeight <
+                280 * MediaQuery.textScalerOf(context).scale(10) / 10;
+            return Center(
+              child: PickerShortMapScroll(
+                roomUnder: short ? 25 : 49,
+                child: Padding(
+                  padding: EdgeInsets.all(short ? 10 : 24),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: short ? 560 : 420),
+                    child: Material(
+                      elevation: SeatLayerElevationTokens.sheet,
+                      color: theme.surface,
                       borderRadius: BorderRadius.circular(theme.radius),
-                      border: Border.all(color: theme.divider),
-                    ),
-                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        _AccessIcon(theme: theme, spinning: _retrying),
-                        const SizedBox(height: 16),
-                        Text(
-                          telling.title,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: theme.text,
-                            fontSize: 18,
-                            height: 1.25,
-                            letterSpacing: -.27,
-                            fontWeight:
-                                seatLayerBoldWeight(context, FontWeight.w800),
-                            fontFamily: theme.fontFamily,
-                          ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(theme.radius),
+                          border: Border.all(color: theme.divider),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          telling.body,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: theme.mutedText,
-                            fontSize: 13,
-                            height: 1.55,
-                            fontFamily: theme.fontFamily,
-                          ),
-                        ),
-                        if (telling.action != null) ...<Widget>[
-                          const SizedBox(height: 18),
-                          FilledButton(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: theme.accent,
-                              foregroundColor: theme.onAccent,
-                              minimumSize: const Size(
-                                0,
-                                SeatLayerSizeTokens.minimumHitTarget,
-                              ),
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 18),
-                              shape: const StadiumBorder(),
-                            ),
-                            onPressed: _retrying
-                                ? null
-                                : () => _recover(
-                                      controller,
-                                      paused: reason == 'paused',
-                                      hostListening: SeatLayerPickerScope
-                                              .callbacksOf(context)
-                                              .onAccessUnavailable !=
-                                          null,
-                                    ),
-                            child: Text(
-                              telling.action!,
+                        padding: short
+                            ? const EdgeInsets.all(14)
+                            : const EdgeInsets.fromLTRB(24, 28, 24, 24),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            if (!short) ...<Widget>[
+                              _AccessIcon(theme: theme, spinning: _retrying),
+                              const SizedBox(height: 16),
+                            ],
+                            Text(
+                              telling.title,
+                              textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 13,
+                                color: theme.text,
+                                fontSize: 18,
+                                height: 1.25,
+                                letterSpacing: -.27,
                                 fontWeight: seatLayerBoldWeight(
                                     context, FontWeight.w800),
                                 fontFamily: theme.fontFamily,
                               ),
                             ),
-                          ),
-                        ],
-                      ],
+                            const SizedBox(height: 8),
+                            Text(
+                              telling.body,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: theme.mutedText,
+                                fontSize: 13,
+                                height: 1.55,
+                                fontFamily: theme.fontFamily,
+                              ),
+                            ),
+                            if (telling.action != null) ...<Widget>[
+                              SizedBox(height: short ? 12 : 18),
+                              DecoratedBox(
+                                // The accent's own glow, as the web draws it.
+                                decoration: ShapeDecoration(
+                                  shape: const StadiumBorder(),
+                                  shadows: <BoxShadow>[
+                                    BoxShadow(
+                                      color: theme.accent,
+                                      blurRadius: 24,
+                                      spreadRadius: -14,
+                                      offset: const Offset(0, 10),
+                                    ),
+                                  ],
+                                ),
+                                child: SizedBox(
+                                  // A phone gives the action the whole card.
+                                  width: seatLayerOnTablet(context)
+                                      ? null
+                                      : double.infinity,
+                                  child: FilledButton(
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor: theme.accent,
+                                      foregroundColor: theme.onAccent,
+                                      minimumSize: const Size(
+                                        0,
+                                        SeatLayerSizeTokens.minimumHitTarget,
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20),
+                                      shape: const StadiumBorder(),
+                                    ),
+                                    onPressed: _retrying
+                                        ? null
+                                        : () => _recover(
+                                              controller,
+                                              paused: reason == 'paused',
+                                              hostListening: SeatLayerPickerScope
+                                                          .callbacksOf(context)
+                                                      .onAccessUnavailable !=
+                                                  null,
+                                            ),
+                                    child: Text(
+                                      telling.action!,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: seatLayerBoldWeight(
+                                            context, FontWeight.w800),
+                                        fontFamily: theme.fontFamily,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -664,9 +689,8 @@ class _SeatLayerPickerExtendHoldPromptState
                     width: SeatLayerSizeTokens.minimumHitTarget,
                     height: SeatLayerSizeTokens.minimumHitTarget,
                   ),
-                  onPressed: _adding
-                      ? null
-                      : () => setState(() => _spent = true),
+                  onPressed:
+                      _adding ? null : () => setState(() => _spent = true),
                   icon: Icon(
                     Icons.close_rounded,
                     size: 18,

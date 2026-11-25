@@ -89,17 +89,6 @@ Future<FakePickerMap> _corner(
   return map;
 }
 
-/// Whether the `+` disc is drawn: it keeps its SLOT when retired, so the
-/// widget is still in the tree and only its visibility says.
-bool _zoomInShown(WidgetTester tester) => tester
-    .widget<Visibility>(
-      find.ancestor(
-        of: find.byType(SeatLayerPickerZoomInButton),
-        matching: find.byType(Visibility),
-      ),
-    )
-    .visible;
-
 void main() {
   testWidgets('the phone corner carries + and the whole venue', (tester) async {
     await _corner(
@@ -188,9 +177,7 @@ void main() {
     expect(_enabled(tester, SeatLayerPickerShowWholeVenueButton), isTrue);
   });
 
-  testWidgets('+ retires at the far end of the zoom', (tester) async {
-    // A disc that does nothing is the broken-map reading (web 0.84.0), so at
-    // the zoom ceiling `+` leaves rather than dims.
+  testWidgets('+ dims at the far end of the zoom', (tester) async {
     await _corner(
       tester,
       snapshot: pickerSnapshot(
@@ -200,25 +187,25 @@ void main() {
       ),
     );
 
-    expect(_zoomInShown(tester), isFalse);
+    expect(_enabled(tester, SeatLayerPickerZoomInButton), isFalse);
+    expect(_dim(tester, SeatLayerPickerZoomInButton), isNotNull);
     // The other two are a different question and are unaffected by it.
     expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsOneWidget);
   });
 
-  testWidgets('+ retires among the seats', (tester) async {
+  testWidgets('+ dims among the seats', (tester) async {
     // Once the buyer is at the seats there is nothing left to step into.
     await _corner(
       tester,
       snapshot: pickerSnapshot(withSelection: false, rung: 'seats'),
     );
 
-    expect(_zoomInShown(tester), isFalse);
+    expect(_enabled(tester, SeatLayerPickerZoomInButton), isFalse);
+    expect(_dim(tester, SeatLayerPickerZoomInButton), isNotNull);
     expect(find.byType(SeatLayerPickerShowWholeVenueButton), findsOneWidget);
   });
 
-  testWidgets('a retired + keeps its slot, so ♿ never moves', (tester) async {
-    // The column is anchored at its foot: a disc that left the tree moved the
-    // ♿ disc under the thumb reaching for it (web 0.84.1).
+  testWidgets('a dimmed + keeps its slot, so ♿ never moves', (tester) async {
     await _corner(
       tester,
       snapshot: pickerSnapshot(withSelection: false, rung: 'sections'),
@@ -230,7 +217,8 @@ void main() {
       tester,
       snapshot: pickerSnapshot(withSelection: false, rung: 'seats'),
     );
-    expect(_zoomInShown(tester), isFalse);
+    expect(_enabled(tester, SeatLayerPickerZoomInButton), isFalse);
+    expect(_dim(tester, SeatLayerPickerZoomInButton), isNotNull);
     expect(
       tester.getTopLeft(find.byType(SeatLayerPickerAccessibilityFilters)),
       shown,
