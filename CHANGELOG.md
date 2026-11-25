@@ -28,6 +28,7 @@
 - **iPhone, the system ends the page (low memory):** the map comes back by itself once the app is in front, in the event picker, a Season and a run. A hold handed to checkout and a hold the picker was opened on are taken up again. A Season or run asks for its hold too and gets it when your app gives the page the same buyer token again; without a token the page starts a new buyer session, and the seats stay held until their time is up. A third time within a minute the failure view opens, with Try again. A blank map stood there, and a Season could not be closed. A bare `SeatLayerView` reports `sl_transport` on `onError`.
 - **A Season closed while no page is up, with seats held (behaviour change):** `onClose` receives `kept` and the hold's operation id. It received `closed`.
 - **Try again on a page that had loaded** brings one that works. The new page was cut off as the old one left.
+- **The spotlight on the seat a card asks about** stands on the seat. On a map at its edge, which could not move that far, it stood up to 120 points above it. Its clear part is round and as large as the design draws it; it was twice as large, with square edges in it. The card always named the right seat.
 - **A Season or run picker mounted without its route, held sideways,** stays clear of the camera cutout.
 
 ## 0.13.0 (2026-11-25)

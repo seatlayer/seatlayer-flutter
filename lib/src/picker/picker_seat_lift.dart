@@ -32,8 +32,8 @@ class SeatLayerSeatFrame {
   /// Creates a frame result.
   const SeatLayerSeatFrame({required this.dy, required this.gestures});
 
-  /// The screen-space vertical pan the runtime made; 0 when it declined or
-  /// the seat was already in place.
+  /// The screen-space vertical pan the runtime asked of its map; 0 when it
+  /// declined or the seat was already in place. A map at its edge moves less.
   final double dy;
 
   /// The runtime's count of the buyer's own camera moves, to hand back on a
@@ -196,6 +196,19 @@ class PickerSeatLift {
   double _fraction = 0;
   double _dy = 0;
   double _anchorDy = 0;
+
+  /// How much is still missing of the way to where the seat was asked to
+  /// rest, as far as the answers have said.
+  double _short = 0;
+
+  /// Whether the question that stands has been answered before, and whether
+  /// the last answer found the seat in place.
+  bool _answered = false;
+  bool _arrived = false;
+
+  /// How often the question that stands was asked again because an answer
+  /// was news.
+  int _news = 0;
   int? _gestures;
   int _revision = -1;
   int _generation = 0;
@@ -272,6 +285,10 @@ class PickerSeatLift {
     // lift has already moved, so the pans folded into it are no longer the
     // shell's to add.
     if (revision != _revision) _anchorDy = 0;
+    if (seatId != _seatId || fraction != _fraction) _short = 0;
+    _answered = false;
+    _arrived = false;
+    _news = 0;
     _page = page;
     _seatId = seatId;
     _fraction = fraction;
@@ -301,21 +318,54 @@ class PickerSeatLift {
     // was, so the restore is refused for the same reason.
     if (_gestures != null && answer.gestures != _gestures) return;
     _gestures = answer.gestures;
-    _dy += answer.dy;
-    if (answer.dy != 0) {
-      _anchorDy += answer.dy;
+    final again = _answered;
+    final wasThere = _arrived;
+    final moved = _movedBy(answer.dy);
+    if (moved != 0) {
+      _dy += moved;
+      _anchorDy += moved;
       onChanged?.call();
     }
-    if (_settleTimers.isEmpty) {
-      for (final delay in settle) {
-        _settleTimers.add(
+    void ask(Duration delay) => _settleTimers.add(
           Timer(delay, () {
             if (generation != _generation || _seatId != seatId) return;
             unawaited(_lift(seatId, fraction, generation));
           }),
         );
-      }
+    if (_settleTimers.isEmpty) {
+      settle.forEach(ask);
+    } else if (again &&
+        answer.dy != 0 &&
+        (moved != 0 || wasThere) &&
+        _news < settle.length) {
+      _news += 1;
+      ask(settle.first);
     }
+  }
+
+  /// How far the seat has moved, now that the runtime asks its map for [dy].
+  ///
+  /// [dy] is the way still left when the runtime was asked, and it answers so
+  /// whether or not its map can go there. The first time the map is taken at
+  /// its word. A map that is still short the next time stands at its edge, and
+  /// the seat is where that answer says it is; one that had arrived was put
+  /// back by a refit, and is brought back by this very pan.
+  double _movedBy(double dy) {
+    final double moved;
+    if (!_answered) {
+      // The same way short of the same place, on a newer snapshot.
+      final stuck = dy != 0 && dy == _short;
+      moved = stuck ? 0 : dy;
+      if (!stuck) _short = 0;
+    } else if (_arrived) {
+      moved = 0;
+    } else {
+      moved = _short - dy;
+      _short = dy;
+    }
+    _answered = true;
+    _arrived = dy == 0;
+    return moved;
   }
 
   void _cancelSettle() {
@@ -350,6 +400,10 @@ class PickerSeatLift {
     _fraction = 0;
     _dy = 0;
     _anchorDy = 0;
+    _short = 0;
+    _answered = false;
+    _arrived = false;
+    _news = 0;
     _gestures = null;
     _revision = -1;
   }

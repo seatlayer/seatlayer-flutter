@@ -7,6 +7,7 @@
 // buyer wants it. On a real device that read as `1 ticket · €40` on the peek bar
 // under the card, with a live Continue behind the scrim.
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_accessibility.dart';
@@ -273,6 +274,53 @@ void main() {
     await tester.tapAt(Offset(6, _mapOrigin(tester).dy + 200));
     await pumpToRest(tester);
     expect(find.byType(SeatLayerConfirmCard), findsNothing);
+  });
+
+  testWidgets('the clear hole is as large as the design draws it', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final root = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(
+            size: Size(390, 700),
+            highContrast: true,
+          ),
+          child: RepaintBoundary(
+            key: root,
+            child: const ColoredBox(
+              color: Color(0xFFFFFFFF),
+              child: PickerSpotlightGlass(at: Offset(195, 300)),
+            ),
+          ),
+        ),
+      ),
+    );
+    final boundary = root.currentContext!.findRenderObject()!
+        as RenderRepaintBoundary;
+    final pixels = await tester.runAsync(() async {
+      final image = await boundary.toImage();
+      final data = await image.toByteData();
+      image.dispose();
+      return data!;
+    });
+    int lightAt(int x, int y) => pixels!.getUint8((y * 390 + x) * 4);
+    const full = 1 - SeatLayerOpacityTokens.confirmScrimFlat;
+    const clear = SeatLayerSizeTokens.confirmScrimClearRadius;
+    const feather = SeatLayerSizeTokens.confirmScrimFeatherRadius;
+    for (final (dx, dy) in const <(int, int)>[(1, 0), (-1, 0), (0, 1), (0, -1)]) {
+      int at(double r) =>
+          lightAt(195 + (dx * r).round(), 300 + (dy * r).round());
+      expect(at(0), 255);
+      expect(at(clear - 3), closeTo(255, 2));
+      expect(at((clear + feather) / 2), closeTo(255 * (1 + full) / 2, 6));
+      expect(at(feather + 3), closeTo(255 * full, 2));
+    }
   });
 
   testWidgets('the card rests in one place whatever seat is tapped', (
