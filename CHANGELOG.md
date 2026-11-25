@@ -16,6 +16,7 @@
 
 - **After sales close,** a buyer who holds seats can still continue to checkout; the button was off. With no seats held the row says "Sales are closed" with the event's date and has no button.
 - **The open cart on a short screen** gives way to what stands over the map.
+- **"Release and change seats"** under a refused action stands whole under the words, and the words scroll; it was cut off on every phone. Where the cart's list is open on a small phone, the list gives way to it.
 - **The first 15 seconds:** best seats, holding, checkout and the map's fit waited up to 15 seconds after the picker opened. They go to the page as soon as it is ready. `setMapInteractionEnabled` called before that is told to the page once it is ready. A phone that turned light or dark while the page loaded caused the same wait.
 - **A map that did not load:** the failure view with Try again opens when the page answers ready without a map, where an empty picker stood, and at once when the server answers the page with an HTTP error, where it took the whole wait.
 - **Standing areas and boxes** offer only amounts the page accepts. A box is sold as all its places, or as a party inside its range; with the wheelchair filter on, an area offers its wheelchair places. A tap on an area with nothing to offer opens nothing. New on `GAArea`: `bookingMode`, `minOccupancy`, `maxOccupancy`, `wheelchairPlaces` and `wheelchairAvailable`.

@@ -144,6 +144,17 @@ Map<String, Object?> _confirmedCart(int count) {
   return snapshot;
 }
 
+Map<String, Object?> _inCheckout(Map<String, Object?> snapshot) =>
+    <String, Object?>{
+      ...snapshot,
+      'revision': 2,
+      'hold': <String, Object?>{
+        'active': true,
+        'expiresAt': 1999999999000.0,
+        'ownership': 'host',
+      },
+    };
+
 const Map<String, Object?> _box = <String, Object?>{
   'id': 'box-1',
   'label': 'Box 1',
@@ -195,8 +206,9 @@ Widget _mapPlaceholder(BuildContext context, SeatLayerPickerPartContext part) =>
 
 /// Put the picker on [phone] in [state].
 ///
-/// [actionError] is a refusal the buyer met there. Returns the strings the
-/// picker draws, so a check can find its own words in any language.
+/// [actionError] is a refusal the buyer met there, [inCheckout] whether the
+/// hold had been handed to checkout. Returns the strings the picker draws, so
+/// a check can find its own words in any language.
 Future<SeatLayerPickerStrings> pumpPhone(
   WidgetTester tester,
   Phone phone,
@@ -207,6 +219,7 @@ Future<SeatLayerPickerStrings> pumpPhone(
   PhonePresentation presentation = PhonePresentation.page,
   bool golden = false,
   Object? actionError,
+  bool inCheckout = false,
 }) async {
   useFakeWebViewPlatform();
   putOnPhone(tester, phone);
@@ -229,6 +242,21 @@ Future<SeatLayerPickerStrings> pumpPhone(
         'picker.setVenue3DNavigationMode',
       ],
     ),
+    handler: !inCheckout
+        ? null
+        : (command, _) async => command == 'picker.continue'
+            ? <String, Object?>{
+                'revision': 2,
+                'snapshot': _inCheckout(_snapshotFor(state)),
+                'handoff': <String, Object?>{
+                  'holdId': 'hold-1',
+                  'expiresAt': 1999999999000.0,
+                  'currency': 'EUR',
+                  'total': 50.0,
+                  'lineItems': <Object?>[],
+                },
+              }
+            : null,
   );
   addTearDown(map.dispose);
   final picker = SeatLayerPickerController(mapController: map);
@@ -321,6 +349,10 @@ Future<SeatLayerPickerStrings> pumpPhone(
   }
   if (state == PhoneState.cartOpen) {
     await tester.tap(find.byType(PickerCartBarDisc));
+    await pumpToRest(tester);
+  }
+  if (inCheckout) {
+    await picker.checkout();
     await pumpToRest(tester);
   }
   if (actionError != null) {

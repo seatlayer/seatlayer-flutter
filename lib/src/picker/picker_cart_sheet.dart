@@ -376,21 +376,30 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
                   children: <Widget>[
                     // The open list gives way where the screen is too short
                     // for it and the row.
+                    // While the row says why an action was refused, it leaves
+                    // the map its top line.
                     Flexible(
-                      child: _CartRegion(
-                        height: body,
-                        open: open,
-                        salesClosed: salesClosed,
-                        hasTickets: hasTickets,
-                        cartList: widget.cartList,
-                        bestSeats: widget.bestSeats,
-                        onCart: (value) => _measured(_cartNatural, value, (v) {
-                          _cartNatural = v;
-                        }),
-                        onExtras: (value) =>
-                            _measured(_extrasNatural, value, (v) {
-                          _extrasNatural = v;
-                        }),
+                      child: LayoutBuilder(
+                        builder: (context, room) => _CartRegion(
+                          height: controller.state.error == null
+                              ? body
+                              : _atMost(
+                                  body,
+                                  math.max(0, room.maxHeight - _mapTopLine),
+                                ),
+                          open: open,
+                          salesClosed: salesClosed,
+                          hasTickets: hasTickets,
+                          cartList: widget.cartList,
+                          bestSeats: widget.bestSeats,
+                          onCart: (value) => _measured(_cartNatural, value, (v) {
+                            _cartNatural = v;
+                          }),
+                          onExtras: (value) =>
+                              _measured(_extrasNatural, value, (v) {
+                            _extrasNatural = v;
+                          }),
+                        ),
                       ),
                     ),
                     PickerMeasuredHeight(
@@ -776,6 +785,9 @@ Future<void> checkoutThroughHost(
     Error.throwWithStackTrace(error, stack);
   }
 }
+
+/// The map's line of controls at its top edge, and the room around it.
+const double _mapTopLine = 60;
 
 /// [value], never above [ceiling].
 ///
