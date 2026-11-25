@@ -33,9 +33,9 @@ class SeatLayerPickerPartContext {
 
 /// Optional replacements for non-mandatory parts of the adaptive picker.
 ///
-/// The complete layout, test-mode marker and required SeatLayer attribution do
-/// not have builder slots, so a custom builder cannot suppress compliance
-/// chrome. Their appearance remains configurable through the picker theme.
+/// The complete layout and the test-mode marker do not have builder slots, so a
+/// custom builder cannot suppress the marker. Its appearance remains
+/// configurable through the picker theme.
 class SeatLayerPickerBuilders {
   /// Creates a builder set; every slot is optional.
   const SeatLayerPickerBuilders({

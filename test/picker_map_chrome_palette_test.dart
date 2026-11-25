@@ -11,7 +11,6 @@
 // event rather than the same fact.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:seatlayer/src/picker/picker_attribution.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_status_views.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
@@ -193,31 +192,6 @@ void main() {
     map.emit(_inVenue3D(revision: 4));
     await tester.pumpAndSettle();
     expect(_sheetGround(tester), SeatLayerDarkTokens.background);
-  });
-
-  testWidgets('the credit line keeps its words on the scene sheet',
-      (tester) async {
-    final map = FakePickerMap();
-    addTearDown(map.dispose);
-    usePhoneSurface(tester);
-
-    await tester.pumpWidget(
-      pickerHarness(
-        map,
-        const SeatLayerPickerAttribution(),
-        themeMode: SeatLayerThemeMode.light,
-      ),
-    );
-    map.emit(pickerSnapshot());
-    await tester.pumpAndSettle();
-    Color ink() =>
-        tester.widget<Text>(find.text('Powered by SeatLayer')).style!.color!;
-    expect(ink(), SeatLayerLightTokens.text);
-
-    // Dark ink on the dark sheet was the one thing the first 3D build hid.
-    map.emit(_inVenue3D(revision: 4));
-    await tester.pumpAndSettle();
-    expect(ink(), SeatLayerDarkTokens.text);
   });
 
   test('a floating control separates from the map it sits on', () {

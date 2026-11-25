@@ -26,6 +26,21 @@ String _accessFreeCountLv(int count) => '$count brīvas';
 String _seatJustTakenByAnotherLv(String label) =>
     'Vietu $label tikko aizņēma cits pircējs.';
 
+String _labelNoLongerAvailableLv(String label) =>
+    '$label vairs nav pieejama. Izvēlieties citu vietu.';
+
+String _labelsNoLongerAvailableLv(String labels) =>
+    '$labels vairs nav pieejamas. Izvēlieties citu grupu.';
+
+String _couldNotFindSeatsTogetherLv(int count) =>
+    'Neatradām $count vietas blakus. Mēģiniet mazāk vietu vai citu biļetes veidu.';
+
+String _maxTicketsForOrderLv(int count) =>
+    'Šim pasūtījumam varat izvēlēties līdz $count biļetēm.';
+
+String _couldNotRemoveLabelLv(String label) =>
+    'Neizdevās noņemt $label. Rezervācija nav mainījusies.';
+
 String _peekSecuredLv(int count, String total) =>
     '✓ $count nodrošinātas · $total. Vēl nekas netiks norakstīts';
 
@@ -181,6 +196,18 @@ String _onlyLeftLv(int count) => switch (pickerPluralCategory('lv', count)) {
   _ => 'Atlikušas $count vietas',
 };
 
+String _maintenancePausedLv(int count) => switch (pickerPluralCategory(
+  'lv',
+  count,
+)) {
+  PickerPluralCategory.zero =>
+    'Rezervēšana ir apturēta apkopes dēļ. Mēģiniet vēlreiz pēc aptuveni $count minūtēm.',
+  PickerPluralCategory.one =>
+    'Rezervēšana ir apturēta apkopes dēļ. Mēģiniet vēlreiz pēc aptuveni $count minūtes.',
+  _ =>
+    'Rezervēšana ir apturēta apkopes dēļ. Mēģiniet vēlreiz pēc aptuveni $count minūtēm.',
+};
+
 String _continueWithTotalLv(String money) => 'Turpināt \u00b7 $money';
 
 /// The `lv` defaults for the native picker chrome.
@@ -284,6 +311,26 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
       'Neizdevās pievienot laiku. Dodieties uz maksājumu tagad.',
   seatsJustTaken:
       'Viena vai vairākas vietas tikko tika aizņemtas. Izvēlieties no jauna.',
+  ticketTypeSoldOut: 'Šis biļešu veids ir izpārdots. Mēģiniet citu veidu.',
+  seatsNoLongerAvailableTryAnother:
+      'Šīs vietas vairs nav pieejamas. Mēģiniet citu daudzumu vai biļetes veidu.',
+  companionPairRequired:
+      'Katrai pavadoņa biļetei izvēlieties blakus esošo ratiņkrēsla vietu.',
+  ticketOptionNotApplicable:
+      'Šis biļetes variants izvēlētajai vietai nav pieejams.',
+  maintenancePausedShortly:
+      'Rezervēšana uz dažām minūtēm ir apturēta apkopes dēļ. Mēģiniet vēlreiz pēc brīža.',
+  guestsOnly: 'Šis pasākums ir paredzēts ielūgtajiem viesiem.',
+  guestChoiceClosed: 'Vietu izvēle pašlaik nav atvērta.',
+  maxOneTicketForOrder: 'Šim pasūtījumam varat izvēlēties līdz 1 biļetei.',
+  tooManyAttempts:
+      'Pārāk daudz mēģinājumu. Uzgaidiet brīdi un mēģiniet vēlreiz.',
+  seatHeldForRenewal:
+      'Viena no šīm vietām tiek turēta abonementa īpašniekam, kurš to vēl var pagarināt. Izvēlieties citu vietu.',
+  seatUnavailable: 'Šī vieta nav pieejama.',
+  eventUnavailable: 'Pašlaik šeit nevar rezervēt biļetes.',
+  savedSeatsNotRestored:
+      'Jūsu iepriekšējās vietas neizdevās atjaunot. Lūdzu, izvēlieties vēlreiz.',
   allSetTitle: 'Viss ir gatavs',
   confirmedAndOnWay: 'apstiprināts. Apstiprinājums jau ceļā.',
   backToMap: 'Atpakaļ uz plānu',
@@ -310,6 +357,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   floorWord: 'Stāvs',
   totalWord: 'Kopā',
   adjustSelection: 'Pielāgot vietu izvēli',
+  backToSeatMap: 'Atpakaļ uz vietu plānu',
   chooseSeats: 'Izvēlieties savas vietas',
   chooseTickets: 'Izvēlieties biļetes',
   placeWord: 'VIETA',
@@ -368,6 +416,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutLv,
   accessFreeCount: _accessFreeCountLv,
   seatJustTakenByAnother: _seatJustTakenByAnotherLv,
+  labelNoLongerAvailable: _labelNoLongerAvailableLv,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableLv,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherLv,
+  maxTicketsForOrder: _maxTicketsForOrderLv,
+  couldNotRemoveLabel: _couldNotRemoveLabelLv,
   peekSecured: _peekSecuredLv,
   venueMap: _venueMapLv,
   accessibleStep: _accessibleStepLv,
@@ -393,5 +446,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   activeFilters: _activeFiltersLv,
   accessibilityFiltersActive: _accessibilityFiltersActiveLv,
   onlyLeft: _onlyLeftLv,
+  maintenancePaused: _maintenancePausedLv,
   continueWithTotal: _continueWithTotalLv,
 );

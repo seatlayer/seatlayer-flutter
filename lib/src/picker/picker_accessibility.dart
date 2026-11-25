@@ -529,7 +529,7 @@ const double _controlIconSize = 21;
 /// that turned a sheet of switches into a page of prose. The sentence rides an
 /// ⓘ beside the label now and opens under the row that owns it, and the label
 /// truncates rather than wrapping when a translation runs long, so twelve rows
-/// stay twelve lines on any phone.
+/// stay twelve lines on any phone. In the wide popover the label wraps.
 class _AccessOptionRow extends StatefulWidget {
   const _AccessOptionRow({
     required this.iconKey,
@@ -571,8 +571,11 @@ class _AccessOptionRow extends StatefulWidget {
   State<_AccessOptionRow> createState() => _AccessOptionRowState();
 }
 
-/// One row height for the whole sheet.
+/// The height of every row whose name fits on the lines it has.
 const double _rowHeight = 50;
+
+/// What keeps a row's text off its hairlines once it has grown.
+const double _rowPaddingY = 6;
 
 /// The width of the count column, right-aligned, wide enough for "999 free".
 const double _countColumn = 68;
@@ -620,9 +623,8 @@ class _AccessOptionRowState extends State<_AccessOptionRow> {
                     : const Border(),
               ),
               child: ConstrainedBox(
-                // ONE height for every row, whatever it carries: a sheet whose
-                // rows breathe differently reads as three lists in a trench
-                // coat.
+                // ONE height for every row whose name fits. A name that does
+                // not fit wraps and its row grows: it is never cut.
                 constraints: const BoxConstraints(minHeight: _rowHeight),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -648,20 +650,23 @@ class _AccessOptionRowState extends State<_AccessOptionRow> {
                         child: Row(
                           children: <Widget>[
                             Flexible(
-                              child: Text(
-                                label,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: theme.text,
-                                  fontSize: SeatLayerSizeTokens
-                                      .accessRowLabelFontSize,
-                                  fontWeight: seatLayerBoldWeight(
-                                    context,
-                                    FontWeight.w600,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: _rowPaddingY,
+                                ),
+                                child: Text(
+                                  label,
+                                  style: TextStyle(
+                                    color: theme.text,
+                                    fontSize: SeatLayerSizeTokens
+                                        .accessRowLabelFontSize,
+                                    fontWeight: seatLayerBoldWeight(
+                                      context,
+                                      FontWeight.w600,
+                                    ),
+                                    height: 1.25,
+                                    fontFamily: theme.fontFamily,
                                   ),
-                                  height: 1.25,
-                                  fontFamily: theme.fontFamily,
                                 ),
                               ),
                             ),

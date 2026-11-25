@@ -193,6 +193,29 @@ const KEYS = {
   couldNotAddMoreTime: 'picker.couldNotAddMoreTime',
   seatJustTakenByAnother: 'picker.seatJustTakenByAnother',
   seatsJustTaken: 'picker.seatsJustTaken',
+  // What a refused hold, finder or removal says. One sentence for one seat and
+  // one for several; a dictionary with a single form has only `.other`, so the
+  // one-seat sentence takes it there (see SINGLE_FORM below).
+  labelNoLongerAvailable: 'picker.labelsNoLongerAvailable.one',
+  labelsNoLongerAvailable: 'picker.labelsNoLongerAvailable.other',
+  couldNotFindSeatsTogether: 'picker.couldNotFindSeatsTogether',
+  ticketTypeSoldOut: 'picker.ticketTypeSoldOut',
+  seatsNoLongerAvailableTryAnother: 'picker.seatsNoLongerAvailableTryAnother',
+  companionPairRequired: 'picker.companionPairRequired',
+  ticketOptionNotApplicable: 'picker.ticketOptionNotApplicable',
+  couldNotRemoveLabel: 'picker.couldNotRemoveLabel',
+  'maintenancePaused.one': 'picker.maintenancePaused.one',
+  'maintenancePaused.other': 'picker.maintenancePaused.other',
+  maintenancePausedShortly: 'picker.maintenancePausedShortly',
+  guestsOnly: 'picker.guestsOnlyToast',
+  guestChoiceClosed: 'picker.guestChoiceClosed',
+  maxTicketsForOrder: 'picker.maxTicketsForOrder',
+  maxOneTicketForOrder: 'picker.maxOneTicketForOrder',
+  tooManyAttempts: 'checkout.error.rateLimited',
+  seatHeldForRenewal: 'season.seatHeldForRenewal',
+  seatUnavailable: 'picker.seatUnavailableNote',
+  eventUnavailable: 'picker.eventUnavailable',
+  savedSeatsNotRestored: 'picker.savedSeatsNotRestored',
   allSetTitle: 'picker.allSetTitle',
   confirmedAndOnWay: 'picker.confirmedAndOnWay',
   backToMap: 'picker.backToMap',
@@ -219,6 +242,11 @@ const KEYS = {
   // like any other, so the package keeps its English default for it until the
   // runtime's dictionaries carry it, and the next extraction then takes it.
   backToSeatMap: 'picker.backToSeatMap',
+};
+
+/** A key whose dictionary may have one form only -> the key that form is under. */
+const SINGLE_FORM = {
+  labelNoLongerAvailable: 'picker.labelsNoLongerAvailable.other',
 };
 
 /**
@@ -293,7 +321,10 @@ const IGNORED_APP_KEYS = [
 async function readDictionary(file) {
   const code = fs
     .readFileSync(file, 'utf8')
-    .replace(/^import[\s\S]*?;$/m, '')
+    .replace(/^import[\s\S]*?;$/gm, '')
+    // English spreads its Season page's texts in from a file of their own; the
+    // picker draws none of them.
+    .replace(/^\s*\.\.\.[A-Za-z0-9_$]+,$/gm, '')
     .replace(/export const\s+[A-Za-z0-9_$]+\s*:\s*Dict\s*=\s*/, 'export default ');
   const scratch = path.join(fs.mkdtempSync(path.join(process.env.TMPDIR || '/tmp', 'sl-')), 'dict.mjs');
   fs.writeFileSync(scratch, code);
@@ -405,7 +436,8 @@ if (process.argv[2] === '--plural-categories') {
     const dictionary = await readDictionary(path.join(dir, file));
     const entry = {};
     for (const [key, source] of Object.entries(KEYS)) {
-      if (typeof dictionary[source] === 'string') entry[key] = dictionary[source];
+      const value = dictionary[source] ?? dictionary[SINGLE_FORM[key]];
+      if (typeof value === 'string') entry[key] = value;
       // A counted sentence: take every form the runtime has for it, not just
       // the two English needs. Russian, Polish, Arabic and the rest choose
       // between `few`, `many`, `two` and `zero` too.

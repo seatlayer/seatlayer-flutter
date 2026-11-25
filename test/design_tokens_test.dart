@@ -25,7 +25,7 @@ String _sha256(String path) =>
     sha256.convert(File(path).readAsBytesSync()).toString();
 
 void main() {
-  test('the design inputs match the approved source lock', () {
+  test('the design inputs match the source lock', () {
     final lock = jsonDecode(
       File('design/source-lock.json').readAsStringSync(),
     ) as Map<String, Object?>;

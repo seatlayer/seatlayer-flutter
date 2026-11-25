@@ -149,7 +149,7 @@ void main() {
           ),
         );
 
-    // Securing the seats is words alone, as the design draws it, and stays
+    // Securing the seats is words alone, and stays
     // busy so the button stays down.
     final securing = _cta(_state(busy: SeatLayerPickerBusyAction.creatingHold));
     await pumpLabel(securing);

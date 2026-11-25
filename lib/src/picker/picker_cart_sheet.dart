@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -18,7 +19,6 @@ import 'picker_sheet_drag.dart';
 import 'picker_states.dart';
 import 'picker_styles.dart';
 import 'picker_tokens.g.dart';
-import 'picker_attribution.dart';
 import 'picker_errors.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -62,7 +62,7 @@ class SeatLayerCartSheet extends StatefulWidget {
     this.bestSeats,
     this.checkoutBar,
     this.actionError,
-    this.attribution = const SeatLayerPickerAttribution(compact: true),
+    this.attribution,
     this.reserveBottomInset = true,
     this.style,
     this.continueButtonStyle,
@@ -101,8 +101,8 @@ class SeatLayerCartSheet extends StatefulWidget {
   /// merges over.
   final ButtonStyle? continueButtonStyle;
 
-  /// The required SeatLayer attribution.
-  final Widget attribution;
+  /// A line of the host's own under the button, or nothing.
+  final Widget? attribution;
 
   /// Whether to reserve the device's bottom inset below the sheet.
   final bool reserveBottomInset;
@@ -290,8 +290,14 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
     // reads as a mistake, and the three were disagreeing in 3D.
     final theme = seatLayerMapChromeThemeOf(context);
     final layout = theme.layout;
-    final bottomInset =
-        widget.reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0;
+    // A phone that takes no room at its foot still keeps the button off the
+    // glass's edge.
+    final bottomInset = widget.reserveBottomInset
+        ? math.max(
+            MediaQuery.paddingOf(context).bottom,
+            SeatLayerSizeTokens.footMinInset,
+          )
+        : 0.0;
     final hasTickets = controller.confirmedCartLines.isNotEmpty;
     // The handle leaves while a confirm card is up (web 0.84.1): the disc was
     // sitting half under the card's scrim, and the card is the only question
@@ -693,7 +699,7 @@ class _SheetFoot extends StatelessWidget {
 
   final Widget? actionError;
   final Widget? checkoutBar;
-  final Widget attribution;
+  final Widget? attribution;
 
   /// Whether a card list sits above the foot and wants a rule under it.
   ///
@@ -740,9 +746,8 @@ class _SheetFoot extends StatelessWidget {
                   style: buttonStyle,
                 ),
             // Centred, not trailing: at the foot of a phone the trailing edge
-            // is the display's rounded corner, and a credit tucked into it lost
-            // its last letters behind the glass.
-            Center(child: attribution),
+            // is the display's rounded corner.
+            if (attribution case final line?) Center(child: line),
           ],
         ),
       ),

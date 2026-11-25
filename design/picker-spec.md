@@ -128,8 +128,7 @@ Header   brand · name over "date · venue" · sales-closed pill · hold pill ·
 │              ♿ · + · −                 ││ action error                 │
 │                                        ││ summary line                 │
 │                                        ││ full-width checkout button   │
-└────────────────────────────────────────┘│ Powered by SeatLayer         │
-                                          └──────────────────────────────┘
+└────────────────────────────────────────┘└──────────────────────────────┘
 ```
 
 - **Panel headings.** `strings.ticketPrices` over the price legend, drawn only
@@ -259,7 +258,7 @@ additionally tell the runtime to stop accepting input at all
 (`picker.setInteractionEnabled`), so the map is quiet as well as unclaimed
 while a decision is open.
 
-**The second guard, on the runtime's side (2026-09-05).** The three rules
+**The second guard, on the runtime's side.** The three rules
 above are necessary and, on iOS 26, not sufficient: measured on the
 simulator, the platform view is told it lost 134 ms before the finger lifts
 and WKWebView is handed the touch regardless, so a tap on a corner disc still
@@ -329,7 +328,9 @@ lose the event name) — with a hairline of `color.*.divider` under it. Start
 (the left in a left-to-right language, the right in Arabic or Hebrew): the
 brand mark, a square of `size.headerLogoSize` at `radius.headerLogo`, filled
 with the accent and carrying either the organizer's logo image (cover-fitted) or
-the first letter of the brand or event name in `color.*.onAccent`. Centre: the
+the first letter of the brand or event name in `color.*.onAccent` (on a brand
+accent: the organizer's ink where it reads at 3:1, else white where white
+does, else `#1A1200`, the web picker's rule from runtime 1.0.1). Centre: the
 event name at `size.headerNameFontSize` w700, one line, ellipsized. End, in
 order: the hold pill, the sales-closed pill, the close ring. The row's padding
 is directional: 12 before the mark on a phone (16 / 12 / 4 / 12 start / top /
@@ -706,7 +707,7 @@ the scene is up under the older gestures (§3.14), the same ♿ disc, then `+` a
 and leaves again, so it never moves a control below it. The standalone
 colourblind toggle is **off by default on both widths** — the palette is a
 switch in the accessibility sheet — and `showColorblindControl: true` adds it
-last, under `−`. The column has **no fit control of its own** (2026-09-06). It carried a plain fit-to-screen
+last, under `−`. The column has **no fit control of its own**. It carried a plain fit-to-screen
 button until then; two ways to frame the same flat venue on one composition is
 one too many, and the one that went is the one a pinch already does. The
 immersive scene keeps its own Fit chip (§3.14), which frames a camera rather
@@ -849,8 +850,8 @@ label now (`size.accessNoteIconSize`, muted, accent while open, inside a
 line is a line whether or not the buyer has asked for it. The ⓘ carries the
 sentence as its own accessible name, so it is spoken either way, and it is a
 separate node from the row's switch because the two do different things. The
-label itself is `maxLines: 1` and truncates: a translation that runs long
-shortens rather than wrapping.
+label itself is never cut: a name too long for its cell wraps and its row
+grows.
 
 **The line reads icon · name · ⓘ · count · switch**, and the ⓘ shares ONE cell
 with the label: it explains the words beside it, not the switch at the far end.
@@ -866,15 +867,14 @@ from `picker.accessShort.*` so they agree. The wire key `cart` is the CART
 live-caption provision (its glyph is the CC mark), so its English name is
 "Live captions"; it is not a mobility vehicle.
 
-Row anatomy, leading to trailing, at **one fixed height of 50 for every row on
-the sheet** — a sheet whose rows breathe differently reads as three lists in a
-trench coat:
+Row anatomy, leading to trailing, at **a height of 50 for every row whose name
+fits**; a row whose name wraps grows, with 6 above and below the name:
 
 | Cell | Width | Contents |
 | --- | --- | --- |
 | icon | `size.accessRowIconCell` (20) | the attribute's own drawing at `size.accessRowIconSize`, in `color.*.mutedText` |
 | gap | `size.accessRowGap` (10) | — |
-| label + ⓘ | flexible | the short name at `size.accessRowLabelFontSize` / w600 in `color.*.text`, one line, ellipsized; then, only where the row has a note, the ⓘ in a 36-wide column |
+| label + ⓘ | flexible | the short name at `size.accessRowLabelFontSize` / w600 in `color.*.text`, wrapping (never cut); then, only where the row has a note, the ⓘ in a 36-wide column |
 | count | 68, trailing-aligned | `strings.accessFreeCount`, or `0`; wide enough for "999 free" |
 | gap | `size.accessRowSwitchGap` (12) | — |
 | switch | `size.accessSwitchWidth` × `size.accessSwitchHeight` | drawn, not the platform's |
@@ -1891,9 +1891,10 @@ do about it, on the one line a buyer reads to find out what they are about to
 pay. `fromAmount` / `fromPriceText` and every path that carried them are gone.
 
 **The foot** is the lapse notice, the hold-ending cue, the inline action error,
-the total line, `size.footTotalGap` (8), the BookButton and the centred
-attribution, inside `size.footPadX` (16) / `size.footPadTop` (4) /
-`size.footPadBottom` (2). It carries a hairline on its top edge **only when the
+the total line, `size.footTotalGap` (8) and the BookButton, inside
+`size.footPadX` (16) / `size.footPadTop` (4) /
+`size.footPadBottom` (2), over the bottom safe inset, which is never less than
+`size.footMinInset` (10). It carries a hairline on its top edge **only when the
 sheet is open and there are tickets above it** — the collapsed sheet has
 nothing above the foot but the panel's own top edge, and a second hairline a
 few points under the first read as two lines for one edge. It is **not
@@ -2043,7 +2044,7 @@ for a line the selection cannot name, and `picker.frameSeat` for the card tap.
 #### 3.10.3 Foot
 
 Order: the lapse notice if there is one, the hold-ending cue, the inline action
-error, the total line, the checkout button, then the attribution. The whole
+error, the total line, then the checkout button. The whole
 foot is drawn in both sheet states, and it carries a hairline above it **only
 while the sheet is open with tickets in it** (§3.9).
 
@@ -2063,7 +2064,7 @@ Label ladder, in priority order:
    with no card up** and is simply disabled, and it offers no finder either.
    The card is the question; the footer says nothing about it, so the buyer's
    cart still reads as their cart underneath.
-4. securing → disabled, **no spinner** (words only, as the design draws it),
+4. securing → disabled, **no spinner** (words only),
    `strings.securingSeats`; still busy, so the button stays down
 5. opening checkout → disabled, **no spinner** (words only; the seats are held),
    `strings.seatsSecuredOpeningCheckout`; still busy, so the button stays down
@@ -2095,13 +2096,9 @@ Label ladder, in priority order:
 hold is never stranded. Checkout phases run idle → holding → checkout and each
 phase ends where the work ends, never on a timer.
 
-**Attribution** — `SeatLayerPickerAttribution`, height
-`size.attributionHeight`, `type.attribution`, centred at the **foot of the
-sheet**, where a phone's rounded corner cannot clip it. It reads the map
-chrome's palette, not the picker's, so its words survive on the dark scene
-sheet. Copy `strings.poweredBy`. Drawn when `branding.attributionRequired`; it is
-**absent entirely on a white-labelled account**, hidden server-side with no
-host switch.
+**No credit line.** The picker draws no "Powered by SeatLayer", whatever
+`branding.attributionRequired` says: the foot ends with its button.
+`SeatLayerPickerAttribution` is kept, deprecated, and draws nothing.
 
 The total is said ONCE, on the foot's own line, and there is no separate
 "secured" strip on a phone: the header pill is the clock, and each held card's
@@ -2514,7 +2511,7 @@ dismiss at `size.minimumHitTarget`. Due while the hold has under a minute left
 and the booked overlay is not up — and mounted only where the layout asks for
 it, which by default is the wide layout alone.
 
-**Decision (2026-09-04): not shown on the phone by default.** The phone picker
+**Not shown on the phone by default.** The phone picker
 gives the buyer ONE timer — the header's hold countdown
 (`SeatLayerPickerHoldCountdown`), which fills with the accent, breathes its
 status light, and counts the last minute out second by second to a screen
@@ -2625,6 +2622,51 @@ picker extending a host-owned hold — was not taken: it would change who owns
 the hold after handoff, which is checkout's contract, not the picker's.
 
 Dart file: `lib/src/picker/picker_errors.dart`.
+
+#### 3.13.14 What a refused action says
+
+After the map is ready, a failure is said in the inline action error in the web
+picker's own sentence, in the buyer's language. The machine code and the
+server's message go to the host's `onError`, never to the buyer. Where the code
+names its own sentence, the code decides; otherwise the action does.
+
+| What came back | What the buyer reads |
+|---|---|
+| no connection, no answer, a 5xx page, a 503, a command that timed out | `checkConnection` |
+| `maintenance_mode` | the operator's notice; else `maintenancePaused(minutes)` from `retryAfterS`, rounded up; else `maintenancePausedShortly` |
+| `event_closed`, "seat sales are closed" | `salesClosedToast` |
+| `guests_only` / `guest_choice_closed` | `guestsOnly` / `guestChoiceClosed` |
+| `rate_limited` | `tooManyAttempts` |
+| `companion_pair_required` / `ticket_option_not_applicable` | `companionPairRequired` / `ticketOptionNotApplicable` |
+| `channel_paused`; `buyer_access_revoked`; an expired or invalid session; `buyer_access_*_mismatch`, `access_provider_unavailable` | the access panel's title and body for paused; revoked; expired; not verified |
+| `seat_held_for_renewal` | `seatHeldForRenewal` |
+| `hold_quantity_exceeded`, when the limit comes with it | `maxTicketsForOrder(limit)` / `maxOneTicketForOrder` |
+| `channel_access_denied` | `accessUnverifiedCopy` |
+| `hold_not_active` / `hold_not_found`, `legacy_hold_requires_restart` | `holdExpired` / `savedSeatsNotRestored` |
+| `order_edit_in_progress`, `event_not_found`, `key_not_found`, `key_revoked`, `mode_mismatch`, `org_mismatch`, `credit_limit_reached`; `forbidden` and `not_found` on a hold or Best Available | `eventUnavailable` |
+| Best Available: `not_enough_together` / `sold_out` / anything else | `couldNotFindSeatsTogether(n)` / `ticketTypeSoldOut` / `seatsNoLongerAvailableTryAnother` |
+| a removal, anything else | `couldNotRemoveLabel(line)`; a standing place by its area |
+| more time, anything else | `couldNotAddMoreTime` |
+| a hold, with seats named (the first three, standing places left out) | `labelNoLongerAvailable` / `labelsNoLongerAvailable` |
+| `not_for_sale`, with no seat named | `seatUnavailable` |
+| a hold, anything else | `seatsJustTaken` |
+| a call made wrongly, or a page the app cannot speak to (`sl_incompatible`, `unsupported_*`, `read_only`, `destroyed`, `bad_payload`, `handoff_not_owned`, `table_quantity_rejected`, a missing or invalid argument, an idempotency key used twice) | `eventUnavailable` |
+| anything else | `checkConnection` |
+
+A removal and more time keep their own sentence for the codes from
+`seat_held_for_renewal` to `eventUnavailable`.
+
+The last two rows answer nobody: the action's own sentence would not be true.
+"Anything else" is a failure that may pass (a transport or decoding fault, a
+map still loading, a page's fallback code, an exception of the app's own
+checkout) and any code the picker does not know, outside a hold, Best
+Available, a removal and more time. The error's own line is never drawn.
+
+A sentence wraps and is never cut; the bar's words take at most 15 per cent of
+the screen's height (84 at least) and scroll past it, so the button under them stays in
+reach.
+
+Dart file: `lib/src/picker/picker_error_words.dart`.
 
 ### 3.14 3D chrome
 
@@ -2772,7 +2814,7 @@ A run (a few performances sold to one buyer as one hold) is drawn by the pinned
 `group.html` (contract `seatlayer-group-surface`, capabilities
 `group-surface-v1` and `group-app-shell-v1`), booted with `header: false`,
 `appBar: true` and `checkout: handoff`: the map, the seat card and the cart are
-the page's. Board FR01 (approved 23 Nov 2026): a page that says
+the page's. A page that says
 `group-app-shell-v2` honours `appBar` and hides its own name row, steps, hint
 line and key; the seat card is a bottom sheet on a phone. A 1.0.0 page ignores
 `appBar` and shows them.
@@ -3067,8 +3109,8 @@ of them portable:
   floored at `size.accessSheetMinHeight`, never taller than the screen — and
   the provision list **scrolls inside** that bound rather than the sheet
   growing;
-- **every row is one line at one fixed height (50)**, short name truncating
-  rather than wrapping, with any sentence it needs behind an ⓘ that opens
+- **every row is 50 high and grows only where its short name wraps**, with any
+  sentence it needs behind an ⓘ that opens
   *under* the row it belongs to;
 - **the whole line toggles**, so the target is the words and not the
   20-point switch at the end of it, and each row's count keeps its own

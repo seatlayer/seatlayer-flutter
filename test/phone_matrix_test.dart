@@ -3,8 +3,9 @@
 // See `phone_matrix_harness.dart` for the phones and the checks. Pictures of
 // the same screens are `phone_matrix_golden_test.dart`.
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
+import 'package:seatlayer/seatlayer.dart';
 import 'package:seatlayer/src/picker/picker_wide_panel.dart';
 
 import 'phone_matrix_harness.dart';
@@ -67,6 +68,60 @@ void main() {
     }
   });
 
+  // The longest thing the error bar says: a title and the line under it. Held
+  // sideways with the cart open has no layout of its own yet (below).
+  group('a refused action', () {
+    const refusal = SeatLayerError.bridge(
+      BridgeErrorPayload(
+        code: 'buyer_access_origin_mismatch',
+        message: 'buyer_access_origin_mismatch',
+        details: <String, Object?>{'status': 403},
+      ),
+    );
+    const states = <PhoneState>[
+      PhoneState.ready,
+      PhoneState.cart,
+      PhoneState.cartOpen,
+    ];
+    for (final phone in <Phone>[...uprightPhones, ...sidewaysPhones]) {
+      final sideways = sidewaysPhones.contains(phone);
+      for (final textScale in <double>[1, 1.3, if (!sideways) 2]) {
+        for (final state in states) {
+          if (sideways && state == PhoneState.cartOpen) continue;
+          for (final tag in const <String>['en', 'el', 'ar']) {
+            testWidgets('$phone, text $textScale, ${state.name}, $tag',
+                (tester) async {
+              final semantics = tester.ensureSemantics();
+              final strings = await pumpPhone(
+                tester,
+                phone,
+                state,
+                textScale: textScale,
+                locale: Locale(tag),
+                actionError: refusal,
+              );
+              expectPhoneLayout(tester, phone, strings);
+              for (final sentence in <String>[
+                strings.accessUnverifiedTitle,
+                strings.accessUnverifiedCopy,
+              ]) {
+                final text = tester.renderObject<RenderParagraph>(
+                  find.descendant(
+                    of: find.text(sentence),
+                    matching: find.byType(RichText),
+                  ),
+                );
+                expect(text.didExceedMaxLines, isFalse, reason: sentence);
+              }
+              expect(find.textContaining('mismatch'), findsNothing);
+              semantics.dispose();
+            });
+          }
+        }
+      }
+    }
+  });
+
   group('sideways', () {
     for (final phone in sidewaysPhones) {
       for (final scale in <double>[1, 1.3]) {
@@ -77,7 +132,7 @@ void main() {
                 '${presentation.name}, ${state.name}',
                 // Held sideways with the cart open, the sheet leaves about 30
                 // points of map and cuts the Map/3D switch and the fit button.
-                // No approved board covers this state yet; it waits for one.
+                // This state has no layout of its own yet.
                 skip: state == PhoneState.cartOpen, (tester) async {
               final semantics = tester.ensureSemantics();
               final strings = await pumpPhone(

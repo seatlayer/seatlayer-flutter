@@ -24,6 +24,17 @@ String _accessFreeCountZhHant(int count) => '$count 個可選';
 
 String _seatJustTakenByAnotherZhHant(String label) => '座位 $label 剛被另一位買家選走。';
 
+String _labelNoLongerAvailableZhHant(String label) => '$label 已無法選購。請另選座位。';
+
+String _labelsNoLongerAvailableZhHant(String labels) => '$labels 已無法選購。請另選座位。';
+
+String _couldNotFindSeatsTogetherZhHant(int count) =>
+    '找不到 $count 個連號座位。請減少座位數或改選其他票種。';
+
+String _maxTicketsForOrderZhHant(int count) => '本次訂單最多可選擇 $count 張票。';
+
+String _couldNotRemoveLabelZhHant(String label) => '無法移除 $label。您的座位保留維持不變。';
+
 String _peekSecuredZhHant(int count, String total) =>
     '✓ 已鎖定 $count 個 · $total，暫不會扣款';
 
@@ -75,6 +86,8 @@ String _activeFiltersZhHant(int count) => '$count 項篩選';
 String _accessibilityFiltersActiveZhHant(int count) => '已啟用 $count 項無障礙篩選';
 
 String _onlyLeftZhHant(int count) => '剩餘 $count 個座位';
+
+String _maintenancePausedZhHant(int count) => '訂位因維護暫時停止。請在約 $count 分鐘後再試。';
 
 String _continueWithTotalZhHant(String money) => '繼續 \u00b7 $money';
 
@@ -175,6 +188,19 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       moreTimeAdded: '已延長時間。您的座位仍在鎖定中。',
       couldNotAddMoreTime: '無法延長時間，請立即前往結帳。',
       seatsJustTaken: '有一個或多個座位剛被選走，請重新選擇。',
+      ticketTypeSoldOut: '該票種已售完。請改選其他票種。',
+      seatsNoLongerAvailableTryAnother: '這些座位已無法選購。請改用其他數量或票種。',
+      companionPairRequired: '每張陪同票都需要選擇相鄰的輪椅席位。',
+      ticketOptionNotApplicable: '該票種選項不適用於所選座位。',
+      maintenancePausedShortly: '訂位因維護暫停幾分鐘。請稍後再試。',
+      guestsOnly: '本活動僅向受邀賓客開放。',
+      guestChoiceClosed: '目前未開放選位。',
+      maxOneTicketForOrder: '本次訂單最多可選擇 1 張票。',
+      tooManyAttempts: '嘗試次數過多。請稍候片刻後再試。',
+      seatHeldForRenewal: '其中一個座位為仍可續購的季票持有人保留，請選擇其他座位。',
+      seatUnavailable: '此座位無法選擇。',
+      eventUnavailable: '目前無法在此預訂門票。',
+      savedSeatsNotRestored: '無法恢復您先前選擇的座位。請重新選擇。',
       allSetTitle: '一切就緒',
       confirmedAndOnWay: '已確認。確認通知即將送達。',
       backToMap: '返回座位圖',
@@ -197,6 +223,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       floorWord: '樓層',
       totalWord: '合計',
       adjustSelection: '調整選位',
+      backToSeatMap: '返回座位圖',
       chooseSeats: '選擇座位',
       chooseTickets: '選擇門票',
       placeWord: '席位',
@@ -252,6 +279,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       secureMoreAndCheckout: _secureMoreAndCheckoutZhHant,
       accessFreeCount: _accessFreeCountZhHant,
       seatJustTakenByAnother: _seatJustTakenByAnotherZhHant,
+      labelNoLongerAvailable: _labelNoLongerAvailableZhHant,
+      labelsNoLongerAvailable: _labelsNoLongerAvailableZhHant,
+      couldNotFindSeatsTogether: _couldNotFindSeatsTogetherZhHant,
+      maxTicketsForOrder: _maxTicketsForOrderZhHant,
+      couldNotRemoveLabel: _couldNotRemoveLabelZhHant,
       peekSecured: _peekSecuredZhHant,
       venueMap: _venueMapZhHant,
       accessibleStep: _accessibleStepZhHant,
@@ -277,5 +309,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       activeFilters: _activeFiltersZhHant,
       accessibilityFiltersActive: _accessibilityFiltersActiveZhHant,
       onlyLeft: _onlyLeftZhHant,
+      maintenancePaused: _maintenancePausedZhHant,
       continueWithTotal: _continueWithTotalZhHant,
     );

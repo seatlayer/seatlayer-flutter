@@ -2,9 +2,12 @@
 
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../seat_layer_error.dart';
+import 'picker_error_words.dart';
 import 'picker_internal.dart';
 import 'picker_models.dart';
 import 'seat_layer_picker_scope.dart';
@@ -19,6 +22,12 @@ const Set<String> _holdOwnershipCodes = <String>{
   'hold_selection_mismatch',
   'hold_already_active',
 };
+
+/// How much of the screen's height the bar's words may take before they scroll.
+const double _maxHeightFraction = .15;
+
+/// And what they always get, on a phone held sideways.
+const double _minMaxHeight = 84;
 
 class SeatLayerPickerActionError extends StatelessWidget {
   const SeatLayerPickerActionError({super.key});
@@ -56,7 +65,14 @@ class SeatLayerPickerActionError extends StatelessWidget {
         detail = strings.holdAlreadyHeldBody;
       }
     } else {
-      message = error is SeatLayerError ? error.message : '$error';
+      final words = pickerErrorWords(
+        error,
+        strings,
+        failure:
+            error is SeatLayerError ? controller.failureFor(error) : null,
+      );
+      message = words.message;
+      detail = words.detail;
     }
     return Material(
       color: theme.error,
@@ -64,52 +80,55 @@ class SeatLayerPickerActionError extends StatelessWidget {
         top: false,
         bottom: false,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(width: 12),
-            const Padding(
-              padding: EdgeInsets.only(top: 10),
-              child: Icon(Icons.error_outline_rounded, color: Colors.white),
-            ),
+            const Icon(Icons.error_outline_rounded, color: Colors.white),
             const SizedBox(width: 9),
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      message,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (detail != null) ...[
-                      const SizedBox(height: 2),
+              // A sentence that outgrows its share of the screen scrolls: it is
+              // never cut, and the checkout button under it stays in reach.
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: math.max(
+                    MediaQuery.sizeOf(context).height * _maxHeightFraction,
+                    _minMaxHeight,
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  primary: false,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
                       Text(
-                        detail,
-                        style: const TextStyle(color: Colors.white),
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                    if (release != null) ...[
-                      const SizedBox(height: 6),
-                      OutlinedButton(
-                        onPressed: state.isBusy ? null : release,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white),
-                          visualDensity: VisualDensity.compact,
+                        message,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
                         ),
-                        child: Text(strings.releaseAndChangeSeats),
                       ),
+                      if (detail != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          detail,
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ],
+                      if (release != null) ...[
+                        const SizedBox(height: 6),
+                        OutlinedButton(
+                          onPressed: state.isBusy ? null : release,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.white),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: Text(strings.releaseAndChangeSeats),
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),

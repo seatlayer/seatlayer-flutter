@@ -26,6 +26,21 @@ String _accessFreeCountHu(int count) => '$count szabad';
 String _seatJustTakenByAnotherHu(String label) =>
     'A(z) $label helyet az imént elvitte egy másik vásárló.';
 
+String _labelNoLongerAvailableHu(String label) =>
+    '$label már nem elérhető. Válassz másik helyet.';
+
+String _labelsNoLongerAvailableHu(String labels) =>
+    '$labels már nem elérhetők. Válassz másik csoportot.';
+
+String _couldNotFindSeatsTogetherHu(int count) =>
+    'Nem találtunk $count egymás melletti helyet. Próbálj kevesebb helyet vagy másik jegytípust.';
+
+String _maxTicketsForOrderHu(int count) =>
+    'Ehhez a rendeléshez legfeljebb $count jegyet választhatsz.';
+
+String _couldNotRemoveLabelHu(String label) =>
+    'Nem sikerült eltávolítani: $label. A foglalásod változatlan.';
+
 String _peekSecuredHu(int count, String total) =>
     '✓ $count rögzítve · $total. Még nem terhelünk meg';
 
@@ -156,6 +171,16 @@ String _onlyLeftHu(int count) => switch (pickerPluralCategory('hu', count)) {
   _ => '$count hely maradt',
 };
 
+String _maintenancePausedHu(int count) => switch (pickerPluralCategory(
+  'hu',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'A foglalás karbantartás miatt szünetel. Próbálja újra körülbelül $count perc múlva.',
+  _ =>
+    'A foglalás karbantartás miatt szünetel. Próbálja újra körülbelül $count perc múlva.',
+};
+
 String _continueWithTotalHu(String money) => 'Tovább \u00b7 $money';
 
 /// The `hu` defaults for the native picker chrome.
@@ -258,6 +283,26 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   couldNotAddMoreTime:
       'Nem sikerült több időt adni. Kérjük, most menj a fizetéshez.',
   seatsJustTaken: 'Egy vagy több helyet az imént elvittek. Válassz újra.',
+  ticketTypeSoldOut: 'Ez a jegytípus elfogyott. Próbálj másik jegytípust.',
+  seatsNoLongerAvailableTryAnother:
+      'Azok a helyek már nem elérhetők. Próbálj más darabszámot vagy jegytípust.',
+  companionPairRequired:
+      'Minden kísérőjegyhez válaszd ki a szomszédos kerekesszékes helyet.',
+  ticketOptionNotApplicable:
+      'Ez a jegytípus nem érhető el a kiválasztott helyre.',
+  maintenancePausedShortly:
+      'A foglalás karbantartás miatt néhány percig szünetel. Próbálja újra hamarosan.',
+  guestsOnly: 'Ez az esemény meghívott vendégeknek szól.',
+  guestChoiceClosed: 'A helyválasztás most nincs nyitva.',
+  maxOneTicketForOrder: 'Ehhez a rendeléshez legfeljebb 1 jegyet választhatsz.',
+  tooManyAttempts:
+      'Túl sok próbálkozás történt. Várjon egy kicsit, majd próbálja újra.',
+  seatHeldForRenewal:
+      'Az egyik hely egy szezonbérletesnek van fenntartva, aki még megújíthatja a bérletét. Válassz másik helyet.',
+  seatUnavailable: 'Ez a hely nem elérhető.',
+  eventUnavailable: 'Jegyet most nem lehet itt foglalni.',
+  savedSeatsNotRestored:
+      'A korábbi helyeit nem sikerült visszaállítani. Kérjük, válasszon újra.',
   allSetTitle: 'Minden készen áll',
   confirmedAndOnWay: 'megerősítve. A visszaigazolás úton van.',
   backToMap: 'Vissza az üléstervhez',
@@ -284,6 +329,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   floorWord: 'Emelet',
   totalWord: 'Összesen',
   adjustSelection: 'Helykiválasztás módosítása',
+  backToSeatMap: 'Vissza az üléstervhez',
   chooseSeats: 'Válaszd ki a helyeidet',
   chooseTickets: 'Válassz jegyeket',
   placeWord: 'HELY',
@@ -342,6 +388,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutHu,
   accessFreeCount: _accessFreeCountHu,
   seatJustTakenByAnother: _seatJustTakenByAnotherHu,
+  labelNoLongerAvailable: _labelNoLongerAvailableHu,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableHu,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherHu,
+  maxTicketsForOrder: _maxTicketsForOrderHu,
+  couldNotRemoveLabel: _couldNotRemoveLabelHu,
   peekSecured: _peekSecuredHu,
   venueMap: _venueMapHu,
   accessibleStep: _accessibleStepHu,
@@ -367,5 +418,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   activeFilters: _activeFiltersHu,
   accessibilityFiltersActive: _accessibilityFiltersActiveHu,
   onlyLeft: _onlyLeftHu,
+  maintenancePaused: _maintenancePausedHu,
   continueWithTotal: _continueWithTotalHu,
 );

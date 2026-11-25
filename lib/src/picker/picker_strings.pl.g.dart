@@ -27,6 +27,21 @@ String _accessFreeCountPl(int count) => 'Wolne: $count';
 String _seatJustTakenByAnotherPl(String label) =>
     'Miejsce $label właśnie zajął inny kupujący.';
 
+String _labelNoLongerAvailablePl(String label) =>
+    '$label nie jest już dostępne. Wybierz inne miejsce.';
+
+String _labelsNoLongerAvailablePl(String labels) =>
+    '$labels nie są już dostępne. Wybierz inną grupę.';
+
+String _couldNotFindSeatsTogetherPl(int count) =>
+    'Nie znaleźliśmy $count miejsc obok siebie. Spróbuj mniejszej liczby miejsc lub innego rodzaju biletu.';
+
+String _maxTicketsForOrderPl(int count) =>
+    'W tym zamówieniu możesz wybrać maksymalnie $count biletów.';
+
+String _couldNotRemoveLabelPl(String label) =>
+    'Nie udało się usunąć $label. Rezerwacja pozostaje bez zmian.';
+
 String _peekSecuredPl(int count, String total) =>
     '✓ $count zabezpieczone · $total. Jeszcze nic nie pobierzemy';
 
@@ -203,6 +218,20 @@ String _onlyLeftPl(int count) => switch (pickerPluralCategory('pl', count)) {
   _ => 'Zostało $count miejsca',
 };
 
+String _maintenancePausedPl(int count) => switch (pickerPluralCategory(
+  'pl',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Rezerwacja jest wstrzymana z powodu konserwacji. Spróbuj ponownie za około $count minutę.',
+  PickerPluralCategory.few =>
+    'Rezerwacja jest wstrzymana z powodu konserwacji. Spróbuj ponownie za około $count minuty.',
+  PickerPluralCategory.many =>
+    'Rezerwacja jest wstrzymana z powodu konserwacji. Spróbuj ponownie za około $count minut.',
+  _ =>
+    'Rezerwacja jest wstrzymana z powodu konserwacji. Spróbuj ponownie za około $count minuty.',
+};
+
 String _continueWithTotalPl(String money) => 'Dalej \u00b7 $money';
 
 /// The `pl` defaults for the native picker chrome.
@@ -306,6 +335,26 @@ const SeatLayerPickerStrings seatLayerPickerStringsPl = SeatLayerPickerStrings(
   moreTimeAdded: 'Dodano więcej czasu. Twoje miejsca są nadal zarezerwowane.',
   couldNotAddMoreTime: 'Nie udało się dodać czasu. Przejdź teraz do płatności.',
   seatsJustTaken: 'Jedno lub więcej miejsc właśnie zajęto. Wybierz ponownie.',
+  ticketTypeSoldOut:
+      'Ten rodzaj biletu jest wyprzedany. Spróbuj innego rodzaju biletu.',
+  seatsNoLongerAvailableTryAnother:
+      'Te miejsca nie są już dostępne. Spróbuj innej liczby lub innego rodzaju biletu.',
+  companionPairRequired:
+      'Do każdego biletu dla opiekuna wybierz sąsiednie miejsce dla wózka.',
+  ticketOptionNotApplicable:
+      'Ten rodzaj biletu nie jest dostępny dla wybranego miejsca.',
+  maintenancePausedShortly:
+      'Rezerwacja jest wstrzymana na kilka minut z powodu konserwacji. Spróbuj ponownie za chwilę.',
+  guestsOnly: 'To wydarzenie jest dla zaproszonych gości.',
+  guestChoiceClosed: 'Wybór miejsc nie jest teraz otwarty.',
+  maxOneTicketForOrder: 'W tym zamówieniu możesz wybrać maksymalnie 1 bilet.',
+  tooManyAttempts: 'Zbyt wiele prób. Poczekaj chwilę i spróbuj ponownie.',
+  seatHeldForRenewal:
+      'Jedno z tych miejsc jest zatrzymane dla posiadacza karnetu sezonowego, który wciąż może przedłużyć karnet. Wybierz inne miejsce.',
+  seatUnavailable: 'To miejsce jest niedostępne.',
+  eventUnavailable: 'Obecnie nie można tu zarezerwować biletów.',
+  savedSeatsNotRestored:
+      'Nie udało się przywrócić wcześniej wybranych miejsc. Wybierz je ponownie.',
   allSetTitle: 'Wszystko gotowe',
   confirmedAndOnWay: 'potwierdzone. Potwierdzenie jest w drodze.',
   backToMap: 'Wróć do planu',
@@ -332,6 +381,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsPl = SeatLayerPickerStrings(
   floorWord: 'Piętro',
   totalWord: 'Razem',
   adjustSelection: 'Dostosuj wybór miejsc',
+  backToSeatMap: 'Wróć do planu miejsc',
   chooseSeats: 'Wybierz swoje miejsca',
   chooseTickets: 'Wybierz bilety',
   placeWord: 'MIEJSCE',
@@ -390,6 +440,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsPl = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutPl,
   accessFreeCount: _accessFreeCountPl,
   seatJustTakenByAnother: _seatJustTakenByAnotherPl,
+  labelNoLongerAvailable: _labelNoLongerAvailablePl,
+  labelsNoLongerAvailable: _labelsNoLongerAvailablePl,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherPl,
+  maxTicketsForOrder: _maxTicketsForOrderPl,
+  couldNotRemoveLabel: _couldNotRemoveLabelPl,
   peekSecured: _peekSecuredPl,
   venueMap: _venueMapPl,
   accessibleStep: _accessibleStepPl,
@@ -415,5 +470,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsPl = SeatLayerPickerStrings(
   activeFilters: _activeFiltersPl,
   accessibilityFiltersActive: _accessibilityFiltersActivePl,
   onlyLeft: _onlyLeftPl,
+  maintenancePaused: _maintenancePausedPl,
   continueWithTotal: _continueWithTotalPl,
 );

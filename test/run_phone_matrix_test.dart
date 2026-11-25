@@ -1,4 +1,4 @@
-// The run picker on every phone in the matrix: the app's header (NS01) over
+// The run picker on every phone in the matrix: the app's header over
 // group.html, which a test cannot draw — the page is the web view, so its area
 // shows the page's ground here and the device runs show the rest.
 //
@@ -39,7 +39,7 @@ Future<SeatLayerPickerStrings> _pumpRun(
   Locale locale = const Locale('en'),
   bool golden = false,
 }) async {
-  // The page FR01 pairs with: it honours `appBar`.
+  // The page honours `appBar`.
   final page = RunPage(useFakeWebViewPlatform(), hello: runHelloAppBar);
   putOnPhone(tester, phone);
   final strings = SeatLayerPickerStrings.forLocale(locale);

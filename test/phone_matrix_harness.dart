@@ -162,8 +162,8 @@ Widget _mapPlaceholder(BuildContext context, SeatLayerPickerPartContext part) =>
 
 /// Put the picker on [phone] in [state].
 ///
-/// Returns the strings the picker draws, so a check can find its own words in
-/// any language.
+/// [actionError] is a refusal the buyer met there. Returns the strings the
+/// picker draws, so a check can find its own words in any language.
 Future<SeatLayerPickerStrings> pumpPhone(
   WidgetTester tester,
   Phone phone,
@@ -173,6 +173,7 @@ Future<SeatLayerPickerStrings> pumpPhone(
   Locale locale = const Locale('en'),
   PhonePresentation presentation = PhonePresentation.page,
   bool golden = false,
+  Object? actionError,
 }) async {
   useFakeWebViewPlatform();
   putOnPhone(tester, phone);
@@ -282,6 +283,10 @@ Future<SeatLayerPickerStrings> pumpPhone(
     await tester.tap(find.byIcon(Icons.keyboard_arrow_up_rounded).first);
     await pumpToRest(tester);
   }
+  if (actionError != null) {
+    picker.reportActionError(actionError);
+    await pumpToRest(tester);
+  }
   return strings;
 }
 
@@ -363,8 +368,8 @@ bool pressReaches(WidgetTester tester, Offset point, Tappable control) {
 
 /// The smallest a control may be: WCAG 2.2's 24 points (2.5.8, level AA).
 ///
-/// Apple asks for 44. The approved phone boards draw several controls between
-/// the two, so [controlsUnder] lists those for a decision rather than failing.
+/// Apple asks for 44. Several phone controls are between the two, so
+/// [controlsUnder] lists those rather than failing.
 const double minimumTapTarget = 24;
 
 /// What Apple's Human Interface Guidelines ask a control to be.

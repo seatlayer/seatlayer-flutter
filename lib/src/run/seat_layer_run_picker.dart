@@ -28,7 +28,7 @@ typedef SeatLayerRunContinueCallback = FutureOr<void> Function(
 /// The complete run picker: the header the event picker wears (brand mark,
 /// name, hold clock, ✕) over the run page, which draws the map, the seat
 /// card and the cart. The page's own header is off, and a page that honours
-/// `appBar` hides its name row, steps, hint line and key too (FR01).
+/// `appBar` hides its name row, steps, hint line and key too.
 ///
 /// Give it a definite size. [showSeatLayerRunPicker] puts it on a route of its
 /// own with system Back wired up.
@@ -193,7 +193,7 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
   }
 
   /// Whether this page keeps its own cart clear of the home indicator / gesture
-  /// bar from the inset the app sends (#15). Without it the app keeps a band
+  /// bar from the inset the app sends. Without it the app keeps a band
   /// there: the web view passes no bottom inset (env() reads 0 on iOS and
   /// Android).
   bool get _pageTakesInsets =>

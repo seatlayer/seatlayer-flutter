@@ -24,6 +24,19 @@ String _accessFreeCountJa(int count) => '空き $count';
 
 String _seatJustTakenByAnotherJa(String label) => '座席$labelは他のお客様が確保しました。';
 
+String _labelNoLongerAvailableJa(String label) =>
+    '$labelはご利用いただけなくなりました。別の席をお選びください。';
+
+String _labelsNoLongerAvailableJa(String labels) =>
+    '$labelsはご利用いただけなくなりました。別の席をお選びください。';
+
+String _couldNotFindSeatsTogetherJa(int count) =>
+    '隣り合った$count席が見つかりませんでした。席数を減らすか、別のチケット種別をお試しください。';
+
+String _maxTicketsForOrderJa(int count) => 'このご注文で選べるチケットは$count枚までです。';
+
+String _couldNotRemoveLabelJa(String label) => '$labelを外せませんでした。確保状況は変わっていません。';
+
 String _peekSecuredJa(int count, String total) =>
     '✓ $count席確保 · $total。まだ請求はされません';
 
@@ -75,6 +88,9 @@ String _activeFiltersJa(int count) => '絞り込み$count件';
 String _accessibilityFiltersActiveJa(int count) => 'バリアフリーの絞り込みを$count件適用中';
 
 String _onlyLeftJa(int count) => '残り$count席';
+
+String _maintenancePausedJa(int count) =>
+    '予約はメンテナンスのため一時停止中です。約$count分後にもう一度お試しください。';
 
 String _continueWithTotalJa(String money) => '次へ \u00b7 $money';
 
@@ -174,6 +190,20 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   moreTimeAdded: '時間を延長しました。座席は確保されたままです。',
   couldNotAddMoreTime: '時間を延長できませんでした。今すぐ決済にお進みください。',
   seatsJustTaken: '1席以上が他のお客様に確保されました。もう一度お選びください。',
+  ticketTypeSoldOut: 'そのチケット種別は完売しました。別の種別をお試しください。',
+  seatsNoLongerAvailableTryAnother: 'その座席はご利用いただけなくなりました。枚数かチケット種別を変えてお試しください。',
+  companionPairRequired: '同伴者チケットごとに、隣接する車椅子スペースを選択してください。',
+  ticketOptionNotApplicable: 'そのチケット種別は、選択した席ではご利用いただけません。',
+  maintenancePausedShortly: '予約はメンテナンスのため数分間停止しています。しばらくしてからもう一度お試しください。',
+  guestsOnly: 'このイベントは招待されたゲスト専用です。',
+  guestChoiceClosed: '現在、座席の選択は受け付けていません。',
+  maxOneTicketForOrder: 'このご注文で選べるチケットは1枚までです。',
+  tooManyAttempts: '試行回数が多すぎます。しばらく待ってからもう一度お試しください。',
+  seatHeldForRenewal:
+      'これらの座席のうち1席は、まだ更新できるシーズンチケット保有者のために確保されています。別の座席をお選びください。',
+  seatUnavailable: 'この席はご利用いただけません。',
+  eventUnavailable: '現在、ここではチケットを予約できません。',
+  savedSeatsNotRestored: '以前の座席を復元できませんでした。もう一度お選びください。',
   allSetTitle: '準備完了です',
   confirmedAndOnWay: '確定しました。確認のご連絡をお送りします。',
   backToMap: '座席図に戻る',
@@ -197,6 +227,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   floorWord: 'フロア',
   totalWord: '合計',
   adjustSelection: '座席の選択を調整',
+  backToSeatMap: '座席図に戻る',
   chooseSeats: '座席を選ぶ',
   chooseTickets: 'チケットを選ぶ',
   placeWord: 'スペース',
@@ -253,6 +284,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutJa,
   accessFreeCount: _accessFreeCountJa,
   seatJustTakenByAnother: _seatJustTakenByAnotherJa,
+  labelNoLongerAvailable: _labelNoLongerAvailableJa,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableJa,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherJa,
+  maxTicketsForOrder: _maxTicketsForOrderJa,
+  couldNotRemoveLabel: _couldNotRemoveLabelJa,
   peekSecured: _peekSecuredJa,
   venueMap: _venueMapJa,
   accessibleStep: _accessibleStepJa,
@@ -278,5 +314,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsJa = SeatLayerPickerStrings(
   activeFilters: _activeFiltersJa,
   accessibilityFiltersActive: _accessibilityFiltersActiveJa,
   onlyLeft: _onlyLeftJa,
+  maintenancePaused: _maintenancePausedJa,
   continueWithTotal: _continueWithTotalJa,
 );

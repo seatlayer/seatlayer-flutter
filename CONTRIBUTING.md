@@ -15,9 +15,9 @@ dart pub publish --dry-run
 
 The picker's colours, sizes, radii, elevations, type scale, motion table, haptic
 cues and default strings live in one platform-neutral file,
-[`design/tokens.json`](design/tokens.json); the catalogue describing every widget
-in terms of those tokens is [`design/components.md`](design/components.md),
-written so a Swift, Kotlin or React Native engineer can reproduce the design.
+`design/tokens.json`; the catalogue describing every widget in terms of those
+tokens is `design/components.md`, written so a Swift, Kotlin or React Native
+engineer can reproduce the design.
 
 `lib/src/picker/picker_tokens.g.dart` is **generated** from that JSON by
 `dart run tool/gen_tokens.dart` (`--check` fails if it is stale) and must not be

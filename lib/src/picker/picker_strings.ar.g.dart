@@ -26,6 +26,21 @@ String _accessFreeCountAr(int count) => '$count متاح';
 String _seatJustTakenByAnotherAr(String label) =>
     'حجز مشترٍ آخر المقعد $label للتو.';
 
+String _labelNoLongerAvailableAr(String label) =>
+    'لم يعد $label متاحًا. اختر مقعدًا آخر.';
+
+String _labelsNoLongerAvailableAr(String labels) =>
+    'لم تعد $labels متاحة. اختر مجموعة أخرى.';
+
+String _couldNotFindSeatsTogetherAr(int count) =>
+    'لم نجد $count مقاعد متجاورة. جرّب عددًا أقل أو نوع تذكرة آخر.';
+
+String _maxTicketsForOrderAr(int count) =>
+    'يمكنك اختيار $count تذكرة كحد أقصى لهذا الطلب.';
+
+String _couldNotRemoveLabelAr(String label) =>
+    'تعذّرت إزالة $label. حجزك المؤقت لم يتغير.';
+
 String _peekSecuredAr(int count, String total) =>
     '✓ تم تأمين $count · $total. لن نخصم أي مبلغ بعد';
 
@@ -235,6 +250,24 @@ String _onlyLeftAr(int count) => switch (pickerPluralCategory('ar', count)) {
   _ => 'بقي $count مقعد',
 };
 
+String _maintenancePausedAr(int count) => switch (pickerPluralCategory(
+  'ar',
+  count,
+)) {
+  PickerPluralCategory.zero =>
+    'الحجز متوقف مؤقتًا للصيانة. يُرجى المحاولة مجددًا بعد $count دقيقة.',
+  PickerPluralCategory.one =>
+    'الحجز متوقف مؤقتًا للصيانة. يُرجى المحاولة مجددًا بعد نحو $count دقيقة.',
+  PickerPluralCategory.two =>
+    'الحجز متوقف مؤقتًا للصيانة. يُرجى المحاولة مجددًا بعد نحو $count دقيقتين.',
+  PickerPluralCategory.few =>
+    'الحجز متوقف مؤقتًا للصيانة. يُرجى المحاولة مجددًا بعد نحو $count دقائق.',
+  PickerPluralCategory.many =>
+    'الحجز متوقف مؤقتًا للصيانة. يُرجى المحاولة مجددًا بعد نحو $count دقيقة.',
+  _ =>
+    'الحجز متوقف مؤقتًا للصيانة. يُرجى المحاولة مجددًا بعد نحو $count دقيقة.',
+};
+
 String _continueWithTotalAr(String money) => 'متابعة \u00b7 $money';
 
 /// The `ar` defaults for the native picker chrome.
@@ -334,6 +367,23 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   moreTimeAdded: 'تمت إضافة وقت. مقاعدك ما زالت محجوزة.',
   couldNotAddMoreTime: 'تعذّرت إضافة مزيد من الوقت. انتقل إلى الدفع الآن.',
   seatsJustTaken: 'حُجز مقعد أو أكثر للتو. اختر من جديد.',
+  ticketTypeSoldOut: 'نفد هذا النوع من التذاكر. جرّب نوعًا آخر.',
+  seatsNoLongerAvailableTryAnother:
+      'لم تعد تلك المقاعد متاحة. جرّب كمية أخرى أو نوع تذكرة آخر.',
+  companionPairRequired: 'اختر مكان الكرسي المتحرك المجاور مع كل تذكرة مرافق.',
+  ticketOptionNotApplicable: 'خيار التذكرة هذا غير متاح للمقعد المحدد.',
+  maintenancePausedShortly:
+      'الحجز متوقف مؤقتًا لبضع دقائق للصيانة. يُرجى المحاولة مجددًا بعد قليل.',
+  guestsOnly: 'هذه الفعالية مخصصة للضيوف المدعوين.',
+  guestChoiceClosed: 'اختيار المقاعد غير متاح الآن.',
+  maxOneTicketForOrder: 'يمكنك اختيار تذكرة واحدة كحد أقصى لهذا الطلب.',
+  tooManyAttempts: 'محاولات كثيرة جدًا. انتظر لحظة وأعد المحاولة.',
+  seatHeldForRenewal:
+      'أحد هذه المقاعد محجوز لحامل تذكرة موسمية لا يزال بإمكانه التجديد. اختر مقعدًا آخر.',
+  seatUnavailable: 'هذا المقعد غير متاح.',
+  eventUnavailable: 'لا يمكن حجز التذاكر هنا حاليًا.',
+  savedSeatsNotRestored:
+      'تعذّرت استعادة مقاعدك السابقة. يرجى الاختيار مرة أخرى.',
   allSetTitle: 'كل شيء جاهز',
   confirmedAndOnWay: 'تم التأكيد. رسالة التأكيد في طريقها إليك.',
   backToMap: 'العودة إلى الخريطة',
@@ -360,6 +410,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   floorWord: 'الطابق',
   totalWord: 'الإجمالي',
   adjustSelection: 'تعديل اختيار المقاعد',
+  backToSeatMap: 'العودة إلى خريطة المقاعد',
   chooseSeats: 'اختر مقاعدك',
   chooseTickets: 'اختر التذاكر',
   placeWord: 'مكان',
@@ -418,6 +469,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutAr,
   accessFreeCount: _accessFreeCountAr,
   seatJustTakenByAnother: _seatJustTakenByAnotherAr,
+  labelNoLongerAvailable: _labelNoLongerAvailableAr,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableAr,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherAr,
+  maxTicketsForOrder: _maxTicketsForOrderAr,
+  couldNotRemoveLabel: _couldNotRemoveLabelAr,
   peekSecured: _peekSecuredAr,
   venueMap: _venueMapAr,
   accessibleStep: _accessibleStepAr,
@@ -443,5 +499,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   activeFilters: _activeFiltersAr,
   accessibilityFiltersActive: _accessibilityFiltersActiveAr,
   onlyLeft: _onlyLeftAr,
+  maintenancePaused: _maintenancePausedAr,
   continueWithTotal: _continueWithTotalAr,
 );

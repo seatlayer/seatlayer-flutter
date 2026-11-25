@@ -25,6 +25,21 @@ String _accessFreeCountVi(int count) => 'Còn $count';
 String _seatJustTakenByAnotherVi(String label) =>
     'Ghế $label vừa được người mua khác đặt.';
 
+String _labelNoLongerAvailableVi(String label) =>
+    '$label không còn trống. Vui lòng chọn ghế khác.';
+
+String _labelsNoLongerAvailableVi(String labels) =>
+    '$labels không còn trống. Vui lòng chọn ghế khác.';
+
+String _couldNotFindSeatsTogetherVi(int count) =>
+    'Không tìm được $count ghế liền nhau. Hãy thử ít ghế hơn hoặc loại vé khác.';
+
+String _maxTicketsForOrderVi(int count) =>
+    'Bạn có thể chọn tối đa $count vé cho đơn hàng này.';
+
+String _couldNotRemoveLabelVi(String label) =>
+    'Không bỏ được $label. Các vé đang giữ vẫn giữ nguyên.';
+
 String _peekSecuredVi(int count, String total) =>
     '✓ Đã giữ $count · $total. Bạn chưa bị trừ tiền';
 
@@ -81,6 +96,9 @@ String _accessibilityFiltersActiveVi(int count) =>
     'Đang bật $count bộ lọc hỗ trợ tiếp cận';
 
 String _onlyLeftVi(int count) => 'Còn $count ghế';
+
+String _maintenancePausedVi(int count) =>
+    'Hệ thống đang tạm dừng đặt vé để bảo trì. Vui lòng thử lại sau khoảng $count phút.';
 
 String _continueWithTotalVi(String money) => 'Tiếp tục \u00b7 $money';
 
@@ -184,6 +202,25 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   couldNotAddMoreTime:
       'Không gia hạn được thời gian giữ ghế. Vui lòng thanh toán ngay.',
   seatsJustTaken: 'Một hoặc nhiều ghế vừa có người đặt. Vui lòng chọn lại.',
+  ticketTypeSoldOut: 'Loại vé đó đã hết. Hãy chọn loại vé khác.',
+  seatsNoLongerAvailableTryAnother:
+      'Các ghế đó không còn trống. Hãy thử số lượng hoặc loại vé khác.',
+  companionPairRequired:
+      'Mỗi vé người đi kèm cần chọn kèm chỗ dành cho xe lăn bên cạnh.',
+  ticketOptionNotApplicable: 'Lựa chọn vé đó không áp dụng cho ghế đã chọn.',
+  maintenancePausedShortly:
+      'Hệ thống tạm dừng đặt vé vài phút để bảo trì. Vui lòng thử lại sau ít phút.',
+  guestsOnly: 'Sự kiện này dành cho khách mời.',
+  guestChoiceClosed: 'Hiện không mở chọn chỗ ngồi.',
+  maxOneTicketForOrder: 'Bạn có thể chọn tối đa 1 vé cho đơn hàng này.',
+  tooManyAttempts:
+      'Bạn đã thử quá nhiều lần. Vui lòng chờ một chút rồi thử lại.',
+  seatHeldForRenewal:
+      'Một trong các ghế này đang được giữ cho người có vé cả mùa vẫn còn có thể gia hạn. Hãy chọn ghế khác.',
+  seatUnavailable: 'Ghế này không khả dụng.',
+  eventUnavailable: 'Hiện chưa thể đặt vé tại đây.',
+  savedSeatsNotRestored:
+      'Không khôi phục được các ghế bạn chọn trước đó. Vui lòng chọn lại.',
   allSetTitle: 'Đã xong',
   confirmedAndOnWay: 'đã được xác nhận. Email xác nhận đang được gửi đến bạn.',
   backToMap: 'Quay lại sơ đồ',
@@ -210,6 +247,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   floorWord: 'Tầng',
   totalWord: 'Tổng cộng',
   adjustSelection: 'Điều chỉnh ghế đã chọn',
+  backToSeatMap: 'Quay lại sơ đồ ghế',
   chooseSeats: 'Chọn ghế của bạn',
   chooseTickets: 'Chọn vé',
   placeWord: 'CHỖ',
@@ -268,6 +306,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutVi,
   accessFreeCount: _accessFreeCountVi,
   seatJustTakenByAnother: _seatJustTakenByAnotherVi,
+  labelNoLongerAvailable: _labelNoLongerAvailableVi,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableVi,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherVi,
+  maxTicketsForOrder: _maxTicketsForOrderVi,
+  couldNotRemoveLabel: _couldNotRemoveLabelVi,
   peekSecured: _peekSecuredVi,
   venueMap: _venueMapVi,
   accessibleStep: _accessibleStepVi,
@@ -293,5 +336,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   activeFilters: _activeFiltersVi,
   accessibilityFiltersActive: _accessibilityFiltersActiveVi,
   onlyLeft: _onlyLeftVi,
+  maintenancePaused: _maintenancePausedVi,
   continueWithTotal: _continueWithTotalVi,
 );

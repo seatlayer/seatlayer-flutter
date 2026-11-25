@@ -269,9 +269,9 @@ void main() {
     );
     for (final key in keys) {
       final label = SeatLayerPickerStrings.defaultAccessNeeds[key]!;
+      // On this width every English name fits on one line; none is ever cut.
       final text = tester.widget<Text>(find.text(label));
-      expect(text.maxLines, 1, reason: label);
-      expect(text.overflow, TextOverflow.ellipsis, reason: label);
+      expect(text.maxLines, isNull, reason: label);
       expect(
         tester.getSize(find.text(label)).height,
         lessThan(24),

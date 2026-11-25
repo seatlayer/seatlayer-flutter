@@ -25,7 +25,7 @@ view from each seat (3D for venues up to 60,000 seats; the 2D map benchmarked at
 [Season tickets](https://seatlayer.io/season-tickets/) · [Pricing](https://seatlayer.io/pricing/) ·
 [Live demo](https://seatlayer.io/demo/)
 
-Season tickets are in the web and server SDKs today, not in this SDK.
+Season tickets and runs open with `showSeatLayerSeasonPicker` and `showSeatLayerRunPicker`.
 
 ## Try it
 
@@ -214,7 +214,7 @@ numbers are defaults, not constants, and every buyer-facing string is an
 override:
 
 ```dart
-// before: the approved phone metrics and English defaults.
+// before: the default phone metrics and English defaults.
 // after: a taller dock, no floor strip, French wording.
 theme: const SeatLayerPickerThemeData.light(
   layout: SeatLayerPickerLayout(dockBarHeight: 60, sheetMaxHeightFraction: .5),
@@ -346,9 +346,11 @@ theme: const SeatLayerPickerThemeData(accent: Color(0xFFE54558)),
 The default constructor sets only the roles you name, so every ground role still
 comes from `themeMode`. Name `accent` alone and the ink on it is derived for
 you: white, the colour a brand already puts on its own, unless the accent is
-pale enough that white cannot be read on it (a yellow, a mint, a near-white
-tint), where it turns black. Pass `onAccent` to say it yourself and the picker
-uses exactly that, whatever it reads like. **A preset pins the mode:**
+pale enough that white cannot be read on it at 3:1 (a yellow, a mint, a
+near-white tint), where it turns near-black (`#1A1200`), the web picker's ink. An
+organizer's own ink from the chart is used where it reads at 3:1 on the accent.
+Pass `onAccent` to say it yourself and the picker uses exactly that, whatever it
+reads like. **A preset pins the mode:**
 `SeatLayerPickerThemeData.light()` and `.dark()` are complete ground palettes;
 each also sends a contrast-paired `SeatLayerMapThemeData` for the canvas
 background, row labels, free text and the selection ring, and an explicit
@@ -426,7 +428,6 @@ Every widget below works standalone inside a `SeatLayerPickerScope`.
 | `SeatLayerPickerTablePrompt` / `…GeneralAdmissionPrompt` | Quantity prompts |
 | `SeatLayerPickerSectionNavigator` | Section list and stepping |
 | `SeatLayerPickerTestModeIndicator` | The one test-event badge |
-| `SeatLayerPickerAttribution` | Draws the badge only when the server requires it; the server requires it on no plan, so it draws nothing |
 
 The individual corner controls (`…ZoomInButton`, `…ZoomToFitButton`,
 `…ViewModeControl`, `…ColorblindButton`, `…OverviewButton`,
@@ -444,12 +445,9 @@ event streams.
 The picker fails closed rather than showing a control that quietly does
 nothing, and it reads one immutable state snapshot at a time: stale state is
 dropped, and inventory-changing actions are serialized, repeated checkout taps
-included. Private buyer tokens stay in memory and never enter a snapshot. See
-[the picker architecture](doc/mobile-picker-architecture.md) for the layers,
-ownership rules and validation gates.
+included. Private buyer tokens stay in memory and never enter a snapshot.
 
-The design tokens behind these widgets, and how to build and test the package,
-are in [CONTRIBUTING.md](CONTRIBUTING.md).
+How to build and test the package is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Frequently asked questions
 

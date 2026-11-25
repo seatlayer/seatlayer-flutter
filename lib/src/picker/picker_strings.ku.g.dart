@@ -27,6 +27,21 @@ String _accessFreeCountKu(int count) => '$count vala';
 String _seatJustTakenByAnotherKu(String label) =>
     'Cihê $label nû ji hêla kirrûbarekî din ve hat girtin.';
 
+String _labelNoLongerAvailableKu(String label) =>
+    '$label êdî berdest nîne. Cihekî din hilbijêre.';
+
+String _labelsNoLongerAvailableKu(String labels) =>
+    '$labels êdî berdest nînin. Komeke din hilbijêre.';
+
+String _couldNotFindSeatsTogetherKu(int count) =>
+    'Me $count cihên li kêleka hev nedîtin. Cihên kêmtir an cureyeke bilêtê ya din biceribîne.';
+
+String _maxTicketsForOrderKu(int count) =>
+    'Ji bo vê siparîşê tu dikarî herî zêde $count bilêtan hilbijêrî.';
+
+String _couldNotRemoveLabelKu(String label) =>
+    '$label nehat rakirin. Girtina te neguherî.';
+
 String _peekSecuredKu(int count, String total) =>
     '✓ $count hatin piştrastkirin · $total. Hîn tu pere nayê girtin';
 
@@ -159,6 +174,16 @@ String _onlyLeftKu(int count) => switch (pickerPluralCategory('ku', count)) {
   _ => '$count cih mane',
 };
 
+String _maintenancePausedKu(int count) => switch (pickerPluralCategory(
+  'ku',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Rezervasyon ji bo lênihêrînê hatiye rawestandin. Ji kerema xwe piştî nêzîkî $count deqeyê dîsa biceribîne.',
+  _ =>
+    'Rezervasyon ji bo lênihêrînê hatiye rawestandin. Ji kerema xwe piştî nêzîkî $count deqeyan dîsa biceribîne.',
+};
+
 String _continueWithTotalKu(String money) => 'Berdewam bike \u00b7 $money';
 
 /// The `ku` defaults for the native picker chrome.
@@ -261,6 +286,28 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   couldNotAddMoreTime: 'Dem nehat zêdekirin. Niha here dravdanê.',
   seatsJustTaken:
       'Yek an zêdetir cih nû hatin girtin. Ji kerema xwe ji nû ve hilbijêre.',
+  ticketTypeSoldOut:
+      'Ew cureya bilêtê tev hatiye firotin. Cureyeke din biceribîne.',
+  seatsNoLongerAvailableTryAnother:
+      'Ew cih êdî berdest nînin. Hejmareke din an cureyeke bilêtê ya din biceribîne.',
+  companionPairRequired:
+      'Bi her bilêta hevrêtiyê re cihê kursiya teker ya cîran hilbijêre.',
+  ticketOptionNotApplicable:
+      'Ew vebijarka bilêtê ji bo cihê hilbijartî ne berdest e.',
+  maintenancePausedShortly:
+      'Rezervasyon ji bo lênihêrînê çend deqeyan hatiye rawestandin. Ji kerema xwe piştî demekê dîsa biceribîne.',
+  guestsOnly: 'Ev çalakî ji bo mêvanên vexwendî ye.',
+  guestChoiceClosed: 'Hilbijartina cihan niha ne vekirî ye.',
+  maxOneTicketForOrder:
+      'Ji bo vê siparîşê tu dikarî herî zêde 1 bilêtê hilbijêrî.',
+  tooManyAttempts:
+      'Gelek ceribandin hatin kirin. Hinekî bisekine û dîsa biceribîne.',
+  seatHeldForRenewal:
+      'Yek ji van cihan ji bo xwediyê bilêta demsalê tê girtin ku hîn dikare wê nû bike. Cihekî din hilbijêre.',
+  seatUnavailable: 'Ev cih ne berdest e.',
+  eventUnavailable: 'Niha li vir bilêt nayên rezervekirin.',
+  savedSeatsNotRestored:
+      'Kursiyên te yên berê nehatin vegerandin. Ji kerema xwe dîsa hilbijêre.',
   allSetTitle: 'Her tişt amade ye',
   confirmedAndOnWay: 'hat piştrastkirin. Piştrastkirin di rê de ye.',
   backToMap: 'Vegere nexşeyê',
@@ -287,6 +334,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   floorWord: 'Qat',
   totalWord: 'Tevahî',
   adjustSelection: 'Hilbijartina cihan sererast bike',
+  backToSeatMap: 'Vegere nexşeya cihan',
   chooseSeats: 'Cihên xwe hilbijêre',
   chooseTickets: 'Bilêtan hilbijêre',
   placeWord: 'CIH',
@@ -345,6 +393,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutKu,
   accessFreeCount: _accessFreeCountKu,
   seatJustTakenByAnother: _seatJustTakenByAnotherKu,
+  labelNoLongerAvailable: _labelNoLongerAvailableKu,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableKu,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherKu,
+  maxTicketsForOrder: _maxTicketsForOrderKu,
+  couldNotRemoveLabel: _couldNotRemoveLabelKu,
   peekSecured: _peekSecuredKu,
   venueMap: _venueMapKu,
   accessibleStep: _accessibleStepKu,
@@ -370,5 +423,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   activeFilters: _activeFiltersKu,
   accessibilityFiltersActive: _accessibilityFiltersActiveKu,
   onlyLeft: _onlyLeftKu,
+  maintenancePaused: _maintenancePausedKu,
   continueWithTotal: _continueWithTotalKu,
 );

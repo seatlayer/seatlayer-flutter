@@ -151,7 +151,7 @@ void main() {
     );
   });
 
-  testWidgets('native chrome shows one test badge and required attribution',
+  testWidgets('native chrome shows one test badge and no SeatLayer credit',
       (tester) async {
     final map = _FakeMapController();
     addTearDown(map.dispose);
@@ -161,40 +161,17 @@ void main() {
         const Column(
           children: <Widget>[
             SeatLayerPickerTestModeIndicator(),
+            // ignore: deprecated_member_use_from_same_package
             SeatLayerPickerAttribution(),
           ],
         ),
       ),
     );
+    // Even for a server that still asks for one.
     map.emit(pickerSnapshot());
     await tester.pump();
     expect(find.text('Test mode · books nothing'), findsOneWidget);
-    expect(find.text('Powered by SeatLayer'), findsOneWidget);
-  });
-
-  testWidgets('white-label entitlement hides only the attribution',
-      (tester) async {
-    final map = _FakeMapController();
-    addTearDown(map.dispose);
-    await tester.pumpWidget(
-      _app(
-        map,
-        const Column(
-          children: <Widget>[
-            SeatLayerPickerTestModeIndicator(),
-            SeatLayerPickerAttribution(),
-          ],
-        ),
-      ),
-    );
-    final snapshot = pickerSnapshot();
-    (snapshot['branding']! as Map<String, Object?>)['attributionRequired'] =
-        false;
-    map.emit(snapshot);
-    await tester.pump();
-
-    expect(find.text('Test mode · books nothing'), findsOneWidget);
-    expect(find.text('Powered by SeatLayer'), findsNothing);
+    expect(find.textContaining('SeatLayer'), findsNothing);
   });
 
   group('a tap on the test badge', () {
@@ -983,7 +960,8 @@ void main() {
       map.calls.last.$2,
       <String, Object?>{'holdId': 'hold-1'},
     );
-    expect(find.textContaining('checkout route failed'), findsOneWidget);
+    expect(find.text('Check your connection and try again.'), findsOneWidget);
+    expect(find.textContaining('checkout route failed'), findsNothing);
     expect(find.textContaining('rejection unavailable'), findsNothing);
   });
 }

@@ -26,6 +26,21 @@ String _accessFreeCountBg(int count) => 'Свободни: $count';
 String _seatJustTakenByAnotherBg(String label) =>
     'Място $label току-що беше заето от друг купувач.';
 
+String _labelNoLongerAvailableBg(String label) =>
+    '$label вече не е налично. Изберете друго място.';
+
+String _labelsNoLongerAvailableBg(String labels) =>
+    '$labels вече не са налични. Изберете друга група.';
+
+String _couldNotFindSeatsTogetherBg(int count) =>
+    'Не намерихме $count места едно до друго. Опитайте с по-малко места или друг вид билет.';
+
+String _maxTicketsForOrderBg(int count) =>
+    'За тази поръчка можете да изберете най-много $count билета.';
+
+String _couldNotRemoveLabelBg(String label) =>
+    'Не можахме да премахнем $label. Резервацията ви остава непроменена.';
+
 String _peekSecuredBg(int count, String total) =>
     '✓ $count запазени · $total. Още няма да ви таксуваме';
 
@@ -159,6 +174,16 @@ String _onlyLeftBg(int count) => switch (pickerPluralCategory('bg', count)) {
   _ => 'Остават $count места',
 };
 
+String _maintenancePausedBg(int count) => switch (pickerPluralCategory(
+  'bg',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Резервациите са временно спрени за поддръжка. Опитайте отново след около $count минута.',
+  _ =>
+    'Резервациите са временно спрени за поддръжка. Опитайте отново след около $count минути.',
+};
+
 String _continueWithTotalBg(String money) => 'Продължи \u00b7 $money';
 
 /// The `bg` defaults for the native picker chrome.
@@ -260,6 +285,25 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   couldNotAddMoreTime:
       'Не можахме да добавим време. Преминете към плащане сега.',
   seatsJustTaken: 'Едно или повече места току-що бяха заети. Изберете отново.',
+  ticketTypeSoldOut: 'Този вид билет е изчерпан. Опитайте с друг вид.',
+  seatsNoLongerAvailableTryAnother:
+      'Тези места вече не са налични. Опитайте с друго количество или друг вид билет.',
+  companionPairRequired:
+      'Към всеки билет за придружител изберете съседното място за инвалидна количка.',
+  ticketOptionNotApplicable:
+      'Този вариант на билет не е наличен за избраното място.',
+  maintenancePausedShortly:
+      'Резервациите са спрени за няколко минути заради поддръжка. Опитайте отново след малко.',
+  guestsOnly: 'Това събитие е за поканени гости.',
+  guestChoiceClosed: 'Изборът на места не е отворен в момента.',
+  maxOneTicketForOrder: 'За тази поръчка можете да изберете най-много 1 билет.',
+  tooManyAttempts: 'Твърде много опити. Изчакайте малко и опитайте отново.',
+  seatHeldForRenewal:
+      'Едно от тези места е запазено за притежател на абонамент, който все още може да го поднови. Изберете друго място.',
+  seatUnavailable: 'Това място не е налично.',
+  eventUnavailable: 'В момента тук не могат да се резервират билети.',
+  savedSeatsNotRestored:
+      'Предишните ви места не можаха да бъдат възстановени. Моля, изберете отново.',
   allSetTitle: 'Всичко е готово',
   confirmedAndOnWay: 'потвърдено. Потвърждението пътува към вас.',
   backToMap: 'Назад към плана',
@@ -286,6 +330,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   floorWord: 'Етаж',
   totalWord: 'Общо',
   adjustSelection: 'Промени избора на места',
+  backToSeatMap: 'Назад към плана на местата',
   chooseSeats: 'Изберете местата си',
   chooseTickets: 'Изберете билети',
   placeWord: 'МЯСТО',
@@ -344,6 +389,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutBg,
   accessFreeCount: _accessFreeCountBg,
   seatJustTakenByAnother: _seatJustTakenByAnotherBg,
+  labelNoLongerAvailable: _labelNoLongerAvailableBg,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableBg,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherBg,
+  maxTicketsForOrder: _maxTicketsForOrderBg,
+  couldNotRemoveLabel: _couldNotRemoveLabelBg,
   peekSecured: _peekSecuredBg,
   venueMap: _venueMapBg,
   accessibleStep: _accessibleStepBg,
@@ -369,5 +419,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   activeFilters: _activeFiltersBg,
   accessibilityFiltersActive: _accessibilityFiltersActiveBg,
   onlyLeft: _onlyLeftBg,
+  maintenancePaused: _maintenancePausedBg,
   continueWithTotal: _continueWithTotalBg,
 );

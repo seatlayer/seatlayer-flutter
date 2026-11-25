@@ -135,8 +135,8 @@ class _SeatLayerCartListState extends State<SeatLayerCartList> {
       ..clear()
       ..addAll(lines.map((line) => line.item.lineKey));
 
-    // The × stays on a card even while the host owns the hold (2026-09-05,
-    // TestFlight): hiding it left a buyer back from checkout with a washed
+    // The × stays on a card even while the host owns the hold:
+    // hiding it left a buyer back from checkout with a washed
     // card and no way to change anything. The runtime refuses the removal, and
     // that refusal is drawn as a state with a way out by the action bar.
     final removable = !SeatLayerPickerScope.optionsOf(context).readOnly;

@@ -25,6 +25,21 @@ String _accessFreeCountId(int count) => '$count kosong';
 String _seatJustTakenByAnotherId(String label) =>
     'Kursi $label baru saja diambil pembeli lain.';
 
+String _labelNoLongerAvailableId(String label) =>
+    '$label sudah tidak tersedia. Pilih kursi lain.';
+
+String _labelsNoLongerAvailableId(String labels) =>
+    '$labels sudah tidak tersedia. Pilih kursi lain.';
+
+String _couldNotFindSeatsTogetherId(int count) =>
+    'Tidak ada $count kursi berdampingan. Coba kurangi jumlah kursi atau pilih jenis tiket lain.';
+
+String _maxTicketsForOrderId(int count) =>
+    'Anda bisa memilih maksimal $count tiket untuk pesanan ini.';
+
+String _couldNotRemoveLabelId(String label) =>
+    '$label gagal dihapus. Kursi yang Anda tahan tidak berubah.';
+
 String _peekSecuredId(int count, String total) =>
     '✓ $count diamankan · $total. Anda belum ditagih';
 
@@ -83,6 +98,9 @@ String _accessibilityFiltersActiveId(int count) =>
     '$count filter aksesibilitas aktif';
 
 String _onlyLeftId(int count) => 'Sisa $count kursi';
+
+String _maintenancePausedId(int count) =>
+    'Pemesanan dihentikan sementara untuk pemeliharaan. Silakan coba lagi dalam sekitar $count menit.';
 
 String _continueWithTotalId(String money) => 'Lanjut \u00b7 $money';
 
@@ -188,6 +206,25 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
       'Waktu tidak bisa ditambah. Silakan lanjut ke pembayaran sekarang.',
   seatsJustTaken:
       'Satu atau beberapa kursi baru saja diambil. Silakan pilih lagi.',
+  ticketTypeSoldOut: 'Jenis tiket tersebut sudah habis. Coba jenis tiket lain.',
+  seatsNoLongerAvailableTryAnother:
+      'Kursi tersebut sudah tidak tersedia. Coba jumlah lain atau jenis tiket lain.',
+  companionPairRequired:
+      'Pilih tempat kursi roda di sebelahnya untuk setiap tiket pendamping.',
+  ticketOptionNotApplicable:
+      'Pilihan tiket tersebut tidak tersedia untuk kursi yang dipilih.',
+  maintenancePausedShortly:
+      'Pemesanan dihentikan beberapa menit untuk pemeliharaan. Silakan coba lagi sebentar lagi.',
+  guestsOnly: 'Acara ini khusus untuk tamu undangan.',
+  guestChoiceClosed: 'Pemilihan kursi sedang tidak dibuka.',
+  maxOneTicketForOrder: 'Anda bisa memilih maksimal 1 tiket untuk pesanan ini.',
+  tooManyAttempts: 'Terlalu banyak percobaan. Tunggu sebentar, lalu coba lagi.',
+  seatHeldForRenewal:
+      'Salah satu kursi ini dicadangkan untuk pemegang tiket musiman yang masih bisa memperpanjangnya. Pilih kursi lain.',
+  seatUnavailable: 'Kursi ini tidak tersedia.',
+  eventUnavailable: 'Saat ini tiket tidak bisa dipesan di sini.',
+  savedSeatsNotRestored:
+      'Kursi pilihan Anda sebelumnya tidak bisa dipulihkan. Silakan pilih lagi.',
   allSetTitle: 'Semua beres',
   confirmedAndOnWay: 'terkonfirmasi. Konfirmasi sedang dikirim.',
   backToMap: 'Kembali ke denah',
@@ -214,6 +251,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   floorWord: 'Lantai',
   totalWord: 'Total',
   adjustSelection: 'Ubah pilihan kursi',
+  backToSeatMap: 'Kembali ke denah kursi',
   chooseSeats: 'Pilih kursi Anda',
   chooseTickets: 'Pilih tiket',
   placeWord: 'TEMPAT',
@@ -272,6 +310,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutId,
   accessFreeCount: _accessFreeCountId,
   seatJustTakenByAnother: _seatJustTakenByAnotherId,
+  labelNoLongerAvailable: _labelNoLongerAvailableId,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableId,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherId,
+  maxTicketsForOrder: _maxTicketsForOrderId,
+  couldNotRemoveLabel: _couldNotRemoveLabelId,
   peekSecured: _peekSecuredId,
   venueMap: _venueMapId,
   accessibleStep: _accessibleStepId,
@@ -297,5 +340,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   activeFilters: _activeFiltersId,
   accessibilityFiltersActive: _accessibilityFiltersActiveId,
   onlyLeft: _onlyLeftId,
+  maintenancePaused: _maintenancePausedId,
   continueWithTotal: _continueWithTotalId,
 );

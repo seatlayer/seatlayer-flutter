@@ -92,7 +92,7 @@ class SeatLayerPickerHeader extends StatelessWidget {
 }
 
 /// The header's layout, fed what to show rather than reading it: the event
-/// picker and the Season page draw the same bar (NS01) from their own state.
+/// picker and the Season page draw the same bar from their own state.
 @internal
 class SeatLayerHeaderBar extends StatelessWidget {
   /// Creates the bar.

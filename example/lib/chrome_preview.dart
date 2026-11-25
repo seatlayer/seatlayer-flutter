@@ -261,7 +261,7 @@ Map<String, Object?> _snapshot({required int seats, bool venue3D = false}) {
       'currency': 'USD',
       'venue': 'Grand Theatre',
     },
-    'branding': <String, Object?>{'attributionRequired': true},
+    'branding': <String, Object?>{'attributionRequired': false},
     'features': <String, Object?>{
       'bestAvailable': true,
       'venue3d': true,

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
 import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
-import 'package:seatlayer/src/picker/picker_attribution.dart';
 import 'package:seatlayer/src/picker/picker_best_seats.dart';
 import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
@@ -279,17 +278,7 @@ void main() {
       await tester.pumpWidget(const SizedBox.shrink());
     });
 
-    testWidgets('the credit sits under the checkout bar', (tester) async {
-      await _mount(tester, _layout(), pickerSnapshot());
-
-      final bar = _rect(tester, find.byType(SeatLayerWideCheckoutFoot));
-      final credit = _rect(tester, find.byType(SeatLayerPickerAttribution));
-      expect(credit.top, greaterThanOrEqualTo(bar.bottom - .5));
-      // And the panel ends where the screen does: nothing hangs below it.
-      expect(credit.bottom, lessThanOrEqualTo(_tablet.height + .5));
-    });
-
-    testWidgets('the device inset is taken once, under the credit',
+    testWidgets('the panel ends with the checkout bar, over the device inset',
         (tester) async {
       final map = FakePickerMap(bundle: _bundle());
       addTearDown(map.dispose);
@@ -299,17 +288,8 @@ void main() {
       map.emit(pickerSnapshot());
       await pumpToRest(tester);
 
-      final button = _rect(
-        tester,
-        find.descendant(
-          of: find.byType(SeatLayerWideCheckoutFoot),
-          matching: find.byType(FilledButton),
-        ),
-      );
-      final credit = _rect(tester, find.byType(SeatLayerPickerAttribution));
-      // No inset-sized gap between the button and the line under it.
-      expect(credit.top - button.bottom, lessThan(20));
-      expect(credit.bottom, lessThanOrEqualTo(_tablet.height - 20 + .5));
+      final bar = _rect(tester, find.byType(SeatLayerWideCheckoutFoot));
+      expect(bar.bottom, closeTo(_tablet.height - 20, .5));
     });
 
     for (final direction in TextDirection.values) {

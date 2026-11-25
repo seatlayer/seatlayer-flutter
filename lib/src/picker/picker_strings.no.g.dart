@@ -26,6 +26,21 @@ String _accessFreeCountNo(int count) => '$count ledige';
 String _seatJustTakenByAnotherNo(String label) =>
     'Plass $label ble nettopp tatt av en annen kjøper.';
 
+String _labelNoLongerAvailableNo(String label) =>
+    '$label er ikke lenger ledig. Velg en annen plass.';
+
+String _labelsNoLongerAvailableNo(String labels) =>
+    '$labels er ikke lenger ledige. Velg en annen gruppe.';
+
+String _couldNotFindSeatsTogetherNo(int count) =>
+    'Vi fant ikke $count plasser ved siden av hverandre. Prøv færre plasser eller en annen billettype.';
+
+String _maxTicketsForOrderNo(int count) =>
+    'Du kan velge opptil $count billetter til denne bestillingen.';
+
+String _couldNotRemoveLabelNo(String label) =>
+    'Kunne ikke fjerne $label. Reservasjonen din er uendret.';
+
 String _peekSecuredNo(int count, String total) =>
     '✓ $count sikret · $total. Du blir ikke belastet ennå';
 
@@ -159,6 +174,16 @@ String _onlyLeftNo(int count) => switch (pickerPluralCategory('no', count)) {
   _ => '$count plasser igjen',
 };
 
+String _maintenancePausedNo(int count) => switch (pickerPluralCategory(
+  'no',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Bestilling er satt på pause på grunn av vedlikehold. Prøv igjen om cirka $count minutt.',
+  _ =>
+    'Bestilling er satt på pause på grunn av vedlikehold. Prøv igjen om cirka $count minutter.',
+};
+
 String _continueWithTotalNo(String money) => 'Fortsett \u00b7 $money';
 
 /// The `no` defaults for the native picker chrome.
@@ -261,6 +286,25 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   moreTimeAdded: 'Mer tid lagt til. Plassene dine er fortsatt reservert.',
   couldNotAddMoreTime: 'Kunne ikke legge til mer tid. Gå til betaling nå.',
   seatsJustTaken: 'Én eller flere plasser ble nettopp tatt. Velg på nytt.',
+  ticketTypeSoldOut: 'Den billettypen er utsolgt. Prøv en annen billettype.',
+  seatsNoLongerAvailableTryAnother:
+      'De plassene er ikke lenger ledige. Prøv et annet antall eller en annen billettype.',
+  companionPairRequired:
+      'Velg den tilstøtende rullestolplassen til hver ledsagerbillett.',
+  ticketOptionNotApplicable:
+      'Det billettvalget er ikke tilgjengelig for den valgte plassen.',
+  maintenancePausedShortly:
+      'Bestilling er satt på pause i noen minutter på grunn av vedlikehold. Prøv igjen om litt.',
+  guestsOnly: 'Dette arrangementet er for inviterte gjester.',
+  guestChoiceClosed: 'Plassvalget er ikke åpent akkurat nå.',
+  maxOneTicketForOrder: 'Du kan velge opptil 1 billett til denne bestillingen.',
+  tooManyAttempts: 'For mange forsøk. Vent litt og prøv igjen.',
+  seatHeldForRenewal:
+      'Én av disse plassene er holdt av til en sesongkortinnehaver som fortsatt kan fornye den. Velg en annen plass.',
+  seatUnavailable: 'Denne plassen er ikke tilgjengelig.',
+  eventUnavailable: 'Det kan ikke bestilles billetter her akkurat nå.',
+  savedSeatsNotRestored:
+      'De tidligere setene dine kunne ikke gjenopprettes. Velg på nytt.',
   allSetTitle: 'Da er alt klart',
   confirmedAndOnWay: 'bekreftet. En bekreftelse er på vei.',
   backToMap: 'Tilbake til kartet',
@@ -287,6 +331,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   floorWord: 'Etasje',
   totalWord: 'Totalt',
   adjustSelection: 'Juster plassvalget',
+  backToSeatMap: 'Tilbake til setekartet',
   chooseSeats: 'Velg plassene dine',
   chooseTickets: 'Velg billetter',
   placeWord: 'PLASS',
@@ -345,6 +390,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutNo,
   accessFreeCount: _accessFreeCountNo,
   seatJustTakenByAnother: _seatJustTakenByAnotherNo,
+  labelNoLongerAvailable: _labelNoLongerAvailableNo,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableNo,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherNo,
+  maxTicketsForOrder: _maxTicketsForOrderNo,
+  couldNotRemoveLabel: _couldNotRemoveLabelNo,
   peekSecured: _peekSecuredNo,
   venueMap: _venueMapNo,
   accessibleStep: _accessibleStepNo,
@@ -370,5 +420,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   activeFilters: _activeFiltersNo,
   accessibilityFiltersActive: _accessibilityFiltersActiveNo,
   onlyLeft: _onlyLeftNo,
+  maintenancePaused: _maintenancePausedNo,
   continueWithTotal: _continueWithTotalNo,
 );

@@ -15,7 +15,7 @@ const runHello = <String, Object?>{
   'commands': <String>[],
 };
 
-/// A page that honours `appBar` (FR01): it fits the web view and runs its
+/// A page that honours `appBar`: it fits the web view and runs its
 /// cart bar under the home indicator.
 final runHelloAppBar = <String, Object?>{
   ...runHello,
@@ -26,7 +26,7 @@ final runHelloAppBar = <String, Object?>{
   ],
 };
 
-/// A page that also takes the app's insets (#15): it keeps its cart clear of
+/// A page that also takes the app's insets: it keeps its cart clear of
 /// the home indicator itself.
 final runHelloInsets = <String, Object?>{
   ...runHelloAppBar,

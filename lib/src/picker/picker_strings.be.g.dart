@@ -27,6 +27,21 @@ String _accessFreeCountBe(int count) => 'Вольна: $count';
 String _seatJustTakenByAnotherBe(String label) =>
     'Месца $label толькі што заняў іншы пакупнік.';
 
+String _labelNoLongerAvailableBe(String label) =>
+    '$label больш недаступна. Выберыце іншае месца.';
+
+String _labelsNoLongerAvailableBe(String labels) =>
+    '$labels больш недаступныя. Выберыце іншую групу.';
+
+String _couldNotFindSeatsTogetherBe(int count) =>
+    'Мы не знайшлі $count месцаў побач. Паспрабуйце менш месцаў або іншы тып білета.';
+
+String _maxTicketsForOrderBe(int count) =>
+    'У гэтым заказе можна выбраць не больш за $count білетаў.';
+
+String _couldNotRemoveLabelBe(String label) =>
+    'Не ўдалося прыбраць $label. Броня засталася без змен.';
+
 String _peekSecuredBe(int count, String total) =>
     '✓ $count замацавана · $total. Спісання пакуль не будзе';
 
@@ -203,6 +218,20 @@ String _onlyLeftBe(int count) => switch (pickerPluralCategory('be', count)) {
   _ => 'Засталося $count месца',
 };
 
+String _maintenancePausedBe(int count) => switch (pickerPluralCategory(
+  'be',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Браніраванне прыпынена на тэхнічнае абслугоўванне. Паспрабуйце зноў прыкладна праз $count хвіліну.',
+  PickerPluralCategory.few =>
+    'Браніраванне прыпынена на тэхнічнае абслугоўванне. Паспрабуйце зноў прыкладна праз $count хвіліны.',
+  PickerPluralCategory.many =>
+    'Браніраванне прыпынена на тэхнічнае абслугоўванне. Паспрабуйце зноў прыкладна праз $count хвілін.',
+  _ =>
+    'Браніраванне прыпынена на тэхнічнае абслугоўванне. Паспрабуйце зноў прыкладна праз $count хвіліны.',
+};
+
 String _continueWithTotalBe(String money) => 'Працягнуць \u00b7 $money';
 
 /// The `be` defaults for the native picker chrome.
@@ -305,6 +334,25 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   couldNotAddMoreTime: 'Не ўдалося падоўжыць час. Перайдзіце да аплаты зараз.',
   seatsJustTaken:
       'Адно або некалькі месцаў толькі што занялі. Выберыце нанова.',
+  ticketTypeSoldOut: 'Гэты тып білета распрададзены. Паспрабуйце іншы тып.',
+  seatsNoLongerAvailableTryAnother:
+      'Гэтыя месцы больш недаступныя. Паспрабуйце іншую колькасць або тып білета.',
+  companionPairRequired:
+      'Да кожнага білета суправаджальніка выберыце суседняе месца для калянкі.',
+  ticketOptionNotApplicable:
+      'Гэты варыянт білета недаступны для выбранага месца.',
+  maintenancePausedShortly:
+      'Браніраванне прыпынена на некалькі хвілін для тэхнічнага абслугоўвання. Паспрабуйце зноў крыху пазней.',
+  guestsOnly: 'Гэтая падзея для запрошаных гасцей.',
+  guestChoiceClosed: 'Выбар месцаў зараз недаступны.',
+  maxOneTicketForOrder: 'У гэтым заказе можна выбраць не больш за 1 білет.',
+  tooManyAttempts: 'Занадта шмат спроб. Пачакайце крыху і паспрабуйце зноў.',
+  seatHeldForRenewal:
+      'Адно з гэтых месцаў замацавана за ўладальнікам абанемента, які яшчэ можа яго падоўжыць. Выберыце іншае месца.',
+  seatUnavailable: 'Гэта месца недаступна.',
+  eventUnavailable: 'Зараз тут нельга забраніраваць білеты.',
+  savedSeatsNotRestored:
+      'Не ўдалося аднавіць вашы папярэднія месцы. Калі ласка, выберыце зноў.',
   allSetTitle: 'Усё гатова',
   confirmedAndOnWay: 'пацверджана. Пацвярджэнне ўжо ў дарозе.',
   backToMap: 'Назад да схемы',
@@ -331,6 +379,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   floorWord: 'Паверх',
   totalWord: 'Разам',
   adjustSelection: 'Змяніць выбар месцаў',
+  backToSeatMap: 'Назад да схемы месцаў',
   chooseSeats: 'Выберыце свае месцы',
   chooseTickets: 'Выберыце білеты',
   placeWord: 'МЕСЦА',
@@ -389,6 +438,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutBe,
   accessFreeCount: _accessFreeCountBe,
   seatJustTakenByAnother: _seatJustTakenByAnotherBe,
+  labelNoLongerAvailable: _labelNoLongerAvailableBe,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableBe,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherBe,
+  maxTicketsForOrder: _maxTicketsForOrderBe,
+  couldNotRemoveLabel: _couldNotRemoveLabelBe,
   peekSecured: _peekSecuredBe,
   venueMap: _venueMapBe,
   accessibleStep: _accessibleStepBe,
@@ -414,5 +468,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   activeFilters: _activeFiltersBe,
   accessibilityFiltersActive: _accessibilityFiltersActiveBe,
   onlyLeft: _onlyLeftBe,
+  maintenancePaused: _maintenancePausedBe,
   continueWithTotal: _continueWithTotalBe,
 );

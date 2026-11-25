@@ -125,13 +125,6 @@ class _Home extends StatelessWidget {
                   ),
                 ),
               ),
-            const SizedBox(height: 8),
-            Text(
-              'The event picker also takes '
-              '--dart-define=SEATLAYER_PUBLIC_KEY=pk_test_…. For bridge work '
-              'without a key, run lib/offline_fixture_demo.dart.',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
           ],
         ),
       ),

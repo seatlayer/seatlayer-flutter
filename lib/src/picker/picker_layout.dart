@@ -6,7 +6,7 @@ import 'picker_tokens.g.dart';
 ///
 /// Every number the phone layout depends on lives here rather than inside a
 /// widget, so an integrator can retune the chrome without forking it. The
-/// defaults are the approved phone specification and are what the
+/// defaults are the phone specification and are what the
 /// zero-configuration [SeatLayerPicker] renders.
 @immutable
 class SeatLayerPickerLayout {
@@ -216,7 +216,8 @@ class SeatLayerPickerLayout {
   /// Edge length of every other map corner control.
   final double mapControlSize;
 
-  /// Height of the "Powered by SeatLayer" line.
+  /// Not used: the picker draws no credit line. Kept because a host may still
+  /// be passing it.
   final double attributionHeight;
 
   /// Font size of a price legend chip.

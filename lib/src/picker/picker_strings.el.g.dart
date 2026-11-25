@@ -27,6 +27,21 @@ String _accessFreeCountEl(int count) => '$count ελεύθερες';
 String _seatJustTakenByAnotherEl(String label) =>
     'Η θέση $label μόλις καταλήφθηκε από άλλον αγοραστή.';
 
+String _labelNoLongerAvailableEl(String label) =>
+    'Το $label δεν είναι πλέον διαθέσιμο. Επιλέξτε άλλη θέση.';
+
+String _labelsNoLongerAvailableEl(String labels) =>
+    'Τα $labels δεν είναι πλέον διαθέσιμα. Επιλέξτε άλλη ομάδα.';
+
+String _couldNotFindSeatsTogetherEl(int count) =>
+    'Δεν βρήκαμε $count θέσεις μαζί. Δοκιμάστε λιγότερες θέσεις ή άλλον τύπο εισιτηρίου.';
+
+String _maxTicketsForOrderEl(int count) =>
+    'Μπορείτε να επιλέξετε έως $count εισιτήρια για αυτή την παραγγελία.';
+
+String _couldNotRemoveLabelEl(String label) =>
+    'Δεν ήταν δυνατή η αφαίρεση του $label. Η κράτησή σας παραμένει ως έχει.';
+
 String _peekSecuredEl(int count, String total) =>
     '✓ $count εξασφαλίστηκαν · $total. Δεν θα χρεωθείτε ακόμη';
 
@@ -161,6 +176,16 @@ String _onlyLeftEl(int count) => switch (pickerPluralCategory('el', count)) {
   _ => 'Απομένουν $count θέσεις',
 };
 
+String _maintenancePausedEl(int count) => switch (pickerPluralCategory(
+  'el',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Οι κρατήσεις έχουν διακοπεί προσωρινά για συντήρηση. Δοκιμάστε ξανά σε περίπου $count λεπτό.',
+  _ =>
+    'Οι κρατήσεις έχουν διακοπεί προσωρινά για συντήρηση. Δοκιμάστε ξανά σε περίπου $count λεπτά.',
+};
+
 String _continueWithTotalEl(String money) => 'Συνέχεια \u00b7 $money';
 
 /// The `el` defaults for the native picker chrome.
@@ -265,6 +290,27 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
       'Δεν ήταν δυνατή η προσθήκη χρόνου. Προχωρήστε τώρα στην πληρωμή.',
   seatsJustTaken:
       'Μία ή περισσότερες θέσεις μόλις καταλήφθηκαν. Επιλέξτε ξανά.',
+  ticketTypeSoldOut:
+      'Αυτός ο τύπος εισιτηρίου εξαντλήθηκε. Δοκιμάστε άλλον τύπο.',
+  seatsNoLongerAvailableTryAnother:
+      'Αυτές οι θέσεις δεν είναι πλέον διαθέσιμες. Δοκιμάστε άλλη ποσότητα ή τύπο εισιτηρίου.',
+  companionPairRequired:
+      'Επιλέξτε τη διπλανή θέση αναπηρικού αμαξιδίου με κάθε εισιτήριο συνοδού.',
+  ticketOptionNotApplicable:
+      'Αυτή η επιλογή εισιτηρίου δεν είναι διαθέσιμη για την επιλεγμένη θέση.',
+  maintenancePausedShortly:
+      'Οι κρατήσεις έχουν διακοπεί για λίγα λεπτά λόγω συντήρησης. Δοκιμάστε ξανά σε λίγο.',
+  guestsOnly: 'Αυτή η εκδήλωση είναι για προσκεκλημένους.',
+  guestChoiceClosed: 'Η επιλογή θέσεων δεν είναι ανοιχτή αυτή τη στιγμή.',
+  maxOneTicketForOrder:
+      'Μπορείτε να επιλέξετε έως 1 εισιτήριο για αυτή την παραγγελία.',
+  tooManyAttempts: 'Πολλές προσπάθειες. Περιμένετε λίγο και δοκιμάστε ξανά.',
+  seatHeldForRenewal:
+      'Μία από αυτές τις θέσεις κρατείται για κάτοχο εισιτηρίου διαρκείας που μπορεί ακόμη να την ανανεώσει. Επιλέξτε άλλη θέση.',
+  seatUnavailable: 'Αυτή η θέση δεν είναι διαθέσιμη.',
+  eventUnavailable: 'Δεν είναι δυνατή η κράτηση εισιτηρίων εδώ αυτή τη στιγμή.',
+  savedSeatsNotRestored:
+      'Δεν ήταν δυνατή η επαναφορά των προηγούμενων θέσεών σας. Επιλέξτε ξανά.',
   allSetTitle: 'Όλα έτοιμα',
   confirmedAndOnWay: 'επιβεβαιώθηκε. Η επιβεβαίωση είναι καθ\' οδόν.',
   backToMap: 'Επιστροφή στον χάρτη',
@@ -291,6 +337,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   floorWord: 'Όροφος',
   totalWord: 'Σύνολο',
   adjustSelection: 'Προσαρμογή επιλογής θέσεων',
+  backToSeatMap: 'Επιστροφή στον χάρτη θέσεων',
   chooseSeats: 'Επιλέξτε τις θέσεις σας',
   chooseTickets: 'Επιλέξτε εισιτήρια',
   placeWord: 'ΘΕΣΗ',
@@ -350,6 +397,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutEl,
   accessFreeCount: _accessFreeCountEl,
   seatJustTakenByAnother: _seatJustTakenByAnotherEl,
+  labelNoLongerAvailable: _labelNoLongerAvailableEl,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableEl,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherEl,
+  maxTicketsForOrder: _maxTicketsForOrderEl,
+  couldNotRemoveLabel: _couldNotRemoveLabelEl,
   peekSecured: _peekSecuredEl,
   venueMap: _venueMapEl,
   accessibleStep: _accessibleStepEl,
@@ -375,5 +427,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   activeFilters: _activeFiltersEl,
   accessibilityFiltersActive: _accessibilityFiltersActiveEl,
   onlyLeft: _onlyLeftEl,
+  maintenancePaused: _maintenancePausedEl,
   continueWithTotal: _continueWithTotalEl,
 );

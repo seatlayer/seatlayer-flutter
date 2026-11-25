@@ -27,6 +27,21 @@ String _accessFreeCountFi(int count) => '$count vapaana';
 String _seatJustTakenByAnotherFi(String label) =>
     'Toinen ostaja otti juuri paikan $label.';
 
+String _labelNoLongerAvailableFi(String label) =>
+    '$label ei ole enää saatavilla. Valitse toinen paikka.';
+
+String _labelsNoLongerAvailableFi(String labels) =>
+    '$labels eivät ole enää saatavilla. Valitse toinen ryhmä.';
+
+String _couldNotFindSeatsTogetherFi(int count) =>
+    'Emme löytäneet $count paikkaa vierekkäin. Kokeile vähempää paikkaa tai toista lipputyyppiä.';
+
+String _maxTicketsForOrderFi(int count) =>
+    'Voit valita tähän tilaukseen enintään $count lippua.';
+
+String _couldNotRemoveLabelFi(String label) =>
+    'Kohdetta $label ei voitu poistaa. Varauksesi on ennallaan.';
+
 String _peekSecuredFi(int count, String total) =>
     '✓ $count varmistettu · $total. Emme veloita vielä';
 
@@ -156,6 +171,16 @@ String _onlyLeftFi(int count) => switch (pickerPluralCategory('fi', count)) {
   _ => '$count paikkaa jäljellä',
 };
 
+String _maintenancePausedFi(int count) => switch (pickerPluralCategory(
+  'fi',
+  count,
+)) {
+  PickerPluralCategory.one =>
+    'Varaaminen on keskeytetty huollon ajaksi. Yritä uudelleen noin $count minuutin kuluttua.',
+  _ =>
+    'Varaaminen on keskeytetty huollon ajaksi. Yritä uudelleen noin $count minuutin kuluttua.',
+};
+
 String _continueWithTotalFi(String money) => 'Jatka \u00b7 $money';
 
 /// The `fi` defaults for the native picker chrome.
@@ -257,6 +282,26 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   moreTimeAdded: 'Lisäaikaa annettu. Paikkasi ovat yhä varattuina.',
   couldNotAddMoreTime: 'Lisäaikaa ei voitu antaa. Siirry kassalle nyt.',
   seatsJustTaken: 'Yksi tai useampi paikka otettiin juuri. Valitse uudelleen.',
+  ticketTypeSoldOut:
+      'Tuo lipputyyppi on loppuunmyyty. Kokeile toista lipputyyppiä.',
+  seatsNoLongerAvailableTryAnother:
+      'Nuo paikat eivät ole enää saatavilla. Kokeile toista määrää tai lipputyyppiä.',
+  companionPairRequired:
+      'Valitse viereinen pyörätuolipaikka jokaisen avustajalipun kanssa.',
+  ticketOptionNotApplicable:
+      'Tämä lippuvalinta ei ole saatavilla valitulle paikalle.',
+  maintenancePausedShortly:
+      'Varaaminen on keskeytetty muutamaksi minuutiksi huollon vuoksi. Yritä pian uudelleen.',
+  guestsOnly: 'Tämä tapahtuma on kutsutuille vieraille.',
+  guestChoiceClosed: 'Paikkojen valinta ei ole nyt auki.',
+  maxOneTicketForOrder: 'Voit valita tähän tilaukseen enintään 1 lipun.',
+  tooManyAttempts: 'Liian monta yritystä. Odota hetki ja yritä uudelleen.',
+  seatHeldForRenewal:
+      'Yksi näistä paikoista on varattu kausilipun haltijalle, joka voi vielä uusia sen. Valitse toinen paikka.',
+  seatUnavailable: 'Tämä paikka ei ole saatavilla.',
+  eventUnavailable: 'Lippuja ei voi varata täällä juuri nyt.',
+  savedSeatsNotRestored:
+      'Aiempia paikkojasi ei voitu palauttaa. Valitse uudelleen.',
   allSetTitle: 'Kaikki valmista',
   confirmedAndOnWay: 'vahvistettu. Vahvistus on matkalla.',
   backToMap: 'Takaisin karttaan',
@@ -283,6 +328,7 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   floorWord: 'Kerros',
   totalWord: 'Yhteensä',
   adjustSelection: 'Säädä paikkavalintaa',
+  backToSeatMap: 'Takaisin paikkakarttaan',
   chooseSeats: 'Valitse paikkasi',
   chooseTickets: 'Valitse liput',
   placeWord: 'PAIKKA',
@@ -341,6 +387,11 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   secureMoreAndCheckout: _secureMoreAndCheckoutFi,
   accessFreeCount: _accessFreeCountFi,
   seatJustTakenByAnother: _seatJustTakenByAnotherFi,
+  labelNoLongerAvailable: _labelNoLongerAvailableFi,
+  labelsNoLongerAvailable: _labelsNoLongerAvailableFi,
+  couldNotFindSeatsTogether: _couldNotFindSeatsTogetherFi,
+  maxTicketsForOrder: _maxTicketsForOrderFi,
+  couldNotRemoveLabel: _couldNotRemoveLabelFi,
   peekSecured: _peekSecuredFi,
   venueMap: _venueMapFi,
   accessibleStep: _accessibleStepFi,
@@ -366,5 +417,6 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   activeFilters: _activeFiltersFi,
   accessibilityFiltersActive: _accessibilityFiltersActiveFi,
   onlyLeft: _onlyLeftFi,
+  maintenancePaused: _maintenancePausedFi,
   continueWithTotal: _continueWithTotalFi,
 );

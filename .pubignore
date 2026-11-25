@@ -10,6 +10,11 @@ example/build/
 example/ios/Pods/
 example/ios/Flutter/ephemeral/
 
+# The design source, its specification and the architecture notes stay in the
+# repository.
+design/
+doc/mobile-picker-architecture.md
+
 # Repository-only validation and contributor policy are not runtime package
 # payload. Pub consumers receive the SDK, public docs, and runnable example.
 .github/

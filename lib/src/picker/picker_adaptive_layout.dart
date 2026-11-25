@@ -39,7 +39,6 @@ import 'picker_tokens.g.dart';
 import 'seat_layer_picker_controller.dart';
 import 'picker_a11y.dart';
 import 'picker_accessibility.dart';
-import 'picker_attribution.dart';
 import 'picker_errors.dart';
 import 'picker_prompt_presentation.dart';
 import 'picker_prompts.dart';
@@ -406,7 +405,6 @@ class _SeatLayerPickerAdaptiveLayoutState
           widget.builders.bestAvailable,
           const SeatLayerBestSeatsForm(),
         );
-        const attribution = SeatLayerPickerAttribution();
         final actionError = _part(
           context,
           widget.builders.actionError,
@@ -720,10 +718,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                                       child:
                                           SingleChildScrollView(child: tray)),
                                   actionError,
-                                  SeatLayerWidePanelFoot(
-                                    checkout: checkout,
-                                    attribution: attribution,
-                                  ),
+                                  SeatLayerWidePanelFoot(checkout: checkout),
                                 ],
                               ),
                       ),
