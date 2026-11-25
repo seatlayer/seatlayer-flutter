@@ -162,6 +162,35 @@ void main() {
     expect(picker.controller.bookedHandoff, isNull);
   });
 
+  test('a booked hold is told once, also after the buyer starts a second cart',
+      () async {
+    final picker = _Picker()
+      ..answer = (_) => <String, Object?>{
+            'booked': true,
+            'status': 'booked',
+            'holdId': 'hold-1',
+            'revision': 3,
+            'snapshot': pickerSnapshot(revision: 3),
+          };
+    await picker.handOff();
+    expect(await picker.controller.markBooked(holdId: 'hold-1'), isTrue);
+    expect(picker.booked, hasLength(1));
+    expect(picker.controller.bookedHandoff?.holdId, 'hold-1');
+
+    // The second cart, then your server says again that the first is booked.
+    await picker.emit(pickerSnapshot(revision: 4, holdOwner: 'picker'));
+    expect(picker.controller.bookedHandoff, isNull);
+    picker.answer = (_) => <String, Object?>{
+          'booked': true,
+          'status': 'already_booked',
+          'holdId': 'hold-1',
+          'revision': 4,
+        };
+    expect(await picker.controller.markBooked(holdId: 'hold-1'), isTrue);
+    expect(picker.booked, hasLength(1));
+    expect(picker.controller.bookedHandoff, isNull);
+  });
+
   test('a booking of another hold is not this checkout\'s', () async {
     final picker = _Picker()
       ..answer = (_) => <String, Object?>{

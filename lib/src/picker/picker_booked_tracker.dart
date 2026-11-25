@@ -8,9 +8,10 @@ library;
 
 import 'picker_models.dart';
 
-/// Tracks one checkout handoff from hand-off to booking.
+/// Tracks each checkout handoff from hand-off to booking.
 class PickerBookedTracker {
   SeatLayerCheckoutHandoff? _booked;
+  final Set<String> _told = <String>{};
 
   /// The handoff the page said is booked, or null.
   SeatLayerCheckoutHandoff? get booked => _booked;
@@ -25,11 +26,11 @@ class PickerBookedTracker {
   }) {
     if (handoff == null) return null;
     if (holdId != null && holdId != handoff.holdId) return null;
-    if (_booked?.holdId == handoff.holdId) return null;
+    if (!_told.add(handoff.holdId)) return null;
     return _booked = handoff;
   }
 
-  /// Forget the booking: a live hold starts a new story, so a buyer who starts
-  /// a second cart is not congratulated twice.
+  /// The booking is over: a live hold starts a new story. It stays told, so a
+  /// second word of it does not come over the second cart.
   void reset() => _booked = null;
 }
