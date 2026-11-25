@@ -6,6 +6,7 @@
 
 - **`onBooked` and "You're all set" (behaviour change)** come only when the page says the hold is booked, which it does after your server has booked and you call `markBooked`. They also came when the handed-off hold left the map for another reason: the page was loaded again by a changed setting such as the language, you rejected the checkout, or the hold was lost on the server. The buyer then read that their tickets were confirmed, and nothing was booked. Take a sale from your own server, never from `onBooked`. A hold is told once: a second `markBooked` for it, after the buyer started another cart, no longer calls `onBooked` again or opens the booked screen over that cart.
 - **The first 15 seconds:** best seats, holding, checkout and the map's fit waited up to 15 seconds after the picker opened. They go to the page as soon as it is ready. `setMapInteractionEnabled` called before that is told to the page once it is ready.
+- **`buyerAccessTokenProvider` written inline in `build` (behaviour change),** as the README shows it: a rebuild no longer loads the page again, which emptied the picker and left seats held. The newest function is asked for the next token. An app that gave another provider on purpose, to start over for another buyer, now gives the picker another `key` too.
 
 ## 0.13.0 (2026-11-25)
 
