@@ -1,12 +1,9 @@
 /// The app's own server booked the hold; the map is told so at once.
 ///
-/// Without this the picker finds a booking by itself: a handed-off hold that
-/// leaves the snapshot with no expiry announced is a sale (see
-/// `picker_booked_tracker.dart`). That still holds. This is the explicit word
-/// for a host whose server has just booked: the runtime paints the bought seats
-/// booked, stops the clock and never releases that hold afterwards, and the
-/// snapshot that follows ends the hold the same way a booking does, so
-/// `onBooked` and the booked overlay follow as before.
+/// The runtime paints the bought seats booked, stops the clock and never
+/// releases that hold afterwards, and answers that it is booked. That answer is
+/// what `onBooked` and the booked overlay follow: a hold that only leaves the
+/// map is no sale (see `picker_booked_tracker.dart`).
 ///
 /// The web picker's `markBooked(holdId?)`, over the bridge.
 library;
@@ -45,8 +42,7 @@ extension SeatLayerPickerMarkBooked on SeatLayerPickerController {
   ///
   /// Resolves true when the hold is booked, or was already marked booked.
   /// Resolves false and changes nothing for another hold, no hold, or a
-  /// runtime that does not take the command ([supportsMarkBooked] is false);
-  /// the picker then still finds the booking when the hold leaves the map.
+  /// runtime that does not take the command ([supportsMarkBooked] is false).
   ///
   /// Allowed on a read-only picker: it books, releases and changes nothing on
   /// the server.
@@ -57,6 +53,8 @@ extension SeatLayerPickerMarkBooked on SeatLayerPickerController {
       <String, Object?>{if (holdId != null) 'holdId': holdId},
       SeatLayerPickerBusyAction.none,
     );
-    return jBool(jGet(result, 'booked')) == true;
+    if (jBool(jGet(result, 'booked')) != true) return false;
+    bookedByPage(jStr(jGet(result, 'holdId')) ?? holdId);
+    return true;
   }
 }
