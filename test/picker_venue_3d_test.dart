@@ -271,6 +271,41 @@ void main() {
     expect(find.textContaining('Row Stalls D C'), findsNothing);
   });
 
+  testWidgets('the caption names the row and the seat in the buyer\'s words',
+      (tester) async {
+    final map = FakePickerMap(bundle: _venueBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+    final strings = SeatLayerPickerStrings.forLocale(const Locale('ar'));
+
+    await tester.pumpWidget(
+      pickerHarness(
+        map,
+        const Directionality(
+          textDirection: TextDirection.rtl,
+          child: SeatLayerVenue3D(),
+        ),
+        options: SeatLayerPickerOptions(strings: strings),
+      ),
+    );
+    map.emit(_seatedInQualifiedRow());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        strings.seatIdentity(<String>[
+          'Stalls D',
+          // The chart's own name for its rows stays, as on the seat card.
+          'Row C',
+          '${strings.seatWord} 1',
+          strings.viewFromYourSeat,
+        ]),
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Seat'), findsNothing);
+  });
+
   testWidgets('stepping retargets the scene rather than rebuilding it',
       (tester) async {
     final map = FakePickerMap(bundle: _venueBundle());

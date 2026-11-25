@@ -15,6 +15,7 @@
 
 **Fixed**
 
+- **The 3D view's caption** names the row and the seat in the buyer's language, with the words the seat card uses. It said "Row" and "Seat" in English in every language.
 - **Arabic and Hebrew:** the toast, the lapsed-seats line, the hold-ending and booked states, the note under an accessibility row and the Row and Seat fields of the seat card keep their wider side at the start of the line, on the right. They kept it on the left.
 - **The accessibility sheet on a phone held sideways:** everything under its title scrolls as one, so every row can be reached and pressed. Only the list of needs scrolled, in a window of 21 to 48 points, half a row.
 - **After sales close,** a buyer who holds seats can still continue to checkout; the button was off. With no seats held the row says "Sales are closed" with the event's date and has no button.
