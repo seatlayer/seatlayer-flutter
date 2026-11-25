@@ -50,6 +50,10 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
       // part of what the buyer waited for.
       _readyInfo = info;
       _tapToReadyMs = _mountClock.elapsedMilliseconds;
+      // A new page takes touches until it is told not to.
+      if (!_mapInteractionEnabled) {
+        unawaited(setMapInteractionEnabled(false).catchError((Object _) {}));
+      }
       _callbacks.onReady?.call(info);
     });
     _accessExpiredSubscription = this.mapController.onBuyerAccessExpired.listen(
@@ -100,6 +104,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   /// Started when the picker mounts; the clock `tapToReadyMs` is read off.
   final Stopwatch _mountClock = Stopwatch();
   int? _tapToReadyMs;
+  bool _mapInteractionEnabled = true;
   ReadyInfo? _readyInfo;
   SeatLayerSeatView? _seatView;
 
@@ -1055,7 +1060,12 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   /// Older compatible runtimes that do not advertise the command are left
   /// unchanged, preserving source compatibility while the Flutter hit-test
   /// guard remains in place as a best-effort fallback.
+  ///
+  /// A page that is not ready answers nothing, and what the buyer asks for
+  /// next would wait behind it. It is told once it is ready.
   Future<void> setMapInteractionEnabled(bool enabled) {
+    _mapInteractionEnabled = enabled;
+    if (!mapController.isReady) return Future<void>.value();
     final bundle = mapController.bundleInfo;
     if (bundle != null &&
         !bundle.supportsCommand('picker.setInteractionEnabled')) {
