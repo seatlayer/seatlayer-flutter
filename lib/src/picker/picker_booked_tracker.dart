@@ -1,11 +1,9 @@
 /// When a handed-off hold has become a booking.
 ///
-/// The runtime clears the buyer's hold the moment every held seat reads
-/// `booked`, and it clears the same hold when the hold runs out — the snapshot
-/// cannot tell the two apart. The runtime announces an expiry on its own
-/// channel before the snapshot that shows the hold gone, so a hold that
-/// vanished with no expiry announced, while a checkout handoff is still open,
-/// is a sale. The web picker decides the same way.
+/// Only when the page says so. The hold leaves the snapshot for many reasons: it
+/// ran out, the host let it go, the page was loaded again and starts without
+/// it, or its seats were lost to another buyer. None of them is a sale, and a
+/// buyer who reads "You're all set" over one has no tickets.
 library;
 
 import 'picker_models.dart';
@@ -14,30 +12,24 @@ import 'picker_models.dart';
 class PickerBookedTracker {
   SeatLayerCheckoutHandoff? _booked;
 
-  /// The handoff whose seats settled to booked, or null.
+  /// The handoff the page said is booked, or null.
   SeatLayerCheckoutHandoff? get booked => _booked;
 
-  /// Feed one snapshot transition; returns the handoff that just settled to
-  /// booked, or null when nothing did.
+  /// The page said the hold [holdId] is booked; null is the hold handed off.
   ///
-  /// A live hold ends the previous booking's story, so a buyer who starts a
-  /// second cart is not congratulated twice.
-  SeatLayerCheckoutHandoff? observe({
+  /// Returns [handoff] the first time it is told, or null when it is not about
+  /// [handoff] or was told before.
+  SeatLayerCheckoutHandoff? said({
     required SeatLayerCheckoutHandoff? handoff,
-    required SeatLayerPickerHold? previous,
-    required SeatLayerPickerHold? next,
-    required bool expiryReported,
+    required String? holdId,
   }) {
-    if (next != null) {
-      _booked = null;
-      return null;
-    }
-    if (handoff == null || previous == null || expiryReported) return null;
+    if (handoff == null) return null;
+    if (holdId != null && holdId != handoff.holdId) return null;
     if (_booked?.holdId == handoff.holdId) return null;
-    _booked = handoff;
-    return handoff;
+    return _booked = handoff;
   }
 
-  /// Forget the booking, as when the host refuses the handoff.
+  /// Forget the booking: a live hold starts a new story, so a buyer who starts
+  /// a second cart is not congratulated twice.
   void reset() => _booked = null;
 }
