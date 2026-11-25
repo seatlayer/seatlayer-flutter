@@ -61,6 +61,14 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
       if (!_mapInteractionEnabled) {
         unawaited(setMapInteractionEnabled(false).catchError((Object _) {}));
       }
+      final theme = _themeForReady;
+      _themeForReady = null;
+      if (theme != null) {
+        unawaited(
+          setThemeMode(theme.mode, mapTheme: theme.ground)
+              .catchError((Object _) {}),
+        );
+      }
       _callbacks.onReady?.call(info);
       _reloadHold.pageReady();
     });
@@ -113,6 +121,9 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   final Stopwatch _mountClock = Stopwatch();
   int? _tapToReadyMs;
   bool _mapInteractionEnabled = true;
+
+  /// The colours asked for while the page was not ready.
+  ({SeatLayerThemeMode? mode, SeatLayerMapThemeData? ground})? _themeForReady;
   ReadyInfo? _readyInfo;
   SeatLayerSeatView? _seatView;
 
@@ -881,6 +892,10 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
     SeatLayerThemeMode? mode, {
     SeatLayerMapThemeData? mapTheme,
   }) {
+    if (!mapController.isReady) {
+      _themeForReady = (mode: mode, ground: mapTheme);
+      return Future<void>.value();
+    }
     final bundle = mapController.bundleInfo;
     if (bundle != null && !bundle.supportsCommand('picker.setThemeMode')) {
       return Future<void>.value();

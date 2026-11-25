@@ -36,7 +36,7 @@ class _EventPage extends SeasonPage {
         'native-chrome-contract-v1',
       ],
       'events': <String>[],
-      'commands': <String>[_command],
+      'commands': <String>[_command, 'picker.setThemeMode'],
     });
     await tester.pump();
   }
@@ -108,6 +108,26 @@ void main() {
       await tester.pump();
     }
     expect(page.asked('picker.bestAvailable'), isTrue);
+    await close(tester);
+  });
+
+  testWidgets('the phone turns dark while the page loads', (tester) async {
+    final (page, controller) = await open(tester);
+    await page.hello(tester);
+    ignorePickerAction(controller.setThemeMode(SeatLayerThemeMode.light));
+    ignorePickerAction(controller.setThemeMode(SeatLayerThemeMode.dark));
+    await tester.pump();
+    expect(page.asked('picker.setThemeMode'), isFalse);
+    await page.ready(tester);
+    page.answer(_command, const <String, Object?>{});
+    for (var i = 0; i < 4; i += 1) {
+      await tester.pump();
+    }
+    final asked = page.sent.where((e) => e.type == 'picker.setThemeMode');
+    expect(
+      asked.map((e) => (e.payload! as Map)['mode']),
+      <Object?>['dark'],
+    );
     await close(tester);
   });
 

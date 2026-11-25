@@ -4,13 +4,14 @@
 
 **Changed**
 
+- **Amounts (behaviour change)** are written as the map beside them writes them, in the language of `SeatLayerConfiguration.locale`, English when none is given: `$1,250.50`, `1.250,50 €`, `KWD 12.625`, `¥1,200`. They had no thousands mark, two decimals in every currency, and English marks in every language. Whole English amounts below 1,000 in euro, dollar, pound, rupee, yen, yuan and won are unchanged. A `formatter` of your own is used as before.
 - **Test badge:** a tap on it does nothing, where it opened a sentence. `SeatLayerPickerStrings.testModeExplained` is still accepted and is drawn nowhere.
 - **The map's +** stays in its place and dims on a phone when there is nothing more to zoom in to, where it left a gap.
 - **Longer waits:** the page may take 45 seconds to be ready (was 30; `handshakeTimeout`), and a call that can place a hold waits 45 seconds (was 15). The page itself waits up to 40 seconds for the server, so a hold that worked could be called failed. A longer `commandTimeout` of your own is kept.
 
 **Fixed**
 
-- **The first 15 seconds:** best seats, holding, checkout and the map's fit waited up to 15 seconds after the picker opened. They go to the page as soon as it is ready. `setMapInteractionEnabled` called before that is told to the page once it is ready.
+- **The first 15 seconds:** best seats, holding, checkout and the map's fit waited up to 15 seconds after the picker opened. They go to the page as soon as it is ready. `setMapInteractionEnabled` called before that is told to the page once it is ready. A phone that turned light or dark while the page loaded caused the same wait.
 - **A map that did not load:** the failure view with Try again opens when the page answers ready without a map, where an empty picker stood, and at once when the server answers the page with an HTTP error, where it took the whole wait.
 - **Standing areas and boxes** offer only amounts the page accepts. A box is sold as all its places, or as a party inside its range; with the wheelchair filter on, an area offers its wheelchair places. A tap on an area with nothing to offer opens nothing. New on `GAArea`: `bookingMode`, `minOccupancy`, `maxOccupancy`, `wheelchairPlaces` and `wheelchairAvailable`.
 - **When the page refuses standing places (behaviour change):** the prompt stays and the bar says "One or more seats were just taken. Please pick again." It closed as if the places were held. `setGeneralAdmissionQuantity` now completes with an error, `hold_unavailable`, for such a refusal.

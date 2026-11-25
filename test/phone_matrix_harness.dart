@@ -234,7 +234,10 @@ Future<SeatLayerPickerStrings> pumpPhone(
 
   final strings = SeatLayerPickerStrings.forLocale(locale);
   final rtl = locale.languageCode == 'ar' || locale.languageCode == 'he';
-  final configuration = SeatLayerConfiguration(event: 'ev_test');
+  final configuration = SeatLayerConfiguration(
+    event: 'ev_test',
+    locale: locale.toLanguageTag(),
+  );
   final options = SeatLayerPickerOptions(
     strings: strings,
     touchNavigation3D: state == PhoneState.venue3DClassic

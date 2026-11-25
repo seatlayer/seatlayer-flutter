@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'picker_a11y.dart';
 import 'picker_header.dart' show seatLayerAccentText;
 import 'picker_internal.dart';
+import 'picker_money.dart';
 import 'picker_models.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';

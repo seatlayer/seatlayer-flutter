@@ -253,7 +253,7 @@ class SeatLayerPickerStrings {
   /// )
   /// ```
   static SeatLayerPickerStrings forLocale(Locale locale) {
-    for (final tag in _candidates(locale)) {
+    for (final tag in localeNames(locale)) {
       final match = seatLayerPickerStringsByLocale[tag];
       if (match != null) return match;
     }
@@ -261,7 +261,8 @@ class SeatLayerPickerStrings {
   }
 
   /// The dictionary names [locale] could be, most specific first.
-  static Iterable<String> _candidates(Locale locale) sync* {
+  @internal
+  static Iterable<String> localeNames(Locale locale) sync* {
     final language = locale.languageCode;
     final script = locale.scriptCode;
     if (script != null) yield '$language-$script';
