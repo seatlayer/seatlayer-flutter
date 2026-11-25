@@ -115,6 +115,13 @@ abstract class SeatLayerBridgeSession<
 
   // MARK: - Handshake orchestration (driven by SeatLayerView)
 
+  /// The view was built again for the same page. [configuration] is the one to
+  /// ask from now on: its `buyerAccessTokenProvider` may be a new function.
+  @internal
+  void configurationRebuilt(C configuration) {
+    if (_configuration != null) _configuration = configuration;
+  }
+
   /// Attach a channel, arm the handshake, and complete when `sys.ready` arrives.
   /// Called by [SeatLayerView]; not part of the app-facing API.
   @internal

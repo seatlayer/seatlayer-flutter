@@ -244,7 +244,10 @@ class SeatLayerConfiguration implements SeatLayerSurfaceConfiguration {
         buyerAccessToken?.toJson(),
         other.buyerAccessToken?.toJson(),
       ) &&
-      identical(buyerAccessTokenProvider, other.buyerAccessTokenProvider) &&
+      // A function written inline in `build` is a new one each time. The page
+      // asks through the session, which holds the newest.
+      (buyerAccessTokenProvider == null) ==
+          (other.buyerAccessTokenProvider == null) &&
       _deepEquals(selectedObjects, other.selectedObjects) &&
       _deepEquals(selectableObjects, other.selectableObjects) &&
       numberOfPlacesToSelect == other.numberOfPlacesToSelect &&

@@ -246,7 +246,10 @@ class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
         !oldWidget.bridgeProfile.equivalentTo(widget.bridgeProfile);
     final runtimeChanged =
         controllerChanged || configurationChanged || profileChanged;
-    if (!runtimeChanged) return;
+    if (!runtimeChanged) {
+      widget.controller.configurationRebuilt(widget.configuration);
+      return;
+    }
 
     // Invalidate callbacks from the old page before closing its correlations.
     final generation = ++_generation;
