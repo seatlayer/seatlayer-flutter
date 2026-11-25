@@ -1,9 +1,7 @@
 // The host's server booked the hold, and says so.
 //
-// Without `markBooked` the picker learns of a booking only when the handed-off
-// hold leaves the map. With it the runtime settles the hold at once, and the
-// snapshot it sends back carries the hold away, so the booked rule fires on
-// that reply.
+// The runtime settles the hold at once and answers that it is booked; the
+// booked rule follows that answer.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/picker/picker_mark_booked.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';

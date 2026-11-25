@@ -133,8 +133,14 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
 
   SeatLayerPickerState get state => value;
 
-  /// The handoff whose seats settled to booked, or null.
+  /// The handoff that is booked, or null.
   SeatLayerCheckoutHandoff? get bookedHandoff => _booked.booked;
+
+  /// The page said that [holdId] is booked.
+  @internal
+  void bookedByPage(String? holdId) => _booked.said(
+      value.checkoutHandoff, holdId, notifyListeners, _callbacks.onBooked);
+
   SeatLayerPickerOptions get options => _options;
 
   /// Whether the buyer may hand this cart to checkout.
@@ -416,13 +422,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
       _callbacks.onSelectionValidityChanged?.call(snapshot.selectionValidity!);
     }
     final nextHold = snapshot.hold.active ? snapshot.hold : null;
-    final booked = _booked.observe(
-      handoff: value.checkoutHandoff,
-      previous: previousHold,
-      next: nextHold,
-      expiryReported: _holdExpiryReported,
-    );
-    if (booked != null) _callbacks.onBooked?.call(booked);
+    if (nextHold != null) _booked.reset();
     if (previousHold?.active != nextHold?.active ||
         previousHold?.owner != nextHold?.owner ||
         previousHold?.expiresAt != nextHold?.expiresAt) {
