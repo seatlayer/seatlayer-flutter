@@ -20,6 +20,7 @@ import 'picker_toast.dart';
 import 'picker_best_seats.dart';
 import 'picker_blocked_regions.dart';
 import 'picker_cart_sheet.dart';
+import 'picker_map_over_sheet.dart';
 import 'picker_confirm_card.dart';
 import 'picker_header.dart';
 import 'picker_layout.dart';
@@ -343,10 +344,6 @@ class _SeatLayerPickerAdaptiveLayoutState
             expanded: _sheetExpanded,
             onExpandedChanged: _setSheetExpanded,
             onCheckout: _checkoutAndAnnounce,
-            bestSeats: null,
-            cartList: null,
-            checkoutBar: null,
-            actionError: null,
           ),
         );
         // What chrome standing on the map's bottom edge has to clear.
@@ -868,7 +865,8 @@ class _SeatLayerPickerAdaptiveLayoutState
                 // Column's four rows are all keyed: a group with some keys and
                 // some without falls back to geometry for the unkeyed ones,
                 // which is how the map came to be read before the prices.
-                child: seatLayerReadingOrder(
+                child: PickerMapOverSheet(
+                map: seatLayerReadingOrder(
                   SeatLayerPickerReadingOrder.map,
                   SeatLayerMapChromeStack(
                     latch: _mapChromeLatch,
@@ -1073,16 +1071,19 @@ class _SeatLayerPickerAdaptiveLayoutState
                     ],
                   ),
                 ),
-              ),
-              if (chrome.showTicketPanel)
-                seatLayerReadingOrder(
-                  SeatLayerPickerReadingOrder.sheet,
-                  PickerPausedWhileConfirming(
-                    key: const ValueKey<String>('seatlayer-picker-sheet-pause'),
-                    confirming: seatCardUp,
-                    child: sheet,
-                  ),
+                sheet: !chrome.showTicketPanel
+                    ? null
+                    : seatLayerReadingOrder(
+                        SeatLayerPickerReadingOrder.sheet,
+                        PickerPausedWhileConfirming(
+                          key: const ValueKey<String>(
+                              'seatlayer-picker-sheet-pause'),
+                          confirming: seatCardUp,
+                          child: sheet,
+                        ),
+                      ),
                 ),
+              ),
             ],
           ),
         );

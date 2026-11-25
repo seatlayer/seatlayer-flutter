@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/picker/picker_cart_bar_rule.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_dock_bar.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/picker/picker_styles.dart';
-import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_theme.dart';
 
 import 'picker_test_fixture.dart';
@@ -44,15 +44,15 @@ void main() {
     map.emit(pickerSnapshot());
     await tester.pumpAndSettle();
 
-    // The collapsed sheet's one button is the footer's own call to action, so
-    // it takes the picker's button radius. It is a radius rather than a shape
-    // class, so a host style can still override it.
+    // The row's button has corners of its own, unless the app sets the
+    // picker's button radius. It is a radius rather than a shape class, so a
+    // host style can still override it.
     final button = find.byType(FilledButton);
     expect(button, findsOneWidget);
     expect(_shapeOf(tester, button), isA<RoundedRectangleBorder>());
     expect(
       (_shapeOf(tester, button)! as RoundedRectangleBorder).borderRadius,
-      BorderRadius.circular(SeatLayerRadiusTokens.button),
+      BorderRadius.circular(PickerCartBarSize.buttonRadius),
     );
     final painted = tester
         .widget<Material>(

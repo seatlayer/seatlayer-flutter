@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import '../payloads.dart';
 import 'picker_internal.dart';
 import 'picker_money.dart';
-import 'picker_short_map_scroll.dart';
 import 'picker_standing_amounts.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
@@ -438,9 +437,8 @@ class _PromptSheet extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           // Where it does not fit it opens at its foot: the number and the
           // buttons are there, and the name is a scroll away.
-          child: PickerShortMapScroll(
+          child: SingleChildScrollView(
             reverse: true,
-            roomUnder: 18 + MediaQuery.paddingOf(context).bottom,
             child: SafeArea(
               top: false,
               child: Padding(

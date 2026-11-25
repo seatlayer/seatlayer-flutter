@@ -4,6 +4,9 @@
 
 **Changed**
 
+- **The cart on a phone** is one row: a circle that opens the list, the count and the total with the seats under them, and the button. It was a block of three rows with a handle on its edge, so the map is about 40 to 70 points taller. The words open the list as the circle does, a new seat closes it, and where the button's own words do not fit two lines it goes under the words. Under the row stands the phone's own strip alone, or 10 points where there is none. `sheetHandleWidth`, `sheetHandleHeight`, `sheetHandleOverhang` and `sheetHeadHeight` on the layout are still accepted and have no effect.
+- **The seats on that row** are named as the map names them: the section once, then row and seat, "Dress Circle · C-6, C-7".
+- **When nothing is left to sell** the button says "Select seats" and is off, where it opened a form that could find nothing.
 - **Amounts (behaviour change)** are written as the map beside them writes them, in the language of `SeatLayerConfiguration.locale`, English when none is given: `$1,250.50`, `1.250,50 €`, `KWD 12.625`, `¥1,200`. They had no thousands mark, two decimals in every currency, and English marks in every language. Whole English amounts below 1,000 in euro, dollar, pound, rupee, yen, yuan and won are unchanged. A `formatter` of your own is used as before.
 - **Test badge:** a tap on it does nothing, where it opened a sentence. `SeatLayerPickerStrings.testModeExplained` is still accepted and is drawn nowhere.
 - **The map's +** stays in its place and dims on a phone when there is nothing more to zoom in to, where it left a gap.
@@ -11,6 +14,8 @@
 
 **Fixed**
 
+- **After sales close,** a buyer who holds seats can still continue to checkout; the button was off. With no seats held the row says "Sales are closed" with the event's date and has no button.
+- **The open cart on a short screen** gives way to what stands over the map.
 - **The first 15 seconds:** best seats, holding, checkout and the map's fit waited up to 15 seconds after the picker opened. They go to the page as soon as it is ready. `setMapInteractionEnabled` called before that is told to the page once it is ready. A phone that turned light or dark while the page loaded caused the same wait.
 - **A map that did not load:** the failure view with Try again opens when the page answers ready without a map, where an empty picker stood, and at once when the server answers the page with an HTTP error, where it took the whole wait.
 - **Standing areas and boxes** offer only amounts the page accepts. A box is sold as all its places, or as a party inside its range; with the wheelchair filter on, an area offers its wheelchair places. A tap on an area with nothing to offer opens nothing. New on `GAArea`: `bookingMode`, `minOccupancy`, `maxOccupancy`, `wheelchairPlaces` and `wheelchairAvailable`.
