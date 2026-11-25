@@ -31,7 +31,7 @@ class SeatLayerSeasonConfiguration implements SeatLayerSurfaceConfiguration {
     this.enable3DCrowd,
     this.touchNavigation3D,
     this.commandTimeout = BridgeClient.defaultTimeout,
-    this.handshakeTimeout = const Duration(seconds: 30),
+    this.handshakeTimeout = const Duration(seconds: 45),
     this.hostInfo = const {},
     this.assetPath = defaultAssetPath,
   }) {

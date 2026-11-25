@@ -121,6 +121,20 @@ class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
             );
           }
         },
+        onHttpError: (error) {
+          if (!mounted ||
+              widget.controller.isReady ||
+              !seatLayerIsPageHttpError(
+                error,
+                widget.configuration.assetPath,
+              )) {
+            return;
+          }
+          widget.controller.failWithTransport(
+            'page load failed: HTTP ${error.response?.statusCode ?? ''}'
+                .trimRight(),
+          );
+        },
       );
 
   Future<void> _disablePlatformOverScroll() async {

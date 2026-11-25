@@ -27,6 +27,15 @@ const Duration seatLayerPrewarmDefaultTtl = Duration(minutes: 5);
 /// time to send `init`.
 const Duration seatLayerPrewarmHandshakeWindow = Duration(seconds: 6);
 
+/// Whether [error] is the answer to the request for the page itself.
+///
+/// Android reports every request of the page, by its address. iOS reports the
+/// page's own answer alone, and no address.
+bool seatLayerIsPageHttpError(HttpResponseError error, String page) {
+  final uri = error.request?.uri;
+  return uri == null || uri == Uri.tryParse(page);
+}
+
 /// A runtime page that was started before anything asked to look at it.
 ///
 /// The page emits its bridge `hello` as soon as it boots, which is normally
@@ -156,6 +165,11 @@ abstract final class SeatLayerRuntimePrewarm {
               page._failed = true;
               discard(url);
             }
+          },
+          onHttpError: (error) {
+            if (!seatLayerIsPageHttpError(error, url)) return;
+            page._failed = true;
+            discard(url);
           },
         ),
       );
