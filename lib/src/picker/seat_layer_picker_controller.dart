@@ -25,6 +25,7 @@ import 'picker_viewport_report.dart';
 import 'seat_layer_picker_theme.dart';
 
 part 'picker_seat_answers.dart';
+part 'picker_standing_places.dart';
 
 /// State and actions for one high-level picker session.
 ///
@@ -32,7 +33,7 @@ part 'picker_seat_answers.dart';
 /// inventory-changing operations are serialized, and concurrent checkout calls
 /// share one Future so a double tap cannot create two holds.
 class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
-    with _PickerSeatAnswers, PickerFailureLog {
+    with _PickerSeatAnswers, PickerFailureLog, _PickerStandingPlaces {
   SeatLayerPickerController({SeatLayerController? mapController})
       : mapController = mapController ?? SeatLayerController(),
         _ownsMapController = mapController == null,
@@ -1084,51 +1085,6 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
             'ttlMs': _options.holdTtl!.inMilliseconds,
         },
         SeatLayerPickerBusyAction.findingBestAvailable);
-  }
-
-  Future<void> setGeneralAdmissionQuantity({
-    required String areaId,
-    required Map<String?, int> quantitiesByTier,
-  }) {
-    final requested = quantitiesByTier.entries
-        .where((entry) => entry.value > 0)
-        .toList(growable: false);
-    if (requested.isEmpty ||
-        quantitiesByTier.values.any((quantity) => quantity < 0)) {
-      return Future<void>.error(
-        ArgumentError.value(quantitiesByTier, 'quantitiesByTier'),
-      );
-    }
-    final rejected = _rejectReadOnly<void>('picker.holdGA');
-    if (rejected != null) return rejected;
-    return _serialize(() async {
-      value = value.withBusy(SeatLayerPickerBusyAction.creatingHold);
-      try {
-        for (final entry in requested) {
-          final result = await mapController.runBridgeCommand(
-            'picker.holdGA',
-            <String, Object?>{
-              'areaId': areaId,
-              'qty': entry.value,
-              if (entry.key != null) 'tierId': entry.key,
-              if (_options.holdTtl != null)
-                'ttlMs': _options.holdTtl!.inMilliseconds,
-            },
-          );
-          _applySnapshotFromResult(result);
-          final revision = jInt(jGet(result, 'revision'));
-          if (revision != null) await _awaitRevision(revision);
-        }
-        value = value.withGeneralAdmissionCandidate(null);
-      } catch (error) {
-        value = failed(error, 'picker.holdGA');
-        rethrow;
-      }
-    });
-  }
-
-  void dismissGeneralAdmissionCandidate() {
-    value = value.withGeneralAdmissionCandidate(null);
   }
 
   void dismissError() {
