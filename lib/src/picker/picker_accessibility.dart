@@ -742,11 +742,11 @@ class _AccessOptionRowState extends State<_AccessOptionRow> {
           alignment: Alignment.topCenter,
           child: _noteOpen
               ? Padding(
-                  padding: const EdgeInsets.only(
-                    left: SeatLayerSizeTokens.accessRowIconCell +
+                  padding: const EdgeInsetsDirectional.only(
+                    start: SeatLayerSizeTokens.accessRowIconCell +
                         SeatLayerSizeTokens.accessRowGap +
                         SeatLayerSizeTokens.accessRowPaddingX,
-                    right: SeatLayerSizeTokens.accessRowPaddingX,
+                    end: SeatLayerSizeTokens.accessRowPaddingX,
                     bottom: SeatLayerSizeTokens.accessRowPaddingY,
                   ),
                   child: Text(

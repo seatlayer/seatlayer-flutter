@@ -65,7 +65,7 @@ class _SeatLayerHoldLapseNoticeState extends State<SeatLayerHoldLapseNotice> {
     }
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 8, 6, 2),
+      padding: const EdgeInsetsDirectional.fromSTEB(14, 8, 6, 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [

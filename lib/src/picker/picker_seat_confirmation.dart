@@ -560,7 +560,7 @@ class _SeatIdentityField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = seatLayerPickerThemeOf(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 14, 12, 13),
+      padding: const EdgeInsetsDirectional.fromSTEB(14, 14, 12, 13),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
