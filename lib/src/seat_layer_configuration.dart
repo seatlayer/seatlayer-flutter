@@ -59,7 +59,7 @@ class SeatLayerConfiguration implements SeatLayerSurfaceConfiguration {
     this.selectionValidators,
     this.telemetry,
     this.commandTimeout = BridgeClient.defaultTimeout,
-    this.handshakeTimeout = const Duration(seconds: 30),
+    this.handshakeTimeout = const Duration(seconds: 45),
     this.hostInfo = const {},
     this.assetPath = defaultAssetPath,
   }) {

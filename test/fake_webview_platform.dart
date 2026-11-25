@@ -62,6 +62,11 @@ class FakeWebViewPlatform extends WebViewPlatform with MockPlatformInterfaceMixi
     params.onMessageReceived(JavaScriptMessage(message: message));
   }
 
+  /// What each navigation delegate was told to do with an HTTP error, in
+  /// creation order.
+  final List<HttpResponseErrorCallback> httpErrors =
+      <HttpResponseErrorCallback>[];
+
   @override
   PlatformWebViewController createPlatformWebViewController(
     PlatformWebViewControllerCreationParams params,
@@ -75,7 +80,7 @@ class FakeWebViewPlatform extends WebViewPlatform with MockPlatformInterfaceMixi
   PlatformNavigationDelegate createPlatformNavigationDelegate(
     PlatformNavigationDelegateCreationParams params,
   ) =>
-      _FakeNavigationDelegate(params);
+      _FakeNavigationDelegate(params, this);
 
   @override
   PlatformWebViewWidget createPlatformWebViewWidget(
@@ -138,7 +143,10 @@ class _FakeController extends PlatformWebViewController
 
 class _FakeNavigationDelegate extends PlatformNavigationDelegate
     with MockPlatformInterfaceMixin {
-  _FakeNavigationDelegate(super.params) : super.implementation();
+  _FakeNavigationDelegate(super.params, this._platform)
+      : super.implementation();
+
+  final FakeWebViewPlatform _platform;
 
   @override
   Future<void> setOnNavigationRequest(
@@ -152,7 +160,8 @@ class _FakeNavigationDelegate extends PlatformNavigationDelegate
   Future<void> setOnPageFinished(PageEventCallback onPageFinished) async {}
 
   @override
-  Future<void> setOnHttpError(HttpResponseErrorCallback onHttpError) async {}
+  Future<void> setOnHttpError(HttpResponseErrorCallback onHttpError) async =>
+      _platform.httpErrors.add(onHttpError);
 
   @override
   Future<void> setOnProgress(ProgressCallback onProgress) async {}

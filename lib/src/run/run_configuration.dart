@@ -30,7 +30,7 @@ class SeatLayerRunConfiguration implements SeatLayerSurfaceConfiguration {
     this.colorblindSafe,
     this.enable3D,
     this.commandTimeout = BridgeClient.defaultTimeout,
-    this.handshakeTimeout = const Duration(seconds: 30),
+    this.handshakeTimeout = const Duration(seconds: 45),
     this.hostInfo = const {},
     this.assetPath = defaultAssetPath,
   }) {
