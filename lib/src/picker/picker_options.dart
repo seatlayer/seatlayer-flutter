@@ -451,8 +451,8 @@ class SeatLayerPickerOptions {
   /// keeps the notification.
   final bool announceHoldLapse;
 
-  /// Whether the picker draws its own "You're all set" screen once a
-  /// handed-off hold settles to booked.
+  /// Whether the picker draws its own "You're all set" screen once the
+  /// handed-off hold is booked (`markBooked`).
   ///
   /// True mirrors the web picker. A host whose checkout ends on a confirmation
   /// of its own sets this false, so the buyer is told once; `onBooked` still
@@ -558,8 +558,11 @@ class SeatLayerPickerCallbacks {
   /// The hold ran out.
   final VoidCallback? onHoldExpired;
 
-  /// The held seats settled to booked while the picker was still up: the
-  /// hold passed to the host, then vanished with no expiry announced.
+  /// The hold handed to your checkout is booked: the picker's page said so,
+  /// after you called `markBooked`.
+  ///
+  /// It is a notice for the screen, never the proof of a sale: your server's
+  /// own booking is. A hold that only leaves the map does not call it.
   final ValueChanged<SeatLayerCheckoutHandoff>? onBooked;
 
   /// The buyer's access token expired.

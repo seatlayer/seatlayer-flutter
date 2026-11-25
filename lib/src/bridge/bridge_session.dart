@@ -11,6 +11,7 @@ import '../seat_layer_surface_configuration.dart';
 import 'bridge_client.dart';
 import 'bridge_profile.dart';
 import 'bridge_protocol.dart';
+import 'bridge_unloaded_map.dart';
 import 'envelope.dart';
 
 /// What every SeatLayer page needs from the app, whatever it shows: the
@@ -32,6 +33,9 @@ abstract class SeatLayerBridgeSession<
   int? _protocolRevision;
 
   Completer<ReadyInfo>? _readyCompleter;
+
+  /// What the page reported while it was still loading.
+  SeatLayerError? _loadError;
   Timer? _handshakeTimer;
 
   /// Runs from the view arming the handshake to `sys.ready`, which is the only
@@ -99,7 +103,10 @@ abstract class SeatLayerBridgeSession<
 
   /// Reports an out-of-band failure on [onError].
   @protected
-  void emitError(SeatLayerError error) => _onError.add(error);
+  void emitError(SeatLayerError error) {
+    if (_readyCompleter != null) _loadError = error;
+    _onError.add(error);
+  }
 
   /// Reports an event this build does not model on [onUnknownEvent].
   @protected
@@ -123,6 +130,7 @@ abstract class SeatLayerBridgeSession<
     _handshakeClock = Stopwatch()..start();
     _timeToHelloMs = null;
     _hasFinished = false;
+    _loadError = null;
     _readyInfo = null;
     _bundleInfo = null;
     _protocolRevision = null;
@@ -171,6 +179,16 @@ abstract class SeatLayerBridgeSession<
       case HelloSignal(:final payload):
         _handleHello(payload);
       case EventSignal(:final name, :final payload):
+        if (name == 'sys.ready' &&
+            _profile.isPicker &&
+            seatLayerPickerMapDidNotLoad(jGet(payload, 'snapshot'))) {
+          final error = _loadError ??
+              const SeatLayerError.transport('The seat map did not load.');
+          _finishHandshake(error);
+          _client?.close(error);
+          _client = null;
+          return;
+        }
         _onBridgeEvent.add(signal);
         _handleEvent(name, payload);
       case UnhandledSignal(:final envelope):
@@ -347,7 +365,7 @@ abstract class SeatLayerBridgeSession<
       _onReady.add(outcome);
       completer?.complete(outcome);
     } else if (outcome is SeatLayerError) {
-      _onError.add(outcome);
+      if (!identical(outcome, _loadError)) _onError.add(outcome);
       completer?.completeError(outcome);
     }
   }

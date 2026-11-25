@@ -98,7 +98,7 @@ void main() {
       fakeAsync((async) {
         final client = BridgeClient(channel: _FakeChannel());
         Object? caught;
-        client.command('hold').catchError((Object e) {
+        client.command('getSelection').catchError((Object e) {
           caught = e;
           return null;
         });
@@ -109,9 +109,50 @@ void main() {
         async.flushMicrotasks();
 
         expect(caught, isA<TimeoutFailure>());
-        expect((caught! as TimeoutFailure).command, 'hold');
+        expect((caught! as TimeoutFailure).command, 'getSelection');
         expect((caught! as SeatLayerError).code, 'sl_timeout');
         expect(client.openCommandCount, 0);
+      });
+    });
+
+    test('a command that can place a hold waits 45 seconds', () {
+      fakeAsync((async) {
+        for (final command in <String>[
+          'hold',
+          'picker.continue',
+          'picker.holdGA',
+          'season.holdBestAvailable',
+          'group.continue',
+        ]) {
+          final client = BridgeClient(channel: _FakeChannel());
+          Object? caught;
+          client.command(command).catchError((Object e) {
+            caught = e;
+            return null;
+          });
+          async.elapse(const Duration(seconds: 44));
+          expect(caught, isNull, reason: command);
+          async.elapse(const Duration(seconds: 2));
+          expect(caught, isA<TimeoutFailure>(), reason: command);
+        }
+      });
+    });
+
+    test('a longer limit of the app itself is kept', () {
+      fakeAsync((async) {
+        final client = BridgeClient(
+          channel: _FakeChannel(),
+          timeout: const Duration(seconds: 90),
+        );
+        Object? caught;
+        client.command('hold').catchError((Object e) {
+          caught = e;
+          return null;
+        });
+        async.elapse(const Duration(seconds: 89));
+        expect(caught, isNull);
+        async.elapse(const Duration(seconds: 2));
+        expect(caught, isA<TimeoutFailure>());
       });
     });
 
@@ -119,7 +160,7 @@ void main() {
       fakeAsync((async) {
         final client = BridgeClient(channel: _FakeChannel());
         var completions = 0;
-        client.command('hold').then(
+        client.command('getSelection').then(
               (_) => completions++,
               onError: (_) => completions++,
             );

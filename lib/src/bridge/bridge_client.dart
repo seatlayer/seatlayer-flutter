@@ -65,7 +65,8 @@ class _Pending {
 ///
 /// Invariants it enforces on the native side:
 ///   - one `cmd` resolves exactly once, by `id`;
-///   - a command with no reply fails with `sl_timeout` after [timeout];
+///   - a command with no reply fails with `sl_timeout` after [timeout], or
+///     after 45 seconds when it can place a hold;
 ///   - a LATE reply for an already-timed-out id is dropped, never delivered;
 ///   - an `evt` whose `n` is not greater than the highest `n` already applied
 ///     FOR THAT `t` is dropped as stale.
@@ -102,6 +103,30 @@ class BridgeClient {
     'release',
     'releaseLabels',
   };
+
+  /// Commands that can place a hold. The page waits up to 40 seconds for the
+  /// server's answer, so a shorter limit here would call a hold that worked
+  /// failed.
+  static const Set<String> _holdCommands = {
+    'hold',
+    'holdGA',
+    'bestAvailable',
+    'resumeHold',
+    'extendHold',
+    'picker.continue',
+    'picker.holdSelection',
+    'picker.holdGA',
+    'picker.bestAvailable',
+    'picker.setTableQuantity',
+    'picker.resumeHold',
+    'picker.extendHold',
+    'season.holdSameSeat',
+    'season.holdBestAvailable',
+    'season.restoreOperation',
+    'group.continue',
+  };
+
+  static const Duration _holdTimeout = Duration(seconds: 45);
 
   /// Event types the bundle uses to report a command failure out of band.
   static const Set<String> defaultCommandErrorEvents = {'error'};
@@ -149,7 +174,10 @@ class BridgeClient {
 
     // Register the pending entry BEFORE sending: a synchronous reply must never
     // arrive to an empty pending table.
-    final timer = untimed ? null : Timer(timeout, () => _expire(id));
+    final limit = _holdCommands.contains(name) && timeout < _holdTimeout
+        ? _holdTimeout
+        : timeout;
+    final timer = untimed ? null : Timer(limit, () => _expire(id, limit));
     _pending[id] = _Pending(
       command: name,
       order: order,
@@ -177,12 +205,11 @@ class BridgeClient {
     );
   }
 
-  void _expire(String id) {
+  void _expire(String id, Duration limit) {
     final entry = _pending.remove(id);
     if (entry == null) return;
     entry.timer?.cancel();
-    entry.completer
-        .completeError(SeatLayerError.timeout(entry.command, timeout));
+    entry.completer.completeError(SeatLayerError.timeout(entry.command, limit));
   }
 
   // MARK: - Inbound
