@@ -25,6 +25,7 @@ import 'package:flutter/physics.dart';
 import '../payloads.dart';
 import 'picker_buyer_asset_loader.dart';
 import 'picker_internal.dart';
+import 'picker_money.dart';
 import 'picker_models.dart';
 import 'picker_seat_lift.dart';
 import 'picker_seat_notes.dart';

@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'picker_internal.dart';
+import 'picker_money.dart';
 import 'picker_motion.dart';
 import 'picker_options.dart';
 import 'picker_strings.dart';

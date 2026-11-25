@@ -11,6 +11,7 @@ import 'picker_checkout_cta.dart';
 import 'picker_header.dart';
 import 'picker_hold_lapse.dart';
 import 'picker_internal.dart';
+import 'picker_money.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'picker_haptics.dart';

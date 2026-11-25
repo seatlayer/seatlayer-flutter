@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'picker_a11y.dart';
 import 'picker_internal.dart';
+import 'picker_money.dart';
 import 'picker_styles.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../open_enums.dart';
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_money.dart';
 import 'picker_seat_notes.dart';
 import 'picker_ticket_tiers.dart';
 import 'seat_layer_picker_controller.dart';

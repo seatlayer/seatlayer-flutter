@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_money.dart';
 import 'picker_short_map_scroll.dart';
 import 'picker_standing_amounts.dart';
 import 'picker_tokens.g.dart';
