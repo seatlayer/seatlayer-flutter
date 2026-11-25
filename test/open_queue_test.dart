@@ -1,5 +1,7 @@
 // What the buyer asks for in the first seconds is not kept behind a command
 // the page could not answer yet.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/seatlayer.dart';
@@ -39,10 +41,13 @@ class _EventPage extends SeasonPage {
     await tester.pump();
   }
 
-  Future<void> ready(WidgetTester tester) async {
+  Future<void> ready(
+    WidgetTester tester, {
+    bool withSelection = false,
+  }) async {
     evt('sys.ready', <String, Object?>{
       'protocol': 2,
-      'snapshot': pickerSnapshot(withSelection: false),
+      'snapshot': pickerSnapshot(withSelection: withSelection),
     });
     for (var i = 0; i < 4; i += 1) {
       await tester.pump();
@@ -123,6 +128,42 @@ void main() {
       asked.map((e) => (e.payload! as Map)['mode']),
       <Object?>['dark'],
     );
+    await close(tester);
+  });
+
+  testWidgets('a hold pressed first goes to the page at once', (tester) async {
+    final (page, controller) = await open(tester);
+    await page.hello(tester);
+    final before = page.told.length;
+    await page.ready(tester, withSelection: true);
+    ignorePickerAction(controller.holdSelection());
+    if (page.told.length > before) {
+      page.answer(_command, const <String, Object?>{});
+    }
+    for (var i = 0; i < 4; i += 1) {
+      await tester.pump();
+    }
+    expect(page.asked('picker.holdSelection'), isTrue);
+    await close(tester);
+  });
+
+  testWidgets('a page that never becomes ready fails in its time',
+      (tester) async {
+    final (page, controller) = await open(tester);
+    await page.hello(tester);
+    Object? failure;
+    unawaited(
+      controller.bestAvailable(quantity: 2).catchError((Object error) {
+        failure = error;
+      }),
+    );
+    final wait = SeatLayerConfiguration(event: 'ev_test').handshakeTimeout;
+    await tester.pump(wait - const Duration(seconds: 1));
+    expect(controller.state.phase, SeatLayerPickerPhase.initializing);
+    await tester.pump(const Duration(seconds: 2));
+    expect(controller.state.phase, SeatLayerPickerPhase.failed);
+    expect(failure, isA<SeatLayerError>());
+    expect(page.told, isEmpty);
     await close(tester);
   });
 
