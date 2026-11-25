@@ -37,6 +37,9 @@ final class _FakeMapController extends SeatLayerController {
   int _sequence = 0;
 
   @override
+  bool get isReady => true;
+
+  @override
   BundleInfo? get bundleInfo => bundle;
 
   @override

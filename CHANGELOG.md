@@ -10,6 +10,7 @@
 
 **Fixed**
 
+- **The first 15 seconds:** best seats, holding, checkout and the map's fit waited up to 15 seconds after the picker opened. They go to the page as soon as it is ready. `setMapInteractionEnabled` called before that is told to the page once it is ready.
 - **A map that did not load:** the failure view with Try again opens when the page answers ready without a map, where an empty picker stood, and at once when the server answers the page with an HTTP error, where it took the whole wait.
 - **Standing areas and boxes** offer only amounts the page accepts. A box is sold as all its places, or as a party inside its range; with the wheelchair filter on, an area offers its wheelchair places. A tap on an area with nothing to offer opens nothing. New on `GAArea`: `bookingMode`, `minOccupancy`, `maxOccupancy`, `wheelchairPlaces` and `wheelchairAvailable`.
 - **When the page refuses standing places (behaviour change):** the prompt stays and the bar says "One or more seats were just taken. Please pick again." It closed as if the places were held. `setGeneralAdmissionQuantity` now completes with an error, `hold_unavailable`, for such a refusal.

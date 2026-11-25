@@ -346,6 +346,7 @@ void main() {
       () async {
     final map = _FakeMapController(
       (command, payload) async => <String, Object?>{},
+      ready: true,
     );
     final picker = _picker(map);
     addTearDown(() {
