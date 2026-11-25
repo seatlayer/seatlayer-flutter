@@ -5,6 +5,8 @@
 // zoom — and the tapped seat is panned to a constant fraction of the band the
 // sheet leaves clear instead, then put back when the card leaves unless the
 // buyer has moved the map since. An older runtime keeps the inset.
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
@@ -233,49 +235,154 @@ void main() {
       lift.forget();
     });
 
-    test('reports the pan the chrome has to add, and forgets it on a snapshot',
-        () async {
-      // The spotlight hole is cut against `screenPoint`, which is only ever as
-      // fresh as the last snapshot. A pan carries no revision, so the shell
-      // adds what has been panned SINCE that snapshot — and nothing once a
-      // newer one has folded the pan in.
+    group('where the seat is under the pan', () {
+      // The page answers the pan it ASKED its map for, and the map stops at
+      // its edge. The spotlight stands where the seat is, not where it was
+      // asked to go.
+      late double at;
+      late double least;
+      late List<double> asked;
+      late PickerSeatLift lift;
       var changed = 0;
-      final lift = PickerSeatLift(
-        onChanged: () => changed += 1,
-        frame: (seatId, {required fraction, int? gestures}) async =>
-            const SeatLayerSeatFrame(dy: -100, gestures: 2),
-        settle: const <Duration>[Duration(milliseconds: 5)],
-      );
-      void sync({int revision = 1}) => lift.sync(
-            seatId: 's1',
+
+      /// A map whose seat stands at [from] and cannot rise above [edge].
+      /// [settle] is when the lift asks again.
+      void mapOf({
+        required double from,
+        required double edge,
+        List<Duration> settle = const <Duration>[
+          Duration(milliseconds: 20),
+          Duration(milliseconds: 40),
+        ],
+      }) {
+        at = from;
+        least = edge;
+        asked = <double>[];
+        changed = 0;
+        lift = PickerSeatLift(
+          onChanged: () => changed += 1,
+          frame: (seatId, {required fraction, int? gestures}) async {
+            final dy = (60 + (844 - 60) * fraction - at).roundToDouble();
+            asked.add(dy);
+            at = math.max(least, at + dy);
+            return SeatLayerSeatFrame(dy: dy.abs() < 2 ? 0 : dy, gestures: 2);
+          },
+          settle: settle,
+        );
+        addTearDown(lift.forget);
+      }
+
+      Future<void> show({int revision = 1, String seat = 's1'}) async {
+        for (var i = 0; i < 2; i += 1) {
+          lift.sync(
+            seatId: seat,
             mapHeight: 844,
             top: 60,
             bottom: 0,
             sheet: 300,
             revision: revision,
           );
+        }
+        await Future<void>.delayed(Duration.zero);
+      }
 
-      // Two syncs at one height: the lift waits for the map to hold still.
-      sync();
-      sync();
-      await Future<void>.delayed(Duration.zero);
-      expect(lift.anchorDy, -100);
-      expect(changed, 1);
+      Future<void> rest() =>
+          Future<void>.delayed(const Duration(milliseconds: 160));
 
-      // The runtime re-fitted under the card and the lift went again: the
-      // hole moves with it, on the same snapshot.
-      await Future<void>.delayed(const Duration(milliseconds: 20));
-      expect(lift.anchorDy, -200);
-      expect(changed, 2);
+      test('a map that could move', () async {
+        mapOf(from: 500, edge: 0);
+        await show();
+        expect(lift.anchorDy, closeTo(at - 500, 1));
+        await rest();
+        expect(lift.anchorDy, closeTo(at - 500, 1));
+        expect(changed, 1);
+        expect(lift.dy, closeTo(at - 500, 1));
+      });
 
-      // A newer snapshot's screen points already stand where the map is now.
-      sync(revision: 2);
-      expect(lift.anchorDy, 0);
-      await Future<void>.delayed(Duration.zero);
-      expect(lift.anchorDy, -100);
+      test('a map that stopped at its edge', () async {
+        mapOf(from: 500, edge: 465);
+        await show();
+        await rest();
+        expect(at, 465);
+        expect(lift.anchorDy, closeTo(-35, 1));
+        expect(lift.dy, closeTo(-35, 1));
+      });
 
-      lift.forget();
-      expect(lift.anchorDy, 0);
+      test('a map that could not move at all', () async {
+        mapOf(from: 500, edge: 500);
+        await show();
+        await rest();
+        expect(lift.anchorDy, closeTo(0, 1));
+        // Nothing was moved, so nothing is put back.
+        final before = asked.length;
+        lift.release();
+        expect(asked, hasLength(before));
+      });
+
+      test('a map that let go of its edge later', () async {
+        mapOf(from: 500, edge: 465);
+        await show();
+        await Future<void>.delayed(const Duration(milliseconds: 25));
+        expect(lift.anchorDy, closeTo(-35, 1));
+        least = 0;
+        await rest();
+        expect(lift.anchorDy, closeTo(at - 500, 1));
+        expect(at, lessThan(400));
+      });
+
+      test('a map put back by its own refit, before it was seen to arrive',
+          () async {
+        mapOf(from: 500, edge: 0);
+        await show();
+        at = 500;
+        await rest();
+        expect(at, lessThan(400));
+        expect(lift.anchorDy, closeTo(at - 500, 1));
+      });
+
+      test('a map put back by its own refit, after it arrived', () async {
+        mapOf(from: 500, edge: 0);
+        await show();
+        await Future<void>.delayed(const Duration(milliseconds: 25));
+        at = 500;
+        await rest();
+        expect(at, lessThan(400));
+        expect(lift.anchorDy, closeTo(at - 500, 1));
+      });
+
+      test('a newer snapshot already says where the seat is', () async {
+        mapOf(from: 500, edge: 0);
+        await show();
+        await rest();
+        await show(revision: 2);
+        expect(lift.anchorDy, 0);
+        // At its edge, too.
+        mapOf(from: 500, edge: 465);
+        await show();
+        await rest();
+        await show(revision: 2);
+        expect(lift.anchorDy, 0);
+        await rest();
+        expect(lift.anchorDy, 0);
+      });
+
+      test('another seat, on a map at its edge', () async {
+        mapOf(from: 500, edge: 465);
+        await show();
+        await rest();
+        at = 520;
+        least = 520;
+        await show(revision: 2, seat: 's2');
+        await rest();
+        expect(lift.anchorDy, closeTo(0, 1));
+      });
+
+      test('forgets it all', () async {
+        mapOf(from: 500, edge: 0);
+        await show();
+        lift.forget();
+        expect(lift.anchorDy, 0);
+      });
     });
 
     test('an unmeasured card sends nothing, and a refused lift is not undone',
@@ -372,7 +479,7 @@ void main() {
     final lift = PickerSeatLift(
       frame: (seatId, {required fraction, int? gestures}) async {
         calls += 1;
-        return const SeatLayerSeatFrame(dy: -10, gestures: 1);
+        return SeatLayerSeatFrame(dy: calls == 1 ? -10 : 0, gestures: 1);
       },
       settle: const <Duration>[Duration(milliseconds: 5)],
     );
@@ -391,7 +498,7 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 20));
     // The runtime may have re-fitted under the lift: ask once more.
     expect(calls, 2);
-    expect(lift.dy, -20);
+    expect(lift.dy, -10);
     lift.forget();
     await Future<void>.delayed(const Duration(milliseconds: 20));
     expect(calls, 2);
@@ -419,7 +526,7 @@ void main() {
 
   testWidgets('cancelling the card puts the map back, with the gesture count',
       (tester) async {
-    final map = _framingMap();
+    final map = _pansOnceMap();
     addTearDown(map.dispose);
     await _cardUp(tester, map);
     final lifted = _frames(map).length;

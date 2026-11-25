@@ -7,6 +7,7 @@
 /// *which* surface is up, and this file decides how one arrives and leaves.
 library;
 
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -272,7 +273,7 @@ class _PromptBackdrop extends StatelessWidget {
   Widget build(BuildContext context) {
     final backdrop = spotlight == null
         ? ColoredBox(color: scrimColor)
-        : _SpotlightGlass(at: spotlight!);
+        : PickerSpotlightGlass(at: spotlight!);
     return Stack(
       children: [
         // The dismissing tap belongs to the backdrop, not to the whole area:
@@ -533,8 +534,9 @@ class _SeatCardLayout extends SingleChildLayoutDelegate {
 ///
 /// Never takes a pointer event of its own — the press has to reach the
 /// dismissing detector underneath, exactly as a press on bare map does.
-class _SpotlightGlass extends StatelessWidget {
-  const _SpotlightGlass({required this.at});
+class PickerSpotlightGlass extends StatelessWidget {
+  /// Creates the glass.
+  const PickerSpotlightGlass({super.key, required this.at});
 
   /// The centre of the clear hole.
   final Offset at;
@@ -562,8 +564,9 @@ class _SpotlightGlass extends StatelessWidget {
           (at.dx / bounds.width) * 2 - 1,
           (at.dy / bounds.height) * 2 - 1,
         ),
+        // A part of the box's WHOLE shorter side.
         radius: SeatLayerSizeTokens.confirmScrimFeatherRadius /
-            (bounds.shortestSide / 2),
+            bounds.shortestSide,
         colors: const <Color>[Color(0x00000000), Color(0xFF000000)],
         stops: const <double>[
           SeatLayerSizeTokens.confirmScrimClearRadius /
@@ -580,9 +583,8 @@ class _SpotlightGlass extends StatelessWidget {
                 // applied to what is already painted behind, and a mask on
                 // the layer only shapes the veil drawn on top. So the seat
                 // the card asks about came out smeared under a clear tint.
-                // The blur is clipped around the hole instead, in rings that
-                // ramp it in — see _BlurAround — and the seat and its
-                // neighbours stay crisp, as on the web.
+                // The blur is laid around the hole instead — see _BlurAround —
+                // and the seat and its neighbours stay crisp, as on the web.
                 _BlurAround(at: at),
                 ColoredBox(color: veil),
               ],
@@ -592,65 +594,59 @@ class _SpotlightGlass extends StatelessWidget {
   }
 }
 
-/// The backdrop blur everywhere but the spotlight, ramping in like the
-/// veil's feather.
+/// The backdrop blur everywhere but the spotlight.
 ///
 /// The map is a platform view, and its compositor honours rectangle clips
 /// only: a path with a hole in it — even-odd, or a rectangle with a circle
 /// subtracted — blurred the whole surface, seat and all. So the blur is laid
-/// in rectangles: three nested square frames, each adding a third of the
-/// blur, from the clear radius out to the feather radius. The veil's own
-/// circular feather softens the squares' corners, and the seat and its
-/// neighbours stay crisp, as on the web.
+/// in four bands around a square. The square holds the whole of the veil's
+/// feather, so its straight edges lie where the veil is full and the disc of
+/// seats inside is round and sharp.
 class _BlurAround extends StatelessWidget {
   const _BlurAround({required this.at});
 
   final Offset at;
 
-  static const double _clear = SeatLayerSizeTokens.confirmScrimClearRadius;
   static const double _feather = SeatLayerSizeTokens.confirmScrimFeatherRadius;
-  static const double _blur = SeatLayerSizeTokens.confirmScrimBlur;
-  static const int _steps = 3;
+
+  /// As three passes of a third of the design's blur: blurs add up as their
+  /// squares do.
+  static final double _sigma =
+      SeatLayerSizeTokens.confirmScrimBlur / math.sqrt(3);
+
+  static final ImageFilter _blur =
+      ImageFilter.blur(sigmaX: _sigma, sigmaY: _sigma);
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) {
           final w = constraints.maxWidth;
           final h = constraints.maxHeight;
-          final filter = ImageFilter.blur(
-            sigmaX: _blur / _steps,
-            sigmaY: _blur / _steps,
-          );
+          final left = (at.dx - _feather).clamp(0.0, w);
+          final right = (at.dx + _feather).clamp(0.0, w);
+          final top = (at.dy - _feather).clamp(0.0, h);
+          final bottom = (at.dy + _feather).clamp(0.0, h);
+          // Two bands that meet show a seam: it runs the shorter way out.
+          final tall = h >= w;
+          final (from, to) = tall ? (0.0, w) : (left, right);
+          final (upper, lower) = tall ? (top, bottom) : (0.0, h);
           Widget band(Rect rect) => Positioned.fromRect(
                 rect: rect,
                 child: ClipRect(
                   child: BackdropFilter(
-                    filter: filter,
+                    filter: _blur,
                     child: const SizedBox.expand(),
                   ),
                 ),
               );
-          final bands = <Widget>[];
-          for (var i = 0; i < _steps; i += 1) {
-            final r = _clear + (_feather - _clear) * i / _steps;
-            final left = (at.dx - r).clamp(0.0, w);
-            final right = (at.dx + r).clamp(0.0, w);
-            final top = (at.dy - r).clamp(0.0, h);
-            final bottom = (at.dy + r).clamp(0.0, h);
-            if (top > 0) {
-              bands.add(band(Rect.fromLTRB(0, 0, w, top)));
-            }
-            if (bottom < h) {
-              bands.add(band(Rect.fromLTRB(0, bottom, w, h)));
-            }
-            if (left > 0) {
-              bands.add(band(Rect.fromLTRB(0, top, left, bottom)));
-            }
-            if (right < w) {
-              bands.add(band(Rect.fromLTRB(right, top, w, bottom)));
-            }
-          }
-          return Stack(children: bands);
+          return Stack(
+            children: [
+              if (top > 0) band(Rect.fromLTRB(from, 0, to, top)),
+              if (bottom < h) band(Rect.fromLTRB(from, bottom, to, h)),
+              if (left > 0) band(Rect.fromLTRB(0, upper, left, lower)),
+              if (right < w) band(Rect.fromLTRB(right, upper, w, lower)),
+            ],
+          );
         },
       );
 }
