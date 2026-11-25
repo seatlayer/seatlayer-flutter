@@ -7,6 +7,8 @@ import '../payloads.dart';
 import 'picker_internal.dart';
 import 'picker_map_controls.dart';
 import 'picker_camera_actions.dart';
+import 'picker_confirm_card.dart';
+import 'picker_strings.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
 import 'seat_layer_picker_controller.dart';
@@ -364,6 +366,7 @@ class _SeatDeck extends StatelessWidget {
   static List<String> identityParts(
     SeatLayerPickerState state,
     SelectedSeat seat,
+    SeatLayerPickerStrings strings,
   ) {
     final row = pickerRowLabel(
       seat.rowLabel,
@@ -373,9 +376,11 @@ class _SeatDeck extends StatelessWidget {
     return <String>[
       if (seat.sectionLabel?.trim().isNotEmpty ?? false)
         seat.sectionLabel!.trim(),
-      if (row.isNotEmpty) 'Row $row',
+      // In the buyer's language, as the seat card names them.
+      if (row.isNotEmpty) '${pickerRowWord(seat, strings)} $row',
       if (seat.seatNumber?.trim().isNotEmpty ?? false)
-        'Seat ${seat.seatNumber!.trim()}',
+        '${seatLayerSpokenWord(pickerSeatWord(seat, strings))} '
+            '${seat.seatNumber!.trim()}',
     ];
   }
 }
@@ -407,7 +412,7 @@ class _SeatCaption extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           child: Text(
             strings.seatIdentity(<String>[
-              ..._SeatDeck.identityParts(state, target),
+              ..._SeatDeck.identityParts(state, target, strings),
               strings.viewFromYourSeat,
             ]),
             maxLines: 1,

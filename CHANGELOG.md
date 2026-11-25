@@ -4,6 +4,7 @@
 
 **Changed**
 
+- **Levels on a phone:** held sideways, the pill of levels stands on the map's top line, between the test badge and the Map/3D control, where all three fit; where they do not, it stands under them, as upright. It keeps the map's margin on both sides and scrolls inside its own ends. The chosen level comes into view by itself, when the pill is first drawn and when the level changes, without motion where the system asks for less of it.
 - **The cart on a phone** is one row: a circle that opens the list, the count and the total with the seats under them, and the button. It was a block of three rows with a handle on its edge, so the map is about 40 to 70 points taller. The words open the list as the circle does, a new seat closes it, and where the button's own words do not fit two lines it goes under the words. Under the row stands the phone's own strip alone, or 10 points where there is none. `sheetHandleWidth`, `sheetHandleHeight`, `sheetHandleOverhang` and `sheetHeadHeight` on the layout are still accepted and have no effect.
 - **The seats on that row** are named as the map names them: the section once, then row and seat, "Dress Circle · C-6, C-7".
 - **When nothing is left to sell** the button says "Select seats" and is off, where it opened a form that could find nothing.
@@ -14,6 +15,9 @@
 
 **Fixed**
 
+- **The 3D view's caption** names the row and the seat in the buyer's language, with the words the seat card uses. It said "Row" and "Seat" in English in every language.
+- **Arabic and Hebrew:** the toast, the lapsed-seats line, the hold-ending and booked states, the note under an accessibility row and the Row and Seat fields of the seat card keep their wider side at the start of the line, on the right. They kept it on the left.
+- **The accessibility sheet on a phone held sideways:** everything under its title scrolls as one, so every row can be reached and pressed. Only the list of needs scrolled, in a window of 21 to 48 points, half a row.
 - **After sales close,** a buyer who holds seats can still continue to checkout; the button was off. With no seats held the row says "Sales are closed" with the event's date and has no button.
 - **The open cart on a short screen** gives way to what stands over the map.
 - **"Release and change seats"** under a refused action stands whole under the words, and the words scroll; it was cut off on every phone. Where the cart's list is open on a small phone, the list gives way to it.

@@ -14,7 +14,9 @@ import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_floor_strip.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
 import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_map_controls.dart';
 import 'package:seatlayer/src/picker/picker_status_views.dart';
+import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
@@ -379,14 +381,20 @@ void main() {
         const Size(320, 568),
         const SeatLayerPickerChromeOptions(),
       );
-      final chip = find.text('All floors');
-      final before = tester.getCenter(chip);
+      final strip = tester.state<ScrollableState>(
+        find.descendant(
+          of: find.byType(SeatLayerFloorStrip),
+          matching: find.byType(Scrollable),
+        ),
+      );
+      final before = strip.position.pixels;
       await tester.dragFrom(
-        before + const Offset(20, 20),
+        tester.getRect(find.byType(SeatLayerFloorStrip)).centerLeft +
+            const Offset(60, 20),
         const Offset(-120, 0),
       );
       await pumpToRest(tester);
-      expect(tester.getCenter(chip).dx, lessThan(before.dx - 1));
+      expect(strip.position.pixels, greaterThan(before + 1));
       expect(map.callsTo('picker.setFloor'), isEmpty);
     });
 
@@ -409,6 +417,120 @@ void main() {
       expect(_levelList.hitTestable(), findsOneWidget);
     });
   });
+
+  group('the levels over a phone map', () {
+    final many = <Object?>[
+      for (final name in <String>[
+        'Stalls',
+        'Dress circle',
+        'Upper circle',
+        'Grand tier',
+        'Balcony',
+        'Gallery',
+      ])
+        <String, Object?>{'id': name.toLowerCase(), 'name': name},
+    ];
+    Rect pill(WidgetTester tester) => tester.getRect(
+          find
+              .descendant(
+                of: find.byType(SeatLayerFloorStrip),
+                matching: find.byType(Material),
+              )
+              .first,
+        );
+    Rect control(WidgetTester tester) =>
+        tester.getRect(find.byType(SeatLayerPickerViewModeControl));
+    Rect badge(WidgetTester tester) =>
+        tester.getRect(find.byType(SeatLayerPickerTestModeIndicator));
+
+    testWidgets("keep the map's margin on both sides", (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await _pumpPicker(
+        tester,
+        const Size(320, 568),
+        const SeatLayerPickerChromeOptions(),
+        floors: many,
+      );
+      expect(
+        pill(tester).left,
+        closeTo(SeatLayerSizeTokens.mapAnchorInset, .5),
+      );
+      expect(
+        pill(tester).right,
+        closeTo(320 - SeatLayerSizeTokens.mapAnchorInset, .5),
+      );
+    });
+
+    testWidgets('bring the chosen level into view, and each new choice',
+        (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final map = await _pumpPicker(
+        tester,
+        const Size(320, 568),
+        const SeatLayerPickerChromeOptions(),
+        floors: many,
+        activeFloorId: 'gallery',
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      bool inView(String name) {
+        final chip = find.text(name);
+        if (chip.evaluate().isEmpty) return false;
+        final rect = tester.getRect(chip);
+        return rect.left >= pill(tester).left - .5 &&
+            rect.right <= pill(tester).right + .5;
+      }
+
+      expect(inView('Gallery'), isTrue);
+      expect(inView('Stalls'), isFalse);
+      map.emit(
+        _venue(withSelection: false, floors: many, activeFloorId: 'stalls')
+          ..['revision'] = 2,
+      );
+      await pumpToRest(tester);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(inView('Stalls'), isTrue);
+    });
+
+    testWidgets('held sideways, stand on the top line where they fit',
+        (tester) async {
+      await _pumpPicker(
+        tester,
+        const Size(844, 390),
+        const SeatLayerPickerChromeOptions(),
+      );
+      expect(pill(tester).center.dy, closeTo(control(tester).center.dy, 1));
+      expect(badge(tester).top, closeTo(control(tester).top, 1));
+      expect(pill(tester).left, greaterThan(badge(tester).right));
+      expect(pill(tester).right, lessThan(control(tester).left));
+    });
+
+    testWidgets('held sideways, stand under the top line where they do not',
+        (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await _pumpPicker(
+        tester,
+        const Size(667, 375),
+        const SeatLayerPickerChromeOptions(),
+        floors: many,
+      );
+      expect(pill(tester).top, greaterThan(control(tester).bottom));
+      expect(badge(tester).top, greaterThan(pill(tester).bottom));
+    });
+
+    testWidgets('upright, stand under the top line', (tester) async {
+      await _pumpPicker(
+        tester,
+        const Size(393, 852),
+        const SeatLayerPickerChromeOptions(),
+      );
+      expect(pill(tester).top, greaterThan(control(tester).bottom));
+    });
+  });
 }
 
 final Finder _levelList = find.descendant(
@@ -422,6 +544,8 @@ Future<FakePickerMap> _pumpPicker(
   SeatLayerPickerChromeOptions chrome, {
   bool venue3D = false,
   SeatLayerPickerPartBuilder? floorStrip,
+  List<Object?>? floors,
+  String activeFloorId = 'stalls',
 }) async {
   tester.view
     ..devicePixelRatio = 1
@@ -453,7 +577,11 @@ Future<FakePickerMap> _pumpPicker(
     ),
   );
   // No seat picked, so no seat card stands over the map.
-  final snapshot = _venue(withSelection: false);
+  final snapshot = _venue(
+    withSelection: false,
+    floors: floors,
+    activeFloorId: activeFloorId,
+  );
   if (venue3D) {
     (snapshot['map']! as Map<String, Object?>)['buyerView'] = 'venue3d';
   }

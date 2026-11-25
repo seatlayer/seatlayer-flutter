@@ -628,7 +628,7 @@ class _SeatLayerPickerExtendHoldPromptState
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: theme.divider),
             ),
-            padding: const EdgeInsets.fromLTRB(16, 10, 12, 10),
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 10, 12, 10),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -792,7 +792,7 @@ class _SeatLayerPickerBookedOverlayState
                       0,
                       SeatLayerSizeTokens.minimumHitTarget,
                     ),
-                    padding: const EdgeInsets.fromLTRB(12, 0, 16, 0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 16, 0),
                     shape: const StadiumBorder(),
                   ),
                   onPressed: () => setState(() => _dismissed = handoff.holdId),
@@ -879,7 +879,8 @@ class _BookedSeatList extends StatelessWidget {
                           ),
                           if (line.quantity > 1)
                             Padding(
-                              padding: const EdgeInsets.only(left: 6),
+                              padding:
+                                  const EdgeInsetsDirectional.only(start: 6),
                               child: Text(
                                 '×${line.quantity}',
                                 style: TextStyle(

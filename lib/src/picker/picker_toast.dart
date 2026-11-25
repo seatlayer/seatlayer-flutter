@@ -213,7 +213,12 @@ class SeatLayerPickerToastCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: border),
           ),
-          padding: EdgeInsets.fromLTRB(16, 9, toast.hasAction ? 8 : 16, 9),
+          padding: EdgeInsetsDirectional.fromSTEB(
+            16,
+            9,
+            toast.hasAction ? 8 : 16,
+            9,
+          ),
           child: toast.hasAction
               ? Row(
                   mainAxisSize: MainAxisSize.min,

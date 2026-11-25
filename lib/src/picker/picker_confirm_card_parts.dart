@@ -176,18 +176,11 @@ class _IdentityGrid extends StatelessWidget {
     );
   }
 
-  /// What the chart calls a row, where it called it anything.
   static String _rowWord(SelectedSeat seat, SeatLayerPickerStrings strings) =>
-      seat.displayType?.trim().isNotEmpty ?? false
-          ? seat.displayType!.trim()
-          : seat.rowType?.trim().isNotEmpty ?? false
-              ? seat.rowType!.trim()
-              : strings.rowWord;
+      pickerRowWord(seat, strings);
 
   static String _seatWord(SelectedSeat seat, SeatLayerPickerStrings strings) =>
-      seat.objectType == ObjectType.booth
-          ? strings.placeWord
-          : strings.seatWord;
+      pickerSeatWord(seat, strings);
 }
 
 /// The longest section label that keeps the identity grid's big centred type.
@@ -1085,3 +1078,16 @@ class _TierNote extends StatelessWidget {
     );
   }
 }
+
+/// What the chart calls [seat]'s row, where it called it anything, else the
+/// buyer's word for a row.
+String pickerRowWord(SelectedSeat seat, SeatLayerPickerStrings strings) =>
+    seat.displayType?.trim().isNotEmpty ?? false
+        ? seat.displayType!.trim()
+        : seat.rowType?.trim().isNotEmpty ?? false
+            ? seat.rowType!.trim()
+            : strings.rowWord;
+
+/// The buyer's word for [seat]: a place in a booth, else a seat.
+String pickerSeatWord(SelectedSeat seat, SeatLayerPickerStrings strings) =>
+    seat.objectType == ObjectType.booth ? strings.placeWord : strings.seatWord;
