@@ -59,6 +59,12 @@ extension SeatLayerPickerSeatFraming on SeatLayerPickerController {
       mapController.bundleInfo?.supportsCommand(seatLayerFrameSeatCommand) ==
       true;
 
+  /// The page a pan is made on: null while none is up, and another one once it
+  /// has been loaded again.
+  @internal
+  Object? get framingPage =>
+      mapController.isReady ? value.snapshot?.sessionId : null;
+
   /// Pan — never zoom — so [seatId] rests at [fraction] of the band the
   /// reported viewport insets leave clear.
   ///
@@ -141,9 +147,16 @@ class PickerSeatLift {
   /// Creates a lift that pans through [frame].
   PickerSeatLift({
     required this.frame,
+    this.page,
     this.onChanged,
     this.settle = defaultSettle,
   });
+
+  /// The page the map is on; see [SeatLayerPickerSeatFraming.framingPage].
+  ///
+  /// A lift ends with its page: the next one opens where the venue fits, and
+  /// undoing a pan it never made throws it off the middle.
+  final Object? Function()? page;
 
   /// Called after a pan lands, so the chrome drawn against the seat's screen
   /// position can be laid out again.
@@ -178,6 +191,7 @@ class PickerSeatLift {
     int? gestures,
   }) frame;
 
+  Object? _page;
   String? _seatId;
   double _fraction = 0;
   double _dy = 0;
@@ -226,6 +240,8 @@ class PickerSeatLift {
     required double sheet,
     required int revision,
   }) {
+    final page = this.page?.call();
+    if (_seatId != null && page != _page) forget();
     if (seatId == null) {
       release();
       return;
@@ -256,6 +272,7 @@ class PickerSeatLift {
     // lift has already moved, so the pans folded into it are no longer the
     // shell's to add.
     if (revision != _revision) _anchorDy = 0;
+    _page = page;
     _seatId = seatId;
     _fraction = fraction;
     _revision = revision;
@@ -270,6 +287,7 @@ class PickerSeatLift {
   }
 
   Future<void> _lift(String seatId, double fraction, int generation) async {
+    if (page?.call() != _page) return;
     SeatLayerSeatFrame? answer;
     try {
       answer = await frame(seatId, fraction: fraction, gestures: _gestures);
@@ -327,6 +345,7 @@ class PickerSeatLift {
     _cancelSettle();
     _seenHeight = null;
     _pending = false;
+    _page = null;
     _seatId = null;
     _fraction = 0;
     _dy = 0;

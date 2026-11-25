@@ -187,6 +187,52 @@ void main() {
       expect(lift.dy, 0);
     });
 
+    test('ends with its page: the next one is not panned for it', () async {
+      final calls = <(String, double, int?)>[];
+      Object? page = 'page-1';
+      final lift = PickerSeatLift(
+        frame: (seatId, {required fraction, int? gestures}) async {
+          calls.add((seatId, fraction, gestures));
+          return const SeatLayerSeatFrame(dy: -100, gestures: 0);
+        },
+        page: () => page,
+        settle: const <Duration>[Duration(milliseconds: 5)],
+      );
+      void sync(String? seat) => lift.sync(
+            seatId: seat,
+            mapHeight: 844,
+            top: 60,
+            bottom: 0,
+            sheet: 300,
+            revision: 1,
+          );
+
+      sync('s1');
+      sync('s1');
+      await Future<void>.delayed(Duration.zero);
+      expect(calls, hasLength(1));
+
+      // The page goes while the card is up: nothing is asked again.
+      page = null;
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(calls, hasLength(1));
+
+      // The next one is up, and the card has gone with the seat.
+      page = 'page-2';
+      sync(null);
+      await Future<void>.delayed(Duration.zero);
+      expect(calls, hasLength(1));
+      expect(lift.dy, 0);
+
+      // A seat tapped there is lifted as any other.
+      sync('s2');
+      sync('s2');
+      await Future<void>.delayed(Duration.zero);
+      expect(calls.last.$1, 's2');
+      expect(calls.last.$3, isNull);
+      lift.forget();
+    });
+
     test('reports the pan the chrome has to add, and forgets it on a snapshot',
         () async {
       // The spotlight hole is cut against `screenPoint`, which is only ever as
