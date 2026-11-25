@@ -12,7 +12,7 @@ Flutter widgets for live availability, best-available seats, and temporary
 holds, then confirm bookings on your trusted backend. SeatLayer is seating chart
 and reserved-seat ticketing software built for venues up to stadium scale.
 
-![Seat map picker running in a Flutter app: venue overview, section dock, seat confirmation, ticket list and the 3D venue view](https://raw.githubusercontent.com/seatlayer/seatlayer-flutter/main/doc/media/picker-flow.gif)
+![Seat map picker running in a Flutter app: the whole venue, a section, the seat card, the cart and the 3D venue](https://raw.githubusercontent.com/seatlayer/seatlayer-flutter/main/doc/media/picker-flow.gif)
 
 ## What SeatLayer is
 
@@ -145,10 +145,46 @@ message to you; `onHoldExpired` fires either way. Call
 `controller.refreshAvailability()` yourself from a composed layout. Details:
 [lifecycle and recovery](https://docs.seatlayer.io/buyer-sdk/flutter/lifecycle-and-recovery/#control-automatic-behavior).
 
+## Sell a Season or a run
+
+A **Season** is a package of dates sold as the same seat for every date. A
+**run** is a few performances sold to one buyer as one hold.
+
+<img src="https://raw.githubusercontent.com/seatlayer/seatlayer-flutter/main/doc/media/season-picker.png" width="260" alt="Season picker in a Flutter app: the package, its prices and dates, and the Choose seats button">
+
+```dart
+final handoff = await showSeatLayerSeasonPicker(
+  context,
+  configuration: SeatLayerSeasonConfiguration(
+    season: 'sea_your_season',
+    publicKey: 'pk_test_your_key',
+  ),
+  onContinue: (handoff) => bookOnYourBackend(handoff.operationId),
+);
+```
+
+```dart
+final handoff = await showSeatLayerRunPicker(
+  context,
+  configuration: SeatLayerRunConfiguration(run: 'pg_your_run'),
+  onContinue: (handoff) => bookOnYourBackend(handoff.operationId),
+);
+```
+
+- `onContinue` runs before the screen closes; throw there to keep the buyer on
+  their seats. Your server books the hold by `operationId`, at your prices. A
+  run's handoff carries no prices.
+- Closing a Season with seats held asks the buyer to release or keep them.
+  Closing a run releases the seats that were not handed off.
+- In these two the header is a Flutter widget; the packages, map and cart are
+  SeatLayer's page, shown inside your app.
+
+More: [open a Season or a run](https://docs.seatlayer.io/buyer-sdk/flutter/#open-a-season-or-a-run).
+
 ## Works as a native picker
 
-**Every piece of chrome is a Flutter widget.** The header, price rail, floor strip, section dock, seat confirm card,
-cart sheet, checkout button and the captions over the 3D scene and the seat-view
+**In the event picker, every piece of chrome is a Flutter widget.** The header,
+price rail, floor strip, seat confirm card, cart sheet, checkout button and the captions over the 3D scene and the seat-view
 panorama are all Dart: drawn in your palette, laid out by Flutter, replaceable
 one at a time. The seat map itself (seats, labels, sections, the 3D scene and
 the view from a seat) is the SeatLayer map from the web, shown inside your app.
@@ -207,7 +243,7 @@ Slots: `primaryButtonStyle`, `secondaryButtonStyle`, `continueButtonStyle`,
 `headerStyle`, `pillStyle`. Button slots take a Material `ButtonStyle`; surface
 slots take a `SeatLayerSurfaceStyle` (colour, shape, elevation, padding, type).
 Every widget owning a slot also takes `style:`, which wins for that one instance,
-for example `SeatLayerDockBar(style: SeatLayerSurfaceStyle(shape: …))`.
+for example `SeatLayerCartSheet(style: SeatLayerSurfaceStyle(shape: …))`.
 
 **Sizes, visibility and words: layout, chrome switches, strings.** The spec's
 numbers are defaults, not constants, and every buyer-facing string is an
@@ -215,9 +251,9 @@ override:
 
 ```dart
 // before: the default phone metrics and English defaults.
-// after: a taller dock, no floor strip, French wording.
+// after: a shorter cart sheet, no floor strip, French wording.
 theme: const SeatLayerPickerThemeData.light(
-  layout: SeatLayerPickerLayout(dockBarHeight: 60, sheetMaxHeightFraction: .5),
+  layout: SeatLayerPickerLayout(sheetMaxHeightFraction: .5),
 ),
 options: SeatLayerPickerOptions(
   chrome: const SeatLayerPickerChromeOptions(showFloorStrip: false),
@@ -232,7 +268,36 @@ It resolves by language, and by script for Chinese; an untranslated locale (and
 any entry with no runtime wording yet) keeps its English default, and the
 result is an ordinary `SeatLayerPickerStrings` you can still override on top of.
 
-**3D limit.** `SeatLayerPickerOptions(max3DSeats:)`: 3D opens for venues up to 60,000 seats; on a touch screen the default is 30,000 unless you set this option.
+**Your own prices.** Show the prices your backend charges on the price rail, the
+seat card and the cart, by category and by single seat:
+
+```dart
+options: const SeatLayerPickerOptions(
+  pricing: SeatLayerPickerPricing(
+    categories: {
+      'stalls': SeatLayerCategoryPricing(base: 45, tiers: {'child': 20}),
+    },
+    objects: {
+      'A-12': SeatLayerSeatPricing(60),
+      'A-13': SeatLayerSeatPricing.tiers({'adult': 60, 'child': 30}),
+    },
+  ),
+),
+```
+
+A seat's own price wins over its category's. These prices are for display:
+charge from your server.
+
+**3D.** `SeatLayerPickerOptions(max3DSeats:)`: 3D opens for venues up to 60,000
+seats; on a touch screen the default is 30,000 unless you set this option.
+`enable3DCrowd: false` hides the crowd in standing areas, and
+`touchNavigation3D: SeatLayer3DTouchNavigation.classic` keeps the 0.12 gestures.
+
+**Telemetry.** `SeatLayerConfiguration(telemetry: false)` stops the map page
+sending SeatLayer its load and error reports.
+
+**Levels.** `SelectedSeat.levelName` names a seat's level on a chart with two or
+more levels.
 
 **One whole part: a builder slot.** The builder receives the live state, the
 controller and the widget the drop-in would have rendered:
@@ -381,6 +446,14 @@ who owns it. The capability crosses into Dart at the handoff and nowhere else.
 - Inspect the hold server-side and calculate the charge from server data.
 - Reuse a stable host order id as the booking reference for safe retries.
 
+After your server has booked, tell the picker: the map shows the seats booked
+and the hold clock stops.
+
+```dart
+await bookOnYourBackend(handoff.holdId);
+await picker.markBooked(holdId: handoff.holdId);
+```
+
 Checkout transfers ownership: closing the picker afterwards must not release the
 hold, while closing *before* handoff releases a picker-owned one. Process
 termination cannot guarantee a release, so the server TTL is the final boundary.
@@ -407,7 +480,9 @@ with a typed `read_only` error rather than relying on hidden UI. Continue with
 
 ## Widget catalogue
 
-Every widget below works standalone inside a `SeatLayerPickerScope`.
+Every widget below works standalone inside a `SeatLayerPickerScope`, except the
+last two rows: a Season and a run have their own controllers, outside the event
+scope.
 
 | Widget | What it draws |
 | --- | --- |
@@ -415,7 +490,7 @@ Every widget below works standalone inside a `SeatLayerPickerScope`.
 | `SeatLayerPickerHeader` | Event identity, hold pill, dismiss |
 | `SeatLayerPriceLegend` | Price chips that filter the map |
 | `SeatLayerFloorStrip` | Floor chips on a multi-floor venue |
-| `SeatLayerDockBar` | Focused section, seats left, prev/next, Venue |
+| `SeatLayerDockBar` | Focused section, seats left, prev/next, Venue (off in the drop-in picker) |
 | `SeatLayerPickerMapControls` | Accessibility, fit, Map/3D in the corners |
 | `SeatLayerConfirmCard` | The phone's one-seat decision card |
 | `SeatLayerCartSheet` | Peek bar and content-height cart |
@@ -428,6 +503,8 @@ Every widget below works standalone inside a `SeatLayerPickerScope`.
 | `SeatLayerPickerTablePrompt` / `…GeneralAdmissionPrompt` | Quantity prompts |
 | `SeatLayerPickerSectionNavigator` | Section list and stepping |
 | `SeatLayerPickerTestModeIndicator` | The one test-event badge |
+| `SeatLayerSeasonPicker` / `SeatLayerSeasonView` | The Season picker, and its page alone |
+| `SeatLayerRunPicker` / `SeatLayerRunView` | The run picker, and its page alone |
 
 The individual corner controls (`…ZoomInButton`, `…ZoomToFitButton`,
 `…ViewModeControl`, `…ColorblindButton`, `…OverviewButton`,
@@ -449,6 +526,18 @@ included. Private buyer tokens stay in memory and never enter a snapshot.
 
 How to build and test the package is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Upgrading from 0.12
+
+- **3D touch:** one finger moves the view, a pinch zooms, and a two-finger twist
+  turns the venue.
+- **Errors:** when a seat or ticket is refused, the buyer reads a sentence in
+  their language, not the error's code. Your code still gets the error as before.
+- **No "Powered by SeatLayer" line** under the checkout button.
+- **Tablet panel:** one row per ticket type, with the total above one full-width
+  button; the map's controls moved to the bottom end.
+
+Everything else is in the [changelog](CHANGELOG.md).
+
 ## Frequently asked questions
 
 ### Is there a Flutter SDK for seat selection in a ticketing app?
@@ -456,9 +545,9 @@ How to build and test the package is in [CONTRIBUTING.md](CONTRIBUTING.md).
 Yes. The `seatlayer` package gives Flutter apps on iOS and Android a ready-made
 seat picker: live availability, seat selection, best available, holds with a
 countdown, a cart, 3D and the view from a seat for venues up to 60,000 seats,
-and a checkout hand-off to your backend. Every control is a Flutter widget you
-can restyle or replace, and the seat map itself is the SeatLayer map from the
-web, shown inside your app. You pay only for sold seats, with 100 free every
+and a checkout hand-off to your backend. Every control of the event picker is a
+Flutter widget you can restyle or replace, and the seat map itself is the
+SeatLayer map from the web, shown inside your app. You pay only for sold seats, with 100 free every
 month, and the same charts run on the web, iOS, Android and React Native. Your
 own server and payment provider keep the order and the money.
 
@@ -471,11 +560,18 @@ countdown, best available, 3D and the view from a seat for venues up to 60,000
 seats, and the checkout hand-off. `SeatLayerView` remains for an app that wants
 only the map and draws every control itself.
 
+### Can I sell season tickets in a Flutter app?
+
+Yes. `showSeatLayerSeasonPicker` opens a Season: the buyer picks a package and
+one seat that is the same at every date, and your server books the hold.
+`showSeatLayerRunPicker` sells a run of performances the same way, as one hold.
+
 ### What is native in the SeatLayer Flutter SDK?
 
-Every control around the seat map is a Flutter widget: the header, price rail,
-section dock, seat card, cart sheet and checkout button, drawn in your palette
-and replaceable one at a time. The seat map itself is the SeatLayer map from the
+In the event picker, every control around the seat map is a Flutter widget: the
+header, price rail, seat card, cart sheet and checkout button, drawn in your
+palette and replaceable one at a time. In the Season and run pickers the header
+is a Flutter widget and the rest is SeatLayer's page. The seat map itself is the SeatLayer map from the
 web, shown inside your app, so a seat, its price and its 3D view (for venues up
 to 60,000 seats) are the same on Flutter, iOS, Android and the web.
 

@@ -105,10 +105,45 @@ void main() {
       'publicKey': 'pk_test_x',
       'locale': 'de',
       'theme': 'dark',
+      'appBar': true,
     });
     // The picker's blocks are the picker's: the Season page takes none.
     expect(payload.containsKey('requirements'), isFalse);
     expect(payload.containsKey('chrome'), isFalse);
+  });
+
+  test('the status carries the Season\'s name and its club\'s brand', () async {
+    await boot();
+    evt('season.status', <String, Object?>{
+      'kind': 'ready',
+      'message': 'Ready',
+      'season': <String, Object?>{'name': 'Main Stage 2026/27'},
+      'branding': <String, Object?>{
+        'brandName': 'Grand Theatre',
+        'logoUrl': 'https://api.example.test/logo.png',
+        'accent': '#0f766e',
+      },
+    });
+    expect(season.status?.seasonName, 'Main Stage 2026/27');
+    expect(season.status?.branding?.brandName, 'Grand Theatre');
+    expect(
+      season.status?.branding?.logoUrl,
+      'https://api.example.test/logo.png',
+    );
+    expect(season.status?.branding?.accent, '#0f766e');
+    // A club that set none of them sends an empty brand.
+    evt('season.status', <String, Object?>{
+      'kind': 'held',
+      'message': 'Held',
+      'season': <String, Object?>{'name': 'Main Stage 2026/27'},
+      'branding': <String, Object?>{},
+    });
+    expect(season.status?.seasonName, 'Main Stage 2026/27');
+    expect(season.status?.branding?.brandName, isNull);
+    // An older page sends neither.
+    evt('season.status', <String, Object?>{'kind': 'ready', 'message': ''});
+    expect(season.status?.seasonName, isNull);
+    expect(season.status?.branding, isNull);
   });
 
   test('a page without the app-shell hooks is refused before init', () async {

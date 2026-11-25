@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.13.0 (unreleased)
+## 0.13.0 (2026-11-25)
 
 **New**
 
-- **Season picker:** `SeatLayerSeasonPicker` and `showSeatLayerSeasonPicker` open a Season: packages, map and cart under the event picker's header, with the Season's name, the club's mark and the hold clock. `onContinue` gives your server the hold to book. On Close or system Back the page asks the buyer first, and `onClose` receives the answer. `SeatLayerSeasonController`, `SeatLayerSeasonConfiguration` and `SeatLayerSeasonView` are there for a layout of your own.
+- **Season picker:** `SeatLayerSeasonPicker` and `showSeatLayerSeasonPicker` open a Season: packages, map and cart under the event picker's header, with the Season's name, the club's mark and the hold clock. `onContinue` gives your server the hold to book. On Close or system Back the page asks the buyer first, and `onClose` receives the answer. `SeatLayerSeasonController`, `SeatLayerSeasonConfiguration` and `SeatLayerSeasonView` are there for a layout of your own; the page leaves the Season's name and the hold clock to your bar.
 - **Run picker:** `SeatLayerRunPicker` and `showSeatLayerRunPicker` open a run, a few performances sold to one buyer as one hold, under the same header. `onContinue` gives your server a hold without prices, to price and book. Close and system Back release seats that were not handed off. It stays light or dark as it opened. `SeatLayerRunController`, `SeatLayerRunConfiguration` and `SeatLayerRunView` are there for a layout of your own.
 - **`SeatLayerPickerController.markBooked({holdId})`:** call it after your server has booked. The map shows the seats booked, the clock stops, the hold is never released, and the booked screen opens at once. It is false, and changes nothing, for another hold or no hold.
 - **Per-seat prices:** `SeatLayerPickerPricing.objects`, by seat or table label, with `SeatLayerSeatPricing(price)` or `SeatLayerSeatPricing.tiers({...})`. A seat's own price wins over its category's.
@@ -16,7 +16,7 @@
 
 **Changed**
 
-- **Map 1.0.2** (was 0.101.0). A venue with several levels opens on its lowest level, and the map's loads, holds and releases are tried again when the server is busy. Moving the map over a standing area no longer opens its number, and the outermost seats are drawn whole. What else changed on the map is in the [changelog](https://docs.seatlayer.io/changelog/).
+- **Map 1.0.3** (was 0.101.0). A venue with several levels opens on its lowest level, and the map's loads, holds and releases are tried again when the server is busy. Moving the map over a standing area no longer opens its number, and the outermost seats are drawn whole. What else changed on the map is in the [changelog](https://docs.seatlayer.io/changelog/).
 - **3D touch (behaviour change):** one finger moves the view, a pinch zooms, a two-finger twist turns the venue and a two-finger drag tilts it. The Rotate / Move pair is drawn only with `touchNavigation3D: SeatLayer3DTouchNavigation.classic`, which also keeps the earlier gestures. The pair now has labels, "Rotate venue" and "Move venue", or icons where the labels do not fit.
 - **The ink on a brand colour (behaviour change):** an organizer's own ink is used where it reads at 3:1 on the accent; otherwise white where white reads at 3:1; otherwise `#1A1200` instead of black. An `onAccent` you pass is used exactly.
 - **When the map does not load (behaviour change):** the buyer no longer sees the error's own message, only "The seat map didn’t load", "Check your connection and try again." and Try again. The error still reaches `onError`. A sentence you pass as `SeatLayerPickerErrorView.standalone(message:)` or `errorMessage` is still drawn when it differs from the title.
@@ -50,6 +50,8 @@
 
 - **A phone held sideways** keeps the phone layout and opens full screen; the dialog and the wide layout need a tablet (shortest side 600 or more). The seat card, the loading view and the map's controls fit its short map, and the prices, map controls and cart stay clear of the camera cutout. `SeatLayerPickerMapControls.topInset` keeps the controls under top chrome of your own.
 - **Right to left:** the map's controls, the header's padding and the wide panel's divider follow the reading direction. The venue itself never mirrors.
+- **The folded cart line** names a seat as its card does, section, row and seat, where the chart gives the row a name of its own. It showed the row's code.
+- **When the map does not load**, nothing of the page shows through the message.
 
 ## 0.12.0 (2026-09-25)
 

@@ -1,8 +1,8 @@
 name: seatlayer
 description: >-
-  Flutter seat map SDK: a native seating chart and seat picker for iOS and
-  Android ticketing apps, with live availability, best available, seat holds,
-  3D views and secure checkout.
+  Flutter seat map SDK: a seating chart and seat picker for iOS and Android
+  ticketing apps, with live availability, seat holds, season tickets, 3D views
+  and secure checkout.
 version: 0.13.0
 homepage: https://docs.seatlayer.io/buyer-sdk/flutter/
 repository: https://github.com/seatlayer/seatlayer-flutter
@@ -18,12 +18,17 @@ topics:
 
 screenshots:
   - description: >-
-      The SeatLayer picker on a phone: venue overview, section dock, seat
-      confirmation, ticket list and the 3D venue view.
+      The SeatLayer picker on a phone: the whole venue, a section, the seat
+      card, the cart and the 3D venue.
     path: doc/media/picker-flow.gif
   - description: >-
-      A focused section with the SeatLayer picker's dock bar and price legend.
+      A section of the venue with the SeatLayer picker's price rail, map
+      controls and cart.
     path: doc/media/picker-section.png
+  - description: >-
+      The Season picker: the package, its prices and dates, and the Choose
+      seats button, under a Flutter header.
+    path: doc/media/season-picker.png
 
 platforms:
   android:

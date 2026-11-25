@@ -1873,7 +1873,9 @@ bottom edge instead and the spring puts it back.
   `type.footTotalAmount` (17 / w700) in tabular figures once there is one.
 - **While collapsed and non-empty, a second, muted line under it names the
   seats**: each cart line's label with `-` replaced by ` · `, joined by a comma
-  and two spaces — `204 · Q · 7,  204 · U · 13` — at 12 / w600 in
+  and two spaces — `204 · Q · 7,  204 · U · 13`. A seat the chart gives a name
+  of its own is named as its card names it, section, row and seat, or by that
+  name where it has no row — at 12 / w600 in
   `color.*.mutedText`, one line, ellipsized, 3 points under the total row, with
   an unfold glyph at 16 on the trailing edge. "2 tickets" alone told a buyer
   they had bought something and not what, and the handle above was the only way
@@ -2767,20 +2769,25 @@ words back to the runtime.
 
 A Season (one package of dates, the same seat for every date) is drawn by the
 pinned `season.html` (contract `seatlayer-season-surface-v1`, capabilities
-`season-surface-v1` and `season-app-shell-v1`): the package step, the dates,
-the map and the cart are the page's. The app draws only what stands around it.
+`season-surface-v1` and `season-app-shell-v1`), booted with `appBar: true`: the
+package step, the dates, the map and the cart are the page's. The app draws only
+what stands around it. A page that lists `season-app-shell-v2` honours `appBar`
+and hides its own name row, hold clock and full-screen control (the row stays
+only to carry Sales closed or the offer to extend a hold); an older page ignores
+it and shows them.
 
 **Bar.** §3.1's header, the same layout and numbers: brand mark, name, the
 hold pill, the dismiss control. No new tokens.
-- Name: `season.status` `ready`'s `season.name` when the page sends it, else
-  the loading words `strings.chooseSeats`. Brand: its `branding` (`brandName`,
+- Name: `season.status`'s `season.name` (every status once the Season is read)
+  when the page sends it, else the loading words `strings.chooseSeats`. Brand: its `branding` (`brandName`,
   `logoUrl`, `accent`, the event's field names), else the seat glyph.
 - Hold pill: from `season.hold` / `season.holdChanged` to `null` or
   `season.holdExpired`, counting the handoff's `expiresAt`.
 
 **Frame.** The same route frame as the event page: top and side safe areas on
 the page's own ground, the bottom one sent to the page with
-`season.setViewportInsets` (its cart docks over the home indicator).
+`season.setViewportInsets` (its cart docks over the home indicator, on the
+cart's own ground where the page honours `appBar`). The app adds no band.
 
 **Close.** The dismiss control and system Back send `season.requestClose`,
 every press: the page may ask the buyer to release or keep the seats, so the

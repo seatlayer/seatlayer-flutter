@@ -145,6 +145,9 @@ class SeatLayerSeasonConfiguration implements SeatLayerSurfaceConfiguration {
       if (enable3DCrowd != null) 'enable3DCrowd': enable3DCrowd,
       if (touchNavigation3D != null)
         'touchNavigation3D': touchNavigation3D!.raw,
+      // The app's bar is the only one, with the name, the clock and the ✕. A
+      // page without `season-app-shell-v2` ignores it and shows its own.
+      'appBar': true,
     };
     return <String, Object?>{
       'protocol': protocolRange.toJson(),

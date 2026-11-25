@@ -1,5 +1,5 @@
 // The Season picker in the app: the event header over season.html, driven
-// through a fake page that answers like runtime 1.0.0's.
+// through a fake page that answers like it.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/seatlayer.dart';
@@ -48,8 +48,9 @@ void main() {
     final payload = init.payload! as Map<String, Object?>;
     expect(payload['surface'], <String, Object?>{'kind': 'season'});
     expect((payload['config']! as Map)['theme'], 'light');
+    expect((payload['config']! as Map)['appBar'], isTrue);
 
-    // Runtime 1.0.1 names the Season and its club on `ready`.
+    // The page names the Season and its club on `ready`.
     page.evt('season.status', <String, Object?>{
       'kind': 'ready',
       'message': 'Ready',
@@ -67,6 +68,72 @@ void main() {
       'bottom': 34.0,
       'left': 0.0,
     });
+  });
+
+  testWidgets('every status of season-app-shell-v2 keeps the name and the mark',
+      (tester) async {
+    final fake = useFakeWebViewPlatform();
+    final page = SeasonPage(fake);
+    await tester.pumpWidget(_app(SeatLayerSeasonPicker(
+      configuration: seasonConfiguration,
+      onContinue: (_) {},
+      onClose: (_, __) {},
+    )));
+    page.appBarPage = true;
+    await page.boot(tester);
+    // The club's logo is a picture; without one its colour and letter stand.
+    const brand = <String, Object?>{
+      'brandName': 'Grand Theatre',
+      'accent': '#0f766e',
+    };
+    for (final kind in <String>[
+      'ready',
+      'pending',
+      'held',
+      'failed',
+      'released',
+      'booked',
+    ]) {
+      page.statusV2(kind, branding: brand);
+      if (kind == 'held') page.held('sop_a');
+      await _settle(tester);
+      expect(find.text('Main Stage 2026/27'), findsOneWidget, reason: kind);
+      expect(find.text('Choose your seats'), findsNothing, reason: kind);
+      expect(find.text('G'), findsOneWidget, reason: kind);
+    }
+    final bar =
+        tester.widget<SeatLayerHeaderBar>(find.byType(SeatLayerHeaderBar));
+    expect(bar.theme.accent, const Color(0xFF0F766E));
+    // One clock, the app's, and the bottom for the page's cart.
+    expect(find.byType(SeatLayerHoldClock), findsOneWidget);
+    expect(
+      (page.last('season.setViewportInsets').payload! as Map)['bottom'],
+      34.0,
+    );
+  });
+
+  testWidgets('an older page: no name on its statuses, the loading words stay',
+      (tester) async {
+    final fake = useFakeWebViewPlatform();
+    final page = SeasonPage(fake);
+    await tester.pumpWidget(_app(SeatLayerSeasonPicker(
+      configuration: seasonConfiguration,
+      onContinue: (_) {},
+      onClose: (_, __) {},
+    )));
+    await page.boot(tester);
+    for (final kind in <String>['ready', 'held', 'released']) {
+      page.evt('season.status', <String, Object?>{
+        'kind': kind,
+        'message': kind,
+      });
+      await _settle(tester);
+      expect(find.text('Choose your seats'), findsOneWidget, reason: kind);
+    }
+    expect(
+      (page.last('season.setViewportInsets').payload! as Map)['bottom'],
+      34.0,
+    );
   });
 
   testWidgets('a hold puts the clock in the header', (tester) async {
@@ -178,7 +245,8 @@ void main() {
     await tester.tap(find.text(words.retry));
     await _settle(tester);
     expect(find.byType(SeatLayerPickerErrorView), findsNothing);
-    expect(fake.loads, <String>[seatLayerSeasonPageUrl, seatLayerSeasonPageUrl]);
+    expect(
+        fake.loads, <String>[seatLayerSeasonPageUrl, seatLayerSeasonPageUrl]);
     page.reloaded();
     await page.boot(tester);
     expect(page.sent.where((e) => e.kind == EnvelopeKind.init), hasLength(2));

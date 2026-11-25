@@ -234,8 +234,7 @@ class SeatLayerPickerChromeOptions {
   /// Whether the cart sheet renders.
   final bool showTicketPanel;
 
-  /// Whether the rung-2 dock bar renders. Auto: wide only, so the drop-in
-  /// phone layout mounts none.
+  /// Whether the rung-2 dock bar renders. Auto: off on every width.
   ///
   /// Focusing a section on a phone used to dock a bar onto the map's bottom
   /// edge — "406 · 302 seats left ‹ › ‹ Venue". Pinch-out and the zoom-out
