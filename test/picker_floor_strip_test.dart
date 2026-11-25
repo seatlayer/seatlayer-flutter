@@ -328,6 +328,68 @@ void main() {
       });
     }
 
+    for (final (name, size, up, down) in const <(String, Size, double, double)>[
+      ('phone', Size(393, 852), 21.5, 21.5),
+      // In the panel the room is all above: the next line follows at once.
+      ('wide', Size(1024, 768), 23.5, 19.5),
+    ]) {
+      for (final dy in <double>[-up, 0, down]) {
+        testWidgets('$name: a chip takes a tap ${dy}pt from its middle',
+            (tester) async {
+          final map = await _pumpPicker(
+            tester,
+            size,
+            const SeatLayerPickerChromeOptions(),
+          );
+          expect(up + down, greaterThanOrEqualTo(43));
+          final chip = find.text('Dress circle');
+          await tester.tapAt(tester.getCenter(chip) + Offset(0, dy));
+          await pumpToRest(tester);
+          expect(
+            map.callsTo('picker.setFloor').single.$2,
+            <String, Object?>{'floorId': 'circle'},
+          );
+        });
+      }
+
+      testWidgets('$name: the room around a chip does not move it',
+          (tester) async {
+        Future<Rect> chip({bool own = false}) async {
+          await _pumpPicker(
+            tester,
+            size,
+            const SeatLayerPickerChromeOptions(),
+            // A host's strip gets no room, so this is where the chip was.
+            floorStrip: own ? (context, part) => part.defaultChild : null,
+          );
+          return tester.getRect(find.text('Dress circle'));
+        }
+
+        expect(await chip(), await chip(own: true));
+      });
+    }
+
+    testWidgets('a drag that starts in the room still scrolls the strip',
+        (tester) async {
+      // Larger text, so the levels are wider than the phone.
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final map = await _pumpPicker(
+        tester,
+        const Size(320, 568),
+        const SeatLayerPickerChromeOptions(),
+      );
+      final chip = find.text('All floors');
+      final before = tester.getCenter(chip);
+      await tester.dragFrom(
+        before + const Offset(20, 20),
+        const Offset(-120, 0),
+      );
+      await pumpToRest(tester);
+      expect(tester.getCenter(chip).dx, lessThan(before.dx - 1));
+      expect(map.callsTo('picker.setFloor'), isEmpty);
+    });
+
     testWidgets('phone, 3D: the list stands in only without the 3D controls',
         (tester) async {
       await _pumpPicker(

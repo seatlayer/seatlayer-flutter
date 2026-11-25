@@ -24,7 +24,7 @@
 - **No "Powered by SeatLayer"** under the checkout button. `SeatLayerPickerAttribution` is deprecated and draws nothing. On a phone with no safe area at its foot, the button keeps 12 points from the edge.
 - **Sold-out prices** stay on the price rail, struck through and greyed, and can still be tapped to clear a filter.
 - **Checkout button:** "Securing your seats…" and "Seats secured. Opening checkout…" are drawn without a spinner. If you set `openingCheckout` and not `seatsSecuredOpeningCheckout`, your wording is still drawn. `SeatLayerCheckoutCtaState.busyInWords` marks these states when you rebuild one with your own label.
-- **Levels (behaviour change):** one level selector on a venue with several levels. The list at the map's bottom corner is no longer drawn beside the level chips, only where they are not; an app that wants both places `SeatLayerPickerFloorSelector` itself.
+- **Levels (behaviour change):** one level selector on a venue with several levels. The list at the map's bottom corner is no longer drawn beside the level chips, only where they are not; an app that wants both places `SeatLayerPickerFloorSelector` itself. The touch area of a level's chip is 44 points high.
 - **Test mode:** a tap on the test badge says "Bookings here are not real and no card is charged". Its screen-reader name is "Test mode · books nothing".
 - **Accessibility sheet:** the two map switches come first, then "SHOW SEATS FOR". A long name wraps and its row grows; it is never cut. `showSeatsFor` is drawn as written, no longer upper-cased.
 - **English wording:**

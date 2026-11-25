@@ -1121,6 +1121,10 @@ stands in where `showFloorStrip` is off, beside a host's own
 off. `showFloorSelector: false` never draws it. A host that wants both places
 `SeatLayerPickerFloorSelector` itself.
 
+**Touch area.** In the ready-made layout a chip takes a tap over
+`size.minimumHitTarget` of height: the room above and below the track (in the
+wide panel, above it) is the nearest chip's. Nothing drawn moves.
+
 **Capability.** `floor-stack-v1`. Without it the floor list is not offered.
 
 **Accessibility.** A group named for floors; each chip a toggle with a pressed
