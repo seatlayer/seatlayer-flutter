@@ -227,6 +227,36 @@ void main() {
       expect(fake.loads, hasLength(2));
     });
 
+    testWidgets('under the loading view the hold does not wait', (tester) async {
+      final fake = useFakeWebViewPlatform();
+      usePhoneSurface(tester);
+      final controller = SeatLayerPickerController();
+      addTearDown(controller.dispose);
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: SeatLayerPicker(
+            configuration: SeatLayerConfiguration(event: 'ev_test'),
+            controller: controller,
+            options: const SeatLayerPickerOptions(initialHoldId: 'hold-1'),
+            onCheckout: (_) async {},
+          ),
+        ),
+      ));
+      await _settle(tester);
+      final page = _EventPage(fake);
+      await page.boot(tester, holdOwner: 'host');
+      fake.endPage();
+      await _settle(tester);
+      page.reloaded();
+      await page.boot(tester);
+      expect(
+        page.last('picker.resumeHold').payload,
+        <String, Object?>{'holdId': 'hold-1'},
+      );
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(minutes: 1));
+    });
+
     testWidgets('behind another app it waits', (tester) async {
       final (fake, page, _) = await open(tester);
       await page.boot(tester);
