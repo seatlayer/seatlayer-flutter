@@ -60,6 +60,9 @@ class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
   late final WebViewController _web;
   int _generation = 0;
 
+  /// This view's page, as its session knows it.
+  Object? _transport;
+
   /// The prewarmed page this view adopted, for as long as it is mounted.
   ///
   /// Held rather than dropped after boot so `dispose` can detach its channel:
@@ -156,6 +159,7 @@ class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
       widget.configuration,
       profile: widget.bridgeProfile,
     );
+    _transport = widget.controller.transport;
     unawaited(
       ready.then(
         (info) {
@@ -272,7 +276,12 @@ class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
     // Nothing more from this page: the controller it was delivering into is
     // being detached on the next line.
     _warm?.detach();
-    widget.controller.detachTransport();
+    // A view mounted in this one's place has its page up before this one is
+    // disposed.
+    final current = widget.controller.transport;
+    if (current == null || identical(current, _transport)) {
+      widget.controller.detachTransport();
+    }
     super.dispose();
   }
 

@@ -14,6 +14,8 @@
 - **When the page refuses standing places (behaviour change):** the prompt stays and the bar says "One or more seats were just taken. Please pick again." It closed as if the places were held. `setGeneralAdmissionQuantity` now completes with an error, `hold_unavailable`, for such a refusal.
 - **The standing and table prompts on a short map,** a phone held sideways or a large text size: they scroll, and open with the number and the buttons in sight. The buttons were cut off.
 - **`onBooked` and "You're all set" (behaviour change)** come only when the page says the hold is booked, which it does after your server has booked and you call `markBooked`. They also came when the handed-off hold left the map for another reason: the page was loaded again by a changed setting such as the language, you rejected the checkout, or the hold was lost on the server. The buyer then read that their tickets were confirmed, and nothing was booked. Take a sale from your own server, never from `onBooked`.
+- **A hold handed to checkout, when the page is loaded again** by a changed setting such as the language, or by `retry()`: the new page takes it up again. The picker stood empty while your checkout held the seats.
+- **Try again on a page that had loaded** brings one that works. The new page was cut off as the old one left.
 
 ## 0.13.0 (2026-11-25)
 

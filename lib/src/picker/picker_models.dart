@@ -1255,6 +1255,14 @@ class SeatLayerPickerState {
         holdLapsed: holdLapsed,
       );
 
+  /// A page that takes another's place starts over; the hold handed to checkout
+  /// is still the host's.
+  SeatLayerPickerState reloading() => SeatLayerPickerState(
+        phase: SeatLayerPickerPhase.initializing,
+        busyAction: SeatLayerPickerBusyAction.none,
+        checkoutHandoff: checkoutHandoff,
+      );
+
   SeatLayerPickerState withoutHandoff() => SeatLayerPickerState(
         phase: phase,
         busyAction: SeatLayerPickerBusyAction.none,

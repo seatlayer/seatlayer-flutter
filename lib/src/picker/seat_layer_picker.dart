@@ -349,7 +349,9 @@ class _SeatLayerPickerMapState extends State<SeatLayerPickerMap>
           configuration: configuration,
           bridgeProfile: SeatLayerBridgeProfile.picker(
             config: <String, Object?>{
-              ...options.toBridgeConfig(),
+              ...options.toBridgeConfig(
+                withInitialHold: !picker.bootsWithoutInitialHold,
+              ),
               'theme': <String, Object?>{'mode': boot.mode.raw},
               if (boot.mapTheme != null)
                 'mapTheme': boot.mapTheme!.toBridgeConfig(),

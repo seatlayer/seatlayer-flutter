@@ -19,6 +19,7 @@ import 'picker_error_words.dart';
 import 'picker_haptics.dart';
 import 'picker_models.dart';
 import 'picker_options.dart';
+import 'picker_reload_hold.dart';
 import 'picker_revision_waiters.dart';
 import 'picker_selection_focus.dart';
 import 'picker_sheet_drag.dart';
@@ -26,6 +27,7 @@ import 'picker_standing_amounts.dart';
 import 'picker_viewport_report.dart';
 import 'seat_layer_picker_theme.dart';
 
+part 'picker_page_reload.dart';
 part 'picker_seat_answers.dart';
 part 'picker_standing_places.dart';
 
@@ -35,7 +37,11 @@ part 'picker_standing_places.dart';
 /// inventory-changing operations are serialized, and concurrent checkout calls
 /// share one Future so a double tap cannot create two holds.
 class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
-    with _PickerSeatAnswers, PickerFailureLog, _PickerStandingPlaces {
+    with
+        _PickerSeatAnswers,
+        PickerFailureLog,
+        _PickerStandingPlaces,
+        _PickerPageReload {
   SeatLayerPickerController({SeatLayerController? mapController})
       : mapController = mapController ?? SeatLayerController(),
         _ownsMapController = mapController == null,
@@ -55,6 +61,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
         unawaited(setMapInteractionEnabled(false).catchError((Object _) {}));
       }
       _callbacks.onReady?.call(info);
+      _reloadHold.pageReady();
     });
     _accessExpiredSubscription = this.mapController.onBuyerAccessExpired.listen(
           (event) => _callbacks.onAccessExpired?.call(event),
@@ -210,10 +217,6 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   @internal
   int get reloadGeneration => _reloadGeneration;
 
-  /// Recreate the embedded runtime after a load or compatibility failure.
-  ///
-  /// Selection and hold recovery remain runtime/server-authoritative; the SDK
-  /// does not pretend stale local state survived a failed transport.
   /// Decides which haptic each snapshot has earned. Pure and stateful — the
   /// judgement is the interesting part, and it is only testable apart from the
   /// platform channel.
@@ -240,38 +243,6 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
     }
   }
 
-  Future<void> retry() {
-    if (_disposed) return Future<void>.error(const SeatLayerError.destroyed());
-    if (value.phase == SeatLayerPickerPhase.closed) {
-      return Future<void>.error(const SeatLayerError.destroyed());
-    }
-    return _serialize(() async {
-      // A failed handshake has no live picker to clean up. If the runtime did
-      // reach Ready (for example access later became unavailable), acknowledge
-      // destroy before the ValueKey swap removes its WebView so a picker-owned
-      // hold is not left solely to TTL cleanup.
-      if (mapController.isReady) {
-        try {
-          await mapController.runBridgeCommand('picker.destroy');
-        } catch (_) {
-          // Retry remains recoverable when the old runtime is already gone.
-        }
-      }
-      _reloadGeneration += 1;
-      _haptics.reset();
-      _viewportReport.forget();
-      _blockedRegions.forget();
-      _seatView = null;
-      // A retry is a second open, and its own wait starts here.
-      _tapToReadyMs = null;
-      _readyInfo = null;
-      _mountClock
-        ..reset()
-        ..start();
-      value = const SeatLayerPickerState.initializing();
-    });
-  }
-
   @internal
   void attach({
     required SeatLayerConfiguration configuration,
@@ -294,6 +265,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
     _options = options;
     _callbacks = callbacks;
     _runtimeAttached = true;
+    _bootsWithoutInitialHold = false;
     // T0 for `tapToReadyMs`. Only the first mount starts it: a controller
     // handed to a second scope is a re-parent, not a second open, and
     // restarting here would report the re-parent as the buyer's wait.
@@ -317,6 +289,9 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
     required SeatLayerPickerOptions options,
     required SeatLayerPickerCallbacks callbacks,
   }) {
+    if (options.initialHoldId != _options.initialHoldId) {
+      _bootsWithoutInitialHold = false;
+    }
     _options = options;
     _callbacks = callbacks;
     if (options.readOnly && value.generalAdmissionCandidate != null) {
@@ -423,6 +398,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
       return;
     }
 
+    _pageTookOver(current, snapshot);
     final previousSelection = value.selection;
     final previousValidity = current?.selectionValidity;
     final previousHold = value.hold;
@@ -1454,6 +1430,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
     if (_disposed) return;
     _disposed = true;
     _revisionWaiters.failAll();
+    _reloadHold.forget();
     unawaited(_bridgeSubscription.cancel());
     unawaited(_readySubscription.cancel());
     unawaited(_accessExpiredSubscription.cancel());

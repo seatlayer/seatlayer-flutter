@@ -158,6 +158,11 @@ abstract class SeatLayerBridgeSession<
     return completer.future;
   }
 
+  /// The page the session talks to, by identity. A page that another one has
+  /// already replaced must not detach it.
+  @internal
+  Object? get transport => _client;
+
   /// Feed one raw web→native frame (the `JavaScriptChannel` string) to the
   /// client. Called by [SeatLayerView].
   @internal
