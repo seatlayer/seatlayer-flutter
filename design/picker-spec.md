@@ -121,7 +121,7 @@ Header   brand · name over "date · venue" · sales-closed pill · hold pill ·
 ┌ map surface ──────────────────────────┐┌ panel ───────────────────────┐
 │ top-start  test chip                   ││ strings.ticketPrices heading │
 │ seat card / prompts / status overlays  ││ price list (named rows)      │
-│ bottom-start floor selector            ││ floor strip (multi-floor)    │
+│ bottom-start (empty by default)        ││ floor strip (multi-floor)    │
 │ bottom-end control column, top down:   ││ strings.yourSeats heading    │
 │              Venue (section framed)    ││ best-seats card              │
 │              Map | 3D · Rotate / Move  ││ cart list (scrolls)          │
@@ -1113,6 +1113,13 @@ control that opens nothing is not drawn.
 
 `strings.allFloors` is the first chip where the runtime offers an all-floors
 view.
+
+**One level selector.** The floor selector (`SeatLayerPickerFloorSelector`, the
+list at the map's bottom start corner) is not drawn beside the rail's chips. It
+stands in where `showFloorStrip` is off, beside a host's own
+`builders.floorStrip`, and in the immersive scene where `showVenue3DChrome` is
+off. `showFloorSelector: false` never draws it. A host that wants both places
+`SeatLayerPickerFloorSelector` itself.
 
 **Capability.** `floor-stack-v1`. Without it the floor list is not offered.
 

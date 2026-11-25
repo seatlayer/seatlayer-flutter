@@ -630,7 +630,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                                 end: _mapInset,
                                 child:
                                     SeatLayerMapChromeRegion(child: controls)),
-                            if (chrome.showFloorSelector)
+                            if (floorListUp(chrome, widget.builders, false))
                               const PositionedDirectional(
                                 start: _mapInset,
                                 bottom: _mapInset,
@@ -928,7 +928,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                             ),
                           ),
                         ),
-                      if (chrome.showFloorSelector)
+                      if (floorListUp(chrome, widget.builders, venue3DUp))
                         PositionedDirectional(
                           start: _mapInset,
                           // The map's own bottom-left edge again: the ♿ disc

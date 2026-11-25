@@ -134,7 +134,7 @@ Header   name over "date · venue"        sales-closed pill · HoldPill · close
 ┌ map surface ──────────────────────────┐┌ panel ───────────────────────┐
 │ TestModeBadge (top-start)              ││ "Ticket prices"   heading    │
 │ seat card / prompts / status overlay   ││ price list (named rows)      │
-│ floor selector (bottom-start)          ││ FloorStrip (multi-floor)     │
+│ (bottom-start empty by default)        ││ FloorStrip (multi-floor)     │
 │ control column (bottom-end), top down: ││ "Your seats"      heading    │
 │   Venue (only while a section is up)   ││ best-seats card              │
 │   ViewModeControl · 3D Rotate / Move   ││ CartList (scrolls)           │

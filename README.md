@@ -535,6 +535,9 @@ How to build and test the package is in [CONTRIBUTING.md](CONTRIBUTING.md).
 - **No "Powered by SeatLayer" line** under the checkout button.
 - **Tablet panel:** one row per ticket type, with the total above one full-width
   button; the map's controls moved to the bottom end.
+- **Levels:** the list at the map's bottom corner is no longer drawn beside the
+  level chips; an app that wants both places `SeatLayerPickerFloorSelector`
+  itself.
 
 Everything else is in the [changelog](CHANGELOG.md).
 

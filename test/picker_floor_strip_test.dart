@@ -9,8 +9,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/src/payloads.dart';
+import 'package:seatlayer/src/picker/picker_adaptive_layout.dart';
+import 'package:seatlayer/src/picker/picker_builders.dart';
 import 'package:seatlayer/src/picker/picker_floor_strip.dart';
 import 'package:seatlayer/src/picker/picker_models.dart';
+import 'package:seatlayer/src/picker/picker_options.dart';
+import 'package:seatlayer/src/picker/picker_status_views.dart';
 
 import 'picker_test_fixture.dart';
 import 'picker_widget_harness.dart';
@@ -29,8 +33,12 @@ Map<String, Object?> _venue({
   List<Object?>? floors,
   String? activeFloorId = 'stalls',
   String? floorMode = 'single',
+  bool withSelection = true,
 }) {
-  final snapshot = pickerSnapshot(sections: pickerSections());
+  final snapshot = pickerSnapshot(
+    withSelection: withSelection,
+    sections: pickerSections(),
+  );
   final map = snapshot['map']! as Map<String, Object?>;
   // Stage upward, which is the order the runtime reports and the order the
   // strip must draw. No `level`: the runtime does not send one.
@@ -251,4 +259,143 @@ void main() {
       }, tags: goldenTag);
     }
   }, skip: goldenSkip);
+
+  group('one level selector', () {
+    for (final (name, size) in const <(String, Size)>[
+      ('phone', Size(393, 852)),
+      ('wide', Size(1024, 768)),
+    ]) {
+      testWidgets('$name: the strip is the only level selector',
+          (tester) async {
+        await _pumpPicker(tester, size, const SeatLayerPickerChromeOptions());
+        expect(find.byType(SeatLayerFloorStrip), findsOneWidget);
+        expect(find.byType(SeatLayerPickerFloorSelector), findsNothing);
+        // One selector, one name per level.
+        expect(find.text('Dress circle'), findsOneWidget);
+      });
+
+      testWidgets('$name: a host that names the default has one selector too',
+          (tester) async {
+        await _pumpPicker(
+          tester,
+          size,
+          const SeatLayerPickerChromeOptions(showFloorSelector: true),
+        );
+        expect(find.byType(SeatLayerFloorStrip), findsOneWidget);
+        expect(find.byType(SeatLayerPickerFloorSelector), findsNothing);
+      });
+
+      testWidgets('$name: the list stays beside a strip of the host\'s own',
+          (tester) async {
+        await _pumpPicker(
+          tester,
+          size,
+          const SeatLayerPickerChromeOptions(),
+          floorStrip: (context, part) => const SizedBox.shrink(),
+        );
+        expect(_levelList.hitTestable(), findsOneWidget);
+      });
+
+      testWidgets('$name: showFloorSelector false never draws the list',
+          (tester) async {
+        await _pumpPicker(
+          tester,
+          size,
+          const SeatLayerPickerChromeOptions(
+            showFloorSelector: false,
+            showFloorStrip: false,
+          ),
+        );
+        expect(find.byType(SeatLayerPickerFloorSelector), findsNothing);
+      });
+
+      testWidgets('$name: without the strip the list still changes level',
+          (tester) async {
+        final map = await _pumpPicker(
+          tester,
+          size,
+          const SeatLayerPickerChromeOptions(showFloorStrip: false),
+        );
+        expect(find.byType(SeatLayerFloorStrip), findsNothing);
+        await tester.tap(_levelList);
+        await pumpToRest(tester);
+        await tester.tap(find.text('Dress circle').last);
+        await pumpToRest(tester);
+        expect(
+          map.callsTo('picker.setFloor').single.$2,
+          <String, Object?>{'floorId': 'circle'},
+        );
+      });
+    }
+
+    testWidgets('phone, 3D: the list stands in only without the 3D controls',
+        (tester) async {
+      await _pumpPicker(
+        tester,
+        const Size(393, 852),
+        const SeatLayerPickerChromeOptions(),
+        venue3D: true,
+      );
+      expect(find.byType(SeatLayerPickerFloorSelector), findsNothing);
+
+      await _pumpPicker(
+        tester,
+        const Size(393, 852),
+        const SeatLayerPickerChromeOptions(showVenue3DChrome: false),
+        venue3D: true,
+      );
+      expect(_levelList.hitTestable(), findsOneWidget);
+    });
+  });
+}
+
+final Finder _levelList = find.descendant(
+  of: find.byType(SeatLayerPickerFloorSelector),
+  matching: find.byType(DropdownButton<String>),
+);
+
+Future<FakePickerMap> _pumpPicker(
+  WidgetTester tester,
+  Size size,
+  SeatLayerPickerChromeOptions chrome, {
+  bool venue3D = false,
+  SeatLayerPickerPartBuilder? floorStrip,
+}) async {
+  tester.view
+    ..devicePixelRatio = 1
+    ..physicalSize = size;
+  addTearDown(tester.view.reset);
+  final map = FakePickerMap(
+    bundle: nativeChromeBundle(
+      capabilities: const <String>[
+        'native-chrome-contract-v1',
+        'viewport-insets-v1',
+        'floor-stack-v1',
+        'venue-3d-controls-v1',
+      ],
+    ),
+  );
+  addTearDown(map.dispose);
+  await tester.pumpWidget(
+    pickerHarness(
+      map,
+      SeatLayerPickerAdaptiveLayout(
+        key: UniqueKey(),
+        onCheckout: (_) async {},
+        builders: SeatLayerPickerBuilders(
+          map: (context, part) => const SizedBox.expand(),
+          floorStrip: floorStrip,
+        ),
+      ),
+      options: SeatLayerPickerOptions(chrome: chrome),
+    ),
+  );
+  // No seat picked, so no seat card stands over the map.
+  final snapshot = _venue(withSelection: false);
+  if (venue3D) {
+    (snapshot['map']! as Map<String, Object?>)['buyerView'] = 'venue3d';
+  }
+  map.emit(snapshot);
+  await pumpToRest(tester);
+  return map;
 }

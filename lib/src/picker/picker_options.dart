@@ -178,7 +178,9 @@ class SeatLayerPickerChromeOptions {
   /// Whether the price legend renders.
   final bool showPriceRail;
 
-  /// Whether the floor selector renders on a multi-floor venue.
+  /// Whether the floor selector, the list at the map's bottom start corner,
+  /// renders on a multi-floor venue. It is drawn only where the floor strip's
+  /// own chips are not; place a `SeatLayerPickerFloorSelector` to have both.
   final bool showFloorSelector;
 
   /// Whether the floor chip strip renders on a multi-floor venue.
