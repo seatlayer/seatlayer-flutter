@@ -2,8 +2,25 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import 'picker_builders.dart';
 import 'picker_models.dart';
+import 'picker_options.dart';
 import 'seat_layer_picker_scope.dart';
+
+/// Whether the ready-made layout draws the floor selector: only where the floor
+/// strip's own chips are not, so a venue has one level selector.
+///
+/// A host's own strip may be anything, so the list stays beside it. [venue3D]
+/// is the phone's 3D scene, where the strip stands back.
+bool floorListUp(
+  SeatLayerPickerChromeOptions chrome,
+  SeatLayerPickerBuilders builders,
+  bool venue3D,
+) =>
+    chrome.showFloorSelector &&
+    (!chrome.showFloorStrip ||
+        builders.floorStrip != null ||
+        (venue3D && !chrome.showVenue3DChrome));
 
 /// [color] at [opacity], without the deprecated `withOpacity`.
 Color pickerAlpha(Color color, double opacity) =>

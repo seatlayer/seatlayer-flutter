@@ -30,6 +30,7 @@ import 'picker_price_list.dart';
 import 'picker_wide_panel.dart';
 import 'picker_dock_bar.dart';
 import 'picker_floor_strip.dart';
+import 'picker_floor_strip_touch.dart';
 import 'picker_haptics.dart';
 import 'picker_camera_actions.dart';
 import 'picker_models.dart';
@@ -284,13 +285,16 @@ class _SeatLayerPickerAdaptiveLayoutState
           widget.builders.sectionNavigator,
           const SeatLayerPickerSectionNavigator(),
         );
+        final stripRoom = SeatLayerFloorStripTouch.above(
+            compact: !wide, enabled: widget.builders.floorStrip == null);
         final floorStrip = panoramaUp
             ? const SizedBox.shrink()
             : _part(
                 context,
                 widget.builders.floorStrip,
                 chrome.showFloorStrip
-                    ? SeatLayerFloorStrip(compact: !wide)
+                    ? SeatLayerFloorStripTouch(
+                        compact: !wide, enabled: stripRoom > 0)
                     : const SizedBox.shrink(),
               );
         // Nothing is drawn on a venue with one floor, so nothing is reserved
@@ -630,7 +634,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                                 end: _mapInset,
                                 child:
                                     SeatLayerMapChromeRegion(child: controls)),
-                            if (chrome.showFloorSelector)
+                            if (floorListUp(chrome, widget.builders, false))
                               const PositionedDirectional(
                                 start: _mapInset,
                                 bottom: _mapInset,
@@ -700,7 +704,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                                   // layout reports no band for it.
                                   if (floorStripUp)
                                     Padding(
-                                      padding: const EdgeInsets.only(top: 8),
+                                      padding: EdgeInsets.only(top: 8 - stripRoom),
                                       child: floorStrip,
                                     ),
                                   sections,
@@ -882,7 +886,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                       if (floorStripUp && !venue3DUp)
                         Positioned(
                           top: _floorStripTop(
-                              viewModeControl: viewModeControlUp),
+                              viewModeControl: viewModeControlUp) - stripRoom,
                           left: 0,
                           right: 0,
                           child: SeatLayerMapChromeRegion(
@@ -928,7 +932,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                             ),
                           ),
                         ),
-                      if (chrome.showFloorSelector)
+                      if (floorListUp(chrome, widget.builders, venue3DUp))
                         PositionedDirectional(
                           start: _mapInset,
                           // The map's own bottom-left edge again: the ♿ disc
