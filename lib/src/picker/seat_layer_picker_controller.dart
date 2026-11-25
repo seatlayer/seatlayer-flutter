@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
 import '../bridge/bridge_client.dart';
+import '../bridge/bridge_protocol.dart';
 import '../json.dart';
 import '../open_enums.dart';
 import '../payloads.dart';

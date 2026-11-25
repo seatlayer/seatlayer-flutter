@@ -40,6 +40,15 @@ mixin _PickerStandingPlaces
           _controller._applySnapshotFromResult(result);
           final revision = jInt(jGet(result, 'revision'));
           if (revision != null) await _controller._awaitRevision(revision);
+          // The page's refusal: it took no places and gives no error.
+          if (jBool(jGet(result, 'held')) == false) {
+            throw const SeatLayerError.bridge(
+              BridgeErrorPayload(
+                code: 'hold_unavailable',
+                message: 'The standing places could not be held.',
+              ),
+            );
+          }
         }
         value = value.withGeneralAdmissionCandidate(null);
       } catch (error) {

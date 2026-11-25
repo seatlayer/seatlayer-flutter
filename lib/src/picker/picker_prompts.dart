@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 
 import '../payloads.dart';
 import 'picker_internal.dart';
+import 'picker_standing_amounts.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -155,15 +156,16 @@ class _SeatLayerPickerGeneralAdmissionPromptState
     final area = widget.area ?? controller.state.generalAdmissionCandidate;
     if (area == null) return const SizedBox.shrink();
     _tierId ??= area.tiers?.firstOrNull?.id;
-    final selectedCount = controller.state.snapshot?.ticketCount ?? 0;
-    final remainingCap =
-        (controller.state.snapshot?.maxSelection ?? 10) - selectedCount;
-    final max = [area.available ?? remainingCap, remainingCap]
-        .where((value) => value > 0)
-        .fold<int>(remainingCap, (a, b) => a < b ? a : b);
+    final snapshot = controller.state.snapshot;
+    final live = seatLayerLiveStandingArea(area, snapshot);
+    final amounts = seatLayerStandingAmounts(live, snapshot);
+    final quantity =
+        amounts == null ? 0 : _quantity.clamp(amounts.minimum, amounts.maximum);
     return _PromptSheet(
       title: area.label ?? strings.generalAdmission,
-      subtitle: strings.placesAvailable(area.available ?? 0),
+      subtitle: strings.placesAvailable(
+        seatLayerStandingPlacesFree(live, snapshot) ?? 0,
+      ),
       children: <Widget>[
         if (area.tiers?.isNotEmpty == true)
           Padding(
@@ -187,9 +189,9 @@ class _SeatLayerPickerGeneralAdmissionPromptState
           ),
         _StepperLabel(text: strings.chooseTickets, theme: theme),
         _PromptStepper(
-          value: _quantity,
-          canDecrease: _quantity > 1,
-          canIncrease: _quantity < max,
+          value: quantity,
+          canDecrease: amounts != null && quantity > amounts.minimum,
+          canIncrease: amounts != null && quantity < amounts.maximum,
           decreaseLabel: strings.fewerTickets,
           increaseLabel: strings.moreTickets,
           onChanged: (next) => setState(() => _quantity = next),
@@ -201,14 +203,14 @@ class _SeatLayerPickerGeneralAdmissionPromptState
             controller.dismissGeneralAdmissionCandidate();
             widget.onCancel?.call();
           },
-          onConfirm: max < 1 ||
+          onConfirm: amounts == null ||
                   controller.state.isBusy ||
                   !controller.state.canMutateInventory
               ? null
               : () => ignorePickerAction(() async {
                     await controller.setGeneralAdmissionQuantity(
                       areaId: area.id,
-                      quantitiesByTier: <String?, int>{_tierId: _quantity},
+                      quantitiesByTier: <String?, int>{_tierId: quantity},
                     );
                     await widget.onConfirmed?.call(area);
                   }()),
