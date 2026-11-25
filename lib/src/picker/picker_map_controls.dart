@@ -248,20 +248,10 @@ class _CornerControls extends StatelessWidget {
       // "+" and the whole-venue disc, nothing between them:
       // a "−" that only sometimes had a step to take read as a control that
       // sometimes worked. Pinch steps out; the disc below goes home.
-      // "+" retires once the buyer is among the seats or at the zoom ceiling
-      // (web 0.84.0): a disc that does nothing is the broken-map reading.
-      // A retired "+" keeps its SLOT (web 0.84.1): the column is anchored at
-      // its foot, so a disc that left the tree moved the ♿ disc under the
-      // thumb reaching for it.
+      // "+" stays in its place and dims once the buyer is among the seats or
+      // at the zoom ceiling: there is nothing more to step in to.
       if (onMap && chrome.zoomControlsFor(phone: true))
-        Visibility(
-          visible: state.snapshot?.map.rung != 'seats' &&
-              state.snapshot?.map.canZoomIn != false,
-          maintainSize: true,
-          maintainState: true,
-          maintainAnimation: true,
-          child: const SeatLayerPickerZoomInButton(),
-        ),
+        const SeatLayerPickerZoomInButton._phone(),
       if (onMap && chrome.zoomToFitControlFor(phone: true))
         const SeatLayerPickerShowWholeVenueButton(),
     ];
@@ -581,7 +571,12 @@ class SeatLayerPickerOverviewButton extends StatelessWidget {
 /// A standalone zoom-in control for custom picker compositions.
 class SeatLayerPickerZoomInButton extends StatelessWidget {
   /// Creates the zoom-in control.
-  const SeatLayerPickerZoomInButton({super.key});
+  const SeatLayerPickerZoomInButton({super.key}) : _endsAtSeats = false;
+
+  const SeatLayerPickerZoomInButton._phone() : _endsAtSeats = true;
+
+  /// The phone corner's disc has nothing to do among the seats.
+  final bool _endsAtSeats;
 
   @override
   Widget build(BuildContext context) {
@@ -590,7 +585,10 @@ class SeatLayerPickerZoomInButton extends StatelessWidget {
     return _ControlButton(
       icon: Icons.add_rounded,
       tooltip: SeatLayerPickerScope.stringsOf(context).zoomIn,
-      onPressed: map?.canZoomIn == false ? null : controller.zoomIn,
+      onPressed:
+          map?.canZoomIn == false || (_endsAtSeats && map?.rung == 'seats')
+              ? null
+              : controller.zoomIn,
     );
   }
 }

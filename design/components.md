@@ -728,9 +728,8 @@ sheet merges `continueButtonStyle` over it) · **Instance override** `style:`
 - **Anatomy** a pill of `size.testChipHeight` at `radius.pill`, one recipe in
   both themes: warning ink on the warning colour at `opacity.warnPillWash` over
   the surface, a leading dot of `size.testChipDotSize`. Copy `strings.testMode`;
-  the accessible name keeps `strings.testModeLong`. A tap shows
-  `strings.testModeExplained` as the explainer toast (spec §3.12). Amber, never the accent — an
-  environment flag must not wear "buy" gold.
+  the accessible name keeps `strings.testModeLong`. A tap does nothing. Amber,
+  never the accent — an environment flag must not wear "buy" gold.
 - **Contrast** the ink is measured against the **wash**, never the bare surface,
   and must clear 4.5:1 on it: the hue if it already reads, else the hue walked
   toward `color.*.text` until it clears, else a neutral chosen by contrast.

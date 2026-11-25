@@ -607,7 +607,7 @@ class SeatLayerPickerStrings {
   /// keeps its English wording in every locale until one exists.
   final String testModeLong;
 
-  /// What test mode means, offered as the badge's tooltip.
+  /// No longer drawn. Still accepted, so a set of your own strings compiles.
   final String testModeExplained;
 
   /// Tooltip on the accessibility map control.

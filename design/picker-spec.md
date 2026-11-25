@@ -578,14 +578,8 @@ The walk stops at the **first** candidate that clears, so the chip keeps as much
 amber as the floor allows rather than driving to maximum contrast.
 
 **Copy.** Sentence case `strings.testMode`; the accessible name keeps
-`strings.testModeLong`; the description is `strings.testModeExplained`.
-
-**A tap explains it.** Tapping the chip shows `strings.testModeExplained` as the
-explainer toast (§3.12): through the one toast queue, announced once, gone after
-`motion.durationOutsideBudget.toastDwell` or on a tap on the toast. Nothing else
-reacts to the tap. The chip is exposed as a button named `strings.testModeLong`.
-A layout composed without `SeatLayerPickerToastLayer` has no band to show it
-on, so there the tap shows the same sentence as a tooltip under the chip.
+`strings.testModeLong`. The chip is a label: a tap on it does nothing.
+`strings.testModeExplained` is accepted and drawn nowhere.
 
 **Placement.** The map's top-left corner in both 2D and 3D, at
 `size.mapAnchorInset`. It steps down by the back pill's height plus
@@ -641,13 +635,9 @@ dimming this disc on a stale "already at the venue" reading stranded a buyer
 with the venue unframed and nothing left to press. At the venue already, the
 press is a harmless no-op. **A port must never dim the escape hatch.**
 
-**`+` retires, and keeps its slot.** A `+` that cannot zoom in is the
-broken-map reading, so it goes inert once `map.rung` is `seats` or
-`map.canZoomIn` is false. It is drawn with its space maintained — Flutter's
-`Visibility(maintainSize: true, maintainState: true, maintainAnimation: true)`
-— because the column is anchored at its foot: a disc that left the tree
-altogether pulled the ♿ disc down under the thumb already reaching for it.
-Reserve the slot; do not reflow the column.
+**`+` stays and dims.** Once `map.rung` is `seats` or `map.canZoomIn` is false
+there is nothing more to step in to: the disc keeps its place and is drawn
+disabled, so the ♿ disc over it never moves.
 
 **On a short map the column flows; it never climbs over the chrome above it.**
 The column's ceiling is the foot of whatever stands on the map's top line on
@@ -657,11 +647,11 @@ does not count. A column that fits under the ceiling is drawn exactly as
 above. On a map too short for it, as on a phone held sideways, the discs that
 would climb past the ceiling flow into a second column on the start side, at
 full size and in the same order from the foot, so the whole-venue disc keeps
-the corner and the retired `+` keeps its slot. A map shorter than one disc
+the corner and the dimmed `+` keeps its slot. A map shorter than one disc
 (`size.mapControlSize`), as under an open cart sheet on a small phone at a
 large text size, draws no column at all rather than a sliver of one.
 
-**A retired or disabled disc looks retired, and its ground never changes.**
+**A disabled disc looks disabled, and its ground never changes.**
 These controls dim in place rather than disappearing, which only works as an
 answer if the buyer can see that it is one. The glyph steps back to
 `color.*.mutedText` at 55 per cent, the ring to the chrome hairline at 60 per
@@ -2211,18 +2201,6 @@ a chip. With an action it becomes a row: the sentence, then a pill at
 **Motion.** Rises on `motion.duration.toast` on `motion.curve.easeEnter`, dwells
 for `motion.durationOutsideBudget.toastDwell`, then leaves and resets to
 neutral. One queue: a second toast replaces the first rather than stacking.
-
-**Explainer.** The answer to a tap on the picker's own chrome (today only the
-test chip, §3.4) is a different surface on the same queue, motion and
-announcement: a full-width band at the map's foot, inset `size.mapAnchorInset`
-at each side and 14 + `size.sheetHandleOverhang` above the bottom chrome (the
-cart handle stands proud of the chrome under the map in every composition, and
-the band never crosses it), ground `color.*.text`, ink
-`color.*.background`, corner `radius.explainerToast`, padding
-`size.explainerToastPaddingY` × `size.explainerToastPaddingX`, text
-`size.explainerToastFontSize` w500 at line height 1.35, wrapping, aligned to
-the reading start; shadow 0 12 30 −12 at black .5. No hairline and no tone.
-A tap on the band dismisses it.
 
 **Accessibility.** A polite live region. A toast is never the only place a
 consequence is stated — anything that outlives 4 seconds also has a persistent

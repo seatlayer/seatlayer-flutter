@@ -555,8 +555,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                     ),
                   )
                 : switch (state.phase) {
-                    SeatLayerPickerPhase.failed ||
-                    SeatLayerPickerPhase.unavailable =>
+                    SeatLayerPickerPhase.failed =>
                       // Opaque: the page under it has words of its own.
                       ColoredBox(
                         color: pickerAlpha(resolved.background, 1),
@@ -568,6 +567,9 @@ class _SeatLayerPickerAdaptiveLayoutState
                       ),
                     _ => null,
                   };
+        final mapCovered = buyerPrompt != null ||
+            statusOverlay != null ||
+            state.phase == SeatLayerPickerPhase.unavailable;
         final strings = SeatLayerPickerScope.stringsOf(context);
         final mapSurface = Semantics(
           // One node, and it says so. The seats are drawn on a canvas inside
@@ -585,18 +587,16 @@ class _SeatLayerPickerAdaptiveLayoutState
           child: Focus(
             focusNode: _mapFocus,
             child: IgnorePointer(
-              // Platform views participate in iOS gesture recognition before the
-              // Flutter overlay's onPressed callback runs. Explicitly remove the
-              // WebView from hit testing while any native decision surface owns
-              // the map; visual stacking alone does not prevent tap-through.
-              ignoring: buyerPrompt != null || statusOverlay != null,
+              // A platform view joins iOS gesture recognition before the overlay
+              // does: visual stacking alone does not prevent tap-through.
+              ignoring: mapCovered,
               child: map,
             ),
           ),
         );
         _syncMapInteraction(
           controller,
-          enabled: buyerPrompt == null && statusOverlay == null,
+          enabled: !mapCovered,
           unlockDelay: SeatLayerPickerMotion.of(
             context,
             SeatLayerPickerMotion.exit,

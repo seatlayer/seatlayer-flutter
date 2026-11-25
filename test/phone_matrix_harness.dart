@@ -114,6 +114,9 @@ enum PhoneState {
 
   /// The 3D venue under the older gestures, with the Rotate / Move pair.
   venue3DClassic,
+
+  /// The buyer's access to the seats has run out.
+  access,
 }
 
 /// How the picker reaches the screen.
@@ -170,6 +173,15 @@ Map<String, Object?> _snapshotFor(PhoneState state) {
       final snapshot = _confirmedCart(1);
       (snapshot['map']! as Map<String, Object?>)['buyerView'] = 'venue3d';
       return snapshot;
+    case PhoneState.access:
+      return <String, Object?>{
+        ...pickerSnapshot(withSelection: false, sections: pickerSections()),
+        'access': <String, Object?>{
+          'configured': true,
+          'status': 'expired',
+          'reason': 'no_token',
+        },
+      };
   }
 }
 
@@ -459,7 +471,9 @@ void expectPhoneLayout(
       if (both.width <= 1 || both.height <= 1) continue;
       final smaller = area(a.rect) <= area(b.rect) ? a : b;
       final larger = identical(smaller, a) ? b : a;
-      if (!pressReaches(tester, both.center, smaller)) {
+      // Where the press reaches neither, both are behind a panel over the map.
+      if (!pressReaches(tester, both.center, smaller) &&
+          pressReaches(tester, both.center, larger)) {
         problems.add('${larger.name} at ${larger.rect} covers '
             '${smaller.name} at ${smaller.rect}');
       }

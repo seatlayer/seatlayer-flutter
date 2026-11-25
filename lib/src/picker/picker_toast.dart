@@ -17,7 +17,6 @@ import 'picker_a11y.dart';
 import 'picker_internal.dart';
 import 'picker_motion.dart';
 import 'picker_strings.dart';
-import 'picker_toast_explainer.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_scope.dart';
@@ -156,18 +155,6 @@ SeatLayerPickerToastQueue seatLayerPickerToasts(
 ) =>
     _queues[controller] ??= SeatLayerPickerToastQueue();
 
-final Expando<int> _mountedLayers =
-    Expando<int>('seatlayer-picker-toast-layers');
-
-/// Whether a [SeatLayerPickerToastLayer] is in the tree for [controller].
-///
-/// A host may compose its own layout from the picker's parts and leave the
-/// toast layer out. Anything that would otherwise speak only through the
-/// queue asks this first, so its message still reaches that buyer some other
-/// way instead of waiting in a queue nothing draws.
-bool seatLayerPickerToastLayerMounted(SeatLayerPickerController controller) =>
-    (_mountedLayers[controller] ?? 0) > 0;
-
 /// The toast surface itself: a wrapping sentence on the picker's own ground.
 class SeatLayerPickerToastCard extends StatelessWidget {
   /// Creates the surface for [toast].
@@ -182,9 +169,6 @@ class SeatLayerPickerToastCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final toast = this.toast;
-    if (toast is PickerExplainerToast) {
-      return PickerExplainerToastCard(toast: toast, theme: theme);
-    }
     final palette = theme ?? seatLayerMapChromeThemeOf(context);
     final border = switch (toast.tone) {
       SeatLayerPickerToastTone.neutral => palette.divider,
@@ -352,7 +336,6 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
     }
     _detach();
     _controller = controller;
-    _mountedLayers[controller] = (_mountedLayers[controller] ?? 0) + 1;
     _queue = seatLayerPickerToasts(controller);
     _queue!.addListener(_onQueue);
     controller.addListener(_onControllerChanged);
@@ -376,10 +359,6 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
   }
 
   void _detach() {
-    final controller = _controller;
-    if (controller != null) {
-      _mountedLayers[controller] = (_mountedLayers[controller] ?? 1) - 1;
-    }
     _controller?.removeListener(_onControllerChanged);
     _queue?.removeListener(_onQueue);
     unawaited(_conflicts?.cancel());
@@ -471,10 +450,6 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
   Widget build(BuildContext context) {
     final toast = _queue?.current;
     _speak(toast);
-    // An explanation spans the map's foot at the map's own inset, and a tap
-    // on it is the buyer saying they have read it.
-    final explainer = toast is PickerExplainerToast;
-    final inset = explainer ? SeatLayerSizeTokens.mapAnchorInset : 14.0;
     final motion = SeatLayerPickerMotion.of(
       context,
       SeatLayerPickerMotion.enter,
@@ -482,17 +457,13 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
     return IgnorePointer(
       // The band never eats a tap; the action button inside it re-enables
       // itself, so a toast can be acted on without the map going deaf.
-      ignoring: toast?.hasAction != true && !explainer,
+      ignoring: toast?.hasAction != true,
       child: Padding(
         padding: EdgeInsets.only(
-          left: inset,
-          right: inset,
+          left: 14,
+          right: 14,
           bottom: widget.bottomInset +
               14 +
-              // The cart's handle stands proud of whatever is under the map,
-              // in every composition; the full-width band would otherwise
-              // run across it.
-              (explainer ? SeatLayerSizeTokens.sheetHandleOverhang : 0) +
               (widget.lifted ? SeatLayerPickerToastLayer.cardLift : 0),
         ),
         child: Align(
@@ -513,19 +484,10 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
             ),
             child: toast == null
                 ? const SizedBox.shrink()
-                : explainer
-                    ? GestureDetector(
-                        key: ValueKey<String>('explainer:${toast.message}'),
-                        behavior: HitTestBehavior.opaque,
-                        onTap: _queue?.dismiss,
-                        child: _NudgedToast(toast: toast),
-                      )
-                    : _NudgedToast(
-                        key: ValueKey<String>(
-                          '${toast.tone}:${toast.message}',
-                        ),
-                        toast: toast,
-                      ),
+                : _NudgedToast(
+                    key: ValueKey<String>('${toast.tone}:${toast.message}'),
+                    toast: toast,
+                  ),
           ),
         ),
       ),
