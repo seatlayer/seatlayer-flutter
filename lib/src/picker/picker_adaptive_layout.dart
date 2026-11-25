@@ -120,6 +120,26 @@ class _SeatLayerPickerAdaptiveLayoutState
   /// advance, and the runtime cannot frame the map above a sheet whose size
   /// nobody has reported. See [_reportSheetBand].
   double _sheetBand = 0;
+
+  /// What the map's top line holds held sideways, measured: the test badge,
+  /// the Map/3D control and the levels' pill at its own width.
+  double _badgeWidth = 0;
+  double _controlWidth = 0;
+  double _pillWidth = 0;
+
+  void _measuredTop({double? badge, double? control, double? pill}) {
+    if (!mounted) return;
+    if ((badge ?? _badgeWidth) == _badgeWidth &&
+        (control ?? _controlWidth) == _controlWidth &&
+        (pill ?? _pillWidth) == _pillWidth) {
+      return;
+    }
+    setState(() {
+      _badgeWidth = badge ?? _badgeWidth;
+      _controlWidth = control ?? _controlWidth;
+      _pillWidth = pill ?? _pillWidth;
+    });
+  }
   SeatLayerPickerController? _picker;
   Timer? _framingGraceTimer;
   bool _framingGraceLapsed = false;
@@ -278,20 +298,46 @@ class _SeatLayerPickerAdaptiveLayoutState
             compact: !wide, enabled: widget.builders.floorStrip == null);
         final floorStrip = panoramaUp
             ? const SizedBox.shrink()
-            : _part(
+            : NotificationListener<ScrollMetricsNotification>(
+                // The pill's own width, the levels and their track, however
+                // much of it the map has room for.
+                onNotification: (note) {
+                  final metrics = note.metrics;
+                  if (metrics.axis == Axis.horizontal) {
+                    _measuredTop(
+                      pill: metrics.viewportDimension + metrics.maxScrollExtent,
+                    );
+                  }
+                  return false;
+                },
+                child: _part(
                 context,
                 widget.builders.floorStrip,
                 chrome.showFloorStrip
                     ? SeatLayerFloorStripTouch(
                         compact: !wide, enabled: stripRoom > 0)
                     : const SizedBox.shrink(),
-              );
+              ));
         // Nothing is drawn on a venue with one floor, so nothing is reserved
         // either: the band is reported only when the strip is really there.
         final floorStripUp = !panoramaUp &&
             chrome.showFloorStrip &&
             (state.snapshot?.map.floors.length ?? 0) > 1;
         final floorStripHeight = SeatLayerFloorStrip.heightFor(compact: !wide);
+        // Held sideways the map is short, and the levels stand on its top
+        // line, between the badge and the Map/3D control, where all three fit.
+        final screen = MediaQuery.sizeOf(context);
+        final floorOneLine = floorStripUp &&
+            !venue3DUp &&
+            !wide &&
+            screen.width > screen.height &&
+            PickerPhoneTop.fitsOneLine(
+              width: constraints.maxWidth,
+              badge: state.isTestEvent ? _badgeWidth : 0,
+              control: viewModeControlUp ? _controlWidth : 0,
+              pill: _pillWidth,
+            );
+        final floorStripBelow = floorStripUp && !floorOneLine;
         final dock = _part(
           context,
           widget.builders.dockBar,
@@ -377,7 +423,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                             ? SeatLayerDockBar.heightFor(context)
                             : 0,
                         // Under the Map/3D control, or the floor strip below.
-                        topInset: floorStripUp
+                        topInset: floorStripBelow
                             ? PickerPhoneTop.floorStripTop(
                                     viewModeControl: viewModeControlUp) +
                                 floorStripHeight +
@@ -769,7 +815,7 @@ class _SeatLayerPickerAdaptiveLayoutState
           backPill: backPillUp,
           backPillInset: immersiveTopInset,
           viewModeControl: viewModeControlUp,
-          floorStrip: floorStripUp,
+          floorStrip: floorStripBelow,
           floorStripHeight: floorStripHeight,
         );
         final bottomBand = PickerPhoneTop.bottomBand(
@@ -870,11 +916,25 @@ class _SeatLayerPickerAdaptiveLayoutState
                       // at" chrome that stays on the map, so they start at the
                       // map's own edge.
                       if (floorStripUp && !venue3DUp)
-                        Positioned(
-                          top: PickerPhoneTop.floorStripTop(
-                              viewModeControl: viewModeControlUp) - stripRoom,
-                          left: 0,
-                          right: 0,
+                        PositionedDirectional(
+                          top: (floorOneLine
+                                  ? _railTop +
+                                      (SeatLayerPickerViewModeControl.height -
+                                              floorStripHeight) /
+                                          2
+                                  : PickerPhoneTop.floorStripTop(
+                                      viewModeControl: viewModeControlUp)) -
+                              stripRoom,
+                          // The map's own margin on both sides; on the top
+                          // line, the room between the badge and the control.
+                          start: _mapInset +
+                              (floorOneLine && state.isTestEvent
+                                  ? _badgeWidth + _badgeGap
+                                  : 0),
+                          end: _mapInset +
+                              (floorOneLine && viewModeControlUp
+                                  ? _controlWidth + _badgeGap
+                                  : 0),
                           child: SeatLayerMapChromeRegion(
                             child: seatLayerReadingOrder(
                               SeatLayerPickerReadingOrder.mapChrome,
@@ -891,14 +951,17 @@ class _SeatLayerPickerAdaptiveLayoutState
                           backPill: backPillUp,
                           backPillInset: immersiveTopInset,
                           viewModeControl: viewModeControlUp,
-                          floorStrip: floorStripUp,
+                          floorStrip: floorStripBelow,
                           floorStripHeight: floorStripHeight,
                         ),
                         start: _mapInset,
                         child: SeatLayerMapChromeRegion(
                           child: seatLayerReadingOrder(
                             SeatLayerPickerReadingOrder.mapChrome,
-                            testBadge,
+                            PickerMeasuredWidth(
+                              onWidth: (width) => _measuredTop(badge: width),
+                              child: testBadge,
+                            ),
                           ),
                         ),
                       ),
@@ -910,10 +973,15 @@ class _SeatLayerPickerAdaptiveLayoutState
                             // It shares the rail's band, so it is read with the
                             // prices rather than with the map's own corners.
                             SeatLayerPickerReadingOrder.rail,
-                            const SeatLayerMapChromeRegion(
-                              child: SizedBox(
-                                height: SeatLayerPickerViewModeControl.height,
-                                child: SeatLayerPickerViewModeControl(),
+                            SeatLayerMapChromeRegion(
+                              child: PickerMeasuredWidth(
+                                onWidth: (width) =>
+                                    _measuredTop(control: width),
+                                child: const SizedBox(
+                                  height:
+                                      SeatLayerPickerViewModeControl.height,
+                                  child: SeatLayerPickerViewModeControl(),
+                                ),
                               ),
                             ),
                           ),

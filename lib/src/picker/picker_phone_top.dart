@@ -1,6 +1,9 @@
 /// Where the pieces over a phone's map stand, from its top line down.
 library;
 
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+
 import 'picker_options.dart';
 import 'picker_status_views.dart';
 import 'picker_tokens.g.dart';
@@ -145,5 +148,60 @@ abstract final class PickerPhoneTop {
     final deck =
         inset + dockLift + SeatLayerVenue3D.seatDeckHeight(seated: seated);
     return deck > dock ? deck : dock;
+  }
+
+  /// Whether a [pill] of levels fits on the map's top line, between the
+  /// [badge] at the start and the [control] at the end, on a map [width]
+  /// wide. A width of 0 is a piece that is not there, or not measured yet.
+  static bool fitsOneLine({
+    required double width,
+    required double badge,
+    required double control,
+    required double pill,
+  }) {
+    if (pill <= 0) return false;
+    final used = inset * 2 +
+        (badge > 0 ? badge + gap : 0) +
+        (control > 0 ? control + gap : 0);
+    return pill <= width - used;
+  }
+}
+
+/// Reports the width its child is laid out at, after the frame.
+class PickerMeasuredWidth extends SingleChildRenderObjectWidget {
+  /// Measures [child] and reports its width to [onWidth].
+  const PickerMeasuredWidth({
+    super.key,
+    required this.onWidth,
+    required Widget super.child,
+  });
+
+  /// Called after layout whenever the measured width changes.
+  final ValueChanged<double> onWidth;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderMeasuredWidth(onWidth);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderObject renderObject) =>
+      (renderObject as _RenderMeasuredWidth).onWidth = onWidth;
+}
+
+class _RenderMeasuredWidth extends RenderProxyBox {
+  _RenderMeasuredWidth(this.onWidth);
+
+  ValueChanged<double> onWidth;
+  double? _reported;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final measured = size.width;
+    if (_reported != null && (measured - _reported!).abs() < .5) return;
+    _reported = measured;
+    // After the frame: a listener that rebuilds from inside layout would be
+    // changing the tree it is measured in.
+    WidgetsBinding.instance.addPostFrameCallback((_) => onWidth(measured));
   }
 }

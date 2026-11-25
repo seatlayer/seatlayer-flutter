@@ -41,7 +41,7 @@ import 'picker_a11y.dart';
 /// [SeatLayerPickerScope]. The drop-in places it directly under the top rail
 /// and reports the band it stands on, so the runtime keeps framing sections
 /// clear of it.
-class SeatLayerFloorStrip extends StatelessWidget {
+class SeatLayerFloorStrip extends StatefulWidget {
   /// Creates the floor strip.
   const SeatLayerFloorStrip({
     super.key,
@@ -73,7 +73,43 @@ class SeatLayerFloorStrip extends StatelessWidget {
       _trackPadding * 2;
 
   @override
+  State<SeatLayerFloorStrip> createState() => _SeatLayerFloorStripState();
+}
+
+class _SeatLayerFloorStripState extends State<SeatLayerFloorStrip> {
+  final ScrollController _scroll = ScrollController();
+  final GlobalKey _chosen = GlobalKey();
+
+  /// The level last brought into view, so it is brought in once per choice.
+  String? _shown;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// The chosen level comes into view by itself, when the strip is first
+  /// drawn and whenever the choice changes.
+  void _reveal(String chosen) {
+    if (chosen == _shown) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final chip = _chosen.currentContext;
+      if (!mounted || chip == null) return;
+      _shown = chosen;
+      final still = MediaQuery.disableAnimationsOf(context);
+      Scrollable.ensureVisible(
+        chip,
+        alignment: .5,
+        duration: still ? Duration.zero : const Duration(milliseconds: 250),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final compact = widget.compact;
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
     final map = state.snapshot?.map;
@@ -87,7 +123,7 @@ class SeatLayerFloorStrip extends StatelessWidget {
     final strings = SeatLayerPickerScope.stringsOf(context);
     final chipStyle =
         (theme.styles.floorStripStyle ?? const SeatLayerSurfaceStyle())
-            .merge(style);
+            .merge(widget.style);
     final busy = state.isBusy;
     final showsAll = map.showsAllFloors;
     final offersAll = map.hasFloorModes && controller.supportsFloorStack;
@@ -96,6 +132,7 @@ class SeatLayerFloorStrip extends StatelessWidget {
       // Only offered by a runtime that has told us — twice — that it stacks.
       if (offersAll)
         _FloorChip(
+          key: showsAll ? _chosen : null,
           label: strings.allFloors,
           selected: showsAll,
           compact: compact,
@@ -107,6 +144,7 @@ class SeatLayerFloorStrip extends StatelessWidget {
         ),
       for (final floor in floors)
         _FloorChip(
+          key: !showsAll && map.activeFloorId == floor.id ? _chosen : null,
           label: floor.name,
           selected: !showsAll && map.activeFloorId == floor.id,
           compact: compact,
@@ -118,6 +156,8 @@ class SeatLayerFloorStrip extends StatelessWidget {
         ),
     ];
 
+    _reveal(showsAll ? seatLayerAllFloors : map.activeFloorId ?? '');
+
     // One track, not a row of loose chips: the floors are one control with a
     // choice in it, and the pill around them is what says so. It scrolls
     // inside itself, so a venue with six levels never pushes the map about.
@@ -128,14 +168,22 @@ class SeatLayerFloorStrip extends StatelessWidget {
         elevation: chipStyle.elevation ?? 2,
         clipBehavior: Clip.antiAlias,
         child: SizedBox(
-          height: heightFor(compact: compact),
-          child: ListView.separated(
+          height: SeatLayerFloorStrip.heightFor(compact: compact),
+          // Every level is built, so the chosen one can be brought into view
+          // wherever it stands.
+          child: SingleChildScrollView(
+            controller: _scroll,
             scrollDirection: Axis.horizontal,
-            shrinkWrap: true,
             padding: const EdgeInsets.all(_trackPadding),
-            itemCount: chips.length,
-            separatorBuilder: (_, __) => const SizedBox(width: _trackGap),
-            itemBuilder: (context, index) => chips[index],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                for (var i = 0; i < chips.length; i += 1) ...<Widget>[
+                  if (i > 0) const SizedBox(width: _trackGap),
+                  chips[i],
+                ],
+              ],
+            ),
           ),
         ),
       ),
@@ -144,7 +192,7 @@ class SeatLayerFloorStrip extends StatelessWidget {
 
   void _choose(SeatLayerPickerController controller, String floorId) {
     ignorePickerAction(controller.setFloor(floorId));
-    onFloorChanged?.call(floorId);
+    widget.onFloorChanged?.call(floorId);
   }
 }
 
@@ -163,6 +211,7 @@ const double _chipTracking = SeatLayerSizeTokens.floorChipFontSize * 0.05;
 
 class _FloorChip extends StatelessWidget {
   const _FloorChip({
+    super.key,
     required this.label,
     required this.selected,
     required this.compact,
