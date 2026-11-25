@@ -334,47 +334,54 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
         seatLayerOnTablet(context);
     return ColoredBox(
       color: theme.background,
-      child: Column(
-        children: <Widget>[
-          SeatLayerHeaderBar(
-            theme: theme,
-            strings: widget.strings,
-            logoUrl: status?.branding?.logoUrl,
-            markName: status?.branding?.brandName ?? status?.seasonName,
-            // Until the page names the Season, the bar keeps the event
-            // picker's loading words.
-            title: status?.seasonName ?? widget.strings.chooseSeats,
-            clock: hold == null
-                ? null
-                : SeatLayerHoldClock(
-                    expiresAt: hold.expiresAt,
-                    theme: theme,
-                    strings: widget.strings,
-                    compact: !wide,
-                  ),
-            onClose:
-                widget.onClose == null ? null : () => unawaited(requestClose()),
-            compact: !wide,
-          ),
-          Expanded(
-            child: _loadError != null
-                ? SeatLayerPickerErrorView.standalone(
-                    theme: theme,
-                    strings: widget.strings,
-                    onRetry: _retry,
-                  )
-                : SeatLayerSeasonView.inPicker(
-                    key: ValueKey<int>(_page),
-                    resumed: _resumed,
-                    again: _again,
-                    controller: _controller,
-                    configuration: widget.configuration,
-                    bootThemeMode: _bootMode ?? mode,
-                    backgroundColor: theme.mapBackground ?? theme.background,
-                    onLoadError: _failed,
-                  ),
-          ),
-        ],
+      // Held sideways, a phone's camera or its curved edge is a side inset, and
+      // an app that mounts the picker bare gives it no SafeArea.
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Column(
+          children: <Widget>[
+            SeatLayerHeaderBar(
+              theme: theme,
+              strings: widget.strings,
+              logoUrl: status?.branding?.logoUrl,
+              markName: status?.branding?.brandName ?? status?.seasonName,
+              // Until the page names the Season, the bar keeps the event
+              // picker's loading words.
+              title: status?.seasonName ?? widget.strings.chooseSeats,
+              clock: hold == null
+                  ? null
+                  : SeatLayerHoldClock(
+                      expiresAt: hold.expiresAt,
+                      theme: theme,
+                      strings: widget.strings,
+                      compact: !wide,
+                    ),
+              onClose: widget.onClose == null
+                  ? null
+                  : () => unawaited(requestClose()),
+              compact: !wide,
+            ),
+            Expanded(
+              child: _loadError != null
+                  ? SeatLayerPickerErrorView.standalone(
+                      theme: theme,
+                      strings: widget.strings,
+                      onRetry: _retry,
+                    )
+                  : SeatLayerSeasonView.inPicker(
+                      key: ValueKey<int>(_page),
+                      resumed: _resumed,
+                      again: _again,
+                      controller: _controller,
+                      configuration: widget.configuration,
+                      bootThemeMode: _bootMode ?? mode,
+                      backgroundColor: theme.mapBackground ?? theme.background,
+                      onLoadError: _failed,
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

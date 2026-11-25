@@ -319,59 +319,66 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
         seatLayerOnTablet(context);
     return ColoredBox(
       color: theme.background,
-      child: Column(
-        children: <Widget>[
-          SeatLayerHeaderBar(
-            theme: theme,
-            strings: widget.strings,
-            logoUrl: status?.branding?.logoUrl,
-            markName: status?.branding?.brandName ?? descriptor?.name,
-            // Until the page names the run, the bar keeps the event picker's
-            // loading words.
-            title: descriptor?.name ?? widget.strings.chooseSeats,
-            clock: hold == null
-                ? null
-                : SeatLayerHoldClock(
-                    expiresAt: hold.expiresAt,
-                    theme: theme,
-                    strings: widget.strings,
-                    compact: !wide,
-                  ),
-            onClose:
-                widget.onClose == null ? null : () => unawaited(requestClose()),
-            compact: !wide,
-          ),
-          Expanded(
-            child: _loadError != null
-                ? SeatLayerPickerErrorView.standalone(
-                    theme: theme,
-                    strings: widget.strings,
-                    onRetry: _retry,
-                  )
-                // A page that takes the inset runs its cart under the home
-                // indicator; for one that does not, the app keeps it clear,
-                // on the cart's surface.
-                : ColoredBox(
-                    color: theme.surface,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: pageTakesInsets ? 0 : bottomInset,
-                      ),
-                      child: SeatLayerRunView.inPicker(
-                        key: ValueKey<int>(_page),
-                        resumed: _resumed,
-                        again: _again,
-                        controller: _controller,
-                        configuration: widget.configuration,
-                        bootThemeMode: mode,
-                        backgroundColor:
-                            theme.mapBackground ?? theme.background,
-                        onLoadError: _failed,
+      // Held sideways, a phone's camera or its curved edge is a side inset, and
+      // an app that mounts the picker bare gives it no SafeArea.
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Column(
+          children: <Widget>[
+            SeatLayerHeaderBar(
+              theme: theme,
+              strings: widget.strings,
+              logoUrl: status?.branding?.logoUrl,
+              markName: status?.branding?.brandName ?? descriptor?.name,
+              // Until the page names the run, the bar keeps the event picker's
+              // loading words.
+              title: descriptor?.name ?? widget.strings.chooseSeats,
+              clock: hold == null
+                  ? null
+                  : SeatLayerHoldClock(
+                      expiresAt: hold.expiresAt,
+                      theme: theme,
+                      strings: widget.strings,
+                      compact: !wide,
+                    ),
+              onClose: widget.onClose == null
+                  ? null
+                  : () => unawaited(requestClose()),
+              compact: !wide,
+            ),
+            Expanded(
+              child: _loadError != null
+                  ? SeatLayerPickerErrorView.standalone(
+                      theme: theme,
+                      strings: widget.strings,
+                      onRetry: _retry,
+                    )
+                  // A page that takes the inset runs its cart under the home
+                  // indicator; for one that does not, the app keeps it clear,
+                  // on the cart's surface.
+                  : ColoredBox(
+                      color: theme.surface,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          bottom: pageTakesInsets ? 0 : bottomInset,
+                        ),
+                        child: SeatLayerRunView.inPicker(
+                          key: ValueKey<int>(_page),
+                          resumed: _resumed,
+                          again: _again,
+                          controller: _controller,
+                          configuration: widget.configuration,
+                          bootThemeMode: mode,
+                          backgroundColor:
+                              theme.mapBackground ?? theme.background,
+                          onLoadError: _failed,
+                        ),
                       ),
                     ),
-                  ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

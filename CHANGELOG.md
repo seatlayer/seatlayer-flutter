@@ -18,6 +18,7 @@
 - **iPhone, the system ends the page (low memory):** the map comes back by itself once the app is in front, in the event picker, a Season and a run. A hold handed to checkout, a hold the picker was opened on, and a Season's or run's hold are taken up again. A third time within a minute the failure view opens, with Try again. A blank map stood there, and a Season could not be closed. A bare `SeatLayerView` reports `sl_transport` on `onError`.
 - **A Season closed while no page is up, with seats held (behaviour change):** `onClose` receives `kept` and the hold's operation id. It received `closed`.
 - **Try again on a page that had loaded** brings one that works. The new page was cut off as the old one left.
+- **A Season or run picker mounted without its route, held sideways,** stays clear of the camera cutout.
 
 ## 0.13.0 (2026-11-25)
 
