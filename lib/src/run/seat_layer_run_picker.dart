@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../bridge/bridge_page_recovery.dart';
 import '../picker/picker_header.dart';
 import '../picker/picker_layout.dart';
 import '../picker/picker_models.dart';
@@ -13,6 +14,7 @@ import '../picker/picker_strings.dart';
 import '../picker/picker_tokens.g.dart';
 import '../picker/seat_layer_picker_theme.dart';
 import '../seat_layer_error.dart';
+import '../seat_layer_page_keeper.dart';
 import '../seat_layer_surface_route.dart';
 import 'run_configuration.dart';
 import 'run_models.dart';
@@ -95,6 +97,20 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
   int _page = 0;
   bool _closing = false;
 
+  /// The hold the buyer has, whether or not a page is up.
+  SeatLayerRunHandoff? _held;
+
+  /// The hold a page that takes another's place opens on.
+  SeatLayerRunHandoff? _resumed;
+
+  /// Whether a page was up, and whether this page takes its place: that one
+  /// starts without the hold the configuration opens on, which may be gone.
+  bool _pageWasUp = false;
+  bool _again = false;
+
+  final SeatLayerPageRecovery _recovery = SeatLayerPageRecovery();
+  late final SeatLayerPageKeeper _keeper = SeatLayerPageKeeper(_pageLost);
+
   /// The bottom inset this page was last sent, and whether it refused one.
   double? _sentBottomInset;
   bool _insetsRefused = false;
@@ -109,19 +125,23 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
   void _attach(SeatLayerRunController? given) {
     _controller = given ?? SeatLayerRunController();
     _ownsController = given == null;
+    _keeper.watch(_controller);
     void rebuild(Object? _) {
       if (mounted) setState(() {});
     }
 
     _subscriptions.addAll(<StreamSubscription<Object?>>[
       _controller.onReady.listen((_) {
+        _pageWasUp = true;
+        if (_resumed == null) _held = _controller.hold;
         // A page that just booted knows no insets.
         _sentBottomInset = null;
         _insetsRefused = false;
         rebuild(null);
         // A resumed hold may never be announced: ask the page, so the bar
         // shows its clock.
-        if (widget.configuration.initialOperationId != null) {
+        if (_resumed != null ||
+            widget.configuration.initialOperationId != null) {
           unawaited(_controller
               .readHeldOrder()
               .then<void>((_) {}, onError: (Object _) {}));
@@ -129,7 +149,10 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
       }),
       _controller.onRun.listen(rebuild),
       _controller.onStatus.listen(rebuild),
-      _controller.onHold.listen(rebuild),
+      _controller.onHold.listen((hold) {
+        _held = hold;
+        rebuild(null);
+      }),
       _controller.onContinue.listen(
         (handoff) => unawaited(Future<void>.sync(
           () => widget.onContinue(handoff),
@@ -140,6 +163,7 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
   }
 
   void _detach() {
+    _keeper.unwatch();
     for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());
     }
@@ -150,7 +174,14 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
   @override
   void didUpdateWidget(covariant SeatLayerRunPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller == widget.controller) return;
+    final controllerChanged = oldWidget.controller != widget.controller;
+    if (controllerChanged ||
+        !oldWidget.configuration.semanticallyEquals(widget.configuration)) {
+      // Another page is asked for: it opens on what it is given.
+      _held = _resumed = null;
+      _pageWasUp = _again = false;
+    }
+    if (!controllerChanged) return;
     _detach();
     _attach(widget.controller);
   }
@@ -164,7 +195,7 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_controller.isReady) return;
+    if (_keeper.appMoved(state) || !_controller.isReady) return;
     final foreground = switch (state) {
       AppLifecycleState.resumed => true,
       AppLifecycleState.paused || AppLifecycleState.hidden => false,
@@ -219,14 +250,52 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
   }
 
   void _failed(SeatLayerError error) {
-    if (mounted) setState(() => _loadError = error);
+    if (!mounted) return;
+    setState(() {
+      // A hold that is gone is not a run that did not load.
+      if (_resumed == null) {
+        _loadError = error;
+      } else {
+        _resumed = null;
+        _nextPage();
+      }
+    });
+  }
+
+  /// The system ended the page: a new one opens on the same hold, until pages
+  /// keep being lost. Then the failure view stands there, with Try again.
+  void _pageLost() {
+    if (!mounted) return;
+    _controller.detachTransport();
+    if (!_recovery.lost()) {
+      _resumed = null;
+      return _failed(
+        const SeatLayerError.transport(
+          'The system keeps closing the SeatLayer page.',
+        ),
+      );
+    }
+    setState(() {
+      _loadError = null;
+      _resumed = _held;
+      _nextPage();
+    });
+  }
+
+  void _nextPage() {
+    _again = _pageWasUp;
+    _page += 1;
   }
 
   /// Retry boots a new page, as the event picker's does.
-  void _retry() => setState(() {
-        _loadError = null;
-        _page += 1;
-      });
+  void _retry() {
+    _recovery.reset();
+    setState(() {
+      _loadError = null;
+      _resumed = _held;
+      _nextPage();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -250,57 +319,66 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
         seatLayerOnTablet(context);
     return ColoredBox(
       color: theme.background,
-      child: Column(
-        children: <Widget>[
-          SeatLayerHeaderBar(
-            theme: theme,
-            strings: widget.strings,
-            logoUrl: status?.branding?.logoUrl,
-            markName: status?.branding?.brandName ?? descriptor?.name,
-            // Until the page names the run, the bar keeps the event picker's
-            // loading words.
-            title: descriptor?.name ?? widget.strings.chooseSeats,
-            clock: hold == null
-                ? null
-                : SeatLayerHoldClock(
-                    expiresAt: hold.expiresAt,
-                    theme: theme,
-                    strings: widget.strings,
-                    compact: !wide,
-                  ),
-            onClose:
-                widget.onClose == null ? null : () => unawaited(requestClose()),
-            compact: !wide,
-          ),
-          Expanded(
-            child: _loadError != null
-                ? SeatLayerPickerErrorView.standalone(
-                    theme: theme,
-                    strings: widget.strings,
-                    onRetry: _retry,
-                  )
-                // A page that takes the inset runs its cart under the home
-                // indicator; for one that does not, the app keeps it clear,
-                // on the cart's surface.
-                : ColoredBox(
-                    color: theme.surface,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: pageTakesInsets ? 0 : bottomInset,
-                      ),
-                      child: SeatLayerRunView(
-                        key: ValueKey<int>(_page),
-                        controller: _controller,
-                        configuration: widget.configuration,
-                        bootThemeMode: mode,
-                        backgroundColor:
-                            theme.mapBackground ?? theme.background,
-                        onLoadError: _failed,
+      // Held sideways, a phone's camera or its curved edge is a side inset, and
+      // an app that mounts the picker bare gives it no SafeArea.
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        child: Column(
+          children: <Widget>[
+            SeatLayerHeaderBar(
+              theme: theme,
+              strings: widget.strings,
+              logoUrl: status?.branding?.logoUrl,
+              markName: status?.branding?.brandName ?? descriptor?.name,
+              // Until the page names the run, the bar keeps the event picker's
+              // loading words.
+              title: descriptor?.name ?? widget.strings.chooseSeats,
+              clock: hold == null
+                  ? null
+                  : SeatLayerHoldClock(
+                      expiresAt: hold.expiresAt,
+                      theme: theme,
+                      strings: widget.strings,
+                      compact: !wide,
+                    ),
+              onClose: widget.onClose == null
+                  ? null
+                  : () => unawaited(requestClose()),
+              compact: !wide,
+            ),
+            Expanded(
+              child: _loadError != null
+                  ? SeatLayerPickerErrorView.standalone(
+                      theme: theme,
+                      strings: widget.strings,
+                      onRetry: _retry,
+                    )
+                  // A page that takes the inset runs its cart under the home
+                  // indicator; for one that does not, the app keeps it clear,
+                  // on the cart's surface.
+                  : ColoredBox(
+                      color: theme.surface,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          bottom: pageTakesInsets ? 0 : bottomInset,
+                        ),
+                        child: SeatLayerRunView.inPicker(
+                          key: ValueKey<int>(_page),
+                          resumed: _resumed,
+                          again: _again,
+                          controller: _controller,
+                          configuration: widget.configuration,
+                          bootThemeMode: mode,
+                          backgroundColor:
+                              theme.mapBackground ?? theme.background,
+                          onLoadError: _failed,
+                        ),
                       ),
                     ),
-                  ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

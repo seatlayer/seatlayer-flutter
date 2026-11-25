@@ -67,6 +67,20 @@ class FakeWebViewPlatform extends WebViewPlatform with MockPlatformInterfaceMixi
   final List<HttpResponseErrorCallback> httpErrors =
       <HttpResponseErrorCallback>[];
 
+  /// What each navigation delegate was told to do with a page that fails, in
+  /// creation order.
+  final List<WebResourceErrorCallback> resourceErrors =
+      <WebResourceErrorCallback>[];
+
+  /// The system ends the page in the newest web view, as iPhone does.
+  void endPage() => resourceErrors.last(
+        const WebResourceError(
+          errorCode: 0,
+          description: 'The web view process was terminated.',
+          errorType: WebResourceErrorType.webContentProcessTerminated,
+        ),
+      );
+
   @override
   PlatformWebViewController createPlatformWebViewController(
     PlatformWebViewControllerCreationParams params,
@@ -169,7 +183,8 @@ class _FakeNavigationDelegate extends PlatformNavigationDelegate
   @override
   Future<void> setOnWebResourceError(
     WebResourceErrorCallback onWebResourceError,
-  ) async {}
+  ) async =>
+      _platform.resourceErrors.add(onWebResourceError);
 
   @override
   Future<void> setOnUrlChange(UrlChangeCallback onUrlChange) async {}

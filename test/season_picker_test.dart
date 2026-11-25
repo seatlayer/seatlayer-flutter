@@ -136,6 +136,41 @@ void main() {
     );
   });
 
+  testWidgets('mounted bare and held sideways it steps clear of the sides',
+      (tester) async {
+    useFakeWebViewPlatform();
+    tester.view
+      ..physicalSize = const Size(844, 390)
+      ..devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const sides = EdgeInsets.fromLTRB(59, 0, 47, 21);
+    final picker = SeatLayerSeasonPicker(
+      configuration: seasonConfiguration,
+      onContinue: (_) {},
+      onClose: (_, __) {},
+    );
+    Widget held(Widget child) => MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(size: Size(844, 390), padding: sides),
+            child: child,
+          ),
+        );
+    Rect place() => tester.getRect(find.byWidgetPredicate((w) => w is SeatLayerSeasonView));
+
+    await tester.pumpWidget(held(picker));
+    final bare = place();
+    expect(bare.left, 59);
+    expect(bare.right, 844 - 47);
+    expect(
+      tester.getRect(find.byTooltip('Close seat selection')).right,
+      lessThanOrEqualTo(844 - 47),
+    );
+
+    // Inside a surface that has taken the sides nothing is taken twice.
+    await tester.pumpWidget(held(SafeArea(bottom: false, child: picker)));
+    expect(place(), bare);
+  });
+
   testWidgets('a hold puts the clock in the header', (tester) async {
     final fake = useFakeWebViewPlatform();
     final page = SeasonPage(fake);

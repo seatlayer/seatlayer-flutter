@@ -60,6 +60,9 @@ class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
   late final WebViewController _web;
   int _generation = 0;
 
+  /// This view's page, as its session knows it.
+  Object? _transport;
+
   /// The prewarmed page this view adopted, for as long as it is mounted.
   ///
   /// Held rather than dropped after boot so `dispose` can detach its channel:
@@ -112,6 +115,14 @@ class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
                 ? NavigationDecision.navigate
                 : NavigationDecision.prevent,
         onWebResourceError: (error) {
+          if (error.errorType ==
+              WebResourceErrorType.webContentProcessTerminated) {
+            if (!mounted) return;
+            // The picker answers it with a new page: not a load that failed.
+            if (widget.controller.answersPageLost) _generation += 1;
+            widget.controller.pageLost();
+            return;
+          }
           // Only a hard failure of the main document should fail the load;
           // sub-resource noise must not abort a working chart.
           if (error.isForMainFrame ?? true) {
@@ -156,6 +167,7 @@ class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
       widget.configuration,
       profile: widget.bridgeProfile,
     );
+    _transport = widget.controller.transport;
     unawaited(
       ready.then(
         (info) {
@@ -234,7 +246,10 @@ class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
         !oldWidget.bridgeProfile.equivalentTo(widget.bridgeProfile);
     final runtimeChanged =
         controllerChanged || configurationChanged || profileChanged;
-    if (!runtimeChanged) return;
+    if (!runtimeChanged) {
+      widget.controller.configurationRebuilt(widget.configuration);
+      return;
+    }
 
     // Invalidate callbacks from the old page before closing its correlations.
     final generation = ++_generation;
@@ -272,7 +287,12 @@ class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
     // Nothing more from this page: the controller it was delivering into is
     // being detached on the next line.
     _warm?.detach();
-    widget.controller.detachTransport();
+    // A view mounted in this one's place has its page up before this one is
+    // disposed.
+    final current = widget.controller.transport;
+    if (current == null || identical(current, _transport)) {
+      widget.controller.detachTransport();
+    }
     super.dispose();
   }
 

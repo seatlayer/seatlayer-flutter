@@ -17,6 +17,12 @@
 - **The standing and table prompts on a short map,** a phone held sideways or a large text size: they scroll, and open with the number and the buttons in sight. The buttons were cut off.
 - **When the buyer's access to the seats has run out, is paused or is revoked,** the picker says so with "Refresh" or "Try again", where the failed-to-load view was drawn. An app with its own `builders.error` is asked for these as before.
 - **`onBooked` and "You're all set" (behaviour change)** come only when the page says the hold is booked, which it does after your server has booked and you call `markBooked`. They also came when the handed-off hold left the map for another reason: the page was loaded again by a changed setting such as the language, you rejected the checkout, or the hold was lost on the server. The buyer then read that their tickets were confirmed, and nothing was booked. Take a sale from your own server, never from `onBooked`.
+- **`buyerAccessTokenProvider` written inline in `build`,** as the README shows it: a rebuild no longer loads the page again, which emptied the picker and left seats held. The newest function is asked for the next token. To start over for another buyer, give the picker another `key`.
+- **A hold handed to checkout, when the page is loaded again** by a changed setting such as the language, or by `retry()`: the new page takes it up again. The picker stood empty while your checkout held the seats.
+- **iPhone, the system ends the page (low memory):** the map comes back by itself once the app is in front, in the event picker, a Season and a run. A hold handed to checkout and a hold the picker was opened on are taken up again. A Season or run asks for its hold too and gets it when your app gives the page the same buyer token again; without a token the page starts a new buyer session, and the seats stay held until their time is up. A third time within a minute the failure view opens, with Try again. A blank map stood there, and a Season could not be closed. A bare `SeatLayerView` reports `sl_transport` on `onError`.
+- **A Season closed while no page is up, with seats held (behaviour change):** `onClose` receives `kept` and the hold's operation id. It received `closed`.
+- **Try again on a page that had loaded** brings one that works. The new page was cut off as the old one left.
+- **A Season or run picker mounted without its route, held sideways,** stays clear of the camera cutout.
 
 ## 0.13.0 (2026-11-25)
 

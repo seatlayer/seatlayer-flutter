@@ -50,6 +50,7 @@ abstract class SeatLayerBridgeSession<
   final _onError = StreamController<SeatLayerError>.broadcast();
   final _onUnknownEvent = StreamController<UnknownEvent>.broadcast();
   final _onBridgeEvent = StreamController<EventSignal>.broadcast();
+  final _onPageLost = StreamController<void>.broadcast();
 
   // MARK: - State
 
@@ -114,6 +115,13 @@ abstract class SeatLayerBridgeSession<
 
   // MARK: - Handshake orchestration (driven by SeatLayerView)
 
+  /// The view was built again for the same page. [configuration] is the one to
+  /// ask from now on: its `buyerAccessTokenProvider` may be a new function.
+  @internal
+  void configurationRebuilt(C configuration) {
+    if (_configuration != null) _configuration = configuration;
+  }
+
   /// Attach a channel, arm the handshake, and complete when `sys.ready` arrives.
   /// Called by [SeatLayerView]; not part of the app-facing API.
   @internal
@@ -158,6 +166,11 @@ abstract class SeatLayerBridgeSession<
     return completer.future;
   }
 
+  /// The page the session talks to, by identity. A page that another one has
+  /// already replaced must not detach it.
+  @internal
+  Object? get transport => _client;
+
   /// Feed one raw web→native frame (the `JavaScriptChannel` string) to the
   /// client. Called by [SeatLayerView].
   @internal
@@ -172,6 +185,29 @@ abstract class SeatLayerBridgeSession<
   @internal
   void failWithTransport(String detail) {
     _finishHandshake(SeatLayerError.transport(detail));
+  }
+
+  /// The system ended the page (iPhone, low memory). A picker that listens puts
+  /// a new page in its place; a bare view reports it on [onError].
+  @internal
+  Stream<void> get onPageLost => _onPageLost.stream;
+
+  /// Whether somebody answers [onPageLost].
+  @internal
+  bool get answersPageLost => _onPageLost.hasListener;
+
+  /// The page is gone, and everything waiting on it is refused. Called by
+  /// [SeatLayerView].
+  @internal
+  void pageLost() {
+    if (_disposed) return;
+    const error = SeatLayerError.transport(
+      'The system closed the SeatLayer page.',
+    );
+    final answered = answersPageLost;
+    if (!answered) _finishHandshake(error);
+    _dropPage(error);
+    if (answered) _onPageLost.add(null);
   }
 
   void _handleSignal(BridgeSignal signal) {
@@ -404,15 +440,15 @@ abstract class SeatLayerBridgeSession<
   /// Detach the current page/transport without disposing this caller-owned
   /// controller. A subsequent page load may attach a fresh bridge.
   @internal
-  void detachTransport() {
+  void detachTransport() => _dropPage(const SeatLayerError.destroyed());
+
+  void _dropPage(SeatLayerError error) {
     _handshakeTimer?.cancel();
     _handshakeTimer = null;
     final pending = _readyCompleter;
     _readyCompleter = null;
-    if (pending != null && !pending.isCompleted) {
-      pending.completeError(const SeatLayerError.destroyed());
-    }
-    _client?.close();
+    if (pending != null && !pending.isCompleted) pending.completeError(error);
+    _client?.close(error);
     _client = null;
     _readyInfo = null;
     _bundleInfo = null;
@@ -434,5 +470,6 @@ abstract class SeatLayerBridgeSession<
     _onError.close();
     _onUnknownEvent.close();
     _onBridgeEvent.close();
+    _onPageLost.close();
   }
 }

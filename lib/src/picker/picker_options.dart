@@ -484,9 +484,11 @@ class SeatLayerPickerOptions {
   final bool haptics;
 
   /// The subset of these options the runtime is told about at init.
-  Map<String, Object?> toBridgeConfig() => <String, Object?>{
+  Map<String, Object?> toBridgeConfig({bool withInitialHold = true}) =>
+      <String, Object?>{
         if (holdTtl != null) 'holdTtlMs': holdTtl!.inMilliseconds,
-        if (initialHoldId != null) 'initialHoldId': initialHoldId,
+        if (withInitialHold && initialHoldId != null)
+          'initialHoldId': initialHoldId,
         'readOnly': readOnly,
         'confirmSelection': confirmSelection,
         'enableBestAvailable': enableBestAvailable,

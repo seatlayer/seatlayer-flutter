@@ -151,9 +151,8 @@ class _SeatLayerPickerAdaptiveLayoutState
     // The pan publishes no snapshot, so nothing else rebuilds this layout
     // when the map moves under the card — and the spotlight hole is cut
     // against where the seat is NOW. See [_spotlightAnchor].
-    onChanged: () {
-      if (mounted) setState(() {});
-    },
+    onChanged: () => mounted ? setState(() {}) : null,
+    page: () => _picker?.framingPage,
   );
 
   /// Where the glass behind the seat card leaves the map clear.
