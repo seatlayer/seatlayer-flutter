@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../bridge/bridge_page_recovery.dart';
 import '../picker/picker_header.dart';
 import '../picker/picker_layout.dart';
 import '../picker/picker_models.dart';
@@ -13,6 +14,7 @@ import '../picker/picker_strings.dart';
 import '../picker/picker_tokens.g.dart';
 import '../picker/seat_layer_picker_theme.dart';
 import '../seat_layer_error.dart';
+import '../seat_layer_page_keeper.dart';
 import '../seat_layer_surface_route.dart';
 import 'season_configuration.dart';
 import 'season_models.dart';
@@ -99,6 +101,23 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
   SeatLayerError? _loadError;
   int _page = 0;
 
+  /// The hold the buyer has, whether or not a page is up.
+  SeatLayerSeasonHandoff? _held;
+
+  /// The hold a page that takes another's place opens on.
+  SeatLayerSeasonHandoff? _resumed;
+
+  /// Whether a page was up, and whether this page takes its place: that one
+  /// starts without the hold the configuration opens on, which may be gone.
+  bool _pageWasUp = false;
+  bool _again = false;
+
+  /// The hold the page showed booked.
+  String? _booked;
+
+  final SeatLayerPageRecovery _recovery = SeatLayerPageRecovery();
+  late final SeatLayerPageKeeper _keeper = SeatLayerPageKeeper(_pageLost);
+
   @override
   void initState() {
     super.initState();
@@ -109,14 +128,20 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
   void _attach(SeatLayerSeasonController? given) {
     _controller = given ?? SeatLayerSeasonController();
     _ownsController = given == null;
+    _keeper.watch(_controller);
     void rebuild(Object? _) {
       if (mounted) setState(() {});
     }
 
     _subscriptions.addAll(<StreamSubscription<Object?>>[
       _controller.onStatus.listen(rebuild),
-      _controller.onHold.listen(rebuild),
+      _controller.onHold.listen((hold) {
+        _held = hold;
+        rebuild(null);
+      }),
       _controller.onReady.listen((_) {
+        _pageWasUp = true;
+        if (_resumed == null) _held = _controller.hold;
         // A page that just booted knows its boot side and no insets.
         _pageMode = null;
         _sentBottomInset = null;
@@ -127,11 +152,15 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
           () => widget.onContinue(handoff),
         ).catchError((Object _) {})),
       ),
-      _controller.onBooked.listen((handoff) => widget.onBooked?.call(handoff)),
+      _controller.onBooked.listen((handoff) {
+        _booked = handoff.operationId;
+        widget.onBooked?.call(handoff);
+      }),
     ]);
   }
 
   void _detach() {
+    _keeper.unwatch();
     for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());
     }
@@ -142,7 +171,14 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
   @override
   void didUpdateWidget(covariant SeatLayerSeasonPicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.controller == widget.controller) return;
+    final controllerChanged = oldWidget.controller != widget.controller;
+    if (controllerChanged ||
+        !oldWidget.configuration.semanticallyEquals(widget.configuration)) {
+      // Another page is asked for: it opens on what it is given.
+      _held = _resumed = null;
+      _pageWasUp = _again = false;
+    }
+    if (!controllerChanged) return;
     _detach();
     _bootMode = null;
     _attach(widget.controller);
@@ -157,7 +193,7 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (!_controller.isReady) return;
+    if (_keeper.appMoved(state) || !_controller.isReady) return;
     final foreground = switch (state) {
       AppLifecycleState.resumed => true,
       AppLifecycleState.paused || AppLifecycleState.hidden => false,
@@ -181,7 +217,7 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
     try {
       final closed = _controller.isReady
           ? await _controller.requestClose()
-          : (outcome: SeatLayerSeasonCloseOutcome.closed, operationId: null);
+          : _closedWithoutPage;
       if (!mounted || !closed.outcome.closes) return;
       widget.onClose?.call(closed.outcome, closed.operationId);
     } catch (_) {
@@ -189,18 +225,68 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
     }
   }
 
+  /// With no page to ask, the seats the buyer holds stay held.
+  ({SeatLayerSeasonCloseOutcome outcome, String? operationId})
+      get _closedWithoutPage {
+    final hold = _held;
+    return hold == null || hold.operationId == _booked
+        ? (outcome: SeatLayerSeasonCloseOutcome.closed, operationId: null)
+        : (
+            outcome: SeatLayerSeasonCloseOutcome.kept,
+            operationId: hold.operationId,
+          );
+  }
+
+  /// The system ended the page: a new one opens on the same hold, until pages
+  /// keep being lost. Then the failure view stands there, with Try again.
+  void _pageLost() {
+    if (!mounted) return;
+    _controller.detachTransport();
+    if (!_recovery.lost()) {
+      _resumed = null;
+      return _failed(
+        const SeatLayerError.transport(
+          'The system keeps closing the SeatLayer page.',
+        ),
+      );
+    }
+    setState(() {
+      _loadError = null;
+      _resumed = _held;
+      _nextPage();
+    });
+  }
+
   /// A Season that cannot be mounted renders nothing and fails the handshake
   /// (`sys.error`, `sys.incompatible`, or no answer in time). The buyer gets
   /// the event picker's own failure view under the bar, not a blank page.
   void _failed(SeatLayerError error) {
-    if (mounted) setState(() => _loadError = error);
+    if (!mounted) return;
+    setState(() {
+      // A hold that is gone is not a Season that did not load.
+      if (_resumed == null) {
+        _loadError = error;
+      } else {
+        _resumed = null;
+        _nextPage();
+      }
+    });
+  }
+
+  void _nextPage() {
+    _again = _pageWasUp;
+    _page += 1;
   }
 
   /// Retry boots a new page, as the event picker's does.
-  void _retry() => setState(() {
-        _loadError = null;
-        _page += 1;
-      });
+  void _retry() {
+    _recovery.reset();
+    setState(() {
+      _loadError = null;
+      _resumed = _held;
+      _nextPage();
+    });
+  }
 
   /// The side the page is painted on: `auto` resolved here, where the app's
   /// own brightness is known, as the event picker does.
@@ -277,8 +363,10 @@ class SeatLayerSeasonPickerState extends State<SeatLayerSeasonPicker>
                     strings: widget.strings,
                     onRetry: _retry,
                   )
-                : SeatLayerSeasonView(
+                : SeatLayerSeasonView.inPicker(
                     key: ValueKey<int>(_page),
+                    resumed: _resumed,
+                    again: _again,
                     controller: _controller,
                     configuration: widget.configuration,
                     bootThemeMode: _bootMode ?? mode,

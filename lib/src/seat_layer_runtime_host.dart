@@ -115,6 +115,14 @@ class _SeatLayerRuntimeHostState<C extends SeatLayerSurfaceConfiguration>
                 ? NavigationDecision.navigate
                 : NavigationDecision.prevent,
         onWebResourceError: (error) {
+          if (error.errorType ==
+              WebResourceErrorType.webContentProcessTerminated) {
+            if (!mounted) return;
+            // The picker answers it with a new page: not a load that failed.
+            if (widget.controller.answersPageLost) _generation += 1;
+            widget.controller.pageLost();
+            return;
+          }
           // Only a hard failure of the main document should fail the load;
           // sub-resource noise must not abort a working chart.
           if (error.isForMainFrame ?? true) {

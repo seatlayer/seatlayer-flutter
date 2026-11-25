@@ -140,7 +140,8 @@ class SeatLayerBridgeProfile {
       return <String, Object?>{
         ...payload,
         'surface': surface,
-        'config': currentConfig,
+        // A null here leaves out what the configuration would say.
+        'config': currentConfig..removeWhere((_, value) => value == null),
       };
     }
     final currentChrome = Map<String, Object?>.from(

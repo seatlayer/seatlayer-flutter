@@ -7,6 +7,8 @@ part of 'seat_layer_picker_controller.dart';
 mixin _PickerPageReload on ValueNotifier<SeatLayerPickerState> {
   SeatLayerPickerController get _controller;
 
+  final SeatLayerPageRecovery _pageRecovery = SeatLayerPageRecovery();
+
   late final PickerReloadHold _reloadHold = PickerReloadHold(
     holdIsActive: () => value.hold != null,
     resume: _resumeHold,
@@ -34,6 +36,7 @@ mixin _PickerPageReload on ValueNotifier<SeatLayerPickerState> {
     if (controller._disposed || value.phase == SeatLayerPickerPhase.closed) {
       return Future<void>.error(const SeatLayerError.destroyed());
     }
+    _pageRecovery.reset();
     return controller._serialize(() async {
       _rememberHold();
       // A failed handshake has no live picker to clean up. If the runtime did
@@ -48,6 +51,27 @@ mixin _PickerPageReload on ValueNotifier<SeatLayerPickerState> {
         }
       }
       _replacePage();
+    });
+  }
+
+  /// The system ended the page: a new one takes its place, until pages keep
+  /// being lost. Then the buyer gets the failure view and its Try again.
+  @internal
+  Future<void> recoverLostPage() {
+    final controller = _controller;
+    if (controller._disposed || value.phase == SeatLayerPickerPhase.closed) {
+      return Future<void>.value();
+    }
+    final again = _pageRecovery.lost();
+    return controller._serialize(() async {
+      if (value.phase == SeatLayerPickerPhase.closed) return;
+      _rememberHold();
+      if (again) return _replacePage();
+      const error = SeatLayerError.transport(
+        'The system keeps closing the SeatLayer page.',
+      );
+      value = value.reloading().withError(error);
+      controller._callbacks.onError?.call(error);
     });
   }
 

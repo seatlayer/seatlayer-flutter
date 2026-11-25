@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../bridge/bridge_profile.dart';
 import '../seat_layer_configuration.dart';
+import '../seat_layer_page_keeper.dart';
 import '../seat_layer_prewarm.dart';
 import '../seat_layer_view.dart';
 import 'picker_adaptive_layout.dart';
@@ -14,6 +15,7 @@ import 'picker_availability.dart';
 import 'picker_best_seats.dart';
 import 'picker_builders.dart';
 import 'picker_cart_list.dart';
+import 'picker_internal.dart';
 import 'picker_options.dart';
 import 'picker_system_overlay.dart';
 import 'picker_theme_sync.dart';
@@ -250,6 +252,11 @@ class _SeatLayerPickerMapState extends State<SeatLayerPickerMap>
     with WidgetsBindingObserver {
   SeatLayerPickerController? _picker;
 
+  late final SeatLayerPageKeeper _keeper = SeatLayerPageKeeper(() {
+    final picker = _picker;
+    if (picker != null) ignorePickerAction(picker.recoverLostPage());
+  });
+
   @override
   void initState() {
     super.initState();
@@ -259,12 +266,16 @@ class _SeatLayerPickerMapState extends State<SeatLayerPickerMap>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _picker = SeatLayerPickerScope.controllerOf(context);
+    final picker = SeatLayerPickerScope.controllerOf(context);
+    if (identical(picker, _picker)) return;
+    _picker = picker;
+    _keeper.watch(picker.mapController);
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final picker = _picker;
+    if (_keeper.appMoved(state)) return;
     if (picker == null || !picker.state.isReady) return;
     final lifecycle = switch (state) {
       AppLifecycleState.resumed => 'resumed',
@@ -325,6 +336,7 @@ class _SeatLayerPickerMapState extends State<SeatLayerPickerMap>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _keeper.unwatch();
     super.dispose();
   }
 
