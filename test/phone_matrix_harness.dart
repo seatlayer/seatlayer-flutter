@@ -383,6 +383,21 @@ List<Tappable> tappables(WidgetTester tester) {
   return found;
 }
 
+/// Whether [control] answers no press on the parts of it that [other] leaves
+/// free. False where [other] leaves nothing free.
+bool behindPanel(WidgetTester tester, Tappable control, Tappable other) {
+  final free = <Offset>[
+    for (final x in <double>[.1, .3, .5, .7, .9])
+      for (final y in <double>[.1, .3, .5, .7, .9])
+        Offset(
+          control.rect.left + control.rect.width * x,
+          control.rect.top + control.rect.height * y,
+        ),
+  ].where((point) => !other.rect.contains(point));
+  return free.isNotEmpty &&
+      free.every((point) => !pressReaches(tester, point, control));
+}
+
 /// Whether a press at [point] lands on [control]: the semantics node of
 /// something on the press's hit path is the control's own or one inside it.
 bool pressReaches(WidgetTester tester, Offset point, Tappable control) {
@@ -472,8 +487,11 @@ void expectPhoneLayout(
       final smaller = area(a.rect) <= area(b.rect) ? a : b;
       final larger = identical(smaller, a) ? b : a;
       // Where the press reaches neither, both are behind a panel over the map.
+      // Where a press beside the larger one does not reach the smaller one
+      // either, the smaller one is behind a panel that the larger one is on.
       if (!pressReaches(tester, both.center, smaller) &&
-          pressReaches(tester, both.center, larger)) {
+          pressReaches(tester, both.center, larger) &&
+          !behindPanel(tester, smaller, larger)) {
         problems.add('${larger.name} at ${larger.rect} covers '
             '${smaller.name} at ${smaller.rect}');
       }
