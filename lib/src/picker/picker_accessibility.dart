@@ -235,135 +235,146 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                if (available.limited)
-                  _AccessOptionRow(
-                    // The switch that hides limited-view seats wears the mark
-                    // those seats carry, so the row and the thing it acts on
-                    // are one idea.
-                    iconKey: 'restrictedView',
-                    label: strings.hideLimitedView,
-                    reserveNoteSlot: false,
-                    hairline: available.colorblind,
-                    value: hideLimited,
-                    onChanged: () {
-                      final next = !hideLimited;
-                      setSheetState(() => hideLimited = next);
-                      ignorePickerAction(applyLimited(next));
-                    },
-                  ),
-                if (available.colorblind)
-                  _AccessOptionRow(
-                    // NOT an eye and not a seat mark: this row recolours the
-                    // map, it does not choose seats. A contrast disc is the
-                    // one shape on this sheet that is about the palette.
-                    iconKey: 'contrast',
-                    label: strings.colorblindSafe,
-                    reserveNoteSlot: false,
-                    hairline: false,
-                    value: colorblind,
-                    onChanged: () {
-                      final next = !colorblind;
-                      setSheetState(() => colorblind = next);
-                      ignorePickerAction(applyColorblind(next));
-                    },
-                  ),
-                if (needs.isNotEmpty)
-                  // The two map switches come first and the provisions sit
-                  // under their own heading, so the switches never read as two
-                  // more provisions at the foot of the list.
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      8,
-                      available.limited || available.colorblind ? 18 : 0,
-                      8,
-                      4,
+                // Everything under the title scrolls as one: held sideways the
+                // sheet is short, and every row has to be reached and pressed.
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (available.limited)
+                          _AccessOptionRow(
+                            // The switch that hides limited-view seats wears the mark
+                            // those seats carry, so the row and the thing it acts on
+                            // are one idea.
+                            iconKey: 'restrictedView',
+                            label: strings.hideLimitedView,
+                            reserveNoteSlot: false,
+                            hairline: available.colorblind,
+                            value: hideLimited,
+                            onChanged: () {
+                              final next = !hideLimited;
+                              setSheetState(() => hideLimited = next);
+                              ignorePickerAction(applyLimited(next));
+                            },
+                          ),
+                        if (available.colorblind)
+                          _AccessOptionRow(
+                            // NOT an eye and not a seat mark: this row recolours the
+                            // map, it does not choose seats. A contrast disc is the
+                            // one shape on this sheet that is about the palette.
+                            iconKey: 'contrast',
+                            label: strings.colorblindSafe,
+                            reserveNoteSlot: false,
+                            hairline: false,
+                            value: colorblind,
+                            onChanged: () {
+                              final next = !colorblind;
+                              setSheetState(() => colorblind = next);
+                              ignorePickerAction(applyColorblind(next));
+                            },
+                          ),
+                        if (needs.isNotEmpty)
+                          // The two map switches come first and the provisions sit
+                          // under their own heading, so the switches never read as two
+                          // more provisions at the foot of the list.
+                          Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              8,
+                              available.limited || available.colorblind
+                                  ? 18
+                                  : 0,
+                              8,
+                              4,
+                            ),
+                            child: Text(
+                              // Drawn as given: the heading is written in capitals by its
+                              // translator. Upper-casing it here would break Turkish.
+                              strings.showSeatsFor,
+                              style: TextStyle(
+                                color: theme.mutedText,
+                                fontSize: 11,
+                                fontWeight: seatLayerBoldWeight(
+                                  context,
+                                  FontWeight.w700,
+                                ),
+                                letterSpacing: 11 *
+                                    SeatLayerSizeTokens
+                                        .accessGroupHeadingTracking,
+                                fontFamily: theme.fontFamily,
+                              ),
+                            ),
+                          ),
+                        if (needs.isNotEmpty)
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: needs.map((need) {
+                              final on = selected.contains(need.key);
+                              // A need with nothing free stays on the sheet and
+                              // goes dark. Removing it would claim the venue has no
+                              // such seats, which is a different fact. A switch
+                              // that is ON stays live at zero: the buyer holding
+                              // the last space is the one who emptied it, and a
+                              // filter they cannot turn off traps them on a map
+                              // with nothing left to show.
+                              final enabled =
+                                  on || need.count == null || need.count! > 0;
+                              return _AccessOptionRow(
+                                // The same drawing the seat itself carries on the
+                                // map and on every popup — one wheelchair for
+                                // twelve different provisions told the buyer
+                                // nothing about which one a row was.
+                                iconKey: need.key,
+                                label: need.label,
+                                note: need.note,
+                                // A NUMBER, INCLUDING AT ZERO. The row used to
+                                // say "Not available" when the last space went,
+                                // which was a sentence where every other row
+                                // carries a figure — it needed a chip to hold it
+                                // and made the sold-out row the loudest line in
+                                // the sheet. The dimmed switch beside it is what
+                                // says it cannot be had, and the count stays part
+                                // of the row's spoken name.
+                                count: need.count == null
+                                    ? null
+                                    : need.count! > 0
+                                        ? strings.accessFreeCount(need.count!)
+                                        : _zeroCount,
+                                // The web menu's own "12 free" button, which steps
+                                // the camera through the sections that hold them.
+                                // Only where the runtime can fly and there is
+                                // something to fly to; otherwise the number stays
+                                // the static fact it has always been.
+                                countLabel: canJump && (need.count ?? 0) > 0
+                                    ? '${need.label}, '
+                                        '${strings.accessFreeCount(need.count!)}, '
+                                        '${strings.accessJumpFirstSection}'
+                                    : null,
+                                // The one control on the sheet that is not a
+                                // switch, and the one that closes it: the walk it
+                                // starts happens on the map this sheet covers.
+                                onCountPressed: canJump && (need.count ?? 0) > 0
+                                    ? () => Navigator.of(context).pop(need.key)
+                                    : null,
+                                value: on,
+                                onChanged: enabled
+                                    ? () {
+                                        final next = <String>{...selected};
+                                        on
+                                            ? next.remove(need.key)
+                                            : next.add(need.key);
+                                        setSheetState(() => selected = next);
+                                        ignorePickerAction(applyTypes(next));
+                                      }
+                                    : null,
+                              );
+                            }).toList(growable: false),
+                          ),
+                      ],
                     ),
-                    child: Text(
-                      // Drawn as given: the heading is written in capitals by its
-                      // translator. Upper-casing it here would break Turkish.
-                      strings.showSeatsFor,
-                      style: TextStyle(
-                        color: theme.mutedText,
-                        fontSize: 11,
-                        fontWeight: seatLayerBoldWeight(
-                          context,
-                          FontWeight.w700,
-                        ),
-                        letterSpacing:
-                            11 * SeatLayerSizeTokens.accessGroupHeadingTracking,
-                        fontFamily: theme.fontFamily,
-                      ),
-                    ),
                   ),
-                if (needs.isNotEmpty)
-                  Flexible(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: needs.map((need) {
-                          final on = selected.contains(need.key);
-                          // A need with nothing free stays on the sheet and
-                          // goes dark. Removing it would claim the venue has no
-                          // such seats, which is a different fact. A switch
-                          // that is ON stays live at zero: the buyer holding
-                          // the last space is the one who emptied it, and a
-                          // filter they cannot turn off traps them on a map
-                          // with nothing left to show.
-                          final enabled =
-                              on || need.count == null || need.count! > 0;
-                          return _AccessOptionRow(
-                            // The same drawing the seat itself carries on the
-                            // map and on every popup — one wheelchair for
-                            // twelve different provisions told the buyer
-                            // nothing about which one a row was.
-                            iconKey: need.key,
-                            label: need.label,
-                            note: need.note,
-                            // A NUMBER, INCLUDING AT ZERO. The row used to
-                            // say "Not available" when the last space went,
-                            // which was a sentence where every other row
-                            // carries a figure — it needed a chip to hold it
-                            // and made the sold-out row the loudest line in
-                            // the sheet. The dimmed switch beside it is what
-                            // says it cannot be had, and the count stays part
-                            // of the row's spoken name.
-                            count: need.count == null
-                                ? null
-                                : need.count! > 0
-                                    ? strings.accessFreeCount(need.count!)
-                                    : _zeroCount,
-                            // The web menu's own "12 free" button, which steps
-                            // the camera through the sections that hold them.
-                            // Only where the runtime can fly and there is
-                            // something to fly to; otherwise the number stays
-                            // the static fact it has always been.
-                            countLabel: canJump && (need.count ?? 0) > 0
-                                ? '${need.label}, '
-                                    '${strings.accessFreeCount(need.count!)}, '
-                                    '${strings.accessJumpFirstSection}'
-                                : null,
-                            // The one control on the sheet that is not a
-                            // switch, and the one that closes it: the walk it
-                            // starts happens on the map this sheet covers.
-                            onCountPressed: canJump && (need.count ?? 0) > 0
-                                ? () => Navigator.of(context).pop(need.key)
-                                : null,
-                            value: on,
-                            onChanged: enabled
-                                ? () {
-                                    final next = <String>{...selected};
-                                    on
-                                        ? next.remove(need.key)
-                                        : next.add(need.key);
-                                    setSheetState(() => selected = next);
-                                    ignorePickerAction(applyTypes(next));
-                                  }
-                                : null,
-                          );
-                        }).toList(growable: false),
-                      ),
-                    ),
-                  ),
+                ),
               ],
             ),
           ),

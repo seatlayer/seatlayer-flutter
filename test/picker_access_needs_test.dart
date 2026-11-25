@@ -51,12 +51,19 @@ List<String> _rowLabels(WidgetTester tester) => tester
       ),
     )
     .where((row) => row.properties.toggled != null)
+    // The two switches over the map share the scroll; they are not needs.
+    .where((row) => !_mapSwitches.contains(row.properties.label))
     .map((row) {
       final label = row.properties.label!;
       final count = _countFor(tester, label);
       return count == null ? label : '$label · $count';
     })
     .toList(growable: false);
+
+final Set<String> _mapSwitches = <String>{
+  const SeatLayerPickerStrings().hideLimitedView,
+  const SeatLayerPickerStrings().colorblindSafe,
+};
 
 /// The count drawn at the end of the row named [label], if it draws one.
 String? _countFor(WidgetTester tester, String label) {
@@ -664,4 +671,66 @@ void main() {
       skip: goldenSkip != null,
     );
   }
+  for (final (name, size) in const <(String, Size)>[
+    ('667x375', Size(667, 375)),
+    ('844x390', Size(844, 390)),
+    ('915x412', Size(915, 412)),
+  ]) {
+    testWidgets('held sideways, $name: every row can be reached and pressed',
+        (tester) async {
+      tester.view
+        ..devicePixelRatio = 1
+        ..physicalSize = size;
+      addTearDown(tester.view.reset);
+      tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final map = FakePickerMap(bundle: _accessBundle(limited: true));
+      addTearDown(map.dispose);
+      final snapshot = pickerSnapshot(
+        accessNeeds: <Object?>[
+          for (final key in <String>[
+            'wheelchair',
+            'companion',
+            'hearing',
+            'visual',
+            'stepFree',
+            'aisle',
+          ])
+            accessNeed(key, 4),
+        ],
+      );
+      (snapshot['features']! as Map<String, Object?>)['limitedViewFilter'] =
+          true;
+      await _openSheet(tester, map, snapshot);
+
+      final scroll = find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(SingleChildScrollView),
+      );
+      expect(scroll, findsOneWidget);
+      final window = tester.getRect(scroll);
+      // Room for more than a row at a time.
+      expect(window.height, greaterThan(_rowHeight * 2));
+      final rows = find.descendant(
+        of: scroll,
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Semantics && widget.properties.toggled != null,
+          skipOffstage: false,
+        ),
+      );
+      final count = rows.evaluate().length;
+      expect(count, 8);
+      for (var i = 0; i < count; i += 1) {
+        await tester.ensureVisible(rows.at(i));
+        await tester.pumpAndSettle();
+        final row = tester.getRect(rows.at(i));
+        expect(row.top, greaterThanOrEqualTo(window.top - .5), reason: '$i');
+        expect(row.bottom, lessThanOrEqualTo(window.bottom + .5), reason: '$i');
+        expect(rows.at(i).hitTestable(), findsOneWidget, reason: 'row $i');
+      }
+    });
+  }
 }
+
+/// A row's own height on the sheet.
+const double _rowHeight = 50;

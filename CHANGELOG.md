@@ -15,6 +15,7 @@
 
 **Fixed**
 
+- **The accessibility sheet on a phone held sideways:** everything under its title scrolls as one, so every row can be reached and pressed. Only the list of needs scrolled, in a window of 21 to 48 points, half a row.
 - **After sales close,** a buyer who holds seats can still continue to checkout; the button was off. With no seats held the row says "Sales are closed" with the event's date and has no button.
 - **The open cart on a short screen** gives way to what stands over the map.
 - **"Release and change seats"** under a refused action stands whole under the words, and the words scroll; it was cut off on every phone. Where the cart's list is open on a small phone, the list gives way to it.
