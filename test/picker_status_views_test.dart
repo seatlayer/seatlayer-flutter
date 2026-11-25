@@ -105,10 +105,19 @@ void main() {
 
     expect(find.textContaining('page load failed'), findsNothing);
     expect(find.textContaining('SeatLayer'), findsNothing);
-    // The default sentence is the title's, so it is said once.
-    expect(find.text('The seat map didn’t load'), findsOneWidget);
-    expect(find.text('Check your connection and try again.'), findsOneWidget);
-    expect(find.text('Try again'), findsOneWidget);
+    // The default sentence is the title's, so it is said once: the view draws
+    // the title, the line under it and the button, and nothing else.
+    expect(
+      tester.widgetList<Text>(find.descendant(
+        of: find.byType(SeatLayerPickerErrorView),
+        matching: find.byType(Text),
+      )).map((text) => text.data),
+      <String>[
+        'The seat map didn’t load',
+        'Check your connection and try again.',
+        'Try again',
+      ],
+    );
   });
 
   for (final mode in <SeatLayerThemeMode>[

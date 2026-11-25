@@ -304,8 +304,8 @@ abstract final class SeatLayerStringTokens {
   /// Loading seat map…
   static const String loading = 'Loading seat map…';
 
-  /// The seat map could not be loaded.
-  static const String errorMessage = 'The seat map could not be loaded.';
+  /// The seat map didn’t load
+  static const String errorMessage = 'The seat map didn’t load';
 
   /// Try again
   static const String retry = 'Try again';
