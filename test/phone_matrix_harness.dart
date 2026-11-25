@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/picker/picker_cart_bar.dart';
 import 'package:seatlayer/seatlayer.dart';
 
 import 'fake_webview_platform.dart';
@@ -59,6 +60,7 @@ const List<Phone> uprightPhones = <Phone>[
 
 /// The phones held sideways.
 const List<Phone> sidewaysPhones = <Phone>[
+  Phone('667x375', Size(667, 375), EdgeInsets.zero),
   Phone(
     '844x390',
     Size(844, 390),
@@ -318,7 +320,7 @@ Future<SeatLayerPickerStrings> pumpPhone(
     await pumpToRest(tester);
   }
   if (state == PhoneState.cartOpen) {
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_up_rounded).first);
+    await tester.tap(find.byType(PickerCartBarDisc));
     await pumpToRest(tester);
   }
   if (actionError != null) {

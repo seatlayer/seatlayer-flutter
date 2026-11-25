@@ -134,16 +134,16 @@ class SeatLayerPickerLayout {
   /// order, not a resting height the picker ever chooses for them.
   final double sheetFullHeightFraction;
 
-  /// Width of the handle pill that straddles the sheet's top edge.
+  /// Accepted and no longer used: the cart sheet has no handle on its edge.
   final double sheetHandleWidth;
 
-  /// Height of that pill; half of it sits above the sheet.
+  /// Accepted and no longer used: the cart sheet has no handle on its edge.
   final double sheetHandleHeight;
 
-  /// How much of the pill stands above the sheet's own top edge.
+  /// Accepted and no longer used: the cart sheet has no handle on its edge.
   final double sheetHandleOverhang;
 
-  /// Height of the sheet's head — the lower half of the handle, and nothing else drawn under it.
+  /// Accepted and no longer used: the cart sheet has no head over its row.
   final double sheetHeadHeight;
 
   /// Least height of one cart card, which is what its two full-size targets need.

@@ -1163,7 +1163,7 @@ class SeatLayerPickerState {
   bool get canCheckout =>
       isReady &&
       !blocksCheckout &&
-      event?.salesClosed != true &&
+      (event?.salesClosed != true || hold != null) &&
       (snapshot?.ticketCount ?? 0) > 0 &&
       (snapshot?.selectionValidity?.isValid ?? true);
 

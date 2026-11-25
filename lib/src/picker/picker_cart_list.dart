@@ -313,19 +313,33 @@ SeatLayerTicketLine _resolveLine(
   );
 }
 
-/// The seat's name on the folded sheet's line.
-///
-/// The line's label with `-` as ` · `, unless the chart gives the seat a name
-/// of its own: then the label is only a code, and the line says what the card
-/// says — section, row and seat, or the display name where there are none.
-String seatLayerFoldedSeatName(
+/// The seats under the count, as the hosted map writes them: the section once
+/// when every ticket shares it, then each seat as row-seat ("Dress Circle ·
+/// C-6, C-7"). A table booked as one, a booth or a standing area is its own
+/// name, and the same place stands once.
+String seatLayerCartSeatsLine(
+  List<SeatLayerCheckoutLineItem> lines,
+  SeatLayerPickerState state,
+) {
+  final named = <(String, String)>[
+    for (final line in lines) _placeOf(line, state),
+  ];
+  final sections = <String>{for (final (section, _) in named) section};
+  final one = sections.length == 1 ? sections.first : '';
+  final places = <String>{
+    for (final (section, place) in named)
+      if (place.isNotEmpty)
+        one.isNotEmpty || section.isEmpty ? place : '$section $place',
+  };
+  if (places.isEmpty) return '';
+  return '${one.isEmpty ? '' : '$one · '}${places.join(', ')}';
+}
+
+/// The section a ticket is in, and its place there.
+(String, String) _placeOf(
   SeatLayerCheckoutLineItem item,
   SeatLayerPickerState state,
 ) {
-  final shown = item.displayLabel?.trim() ?? '';
-  if (shown.isEmpty || shown == item.label) {
-    return item.label.replaceAll('-', ' · ');
-  }
   final seat = _seatBehind(state.selection, item);
   final section = _first(item.sectionLabel, seat?.sectionLabel);
   final row = pickerRowLabel(
@@ -334,8 +348,14 @@ String seatLayerFoldedSeatName(
     sectionCode: pickerSectionCode(state, section),
   );
   final number = _first(item.seatNumber, seat?.seatNumber);
-  if (row.isEmpty || number == null) return shown;
-  return <String>[if (section != null) section, row, number].join(' · ');
+  final place = <String>[
+    if (row.isNotEmpty) row,
+    if (number != null) number,
+  ].join('-');
+  return (
+    section ?? '',
+    place.isNotEmpty ? place : _first(item.displayLabel, item.label) ?? '',
+  );
 }
 
 /// One ticket, as the desktop panel and the phone sheet both draw it.

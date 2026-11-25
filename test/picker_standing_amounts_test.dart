@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/seatlayer.dart';
 import 'package:seatlayer/src/picker/picker_standing_amounts.dart';
-import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 
 import 'fake_webview_platform.dart';
 import 'picker_test_fixture.dart';
@@ -302,8 +301,8 @@ void main() {
     for (final short in <bool>[true, false]) {
       testWidgets(
           short
-              ? 'keeps its buttons clear of the cart handle where it scrolls'
-              : 'takes no room under its buttons where it fits',
+              ? 'takes no more room under its buttons where it scrolls'
+              : 'takes no more room under its buttons where it fits',
           (tester) async {
         await tester.binding.setSurfaceSize(
           short ? const Size(568, 320) : const Size(375, 812),
@@ -318,7 +317,7 @@ void main() {
         final button = find.widgetWithText(FilledButton, _strings.addTickets);
         expect(
           tester.getRect(sheet).bottom - tester.getRect(button).bottom,
-          closeTo(short ? SeatLayerSizeTokens.sheetHandleOverhang + 8 : 18, .5),
+          closeTo(18, .5),
         );
       });
     }

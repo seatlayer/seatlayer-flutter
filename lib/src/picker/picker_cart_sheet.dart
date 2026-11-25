@@ -6,6 +6,8 @@ import 'package:flutter/physics.dart';
 
 import 'picker_a11y.dart';
 import 'picker_best_seats.dart';
+import 'picker_cart_bar.dart';
+import 'picker_cart_bar_rule.dart';
 import 'picker_cart_list.dart';
 import 'picker_checkout_cta.dart';
 import 'picker_header.dart';
@@ -27,21 +29,10 @@ import 'seat_layer_picker_theme.dart';
 
 /// The buyer's cart, docked at the bottom of the phone.
 ///
-/// ONE SURFACE, AND THE COLLAPSED SHEET IS THE FOOTER. It used to be three
-/// stacked blocks that had each been designed well on its own and none of which agreed with the others: a chrome band
-/// carrying a bespoke one-liner — `From €25 · Find seats` with nothing picked,
-/// `2 tickets · Continue €60` once seats existed — then a bordered list on its
-/// own ground, then a shadowed foot. Two summaries of one cart is two things
-/// to keep in step, and they drifted: the hold clock moved as the sheet
-/// opened, and a buyer with seats already held could not see the button that
-/// takes their money, because the foot that carries it was hidden at peek.
-///
-/// So the collapsed sheet is the same block the open one has, top to bottom:
-/// the handle, the cart itself — capped at three cards and a sliver of the
-/// fourth, scrolling inside its own box — then the total line, the call to
-/// action and the by-line. Opening it lifts the cap and adds the things there
-/// is no room to read at peek: the closed-sales statement and the best-seats
-/// form.
+/// Collapsed it is one row: a circle that opens the list, what the cart holds
+/// and what it comes to, and the button. Opening it lifts the cards over the
+/// row, and with them what there is no room to read in a row: the closed-sales
+/// statement and, on an empty cart, the best-seats form.
 ///
 /// It never opens itself. A sheet that springs up when a seat is picked covers
 /// the map the buyer is still choosing from.
@@ -141,10 +132,6 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
   double _cartNatural = 0;
   double _extrasNatural = 0;
   double _footHeight = 0;
-
-  /// What the collapsed sheet is already showing of the cart, so the detents
-  /// below measure only the part the drag adds.
-  double _collapsedCart = 0;
 
   PickerSheetDetents _detents = const PickerSheetDetents(content: 0, full: 0);
 
@@ -291,25 +278,18 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
     // reads as a mistake, and the three were disagreeing in 3D.
     final theme = seatLayerMapChromeThemeOf(context);
     final layout = theme.layout;
-    // A phone that takes no room at its foot still keeps the button off the
-    // glass's edge.
-    final bottomInset = widget.reserveBottomInset
-        ? math.max(
-            MediaQuery.paddingOf(context).bottom,
-            SeatLayerSizeTokens.footMinInset,
-          )
-        : 0.0;
+    // The phone's own strip is the room under the row. A phone without one
+    // keeps the row's.
+    final bottomInset = math.max(
+      widget.reserveBottomInset ? MediaQuery.paddingOf(context).bottom : 0.0,
+      PickerCartBarSize.padY,
+    );
     final hasTickets = controller.confirmedCartLines.isNotEmpty;
-    // The handle leaves while a confirm card is up (web 0.84.1): the disc was
-    // sitting half under the card's scrim, and the card is the only question
-    // on the screen until it is answered.
-    final confirming = controller.seatAwaitingConfirmation != null;
+    // A seat card is asking: nothing in the row can be pressed until it is
+    // answered.
+    final asking = controller.seatAwaitingConfirmation != null;
     final salesClosed = controller.state.event?.salesClosed == true;
-    // The handle is a control, not type: it stays the size a thumb needs
-    // whatever the platform's text setting is, and the head is exactly the
-    // half of it that sits inside the panel.
-    final overhang = layout.sheetHandleOverhang;
-    final headHeight = layout.sheetHeadHeight;
+    _closeOnNewSeat(controller);
 
     // Two ceilings, both a fraction of the screen capped at a fixed height: a
     // tall phone must not give three quarters of itself to a cart, and a short
@@ -324,23 +304,18 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
     // assumed: it grows with the platform's text size, with a lapse notice and
     // with an inline error, and a cap derived from a guess would clip the
     // button rather than the list.
-    final chrome = headHeight + _footHeight + bottomInset;
+    final chrome = _footHeight + bottomInset;
     final maxBody = (maxSheet - chrome).clamp(0.0, screenHeight);
 
-    // THREE CARDS AND A SLIVER OF THE FOURTH. Ten tickets used to be a sheet
-    // that grew until it owned the phone; the cart scrolls inside its own box
-    // and the map keeps its room. On a short phone the fraction wins instead,
-    // the region shrinks and scrolls, and the button is never what gets cut.
-    // The collapsed sheet is the footer block alone — the total line and the
-    // button. The cards wait behind the handle: a list that unrolled itself
-    // every time a seat was added read as a panel the buyer had not opened.
-    _collapsedCart = 0.0;
-    // THREE CARDS AND A SLIVER OF THE FOURTH once open: the cart scrolls
-    // inside its own box and the map keeps its room.
-    final openNatural =
-        _atMost(_cartNatural, layout.cartPeekMaxHeight) + _extrasNatural;
-    final content =
-        (_atMost(openNatural, maxBody) - _collapsedCart).clamp(0.0, maxBody);
+    // The collapsed sheet is the row alone. The cards wait behind the circle,
+    // and scroll inside their own box once open: the map keeps its room. An
+    // app's own cap is honoured.
+    final cap =
+        layout.cartPeekMaxHeight == SeatLayerSizeTokens.cartPeekMaxHeight
+            ? PickerCartBarSize.listMaxHeight
+            : layout.cartPeekMaxHeight;
+    final openNatural = _atMost(_cartNatural, cap) + _extrasNatural;
+    final content = _atMost(openNatural, maxBody).clamp(0.0, maxBody);
     // The one height the web has no equivalent for: how far a FINGER may pull
     // the sheet past the ceiling the picker itself would stop at. Offered only
     // when the content is taller than the ceiling — see [PickerSheetDetents].
@@ -349,8 +324,7 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
       0.0,
       screenHeight,
     );
-    final full = (_atMost(openNatural, fullCeiling) - _collapsedCart)
-        .clamp(0.0, screenHeight);
+    final full = _atMost(openNatural, fullCeiling).clamp(0.0, screenHeight);
     _detents = PickerSheetDetents(content: content, full: full);
     _keepRestingHeight();
 
@@ -359,7 +333,7 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
     // moves the whole surface off the bottom edge instead — the finger keeps
     // hold of it, and the spring puts it back.
     final belowPeek = extent < 0 ? -extent : 0.0;
-    final body = _collapsedCart + (extent > 0 ? extent : 0.0);
+    final body = extent > 0 ? extent : 0.0;
     // The head answers to the FINGER, not to the last answer the host gave: a
     // sheet being dragged open is open, whatever the controller has been told.
     final open = _detent != SeatLayerSheetDetent.peek ||
@@ -378,96 +352,110 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
         onVerticalDragUpdate: _onDragUpdate,
         onVerticalDragEnd: _onDragEnd,
         child: SeatLayerTypeScale.sheet(
-          child: Stack(
-            // THE HANDLE STRADDLES THE EDGE, so half of it is outside the
-            // panel. The stack takes the overhang into its own height (the
-            // padding below), which is what lets that half be drawn AND
-            // pressed — a positioned child outside the stack's box is not hit
-            // tested at all.
-            clipBehavior: Clip.none,
-            children: <Widget>[
-              // The panel fills the box; the handle's upper half hangs over the
-              // MAP above it rather than over a strip of page ground, which is
-              // what a padded stack left between the venue and the edge.
-              Padding(
-                padding: EdgeInsets.zero,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    // A hairline and nothing else above it: the web's upward
-                    // shadow read as a grey band over the map on a phone, a
-                    // few points of nothing between the venue and the handle.
-                    border: Border(top: BorderSide(color: theme.divider)),
-                  ),
-                  child: Material(
-                    // The PANEL'S own ground, not the card's: the cards inside
-                    // are on `surface`, and a sheet painted the same colour
-                    // would leave them with nothing to sit on.
-                    color: surface.color ?? theme.background,
-                    elevation: surface.elevation ?? 0,
-                    shape: surface.shape,
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: bottomInset),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          // The lower half of the handle, and nothing drawn
-                          // under it: no divider, no band.
-                          SizedBox(height: headHeight),
-                          _CartRegion(
-                            height: body,
-                            open: open,
-                            salesClosed: salesClosed,
-                            hasTickets: hasTickets,
-                            cartList: widget.cartList,
-                            bestSeats: widget.bestSeats,
-                            onCart: (value) =>
-                                _measured(_cartNatural, value, (v) {
-                              _cartNatural = v;
-                            }),
-                            onExtras: (value) =>
-                                _measured(_extrasNatural, value, (v) {
-                              _extrasNatural = v;
-                            }),
-                          ),
-                          PickerMeasuredHeight(
-                            onHeight: (value) =>
-                                _measured(_footHeight, value, (v) {
-                              _footHeight = v;
-                            }),
-                            child: _SheetFoot(
-                              divider: open && hasTickets,
-                              actionError: widget.actionError,
-                              checkoutBar: widget.checkoutBar,
-                              attribution: widget.attribution,
-                              onCheckout: widget.onCheckout,
-                              onFindBestSeats: () => _openBestSeatsForm(),
-                              buttonStyle: widget.continueButtonStyle,
-                            ),
-                          ),
-                        ],
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              // A hairline and nothing else above it: an upward shadow reads
+              // as a grey band over the map on a phone.
+              border: Border(top: BorderSide(color: theme.divider)),
+            ),
+            child: Material(
+              // The PANEL'S own ground, not the card's: the cards inside are
+              // on `surface`, and a sheet painted the same colour would leave
+              // them with nothing to sit on.
+              color: surface.color ?? theme.background,
+              elevation: surface.elevation ?? 0,
+              shape: surface.shape,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: PickerCartBarSize.line,
+                  bottom: bottomInset,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    // The open list gives way where the screen is too short
+                    // for it and the row.
+                    Flexible(
+                      child: _CartRegion(
+                        height: body,
+                        open: open,
+                        salesClosed: salesClosed,
+                        hasTickets: hasTickets,
+                        cartList: widget.cartList,
+                        bestSeats: widget.bestSeats,
+                        onCart: (value) => _measured(_cartNatural, value, (v) {
+                          _cartNatural = v;
+                        }),
+                        onExtras: (value) =>
+                            _measured(_extrasNatural, value, (v) {
+                          _extrasNatural = v;
+                        }),
                       ),
                     ),
-                  ),
+                    PickerMeasuredHeight(
+                      onHeight: (value) => _measured(_footHeight, value, (v) {
+                        _footHeight = v;
+                      }),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: open
+                              ? Border(top: BorderSide(color: theme.divider))
+                              : const Border(),
+                        ),
+                        child: PickerCartBar(
+                          // News about the buyer's own seats outranks the
+                          // layout: a toast is gone in four seconds, and the
+                          // offer to take lapsed seats back has to outlive it.
+                          news: <Widget>[
+                            const SeatLayerHoldLapseNotice(),
+                            const SeatLayerHoldEndingCue(),
+                            widget.actionError ??
+                                const SeatLayerPickerActionError(),
+                          ],
+                          button: widget.checkoutBar ??
+                              SeatLayerBookButton(
+                                onCheckout: widget.onCheckout,
+                                onFindBestSeats: _openBestSeatsForm,
+                                style: widget.continueButtonStyle,
+                              ),
+                          buttonIsOwn: widget.checkoutBar == null,
+                          buttonStyle: widget.continueButtonStyle ??
+                              theme.styles.resolvedContinueButtonStyle,
+                          attribution: widget.attribution,
+                          open: open,
+                          asking: asking,
+                          onToggle: () => _ask(!open),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              if (!confirming)
-                PositionedDirectional(
-                  top: -overhang,
-                  start: 0,
-                  end: 0,
-                  child: _SheetHandle(
-                    expanded: open,
-                    height: overhang + headHeight,
-                    onPressed: () => _ask(!open),
-                  ),
-                ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+
+  /// A new seat closes the list: the buyer is back on the map, and the row
+  /// says what the cart holds now. A new session is a new cart, not a new seat.
+  void _closeOnNewSeat(SeatLayerPickerController controller) {
+    final count = controller.confirmedTicketCount;
+    final session = controller.state.sessionId;
+    final grew = session == _session && count > _seats;
+    _seats = count;
+    _session = session;
+    if (!grew || _detent == SeatLayerSheetDetent.peek) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _ask(false);
+    });
+  }
+
+  /// What the cart held when the sheet was last drawn, and in which session.
+  int _seats = 0;
+  String? _session;
 
   /// The empty cart's way in to the best-seats form.
   ///
@@ -547,7 +535,7 @@ class _CartRegion extends StatelessWidget {
                         SeatLayerSizeTokens.cartTrayPadX,
                         SeatLayerSizeTokens.cartTrayPadTop,
                         SeatLayerSizeTokens.cartTrayPadX,
-                        SeatLayerSizeTokens.cartTrayPadBottom,
+                        PickerCartBarSize.listPadBottom,
                       ),
                       child: cartList ?? const SeatLayerCartList(),
                     )
@@ -562,7 +550,11 @@ class _CartRegion extends StatelessWidget {
                     SeatLayerSizeTokens.cartTrayPadX,
                     hasTickets ? 0 : SeatLayerSizeTokens.cartTrayPadTop,
                     SeatLayerSizeTokens.cartTrayPadX,
-                    SeatLayerSizeTokens.cartTrayPadBottom,
+                    // Beside tickets there is often nothing here, and nothing
+                    // takes no room.
+                    !hasTickets || salesClosed
+                        ? PickerCartBarSize.listPadBottom
+                        : 0,
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -597,387 +589,83 @@ class _CartRegion extends StatelessWidget {
   }
 }
 
-/// The handle: a pill straddling the sheet's own top edge, the way a drawer
-/// handle sits on a drawer.
+/// The wide panel's summary line: what is in the cart, and what it comes to.
 ///
-/// It used to be a grab bar and, separately, a chevron in a corner — the state
-/// and the control that changes it drawn as two different things. It is one
-/// thing now: the chevron lives inside the pill and turns over when the sheet
-/// opens. The whole band is the tap target, and the sheet's own drag runs
-/// under it, because a ten-point strip is not something a thumb can grab.
-class _SheetHandle extends StatelessWidget {
-  const _SheetHandle({
-    required this.expanded,
-    required this.height,
-    required this.onPressed,
-  });
-
-  final bool expanded;
-  final double height;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = seatLayerMapChromeThemeOf(context);
-    final layout = theme.layout;
-    final strings = SeatLayerPickerScope.stringsOf(context);
-    return Semantics(
-      container: true,
-      button: true,
-      expanded: expanded,
-      label: expanded ? strings.collapseCart : strings.expandCart,
-      onTap: onPressed,
-      child: ExcludeSemantics(
-        child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: onPressed,
-          child: SizedBox(
-            height: height,
-            // The disc keeps its own size whatever strip the sheet lends it:
-            // a head shorter than the disc must not squash it into an oval.
-            child: OverflowBox(
-              alignment: Alignment.topCenter,
-              minWidth: layout.sheetHandleWidth,
-              maxWidth: layout.sheetHandleWidth,
-              minHeight: layout.sheetHandleHeight,
-              maxHeight: layout.sheetHandleHeight,
-              child: Container(
-                width: layout.sheetHandleWidth,
-                height: layout.sheetHandleHeight,
-                // A disc on the line (web 0.84.0): white, lifted by its own
-                // shadow, half over the map and half in the sheet, with no
-                // hairline under it — the arrow between two lines read as a
-                // band, not a handle.
-                decoration: BoxDecoration(
-                  color: theme.background,
-                  shape: BoxShape.circle,
-                  boxShadow: const <BoxShadow>[
-                    BoxShadow(
-                      color: Color(0x33000000),
-                      blurRadius: 10,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: AnimatedRotation(
-                  duration: SeatLayerPickerMotion.of(
-                    context,
-                    SeatLayerPickerMotion.chevron,
-                  ),
-                  curve: SeatLayerPickerMotion.easeEnter,
-                  turns: expanded ? .5 : 0,
-                  child: Icon(
-                    Icons.keyboard_arrow_up_rounded,
-                    size: 16,
-                    color: theme.mutedText,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The foot: what the cart comes to, the way on, and the by-line.
-///
-/// The SAME block on every width, and the one the collapsed sheet shows. It is
-/// not restyled on a phone at all — one set of tokens is one thing to get
-/// right, and the only difference the phone has left is the WORD on the
-/// button, which [seatLayerCheckoutCtaState] decides.
-class _SheetFoot extends StatelessWidget {
-  const _SheetFoot({
-    required this.divider,
-    required this.actionError,
-    required this.checkoutBar,
-    required this.attribution,
-    required this.onCheckout,
-    required this.onFindBestSeats,
-    required this.buttonStyle,
-  });
-
-  final Widget? actionError;
-  final Widget? checkoutBar;
-  final Widget? attribution;
-
-  /// Whether a card list sits above the foot and wants a rule under it.
-  ///
-  /// The collapsed sheet has nothing above the foot but the panel's own top
-  /// edge, and a second hairline a few points under the first read as two
-  /// lines for one edge.
-  final bool divider;
-  final SeatLayerCheckoutCallback onCheckout;
-  final VoidCallback onFindBestSeats;
-  final ButtonStyle? buttonStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = seatLayerMapChromeThemeOf(context);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: divider
-            ? Border(top: BorderSide(color: theme.divider))
-            : const Border(),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(
-          SeatLayerSizeTokens.footPadX,
-          SeatLayerSizeTokens.footPadTop,
-          SeatLayerSizeTokens.footPadX,
-          SeatLayerSizeTokens.footPadBottom,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            // News about the buyer's own seats outranks the layout: a toast is
-            // gone in four seconds, and the offer to take lapsed seats back has
-            // to outlive it.
-            const SeatLayerHoldLapseNotice(),
-            const SeatLayerHoldEndingCue(),
-            actionError ?? const SeatLayerPickerActionError(),
-            const _TotalLine(),
-            const SizedBox(height: SeatLayerSizeTokens.footTotalGap),
-            checkoutBar ??
-                SeatLayerBookButton(
-                  onCheckout: onCheckout,
-                  onFindBestSeats: onFindBestSeats,
-                  style: buttonStyle,
-                ),
-            // Centred, not trailing: at the foot of a phone the trailing edge
-            // is the display's rounded corner.
-            if (attribution case final line?) Center(child: line),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// The wide panel's summary line: the cart foot's own count and total.
-///
-/// Not exported: the wide layout draws it over its full-width button, as the
-/// phone's sheet does.
+/// "No seats selected" on an empty cart, `3 tickets` and the total once there
+/// is one. Not exported: the wide layout draws it over its full-width button.
 class SeatLayerWideTotalLine extends StatelessWidget {
   /// Creates the wide panel's summary line.
   const SeatLayerWideTotalLine({super.key});
-
-  @override
-  Widget build(BuildContext context) => const _TotalLine(namesSeats: false);
-}
-
-/// What is in the cart, and what it comes to.
-///
-/// "No seats selected" on an empty cart, `3 tickets` and the total once there
-/// is one. There is no `From €25` here any more: it stated a price and offered
-/// nothing to do about it, on the one line the buyer reads to find out what
-/// they are about to pay.
-class _TotalLine extends StatefulWidget {
-  const _TotalLine({this.namesSeats = true});
-
-  /// Whether the folded sheet's muted line naming the seats is drawn. The
-  /// wide panel lists its cards above the foot, so it never names them twice.
-  final bool namesSeats;
-
-  @override
-  State<_TotalLine> createState() => _TotalLineState();
-}
-
-class _TotalLineState extends State<_TotalLine>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _bump = AnimationController(
-    vsync: this,
-    duration: SeatLayerPickerMotion.bump,
-  );
-  String _last = '';
-
-  /// A change waiting for the chip to land before it is allowed to swell.
-  bool _bumpOnLanding = false;
-
-  @override
-  void dispose() {
-    _bump.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final theme = seatLayerMapChromeThemeOf(context);
     final strings = SeatLayerPickerScope.stringsOf(context);
-    final state = controller.state;
-    // What the buyer has AGREED to. A tapped seat is in the runtime's
-    // selection — and so in the cart, the count and the total — from the
-    // moment it is tapped, but a confirm card standing over the map is still
-    // asking whether they want it.
     final count = controller.confirmedTicketCount;
-    final currency = state.snapshot?.currency ?? 'USD';
+    final currency = controller.state.snapshot?.currency ?? 'USD';
     final summary =
         count == 0 ? strings.noSeatsSelected : strings.ticketCount(count);
     final total = count == 0
         ? ''
         : pickerMoney(context, controller.confirmedCartTotal, currency);
-    if (summary != _last) {
-      _last = summary;
-      if (!SeatLayerPickerMotion.reduced(context)) _bumpOnLanding = true;
-    }
-    // The swell fires on the chip's LANDING, not on the press (web 0.84.1):
-    // while a chip is still flying the number holds still, and the controller
-    // rebuilds this line the moment the flight is over.
-    if (_bumpOnLanding && !controller.cartLanding) {
-      _bumpOnLanding = false;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _bump.forward(from: 0);
-      });
-    }
-    // Which seats, in one muted line under the count, while the cards are
-    // folded away: "2 tickets" alone told the buyer they had bought something
-    // and not what, and the chevron above was the only way to find out.
-    final collapsed = !controller.cartSheetExpanded;
-    final seats = widget.namesSeats && collapsed && count > 0
-        ? controller.confirmedCartLines
-            .map((line) => seatLayerFoldedSeatName(line, state))
-            .join(',  ')
-        : '';
-    final line = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Flexible(
-          child: _bumped(
-            AlignmentDirectional.centerStart,
-            (ink) => SeatLayerCrossFade(
-              token: summary,
-              child: Text(
-                summary,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                // design/tokens.json › type.footTotalLabel.
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 13,
-                  fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
-                  fontFamily: theme.fontFamily,
-                ),
-              ),
-            ),
-          ),
-        ),
-        if (total.isNotEmpty)
-          _bumped(
-            AlignmentDirectional.centerEnd,
-            (ink) => SeatLayerCrossFade(
-              token: total,
-              child: Text(
-                total,
-                softWrap: false,
-                // design/tokens.json › type.footTotalAmount.
-                style: TextStyle(
-                  color: ink,
-                  fontSize: 17,
-                  fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
-                  fontFamily: theme.fontFamily,
-                  fontFeatures: const <FontFeature>[
-                    FontFeature.tabularFigures(),
-                  ],
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
     return Semantics(
-      // The one line that says what the cart holds. It is announced on change
-      // rather than on a timer: the sentence changes when the cart does, and
-      // never otherwise, so the live region speaks exactly as often as
-      // something happened.
+      // Announced on change rather than on a timer: the sentence changes when
+      // the cart does, and never otherwise.
       liveRegion: true,
       container: true,
       label: total.isEmpty ? summary : '$summary, $total',
       child: ExcludeSemantics(
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: collapsed && count > 0
-              ? () => controller.setCartSheetExpanded(true)
-              : null,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              line,
-              if (seats.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 3),
-                  child: Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Text(
-                          seats,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: theme.mutedText,
-                            fontSize: 12,
-                            fontWeight:
-                                seatLayerBoldWeight(context, FontWeight.w600),
-                            fontFamily: theme.fontFamily,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      // Not the handle's chevron: the handle stays the cart's
-                      // one named toggle, and this is only a hint that the
-                      // line opens.
-                      Icon(
-                        Icons.unfold_more_rounded,
-                        size: 16,
-                        color: theme.mutedText,
-                      ),
-                    ],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            Flexible(
+              child: PickerCartSwell(
+                token: summary,
+                builder: (ink) => SeatLayerCrossFade(
+                  token: summary,
+                  child: Text(
+                    summary,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    // design/tokens.json › type.footTotalLabel.
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 13,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
+                      fontFamily: theme.fontFamily,
+                    ),
                   ),
                 ),
-            ],
-          ),
+              ),
+            ),
+            if (total.isNotEmpty)
+              PickerCartSwell(
+                token: summary,
+                anchor: AlignmentDirectional.centerEnd,
+                builder: (ink) => SeatLayerCrossFade(
+                  token: total,
+                  child: Text(
+                    total,
+                    softWrap: false,
+                    // design/tokens.json › type.footTotalAmount.
+                    style: TextStyle(
+                      color: ink,
+                      fontSize: 17,
+                      fontWeight: seatLayerBoldWeight(context, FontWeight.w700),
+                      fontFamily: theme.fontFamily,
+                      fontFeatures: const <FontFeature>[
+                        FontFeature.tabularFigures(),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
     );
   }
-
-  /// The one beat of movement a changed count earns: the only feedback a buyer
-  /// gets that a tap on the map reached a collapsed sheet.
-  ///
-  /// 1.3× at the peak with the ink blinking to the accent (web 0.84.1's phone
-  /// swell): the count is the chip's landing place, and the landing has to
-  /// read from the far side of the thumb.
-  Widget _bumped(
-    AlignmentGeometry anchor,
-    Widget Function(Color ink) build,
-  ) {
-    final theme = seatLayerMapChromeThemeOf(context);
-    return AnimatedBuilder(
-      animation: _bump,
-      // Anchored on its own edge, so the words grow out of the line rather
-      // than sliding across it.
-      builder: (context, _) {
-        final t = _bumpCurve(_bump.value);
-        return Align(
-          alignment: anchor,
-          child: Transform.scale(
-            scale: 1 + (.3 * t),
-            alignment: anchor,
-            child: build(Color.lerp(theme.text, theme.accent, t)!),
-          ),
-        );
-      },
-    );
-  }
-
-  /// Out to the full swell at forty-five per cent, and back.
-  static double _bumpCurve(double t) => t <= .45
-      ? SeatLayerPickerMotion.easeEnter.transform(t / .45)
-      : SeatLayerPickerMotion.easeEnter.transform((1 - t) / .55);
 }
 
 /// The one call to action that turns a cart into a hold.
@@ -1021,7 +709,9 @@ class SeatLayerBookButton extends StatelessWidget {
     // worse than none.
     final canOfferFind = onFindBestSeats != null &&
         options.enableBestAvailable &&
-        !options.readOnly;
+        !options.readOnly &&
+        !seatLayerPickerIsSoldOut(controller.state);
+    final row = PickerCartBarRow.of(context);
     return SeatLayerCheckoutCta(
       label: (context) =>
           SeatLayerPickerScope.stringsOf(context).holdAndCheckout,
@@ -1031,29 +721,36 @@ class SeatLayerBookButton extends StatelessWidget {
       ticketCount: controller.confirmedTicketCount,
       canOfferFind: canOfferFind,
       onPressed: () => checkoutThroughHost(controller, onCheckout),
-      builder: (context, cta, onPressed) => FilledButton(
-        // The shape merges LAST so `primaryButtonStyle` — or this instance's
-        // own `style:` — can still reshape the button.
-        style: FilledButton.styleFrom(
-          backgroundColor: theme.accent,
-          foregroundColor: theme.onAccent,
-          // A reason stated on a button that cannot be pressed still has to be
-          // read, on the dark scene sheet as much as on the light one;
-          // Material's own disabled greys vanish there.
-          disabledBackgroundColor: pickerAlpha(theme.text, .08),
-          disabledForegroundColor: pickerAlpha(theme.text, .55),
-          minimumSize: Size.fromHeight(theme.layout.checkoutButtonHeight),
-          textStyle: TextStyle(
-            fontSize: 14,
-            fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
-            fontFamily: theme.fontFamily,
-          ),
-        )
-            .merge(style ?? theme.styles.resolvedContinueButtonStyle)
-            .merge(seatLayerButtonShape(theme.buttonRadius)),
-        onPressed: cta.findsBestSeats ? onFindBestSeats : onPressed,
-        child: SeatLayerCheckoutCtaLabel(cta: cta, color: theme.onAccent),
-      ),
+      builder: (context, cta, onPressed) => row != null
+          ? PickerCartBarButton(
+              cta: cta,
+              onPressed: cta.findsBestSeats ? onFindBestSeats : onPressed,
+              row: row,
+              style: style ?? theme.styles.resolvedContinueButtonStyle,
+            )
+          : FilledButton(
+              // The shape merges LAST so `primaryButtonStyle` — or this instance's
+              // own `style:` — can still reshape the button.
+              style: FilledButton.styleFrom(
+                backgroundColor: theme.accent,
+                foregroundColor: theme.onAccent,
+                // A reason stated on a button that cannot be pressed still has to be
+                // read, on the dark scene sheet as much as on the light one;
+                // Material's own disabled greys vanish there.
+                disabledBackgroundColor: pickerAlpha(theme.text, .08),
+                disabledForegroundColor: pickerAlpha(theme.text, .55),
+                minimumSize: Size.fromHeight(theme.layout.checkoutButtonHeight),
+                textStyle: TextStyle(
+                  fontSize: 14,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w800),
+                  fontFamily: theme.fontFamily,
+                ),
+              )
+                  .merge(style ?? theme.styles.resolvedContinueButtonStyle)
+                  .merge(seatLayerButtonShape(theme.buttonRadius)),
+              onPressed: cta.findsBestSeats ? onFindBestSeats : onPressed,
+              child: SeatLayerCheckoutCtaLabel(cta: cta, color: theme.onAccent),
+            ),
     );
   }
 }

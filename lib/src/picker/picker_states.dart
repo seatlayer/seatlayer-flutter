@@ -16,7 +16,6 @@ import 'picker_internal.dart';
 import 'picker_layout.dart';
 import 'picker_models.dart';
 import 'picker_motion.dart';
-import 'picker_short_map_scroll.dart';
 import 'picker_strings.dart';
 import 'picker_toast.dart';
 import 'picker_tokens.g.dart';
@@ -316,8 +315,7 @@ class _SeatLayerPickerAccessPanelState
             final short = map.maxHeight <
                 280 * MediaQuery.textScalerOf(context).scale(10) / 10;
             return Center(
-              child: PickerShortMapScroll(
-                roomUnder: short ? 25 : 49,
+              child: SingleChildScrollView(
                 child: Padding(
                   padding: EdgeInsets.all(short ? 10 : 24),
                   child: ConstrainedBox(

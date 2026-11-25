@@ -115,8 +115,11 @@ SeatLayerCheckoutCtaState seatLayerCheckoutCtaState({
         statesReason: true,
       );
 
-  // 1. Nothing else is worth saying about an event that has stopped selling.
-  if (state.event?.salesClosed == true) return reason(strings.salesClosedCta);
+  // 1. Nothing else is worth saying about an event that has stopped selling,
+  //    but seats already held can still be paid for.
+  if (state.event?.salesClosed == true && !holdActive) {
+    return reason(strings.salesClosedCta);
+  }
 
   // 2. A prompt the buyer has not answered. The places under it are already in
   //    the runtime's selection, so without this the button reads as live.

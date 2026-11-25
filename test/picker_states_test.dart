@@ -17,7 +17,6 @@ import 'package:seatlayer/src/picker/picker_states.dart';
 import 'package:seatlayer/src/picker/picker_status_views.dart';
 import 'package:seatlayer/src/picker/picker_strings.dart';
 import 'package:seatlayer/src/picker/picker_toast.dart';
-import 'package:seatlayer/src/picker/picker_tokens.g.dart';
 import 'package:seatlayer/src/picker/seat_layer_picker_controller.dart';
 
 import 'picker_test_fixture.dart';
@@ -266,34 +265,6 @@ void main() {
         expect(find.text('Own words').hitTestable(), findsOneWidget);
       }
       expect(find.text('Refresh').hitTestable(), findsNothing);
-    });
-
-    testWidgets('keeps its button clear of the cart handle where it scrolls',
-        (tester) async {
-      final map = FakePickerMap();
-      addTearDown(map.dispose);
-      tester.view.physicalSize = const Size(320, 150);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      tester.platformDispatcher.textScaleFactorTestValue = 2;
-      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-
-      await tester.pumpWidget(
-        pickerHarness(map, const _Fill(SeatLayerPickerAccessPanel())),
-      );
-      map.emit(_accessSnapshot('no_token'));
-      await tester.pumpAndSettle();
-      await tester.drag(
-        find.byType(SeatLayerPickerAccessPanel),
-        const Offset(0, -2000),
-      );
-      await tester.pumpAndSettle();
-
-      expect(
-        tester.getRect(find.byType(SeatLayerPickerAccessPanel)).bottom -
-            tester.getRect(find.byType(FilledButton)).bottom,
-        closeTo(SeatLayerSizeTokens.sheetHandleOverhang + 8, .5),
-      );
     });
 
     testWidgets('is absent while the picker is ready', (tester) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:seatlayer/src/picker/picker_cart_bar.dart';
 import 'package:seatlayer/src/picker/picker_toast.dart';
 import 'package:seatlayer/src/picker/picker_cart_sheet.dart';
 import 'package:seatlayer/src/picker/picker_haptics.dart';
@@ -48,12 +49,10 @@ Widget _wired(SeatLayerPickerController picker) => AnimatedBuilder(
 double _height(WidgetTester tester) =>
     tester.getSize(find.byType(SeatLayerCartSheet)).height;
 
-/// A point on the sheet's handle — the one place a drag can never be taken by
-/// the ticket list underneath it.
-Offset _head(WidgetTester tester) {
-  final rect = tester.getRect(find.byType(SeatLayerCartSheet));
-  return Offset(rect.center.dx, rect.top + 8);
-}
+/// A point on the row's circle — a drag there can never be taken by the ticket
+/// list over it.
+Offset _head(WidgetTester tester) =>
+    tester.getCenter(find.byType(PickerCartBarDisc));
 
 void main() {
   group('the sheet drags', () {
@@ -73,8 +72,8 @@ void main() {
       // everything the open one would.
       map.emit(_tenDistinctRows());
       await tester.pumpAndSettle();
-      // The collapsed sheet is the height of the block the phone draws — the
-      // handle, the capped cart, the foot — rather than a fixed peek.
+      // The collapsed sheet is the height of the row rather than a fixed
+      // peek.
       final rest = _height(tester);
 
       final drag = await tester.startGesture(_head(tester));
