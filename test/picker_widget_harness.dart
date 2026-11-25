@@ -135,6 +135,9 @@ final class FakePickerMap extends SeatLayerController {
   @override
   BundleInfo? get bundleInfo => bundle;
 
+  @override
+  bool get isReady => true;
+
   /// Every command the picker sent, in order.
   final List<(String, Object?)> calls = <(String, Object?)>[];
 
