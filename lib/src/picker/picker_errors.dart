@@ -85,51 +85,61 @@ class SeatLayerPickerActionError extends StatelessWidget {
             const Icon(Icons.error_outline_rounded, color: Colors.white),
             const SizedBox(width: 9),
             Expanded(
-              // A sentence that outgrows its share of the screen scrolls: it is
-              // never cut, and the checkout button under it stays in reach.
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: math.max(
-                    MediaQuery.sizeOf(context).height * _maxHeightFraction,
-                    _minMaxHeight,
-                  ),
-                ),
-                child: SingleChildScrollView(
-                  primary: false,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        message,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // A sentence that outgrows its share of the screen scrolls:
+                  // it is never cut, and the buttons under it stay in reach.
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: math.max(
+                        MediaQuery.sizeOf(context).height * _maxHeightFraction,
+                        _minMaxHeight,
                       ),
-                      if (detail != null) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          detail,
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                      ],
-                      if (release != null) ...[
-                        const SizedBox(height: 6),
-                        OutlinedButton(
-                          onPressed: state.isBusy ? null : release,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            side: const BorderSide(color: Colors.white),
-                            visualDensity: VisualDensity.compact,
+                    ),
+                    child: SingleChildScrollView(
+                      primary: false,
+                      padding: EdgeInsets.only(
+                        top: 10,
+                        bottom: release == null ? 10 : 0,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            message,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                          child: Text(strings.releaseAndChangeSeats),
-                        ),
-                      ],
-                    ],
+                          if (detail != null) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              detail,
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
-                ),
+                  if (release != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, bottom: 10),
+                      child: OutlinedButton(
+                        onPressed: state.isBusy ? null : release,
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.white),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        child: Text(strings.releaseAndChangeSeats),
+                      ),
+                    ),
+                ],
               ),
             ),
             IconButton(

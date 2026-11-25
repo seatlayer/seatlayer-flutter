@@ -122,6 +122,71 @@ void main() {
     }
   });
 
+  // Back from checkout with a seat to change: the words, and the way out.
+  group('a refused action with a way out', () {
+    const refusal = SeatLayerError.bridge(
+      BridgeErrorPayload(
+        code: 'hold_owned_by_host',
+        message: 'the active hold belongs to the host',
+      ),
+    );
+    for (final phone in <Phone>[...uprightPhones, ...sidewaysPhones]) {
+      final sideways = sidewaysPhones.contains(phone);
+      for (final textScale in <double>[1, 1.3, if (!sideways) 2]) {
+        for (final state in <PhoneState>[
+          PhoneState.cart,
+          if (!sideways) PhoneState.cartOpen,
+        ]) {
+          for (final tag in const <String>['en', 'el', 'ar']) {
+            testWidgets('$phone, text $textScale, ${state.name}, $tag',
+                (tester) async {
+              final semantics = tester.ensureSemantics();
+              final strings = await pumpPhone(
+                tester,
+                phone,
+                state,
+                textScale: textScale,
+                locale: Locale(tag),
+                actionError: refusal,
+                inCheckout: true,
+              );
+              expectPhoneLayout(tester, phone, strings);
+              expect(find.text(strings.holdInCheckoutTitle), findsOneWidget);
+              expect(find.text(strings.holdInCheckoutBody), findsOneWidget);
+              final button = find.widgetWithText(
+                OutlinedButton,
+                strings.releaseAndChangeSeats,
+              );
+              // The whole of it, where a press reaches it.
+              final rect = tester.getRect(button);
+              final render = tester.renderObject(button);
+              for (final at in <Offset>[
+                rect.center,
+                rect.topCenter + const Offset(0, 5),
+                rect.bottomCenter - const Offset(0, 5),
+              ]) {
+                final path = tester.hitTestOnBinding(at).path;
+                expect(
+                  path.any((entry) => identical(entry.target, render)),
+                  isTrue,
+                  reason: 'a press at $at, the button is at $rect',
+                );
+              }
+              final label = tester.renderObject<RenderParagraph>(
+                find.descendant(
+                  of: find.text(strings.releaseAndChangeSeats),
+                  matching: find.byType(RichText),
+                ),
+              );
+              expect(label.didExceedMaxLines, isFalse);
+              semantics.dispose();
+            });
+          }
+        }
+      }
+    }
+  });
+
   group('sideways', () {
     for (final phone in sidewaysPhones) {
       for (final scale in <double>[1, 1.3]) {
