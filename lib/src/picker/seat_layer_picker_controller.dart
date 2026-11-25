@@ -22,6 +22,7 @@ import 'picker_options.dart';
 import 'picker_revision_waiters.dart';
 import 'picker_selection_focus.dart';
 import 'picker_sheet_drag.dart';
+import 'picker_standing_amounts.dart';
 import 'picker_viewport_report.dart';
 import 'seat_layer_picker_theme.dart';
 
@@ -63,7 +64,9 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
         .onSelectedObjectsUnavailable
         .listen((event) => _callbacks.onSelectedObjectUnavailable?.call(event));
     _generalAdmissionSubscription = this.mapController.onGAClick.listen((area) {
-      if (!_options.readOnly) {
+      final live = seatLayerLiveStandingArea(area, value.snapshot);
+      if (!_options.readOnly &&
+          seatLayerStandingAmounts(live, value.snapshot) != null) {
         value = value.withGeneralAdmissionCandidate(area);
       }
     });

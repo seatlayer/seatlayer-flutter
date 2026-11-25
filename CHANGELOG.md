@@ -4,7 +4,7 @@
 
 **Fixed**
 
-- **Standing areas and boxes** offer only amounts the page accepts. A box is sold as all its places, or as a party inside its range; with the wheelchair filter on, an area offers its wheelchair places. A taken area no longer offers places. New on `GAArea`: `bookingMode`, `minOccupancy`, `maxOccupancy`, `wheelchairPlaces` and `wheelchairAvailable`.
+- **Standing areas and boxes** offer only amounts the page accepts. A box is sold as all its places, or as a party inside its range; with the wheelchair filter on, an area offers its wheelchair places. A tap on an area with nothing to offer opens nothing. New on `GAArea`: `bookingMode`, `minOccupancy`, `maxOccupancy`, `wheelchairPlaces` and `wheelchairAvailable`.
 - **When the page refuses standing places (behaviour change):** the prompt stays and the bar says "One or more seats were just taken. Please pick again." It closed as if the places were held. `setGeneralAdmissionQuantity` now completes with an error, `hold_unavailable`, for such a refusal.
 
 ## 0.13.0 (2026-11-25)

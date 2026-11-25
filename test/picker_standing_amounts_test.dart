@@ -298,6 +298,16 @@ void main() {
       );
     });
 
+    testWidgets('is not opened by an area with nothing to offer',
+        (tester) async {
+      final (_, picker) = await open(
+        tester,
+        area: <String, Object?>{...box, 'available': 0},
+      );
+      expect(picker.state.generalAdmissionCandidate, isNull);
+      expect(find.byType(SeatLayerPickerGeneralAdmissionPrompt), findsNothing);
+    });
+
     testWidgets('closes on a hold the page confirms', (tester) async {
       final (_, picker) = await open(
         tester,
