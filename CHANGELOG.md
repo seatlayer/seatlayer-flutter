@@ -12,6 +12,7 @@
 - **Test badge:** a tap on it does nothing, where it opened a sentence. `SeatLayerPickerStrings.testModeExplained` is still accepted and is drawn nowhere.
 - **The map's +** stays in its place and dims on a phone when there is nothing more to zoom in to, where it left a gap.
 - **Longer waits:** the page may take 45 seconds to be ready (was 30; `handshakeTimeout`), and a call that can place a hold waits 45 seconds (was 15). The page itself waits up to 40 seconds for the server, so a hold that worked could be called failed. A longer `commandTimeout` of your own is kept.
+- **Under the seat card** the map is darkened, a little more than before, and no longer blurred. The seat and the seats around it stay clear.
 
 **Fixed**
 

@@ -1151,23 +1151,23 @@ disc on a section-less chart, neighbours keeping full ink and numbers), but
 nothing quieted the MAP.
 
 So while a seat card is up the map takes a black veil at
-`opacity.confirmScrim` behind a `size.confirmScrimBlur` blur, masked by a
+`opacity.confirmScrimFlat`, with no blur, masked by a
 radial gradient that is fully clear to `size.confirmScrimClearRadius` around
 the tapped seat and reaches full strength at
 `size.confirmScrimFeatherRadius`. The hole is what makes this a spotlight
 rather than a curtain — the buyer is being asked about one seat and can still
 see it. The feather is what stops the hole reading as a drawn circle.
 
-Three rules bind it:
+There is no blur under the veil. The map is a platform view, and on iOS a
+backdrop blur over it is clipped to rectangles only, so a blur could not leave
+the round hole clear without straight edges through the seats around it.
+
+Two rules bind it:
 
 - **Only with a seat to spotlight.** No anchor — a prompt about no one seat, or
   the immersive scene, where the seat IS the picture — means no glass.
 - **It never takes a pointer event.** A press over the glass reaches the map
   underneath and cancels the card, exactly as a press on bare map does.
-- **Reduced transparency drops the blur** and deepens the veil to
-  `opacity.confirmScrimFlat`, so the map still recedes without being smeared.
-  Legibility is a setting, not a taste. Flutter has no direct reading of it, so
-  high contrast stands in.
 
 `scrimColor` stays a style slot for a host that wants a flat wash over the
 whole map instead; its default is transparent. While the card is up, the rest of the chrome is *paused*: the
