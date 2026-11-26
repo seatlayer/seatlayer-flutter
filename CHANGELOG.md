@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+**Changed**
+
+- **Map 1.0.5** (was 1.0.4). A standing area's line in the cart reads the area's name, for example "Floor", where it showed an internal label. A standing area keeps its "N left" count after a theme or language switch, where it showed its capacity.
+
 ## 0.14.0 (2026-11-26)
 
 **Changed**
