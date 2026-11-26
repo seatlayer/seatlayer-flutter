@@ -534,14 +534,14 @@ How to build and test the package is in [CONTRIBUTING.md](CONTRIBUTING.md).
 - **Amounts** are written as the map writes them, in the language of
   `SeatLayerConfiguration.locale`: `$1,250.50`, `1.250,50 €`, `KWD 12.625`. A
   `formatter` of your own is used as before.
-- **`onBooked`** comes only after your server has booked and you call
-  `markBooked`, once per hold. Take a sale from your own server, never from
-  `onBooked`.
+- **`onBooked`** (since 0.13.1) comes only after your server has booked and
+  you call `markBooked`, once per hold. Take a sale from your own server, never
+  from `onBooked`.
 - **A refused standing amount:** `setGeneralAdmissionQuantity` completes with
   the error `hold_unavailable`, and the prompt stays open.
-- **`buyerAccessTokenProvider` written inline** no longer loads the page again
-  on a rebuild. To start over for another buyer, give the picker another `key`
-  too.
+- **`buyerAccessTokenProvider` written inline** (since 0.13.1) no longer loads
+  the page again on a rebuild. To start over for another buyer, give the picker
+  another `key` too.
 - **A Season closed with seats held while no page is up:** `onClose` receives
   `kept` and the hold's operation id.
 - **Longer waits:** 45 seconds for the page to be ready and for a call that can
