@@ -17,6 +17,7 @@
 **Fixed**
 
 - **The Map/3D control at a large text size:** its words stand whole in the control. At text 2.0 the bottom of "Map" was cut off; from about 2.5 the words are drawn as large as the control allows.
+- **The header's mark at a large text size:** the event's first letter stays inside its square. At text 2.0 it ran out of the bottom of the square.
 - **The 3D view's caption** names the row and the seat in the buyer's language, with the words the seat card uses. It said "Row" and "Seat" in English in every language.
 - **Arabic and Hebrew:** the toast, the lapsed-seats line, the hold-ending and booked states, the note under an accessibility row and the Row and Seat fields of the seat card keep their wider side at the start of the line, on the right. They kept it on the left.
 - **The accessibility sheet on a phone held sideways:** everything under its title scrolls as one, so every row can be reached and pressed. Only the list of needs scrolled, in a window of 21 to 48 points, half a row.
