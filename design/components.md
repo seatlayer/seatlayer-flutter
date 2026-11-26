@@ -395,12 +395,11 @@ override** `style:`
   runtime ring the seat the card is asking about and pale its neighbours. Paint
   only: no busy state, safe read-only, and never raised as an error.
 - **Backdrop** the map goes behind glass: a black veil at
-  `opacity.confirmScrim` under a `size.confirmScrimBlur` blur, masked clear to
+  `opacity.confirmScrimFlat`, with no blur, masked clear to
   `size.confirmScrimClearRadius` around the tapped seat and reaching full
   strength at `size.confirmScrimFeatherRadius`. A spotlight, not a curtain.
-  Only drawn when there is a seat point to centre on, never takes a pointer
-  event, and under reduced transparency drops the blur for
-  `opacity.confirmScrimFlat`.
+  Only drawn when there is a seat point to centre on, and never takes a
+  pointer event.
 - **Anatomy** `size.confirmCardMaxWidth`, capped at the map width less
   `2 × size.confirmCardGutter`, radius `radius.confirmCard`, elevation
   `elevation.confirmCard`.

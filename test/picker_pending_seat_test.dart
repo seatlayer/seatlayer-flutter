@@ -265,7 +265,16 @@ void main() {
     await pumpToRest(tester);
 
     expect(find.byType(SeatLayerConfirmCard), findsOneWidget);
-    expect(find.byType(BackdropFilter), findsWidgets);
+    expect(find.byType(PickerSpotlightGlass), findsOneWidget);
+    // The map is darkened, never blurred: a blur over the map cannot keep a
+    // round hole clear on iOS.
+    expect(
+      find.descendant(
+        of: find.byType(PickerSpotlightGlass),
+        matching: find.byType(BackdropFilter),
+      ),
+      findsNothing,
+    );
     // The hole is a mask over the veil, not a second painted circle.
     expect(find.byType(ShaderMask), findsWidgets);
 
@@ -287,10 +296,7 @@ void main() {
       Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
-          data: const MediaQueryData(
-            size: Size(390, 700),
-            highContrast: true,
-          ),
+          data: const MediaQueryData(size: Size(390, 700)),
           child: RepaintBoundary(
             key: root,
             child: const ColoredBox(

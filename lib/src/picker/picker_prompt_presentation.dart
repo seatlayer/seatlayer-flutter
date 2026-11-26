@@ -7,9 +7,6 @@
 /// *which* surface is up, and this file decides how one arrives and leaves.
 library;
 
-import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -529,8 +526,13 @@ class _SeatCardLayout extends SingleChildLayoutDelegate {
 /// The phone card rests over a map that is otherwise fully legible, so the
 /// moment of decision competed with several thousand other seats. Per-seat
 /// dimming already recedes the candidate's neighbours; nothing quieted the
-/// MAP. A translucent fill with a small blur does, and a hole cut around the
-/// tapped seat is what makes it a spotlight rather than a curtain.
+/// MAP. A dark fill does, and a hole cut around the tapped seat is what makes
+/// it a spotlight rather than a curtain.
+///
+/// There is no blur under the fill. The map is a platform view, and on iOS a
+/// backdrop blur over it is clipped to rectangles only, so a blur could not
+/// leave the round hole clear without straight edges through the seats
+/// around it.
 ///
 /// Never takes a pointer event of its own — the press has to reach the
 /// dismissing detector underneath, exactly as a press on bare map does.
@@ -543,18 +545,6 @@ class PickerSpotlightGlass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Reduced transparency is a legibility setting, not a taste. Flutter has
-    // no direct reading of it, so high contrast stands in: drop the blur and
-    // deepen the fill, and the map still recedes without being smeared.
-    final flat = MediaQuery.highContrastOf(context);
-    final veil = Color.fromRGBO(
-      0,
-      0,
-      0,
-      flat
-          ? SeatLayerOpacityTokens.confirmScrimFlat
-          : SeatLayerOpacityTokens.confirmScrim,
-    );
     // The feather runs from the clear radius out to the full-strength one, so
     // the hole has no hard edge to read as a drawn circle.
     final Widget glass = ShaderMask(
@@ -574,79 +564,10 @@ class PickerSpotlightGlass extends StatelessWidget {
           1,
         ],
       ).createShader(bounds),
-      child: flat
-          ? ColoredBox(color: veil)
-          : Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                // The mask above cannot clear a backdrop blur: the blur is
-                // applied to what is already painted behind, and a mask on
-                // the layer only shapes the veil drawn on top. So the seat
-                // the card asks about came out smeared under a clear tint.
-                // The blur is laid around the hole instead — see _BlurAround —
-                // and the seat and its neighbours stay crisp, as on the web.
-                _BlurAround(at: at),
-                ColoredBox(color: veil),
-              ],
-            ),
+      child: const ColoredBox(
+        color: Color.fromRGBO(0, 0, 0, SeatLayerOpacityTokens.confirmScrimFlat),
+      ),
     );
     return IgnorePointer(child: glass);
   }
-}
-
-/// The backdrop blur everywhere but the spotlight.
-///
-/// The map is a platform view, and its compositor honours rectangle clips
-/// only: a path with a hole in it — even-odd, or a rectangle with a circle
-/// subtracted — blurred the whole surface, seat and all. So the blur is laid
-/// in four bands around a square. The square holds the whole of the veil's
-/// feather, so its straight edges lie where the veil is full and the disc of
-/// seats inside is round and sharp.
-class _BlurAround extends StatelessWidget {
-  const _BlurAround({required this.at});
-
-  final Offset at;
-
-  static const double _feather = SeatLayerSizeTokens.confirmScrimFeatherRadius;
-
-  /// As three passes of a third of the design's blur: blurs add up as their
-  /// squares do.
-  static final double _sigma =
-      SeatLayerSizeTokens.confirmScrimBlur / math.sqrt(3);
-
-  static final ImageFilter _blur =
-      ImageFilter.blur(sigmaX: _sigma, sigmaY: _sigma);
-
-  @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, constraints) {
-          final w = constraints.maxWidth;
-          final h = constraints.maxHeight;
-          final left = (at.dx - _feather).clamp(0.0, w);
-          final right = (at.dx + _feather).clamp(0.0, w);
-          final top = (at.dy - _feather).clamp(0.0, h);
-          final bottom = (at.dy + _feather).clamp(0.0, h);
-          // Two bands that meet show a seam: it runs the shorter way out.
-          final tall = h >= w;
-          final (from, to) = tall ? (0.0, w) : (left, right);
-          final (upper, lower) = tall ? (top, bottom) : (0.0, h);
-          Widget band(Rect rect) => Positioned.fromRect(
-                rect: rect,
-                child: ClipRect(
-                  child: BackdropFilter(
-                    filter: _blur,
-                    child: const SizedBox.expand(),
-                  ),
-                ),
-              );
-          return Stack(
-            children: [
-              if (top > 0) band(Rect.fromLTRB(from, 0, to, top)),
-              if (bottom < h) band(Rect.fromLTRB(from, bottom, to, h)),
-              if (left > 0) band(Rect.fromLTRB(0, upper, left, lower)),
-              if (right < w) band(Rect.fromLTRB(right, upper, w, lower)),
-            ],
-          );
-        },
-      );
 }
