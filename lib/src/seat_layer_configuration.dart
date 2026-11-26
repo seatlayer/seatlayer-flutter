@@ -5,7 +5,7 @@ import 'payloads.dart';
 import 'seat_layer_surface_configuration.dart';
 
 /// This SDK's version.
-const String seatLayerSdkVersion = '0.13.0';
+const String seatLayerSdkVersion = '0.13.1';
 
 /// The SeatLayer renderer version this SDK release is pinned to.
 const String seatLayerHostedWebVersion = '1.0.3';
@@ -244,7 +244,10 @@ class SeatLayerConfiguration implements SeatLayerSurfaceConfiguration {
         buyerAccessToken?.toJson(),
         other.buyerAccessToken?.toJson(),
       ) &&
-      identical(buyerAccessTokenProvider, other.buyerAccessTokenProvider) &&
+      // A function written inline in `build` is a new one each time. The page
+      // asks through the session, which holds the newest.
+      (buyerAccessTokenProvider == null) ==
+          (other.buyerAccessTokenProvider == null) &&
       _deepEquals(selectedObjects, other.selectedObjects) &&
       _deepEquals(selectableObjects, other.selectableObjects) &&
       numberOfPlacesToSelect == other.numberOfPlacesToSelect &&

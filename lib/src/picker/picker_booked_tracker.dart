@@ -1,43 +1,42 @@
 /// When a handed-off hold has become a booking.
 ///
-/// The runtime clears the buyer's hold the moment every held seat reads
-/// `booked`, and it clears the same hold when the hold runs out — the snapshot
-/// cannot tell the two apart. The runtime announces an expiry on its own
-/// channel before the snapshot that shows the hold gone, so a hold that
-/// vanished with no expiry announced, while a checkout handoff is still open,
-/// is a sale. The web picker decides the same way.
+/// Only when the page says so. The hold leaves the snapshot for many reasons: it
+/// ran out, the host let it go, the page was loaded again and starts without
+/// it, or its seats were lost to another buyer. None of them is a sale, and a
+/// buyer who reads "You're all set" over one has no tickets.
 library;
+
+import 'package:flutter/foundation.dart';
 
 import 'picker_models.dart';
 
-/// Tracks one checkout handoff from hand-off to booking.
+/// Tracks each checkout handoff from hand-off to booking.
 class PickerBookedTracker {
   SeatLayerCheckoutHandoff? _booked;
+  final Set<String> _told = <String>{};
 
-  /// The handoff whose seats settled to booked, or null.
+  /// The handoff the page said is booked, or null.
   SeatLayerCheckoutHandoff? get booked => _booked;
 
-  /// Feed one snapshot transition; returns the handoff that just settled to
-  /// booked, or null when nothing did.
+  /// The page said the hold [holdId] is booked; null is the hold handed off.
   ///
-  /// A live hold ends the previous booking's story, so a buyer who starts a
-  /// second cart is not congratulated twice.
-  SeatLayerCheckoutHandoff? observe({
-    required SeatLayerCheckoutHandoff? handoff,
-    required SeatLayerPickerHold? previous,
-    required SeatLayerPickerHold? next,
-    required bool expiryReported,
-  }) {
-    if (next != null) {
-      _booked = null;
-      return null;
-    }
-    if (handoff == null || previous == null || expiryReported) return null;
-    if (_booked?.holdId == handoff.holdId) return null;
+  /// Once per hold, and only where it is about [handoff], the picker is drawn
+  /// again and the app is told.
+  void said(
+    SeatLayerCheckoutHandoff? handoff,
+    String? holdId,
+    VoidCallback redraw,
+    ValueChanged<SeatLayerCheckoutHandoff>? tell,
+  ) {
+    if (handoff == null) return;
+    if (holdId != null && holdId != handoff.holdId) return;
+    if (!_told.add(handoff.holdId)) return;
     _booked = handoff;
-    return handoff;
+    redraw();
+    tell?.call(handoff);
   }
 
-  /// Forget the booking, as when the host refuses the handoff.
+  /// The booking is over: a live hold starts a new story. It stays told, so a
+  /// second word of it does not come over the second cart.
   void reset() => _booked = null;
 }

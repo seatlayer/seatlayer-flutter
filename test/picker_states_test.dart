@@ -482,8 +482,12 @@ void main() {
       // The hand-off is a buyer on the way to pay, not a sale.
       expect(find.text('You’re all set'), findsNothing);
 
-      // The hold vanishes with no expiry announced: the seats sold.
+      // The hold leaves the map, and nobody said it is booked.
       map.emit(pickerSnapshot(revision: 3));
+      await tester.pumpAndSettle();
+      expect(find.text('You’re all set'), findsNothing);
+
+      controller.bookedByPage('hold-1');
       await tester.pumpAndSettle();
 
       expect(find.text('You’re all set'), findsOneWidget);
@@ -536,7 +540,7 @@ void main() {
       await tester.pumpAndSettle();
       await controller.checkout();
       await tester.pumpAndSettle();
-      map.emit(pickerSnapshot(revision: 3));
+      controller.bookedByPage('hold-1');
       await tester.pumpAndSettle();
 
       expect(find.text('You’re all set'), findsNothing);

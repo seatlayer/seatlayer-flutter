@@ -164,7 +164,10 @@ class SeatLayerRunConfiguration implements SeatLayerSurfaceConfiguration {
   @override
   bool semanticallyEquals(SeatLayerRunConfiguration other) =>
       seatLayerSameValue(_identity, other._identity) &&
-      identical(buyerAccessTokenProvider, other.buyerAccessTokenProvider);
+      // A function written inline in `build` is a new one each time. The page
+      // asks through the session, which holds the newest.
+      (buyerAccessTokenProvider == null) ==
+          (other.buyerAccessTokenProvider == null);
 
   List<Object?> get _identity => <Object?>[
         run,

@@ -41,12 +41,14 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
           _onBridgeEvent,
         );
     _readySubscription = this.mapController.onReady.listen((info) {
-      // T0 is the mount, not the handshake: the buyer's wait started when the
-      // picker appeared. Frozen here rather than read when the trace arrives,
-      // because the trace can land a frame or two later and that frame is not
-      // part of what the buyer waited for.
+      // T0 is the mount: the buyer's wait started when the picker appeared.
+      // Frozen here, because the trace can land a frame or two later.
       _readyInfo = info;
       _tapToReadyMs = _mountClock.elapsedMilliseconds;
+      // A new page takes touches until it is told not to.
+      if (!_mapInteractionEnabled) {
+        unawaited(setMapInteractionEnabled(false).catchError((Object _) {}));
+      }
       _callbacks.onReady?.call(info);
     });
     _accessExpiredSubscription = this.mapController.onBuyerAccessExpired.listen(
@@ -95,6 +97,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   /// Started when the picker mounts; the clock `tapToReadyMs` is read off.
   final Stopwatch _mountClock = Stopwatch();
   int? _tapToReadyMs;
+  bool _mapInteractionEnabled = true;
   ReadyInfo? _readyInfo;
   SeatLayerSeatView? _seatView;
 
@@ -133,8 +136,14 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
 
   SeatLayerPickerState get state => value;
 
-  /// The handoff whose seats settled to booked, or null.
+  /// The handoff that is booked, or null.
   SeatLayerCheckoutHandoff? get bookedHandoff => _booked.booked;
+
+  /// The page said that [holdId] is booked.
+  @internal
+  void bookedByPage(String? holdId) => _booked.said(
+      value.checkoutHandoff, holdId, notifyListeners, _callbacks.onBooked);
+
   SeatLayerPickerOptions get options => _options;
 
   /// Whether the buyer may hand this cart to checkout.
@@ -416,13 +425,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
       _callbacks.onSelectionValidityChanged?.call(snapshot.selectionValidity!);
     }
     final nextHold = snapshot.hold.active ? snapshot.hold : null;
-    final booked = _booked.observe(
-      handoff: value.checkoutHandoff,
-      previous: previousHold,
-      next: nextHold,
-      expiryReported: _holdExpiryReported,
-    );
-    if (booked != null) _callbacks.onBooked?.call(booked);
+    if (nextHold != null) _booked.reset();
     if (previousHold?.active != nextHold?.active ||
         previousHold?.owner != nextHold?.owner ||
         previousHold?.expiresAt != nextHold?.expiresAt) {
@@ -1042,21 +1045,18 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   /// iOS platform view: the map surface can otherwise receive the same physical tap
   /// beneath the Flutter overlay.
   ///
-  /// Older compatible runtimes that do not advertise the command are left
-  /// unchanged, preserving source compatibility while the Flutter hit-test
-  /// guard remains in place as a best-effort fallback.
+  /// Runtimes that do not advertise the command are left unchanged, and the
+  /// Flutter hit-test guard remains in place as a best-effort fallback.
+  /// A page that is not ready answers nothing: it is told once it is.
   Future<void> setMapInteractionEnabled(bool enabled) {
-    final bundle = mapController.bundleInfo;
-    if (bundle != null &&
-        !bundle.supportsCommand('picker.setInteractionEnabled')) {
+    const command = 'picker.setInteractionEnabled';
+    _mapInteractionEnabled = enabled;
+    if (!mapController.isReady ||
+        mapController.bundleInfo?.supportsCommand(command) == false) {
       return Future<void>.value();
     }
-    return _serialize(() async {
-      await mapController.runBridgeCommand(
-        'picker.setInteractionEnabled',
-        <String, Object?>{'enabled': enabled},
-      );
-    });
+    final payload = <String, Object?>{'enabled': enabled};
+    return _serialize(() => mapController.runBridgeCommand(command, payload));
   }
 
   /// Choose whether a primary drag rotates or moves the real 3D venue.
