@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.14.0 (2026-11-26)
 
 **Changed**
 
+- **Map 1.0.4** (was 1.0.3). On a run and on a Season's single dates, a seat free on only some of the dates is half-coloured and can be booked for those dates, where the map said "Sold out" or the seat was grey. A hold the server never answers ends after 40 seconds with "Check your connection and try again." What else changed on the map is in the [changelog](https://docs.seatlayer.io/changelog/).
 - **Levels on a phone:** held sideways, the pill of levels stands on the map's top line, between the test badge and the Map/3D control, where all three fit; where they do not, it stands under them, as upright. It keeps the map's margin on both sides and scrolls inside its own ends. The chosen level comes into view by itself, when the pill is first drawn and when the level changes, without motion where the system asks for less of it.
 - **The cart on a phone** is one row: a circle that opens the list, the count and the total with the seats under them, and the button. It was a block of three rows with a handle on its edge, so the map is about 40 to 70 points taller. The words open the list as the circle does, a new seat closes it, and where the button's own words do not fit two lines it goes under the words. Under the row stands the phone's own strip alone, or 10 points where there is none. `sheetHandleWidth`, `sheetHandleHeight`, `sheetHandleOverhang` and `sheetHeadHeight` on the layout are still accepted and have no effect.
 - **The seats on that row** are named as the map names them: the section once, then row and seat, "Dress Circle · C-6, C-7".
@@ -30,6 +31,7 @@
 - **When the page refuses standing places (behaviour change):** the prompt stays and the bar says "One or more seats were just taken. Please pick again." It closed as if the places were held. `setGeneralAdmissionQuantity` now completes with an error, `hold_unavailable`, for such a refusal.
 - **The standing and table prompts on a short map,** a phone held sideways or a large text size: they scroll, and open with the number and the buttons in sight. The buttons were cut off.
 - **When the buyer's access to the seats has run out, is paused or is revoked,** the picker says so with "Refresh" or "Try again", where the failed-to-load view was drawn. An app with its own `builders.error` is asked for these as before.
+- **A booked hold is told once:** `onBooked` and "You're all set" came a second time, over a new cart, when `markBooked` was called again for a hold already booked, as a retry or a late webhook does.
 - **A hold handed to checkout, when the page is loaded again** by a changed setting such as the language, or by `retry()`: the new page takes it up again. The picker stood empty while your checkout held the seats.
 - **iPhone, the system ends the page (low memory):** the map comes back by itself once the app is in front, in the event picker, a Season and a run. A hold handed to checkout and a hold the picker was opened on are taken up again. A Season or run asks for its hold too and gets it when your app gives the page the same buyer token again; without a token the page starts a new buyer session, and the seats stay held until their time is up. A third time within a minute the failure view opens, with Try again. A blank map stood there, and a Season could not be closed. A bare `SeatLayerView` reports `sl_transport` on `onError`.
 - **A Season closed while no page is up, with seats held (behaviour change):** `onClose` receives `kept` and the hold's operation id. It received `closed`.
