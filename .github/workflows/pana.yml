@@ -1,0 +1,29 @@
+name: Package score
+
+# Scores the package the way pub.dev does, before a release is tagged.
+#
+# pub.dev analyses every upload with the newest stable Flutter and its own
+# lints, so it can report issues that ci.yml's pinned Flutter does not see
+# (an import the newer SDK has deprecated, for one). Run this on the release
+# head; it prints the full report and fails when any point is missing.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pana:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: subosito/flutter-action@v2
+        with:
+          # Unpinned on purpose: the score is pub.dev's, which uses the
+          # newest stable SDK.
+          channel: stable
+          cache: true
+      - run: flutter --version
+      - run: dart pub global activate pana
+      - run: dart pub global run pana --exit-code-threshold 0 .
