@@ -425,6 +425,9 @@ class _PickerBrandMark extends StatelessWidget {
                 )
               : Text(
                   letter,
+                  // Drawn to the square, like the seat glyph beside it: a
+                  // letter that grew with the text size ran out of the square.
+                  textScaler: TextScaler.noScaling,
                   style: TextStyle(
                     color: theme.onAccent,
                     fontSize: size * .5,
