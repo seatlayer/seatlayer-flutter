@@ -25,5 +25,11 @@ jobs:
           channel: stable
           cache: true
       - run: flutter --version
+      # pana converts the README pictures with these, as pub.dev does; without
+      # them the screenshot check fails.
+      - run: sudo apt-get update && sudo apt-get install -y webp
+      # Score what pub publishes, not the checkout: drop every tracked file
+      # .pubignore leaves out of the archive (the tests, tools, design source).
+      - run: git ls-files -z -c -i --exclude-from=.pubignore | xargs -0 rm -f
       - run: dart pub global activate pana
       - run: dart pub global run pana --exit-code-threshold 0 .
