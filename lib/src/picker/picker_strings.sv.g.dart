@@ -310,6 +310,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsSv = SeatLayerPickerStrings(
   backToMap: 'Tillbaka till kartan',
   mapDidNotLoad: 'Platskartan laddades inte',
   checkConnection: 'Kontrollera din anslutning och försök igen.',
+  offline: 'Du är offline',
+  backOnline: 'Online igen',
+  stillHeld: 'Dina platser är fortfarande reserverade.',
+  updating: 'Uppdaterar…',
+  takingLonger: 'Det här tar längre tid än vanligt. Vänta…',
+  loadingTakingLonger: 'Platskartan tar längre tid att läsa in. Vänta…',
+  couldNotReachCheckout: 'Kunde inte nå kassan.',
   accessPausedTitle: 'De här platserna är spärrade just nu',
   accessPausedCopy:
       'Arrangören har pausat det här urvalet. Försök igen om några minuter.',

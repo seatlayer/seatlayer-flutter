@@ -2,8 +2,18 @@
 
 ## Unreleased
 
+**Added**
+
+- **Connection status on the map,** with a page that names `connection-state-v1`: "You’re offline" three seconds after the line goes, "Updating…" while it comes back and "Back online" for a moment once the seats are read again. It stands on the map's top line after the test badge, short of the Map/3D control, and goes under them, the map's full width, when its words do not fit beside them. With seats held it adds "Your seats are still held." until the clock reaches 0:00. It takes no touches. The page's state is `SeatLayerConnectionState`, and what the picker says is `SeatLayerPickerController.connectionShown`. An older page draws nothing new.
+- **Android apps need `ACCESS_NETWORK_STATE`** in their manifest for the map to say "You’re offline": without it the web view never learns the phone went offline, and the map only says "Updating…". The example app now asks for it.
+- **Opening without a connection** shows "You’re offline" with a sign, "Check your connection and try again." and "Try again", and tries again by itself after 10 and 20 seconds, then every 30, while the app is in front.
+- **Seven new strings** in every language the picker speaks: `offline`, `backOnline`, `stillHeld`, `updating`, `takingLonger`, `loadingTakingLonger`, `couldNotReachCheckout`.
+
 **Changed**
 
+- **A press without an answer** is told in the small amber message by the button, "Check your connection and try again.", where it was the red line; the red line stays for refusals. A server fault on the way to checkout says "Couldn’t reach checkout." with "Try again", which runs your checkout again. From 10 seconds into a hold without an answer the message says "This is taking longer than usual. Please wait…".
+- **While the connection is down** a hold clock that reaches 0:00 stays at 0:00, grey, until the server has said what happened to the seats.
+- **A slow opening** says "The seat map is taking longer to load. Please wait…" from 8 seconds. A page whose server failed says "The seat map didn’t load" without the line about the buyer's connection.
 - **A table booked as one, on the seat card,** says how many guests it takes and its name: "Gallery · Guests 4 · Table T2", or "Guests 2–6" where the buyer chooses how many. It read "Row T2 · Seat T2". The table's name shows with or without a section, and the 3D view's caption names the table the same way. The words are new strings, `SeatLayerPickerStrings.guestsWord` and `tableWord`, translated in every language the picker speaks.
 - **Map 1.0.6** (was 1.0.4). A standing area's line in the cart reads the area's name, for example "Floor", where it showed an internal label. A standing area keeps its "N left" count after a theme or language switch, where it showed its capacity. On a phone the level stack no longer narrows the whole map: the venue fits the full width above it, or beside it when it is too tall, and the stack never covers seats. When the accessibility filter takes the map to another level, the level stack marks that level. `selectObjects` with a seat on a level that is not drawn returns that seat and puts it in the cart at once. A whole or party table's `screenPoint` is the middle of its chairs, so the seat card sits on the table.
 

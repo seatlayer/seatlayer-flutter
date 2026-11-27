@@ -313,6 +313,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   backToMap: 'Vegere nexşeyê',
   mapDidNotLoad: 'Nexşeya cihan nehat barkirin',
   checkConnection: 'Girêdana xwe kontrol bike û dîsa biceribîne.',
+  offline: 'Tu negirêdayî yî',
+  backOnline: 'Dîsa girêdayî yî',
+  stillHeld: 'Cihên te hîn jî girtî ne.',
+  updating: 'Tê nûkirin…',
+  takingLonger: 'Ev ji ya asayî dirêjtir dajo. Ji kerema xwe li bendê be…',
+  loadingTakingLonger:
+      'Barkirina nexşeya cihan dirêj dikişîne. Ji kerema xwe li bendê be…',
+  couldNotReachCheckout: 'Negihîşt dravdanê.',
   accessPausedTitle: 'Ev cih niha hatine girtin',
   accessPausedCopy:
       'Organîzator ev hilbijartin rawestandiye. Piştî çend deqîqeyan dîsa biceribîne.',

@@ -348,6 +348,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsFr = SeatLayerPickerStrings(
   backToMap: 'Retour au plan',
   mapDidNotLoad: 'Le plan de salle n’a pas pu se charger',
   checkConnection: 'Vérifiez votre connexion et réessayez.',
+  offline: 'Vous êtes hors ligne',
+  backOnline: 'De nouveau en ligne',
+  stillHeld: 'Vos places restent réservées.',
+  updating: 'Mise à jour en cours…',
+  takingLonger: 'Cela prend plus de temps que d’habitude. Veuillez patienter…',
+  loadingTakingLonger:
+      'Le plan de salle met plus de temps à charger. Veuillez patienter…',
+  couldNotReachCheckout: 'Impossible d’accéder au paiement.',
   accessPausedTitle: 'Ces places sont actuellement en attente',
   accessPausedCopy:
       'L’organisateur a mis cette sélection en pause. Réessayez dans quelques minutes.',

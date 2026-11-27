@@ -306,6 +306,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   backToMap: 'بازگشت به نقشه',
   mapDidNotLoad: 'نقشهٔ صندلی‌ها بارگذاری نشد',
   checkConnection: 'اتصال خود را بررسی کنید و دوباره تلاش کنید.',
+  offline: 'شما آفلاین هستید',
+  backOnline: 'دوباره آنلاین شدید',
+  stillHeld: 'صندلی‌های شما همچنان نگه داشته شده‌اند.',
+  updating: 'در حال به‌روزرسانی…',
+  takingLonger: 'این کار بیشتر از حد معمول طول کشیده است. لطفاً صبر کنید…',
+  loadingTakingLonger:
+      'بارگذاری نقشهٔ صندلی‌ها بیشتر از معمول طول می‌کشد. لطفاً صبر کنید…',
+  couldNotReachCheckout: 'اتصال به صفحهٔ پرداخت ممکن نشد.',
   accessPausedTitle: 'این صندلی‌ها هم‌اکنون نگه داشته شده‌اند',
   accessPausedCopy:
       'برگزارکننده این انتخاب را موقتاً متوقف کرده است. چند دقیقهٔ دیگر دوباره تلاش کنید.',

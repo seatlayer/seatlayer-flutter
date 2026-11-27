@@ -344,6 +344,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsPt = SeatLayerPickerStrings(
   backToMap: 'Voltar ao mapa',
   mapDidNotLoad: 'O mapa de lugares não carregou',
   checkConnection: 'Verifica a tua ligação e tenta de novo.',
+  offline: 'Estás sem ligação',
+  backOnline: 'Ligação restabelecida',
+  stillHeld: 'Os teus lugares continuam reservados.',
+  updating: 'A atualizar…',
+  takingLonger: 'Está a demorar mais do que o habitual. Aguarda…',
+  loadingTakingLonger:
+      'O mapa de lugares está a demorar mais a carregar. Aguarda…',
+  couldNotReachCheckout: 'Não foi possível contactar o pagamento.',
   accessPausedTitle: 'Estes lugares estão retidos neste momento',
   accessPausedCopy:
       'O organizador pausou esta seleção. Tenta de novo dentro de alguns minutos.',

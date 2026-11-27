@@ -335,6 +335,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   backToMap: 'Natrag na plan',
   mapDidNotLoad: 'Plan mjesta se nije učitao',
   checkConnection: 'Provjerite vezu i pokušajte ponovno.',
+  offline: 'Izvan mreže ste',
+  backOnline: 'Ponovno na mreži',
+  stillHeld: 'Vaša su mjesta i dalje rezervirana.',
+  updating: 'Ažuriranje…',
+  takingLonger: 'Ovo traje dulje nego obično. Molimo pričekajte…',
+  loadingTakingLonger:
+      'Učitavanje plana mjesta traje dulje nego obično. Molimo pričekajte…',
+  couldNotReachCheckout: 'Nismo mogli pristupiti plaćanju.',
   accessPausedTitle: 'Ova su mjesta trenutačno blokirana',
   accessPausedCopy:
       'Organizator je pauzirao ovaj odabir. Pokušajte ponovno za nekoliko minuta.',

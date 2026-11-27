@@ -739,6 +739,29 @@ abstract final class SeatLayerStringTokens {
   /// Check your connection and try again.
   static const String checkConnection = 'Check your connection and try again.';
 
+  /// You’re offline
+  static const String offline = 'You’re offline';
+
+  /// Back online
+  static const String backOnline = 'Back online';
+
+  /// Your seats are still held.
+  static const String stillHeld = 'Your seats are still held.';
+
+  /// Updating…
+  static const String updating = 'Updating…';
+
+  /// This is taking longer than usual. Please wait…
+  static const String takingLonger =
+      'This is taking longer than usual. Please wait…';
+
+  /// The seat map is taking longer to load. Please wait…
+  static const String loadingTakingLonger =
+      'The seat map is taking longer to load. Please wait…';
+
+  /// Couldn’t reach checkout.
+  static const String couldNotReachCheckout = 'Couldn’t reach checkout.';
+
   /// These seats are on hold right now
   static const String accessPausedTitle = 'These seats are on hold right now';
 

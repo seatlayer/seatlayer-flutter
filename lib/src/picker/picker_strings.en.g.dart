@@ -304,6 +304,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsEn = SeatLayerPickerStrings(
   backToMap: 'Back to map',
   mapDidNotLoad: 'The seat map didn’t load',
   checkConnection: 'Check your connection and try again.',
+  offline: 'You’re offline',
+  backOnline: 'Back online',
+  stillHeld: 'Your seats are still held.',
+  updating: 'Updating…',
+  takingLonger: 'This is taking longer than usual. Please wait…',
+  loadingTakingLonger: 'The seat map is taking longer to load. Please wait…',
+  couldNotReachCheckout: 'Couldn’t reach checkout.',
   accessPausedTitle: 'These seats are on hold right now',
   accessPausedCopy:
       'The organizer has paused this selection. Try again in a few minutes.',

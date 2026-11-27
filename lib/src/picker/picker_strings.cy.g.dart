@@ -409,6 +409,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   backToMap: 'Yn ôl i\'r map',
   mapDidNotLoad: 'Ni lwythodd y map seddi',
   checkConnection: 'Gwiria dy gysylltiad a rho gynnig arall arni.',
+  offline: 'Rwyt ti all-lein',
+  backOnline: 'Ar-lein eto',
+  stillHeld: 'Mae dy seddi’n dal i gael eu cadw.',
+  updating: 'Yn diweddaru…',
+  takingLonger: 'Mae hyn yn cymryd mwy o amser nag arfer. Arhosa funud…',
+  loadingTakingLonger:
+      'Mae’r map seddi’n cymryd mwy o amser nag arfer i lwytho. Arhosa funud…',
+  couldNotReachCheckout: 'Methu cyrraedd y dudalen dalu.',
   accessPausedTitle: 'Mae\'r seddi hyn wedi\'u cadw ar hyn o bryd',
   accessPausedCopy:
       'Mae\'r trefnydd wedi oedi\'r dewis hwn. Rho gynnig arall arni ymhen ychydig funudau.',

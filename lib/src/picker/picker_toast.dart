@@ -12,6 +12,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import '../payloads.dart';
+import '../seat_layer_error.dart';
+import 'picker_cart_sheet.dart' show checkoutThroughHost;
+import 'picker_error_words.dart';
+import 'picker_models.dart';
+import 'picker_options.dart' show SeatLayerCheckoutCallback;
 import 'picker_availability.dart';
 import 'picker_a11y.dart';
 import 'picker_internal.dart';
@@ -27,6 +32,10 @@ import 'seat_layer_picker_theme.dart';
 /// Only the border changes between tones. A message the buyer did not ask for
 /// should read as the same object every time, coloured by how much it matters
 /// rather than repainted into a different component.
+/// How long a press waits for its answer before the picker says it is taking
+/// longer than usual.
+const Duration seatLayerSlowPressAfter = Duration(seconds: 10);
+
 enum SeatLayerPickerToastTone {
   /// A fact. "D-14 removed."
   neutral,
@@ -297,7 +306,12 @@ class SeatLayerPickerToastLayer extends StatefulWidget {
     super.key,
     this.bottomInset = 0,
     this.lifted = false,
+    this.onCheckout,
   });
+
+  /// The app's checkout, for "Try again" after the server failed a press.
+  /// Null offers no "Try again": the buyer presses the button again.
+  final SeatLayerCheckoutCallback? onCheckout;
 
   /// What the chrome standing on the bottom of the map already covers.
   final double bottomInset;
@@ -327,6 +341,12 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
   StreamSubscription<void>? _expiries;
   SeatLayerHoldLapse? _toldAboutLapse;
   bool? _wasSalesClosed;
+
+  /// The last failure told here, so one failure is told once.
+  Object? _toldFailure;
+
+  /// Runs while a press waits for its answer.
+  Timer? _slowPress;
 
   /// The last message spoken, so one toast is never announced twice.
   String? _spoken;
@@ -364,6 +384,8 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
   }
 
   void _detach() {
+    _slowPress?.cancel();
+    _slowPress = null;
     _controller?.removeListener(_onControllerChanged);
     _queue?.removeListener(_onQueue);
     unawaited(_conflicts?.cancel());
@@ -406,6 +428,8 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
       );
     }
     _wasSalesClosed = closed;
+    _tellFailure(controller);
+    _watchPress(controller);
 
     final lapse = controller.holdLapse;
     if (lapse == null) {
@@ -433,6 +457,67 @@ class _SeatLayerPickerToastLayerState extends State<SeatLayerPickerToastLayer> {
   }
 
   void _say(SeatLayerPickerToast toast) => _queue?.show(toast);
+
+  /// A press that failed for want of a connection, or on a server fault, is
+  /// told here, in amber, rather than in the red line, which stays for
+  /// refusals.
+  void _tellFailure(SeatLayerPickerController controller) {
+    final state = controller.state;
+    final error = state.error;
+    if (error == null ||
+        state.phase != SeatLayerPickerPhase.ready ||
+        identical(error, _toldFailure)) {
+      return;
+    }
+    _toldFailure = error;
+    final kind = pickerFailureKind(error);
+    if (kind == PickerFailureKind.other) return;
+    final command =
+        error is SeatLayerError ? controller.failureFor(error)?.command : null;
+    if (kind == PickerFailureKind.server && pickerSecuresSeats(command)) {
+      final checkout = widget.onCheckout;
+      _say(
+        SeatLayerPickerToast(
+          _strings.couldNotReachCheckout,
+          tone: SeatLayerPickerToastTone.warning,
+          actionLabel: checkout == null ? null : _strings.retry,
+          onAction: checkout == null
+              ? null
+              : () => ignorePickerAction(
+                    checkoutThroughHost(controller, checkout),
+                  ),
+        ),
+      );
+      return;
+    }
+    _say(
+      SeatLayerPickerToast(
+        _strings.checkConnection,
+        tone: SeatLayerPickerToastTone.warning,
+      ),
+    );
+  }
+
+  /// From ten seconds into a press without an answer, says it is taking
+  /// longer than usual.
+  void _watchPress(SeatLayerPickerController controller) {
+    final busy = controller.state.busyAction;
+    final waiting = busy == SeatLayerPickerBusyAction.creatingHold ||
+        busy == SeatLayerPickerBusyAction.findingBestAvailable;
+    if (!waiting) {
+      _slowPress?.cancel();
+      _slowPress = null;
+      return;
+    }
+    _slowPress ??= Timer(seatLayerSlowPressAfter, () {
+      if (!mounted) return;
+      final still = _controller?.state.busyAction;
+      if (still == SeatLayerPickerBusyAction.creatingHold ||
+          still == SeatLayerPickerBusyAction.findingBestAvailable) {
+        _say(SeatLayerPickerToast(_strings.takingLonger));
+      }
+    });
+  }
 
   /// Read a new toast out, once.
   ///

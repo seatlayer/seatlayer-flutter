@@ -81,6 +81,21 @@ abstract final class SeatLayerPickerMotion {
     milliseconds: SeatLayerMotionTokens.cardEnter,
   );
 
+  /// The connection status arriving: four points up and fading in.
+  static const Duration connectionIn =
+      Duration(milliseconds: SeatLayerMotionTokens.connectionIn);
+
+  /// The connection status's words changing in place.
+  static const Duration connectionWords =
+      Duration(milliseconds: SeatLayerMotionTokens.connectionWords);
+
+  /// One turn of the connection status's ring while the line comes back.
+  ///
+  /// Outside [catalog]'s budget: it is a loop, not a transition anything
+  /// waits on.
+  static const Duration connectionRing =
+      Duration(milliseconds: SeatLayerMotionTokens.connectionRing);
+
   /// How long a newly arrived card is left alone before it points at itself.
   ///
   /// The buyer is still reading the seat they just tapped; a highlight that
@@ -139,6 +154,8 @@ abstract final class SeatLayerPickerMotion {
     'pressSweep': pressSweep,
     'cardEnter': cardEnter,
     'thumbOut': thumbOut,
+    'connectionIn': connectionIn,
+    'connectionWords': connectionWords,
   };
 
   /// The one overshoot in the system, reserved for a buyer's own action

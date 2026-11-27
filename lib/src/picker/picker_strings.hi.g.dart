@@ -305,6 +305,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   backToMap: 'मैप पर वापस',
   mapDidNotLoad: 'सीट मैप लोड नहीं हुआ',
   checkConnection: 'अपना इंटरनेट कनेक्शन जाँचें और फिर कोशिश करें।',
+  offline: 'आप ऑफ़लाइन हैं',
+  backOnline: 'फिर से ऑनलाइन',
+  stillHeld: 'आपकी सीटें अब भी होल्ड पर हैं।',
+  updating: 'अपडेट हो रहा है…',
+  takingLonger: 'इसमें सामान्य से ज़्यादा समय लग रहा है। कृपया इंतज़ार करें…',
+  loadingTakingLonger:
+      'सीट मैप लोड होने में ज़्यादा समय लग रहा है। कृपया इंतज़ार करें…',
+  couldNotReachCheckout: 'चेकआउट से कनेक्ट नहीं हो सका।',
   accessPausedTitle: 'ये सीटें अभी होल्ड पर हैं',
   accessPausedCopy:
       'आयोजक ने यह चयन फ़िलहाल रोक दिया है। कुछ मिनट बाद फिर कोशिश करें।',

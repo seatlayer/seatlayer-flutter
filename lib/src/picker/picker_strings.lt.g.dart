@@ -354,6 +354,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   backToMap: 'Atgal į planą',
   mapDidNotLoad: 'Vietų planas neįsikėlė',
   checkConnection: 'Patikrinkite ryšį ir bandykite dar kartą.',
+  offline: 'Esate neprisijungę',
+  backOnline: 'Vėl prisijungta',
+  stillHeld: 'Jūsų vietos tebėra rezervuotos.',
+  updating: 'Atnaujinama…',
+  takingLonger: 'Tai trunka ilgiau nei įprasta. Palaukite…',
+  loadingTakingLonger: 'Vietų planas įkeliamas ilgiau nei įprastai. Palaukite…',
+  couldNotReachCheckout: 'Nepavyko pasiekti apmokėjimo.',
   accessPausedTitle: 'Šios vietos šiuo metu rezervuotos',
   accessPausedCopy:
       'Organizatorius pristabdė šį pasirinkimą. Pabandykite po kelių minučių.',

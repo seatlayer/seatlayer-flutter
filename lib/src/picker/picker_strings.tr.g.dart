@@ -305,6 +305,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsTr = SeatLayerPickerStrings(
   backToMap: 'Plana dön',
   mapDidNotLoad: 'Koltuk planı yüklenemedi',
   checkConnection: 'Bağlantınızı kontrol edip tekrar deneyin.',
+  offline: 'Çevrimdışısınız',
+  backOnline: 'Yeniden çevrimiçi',
+  stillHeld: 'Koltuklarınız hâlâ rezerve.',
+  updating: 'Güncelleniyor…',
+  takingLonger: 'Bu, her zamankinden uzun sürüyor. Lütfen bekleyin…',
+  loadingTakingLonger:
+      'Koltuk planının yüklenmesi uzun sürüyor. Lütfen bekleyin…',
+  couldNotReachCheckout: 'Ödeme sayfasına ulaşılamadı.',
   accessPausedTitle: 'Bu koltuklar şu anda beklemede',
   accessPausedCopy:
       'Organizatör bu seçimi duraklattı. Birkaç dakika sonra tekrar deneyin.',

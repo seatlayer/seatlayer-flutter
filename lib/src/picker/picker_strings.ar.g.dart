@@ -389,6 +389,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsAr = SeatLayerPickerStrings(
   backToMap: 'العودة إلى الخريطة',
   mapDidNotLoad: 'لم تُحمَّل خريطة المقاعد',
   checkConnection: 'تحقق من اتصالك وحاول مرة أخرى.',
+  offline: 'أنت غير متصل',
+  backOnline: 'عاد الاتصال',
+  stillHeld: 'مقاعدك ما زالت محجوزة.',
+  updating: 'جارٍ التحديث…',
+  takingLonger: 'يستغرق هذا وقتًا أطول من المعتاد. يرجى الانتظار…',
+  loadingTakingLonger:
+      'يستغرق تحميل خريطة المقاعد وقتًا أطول من المعتاد. يرجى الانتظار…',
+  couldNotReachCheckout: 'تعذّر الوصول إلى صفحة الدفع.',
   accessPausedTitle: 'هذه المقاعد محجوزة مؤقتًا الآن',
   accessPausedCopy:
       'أوقف المنظّم هذا الاختيار مؤقتًا. حاول مرة أخرى بعد بضع دقائق.',

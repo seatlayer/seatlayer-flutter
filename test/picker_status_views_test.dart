@@ -97,8 +97,10 @@ void main() {
     );
     await tester.pump();
     // What a failed page leaves on the picker: a developer's line, in English.
+    // A page the server refused; one that got no answer at all has its own
+    // panel (picker_connection_messages_test.dart).
     picker.value = picker.value.withError(const SeatLayerError.transport(
-      'page load failed: net::ERR_NAME_NOT_RESOLVED',
+      'page load failed: HTTP 404',
     ));
     await tester.pump();
     expect(picker.state.error, isA<SeatLayerError>());

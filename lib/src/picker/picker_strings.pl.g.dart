@@ -360,6 +360,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsPl = SeatLayerPickerStrings(
   backToMap: 'Wróć do planu',
   mapDidNotLoad: 'Plan miejsc się nie wczytał',
   checkConnection: 'Sprawdź połączenie i spróbuj ponownie.',
+  offline: 'Jesteś offline',
+  backOnline: 'Znów online',
+  stillHeld: 'Twoje miejsca są nadal zarezerwowane.',
+  updating: 'Aktualizowanie…',
+  takingLonger: 'To trwa dłużej niż zwykle. Poczekaj chwilę…',
+  loadingTakingLonger:
+      'Plan miejsc wczytuje się dłużej niż zwykle. Poczekaj chwilę…',
+  couldNotReachCheckout: 'Nie udało się połączyć z płatnością.',
   accessPausedTitle: 'Te miejsca są w tej chwili zablokowane',
   accessPausedCopy:
       'Organizator wstrzymał ten wybór. Spróbuj ponownie za kilka minut.',

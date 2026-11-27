@@ -319,6 +319,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   backToMap: 'Terug naar plattegrond',
   mapDidNotLoad: 'De zaalplattegrond is niet geladen',
   checkConnection: 'Controleer je verbinding en probeer het opnieuw.',
+  offline: 'Je bent offline',
+  backOnline: 'Weer online',
+  stillHeld: 'Je plaatsen blijven gereserveerd.',
+  updating: 'Bijwerken…',
+  takingLonger: 'Dit duurt langer dan normaal. Even geduld…',
+  loadingTakingLonger:
+      'Het laden van de zaalplattegrond duurt langer. Even geduld…',
+  couldNotReachCheckout: 'Kon de checkout niet bereiken.',
   accessPausedTitle: 'Deze plaatsen zijn nu even geblokkeerd',
   accessPausedCopy:
       'De organisator heeft deze selectie gepauzeerd. Probeer het over enkele minuten opnieuw.',

@@ -337,6 +337,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   backToMap: 'Înapoi la hartă',
   mapDidNotLoad: 'Harta locurilor nu s-a încărcat',
   checkConnection: 'Verifică-ți conexiunea și încearcă din nou.',
+  offline: 'Ești offline',
+  backOnline: 'Din nou online',
+  stillHeld: 'Locurile tale sunt în continuare rezervate.',
+  updating: 'Se actualizează…',
+  takingLonger: 'Durează mai mult decât de obicei. Te rugăm să aștepți…',
+  loadingTakingLonger:
+      'Harta locurilor se încarcă mai greu decât de obicei. Te rugăm să aștepți…',
+  couldNotReachCheckout: 'Nu am putut contacta plata.',
   accessPausedTitle: 'Aceste locuri sunt blocate momentan',
   accessPausedCopy:
       'Organizatorul a pus această selecție pe pauză. Încearcă din nou peste câteva minute.',

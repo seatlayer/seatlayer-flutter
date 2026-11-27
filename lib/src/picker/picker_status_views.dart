@@ -3,8 +3,13 @@
 /// and the wide layout's checkout bar.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../seat_layer_error.dart';
+import 'picker_connection_panel.dart';
+import 'picker_error_words.dart';
 import 'picker_internal.dart';
 import 'picker_money.dart';
 import 'picker_motion.dart';
@@ -259,7 +264,7 @@ class SeatLayerPickerCheckoutBar extends StatelessWidget {
 /// scope exists — minting a buyer token, loading its own catalogue — so
 /// [SeatLayerPickerLoadingView.standalone] takes the same two values directly
 /// and needs no scope at all.
-class SeatLayerPickerLoadingView extends StatelessWidget {
+class SeatLayerPickerLoadingView extends StatefulWidget {
   /// Creates the loading view, reading the scope above it.
   const SeatLayerPickerLoadingView({super.key})
       : theme = null,
@@ -281,10 +286,38 @@ class SeatLayerPickerLoadingView extends StatelessWidget {
   /// The words to use, or null to read them from the scope.
   final SeatLayerPickerStrings? strings;
 
+  /// How long the map may take before the view says it is taking longer.
+  static const Duration slowAfter = Duration(seconds: 8);
+
+  @override
+  State<SeatLayerPickerLoadingView> createState() =>
+      _SeatLayerPickerLoadingViewState();
+}
+
+class _SeatLayerPickerLoadingViewState
+    extends State<SeatLayerPickerLoadingView> {
+  Timer? _slow;
+  bool _isSlow = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _slow = Timer(SeatLayerPickerLoadingView.slowAfter, () {
+      if (mounted) setState(() => _isSlow = true);
+    });
+  }
+
+  @override
+  void dispose() {
+    _slow?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final palette = theme ?? seatLayerPickerThemeOf(context);
-    final words = strings ?? SeatLayerPickerScope.stringsOf(context);
+    final palette = widget.theme ?? seatLayerPickerThemeOf(context);
+    final words = widget.strings ?? SeatLayerPickerScope.stringsOf(context);
+    final line = _isSlow ? words.loadingTakingLonger : words.loading;
     // Scaled down, never cut, where the map is short: a phone held sideways
     // leaves the map 145 to 170 points, under the silhouette and its line.
     return Center(
@@ -295,12 +328,19 @@ class SeatLayerPickerLoadingView extends StatelessWidget {
           children: <Widget>[
             _VenueSilhouette(accent: palette.accent),
             const SizedBox(height: 16),
-            Text(
-              words.loading,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: palette.text,
-                fontFamily: palette.fontFamily,
+            // Read once when it changes: the slow line is news.
+            Semantics(
+              liveRegion: _isSlow,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 280),
+                child: Text(
+                  line,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: palette.text,
+                    fontFamily: palette.fontFamily,
+                  ),
+                ),
               ),
             ),
           ],
@@ -500,6 +540,21 @@ class SeatLayerPickerErrorView extends StatelessWidget {
     // bridge error [code]: …"), in English, and it reaches the app through
     // onError. The buyer reads the host's words, and the default sentence is
     // the title's, so by default the view says it once.
+    final error = controller?.state.error;
+    final kind =
+        error == null ? PickerFailureKind.other : pickerFailureKind(error);
+    // No connection at all: its own panel, which also tries again by itself.
+    // A page that only answered slowly keeps today's panel and its line.
+    if (controller != null &&
+        kind == PickerFailureKind.connection &&
+        error is! HandshakeTimeoutFailure) {
+      return PickerOfflinePanel(
+        controller: controller,
+        palette: palette,
+        words: words,
+        onRetry: onRetry ?? () => ignorePickerAction(controller.retry()),
+      );
+    }
     final text = message ?? words.errorMessage;
     final sentence =
         text.trim().isEmpty || text == words.mapDidNotLoad ? null : text;
@@ -536,16 +591,19 @@ class SeatLayerPickerErrorView extends StatelessWidget {
               const SizedBox(height: 4),
             ] else
               const SizedBox(height: 10),
-            Text(
-              words.checkConnection,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: palette.mutedText,
-                fontSize: 13,
-                fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
-                fontFamily: palette.fontFamily,
+            // A server that answered with a fault is not the buyer's
+            // connection, and the panel does not say it is.
+            if (kind != PickerFailureKind.server)
+              Text(
+                words.checkConnection,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: palette.mutedText,
+                  fontSize: 13,
+                  fontWeight: seatLayerBoldWeight(context, FontWeight.w600),
+                  fontFamily: palette.fontFamily,
+                ),
               ),
-            ),
             const SizedBox(height: 16),
             FilledButton(
               style: FilledButton.styleFrom(

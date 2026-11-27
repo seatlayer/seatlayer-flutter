@@ -82,6 +82,7 @@ mixin _PickerPageReload on ValueNotifier<SeatLayerPickerState> {
     controller._viewportReport.forget();
     controller._blockedRegions.forget();
     controller._seatView = null;
+    controller._connection.reset();
     // A new page starts in the colours of now.
     controller._themeForReady = null;
     // A retry is a second open, and its own wait starts here.

@@ -226,6 +226,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   backToMap: 'Quay lại sơ đồ',
   mapDidNotLoad: 'Không tải được sơ đồ ghế',
   checkConnection: 'Kiểm tra kết nối mạng và thử lại.',
+  offline: 'Bạn đang ngoại tuyến',
+  backOnline: 'Đã kết nối lại',
+  stillHeld: 'Ghế của bạn vẫn đang được giữ.',
+  updating: 'Đang cập nhật…',
+  takingLonger: 'Việc này đang lâu hơn bình thường. Vui lòng chờ…',
+  loadingTakingLonger: 'Sơ đồ ghế đang tải lâu hơn bình thường. Vui lòng chờ…',
+  couldNotReachCheckout: 'Không kết nối được trang thanh toán.',
   accessPausedTitle: 'Các ghế này đang tạm khóa',
   accessPausedCopy:
       'Ban tổ chức đã tạm dừng khu chọn ghế này. Vui lòng thử lại sau vài phút.',

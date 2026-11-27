@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../json.dart';
 import '../open_enums.dart';
 import '../payloads.dart';
+import 'picker_connection.dart';
 
 /// The floor id that means "every floor at once".
 ///
@@ -744,6 +745,7 @@ class SeatLayerPickerMapState {
     this.view3DFocusedSectionId,
     this.reportsView3DPosition = false,
     this.viewportInsets,
+    this.connection,
   });
 
   final String rung;
@@ -834,6 +836,9 @@ class SeatLayerPickerMapState {
   /// dropped command from an applied one without a round trip.
   final SeatLayerViewportInsets? viewportInsets;
 
+  /// The page's line to the server; null on a page that does not say it.
+  final SeatLayerConnectionState? connection;
+
   String get projection => viewMode;
   String? get floorId => activeFloorId;
 
@@ -907,6 +912,8 @@ class SeatLayerPickerMapState {
         viewportInsets: SeatLayerViewportInsets.fromJson(
           jGet(value, 'viewportInsets'),
         ),
+        connection:
+            SeatLayerConnectionState.fromJson(jGet(value, 'connection')),
       );
 }
 

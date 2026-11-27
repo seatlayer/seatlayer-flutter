@@ -254,6 +254,7 @@ Future<SeatLayerPickerStrings> pumpPhone(
   Object? actionError,
   bool inCheckout = false,
   bool tableCard = false,
+  String? connection,
 }) async {
   useFakeWebViewPlatform();
   putOnPhone(tester, phone);
@@ -263,11 +264,12 @@ Future<SeatLayerPickerStrings> pumpPhone(
   // above the whole-venue disc.
   final map = FakePickerMap(
     bundle: nativeChromeBundle(
-      capabilities: const <String>[
+      capabilities: <String>[
         'native-chrome-contract-v1',
         'viewport-insets-v1',
         'colorblind-safe',
         'venue-3d-controls-v1',
+        if (connection != null) seatLayerConnectionStateCapability,
       ],
       commands: const <String>[
         'picker.setThemeMode',
@@ -393,6 +395,13 @@ Future<SeatLayerPickerStrings> pumpPhone(
   }
   if (actionError != null) {
     picker.reportActionError(actionError);
+    await pumpToRest(tester);
+  }
+  if (connection != null) {
+    // What the page says when its line changes; the status waits three
+    // seconds before it says the device is offline.
+    map.emitEvent('connection.changed', <String, Object?>{'state': connection});
+    await tester.pump(const Duration(seconds: 3));
     await pumpToRest(tester);
   }
   return strings;

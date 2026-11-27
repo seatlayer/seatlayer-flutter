@@ -68,6 +68,10 @@ const Set<String> _holdCommands = <String>{
   'picker.setTableQuantity',
 };
 
+/// Whether [command] secures seats: a hold, or the step to checkout.
+bool pickerSecuresSeats(String? command) =>
+    command != null && _holdCommands.contains(command);
+
 /// Failures of the app, the page or the call itself, where asking again cannot
 /// help: a page the app cannot speak to, or a call made wrongly.
 const Set<String> _cannotRetry = <String>{
@@ -290,3 +294,54 @@ const Set<String> _takenCodes = <String>{
   'release_closed',
   'release_exhausted',
 };
+
+/// How a failure is told: a lost line, a server that answered with a fault, or
+/// anything else.
+enum PickerFailureKind {
+  /// No answer: the device or the line is down, or nothing came back in time.
+  connection,
+
+  /// The server answered, with a fault of its own (5xx).
+  server,
+
+  /// A refusal, or anything the two above do not cover.
+  other,
+}
+
+final RegExp _pageHttpStatus = RegExp(r'page load failed: HTTP (\d{3})');
+
+/// Which kind of failure [error] is.
+PickerFailureKind pickerFailureKind(Object error) {
+  if (error is TimeoutFailure || error is HandshakeTimeoutFailure) {
+    return PickerFailureKind.connection;
+  }
+  if (error is TransportFailure) {
+    final status = int.tryParse(
+      _pageHttpStatus.firstMatch(error.detail)?.group(1) ?? '',
+    );
+    if (status != null) {
+      return status >= 500 ? PickerFailureKind.server : PickerFailureKind.other;
+    }
+    return error.detail.startsWith('page load failed')
+        ? PickerFailureKind.connection
+        : PickerFailureKind.other;
+  }
+  if (error is! BridgeFailure) return PickerFailureKind.other;
+  final payload = error.payload;
+  final status = jInt(jGet(payload.details, 'status'));
+  if (error.code == 'sl_timeout' || error.code == 'host_timeout') {
+    return PickerFailureKind.connection;
+  }
+  if (status == null) {
+    return _noConnection.hasMatch(payload.message)
+        ? PickerFailureKind.connection
+        : PickerFailureKind.other;
+  }
+  return status >= 500 &&
+          (error.code == 'command_failed' ||
+              error.code == 'picker_error' ||
+              error.code == 'internal_error' ||
+              payload.message.startsWith('request_failed'))
+      ? PickerFailureKind.server
+      : PickerFailureKind.other;
+}
