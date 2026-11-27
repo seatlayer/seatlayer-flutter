@@ -5,7 +5,7 @@
 **Changed**
 
 - **A table booked as one, on the seat card,** says how many guests it takes and its name: "Gallery · Guests 4 · Table T2", or "Guests 2–6" where the buyer chooses how many. It read "Row T2 · Seat T2". The table's name shows with or without a section, and the 3D view's caption names the table the same way. The words are new strings, `SeatLayerPickerStrings.guestsWord` and `tableWord`, translated in every language the picker speaks.
-- **Map 1.0.5** (was 1.0.4). A standing area's line in the cart reads the area's name, for example "Floor", where it showed an internal label. A standing area keeps its "N left" count after a theme or language switch, where it showed its capacity.
+- **Map 1.0.6** (was 1.0.4). A standing area's line in the cart reads the area's name, for example "Floor", where it showed an internal label. A standing area keeps its "N left" count after a theme or language switch, where it showed its capacity. On a phone the level stack no longer narrows the whole map: the venue fits the full width above it, or beside it when it is too tall, and the stack never covers seats. When the accessibility filter takes the map to another level, the level stack marks that level. `selectObjects` with a seat on a level that is not drawn returns that seat and puts it in the cart at once. A whole or party table's `screenPoint` is the middle of its chairs, so the seat card sits on the table.
 
 **Fixed**
 
