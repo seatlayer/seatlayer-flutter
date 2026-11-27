@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import '../json.dart';
 import '../payloads.dart';
+import '../picker/picker_connection.dart';
 import '../seat_layer_error.dart';
 import '../seat_layer_surface_configuration.dart';
 import 'bridge_client.dart';
@@ -45,12 +46,15 @@ abstract class SeatLayerBridgeSession<
   int? _timeToHelloMs;
   bool _hasFinished = false;
   bool _disposed = false;
+  SeatLayerConnectionState? _connection;
 
   final _onReady = StreamController<ReadyInfo>.broadcast();
   final _onError = StreamController<SeatLayerError>.broadcast();
   final _onUnknownEvent = StreamController<UnknownEvent>.broadcast();
   final _onBridgeEvent = StreamController<EventSignal>.broadcast();
   final _onPageLost = StreamController<void>.broadcast();
+  final _onConnection =
+      StreamController<SeatLayerConnectionState>.broadcast();
 
   // MARK: - State
 
@@ -65,6 +69,10 @@ abstract class SeatLayerBridgeSession<
 
   bool get isReady => _readyInfo != null;
 
+  /// The page's line to the server, as its last `connection.changed` said;
+  /// null until a page that lists `connection-state-v1` says it.
+  SeatLayerConnectionState? get connection => _connection;
+
   // MARK: - Event streams
 
   /// The handshake completed and the chart rendered. Check `mode` —
@@ -77,6 +85,9 @@ abstract class SeatLayerBridgeSession<
 
   /// An event this build does not model — a bundle newer than the app.
   Stream<UnknownEvent> get onUnknownEvent => _onUnknownEvent.stream;
+
+  /// Each change of the page's line to the server ([connection]).
+  Stream<SeatLayerConnectionState> get onConnection => _onConnection.stream;
 
   /// Every accepted bridge event, before raw-chart routing.
   ///
@@ -142,6 +153,7 @@ abstract class SeatLayerBridgeSession<
     _readyInfo = null;
     _bundleInfo = null;
     _protocolRevision = null;
+    _connection = null;
 
     // A fresh client so a reload never inherits stale correlations or event
     // sequence watermarks from a previous chart.
@@ -321,6 +333,13 @@ abstract class SeatLayerBridgeSession<
         );
       case 'access.token.request':
         unawaited(_provideBuyerAccessToken(payload));
+      case 'connection.changed':
+        final state =
+            SeatLayerConnectionState.fromJson(jGet(payload, 'state'));
+        if (state != null && state != _connection) {
+          _connection = state;
+          _onConnection.add(state);
+        }
       default:
         handleSurfaceEvent(name, payload);
     }
@@ -454,6 +473,7 @@ abstract class SeatLayerBridgeSession<
     _bundleInfo = null;
     _protocolRevision = null;
     _hasFinished = false;
+    _connection = null;
   }
 
   /// Whether [dispose] has run.
@@ -471,5 +491,6 @@ abstract class SeatLayerBridgeSession<
     _onUnknownEvent.close();
     _onBridgeEvent.close();
     _onPageLost.close();
+    _onConnection.close();
   }
 }

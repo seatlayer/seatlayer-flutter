@@ -11,7 +11,6 @@ import 'picker_connection.dart';
 import 'picker_connection_status.dart';
 import 'picker_strings.dart';
 import 'picker_tokens.g.dart';
-import 'seat_layer_picker_controller.dart';
 import 'seat_layer_picker_theme.dart';
 
 /// How long the panel waits before each retry of its own: 10 s, 20 s, then
@@ -23,7 +22,7 @@ Duration pickerOfflineRetryAfter(int tries) => switch (tries) {
     };
 
 /// How many retries a picker has made since it last opened, kept across the
-/// panel being rebuilt by each retry.
+/// panel being rebuilt (or taken down and put back) by each retry.
 final Expando<_Tries> _tries = Expando<_Tries>('offline retries');
 
 class _Tries {
@@ -39,14 +38,15 @@ class PickerOfflinePanel extends StatefulWidget {
   /// Creates the panel.
   const PickerOfflinePanel({
     super.key,
-    required this.controller,
+    required this.owner,
     required this.palette,
     required this.words,
     required this.onRetry,
   });
 
-  /// The picker whose page did not open.
-  final SeatLayerPickerController controller;
+  /// What keeps the count of retries: the picker whose page did not open,
+  /// which outlives this panel.
+  final Object owner;
 
   /// The palette to paint with.
   final SeatLayerResolvedPickerTheme palette;
@@ -66,7 +66,7 @@ class _PickerOfflinePanelState extends State<PickerOfflinePanel>
   Timer? _retry;
 
   _Tries get _count {
-    final tries = _tries[widget.controller] ??= _Tries();
+    final tries = _tries[widget.owner] ??= _Tries();
     // A picker that has been fine for a while starts the steps again.
     if (DateTime.now().difference(tries.last) > const Duration(minutes: 2)) {
       tries.count = 0;

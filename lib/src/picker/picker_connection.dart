@@ -30,6 +30,12 @@ enum SeatLayerConnectionState {
       };
 }
 
+/// Whether the page's line to the server is down ([state] offline or
+/// reconnecting), so a hold clock at 0:00 is not an answer yet.
+bool seatLayerLineDown(SeatLayerConnectionState? state) =>
+    state == SeatLayerConnectionState.offline ||
+    state == SeatLayerConnectionState.reconnecting;
+
 /// What the picker's connection status says.
 enum SeatLayerConnectionShown {
   /// Nothing: the line is fine, or nothing has been wrong long enough.

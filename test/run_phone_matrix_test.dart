@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/seatlayer.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
+import 'package:webview_flutter_platform_interface/webview_flutter_platform_interface.dart';
 
 import 'fake_webview_platform.dart';
 import 'phone_matrix_harness.dart';
@@ -28,7 +29,14 @@ enum RunPhoneState {
 
   /// The run could not be shown: the event picker's failure view.
   failed,
+
+  /// The page could not load for want of a network: the offline panel.
+  offline,
 }
+
+/// The two states the app draws in place of the page.
+bool _inPlaceOfPage(RunPhoneState state) =>
+    state == RunPhoneState.failed || state == RunPhoneState.offline;
 
 Future<SeatLayerPickerStrings> _pumpRun(
   WidgetTester tester,
@@ -82,6 +90,18 @@ Future<SeatLayerPickerStrings> _pumpRun(
   );
   await tester.tap(find.text('Open'));
   await tester.pumpAndSettle();
+  if (state == RunPhoneState.offline) {
+    page.fake.resourceErrors.last(
+      const WebResourceError(
+        errorCode: -1009,
+        description: 'net::ERR_INTERNET_DISCONNECTED',
+        errorType: WebResourceErrorType.hostLookup,
+        isForMainFrame: true,
+      ),
+    );
+    await pumpToRest(tester);
+    return strings;
+  }
   if (state == RunPhoneState.failed) {
     await page.fail(tester);
     await pumpToRest(tester);
@@ -100,9 +120,7 @@ void _expectRunLayout(WidgetTester tester, Phone phone,
   // The bar stands under the safe area's top; the page fills the rest.
   final bar = tester.getRect(find.byType(SeatLayerHeaderBar));
   final page = tester.getRect(find.byType(
-    state == RunPhoneState.failed
-        ? SeatLayerPickerErrorView
-        : SeatLayerRunView,
+    _inPlaceOfPage(state) ? SeatLayerPickerErrorView : SeatLayerRunView,
   ));
   // Under the status bar, on the page's ground, as on the event page.
   expect(bar.top, phone.insets.top);
@@ -112,7 +130,7 @@ void _expectRunLayout(WidgetTester tester, Phone phone,
   // no room).
   expect(
     page.bottom,
-    state == RunPhoneState.failed
+    _inPlaceOfPage(state)
         ? phone.size.height
         : phone.size.height - phone.insets.bottom,
   );
@@ -123,7 +141,11 @@ void _expectRunLayout(WidgetTester tester, Phone phone,
     find.byType(SeatLayerHoldClock),
     state == RunPhoneState.held ? findsOneWidget : findsNothing,
   );
-  if (state == RunPhoneState.failed) {
+  if (state == RunPhoneState.offline) {
+    expect(find.text(strings.offline), findsOneWidget);
+    expect(find.text(strings.mapDidNotLoad), findsNothing);
+  }
+  if (_inPlaceOfPage(state)) {
     expect(find.text(strings.retry), findsOneWidget);
     expect(
       tester.getSize(find.widgetWithText(FilledButton, strings.retry)).height,
@@ -233,7 +255,8 @@ void main() {
     final phone390 = uprightPhones.firstWhere((phone) => phone.name == '390');
     final phone430 = uprightPhones.firstWhere((phone) => phone.name == '430');
     for (final brightness in Brightness.values) {
-      for (final state in RunPhoneState.values) {
+      for (final state in RunPhoneState.values
+          .where((state) => state != RunPhoneState.offline)) {
         final name = 'run_390_${state.name}_${brightness.name}';
         testWidgets(name, tags: goldenTag, (tester) async {
           await shoot(tester, name, phone390, state, brightness: brightness);

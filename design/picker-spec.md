@@ -2897,9 +2897,21 @@ the handshake (`sys.error`, `sys.incompatible` or no answer in time). Under the
 bar stands the event picker's own failure view (`SeatLayerPickerErrorView`,
 §3.13.2: `strings.mapDidNotLoad`, `strings.checkConnection`, `strings.retry`),
 no new words or tokens. Retry boots a new page; the dismiss
-control closes at once (`closed`), as there is no page to ask. A `failed`
+control closes at once (`closed`), as there is no page to ask. A page that
+could not load because nothing answered gets §3.4.2's offline panel instead,
+with its retries at 10 and 20 s, then every 30 s, while the app is in front;
+one whose server failed says `strings.mapDidNotLoad` without
+`strings.checkConnection`. A `failed`
 status after `ready` is the page's own (a hold it could not make) and stays on
 the page.
+
+**Connection.** The page (`connection-state-v1`) draws its own connection
+status on its map's top line, where §3.4.2 puts the event page's: only the page
+knows where that line and its Map/3D control are. The app does not send
+`init.config.connectionStatus`. It follows `connection.changed` for the bar:
+while the page says `offline` or `reconnecting`, a hold pill that reaches
+`0:00` stays at `0:00` in grey (§3.13.6) until the page says what became of the
+hold.
 
 **Follows the app.** The boot side goes in `init.config.theme`; a later flip is
 `season.setThemeMode`, in place. The app going to the background and coming back
@@ -2950,8 +2962,14 @@ frame included: runtime 1.0.0's run page has no command to repaint in place,
 and a reload would take the buyer's seats. The app going to the background and
 coming back is `group.lifecycle`.
 
-**Could not load.** As §3.16: the failure view (§3.13.2) under the bar, Retry
+**Could not load.** As §3.16: the failure view (§3.13.2) under the bar, or the
+offline panel for a page that could not load for want of a network; Retry
 boots a new page, the dismiss control closes at once.
+
+**Connection.** As §3.16: the page draws its status on its map's top line, with
+the run's own lines in it (securing, the answer missing, the reference to
+quote, and its Try again); the app keeps the hold pill at a grey `0:00` while
+the line is down.
 
 **Checkout.** `group.checkout` hands the hold to the app (once per operation
 id; it carries no price); the app's server prices and books it, then
