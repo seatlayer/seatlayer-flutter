@@ -338,6 +338,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsKu = SeatLayerPickerStrings(
   chooseSeats: 'Cihên xwe hilbijêre',
   chooseTickets: 'Bilêtan hilbijêre',
   placeWord: 'CIH',
+  guestsWord: 'Mêvan',
+  tableWord: 'Mase',
   ticketWord: 'Bilêt',
   passport: 'Profîla cih',
   venue3D: '3D',

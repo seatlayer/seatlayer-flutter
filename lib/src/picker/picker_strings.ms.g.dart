@@ -258,6 +258,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsMs = SeatLayerPickerStrings(
   chooseSeats: 'Pilih tempat duduk anda',
   chooseTickets: 'Pilih tiket',
   placeWord: 'TEMPAT',
+  guestsWord: 'Tetamu',
+  tableWord: 'Meja',
   ticketWord: 'Tiket',
   passport: 'Profil tempat duduk',
   venue3D: '3D',

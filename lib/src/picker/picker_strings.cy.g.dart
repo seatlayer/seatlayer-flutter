@@ -434,6 +434,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCy = SeatLayerPickerStrings(
   chooseSeats: 'Dewisa dy seddi',
   chooseTickets: 'Dewisa docynnau',
   placeWord: 'LLE',
+  guestsWord: 'Gwesteion',
+  tableWord: 'Bwrdd',
   ticketWord: 'Tocyn',
   passport: 'Proffil y sedd',
   venue3D: '3D',

@@ -33,6 +33,8 @@ class SeatLayerPickerStrings {
     this.rowWord = SeatLayerStringTokens.rowWord,
     this.seatWord = SeatLayerStringTokens.seatWord,
     this.placeWord = SeatLayerStringTokens.placeWord,
+    this.guestsWord = SeatLayerStringTokens.guestsWord,
+    this.tableWord = SeatLayerStringTokens.tableWord,
     this.viewFromHere = SeatLayerStringTokens.viewFromHere,
     this.sightline = _defaultSightline,
     this.passport = SeatLayerStringTokens.passport,
@@ -344,6 +346,12 @@ class SeatLayerPickerStrings {
 
   /// Eyebrow over the seat cell of a booth, whose seats are places.
   final String placeWord;
+
+  /// "Guests" — the seat card's word over a table's party size.
+  final String guestsWord;
+
+  /// "Table" — the seat card's word over a table's name.
+  final String tableWord;
 
   /// Confirm-card pill opening the seat-view photo.
   final String viewFromHere;

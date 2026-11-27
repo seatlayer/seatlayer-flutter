@@ -334,6 +334,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   chooseSeats: 'Изберете местата си',
   chooseTickets: 'Изберете билети',
   placeWord: 'МЯСТО',
+  guestsWord: 'Гости',
+  tableWord: 'Маса',
   ticketWord: 'Билет',
   passport: 'Профил на мястото',
   venue3D: '3D',

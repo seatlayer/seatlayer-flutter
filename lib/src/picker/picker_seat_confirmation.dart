@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../open_enums.dart';
 import '../payloads.dart';
+import 'picker_confirm_card.dart' show pickerTableIdentity;
 import 'picker_internal.dart';
 import 'picker_money.dart';
 import 'picker_seat_notes.dart';
@@ -90,27 +91,33 @@ class _SeatLayerPickerSeatConfirmationState
         .where((item) => item.key == seat.categoryKey)
         .firstOrNull;
     final categoryColor = pickerColor(category?.color) ?? theme.accent;
-    final categoryLabel = category?.label ?? seat.categoryKey ?? strings.ticketWord;
+    final categoryLabel =
+        category?.label ?? seat.categoryKey ?? strings.ticketWord;
+    final table = pickerTableIdentity(seat, strings);
     final identity = <({String key, String value})>[
       if (seat.sectionLabel?.trim().isNotEmpty == true)
         (key: strings.sectionWord, value: seat.sectionLabel!.trim()),
-      if (seat.rowLabel?.trim().isNotEmpty == true)
+      if (table != null)
+        for (final (word, value) in table) (key: word, value: value)
+      else ...[
+        if (seat.rowLabel?.trim().isNotEmpty == true)
+          (
+            key: seat.displayType?.trim().isNotEmpty == true
+                ? seat.displayType!.trim()
+                : seat.rowType?.trim().isNotEmpty == true
+                    ? seat.rowType!.trim()
+                    : strings.rowWord,
+            value: seat.rowLabel!.trim(),
+          ),
         (
-          key: seat.displayType?.trim().isNotEmpty == true
-              ? seat.displayType!.trim()
-              : seat.rowType?.trim().isNotEmpty == true
-                  ? seat.rowType!.trim()
-                  : strings.rowWord,
-          value: seat.rowLabel!.trim(),
+          key: seat.objectType == ObjectType.booth
+              ? strings.placeWord
+              : strings.seatWord,
+          value: seat.seatNumber?.trim().isNotEmpty == true
+              ? seat.seatNumber!.trim()
+              : seat.buyerFacingLabel,
         ),
-      (
-        key: seat.objectType == ObjectType.booth
-            ? strings.placeWord
-            : strings.seatWord,
-        value: seat.seatNumber?.trim().isNotEmpty == true
-            ? seat.seatNumber!.trim()
-            : seat.buyerFacingLabel,
-      ),
+      ],
     ];
     // The same rows the phone's card draws, in the same order — this card used
     // to name a wheelchair provision and ONE limited-view line in which

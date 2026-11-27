@@ -362,6 +362,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsRo = SeatLayerPickerStrings(
   chooseSeats: 'Alege-ți locurile',
   chooseTickets: 'Alege bilete',
   placeWord: 'LOC',
+  guestsWord: 'Invitați',
+  tableWord: 'Masă',
   ticketWord: 'Bilet',
   passport: 'Fișa locului',
   venue3D: '3D',

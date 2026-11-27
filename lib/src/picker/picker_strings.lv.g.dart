@@ -361,6 +361,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   chooseSeats: 'Izvēlieties savas vietas',
   chooseTickets: 'Izvēlieties biļetes',
   placeWord: 'VIETA',
+  guestsWord: 'Viesi',
+  tableWord: 'Galds',
   ticketWord: 'Biļete',
   passport: 'Vietas profils',
   venue3D: '3D',

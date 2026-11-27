@@ -124,6 +124,43 @@ void main() {
     }
   });
 
+  // A whole table: its party size and its name fit the card's cells.
+  group('a table on the seat card', () {
+    for (final phone in <Phone>[...uprightPhones, ...sidewaysPhones]) {
+      for (final textScale in const <double>[1, 1.3, 2]) {
+        for (final tag in const <String>['en', 'el', 'ar']) {
+          testWidgets('$phone, text $textScale, $tag', (tester) async {
+            final strings = await pumpPhone(
+              tester,
+              phone,
+              PhoneState.card,
+              textScale: textScale,
+              locale: Locale(tag),
+              tableCard: true,
+            );
+            expectPhoneLayout(tester, phone, strings);
+            for (final words in <String>[
+              strings.guestsWord.toUpperCase(),
+              '8',
+              strings.tableWord.toUpperCase(),
+              'T12',
+            ]) {
+              final text = tester.renderObject<RenderParagraph>(
+                find
+                    .descendant(
+                      of: find.text(words),
+                      matching: find.byType(RichText),
+                    )
+                    .first,
+              );
+              expect(text.didExceedMaxLines, isFalse, reason: words);
+            }
+          });
+        }
+      }
+    }
+  });
+
   // Back from checkout with a seat to change: the words, and the way out.
   group('a refused action with a way out', () {
     const refusal = SeatLayerError.bridge(

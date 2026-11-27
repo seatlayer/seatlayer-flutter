@@ -383,6 +383,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsSk = SeatLayerPickerStrings(
   chooseSeats: 'Vyberte si miesta',
   chooseTickets: 'Vyberte vstupenky',
   placeWord: 'MIESTO',
+  guestsWord: 'Hostia',
+  tableWord: 'Stôl',
   ticketWord: 'Vstupenka',
   passport: 'Profil miesta',
   venue3D: '3D',

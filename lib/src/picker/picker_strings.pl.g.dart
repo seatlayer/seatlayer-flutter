@@ -385,6 +385,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsPl = SeatLayerPickerStrings(
   chooseSeats: 'Wybierz swoje miejsca',
   chooseTickets: 'Wybierz bilety',
   placeWord: 'MIEJSCE',
+  guestsWord: 'Goście',
+  tableWord: 'Stolik',
   ticketWord: 'Bilet',
   passport: 'Profil miejsca',
   venue3D: '3D',

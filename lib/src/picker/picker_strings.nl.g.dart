@@ -344,6 +344,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsNl = SeatLayerPickerStrings(
   chooseSeats: 'Kies je plaatsen',
   chooseTickets: 'Tickets kiezen',
   placeWord: 'PLAATS',
+  guestsWord: 'Gasten',
+  tableWord: 'Tafel',
   ticketWord: 'Ticket',
   passport: 'Plaatsprofiel',
   venue3D: '3D',

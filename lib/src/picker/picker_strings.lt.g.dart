@@ -379,6 +379,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsLt = SeatLayerPickerStrings(
   chooseSeats: 'Pasirinkite savo vietas',
   chooseTickets: 'Pasirinkite bilietus',
   placeWord: 'VIETA',
+  guestsWord: 'Svečiai',
+  tableWord: 'Stalas',
   ticketWord: 'Bilietas',
   passport: 'Vietos profilis',
   venue3D: '3D',

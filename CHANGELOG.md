@@ -4,6 +4,7 @@
 
 **Changed**
 
+- **A table booked as one, on the seat card,** says how many guests it takes and its name: "Gallery · Guests 4 · Table T2", or "Guests 2–6" where the buyer chooses how many. It read "Row T2 · Seat T2". The table's name shows with or without a section, and the 3D view's caption names the table the same way. The words are new strings, `SeatLayerPickerStrings.guestsWord` and `tableWord`, translated in every language the picker speaks.
 - **Map 1.0.5** (was 1.0.4). A standing area's line in the cart reads the area's name, for example "Floor", where it showed an internal label. A standing area keeps its "N left" count after a theme or language switch, where it showed its capacity.
 
 **Fixed**

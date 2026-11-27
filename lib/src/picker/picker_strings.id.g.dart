@@ -255,6 +255,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   chooseSeats: 'Pilih kursi Anda',
   chooseTickets: 'Pilih tiket',
   placeWord: 'TEMPAT',
+  guestsWord: 'Tamu',
+  tableWord: 'Meja',
   ticketWord: 'Tiket',
   passport: 'Profil kursi',
   venue3D: '3D',

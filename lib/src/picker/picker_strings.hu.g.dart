@@ -333,6 +333,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   chooseSeats: 'Válaszd ki a helyeidet',
   chooseTickets: 'Válassz jegyeket',
   placeWord: 'HELY',
+  guestsWord: 'Vendégek',
+  tableWord: 'Asztal',
   ticketWord: 'Jegy',
   passport: 'Hely adatlapja',
   venue3D: '3D',

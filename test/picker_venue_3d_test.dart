@@ -306,6 +306,44 @@ void main() {
     expect(find.textContaining('Seat'), findsNothing);
   });
 
+  testWidgets('the caption names a table booked as one as its card does',
+      (tester) async {
+    final map = FakePickerMap(bundle: _venueBundle());
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+
+    await tester.pumpWidget(pickerHarness(map, const SeatLayerVenue3D()));
+    final snapshot = _seated(at: 'seat-a-1');
+    final selection = snapshot['selection']! as Map<String, Object?>;
+    selection['seats'] = (selection['seats']! as List<Object?>)
+        .map((seat) => <String, Object?>{
+              ...(seat! as Map<String, Object?>)
+                ..remove('seatNumber')
+                ..remove('displayType'),
+              'sectionLabel': 'Gallery',
+              'label': 'T2',
+              'displayLabel': 'T2',
+              'rowLabel': 'T2',
+              'objectType': 'table',
+              'bookingMode': 'whole',
+              'capacity': 4,
+            })
+        .toList(growable: false);
+    (snapshot['map']! as Map<String, Object?>)['view3dTargetSeat'] =
+        (selection['seats']! as List<Object?>).first;
+    map.emit(snapshot);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Gallery · Guests 4 · Table T2 · '
+        '${const SeatLayerPickerStrings().viewFromYourSeat}',
+      ),
+      findsOneWidget,
+    );
+    expect(find.textContaining('Row T2'), findsNothing);
+  });
+
   testWidgets('stepping retargets the scene rather than rebuilding it',
       (tester) async {
     final map = FakePickerMap(bundle: _venueBundle());

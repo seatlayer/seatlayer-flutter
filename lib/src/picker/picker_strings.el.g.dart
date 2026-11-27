@@ -341,6 +341,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   chooseSeats: 'Επιλέξτε τις θέσεις σας',
   chooseTickets: 'Επιλέξτε εισιτήρια',
   placeWord: 'ΘΕΣΗ',
+  guestsWord: 'Καλεσμένοι',
+  tableWord: 'Τραπέζι',
   ticketWord: 'Εισιτήριο',
   passport: 'Προφίλ θέσης',
   venue3D: '3D',

@@ -227,6 +227,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsZhHant =
       chooseSeats: '選擇座位',
       chooseTickets: '選擇門票',
       placeWord: '席位',
+      guestsWord: '賓客',
+      tableWord: '桌位',
       ticketWord: '票券',
       passport: '座位檔案',
       venue3D: '3D',

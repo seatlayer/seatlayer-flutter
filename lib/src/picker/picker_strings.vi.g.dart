@@ -251,6 +251,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsVi = SeatLayerPickerStrings(
   chooseSeats: 'Chọn ghế của bạn',
   chooseTickets: 'Chọn vé',
   placeWord: 'CHỖ',
+  guestsWord: 'Khách',
+  tableWord: 'Bàn',
   ticketWord: 'Vé',
   passport: 'Hồ sơ ghế',
   venue3D: '3D',

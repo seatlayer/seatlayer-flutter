@@ -442,6 +442,41 @@ void main() {
       expect(find.text('SECTION'), findsNothing);
     });
 
+    testWidgets('names a table booked as one by its guests and its name',
+        (tester) async {
+      final snapshot = pickerSnapshot();
+      final selection = Map<String, Object?>.from(
+        snapshot['selection']! as Map<String, Object?>,
+      );
+      selection['seats'] = (selection['seats']! as List<Object?>)
+          .map((item) => <String, Object?>{
+                ...(item! as Map<String, Object?>)
+                  ..remove('seatNumber')
+                  ..remove('displayType'),
+                'label': 'T2',
+                'displayLabel': 'T2',
+                'rowLabel': 'T2',
+                'objectType': 'table',
+                'bookingMode': 'variable',
+                'minOccupancy': 2,
+                'maxOccupancy': 6,
+              })
+          .toList();
+      await _mount(
+        tester,
+        const SeatLayerPickerSeatConfirmation(),
+        <String, Object?>{...snapshot, 'selection': selection},
+      );
+
+      expect(find.text('Section'), findsOneWidget);
+      expect(find.text('Guests'), findsOneWidget);
+      expect(find.text('2–6'), findsOneWidget);
+      expect(find.text('Table'), findsOneWidget);
+      expect(find.text('T2'), findsOneWidget);
+      expect(find.text('Row'), findsNothing);
+      expect(find.text('Seat'), findsNothing);
+    });
+
     testWidgets('and never upper-cases a language in code', (tester) async {
       final turkish = SeatLayerPickerStrings.forLocale(const Locale('tr'));
       await _mount(

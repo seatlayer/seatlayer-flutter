@@ -54,6 +54,12 @@ abstract final class SeatLayerStringTokens {
   /// Place
   static const String placeWord = 'Place';
 
+  /// Guests
+  static const String guestsWord = 'Guests';
+
+  /// Table
+  static const String tableWord = 'Table';
+
   /// View from here
   static const String viewFromHere = 'View from here';
 

@@ -291,14 +291,19 @@ class _SeatLayerConfirmCardState extends State<SeatLayerConfirmCard> {
     // numbers, a colour swatch, a word and an amount — in the order they are
     // painted. The card is a dialog, so it is NAMED, and the name is the
     // question it is asking: this seat, this category, this price.
+    final table = pickerTableIdentity(seat, strings);
     final spokenIdentity = strings.seatIdentity(<String>[
       if (seat.sectionLabel?.trim().isNotEmpty ?? false)
         seat.sectionLabel!.trim(),
-      if (seat.rowLabel?.trim().isNotEmpty ?? false)
-        '${_IdentityGrid._rowWord(seat, strings)} '
-            '${seat.rowLabel!.trim()}',
-      '${seatLayerSpokenWord(_IdentityGrid._seatWord(seat, strings))} '
-          '${seat.buyerFacingLabel}',
+      if (table != null)
+        for (final (word, value) in table) '$word $value'
+      else ...[
+        if (seat.rowLabel?.trim().isNotEmpty ?? false)
+          '${_IdentityGrid._rowWord(seat, strings)} '
+              '${seat.rowLabel!.trim()}',
+        '${seatLayerSpokenWord(_IdentityGrid._seatWord(seat, strings))} '
+            '${seat.buyerFacingLabel}',
+      ],
       if (category != null) category.label,
       if (selectedPrice != null)
         pickerMoney(context, selectedPrice, selectedCurrency),

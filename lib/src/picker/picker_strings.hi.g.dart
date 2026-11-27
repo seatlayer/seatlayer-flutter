@@ -330,6 +330,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHi = SeatLayerPickerStrings(
   chooseSeats: 'अपनी सीटें चुनें',
   chooseTickets: 'टिकट चुनें',
   placeWord: 'स्थान',
+  guestsWord: 'मेहमान',
+  tableWord: 'टेबल',
   ticketWord: 'टिकट',
   passport: 'सीट प्रोफ़ाइल',
   venue3D: '3D',
