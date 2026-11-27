@@ -182,11 +182,18 @@ class SeatLayerHeaderBar extends StatelessWidget {
                   child: _air(
                     compact,
                     title != null
-                        ? _HeaderTitle(
-                            theme: theme,
-                            name: title!,
-                            details: details,
-                            compact: compact,
+                        // The event's name is the screen's heading, a node of
+                        // its own: merged with the close button it read as
+                        // part of that button.
+                        ? Semantics(
+                            container: true,
+                            header: true,
+                            child: _HeaderTitle(
+                              theme: theme,
+                              name: title!,
+                              details: details,
+                              compact: compact,
+                            ),
                           )
                         : const SizedBox.shrink(),
                   ),
@@ -268,6 +275,7 @@ class _CloseRing extends StatelessWidget {
     // The target is the line, so it has to be the line the header was told to
     // draw rather than the default the tokens ship.
     return Semantics(
+      container: true,
       button: true,
       label: tooltip,
       child: Tooltip(

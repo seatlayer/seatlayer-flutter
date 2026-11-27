@@ -9,6 +9,7 @@
 
 **Fixed**
 
+- **The header for a screen reader:** the event's name is a heading, and Close a button of its own. The two were one button to a screen reader, so a double tap on the name would close the picker.
 - **A refused action's notice on a phone at a large text size** stands whole wherever the screen has room for it, the open list giving way first, where its words scrolled past 15 per cent of the screen's height. At text 1.3 and 2.0 only part of the sentence showed until it was scrolled, upright and sideways. Its words scroll only where the whole notice would leave the map less than its top line.
 
 ## 0.14.0 (2026-11-26)

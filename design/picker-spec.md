@@ -352,7 +352,8 @@ is the identity.
 
 **Close ring.** A circle of `size.headerCloseSize` at `radius.pill`, hairline
 `color.*.divider`, glyph in `color.*.mutedText`; the press target is expanded to
-`size.minimumHitTarget` centred on it. Copy `strings.close`.
+`size.minimumHitTarget` centred on it. Copy `strings.close`. The event's name is a heading of its own and Close its
+own button; merged, a screen reader read them as one button.
 
 **Hold pill.** Drawn for as long as a live hold exists, whoever owns it
 (the clock is always in the header; a host that draws
