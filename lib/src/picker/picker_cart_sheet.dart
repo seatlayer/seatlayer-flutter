@@ -378,18 +378,15 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
                         // The open list gives way where the screen is too short
-                        // for it and the row.
-                        // While the row says why an action was refused, it leaves
-                        // the map its top line.
+                        // for it and the row, and always leaves the map its top
+                        // line: on a phone held sideways it scrolls in the rest.
                         Flexible(
                           child: LayoutBuilder(
                             builder: (context, room) => _CartRegion(
-                              height: controller.state.error == null
-                                  ? body
-                                  : _atMost(
-                                      body,
-                                      math.max(0, room.maxHeight - _mapTopLine),
-                                    ),
+                              height: _atMost(
+                                body,
+                                math.max(0, room.maxHeight - _mapTopLine),
+                              ),
                               open: open,
                               salesClosed: salesClosed,
                               hasTickets: hasTickets,

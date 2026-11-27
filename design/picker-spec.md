@@ -1964,7 +1964,9 @@ fourth**: `size.cartTrayPadTop` + three `size.cartCardMinHeight` cards + their
 `size.cartCardGap` gaps + the next card's edge — and scrolls inside its own box.
 Ten tickets used to grow the sheet until it owned the phone. On a short device
 the sheet's own ceiling wins instead, the region shrinks and scrolls, and the
-button is never what gets cut off.
+button is never what gets cut off. The open region also always leaves the map its
+top line (60), so on a phone held sideways the test badge and Map | 3D stay
+whole and the list scrolls in what is left.
 
 The extras stay LAID OUT while the sheet is shut — offstage, not unmounted — so
 the sheet always knows how tall it would open to and opens straight to it rather

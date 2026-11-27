@@ -9,6 +9,7 @@
 
 **Fixed**
 
+- **The open cart list on a phone held sideways** leaves the map its top line, so the test badge and the Map/3D control stay whole, and the list scrolls in the room left. The map was 38 points tall or less, with Map/3D cut, and at text 1.3 and 2.0 it was gone.
 - **Small controls on a phone** answer presses on 44 points across them, each way: Close, the price chips, the halves of the Map/3D control and the map's discs. Each is drawn at its size and in its place as before; a press beside one, on nothing else, is that control's. They answered only on themselves, 28 to 42 points on their short side.
 - **The header for a screen reader:** the event's name is a heading, and Close a button of its own. The two were one button to a screen reader, so a double tap on the name would close the picker.
 - **A refused action's notice on a phone at a large text size** stands whole wherever the screen has room for it, the open list giving way first, where its words scrolled past 15 per cent of the screen's height. At text 1.3 and 2.0 only part of the sentence showed until it was scrolled, upright and sideways. Its words scroll only where the whole notice would leave the map less than its top line.
