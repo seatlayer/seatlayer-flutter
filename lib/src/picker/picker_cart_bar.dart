@@ -278,6 +278,9 @@ class PickerCartBar extends StatelessWidget {
   });
 
   /// What stands over the row. It takes no room while it says nothing.
+  ///
+  /// Where the screen has too little room for all of it, the last part is
+  /// given what the others leave.
   final List<Widget> news;
 
   /// The way on.
@@ -310,15 +313,22 @@ class PickerCartBar extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        _RoomForNews(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: PickerCartBarSize.padX,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: news,
+        // The news gives way before the row does: what the row cannot spare
+        // it is not given, and its last part scrolls in what is left.
+        Flexible(
+          child: _RoomForNews(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: PickerCartBarSize.padX,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  ...news.take(news.length - 1),
+                  if (news.isNotEmpty) Flexible(child: news.last),
+                ],
+              ),
             ),
           ),
         ),
@@ -780,7 +790,15 @@ class _RenderRoomForNews extends RenderShiftedBox {
       size = constraints.smallest;
       return;
     }
-    news.layout(constraints.loosen(), parentUsesSize: true);
+    // The room over the news comes out of what the news is given, so the
+    // two together never stand taller than the row allows.
+    final loose = constraints.loosen();
+    news.layout(
+      loose.copyWith(
+        maxHeight: math.max(0.0, loose.maxHeight - PickerCartBarSize.padY),
+      ),
+      parentUsesSize: true,
+    );
     final room = news.size.height > 0 ? PickerCartBarSize.padY : 0.0;
     (news.parentData! as BoxParentData).offset = Offset(0, room);
     size = constraints.constrain(
