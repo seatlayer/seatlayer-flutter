@@ -362,7 +362,8 @@ class _SeatDeck extends StatelessWidget {
     );
   }
 
-  /// The section, row and seat the scene is aimed at, in that order.
+  /// The section, row and seat the scene is aimed at, in that order; for a
+  /// table booked as one, its guests and its name, as the seat card says.
   static List<String> identityParts(
     SeatLayerPickerState state,
     SelectedSeat seat,
@@ -373,14 +374,19 @@ class _SeatDeck extends StatelessWidget {
       seat.sectionLabel,
       sectionCode: pickerSectionCode(state, seat.sectionLabel),
     );
+    final table = pickerTableIdentity(seat, strings);
     return <String>[
       if (seat.sectionLabel?.trim().isNotEmpty ?? false)
         seat.sectionLabel!.trim(),
       // In the buyer's language, as the seat card names them.
-      if (row.isNotEmpty) '${pickerRowWord(seat, strings)} $row',
-      if (seat.seatNumber?.trim().isNotEmpty ?? false)
-        '${seatLayerSpokenWord(pickerSeatWord(seat, strings))} '
-            '${seat.seatNumber!.trim()}',
+      if (table != null)
+        for (final (word, value) in table) '$word $value'
+      else ...[
+        if (row.isNotEmpty) '${pickerRowWord(seat, strings)} $row',
+        if (seat.seatNumber?.trim().isNotEmpty ?? false)
+          '${seatLayerSpokenWord(pickerSeatWord(seat, strings))} '
+              '${seat.seatNumber!.trim()}',
+      ],
     ];
   }
 }

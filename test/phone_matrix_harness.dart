@@ -165,7 +165,8 @@ const Map<String, Object?> _box = <String, Object?>{
 };
 
 /// [snapshot] with its selected seat turned into a whole table, as the
-/// runtime sends one: the table's name as the row and no seat number.
+/// runtime sends one: the table's name as the row and no seat number. In 3D
+/// the scene is aimed at it.
 Map<String, Object?> tableCardSnapshot(Map<String, Object?> snapshot) {
   final selection = Map<String, Object?>.from(
     snapshot['selection']! as Map<String, Object?>,
@@ -183,7 +184,17 @@ Map<String, Object?> tableCardSnapshot(Map<String, Object?> snapshot) {
             'capacity': 8,
           })
       .toList();
-  return <String, Object?>{...snapshot, 'selection': selection};
+  final map = Map<String, Object?>.from(
+    snapshot['map']! as Map<String, Object?>,
+  );
+  // In 3D the scene sits at the table, so its caption names it.
+  if (map['buyerView'] == 'venue3d') {
+    final table =
+        (selection['seats']! as List<Object?>).first! as Map<String, Object?>;
+    map['view3dTargetSeatId'] = table['id'];
+    map['view3dTargetSeat'] = table;
+  }
+  return <String, Object?>{...snapshot, 'selection': selection, 'map': map};
 }
 
 Map<String, Object?> _snapshotFor(PhoneState state) {
