@@ -10,6 +10,7 @@ import 'package:seatlayer/src/picker/picker_map_over_sheet.dart';
 import 'package:seatlayer/src/picker/picker_wide_panel.dart';
 
 import 'phone_matrix_harness.dart';
+import 'picker_widget_harness.dart' show pumpToRest;
 
 void main() {
   group('upright', () {
@@ -206,6 +207,39 @@ void main() {
         }
       }
     }
+  });
+
+  // Sideways at text 2.0 the notice's words scroll in what is left: a drag on
+  // them moves the words, not the cart sheet under them.
+  testWidgets('a drag on the notice\'s words scrolls them', (tester) async {
+    const refusal = SeatLayerError.bridge(
+      BridgeErrorPayload(
+        code: 'hold_owned_by_host',
+        message: 'the active hold belongs to the host',
+      ),
+    );
+    await pumpPhone(
+      tester,
+      sidewaysPhones.firstWhere((phone) => phone.name == '844x390'),
+      PhoneState.cart,
+      textScale: 2,
+      actionError: refusal,
+      inCheckout: true,
+    );
+    final words = find.descendant(
+      of: find.byType(SeatLayerPickerActionError),
+      matching: find.byType(Scrollable),
+    );
+    final position = tester.state<ScrollableState>(words).position;
+    expect(position.maxScrollExtent, greaterThan(0));
+    final sheet = tester.getRect(find.byType(SeatLayerCartSheet));
+    await tester.dragFrom(
+      tester.getRect(words).center,
+      const Offset(0, -40),
+    );
+    await pumpToRest(tester);
+    expect(position.pixels, greaterThan(0));
+    expect(tester.getRect(find.byType(SeatLayerCartSheet)), sheet);
   });
 
   group('sideways', () {
