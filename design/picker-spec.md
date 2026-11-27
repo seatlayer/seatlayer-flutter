@@ -2653,9 +2653,12 @@ map still loading, a page's fallback code, an exception of the app's own
 checkout) and any code the picker does not know, outside a hold, Best
 Available, a removal and more time. The error's own line is never drawn.
 
-A sentence wraps and is never cut; the bar's words take at most 15 per cent of
-the screen's height (84 at least) and scroll past it, so the button under them stays in
-reach.
+A sentence wraps and is never cut, and the button under it stays in reach.
+Under the cart row on a phone the bar stands whole wherever the screen has
+room for it, the open list giving way first; its words scroll only where the
+whole bar would take the map below its top line (60). In the wide panel the
+words take at most 15 per cent of the screen's height (84 at least) and scroll
+past it.
 
 Dart file: `lib/src/picker/picker_error_words.dart`.
 

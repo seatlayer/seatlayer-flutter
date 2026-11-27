@@ -23,10 +23,11 @@ const Set<String> _holdOwnershipCodes = <String>{
   'hold_already_active',
 };
 
-/// How much of the screen's height the bar's words may take before they scroll.
+/// Where nothing above the bar bounds it (the wide panel), how much of the
+/// screen's height its words may take before they scroll.
 const double _maxHeightFraction = .15;
 
-/// And what they always get, on a phone held sideways.
+/// And what they always get there.
 const double _minMaxHeight = 84;
 
 class SeatLayerPickerActionError extends StatelessWidget {
@@ -68,87 +69,96 @@ class SeatLayerPickerActionError extends StatelessWidget {
       final words = pickerErrorWords(
         error,
         strings,
-        failure:
-            error is SeatLayerError ? controller.failureFor(error) : null,
+        failure: error is SeatLayerError ? controller.failureFor(error) : null,
       );
       message = words.message;
       detail = words.detail;
     }
-    return Material(
-      color: theme.error,
-      child: SafeArea(
-        top: false,
-        bottom: false,
-        child: Row(
-          children: [
-            const SizedBox(width: 12),
-            const Icon(Icons.error_outline_rounded, color: Colors.white),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // A sentence that outgrows its share of the screen scrolls:
-                  // it is never cut, and the buttons under it stay in reach.
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: math.max(
-                        MediaQuery.sizeOf(context).height * _maxHeightFraction,
-                        _minMaxHeight,
-                      ),
-                    ),
-                    child: SingleChildScrollView(
-                      primary: false,
-                      padding: EdgeInsets.only(
-                        top: 10,
-                        bottom: release == null ? 10 : 0,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            message,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          if (detail != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              detail,
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                  if (release != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 6, bottom: 10),
-                      child: OutlinedButton(
-                        onPressed: state.isBusy ? null : release,
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          side: const BorderSide(color: Colors.white),
-                          visualDensity: VisualDensity.compact,
+    return LayoutBuilder(
+      builder: (context, room) => Material(
+        color: theme.error,
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Row(
+            children: [
+              const SizedBox(width: 12),
+              const Icon(Icons.error_outline_rounded, color: Colors.white),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // A sentence is never cut, and the button under it stays in
+                    // reach. Where the bar is given a height (under the cart
+                    // row), the words stand whole wherever it has room for
+                    // them and scroll only where it has not; elsewhere they
+                    // scroll past a share of the screen.
+                    Flexible(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight: room.maxHeight.isFinite
+                              ? double.infinity
+                              : math.max(
+                                  MediaQuery.sizeOf(context).height *
+                                      _maxHeightFraction,
+                                  _minMaxHeight,
+                                ),
                         ),
-                        child: Text(strings.releaseAndChangeSeats),
+                        child: SingleChildScrollView(
+                          primary: false,
+                          padding: EdgeInsets.only(
+                            top: 10,
+                            bottom: release == null ? 10 : 0,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                message,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              if (detail != null) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  detail,
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                ],
+                    if (release != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6, bottom: 10),
+                        child: OutlinedButton(
+                          onPressed: state.isBusy ? null : release,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.white),
+                            visualDensity: VisualDensity.compact,
+                          ),
+                          child: Text(strings.releaseAndChangeSeats),
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
-            IconButton(
-              tooltip: strings.dismissError,
-              onPressed: controller.dismissError,
-              color: Colors.white,
-              icon: const Icon(Icons.close_rounded),
-            ),
-          ],
+              IconButton(
+                tooltip: strings.dismissError,
+                onPressed: controller.dismissError,
+                color: Colors.white,
+                icon: const Icon(Icons.close_rounded),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/seatlayer.dart';
+import 'package:seatlayer/src/picker/picker_map_over_sheet.dart';
 import 'package:seatlayer/src/picker/picker_wide_panel.dart';
 
 import 'phone_matrix_harness.dart';
@@ -130,9 +131,11 @@ void main() {
         message: 'the active hold belongs to the host',
       ),
     );
+    // Sideways at text 2.0 too: the notice is the one thing on that screen
+    // that must stand whole wherever it can.
     for (final phone in <Phone>[...uprightPhones, ...sidewaysPhones]) {
       final sideways = sidewaysPhones.contains(phone);
-      for (final textScale in <double>[1, 1.3, if (!sideways) 2]) {
+      for (final textScale in const <double>[1, 1.3, 2]) {
         for (final state in <PhoneState>[
           PhoneState.cart,
           if (!sideways) PhoneState.cartOpen,
@@ -179,6 +182,24 @@ void main() {
                 ),
               );
               expect(label.didExceedMaxLines, isFalse);
+              // The words stand whole wherever the screen has room for them;
+              // they scroll only where the map is down to its top line.
+              final words = tester.state<ScrollableState>(
+                find.descendant(
+                  of: find.byType(SeatLayerPickerActionError),
+                  matching: find.byType(Scrollable),
+                ),
+              );
+              if (words.position.maxScrollExtent > 0) {
+                final map = tester.getRect(find.byType(PickerMapOverSheet));
+                final sheet = tester.getRect(find.byType(SeatLayerCartSheet));
+                expect(
+                  sheet.top - map.top,
+                  moreOrLessEquals(60, epsilon: .5),
+                  reason: '${words.position.maxScrollExtent} of the words '
+                      'are hidden while the map keeps more than its top line',
+                );
+              }
               semantics.dispose();
             });
           }

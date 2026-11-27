@@ -366,81 +366,95 @@ class _SeatLayerCartSheetState extends State<SeatLayerCartSheet>
               elevation: surface.elevation ?? 0,
               shape: surface.shape,
               child: Padding(
-                padding: EdgeInsets.only(
-                  top: PickerCartBarSize.line,
-                  bottom: bottomInset,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    // The open list gives way where the screen is too short
-                    // for it and the row.
-                    // While the row says why an action was refused, it leaves
-                    // the map its top line.
-                    Flexible(
-                      child: LayoutBuilder(
-                        builder: (context, room) => _CartRegion(
-                          height: controller.state.error == null
-                              ? body
-                              : _atMost(
-                                  body,
-                                  math.max(0, room.maxHeight - _mapTopLine),
-                                ),
-                          open: open,
-                          salesClosed: salesClosed,
-                          hasTickets: hasTickets,
-                          cartList: widget.cartList,
-                          bestSeats: widget.bestSeats,
-                          onCart: (value) => _measured(_cartNatural, value, (v) {
-                            _cartNatural = v;
-                          }),
-                          onExtras: (value) =>
-                              _measured(_extrasNatural, value, (v) {
-                            _extrasNatural = v;
-                          }),
+                  padding: EdgeInsets.only(
+                    top: PickerCartBarSize.line,
+                    bottom: bottomInset,
+                  ),
+                  // What the sheet may stand in: the map keeps its top line
+                  // whatever the row says.
+                  child: LayoutBuilder(
+                    builder: (context, sheetRoom) => Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        // The open list gives way where the screen is too short
+                        // for it and the row.
+                        // While the row says why an action was refused, it leaves
+                        // the map its top line.
+                        Flexible(
+                          child: LayoutBuilder(
+                            builder: (context, room) => _CartRegion(
+                              height: controller.state.error == null
+                                  ? body
+                                  : _atMost(
+                                      body,
+                                      math.max(0, room.maxHeight - _mapTopLine),
+                                    ),
+                              open: open,
+                              salesClosed: salesClosed,
+                              hasTickets: hasTickets,
+                              cartList: widget.cartList,
+                              bestSeats: widget.bestSeats,
+                              onCart: (value) =>
+                                  _measured(_cartNatural, value, (v) {
+                                _cartNatural = v;
+                              }),
+                              onExtras: (value) =>
+                                  _measured(_extrasNatural, value, (v) {
+                                _extrasNatural = v;
+                              }),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                    PickerMeasuredHeight(
-                      onHeight: (value) => _measured(_footHeight, value, (v) {
-                        _footHeight = v;
-                      }),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: open
-                              ? Border(top: BorderSide(color: theme.divider))
-                              : const Border(),
-                        ),
-                        child: PickerCartBar(
-                          // News about the buyer's own seats outranks the
-                          // layout: a toast is gone in four seconds, and the
-                          // offer to take lapsed seats back has to outlive it.
-                          news: <Widget>[
-                            const SeatLayerHoldLapseNotice(),
-                            const SeatLayerHoldEndingCue(),
-                            widget.actionError ??
-                                const SeatLayerPickerActionError(),
-                          ],
-                          button: widget.checkoutBar ??
-                              SeatLayerBookButton(
-                                onCheckout: widget.onCheckout,
-                                onFindBestSeats: _openBestSeatsForm,
-                                style: widget.continueButtonStyle,
+                        // The row's news stands whole wherever this leaves room
+                        // for it, and its words scroll only where it does not.
+                        ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxHeight:
+                                math.max(0, sheetRoom.maxHeight - _mapTopLine),
+                          ),
+                          child: PickerMeasuredHeight(
+                            onHeight: (value) =>
+                                _measured(_footHeight, value, (v) {
+                              _footHeight = v;
+                            }),
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                border: open
+                                    ? Border(
+                                        top: BorderSide(color: theme.divider))
+                                    : const Border(),
                               ),
-                          buttonIsOwn: widget.checkoutBar == null,
-                          buttonStyle: widget.continueButtonStyle ??
-                              theme.styles.resolvedContinueButtonStyle,
-                          attribution: widget.attribution,
-                          open: open,
-                          asking: asking,
-                          onToggle: () => _ask(!open),
+                              child: PickerCartBar(
+                                // News about the buyer's own seats outranks the
+                                // layout: a toast is gone in four seconds, and the
+                                // offer to take lapsed seats back has to outlive it.
+                                news: <Widget>[
+                                  const SeatLayerHoldLapseNotice(),
+                                  const SeatLayerHoldEndingCue(),
+                                  widget.actionError ??
+                                      const SeatLayerPickerActionError(),
+                                ],
+                                button: widget.checkoutBar ??
+                                    SeatLayerBookButton(
+                                      onCheckout: widget.onCheckout,
+                                      onFindBestSeats: _openBestSeatsForm,
+                                      style: widget.continueButtonStyle,
+                                    ),
+                                buttonIsOwn: widget.checkoutBar == null,
+                                buttonStyle: widget.continueButtonStyle ??
+                                    theme.styles.resolvedContinueButtonStyle,
+                                attribution: widget.attribution,
+                                open: open,
+                                asking: asking,
+                                onToggle: () => _ask(!open),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  )),
             ),
           ),
         ),

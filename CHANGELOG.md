@@ -6,6 +6,10 @@
 
 - **Map 1.0.5** (was 1.0.4). A standing area's line in the cart reads the area's name, for example "Floor", where it showed an internal label. A standing area keeps its "N left" count after a theme or language switch, where it showed its capacity.
 
+**Fixed**
+
+- **A refused action's notice on a phone at a large text size** stands whole wherever the screen has room for it, the open list giving way first, where its words scrolled past 15 per cent of the screen's height. At text 1.3 and 2.0 only part of the sentence showed until it was scrolled, upright and sideways. Its words scroll only where the whole notice would leave the map less than its top line.
+
 ## 0.14.0 (2026-11-26)
 
 **Changed**
