@@ -176,6 +176,10 @@ final handoff = await showSeatLayerRunPicker(
   run's handoff carries no prices.
 - Closing a Season with seats held asks the buyer to release or keep them.
   Closing a run releases the seats that were not handed off.
+- `initialOperationId` (and a run's `initialHoldId`) opens a hold again only
+  for the buyer who placed it, so pass that buyer's `buyerAccessToken` or
+  `buyerAccessTokenProvider` with it. A buyer without a token is new to every
+  page: once the app or the page has ended, their hold cannot be opened again.
 - In these two the header is a Flutter widget; the packages, map and cart are
   SeatLayer's page, shown inside your app.
 
