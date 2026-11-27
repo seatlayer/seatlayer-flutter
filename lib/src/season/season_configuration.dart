@@ -84,7 +84,9 @@ class SeatLayerSeasonConfiguration implements SeatLayerSurfaceConfiguration {
   final BuyerAccessTokenProvider? buyerAccessTokenProvider;
 
   /// A hold your app already has, by its `sop_` operation id: the page opens
-  /// on it instead of starting a new one.
+  /// on it instead of starting a new one. Only the buyer who placed the hold
+  /// gets it back: pass that buyer's token too. Without one, a hold cannot be
+  /// opened again once the app or the page has ended.
   final String? initialOperationId;
 
   /// BCP 47 language for the page, e.g. `de` or `es-MX`.

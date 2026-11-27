@@ -92,7 +92,9 @@ class SeatLayerRunConfiguration implements SeatLayerSurfaceConfiguration {
   @override
   final BuyerAccessTokenProvider? buyerAccessTokenProvider;
 
-  /// A hold this buyer already has: both or neither.
+  /// A hold this buyer already has: both or neither. Only the buyer who placed
+  /// the hold gets it back: pass that buyer's token too. Without one, a hold
+  /// cannot be opened again once the app or the page has ended.
   final String? initialHoldId;
 
   /// The `pghop_` operation id of [initialHoldId].
