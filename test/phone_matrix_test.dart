@@ -70,8 +70,7 @@ void main() {
     }
   });
 
-  // The longest thing the error bar says: a title and the line under it. Held
-  // sideways with the cart open has no layout of its own yet (below).
+  // The longest thing the error bar says: a title and the line under it.
   group('a refused action', () {
     const refusal = SeatLayerError.bridge(
       BridgeErrorPayload(
@@ -89,7 +88,6 @@ void main() {
       final sideways = sidewaysPhones.contains(phone);
       for (final textScale in <double>[1, 1.3, if (!sideways) 2]) {
         for (final state in states) {
-          if (sideways && state == PhoneState.cartOpen) continue;
           for (final tag in const <String>['en', 'el', 'ar']) {
             testWidgets('$phone, text $textScale, ${state.name}, $tag',
                 (tester) async {
@@ -172,11 +170,10 @@ void main() {
     // Sideways at text 2.0 too: the notice is the one thing on that screen
     // that must stand whole wherever it can.
     for (final phone in <Phone>[...uprightPhones, ...sidewaysPhones]) {
-      final sideways = sidewaysPhones.contains(phone);
       for (final textScale in const <double>[1, 1.3, 2]) {
         for (final state in <PhoneState>[
           PhoneState.cart,
-          if (!sideways) PhoneState.cartOpen,
+          PhoneState.cartOpen,
         ]) {
           for (final tag in const <String>['en', 'el', 'ar']) {
             testWidgets('$phone, text $textScale, ${state.name}, $tag',
@@ -281,16 +278,16 @@ void main() {
 
   group('sideways', () {
     for (final phone in sidewaysPhones) {
-      for (final scale in <double>[1, 1.3]) {
-        for (final presentation in PhonePresentation.values) {
-          for (final state in PhoneState.values) {
+      for (final state in PhoneState.values) {
+        for (final scale in <double>[
+          1,
+          1.3,
+          if (state == PhoneState.cartOpen) 2,
+        ]) {
+          for (final presentation in PhonePresentation.values) {
             testWidgets(
                 '$phone, text ${scale.toStringAsFixed(1)}, '
-                '${presentation.name}, ${state.name}',
-                // Held sideways with the cart open, the sheet leaves little of
-                // the map and cuts the Map/3D switch. This state has no layout
-                // of its own yet.
-                skip: state == PhoneState.cartOpen, (tester) async {
+                '${presentation.name}, ${state.name}', (tester) async {
               final semantics = tester.ensureSemantics();
               final strings = await pumpPhone(
                 tester,
@@ -308,6 +305,16 @@ void main() {
               );
               expect(layout.width, greaterThanOrEqualTo(phone.safe.width - .5));
               expectPhoneLayout(tester, phone, strings);
+              // The open list leaves the map its top line, where the test
+              // badge and Map | 3D stand whole.
+              if (state == PhoneState.cartOpen) {
+                final map = tester.getRect(find.byType(PickerMapOverSheet));
+                final sheet = tester.getRect(find.byType(SeatLayerCartSheet));
+                expect(sheet.top - map.top, greaterThanOrEqualTo(59.5));
+                final mode = tester.getRect(find.text(strings.mapView).first);
+                expect(mode.top, greaterThanOrEqualTo(map.top));
+                expect(mode.bottom, lessThanOrEqualTo(sheet.top));
+              }
               semantics.dispose();
             });
           }
