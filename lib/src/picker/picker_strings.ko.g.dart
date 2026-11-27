@@ -238,6 +238,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsKo = SeatLayerPickerStrings(
   chooseSeats: '좌석 선택',
   chooseTickets: '티켓 선택',
   placeWord: '자리',
+  guestsWord: '인원',
+  tableWord: '테이블',
   ticketWord: '티켓',
   passport: '좌석 프로필',
   venue3D: '3D',

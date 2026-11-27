@@ -344,6 +344,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHe = SeatLayerPickerStrings(
   chooseSeats: 'בחרו את המושבים שלכם',
   chooseTickets: 'בחרו כרטיסים',
   placeWord: 'מקום',
+  guestsWord: 'אורחים',
+  tableWord: 'שולחן',
   ticketWord: 'כרטיס',
   passport: 'פרופיל המושב',
   venue3D: '3D',

@@ -136,6 +136,8 @@ const KEYS = {
   sectionWord: 'picker.section',
   rowWord: 'picker.row',
   seatWord: 'picker.seat',
+  guestsWord: 'picker.guests',
+  tableWord: 'picker.table',
   seeItIn3D: 'picker.seeItIn3d',
   viewFromThisSeat: 'picker.viewFromThisSeat',
   allPrices: 'picker.allPrices',

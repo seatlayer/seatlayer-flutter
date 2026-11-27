@@ -164,6 +164,28 @@ const Map<String, Object?> _box = <String, Object?>{
   'maxOccupancy': 6,
 };
 
+/// [snapshot] with its selected seat turned into a whole table, as the
+/// runtime sends one: the table's name as the row and no seat number.
+Map<String, Object?> tableCardSnapshot(Map<String, Object?> snapshot) {
+  final selection = Map<String, Object?>.from(
+    snapshot['selection']! as Map<String, Object?>,
+  );
+  selection['seats'] = (selection['seats']! as List<Object?>)
+      .map((item) => <String, Object?>{
+            ...(item! as Map<String, Object?>)
+              ..remove('seatNumber')
+              ..remove('displayType'),
+            'label': 'T12',
+            'displayLabel': 'T12',
+            'rowLabel': 'T12',
+            'objectType': 'table',
+            'bookingMode': 'whole',
+            'capacity': 8,
+          })
+      .toList();
+  return <String, Object?>{...snapshot, 'selection': selection};
+}
+
 Map<String, Object?> _snapshotFor(PhoneState state) {
   switch (state) {
     case PhoneState.ready:
@@ -220,6 +242,7 @@ Future<SeatLayerPickerStrings> pumpPhone(
   bool golden = false,
   Object? actionError,
   bool inCheckout = false,
+  bool tableCard = false,
 }) async {
   useFakeWebViewPlatform();
   putOnPhone(tester, phone);
@@ -341,7 +364,9 @@ Future<SeatLayerPickerStrings> pumpPhone(
     await tester.tap(find.text('Open'));
     await tester.pump();
   }
-  map.emit(_snapshotFor(state));
+  map.emit(
+    tableCard ? tableCardSnapshot(_snapshotFor(state)) : _snapshotFor(state),
+  );
   await pumpToRest(tester);
   if (state == PhoneState.standing) {
     map.emitStandingTap(GAArea.fromJson(_box)!);

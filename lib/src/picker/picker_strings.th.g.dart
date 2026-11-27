@@ -246,6 +246,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   chooseSeats: 'เลือกที่นั่งของคุณ',
   chooseTickets: 'เลือกบัตร',
   placeWord: 'ที่',
+  guestsWord: 'แขก',
+  tableWord: 'โต๊ะ',
   ticketWord: 'บัตร',
   passport: 'ข้อมูลที่นั่ง',
   venue3D: '3D',

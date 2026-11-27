@@ -360,6 +360,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsHr = SeatLayerPickerStrings(
   chooseSeats: 'Odaberite svoja mjesta',
   chooseTickets: 'Odaberite ulaznice',
   placeWord: 'MJESTO',
+  guestsWord: 'Gosti',
+  tableWord: 'Stol',
   ticketWord: 'Ulaznica',
   passport: 'Profil mjesta',
   venue3D: '3D',

@@ -366,6 +366,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   chooseSeats: 'Tria els teus seients',
   chooseTickets: 'Tria entrades',
   placeWord: 'PLAÇA',
+  guestsWord: 'Convidats',
+  tableWord: 'Taula',
   ticketWord: 'Entrada',
   passport: 'Fitxa del seient',
   venue3D: '3D',

@@ -158,6 +158,8 @@ const List<String> _plainFields = <String>[
   'chooseSeats',
   'chooseTickets',
   'placeWord',
+  'guestsWord',
+  'tableWord',
   'ticketWord',
   'passport',
   'venue3D',

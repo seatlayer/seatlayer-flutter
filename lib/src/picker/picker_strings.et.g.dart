@@ -331,6 +331,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   chooseSeats: 'Vali oma kohad',
   chooseTickets: 'Vali piletid',
   placeWord: 'KOHT',
+  guestsWord: 'Külalised',
+  tableWord: 'Laud',
   ticketWord: 'Pilet',
   passport: 'Koha profiil',
   venue3D: '3D',

@@ -53,10 +53,15 @@ class _IdentityGrid extends StatelessWidget {
     final seatWord = _seatWord(seat, strings);
     final layout = theme.layout;
     final hasSection = section.isNotEmpty;
+    final table = pickerTableIdentity(seat, strings);
     final cells = <(String, String)>[
       if (hasSection) (strings.sectionWord, section),
-      if (row.isNotEmpty) (rowWord, row),
-      (seatWord, number),
+      if (table != null)
+        ...table
+      else ...[
+        if (row.isNotEmpty) (rowWord, row),
+        (seatWord, number),
+      ],
     ];
     final children = <Widget>[];
     for (var index = 0; index < cells.length; index++) {
@@ -84,9 +89,13 @@ class _IdentityGrid extends StatelessWidget {
       container: true,
       label: strings.seatIdentity(<String>[
         if (hasSection) section,
-        if (row.isNotEmpty) '$rowWord $row',
-        // Drawn upper-cased either way; spoken in the word's own case.
-        '${seatLayerSpokenWord(seatWord)} $number',
+        if (table != null)
+          for (final (word, value) in table) '$word $value'
+        else ...[
+          if (row.isNotEmpty) '$rowWord $row',
+          // Drawn upper-cased either way; spoken in the word's own case.
+          '${seatLayerSpokenWord(seatWord)} $number',
+        ],
       ]),
       child: ExcludeSemantics(
         child: DecoratedBox(
@@ -1091,3 +1100,32 @@ String pickerRowWord(SelectedSeat seat, SeatLayerPickerStrings strings) =>
 /// The buyer's word for [seat]: a place in a booth, else a seat.
 String pickerSeatWord(SelectedSeat seat, SeatLayerPickerStrings strings) =>
     seat.objectType == ObjectType.booth ? strings.placeWord : strings.seatWord;
+
+/// The cells a table booked as one names itself with, after the section:
+/// its party size and its name, "Guests 4 · Table T2" ("Guests 2–6" where the
+/// buyer chooses how many), or null for anything else.
+///
+/// The runtime sends such a table with its name as the row and no seat
+/// number, so the row-and-seat cells would print the name twice. The name is
+/// drawn with or without a section.
+List<(String, String)>? pickerTableIdentity(
+  SelectedSeat seat,
+  SeatLayerPickerStrings strings,
+) {
+  final mode = seat.bookingMode?.trim() ?? '';
+  if (seat.objectType != ObjectType.table || mode.isEmpty) return null;
+  final min = seat.minOccupancy;
+  final max = seat.maxOccupancy;
+  final guests = mode == 'variable' && min != null && max != null
+      ? (min == max ? '$min' : '$min–$max')
+      : seat.capacity?.toString();
+  final name = <String?>[seat.rowLabel, seat.displayLabel]
+          .map((value) => value?.trim() ?? '')
+          .where((value) => value.isNotEmpty)
+          .firstOrNull ??
+      seat.buyerFacingLabel;
+  return <(String, String)>[
+    if (guests != null) (strings.guestsWord, guests),
+    (strings.tableWord, name),
+  ];
+}

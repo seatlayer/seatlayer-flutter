@@ -332,6 +332,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   chooseSeats: 'Valitse paikkasi',
   chooseTickets: 'Valitse liput',
   placeWord: 'PAIKKA',
+  guestsWord: 'Vieraat',
+  tableWord: 'Pöytä',
   ticketWord: 'Lippu',
   passport: 'Paikan profiili',
   venue3D: '3D',

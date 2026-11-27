@@ -331,6 +331,8 @@ const SeatLayerPickerStrings seatLayerPickerStringsFa = SeatLayerPickerStrings(
   chooseSeats: 'صندلی‌های خود را انتخاب کنید',
   chooseTickets: 'بلیت‌ها را انتخاب کنید',
   placeWord: 'جایگاه',
+  guestsWord: 'مهمانان',
+  tableWord: 'میز',
   ticketWord: 'بلیت',
   passport: 'مشخصات صندلی',
   venue3D: '3D',
