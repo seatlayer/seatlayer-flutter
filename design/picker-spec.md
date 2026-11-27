@@ -1992,6 +1992,9 @@ separated by `size.cartCardGap` (6). Contents, on one baseline:
   tabular figures: the row, the seat and the ticket type joined by ` · `
   (`R · 6 · Lower Bowl`), one line, ellipsized. The type joins the line only
   when it is not already the name of the card;
+- a table booked as one (whole or by guest count) is named once, as the
+  web's cart names it: `Table T2`, and `Guests 4 · Standard` under it, the
+  number being the guests on the line;
 - the amount at 15 / w800 in `color.*.text`, tabular, which never truncates;
 - the **eye**, then the **×**, drawn as 18-point glyphs in `color.*.text`
   inside TIGHT `size.minimumHitTarget` boxes. Tight, not a minimum: the

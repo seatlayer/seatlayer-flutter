@@ -9,6 +9,7 @@
 
 **Fixed**
 
+- **A table booked as one, in the cart,** is named once: "Table T2", with "Guests 4" under it, as the web's cart reads it. Its line read "T2 · T2".
 - **A refused action's notice on a phone at a large text size** stands whole wherever the screen has room for it, the open list giving way first, where its words scrolled past 15 per cent of the screen's height. At text 1.3 and 2.0 only part of the sentence showed until it was scrolled, upright and sideways. Its words scroll only where the whole notice would leave the map less than its top line.
 
 ## 0.14.0 (2026-11-26)

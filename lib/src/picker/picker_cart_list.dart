@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 
+import '../open_enums.dart';
 import '../payloads.dart';
 import 'picker_buyer_asset_loader.dart';
 import 'picker_internal.dart';
@@ -295,16 +296,26 @@ SeatLayerTicketLine _resolveLine(
   final section = _first(item.sectionLabel, seat?.sectionLabel);
   final row = _first(item.rowLabel, seat?.rowLabel);
   final number = _first(item.seatNumber, seat?.seatNumber);
+  // A table booked as one has no row or seat: its name is both. The web's
+  // cart names it "Table T2", with how many guests it is for under it.
+  final table = item.objectType == ObjectType.table &&
+      (seat?.bookingMode?.trim() ?? '').isNotEmpty;
+  final strings = SeatLayerPickerScope.stringsOf(context);
   return SeatLayerTicketLine(
     item: item,
     seat: seat,
-    section: section ?? category?.label ?? item.buyerFacingLabel,
-    rowLabel: pickerRowLabel(
-      row,
-      section,
-      sectionCode: pickerSectionCode(state, section),
-    ),
-    seatLabel: number ?? item.buyerFacingLabel,
+    section: table
+        ? '${strings.tableWord} '
+            '${row ?? _first(item.displayLabel, seat?.displayLabel) ?? item.buyerFacingLabel}'
+        : section ?? category?.label ?? item.buyerFacingLabel,
+    rowLabel: table
+        ? '${strings.guestsWord} ${item.quantity}'
+        : pickerRowLabel(
+            row,
+            section,
+            sectionCode: pickerSectionCode(state, section),
+          ),
+    seatLabel: table ? '' : number ?? item.buyerFacingLabel,
     categoryLabel: category?.label ?? item.categoryKey,
     categoryColor: pickerColor(category?.color) ?? theme.accent,
     amountText: pickerMoney(context, item.total, item.currency),
