@@ -13,6 +13,7 @@ import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
 import 'picker_a11y.dart';
+import 'picker_tap_area.dart';
 
 /// The dark glass every piece of 3D chrome is drawn on.
 ///
@@ -504,46 +505,49 @@ class _Segment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = seatLayerMapChromeThemeOf(context);
-    return Semantics(
-      button: true,
-      selected: selected,
-      tooltip: tooltip,
-      child: Tooltip(
-        message: tooltip,
-        child: Material(
-          color: selected ? theme.accent : const Color(0x00000000),
-          shape: const StadiumBorder(),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onPressed,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: SeatLayerSizeTokens.viewModeButtonHeight,
-                minWidth: SeatLayerSizeTokens.viewModeButtonMinWidth,
-              ),
-              // Both factors, so a half is the size of its own label plus its
-              // minimum — not whatever room the corner it is placed in has.
-              child: Center(
-                widthFactor: 1,
-                heightFactor: 1,
-                child: Padding(
-                  // The half's own height centres the words, so they keep all
-                  // of it for themselves as the text grows.
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  // The map holds the control at its own height. Words taller
-                  // than a half are drawn smaller rather than cut off.
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        color: selected ? theme.onAccent : theme.mutedText,
-                        fontSize: SeatLayerSizeTokens.viewModeLabelFontSize,
-                        fontWeight:
-                            seatLayerBoldWeight(context, FontWeight.w800),
-                        letterSpacing:
-                            SeatLayerSizeTokens.viewModeLabelFontSize * .04,
-                        fontFamily: theme.fontFamily,
+    return PickerTapArea(
+      enabled: onPressed != null,
+      child: Semantics(
+        button: true,
+        selected: selected,
+        tooltip: tooltip,
+        child: Tooltip(
+          message: tooltip,
+          child: Material(
+            color: selected ? theme.accent : const Color(0x00000000),
+            shape: const StadiumBorder(),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onPressed,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: SeatLayerSizeTokens.viewModeButtonHeight,
+                  minWidth: SeatLayerSizeTokens.viewModeButtonMinWidth,
+                ),
+                // Both factors, so a half is the size of its own label plus its
+                // minimum — not whatever room the corner it is placed in has.
+                child: Center(
+                  widthFactor: 1,
+                  heightFactor: 1,
+                  child: Padding(
+                    // The half's own height centres the words, so they keep all
+                    // of it for themselves as the text grows.
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    // The map holds the control at its own height. Words taller
+                    // than a half are drawn smaller rather than cut off.
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          color: selected ? theme.onAccent : theme.mutedText,
+                          fontSize: SeatLayerSizeTokens.viewModeLabelFontSize,
+                          fontWeight:
+                              seatLayerBoldWeight(context, FontWeight.w800),
+                          letterSpacing:
+                              SeatLayerSizeTokens.viewModeLabelFontSize * .04,
+                          fontFamily: theme.fontFamily,
+                        ),
                       ),
                     ),
                   ),
@@ -1001,6 +1005,6 @@ class _ControlButton extends StatelessWidget {
     // The disc keeps its ground in both themes; only the glyph and the ring
     // step back, and the shadow goes. A wash over the whole disc read as a
     // grey blot on the light map and vanished on the dark one.
-    return control;
+    return PickerTapArea(enabled: !disabled, child: control);
   }
 }

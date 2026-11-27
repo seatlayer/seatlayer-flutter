@@ -173,6 +173,34 @@ void main() {
     expect(map.callsTo('picker.zoomIn'), hasLength(1));
   });
 
+  testWidgets(
+      'a press beside a small disc is the disc\'s, and the map loses it',
+      (tester) async {
+    // The disc is drawn under 44 points and answers presses on 44 across it.
+    // A press in that extra room lands on the map, not on the disc, so it is
+    // the same leak as a press on the disc unless the map is still put in the
+    // arena and told, on the press, that it lost.
+    final map = FakePickerMap();
+    addTearDown(map.dispose);
+    usePhoneSurface(tester);
+    final verdicts = <_Verdict>[];
+
+    await tester.pumpWidget(
+      pickerHarness(map, _picker(verdicts), options: _withZoomDiscs),
+    );
+    map.emit(pickerSnapshot(withSelection: false, rung: 'sections'));
+    await tester.pumpAndSettle();
+
+    final disc = tester.getRect(find.byTooltip('Zoom in'));
+    final gesture = await tester.startGesture(disc.centerLeft.translate(-3, 0));
+    expect(verdicts, <_Verdict>[_Verdict.rejected]);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(verdicts, <_Verdict>[_Verdict.rejected]);
+    expect(map.callsTo('picker.zoomIn'), hasLength(1));
+    expect(map.callsTo('picker.selectObjects'), isEmpty);
+  });
+
   testWidgets('the map still claims a touch that landed on the map',
       (tester) async {
     // The other half of the same rule: away from chrome the map keeps the

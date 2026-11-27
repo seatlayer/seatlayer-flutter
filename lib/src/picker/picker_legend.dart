@@ -4,6 +4,7 @@ import 'picker_a11y.dart';
 import 'picker_internal.dart';
 import 'picker_money.dart';
 import 'picker_styles.dart';
+import 'picker_tap_area.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_scope.dart';
 import 'seat_layer_picker_theme.dart';
@@ -303,20 +304,22 @@ class _LegendChip extends StatelessWidget {
     // gesture answers the strip above and below the pill, the inner ink well
     // answers the pill itself and keeps the ripple inside it, and only one of
     // the two ever wins a tap.
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: semanticsLabel,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onPressed,
-        child: Center(
-          child: soldOut && !selected
-              ? Opacity(
-                  opacity: SeatLayerOpacityTokens.legendSoldOut,
-                  child: _ink(context, chipStyle),
-                )
-              : _ink(context, chipStyle),
+    return PickerTapArea(
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: semanticsLabel,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onPressed,
+          child: Center(
+            child: soldOut && !selected
+                ? Opacity(
+                    opacity: SeatLayerOpacityTokens.legendSoldOut,
+                    child: _ink(context, chipStyle),
+                  )
+                : _ink(context, chipStyle),
+          ),
         ),
       ),
     );
