@@ -323,6 +323,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsDe = SeatLayerPickerStrings(
   mapDidNotLoad: 'Der Sitzplan konnte nicht geladen werden',
   checkConnection:
       'Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.',
+  offline: 'Sie sind offline',
+  backOnline: 'Wieder online',
+  stillHeld: 'Ihre Plätze sind weiterhin reserviert.',
+  updating: 'Wird aktualisiert…',
+  takingLonger: 'Das dauert länger als sonst. Bitte warten…',
+  loadingTakingLonger: 'Der Sitzplan braucht länger zum Laden. Bitte warten…',
+  couldNotReachCheckout: 'Die Kasse konnte nicht erreicht werden.',
   accessPausedTitle: 'Diese Plätze sind gerade reserviert',
   accessPausedCopy:
       'Der Veranstalter hat diese Auswahl pausiert. Versuchen Sie es in ein paar Minuten erneut.',

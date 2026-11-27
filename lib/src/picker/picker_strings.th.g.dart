@@ -221,6 +221,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsTh = SeatLayerPickerStrings(
   backToMap: 'กลับไปที่ผัง',
   mapDidNotLoad: 'โหลดผังที่นั่งไม่สำเร็จ',
   checkConnection: 'ตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง',
+  offline: 'คุณออฟไลน์อยู่',
+  backOnline: 'กลับมาออนไลน์แล้ว',
+  stillHeld: 'ที่นั่งของคุณยังถูกกันไว้',
+  updating: 'กำลังอัปเดต…',
+  takingLonger: 'ใช้เวลานานกว่าปกติ กรุณารอสักครู่…',
+  loadingTakingLonger: 'ผังที่นั่งใช้เวลาโหลดนานกว่าปกติ กรุณารอสักครู่…',
+  couldNotReachCheckout: 'เชื่อมต่อหน้าชำระเงินไม่ได้',
   accessPausedTitle: 'ที่นั่งเหล่านี้ถูกระงับชั่วคราว',
   accessPausedCopy:
       'ผู้จัดงานหยุดการเลือกที่นั่งส่วนนี้ชั่วคราว ลองใหม่อีกครั้งในอีกไม่กี่นาที',

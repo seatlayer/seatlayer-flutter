@@ -23,6 +23,7 @@ import 'picker_blocked_regions.dart';
 import 'picker_cart_sheet.dart';
 import 'picker_map_over_sheet.dart';
 import 'picker_confirm_card.dart';
+import 'picker_connection_status.dart';
 import 'picker_header.dart';
 import 'picker_layout.dart';
 import 'picker_legend.dart';
@@ -54,6 +55,9 @@ import 'seat_layer_picker_theme.dart';
 const double _badgeGap = PickerPhoneTop.gap;
 const double _mapInset = PickerPhoneTop.inset;
 const double _railTop = PickerPhoneTop.railTop;
+
+/// The widest the connection status is drawn on a wide map.
+const double _wideStatusMaxWidth = 360;
 
 /// How much closer to the foot the card rests in 3D: ten, not fourteen.
 const double _cardLift3D = seatLayerConfirmCardRestInset -
@@ -658,8 +662,23 @@ class _SeatLayerPickerAdaptiveLayoutState
                             PositionedDirectional(
                                 top: _mapInset,
                                 start: _mapInset,
-                                child:
-                                    SeatLayerMapChromeRegion(child: testBadge)),
+                                child: SeatLayerMapChromeRegion(
+                                    child: PickerMeasuredWidth(
+                                        onWidth: (width) =>
+                                            _measuredTop(badge: width),
+                                        child: testBadge))),
+                            if (!panoramaUp)
+                              Positioned.fill(
+                                child: SeatLayerPickerConnectionStatus(
+                                  place: PickerPhoneTop.connectionPlace(
+                                    top: _mapInset,
+                                    badgeWidth:
+                                        state.isTestEvent ? _badgeWidth : 0,
+                                    controlWidth: 0,
+                                    maxWidth: _wideStatusMaxWidth,
+                                  ),
+                                ),
+                              ),
                             // The column stands at the map's bottom end.
                             PositionedDirectional(
                                 bottom: _mapInset,
@@ -692,8 +711,10 @@ class _SeatLayerPickerAdaptiveLayoutState
                                 ),
                               ),
                             // --- toasts and buyer-facing states (P4) ---
-                            const Positioned.fill(
-                              child: SeatLayerPickerToastLayer(),
+                            Positioned.fill(
+                              child: SeatLayerPickerToastLayer(
+                                onCheckout: widget.onCheckout,
+                              ),
                             ),
                             Positioned.fill(
                               child: SeatLayerPickerStateLayer(
@@ -880,6 +901,14 @@ class _SeatLayerPickerAdaptiveLayoutState
         // Chrome that moved without rebuilding — a column riding up as the
         // dock arrives — reports where it is now.
         _regions.remeasureAfterFrame();
+        final badgeTop = PickerPhoneTop.testBadgeTop(
+          venue3D: venue3DUp,
+          backPill: backPillUp,
+          backPillInset: immersiveTopInset,
+          viewModeControl: viewModeControlUp,
+          floorStrip: floorStripBelow,
+          floorStripHeight: floorStripHeight,
+        );
         // One reading order for the whole phone picker. The Column already
         // reads top to bottom, but the Stack in the middle does not: its paint
         // order puts the dock between two halves of the map's own chrome and
@@ -947,14 +976,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                       // corner; the badge steps below that pill rather than under
                       // it, and only while the pill is actually drawn.
                       PositionedDirectional(
-                        top: PickerPhoneTop.testBadgeTop(
-                          venue3D: venue3DUp,
-                          backPill: backPillUp,
-                          backPillInset: immersiveTopInset,
-                          viewModeControl: viewModeControlUp,
-                          floorStrip: floorStripBelow,
-                          floorStripHeight: floorStripHeight,
-                        ),
+                        top: badgeTop,
                         start: _mapInset,
                         child: SeatLayerMapChromeRegion(
                           child: seatLayerReadingOrder(
@@ -966,6 +988,22 @@ class _SeatLayerPickerAdaptiveLayoutState
                           ),
                         ),
                       ),
+                      if (!panoramaUp)
+                        Positioned.fill(
+                          child: seatLayerReadingOrder(
+                            SeatLayerPickerReadingOrder.mapChrome,
+                            SeatLayerPickerConnectionStatus(
+                              place: PickerPhoneTop.connectionPlace(
+                                top: badgeTop,
+                                badgeWidth:
+                                    state.isTestEvent ? _badgeWidth : 0,
+                                controlWidth:
+                                    viewModeControlUp ? _controlWidth : 0,
+                                levelsOnLine: floorOneLine,
+                              ),
+                            ),
+                          ),
+                        ),
                       if (viewModeControlUp)
                         PositionedDirectional(
                           top: _railTop,
@@ -1101,6 +1139,7 @@ class _SeatLayerPickerAdaptiveLayoutState
                             child: SeatLayerPickerToastLayer(
                               bottomInset: bottomBand,
                               lifted: seatCardUp,
+                              onCheckout: _checkoutAndAnnounce,
                             ),
                           ),
                         ),

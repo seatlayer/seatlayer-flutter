@@ -360,6 +360,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsSl = SeatLayerPickerStrings(
   backToMap: 'Nazaj na načrt',
   mapDidNotLoad: 'Načrt sedežev se ni naložil',
   checkConnection: 'Preverite povezavo in poskusite znova.',
+  offline: 'Niste povezani',
+  backOnline: 'Znova povezani',
+  stillHeld: 'Vaši sedeži so še vedno rezervirani.',
+  updating: 'Posodabljamo…',
+  takingLonger: 'To traja dlje kot običajno. Trenutek, prosim…',
+  loadingTakingLonger:
+      'Nalaganje načrta sedežev traja dlje kot običajno. Trenutek, prosim…',
+  couldNotReachCheckout: 'Blagajne ni bilo mogoče doseči.',
   accessPausedTitle: 'Ti sedeži so trenutno zadržani',
   accessPausedCopy:
       'Organizator je to izbiro začasno ustavil. Poskusite znova čez nekaj minut.',

@@ -1,9 +1,12 @@
 /// Where the pieces over a phone's map stand, from its top line down.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'picker_connection_status.dart';
 import 'picker_options.dart';
 import 'picker_status_views.dart';
 import 'picker_tokens.g.dart';
@@ -126,6 +129,51 @@ abstract final class PickerPhoneTop {
       floorStripHeight: floorStripHeight,
     );
     return above == 0 ? railTop : above + gap;
+  }
+
+  /// Where the connection status stands: on the test badge's line at
+  /// [top], after the badge, short of the Map / 3D switch when the switch
+  /// shares that line. A status too wide for that goes under the badge and
+  /// the switch. When the levels run along the top line between the two,
+  /// it goes under them.
+  static PickerConnectionStatusPlace connectionPlace({
+    required double top,
+    required double badgeWidth,
+    required double controlWidth,
+    bool levelsOnLine = false,
+    double maxWidth = double.infinity,
+  }) {
+    final switchBottom = controlWidth > 0
+        ? railTop + SeatLayerPickerViewModeControl.height
+        : 0.0;
+    final belowTop = math.max(
+      badgeWidth > 0
+          ? top + SeatLayerPickerTestModeIndicator.compactHeight + gap
+          : top,
+      controlWidth > 0 ? switchBottom + gap : top,
+    );
+    if (levelsOnLine) {
+      return PickerConnectionStatusPlace(
+        top: belowTop,
+        start: inset,
+        end: inset,
+        belowTop: belowTop,
+        inset: inset,
+        maxWidth: maxWidth,
+      );
+    }
+    final sharesSwitch = controlWidth > 0 && top < switchBottom;
+    return PickerConnectionStatusPlace(
+      top: top,
+      start: inset + (badgeWidth > 0 ? badgeWidth + gap : 0),
+      end: inset +
+          (sharesSwitch
+              ? controlWidth + SeatLayerSizeTokens.connectionStatusSwitchGap
+              : 0),
+      belowTop: belowTop,
+      inset: inset,
+      maxWidth: maxWidth,
+    );
   }
 
   /// How much of the map's bottom the phone's chrome is standing on.

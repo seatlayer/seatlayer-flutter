@@ -310,6 +310,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsNo = SeatLayerPickerStrings(
   backToMap: 'Tilbake til kartet',
   mapDidNotLoad: 'Setekartet ble ikke lastet',
   checkConnection: 'Sjekk tilkoblingen og prøv igjen.',
+  offline: 'Du er frakoblet',
+  backOnline: 'Tilkoblet igjen',
+  stillHeld: 'Plassene dine er fortsatt reservert.',
+  updating: 'Oppdaterer…',
+  takingLonger: 'Dette tar lengre tid enn vanlig. Vent litt…',
+  loadingTakingLonger: 'Setekartet bruker lengre tid på å laste. Vent litt…',
+  couldNotReachCheckout: 'Fikk ikke kontakt med kassen.',
   accessPausedTitle: 'Disse plassene er sperret akkurat nå',
   accessPausedCopy:
       'Arrangøren har satt dette utvalget på pause. Prøv igjen om noen minutter.',

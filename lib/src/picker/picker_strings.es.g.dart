@@ -339,6 +339,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsEs = SeatLayerPickerStrings(
   backToMap: 'Volver al mapa',
   mapDidNotLoad: 'El mapa de asientos no se pudo cargar',
   checkConnection: 'Comprueba tu conexión e inténtalo de nuevo.',
+  offline: 'Estás sin conexión',
+  backOnline: 'Conexión restablecida',
+  stillHeld: 'Tus asientos siguen retenidos.',
+  updating: 'Actualizando…',
+  takingLonger: 'Esto está tardando más de lo normal. Espera, por favor…',
+  loadingTakingLonger:
+      'El mapa de asientos está tardando más en cargar. Espera, por favor…',
+  couldNotReachCheckout: 'No se pudo conectar con el pago.',
   accessPausedTitle: 'Estos asientos están retenidos en este momento',
   accessPausedCopy:
       'El organizador ha pausado esta selección. Inténtalo de nuevo en unos minutos.',

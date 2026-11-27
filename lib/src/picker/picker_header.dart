@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import 'picker_internal.dart';
+import 'picker_connection.dart';
 import 'picker_motion.dart';
 import 'picker_styles.dart';
 import 'picker_strings.dart';
@@ -487,11 +488,18 @@ class SeatLayerPickerHoldCountdown extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = SeatLayerPickerScope.stateOf(context);
     if (state.hold == null) return const SizedBox.shrink();
-    return SeatLayerHoldClock(
-      expiresAt: state.hold!.expiryDate,
-      theme: seatLayerMapChromeThemeOf(context),
-      strings: SeatLayerPickerScope.stringsOf(context),
-      compact: compact,
+    return ValueListenableBuilder<SeatLayerConnectionShown>(
+      valueListenable:
+          SeatLayerPickerScope.controllerOf(context).connectionShown,
+      builder: (context, shown, _) => SeatLayerHoldClock(
+        expiresAt: state.hold!.expiryDate,
+        theme: seatLayerMapChromeThemeOf(context),
+        strings: SeatLayerPickerScope.stringsOf(context),
+        compact: compact,
+        // Until the line is back, a clock at 0:00 is not an answer.
+        awaitingServer: shown == SeatLayerConnectionShown.offline ||
+            shown == SeatLayerConnectionShown.updating,
+      ),
     );
   }
 }
@@ -507,6 +515,7 @@ class SeatLayerHoldClock extends StatefulWidget {
     required this.theme,
     required this.strings,
     this.compact = false,
+    this.awaitingServer = false,
   });
 
   /// When the hold runs out; null reads as run out.
@@ -514,6 +523,10 @@ class SeatLayerHoldClock extends StatefulWidget {
   final SeatLayerResolvedPickerTheme theme;
   final SeatLayerPickerStrings strings;
   final bool compact;
+
+  /// Whether the server cannot be asked right now. A clock that reaches
+  /// 0:00 then stays at 0:00 in grey: the hold's end is the server's to say.
+  final bool awaitingServer;
 
   @override
   State<SeatLayerHoldClock> createState() => _SeatLayerHoldClockState();
@@ -552,11 +565,17 @@ class _SeatLayerHoldClockState extends State<SeatLayerHoldClock> {
         remaining.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds =
         remaining.inSeconds.remainder(60).toString().padLeft(2, '0');
-    final expiring = remaining <= SeatLayerPickerHoldCountdown.expiring;
+    final stalled = widget.awaitingServer && remaining == Duration.zero;
+    final expiring =
+        !stalled && remaining <= SeatLayerPickerHoldCountdown.expiring;
     // Two states, one pill: a tinted plate while there is time, and the whole
     // accent once there is not. A countdown that only changes its number is a
     // countdown a buyer reads once and then stops looking at.
-    final ink = expiring ? theme.onAccent : seatLayerAccentText(theme);
+    final ink = stalled
+        ? theme.mutedText
+        : expiring
+            ? theme.onAccent
+            : seatLayerAccentText(theme);
     final compact = widget.compact;
     // What the pill SAYS, as opposed to what it draws. `m:ss` read aloud is
     // either a time of day or two bare numbers, and a live region fed the
@@ -573,7 +592,7 @@ class _SeatLayerHoldClockState extends State<SeatLayerHoldClock> {
       container: true,
       label: spoken,
       child: ExcludeSemantics(
-        child: _pill(theme, ink, expiring, compact, minutes, seconds),
+        child: _pill(theme, ink, expiring, stalled, compact, minutes, seconds),
       ),
     );
   }
@@ -582,6 +601,7 @@ class _SeatLayerHoldClockState extends State<SeatLayerHoldClock> {
     SeatLayerResolvedPickerTheme theme,
     Color ink,
     bool expiring,
+    bool stalled,
     bool compact,
     String minutes,
     String seconds,
@@ -589,9 +609,12 @@ class _SeatLayerHoldClockState extends State<SeatLayerHoldClock> {
     final strings = widget.strings;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: expiring
-            ? theme.accent
-            : Color.alphaBlend(pickerAlpha(theme.accent, .14), theme.surface),
+        color: stalled
+            ? Color.alphaBlend(pickerAlpha(theme.mutedText, .14), theme.surface)
+            : expiring
+                ? theme.accent
+                : Color.alphaBlend(
+                    pickerAlpha(theme.accent, .14), theme.surface),
         borderRadius: BorderRadius.circular(SeatLayerRadiusTokens.pill),
       ),
       child: Padding(

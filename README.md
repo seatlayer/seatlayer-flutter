@@ -73,6 +73,16 @@ the cart, a hold with its countdown, real venue 3D, the seat-view panorama and
 the checkout handoff. It fills the bounded space its parent gives it, so do not
 nest it in a gesture-driven `ListView` or `SingleChildScrollView`.
 
+On Android, let the app see the network state, beside `INTERNET` in
+`android/app/src/main/AndroidManifest.xml`:
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+```
+
+Without it the map's web view never learns that the phone went offline, so the
+picker says "Updating…" where it should say "You’re offline".
+
 `SeatLayerPickerPage(configuration:, onCheckout:)` is the same widget as a route
 you push; `showSeatLayerPicker(context, configuration:, presentation:)` is it as
 a modal returning the handoff, or `null` if the buyer closes it. `adaptive` is

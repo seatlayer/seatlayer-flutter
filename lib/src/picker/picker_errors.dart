@@ -38,7 +38,11 @@ class SeatLayerPickerActionError extends StatelessWidget {
     final controller = SeatLayerPickerScope.controllerOf(context);
     final state = controller.state;
     final error = state.error;
-    if (error == null || state.phase != SeatLayerPickerPhase.ready) {
+    if (error == null ||
+        state.phase != SeatLayerPickerPhase.ready ||
+        // A lost line and a server fault are told in amber by the toast
+        // layer; the red line is for refusals.
+        pickerFailureKind(error) != PickerFailureKind.other) {
       return const SizedBox.shrink();
     }
     final theme = seatLayerPickerThemeOf(context);

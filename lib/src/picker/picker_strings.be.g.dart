@@ -358,6 +358,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsBe = SeatLayerPickerStrings(
   backToMap: 'Назад да схемы',
   mapDidNotLoad: 'Схема месцаў не загрузілася',
   checkConnection: 'Праверце злучэнне і паспрабуйце зноў.',
+  offline: 'Вы па-за сеткай',
+  backOnline: 'Зноў у сетцы',
+  stillHeld: 'Вашы месцы па-ранейшаму забраніраваны.',
+  updating: 'Абнаўляем…',
+  takingLonger: 'Гэта займае больш часу, чым звычайна. Калі ласка, пачакайце…',
+  loadingTakingLonger:
+      'Схема месцаў загружаецца даўжэй, чым звычайна. Калі ласка, пачакайце…',
+  couldNotReachCheckout: 'Не ўдалося адкрыць аплату.',
   accessPausedTitle: 'Гэтыя месцы зараз заблакаваны',
   accessPausedCopy:
       'Арганізатар прыпыніў гэты выбар. Паспрабуйце праз некалькі хвілін.',

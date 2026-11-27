@@ -306,6 +306,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsEt = SeatLayerPickerStrings(
   backToMap: 'Tagasi plaanile',
   mapDidNotLoad: 'Istekohtade plaan ei laadinud',
   checkConnection: 'Kontrolli ühendust ja proovi uuesti.',
+  offline: 'Oled võrguühenduseta',
+  backOnline: 'Taas võrgus',
+  stillHeld: 'Sinu kohad on endiselt broneeritud.',
+  updating: 'Uuendame…',
+  takingLonger: 'See võtab tavalisest kauem aega. Palun oota…',
+  loadingTakingLonger:
+      'Istekohtade plaani laadimine võtab tavalisest kauem. Palun oota…',
+  couldNotReachCheckout: 'Kassaga ei õnnestunud ühendust saada.',
   accessPausedTitle: 'Need kohad on praegu broneeritud',
   accessPausedCopy:
       'Korraldaja on selle valiku peatanud. Proovi mõne minuti pärast uuesti.',

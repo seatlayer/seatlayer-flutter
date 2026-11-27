@@ -230,6 +230,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsId = SeatLayerPickerStrings(
   backToMap: 'Kembali ke denah',
   mapDidNotLoad: 'Denah kursi gagal dimuat',
   checkConnection: 'Periksa koneksi Anda, lalu coba lagi.',
+  offline: 'Anda sedang offline',
+  backOnline: 'Kembali online',
+  stillHeld: 'Kursi Anda masih ditahan.',
+  updating: 'Memperbarui…',
+  takingLonger: 'Proses ini lebih lama dari biasanya. Mohon tunggu…',
+  loadingTakingLonger:
+      'Denah kursi butuh waktu lebih lama untuk dimuat. Mohon tunggu…',
+  couldNotReachCheckout: 'Halaman pembayaran tidak dapat dihubungi.',
   accessPausedTitle: 'Kursi ini sedang ditahan',
   accessPausedCopy:
       'Penyelenggara menghentikan sementara pilihan ini. Coba lagi dalam beberapa menit.',

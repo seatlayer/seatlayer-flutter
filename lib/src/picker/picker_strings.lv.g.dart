@@ -336,6 +336,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsLv = SeatLayerPickerStrings(
   backToMap: 'Atpakaļ uz plānu',
   mapDidNotLoad: 'Vietu plāns neielādējās',
   checkConnection: 'Pārbaudiet savienojumu un mēģiniet vēlreiz.',
+  offline: 'Jūs esat bezsaistē',
+  backOnline: 'Atkal tiešsaistē',
+  stillHeld: 'Jūsu vietas joprojām ir rezervētas.',
+  updating: 'Atjauninām…',
+  takingLonger: 'Tas aizņem ilgāk nekā parasti. Lūdzu, uzgaidiet…',
+  loadingTakingLonger:
+      'Vietu plāns ielādējas ilgāk nekā parasti. Lūdzu, uzgaidiet…',
+  couldNotReachCheckout: 'Neizdevās sasniegt maksājumu.',
   accessPausedTitle: 'Šīs vietas pašlaik ir rezervētas',
   accessPausedCopy:
       'Organizators ir apturējis šo izvēli. Mēģiniet vēlreiz pēc dažām minūtēm.',

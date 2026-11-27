@@ -233,6 +233,15 @@ const SeatLayerPickerStrings seatLayerPickerStringsMs = SeatLayerPickerStrings(
   backToMap: 'Kembali ke pelan',
   mapDidNotLoad: 'Pelan tempat duduk gagal dimuatkan',
   checkConnection: 'Semak sambungan anda dan cuba lagi.',
+  offline: 'Anda di luar talian',
+  backOnline: 'Kembali dalam talian',
+  stillHeld: 'Tempat duduk anda masih ditahan.',
+  updating: 'Mengemas kini…',
+  takingLonger:
+      'Proses ini mengambil masa lebih lama daripada biasa. Sila tunggu…',
+  loadingTakingLonger:
+      'Pelan tempat duduk mengambil masa lebih lama untuk dimuatkan. Sila tunggu…',
+  couldNotReachCheckout: 'Halaman pembayaran tidak dapat dihubungi.',
   accessPausedTitle: 'Tempat duduk ini sedang ditahan',
   accessPausedCopy:
       'Penganjur telah menghentikan sementara pilihan ini. Cuba lagi dalam beberapa minit.',

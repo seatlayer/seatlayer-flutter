@@ -307,6 +307,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsFi = SeatLayerPickerStrings(
   backToMap: 'Takaisin karttaan',
   mapDidNotLoad: 'Paikkakartta ei latautunut',
   checkConnection: 'Tarkista yhteytesi ja yritä uudelleen.',
+  offline: 'Olet offline-tilassa',
+  backOnline: 'Taas verkossa',
+  stillHeld: 'Paikkasi ovat yhä varattuina.',
+  updating: 'Päivitetään…',
+  takingLonger: 'Tämä kestää tavallista pidempään. Odota hetki…',
+  loadingTakingLonger:
+      'Paikkakartan lataus kestää tavallista kauemmin. Odota hetki…',
+  couldNotReachCheckout: 'Kassaa ei tavoitettu.',
   accessPausedTitle: 'Nämä paikat on juuri nyt varattu',
   accessPausedCopy:
       'Järjestäjä on keskeyttänyt tämän valinnan. Yritä uudelleen muutaman minuutin kuluttua.',

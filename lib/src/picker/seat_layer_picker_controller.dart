@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
@@ -16,6 +17,7 @@ import 'picker_availability.dart';
 import 'picker_blocked_regions.dart';
 import 'picker_booked_tracker.dart';
 import 'picker_chart_load.dart';
+import 'picker_connection.dart';
 import 'picker_error_words.dart';
 import 'picker_haptics.dart';
 import 'picker_models.dart';
@@ -159,6 +161,17 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   SeatLayerHoldLapse? _holdLapse;
   bool _holdExpiryReported = false;
   final PickerBookedTracker _booked = PickerBookedTracker();
+  final SeatLayerConnectionWatch _connection = SeatLayerConnectionWatch();
+
+  /// What the connection status says: none on a page without
+  /// `connection-state-v1`.
+  ValueListenable<SeatLayerConnectionShown> get connectionShown => _connection;
+
+  /// Whether the page tells the app its line to the server.
+  bool get supportsConnectionState =>
+      mapController.bundleInfo
+          ?.supportsCapability(seatLayerConnectionStateCapability) ==
+      true;
 
   SeatLayerPickerState get state => value;
 
@@ -332,6 +345,14 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
       _applyRetap(event.payload);
       return;
     }
+    if (event.name == 'connection.changed') {
+      if (supportsConnectionState) {
+        _connection.heard(
+          SeatLayerConnectionState.fromJson(jGet(event.payload, 'state')),
+        );
+      }
+      return;
+    }
     if (event.name == 'hold.expired') {
       // Read off the bridge itself, on the same hop as the snapshot that
       // follows it, so the expiry is known before a vanished hold could be
@@ -415,6 +436,11 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
     final previousValidity = current?.selectionValidity;
     final previousHold = value.hold;
     value = value.applying(snapshot);
+    if (supportsConnectionState) {
+      _connection
+        ..heard(snapshot.map.connection)
+        ..seatsRead();
+    }
     _syncSeatAnswers(snapshot.selection.map((seat) => seat.label).toSet());
 
     if (!pickerSameSelection(previousSelection, snapshot.selection)) {
@@ -1445,6 +1471,7 @@ class SeatLayerPickerController extends ValueNotifier<SeatLayerPickerState>
   void dispose() {
     if (_disposed) return;
     _disposed = true;
+    _connection.dispose();
     _revisionWaiters.failAll();
     _reloadHold.forget();
     unawaited(_bridgeSubscription.cancel());

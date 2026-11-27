@@ -358,6 +358,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsSk = SeatLayerPickerStrings(
   backToMap: 'Späť na plán',
   mapDidNotLoad: 'Plán miest sa nenačítal',
   checkConnection: 'Skontrolujte pripojenie a skúste to znova.',
+  offline: 'Ste offline',
+  backOnline: 'Opäť online',
+  stillHeld: 'Vaše miesta sú stále rezervované.',
+  updating: 'Aktualizuje sa…',
+  takingLonger: 'Trvá to dlhšie než zvyčajne. Chvíľu strpenia…',
+  loadingTakingLonger:
+      'Načítanie plánu miest trvá dlhšie ako zvyčajne. Chvíľu strpenia…',
+  couldNotReachCheckout: 'Nepodarilo sa pripojiť k pokladni.',
   accessPausedTitle: 'Tieto miesta sú práve blokované',
   accessPausedCopy:
       'Organizátor tento výber pozastavil. Skúste to o pár minút znova.',

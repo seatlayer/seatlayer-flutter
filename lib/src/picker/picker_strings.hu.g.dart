@@ -308,6 +308,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsHu = SeatLayerPickerStrings(
   backToMap: 'Vissza az üléstervhez',
   mapDidNotLoad: 'Az ülésterv nem töltődött be',
   checkConnection: 'Ellenőrizd a kapcsolatot, és próbáld újra.',
+  offline: 'Offline vagy',
+  backOnline: 'Újra online',
+  stillHeld: 'A helyeid továbbra is le vannak foglalva.',
+  updating: 'Frissítés…',
+  takingLonger: 'Ez a szokásosnál tovább tart. Kérjük, várj…',
+  loadingTakingLonger:
+      'Az ülésterv betöltése a vártnál tovább tart. Kérjük, várj…',
+  couldNotReachCheckout: 'Nem sikerült elérni a pénztárat.',
   accessPausedTitle: 'Ezek a helyek épp zárolva vannak',
   accessPausedCopy:
       'A szervező szüneteltette ezt a kiválasztást. Próbáld újra néhány perc múlva.',

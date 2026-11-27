@@ -200,6 +200,13 @@ class SeatLayerPickerStrings {
     this.backToMap = SeatLayerStringTokens.backToMap,
     this.mapDidNotLoad = SeatLayerStringTokens.mapDidNotLoad,
     this.checkConnection = SeatLayerStringTokens.checkConnection,
+    this.offline = SeatLayerStringTokens.offline,
+    this.backOnline = SeatLayerStringTokens.backOnline,
+    this.stillHeld = SeatLayerStringTokens.stillHeld,
+    this.updating = SeatLayerStringTokens.updating,
+    this.takingLonger = SeatLayerStringTokens.takingLonger,
+    this.loadingTakingLonger = SeatLayerStringTokens.loadingTakingLonger,
+    this.couldNotReachCheckout = SeatLayerStringTokens.couldNotReachCheckout,
     this.accessPausedTitle = SeatLayerStringTokens.accessPausedTitle,
     this.accessPausedCopy = SeatLayerStringTokens.accessPausedCopy,
     this.accessRevokedTitle = SeatLayerStringTokens.accessRevokedTitle,
@@ -1028,6 +1035,27 @@ class SeatLayerPickerStrings {
 
   /// "Check your connection and try again." — the line under it.
   final String checkConnection;
+
+  /// "You’re offline" — the connection status while the device has no network.
+  final String offline;
+
+  /// "Back online" — the connection status for a moment after an outage.
+  final String backOnline;
+
+  /// "Your seats are still held." — the status's second line while a hold the server confirmed has time left.
+  final String stillHeld;
+
+  /// "Updating…" — the connection status while the line comes back.
+  final String updating;
+
+  /// "This is taking longer than usual. Please wait…" — by the button, from ten seconds into a press without an answer.
+  final String takingLonger;
+
+  /// "The seat map is taking longer to load. Please wait…" — the status from eight seconds into a slow opening.
+  final String loadingTakingLonger;
+
+  /// "Couldn’t reach checkout." — by the button when the server failed a press.
+  final String couldNotReachCheckout;
 
   /// "These seats are on hold right now" — access paused by the organizer.
   final String accessPausedTitle;

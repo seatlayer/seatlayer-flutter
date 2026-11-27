@@ -309,6 +309,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsBg = SeatLayerPickerStrings(
   backToMap: 'Назад към плана',
   mapDidNotLoad: 'Планът на местата не се зареди',
   checkConnection: 'Проверете връзката си и опитайте отново.',
+  offline: 'Офлайн сте',
+  backOnline: 'Отново онлайн',
+  stillHeld: 'Местата ви са все още резервирани.',
+  updating: 'Обновяване…',
+  takingLonger: 'Това отнема повече време от обичайното. Моля, изчакайте…',
+  loadingTakingLonger:
+      'Планът на местата се зарежда по-дълго от обичайното. Моля, изчакайте…',
+  couldNotReachCheckout: 'Не успяхме да се свържем с плащането.',
   accessPausedTitle: 'Тези места са блокирани в момента',
   accessPausedCopy:
       'Организаторът е поставил този избор на пауза. Опитайте отново след няколко минути.',

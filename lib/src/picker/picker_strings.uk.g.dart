@@ -352,6 +352,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsUk = SeatLayerPickerStrings(
   backToMap: 'Назад до схеми',
   mapDidNotLoad: 'Схема місць не завантажилася',
   checkConnection: 'Перевірте з\'єднання та спробуйте знову.',
+  offline: 'Немає з’єднання',
+  backOnline: 'Знову в мережі',
+  stillHeld: 'Ваші місця й далі заброньовані.',
+  updating: 'Оновлюємо…',
+  takingLonger: 'Це триває довше, ніж зазвичай. Будь ласка, зачекайте…',
+  loadingTakingLonger:
+      'Схема місць завантажується довше, ніж зазвичай. Будь ласка, зачекайте…',
+  couldNotReachCheckout: 'Не вдалося з’єднатися з оформленням замовлення.',
   accessPausedTitle: 'Ці місця зараз заблоковані',
   accessPausedCopy:
       'Організатор призупинив цей вибір. Спробуйте за кілька хвилин.',

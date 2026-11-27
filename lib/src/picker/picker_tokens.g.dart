@@ -38,6 +38,12 @@ abstract final class SeatLayerLightTokens {
   /// `#745F2C`
   static const Color warnText = Color(0xFF745F2C);
 
+  /// `#B7791F`
+  static const Color connectionLost = Color(0xFFB7791F);
+
+  /// `#1B7F52`
+  static const Color connectionBack = Color(0xFF1B7F52);
+
   /// `#E8C15A`
   static const Color premium = Color(0xFFE8C15A);
 
@@ -94,6 +100,12 @@ abstract final class SeatLayerDarkTokens {
 
   /// `#E3CC93`
   static const Color warnText = Color(0xFFE3CC93);
+
+  /// `#E0B04A`
+  static const Color connectionLost = Color(0xFFE0B04A);
+
+  /// `#4CC38A`
+  static const Color connectionBack = Color(0xFF4CC38A);
 
   /// `#E8C15A`
   static const Color premium = Color(0xFFE8C15A);
@@ -569,6 +581,36 @@ abstract final class SeatLayerSizeTokens {
   /// `11`
   static const double testChipFontSize = 11;
 
+  /// `36`
+  static const double connectionStatusHeight = 36;
+
+  /// `52`
+  static const double connectionStatusTwoLineHeight = 52;
+
+  /// `13`
+  static const double connectionStatusTitleFont = 13;
+
+  /// `12.5`
+  static const double connectionStatusLineFont = 12.5;
+
+  /// `16`
+  static const double connectionStatusSign = 16;
+
+  /// `8`
+  static const double connectionStatusSignGap = 8;
+
+  /// `12`
+  static const double connectionStatusPadStart = 12;
+
+  /// `14`
+  static const double connectionStatusPadEnd = 14;
+
+  /// `8`
+  static const double connectionStatusSwitchGap = 8;
+
+  /// `4`
+  static const double connectionStatusRise = 4;
+
   /// `12`
   static const double mapAnchorInset = 12;
 
@@ -819,6 +861,9 @@ abstract final class SeatLayerRadiusTokens {
   /// `999`
   static const double pill = 999;
 
+  /// `18`
+  static const double connectionStatusTwoLines = 18;
+
   /// `14`
   static const double explainerToast = 14;
 }
@@ -927,6 +972,12 @@ abstract final class SeatLayerMotionTokens {
   /// `160` ms
   static const int thumbOut = 160;
 
+  /// `200` ms
+  static const int connectionIn = 200;
+
+  /// `160` ms
+  static const int connectionWords = 160;
+
   /// `4000` ms — deliberately outside the budget.
   static const int undoWindow = 4000;
 
@@ -956,6 +1007,9 @@ abstract final class SeatLayerMotionTokens {
 
   /// `1600` ms — deliberately outside the budget.
   static const int loadingBreath = 1600;
+
+  /// `900` ms — deliberately outside the budget.
+  static const int connectionRing = 900;
 }
 
 /// What a finger on glass is answered with.

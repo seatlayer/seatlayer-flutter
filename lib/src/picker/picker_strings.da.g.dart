@@ -310,6 +310,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsDa = SeatLayerPickerStrings(
   backToMap: 'Tilbage til oversigten',
   mapDidNotLoad: 'Pladsoversigten blev ikke indlæst',
   checkConnection: 'Tjek din forbindelse, og prøv igen.',
+  offline: 'Du er offline',
+  backOnline: 'Online igen',
+  stillHeld: 'Dine pladser er stadig reserveret.',
+  updating: 'Opdaterer…',
+  takingLonger: 'Det tager længere tid end normalt. Vent venligst…',
+  loadingTakingLonger:
+      'Pladsoversigten er længere tid om at indlæse. Vent venligst…',
+  couldNotReachCheckout: 'Kunne ikke oprette forbindelse til kassen.',
   accessPausedTitle: 'Disse pladser er spærret lige nu',
   accessPausedCopy:
       'Arrangøren har sat dette udvalg på pause. Prøv igen om et par minutter.',

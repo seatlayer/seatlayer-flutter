@@ -341,6 +341,14 @@ const SeatLayerPickerStrings seatLayerPickerStringsCa = SeatLayerPickerStrings(
   backToMap: 'Torna al mapa',
   mapDidNotLoad: 'El mapa de seients no s\'ha carregat',
   checkConnection: 'Comprova la connexió i torna-ho a provar.',
+  offline: 'Estàs fora de línia',
+  backOnline: 'Tornes a estar en línia',
+  stillHeld: 'Els teus seients continuen reservats.',
+  updating: 'Actualitzant…',
+  takingLonger: 'Això triga més del normal. Espera un moment…',
+  loadingTakingLonger:
+      'El mapa de seients triga més del normal a carregar-se. Espera un moment…',
+  couldNotReachCheckout: 'No s\'ha pogut connectar amb el pagament.',
   accessPausedTitle: 'Aquests seients estan bloquejats ara mateix',
   accessPausedCopy:
       'L\'organitzador ha pausat aquesta selecció. Torna-ho a provar d\'aquí a uns minuts.',

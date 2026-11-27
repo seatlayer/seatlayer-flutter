@@ -316,6 +316,13 @@ const SeatLayerPickerStrings seatLayerPickerStringsEl = SeatLayerPickerStrings(
   backToMap: 'Επιστροφή στον χάρτη',
   mapDidNotLoad: 'Ο χάρτης θέσεων δεν φορτώθηκε',
   checkConnection: 'Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.',
+  offline: 'Είστε εκτός σύνδεσης',
+  backOnline: 'Ξανά σε σύνδεση',
+  stillHeld: 'Οι θέσεις σας παραμένουν δεσμευμένες.',
+  updating: 'Ενημέρωση…',
+  takingLonger: 'Αυτό αργεί περισσότερο από το συνηθισμένο. Περιμένετε…',
+  loadingTakingLonger: 'Ο χάρτης θέσεων αργεί να φορτώσει. Περιμένετε…',
+  couldNotReachCheckout: 'Δεν ήταν δυνατή η σύνδεση με το ταμείο.',
   accessPausedTitle: 'Αυτές οι θέσεις είναι δεσμευμένες αυτή τη στιγμή',
   accessPausedCopy:
       'Ο διοργανωτής έχει διακόψει προσωρινά αυτή την επιλογή. Δοκιμάστε ξανά σε λίγα λεπτά.',

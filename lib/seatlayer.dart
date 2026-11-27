@@ -108,6 +108,11 @@ export 'src/picker/picker_map_controls.dart'
         SeatLayerPickerZoomInButton,
         SeatLayerPickerZoomOutButton,
         SeatLayerPickerZoomToFitButton;
+export 'src/picker/picker_connection.dart'
+    show
+        SeatLayerConnectionShown,
+        SeatLayerConnectionState,
+        seatLayerConnectionStateCapability;
 export 'src/picker/picker_mark_booked.dart'
     show SeatLayerPickerMarkBooked, seatLayerMarkBookedCapability;
 export 'src/picker/picker_models.dart';
