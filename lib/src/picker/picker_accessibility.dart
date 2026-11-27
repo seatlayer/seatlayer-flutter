@@ -19,6 +19,7 @@ import 'picker_strings.dart';
 import 'picker_styles.dart';
 import 'seat_layer_picker_theme.dart';
 import 'picker_a11y.dart';
+import 'picker_tap_area.dart';
 
 /// The filters a buyer with an access need reaches for.
 ///
@@ -63,37 +64,40 @@ class SeatLayerPickerAccessibilityFilters extends StatelessWidget {
       final theme = seatLayerMapChromeThemeOf(context);
       final disc = seatLayerMapChromeDisc(theme);
       final size = theme.layout.accessibilityControlSize;
-      return DecoratedBox(
-        decoration: const BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: <BoxShadow>[
-            BoxShadow(
-              color: Color(0x40000000),
-              blurRadius: 20,
-              spreadRadius: -12,
-              offset: Offset(0, 8),
-            ),
-          ],
-        ),
-        child: SizedBox.square(
-          dimension: size,
-          child: IconButton(
-            tooltip: activeCount == 0
-                ? name
-                : strings.accessibilityFiltersActive(activeCount),
-            visualDensity: VisualDensity.compact,
-            padding: EdgeInsets.zero,
-            constraints: BoxConstraints.tightFor(width: size, height: size),
-            style: IconButton.styleFrom(
-              backgroundColor: disc.ground,
-              foregroundColor: activeCount == 0 ? theme.text : theme.accent,
-              side: BorderSide(color: disc.line),
-            ),
-            onPressed: onPressed,
-            icon: Badge(
-              isLabelVisible: activeCount > 0,
-              label: Text('$activeCount'),
-              child: Icon(icon, size: _controlIconSize),
+      return PickerTapArea(
+        enabled: onPressed != null,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Color(0x40000000),
+                blurRadius: 20,
+                spreadRadius: -12,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          child: SizedBox.square(
+            dimension: size,
+            child: IconButton(
+              tooltip: activeCount == 0
+                  ? name
+                  : strings.accessibilityFiltersActive(activeCount),
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: BoxConstraints.tightFor(width: size, height: size),
+              style: IconButton.styleFrom(
+                backgroundColor: disc.ground,
+                foregroundColor: activeCount == 0 ? theme.text : theme.accent,
+                side: BorderSide(color: disc.line),
+              ),
+              onPressed: onPressed,
+              icon: Badge(
+                isLabelVisible: activeCount > 0,
+                label: Text('$activeCount'),
+                child: Icon(icon, size: _controlIconSize),
+              ),
             ),
           ),
         ),

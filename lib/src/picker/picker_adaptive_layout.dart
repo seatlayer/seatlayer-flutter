@@ -9,6 +9,7 @@ import '../open_enums.dart';
 import '../payloads.dart';
 import '../seat_layer_map_chrome.dart';
 import 'picker_internal.dart';
+import 'picker_tap_area.dart';
 import 'picker_builders.dart';
 import 'picker_cart_list.dart';
 import 'seat_layer_picker.dart';
@@ -1174,7 +1175,7 @@ class _SeatLayerPickerAdaptiveLayoutState
       },
       child: SeatLayerMapChromeScope(
         latch: _mapChromeLatch,
-        child: themed,
+        child: PickerTapAreaRoot(latch: _mapChromeLatch, child: themed),
       ),
     );
   }

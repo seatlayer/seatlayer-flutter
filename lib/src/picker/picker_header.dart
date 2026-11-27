@@ -11,6 +11,7 @@ import 'seat_layer_picker_scope.dart';
 import 'picker_tokens.g.dart';
 import 'seat_layer_picker_theme.dart';
 import 'picker_a11y.dart';
+import 'picker_tap_area.dart';
 
 /// Whose event this is, how long the seats are held, and the way out.
 ///
@@ -182,11 +183,18 @@ class SeatLayerHeaderBar extends StatelessWidget {
                   child: _air(
                     compact,
                     title != null
-                        ? _HeaderTitle(
-                            theme: theme,
-                            name: title!,
-                            details: details,
-                            compact: compact,
+                        // The event's name is the screen's heading, a node of
+                        // its own: merged with the close button it read as
+                        // part of that button.
+                        ? Semantics(
+                            container: true,
+                            header: true,
+                            child: _HeaderTitle(
+                              theme: theme,
+                              name: title!,
+                              details: details,
+                              compact: compact,
+                            ),
                           )
                         : const SizedBox.shrink(),
                   ),
@@ -250,7 +258,7 @@ Widget _air(bool compact, Widget child) => compact
 /// which can overflow its 38-point row; a Flutter hit box cannot leave its
 /// parent, so the target is the whole height of the header line and wide
 /// enough to reach the screen edge while the ring stays ten points clear of
-/// it.
+/// it, and [PickerTapArea] lets the picker's root give it the rest of the 44.
 class _CloseRing extends StatelessWidget {
   const _CloseRing({
     required this.theme,
@@ -267,29 +275,32 @@ class _CloseRing extends StatelessWidget {
     const ring = SeatLayerSizeTokens.headerCloseSize;
     // The target is the line, so it has to be the line the header was told to
     // draw rather than the default the tokens ship.
-    return Semantics(
-      button: true,
-      label: tooltip,
-      child: Tooltip(
-        message: tooltip,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onClose,
-          child: SizedBox(
-            width: ring + 20,
-            height: theme.layout.headerHeight,
-            child: Center(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: theme.divider),
-                ),
-                child: SizedBox.square(
-                  dimension: ring,
-                  child: Icon(
-                    Icons.close_rounded,
-                    size: 12,
-                    color: theme.mutedText,
+    return PickerTapArea(
+      child: Semantics(
+        container: true,
+        button: true,
+        label: tooltip,
+        child: Tooltip(
+          message: tooltip,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onClose,
+            child: SizedBox(
+              width: ring + 20,
+              height: theme.layout.headerHeight,
+              child: Center(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: theme.divider),
+                  ),
+                  child: SizedBox.square(
+                    dimension: ring,
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: 12,
+                      color: theme.mutedText,
+                    ),
                   ),
                 ),
               ),

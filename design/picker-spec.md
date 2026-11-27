@@ -71,6 +71,17 @@ the target that receives the press is never below the floor. Where ink and
 target differ, the larger target is centred on the ink and must not steal
 presses from a neighbour.
 
+On a phone the close ring, the price chips, the halves of Map | 3D and the
+map's discs are laid out smaller than the floor and keep that size and place.
+`PickerTapArea` (`lib/src/picker/picker_tap_area.dart`) gives each the square
+of 44 around it: the picker's root takes a press that lands on no control,
+inside that square, for the control. The square moves off a neighbour where it
+has room on its other side, and between two close controls the nearer takes
+the press. It never takes a press from a control, from anything drawn over the
+control that answers a tap or covers it, or for a control that does nothing. A
+press given to a control on the map still puts the map in the arena and marks
+it as chrome's, so the map is turned down as it is for a press on the control.
+
 **1.8 Both themes, always.** `color.light` and `color.dark` are complete ground
 sets. A mode owns only the ground roles; the accent, the accent ink, the font
 and the host radius are the organizer's brand and are identical in both modes.
@@ -352,7 +363,8 @@ is the identity.
 
 **Close ring.** A circle of `size.headerCloseSize` at `radius.pill`, hairline
 `color.*.divider`, glyph in `color.*.mutedText`; the press target is expanded to
-`size.minimumHitTarget` centred on it. Copy `strings.close`.
+`size.minimumHitTarget` centred on it. Copy `strings.close`. The event's name is a heading of its own and Close its
+own button; merged, a screen reader read them as one button.
 
 **Hold pill.** Drawn for as long as a live hold exists, whoever owns it
 (the clock is always in the header; a host that draws
