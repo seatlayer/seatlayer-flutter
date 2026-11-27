@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../bridge/bridge_page_recovery.dart';
+import '../picker/picker_connection.dart';
 import '../picker/picker_header.dart';
 import '../picker/picker_layout.dart';
 import '../picker/picker_models.dart';
@@ -149,6 +150,7 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
       }),
       _controller.onRun.listen(rebuild),
       _controller.onStatus.listen(rebuild),
+      _controller.onConnection.listen(rebuild),
       _controller.onHold.listen((hold) {
         _held = hold;
         rebuild(null);
@@ -341,6 +343,9 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
                       theme: theme,
                       strings: widget.strings,
                       compact: !wide,
+                      // While the page's line is down, 0:00 waits for the
+                      // server's word.
+                      awaitingServer: seatLayerLineDown(_controller.connection),
                     ),
               onClose: widget.onClose == null
                   ? null
@@ -353,6 +358,8 @@ class SeatLayerRunPickerState extends State<SeatLayerRunPicker>
                       theme: theme,
                       strings: widget.strings,
                       onRetry: _retry,
+                      error: _loadError,
+                      retryOwner: this,
                     )
                   // A page that takes the inset runs its cart under the home
                   // indicator; for one that does not, the app keeps it clear,

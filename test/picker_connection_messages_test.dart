@@ -227,7 +227,7 @@ void main() {
           map,
           Builder(
             builder: (context) => PickerOfflinePanel(
-              controller: picker,
+              owner: picker,
               palette: seatLayerPickerThemeOf(context),
               words: const SeatLayerPickerStrings(),
               onRetry: () => tries.add(tries.length + 1),

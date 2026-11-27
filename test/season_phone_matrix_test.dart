@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:seatlayer/seatlayer.dart';
 import 'package:seatlayer/src/picker/picker_header.dart';
 import 'package:seatlayer/src/picker/picker_tokens.g.dart';
+import 'package:webview_flutter_platform_interface/webview_flutter_platform_interface.dart';
 
 import 'fake_webview_platform.dart';
 import 'phone_matrix_harness.dart';
@@ -28,7 +29,14 @@ enum SeasonPhoneState {
 
   /// The Season could not be shown: the event picker's failure view.
   failed,
+
+  /// The page could not load for want of a network: the offline panel.
+  offline,
 }
+
+/// The two states the app draws in place of the page.
+bool _inPlaceOfPage(SeasonPhoneState state) =>
+    state == SeasonPhoneState.failed || state == SeasonPhoneState.offline;
 
 Future<SeatLayerPickerStrings> _pumpSeason(
   WidgetTester tester,
@@ -81,6 +89,18 @@ Future<SeatLayerPickerStrings> _pumpSeason(
   );
   await tester.tap(find.text('Open'));
   await tester.pumpAndSettle();
+  if (state == SeasonPhoneState.offline) {
+    page.fake.resourceErrors.last(
+      const WebResourceError(
+        errorCode: -1009,
+        description: 'net::ERR_INTERNET_DISCONNECTED',
+        errorType: WebResourceErrorType.hostLookup,
+        isForMainFrame: true,
+      ),
+    );
+    await pumpToRest(tester);
+    return strings;
+  }
   if (state == SeasonPhoneState.failed) {
     page.post(EnvelopeKind.hello, 'hello', <String, Object?>{
       'bundle': '1.0.0',
@@ -109,9 +129,7 @@ void _expectSeasonLayout(WidgetTester tester, Phone phone,
   // The bar stands under the safe area's top; the page fills the rest.
   final bar = tester.getRect(find.byType(SeatLayerHeaderBar));
   final page = tester.getRect(find.byType(
-    state == SeasonPhoneState.failed
-        ? SeatLayerPickerErrorView
-        : SeatLayerSeasonView,
+    _inPlaceOfPage(state) ? SeatLayerPickerErrorView : SeatLayerSeasonView,
   ));
   // Under the status bar, on the page's ground, as on the event page.
   expect(bar.top, phone.insets.top);
@@ -123,11 +141,15 @@ void _expectSeasonLayout(WidgetTester tester, Phone phone,
   expect(find.byTooltip(strings.close), findsOneWidget);
   expect(
     find.byType(SeatLayerHoldClock),
-    state == SeasonPhoneState.ready || state == SeasonPhoneState.failed
+    state == SeasonPhoneState.ready || _inPlaceOfPage(state)
         ? findsNothing
         : findsOneWidget,
   );
-  if (state == SeasonPhoneState.failed) {
+  if (state == SeasonPhoneState.offline) {
+    expect(find.text(strings.offline), findsOneWidget);
+    expect(find.text(strings.mapDidNotLoad), findsNothing);
+  }
+  if (_inPlaceOfPage(state)) {
     expect(find.text(strings.retry), findsOneWidget);
     expect(
       tester.getSize(find.widgetWithText(FilledButton, strings.retry)).height,
@@ -237,7 +259,8 @@ void main() {
     final phone390 = uprightPhones.firstWhere((phone) => phone.name == '390');
     final phone430 = uprightPhones.firstWhere((phone) => phone.name == '430');
     for (final brightness in Brightness.values) {
-      for (final state in SeasonPhoneState.values) {
+      for (final state in SeasonPhoneState.values
+          .where((state) => state != SeasonPhoneState.offline)) {
         final name = 'season_390_${state.name}_${brightness.name}';
         testWidgets(name, tags: goldenTag, (tester) async {
           await shoot(tester, name, phone390, state, brightness: brightness);

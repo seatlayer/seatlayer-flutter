@@ -505,7 +505,9 @@ class SeatLayerPickerErrorView extends StatelessWidget {
   const SeatLayerPickerErrorView({super.key, this.onRetry})
       : theme = null,
         strings = null,
-        message = null;
+        message = null,
+        error = null,
+        retryOwner = null;
 
   /// Creates the failure view outside any scope.
   const SeatLayerPickerErrorView.standalone({
@@ -514,6 +516,8 @@ class SeatLayerPickerErrorView extends StatelessWidget {
     required VoidCallback this.onRetry,
     this.strings = const SeatLayerPickerStrings(),
     this.message,
+    this.error,
+    this.retryOwner,
   });
 
   /// Replaces the controller's own retry.
@@ -530,6 +534,13 @@ class SeatLayerPickerErrorView extends StatelessWidget {
   /// not.
   final String? message;
 
+  /// Why the page did not open, outside a scope: it picks the panel.
+  final SeatLayerError? error;
+
+  /// What keeps the offline panel's count of retries outside a scope: an
+  /// object that outlives the view. Without it the offline panel is not used.
+  final Object? retryOwner;
+
   @override
   Widget build(BuildContext context) {
     final palette = theme ?? seatLayerPickerThemeOf(context);
@@ -540,19 +551,20 @@ class SeatLayerPickerErrorView extends StatelessWidget {
     // bridge error [code]: …"), in English, and it reaches the app through
     // onError. The buyer reads the host's words, and the default sentence is
     // the title's, so by default the view says it once.
-    final error = controller?.state.error;
+    final error = this.error ?? controller?.state.error;
     final kind =
         error == null ? PickerFailureKind.other : pickerFailureKind(error);
+    final owner = retryOwner ?? controller;
     // No connection at all: its own panel, which also tries again by itself.
     // A page that only answered slowly keeps today's panel and its line.
-    if (controller != null &&
+    if (owner != null &&
         kind == PickerFailureKind.connection &&
         error is! HandshakeTimeoutFailure) {
       return PickerOfflinePanel(
-        controller: controller,
+        owner: owner,
         palette: palette,
         words: words,
-        onRetry: onRetry ?? () => ignorePickerAction(controller.retry()),
+        onRetry: onRetry ?? () => ignorePickerAction(controller!.retry()),
       );
     }
     final text = message ?? words.errorMessage;
