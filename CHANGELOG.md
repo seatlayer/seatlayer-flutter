@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.15.0
 
 **Added**
 
@@ -9,6 +9,7 @@
 - **Opening without a connection** shows "You’re offline" with a sign, "Check your connection and try again." and "Try again", and tries again by itself after 10 and 20 seconds, then every 30, while the app is in front. The run and Season pickers do the same for a page that could not load.
 - **The page's line to the server on every controller:** `connection` and `onConnection` on `SeatLayerController`, `SeatLayerRunController` and `SeatLayerSeasonController`, from a page that names `connection-state-v1`. On a run or a Season the page draws its own status over its map.
 - **Seven new strings** in every language the picker speaks: `offline`, `backOnline`, `stillHeld`, `updating`, `takingLonger`, `loadingTakingLonger`, `couldNotReachCheckout`.
+- **Two new strings** for a table booked as one, with a default in every language the picker speaks: `guestsWord`, `tableWord`.
 
 **Changed**
 

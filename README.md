@@ -546,27 +546,21 @@ included. Private buyer tokens stay in memory and never enter a snapshot.
 
 How to build and test the package is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Upgrading from 0.13
+## Upgrading from 0.14
 
-- **Amounts** are written as the map writes them, in the language of
-  `SeatLayerConfiguration.locale`: `$1,250.50`, `1.250,50 €`, `KWD 12.625`. A
-  `formatter` of your own is used as before.
-- **`onBooked`** (since 0.13.1) comes only after your server has booked and
-  you call `markBooked`, once per hold. Take a sale from your own server, never
-  from `onBooked`.
-- **A refused standing amount:** `setGeneralAdmissionQuantity` completes with
-  the error `hold_unavailable`, and the prompt stays open.
-- **`buyerAccessTokenProvider` written inline** (since 0.13.1) no longer loads
-  the page again on a rebuild. To start over for another buyer, give the picker
-  another `key` too.
-- **A Season closed with seats held while no page is up:** `onClose` receives
-  `kept` and the hold's operation id.
-- **Longer waits:** 45 seconds for the page to be ready and for a call that can
-  place a hold. A longer `commandTimeout` of your own is kept.
-- **The cart on a phone** is one row. `sheetHandleWidth`, `sheetHandleHeight`,
-  `sheetHandleOverhang` and `sheetHeadHeight` are still accepted and have no
-  effect.
-- **Test badge:** a tap does nothing. `testModeExplained` is drawn nowhere.
+- **Android:** add `ACCESS_NETWORK_STATE` to your app's manifest (see
+  [Quick start](#quick-start)). Without it the map never learns that the phone
+  went offline, and it only says "Updating…".
+- **A press without an answer** is told in the small message by the button,
+  "Check your connection and try again.", not in the red line. The red line
+  stays for refusals.
+- **Strings:** nine new keys: `offline`, `backOnline`, `stillHeld`,
+  `updating`, `takingLonger`, `loadingTakingLonger`, `couldNotReachCheckout`,
+  `guestsWord` and `tableWord`. `SeatLayerPickerStrings.forLocale` has them in
+  every language; a `SeatLayerPickerStrings` you build yourself has them in
+  English until you set them.
+- **Tests that find the header by semantics:** the event's name is a heading
+  and Close is a button of its own. They were one button.
 
 Everything else is in the [changelog](CHANGELOG.md).
 
