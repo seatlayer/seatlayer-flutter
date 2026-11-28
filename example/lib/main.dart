@@ -60,6 +60,17 @@ class DemoApp extends StatelessWidget {
       SeatLayerThemeMode.dark => ThemeMode.dark,
       SeatLayerThemeMode.auto => ThemeMode.system,
     },
+    // Every picker, including the routes the run and Season pickers push,
+    // reads its direction from here.
+    builder: (context, child) => Directionality(
+      textDirection:
+          _rightToLeft.contains(
+            (_locale ?? Localizations.localeOf(context)).languageCode,
+          )
+          ? TextDirection.rtl
+          : TextDirection.ltr,
+      child: child!,
+    ),
     home: const _Home(),
   );
 }
@@ -210,60 +221,55 @@ class _LivePickerDemoState extends State<LivePickerDemo> {
   @override
   Widget build(BuildContext context) {
     final locale = _locale ?? Localizations.localeOf(context);
-    return Directionality(
-      textDirection: _rightToLeft.contains(locale.languageCode)
-          ? TextDirection.rtl
-          : TextDirection.ltr,
-      child: Scaffold(
-        body: SeatLayerPicker(
-          configuration: _configuration,
-          themeMode: _themeMode,
-          options: SeatLayerPickerOptions(
-            strings: SeatLayerPickerStrings.forLocale(locale),
-          ),
-          callbacks: SeatLayerPickerCallbacks(
-            onReady: (info) {
-              final helloToReadyMs =
-                  info.timeToHelloMs == null || info.timeToReadyMs == null
-                  ? null
-                  : info.timeToReadyMs! - info.timeToHelloMs!;
-              debugPrint(
-                '[SeatLayerPickerExample] ready '
-                'protocol=${info.protocolRevision} '
-                'mode=${info.mode.raw} '
-                'event=${info.eventKey ?? "-"} '
-                'timeToHelloMs=${info.timeToHelloMs} '
-                'helloToReadyMs=$helloToReadyMs '
-                'timeToReadyMs=${info.timeToReadyMs}',
-              );
-            },
-            onChartLoad: (load) {
-              final trace = load.trace;
-              debugPrint(
-                '[SeatLayerPickerPerf] '
-                'tapToReadyMs=${load.tapToReadyMs} '
-                'hostMs=${load.hostMs} '
-                'bootMs=${trace.bootMs} '
-                'documentMs=${trace.documentMs} '
-                'handshakeMs=${trace.handshakeMs} '
-                'renderMs=${trace.ms} '
-                'paintMs=${trace.paint} '
-                'availabilityMs=${trace.availabilityMs} '
-                'load=${trace.load} '
-                'chartCache=${trace.chartCache} '
-                'host=${trace.host} '
-                'platform=${trace.platform} '
-                'bundle=${trace.bundle}',
-              );
-            },
-            onError: (error) {
-              debugPrint('[SeatLayerPickerExample] error=${error.code}');
-            },
-          ),
-          onCheckout: _openCheckout,
-          // ✕ goes back to the home screen.
-          onClose: () => Navigator.of(context).pop(),
+    return Scaffold(
+      body: SeatLayerPicker(
+        configuration: _configuration,
+        themeMode: _themeMode,
+        options: SeatLayerPickerOptions(
+          strings: SeatLayerPickerStrings.forLocale(locale),
         ),
+        callbacks: SeatLayerPickerCallbacks(
+          onReady: (info) {
+            final helloToReadyMs =
+                info.timeToHelloMs == null || info.timeToReadyMs == null
+                ? null
+                : info.timeToReadyMs! - info.timeToHelloMs!;
+            debugPrint(
+              '[SeatLayerPickerExample] ready '
+              'protocol=${info.protocolRevision} '
+              'mode=${info.mode.raw} '
+              'event=${info.eventKey ?? "-"} '
+              'timeToHelloMs=${info.timeToHelloMs} '
+              'helloToReadyMs=$helloToReadyMs '
+              'timeToReadyMs=${info.timeToReadyMs}',
+            );
+          },
+          onChartLoad: (load) {
+            final trace = load.trace;
+            debugPrint(
+              '[SeatLayerPickerPerf] '
+              'tapToReadyMs=${load.tapToReadyMs} '
+              'hostMs=${load.hostMs} '
+              'bootMs=${trace.bootMs} '
+              'documentMs=${trace.documentMs} '
+              'handshakeMs=${trace.handshakeMs} '
+              'renderMs=${trace.ms} '
+              'paintMs=${trace.paint} '
+              'availabilityMs=${trace.availabilityMs} '
+              'load=${trace.load} '
+              'chartCache=${trace.chartCache} '
+              'host=${trace.host} '
+              'platform=${trace.platform} '
+              'bundle=${trace.bundle}',
+            );
+          },
+          onError: (error) {
+            debugPrint('[SeatLayerPickerExample] error=${error.code}');
+          },
+        ),
+        onCheckout: _openCheckout,
+        // ✕ goes back to the home screen.
+        onClose: () => Navigator.of(context).pop(),
       ),
     );
   }
