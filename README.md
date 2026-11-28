@@ -190,6 +190,9 @@ final handoff = await showSeatLayerRunPicker(
   for the buyer who placed it, so pass that buyer's `buyerAccessToken` or
   `buyerAccessTokenProvider` with it. A buyer without a token is new to every
   page: once the app or the page has ended, their hold cannot be opened again.
+- For a Season, the hold belongs to the buyer access session that placed it.
+  To open it again, give the page that same session's token while it is
+  still valid: a new session made for the same buyer does not see the hold.
 - In these two the header is a Flutter widget; the packages, map and cart are
   SeatLayer's page, shown inside your app.
 
